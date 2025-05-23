@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// 用户信息表
+/// 存储系统用户的基本信息和认证信息
+/// 包含用户的基本属性、认证信息、状态信息等
+model User {
+  /// 用户唯一标识符，使用 CUID 生成
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 用户名称，长度2-50个字符
+  name String @default("") @db.VarChar(50)
+
+  /// 用户邮箱地址，唯一且必填
+  email String @unique @default("") @db.VarChar(255)
+
+  /// 用户头像的URL地址
+  avatar String @default("") @db.VarChar(500)
+
+  /// 用户密码的哈希值，使用安全的加密算法存储
+  password String @default("") @db.VarChar(255)
+
+  /// 用户状态：active-活跃, inactive-未激活, banned-封禁
+  status String @default("inactive") @db.VarChar(20)
+
+  /// 用户最后一次登录的时间
+  lastLoginAt DateTime @default(now())
+
+  /// 用户最后一次登录的IP地址
+  lastLoginIp String @default("") @db.VarChar(45)
+
+  /// 用户记录的创建时间
+  createdAt DateTime @default(now())
+
+  /// 用户记录的最后更新时间
+  updatedAt DateTime?
+
+  /// 用户记录的软删除时间，为null表示未删除
+  deletedAt DateTime?
+
+  /// 用户拥有的角色列表
+  roles Role[] @relation("UserRoles")
+
+  /// 添加索引
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  /// 数据库表名
+  @@map("users")
+}
+
+/// 角色信息表
+/// 定义系统中的角色及其权限
+/// 用于实现基于角色的访问控制（RBAC）
+model Role {
+  /// 角色唯一标识符，使用 CUID 生成
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 角色名称，唯一且必填
+  name String @unique @default("") @db.VarChar(50)
+
+  /// 角色的详细描述信息
+  description String @default("") @db.VarChar(200)
+
+  /// 角色状态：active-活跃, inactive-未激活
+  status String @default("active") @db.VarChar(20)
+
+  /// 角色记录的创建时间
+  createdAt DateTime @default(now())
+
+  /// 角色记录的最后更新时间
+  updatedAt DateTime?
+
+  /// 角色记录的软删除时间，为null表示未删除
+  deletedAt DateTime?
+
+  /// 角色拥有的权限列表
+  permissions Permission[] @relation("RolePermissions")
+
+  /// 拥有该角色的用户列表
+  users User[] @relation("UserRoles")
+
+  /// 添加索引
+  @@index([name])
+  @@index([status])
+  /// 数据库表名
+  @@map("roles")
+}
+
+/// 权限信息表
+/// 定义系统中的具体权限项
+/// 用于细粒度的访问控制
+model Permission {
+  /// 权限唯一标识符，使用 CUID 生成
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 权限代码，唯一且必填，格式如：user:create, user:read
+  code String @unique @default("") @db.VarChar(100)
+
+  /// 权限的显示名称
+  name String @default("") @db.VarChar(50)
+
+  /// 权限的详细描述信息
+  description String @default("") @db.VarChar(200)
+
+  /// 权限类型：menu-菜单权限, operation-操作权限, data-数据权限
+  type String @default("operation") @db.VarChar(20)
+
+  /// 权限状态：active-活跃, inactive-未激活
+  status String @default("active") @db.VarChar(20)
+
+  /// 权限记录的创建时间
+  createdAt DateTime @default(now())
+
+  /// 权限记录的最后更新时间
+  updatedAt DateTime?
+
+  /// 权限记录的软删除时间，为null表示未删除
+  deletedAt DateTime?
+
+  /// 拥有该权限的角色列表
+  roles Role[] @relation("RolePermissions")
+
+  /// 添加索引
+  @@index([code])
+  @@index([type])
+  @@index([status])
+  /// 数据库表名
+  @@map("permissions")
+}

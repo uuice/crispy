@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// 用户模型
+/// 存储系统用户信息，包括基本信息和认证信息
+model User {
+  /// 用户唯一标识符
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 用户名称，2-50个字符
+  name String @db.VarChar(50)
+
+  /// 用户邮箱，唯一且必填
+  email String @unique @db.VarChar(255)
+
+  /// 用户头像URL，可选
+  avatar String? @db.VarChar(500)
+
+  /// 用户密码哈希，必填
+  password String @db.VarChar(255)
+
+  /// 用户状态：active-活跃, inactive-未激活, banned-封禁
+  status String @default("inactive") @db.VarChar(20)
+
+  /// 最后登录时间
+  lastLoginAt DateTime?
+
+  /// 最后登录IP
+  lastLoginIp String? @db.VarChar(45)
+
+  /// 创建时间
+  createdAt DateTime @default(now())
+
+  /// 更新时间
+  updatedAt DateTime @updatedAt
+
+  /// 软删除标记
+  deletedAt DateTime?
+
+  /// 用户角色关联
+  roles Role[] @relation("UserRoles")
+
+  /// 添加索引
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  /// 数据库表名
+  @@map("users")
+}
+
+/// 角色模型
+/// 定义系统中的角色，如管理员、普通用户等
+model Role {
+  /// 角色唯一标识符
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 角色名称，唯一且必填
+  name String @unique @db.VarChar(50)
+
+  /// 角色描述
+  description String? @db.VarChar(200)
+
+  /// 角色状态：active-活跃, inactive-未激活
+  status String @default("active") @db.VarChar(20)
+
+  /// 创建时间
+  createdAt DateTime @default(now())
+
+  /// 更新时间
+  updatedAt DateTime @updatedAt
+
+  /// 软删除标记
+  deletedAt DateTime?
+
+  /// 角色权限关联
+  permissions Permission[] @relation("RolePermissions")
+
+  /// 角色用户关联
+  users User[] @relation("UserRoles")
+
+  /// 添加索引
+  @@index([name])
+  @@index([status])
+  /// 数据库表名
+  @@map("roles")
+}
+
+/// 权限模型
+/// 定义系统中的具体权限项
+model Permission {
+  /// 权限唯一标识符
+  id String @id @default(cuid()) @db.VarChar(36)
+
+  /// 权限代码，唯一且必填，如：user:create, user:read
+  code String @unique @db.VarChar(100)
+
+  /// 权限名称
+  name String @db.VarChar(50)
+
+  /// 权限描述
+  description String? @db.VarChar(200)
+
+  /// 权限类型：menu-菜单, operation-操作, data-数据
+  type String @db.VarChar(20)
+
+  /// 权限状态：active-活跃, inactive-未激活
+  status String @default("active") @db.VarChar(20)
+
+  /// 创建时间
+  createdAt DateTime @default(now())
+
+  /// 更新时间
+  updatedAt DateTime @updatedAt
+
+  /// 软删除标记
+  deletedAt DateTime?
+
+  /// 权限角色关联
+  roles Role[] @relation("RolePermissions")
+
+  /// 添加索引
+  @@index([code])
+  @@index([type])
+  @@index([status])
+  /// 数据库表名
+  @@map("permissions")
+}

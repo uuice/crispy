@@ -12,7 +12,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['node_modules', '.next'],
+    ignores: ['node_modules', '.next', 'prisma', 'src/prisma', 'src/components/ui'],
   },
   js.configs.recommended,
   ...compat.extends(
