@@ -1,62 +1,84 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
-import js from '@eslint/js'
+import { defineConfig, globalIgnores } from "eslint/config";
+import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import prettier from "eslint-plugin-prettier";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import js from "@eslint/js";
+import { FlatCompat } from "@eslint/eslintrc";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
+    baseDirectory: __dirname,
+    recommendedConfig: js.configs.recommended,
+    allConfig: js.configs.all
+});
 
-const eslintConfig = [
-  {
-    ignores: ['node_modules', '.next', 'prisma', 'src/prisma', 'src/components/ui'],
-  },
-  js.configs.recommended,
-  ...compat.extends(
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:jsx-a11y/recommended',
-    'plugin:prettier/recommended',
-    'next',
-    'next/core-web-vitals',
-    'next/typescript'
-  ),
-  {
+export default defineConfig([globalIgnores([
+    "**/*.d.ts",
+    "**/node_modules/",
+]), {
+    files: ["**/*.ts"],
+
+    extends: compat.extends(
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "plugin:prettier/recommended",
+    ),
+
     rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          singleQuote: true,
-          semi: false,
-          trailingComma: 'es5',
-          tabWidth: 2,
-          printWidth: 100,
-          bracketSpacing: true,
-          arrowParens: 'avoid',
-          endOfLine: 'lf',
-        },
-      ],
-      'react/react-in-jsx-scope': 'off',
+        indent: ["off", 2],
+        "linebreak-style": ["error", "unix"],
 
-      'jsx-a11y/anchor-is-valid': [
-        'error',
-        {
-          components: ['Link'],
-          specialLink: ['hrefLeft', 'hrefRight'],
-          aspects: ['invalidHref', 'preferButton'],
-        },
-      ],
-      'react/prop-types': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'react/no-unescaped-entities': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
+        quotes: ["error", "single", {
+            avoidEscape: true,
+            allowTemplateLiterals: true,
+        }],
+
+        semi: ["error", "never"],
+        "array-callback-return": ["error"],
+        "@typescript-eslint/no-explicit-any": 0,
+        "@typescript-eslint/no-empty-function": 0,
+        // "@typescript-eslint/ban-types": "error", // Deprecated
+        "@typescript-eslint/no-unused-vars": 0,
+        "@angular-eslint/no-host-metadata-property": 0,
+        "@angular-eslint/no-empty-lifecycle-method": 0,
+        "@angular-eslint/no-output-native": 0,
+        "@angular-eslint/template/eqeqeq": 0,
+        "@angular-eslint/component-class-suffix": 0,
+        "@typescript-eslint/no-non-null-assertion": 0,
+        "@angular-eslint/prefer-standalone": 0,
+        "prettier/prettier": "error",
     },
-  },
-]
+}, {
+    files: ["**/*.html"],
+    extends: compat.extends("plugin:@angular-eslint/template/recommended"),
+    rules: {},
+}, {
+    files: ["**/*.html"],
+    ignores: ["**/*inline-template-*.component.html"],
+    extends: compat.extends("plugin:prettier/recommended"),
 
-export default eslintConfig
+    rules: {
+        "prettier/prettier": ["error", {
+            parser: "angular",
+        }],
+    },
+}, {
+    files: ["**/*.less"],
+    ignores: ["**/*inline-template-*.component.less"],
+    extends: compat.extends("eslint:recommended", "plugin:prettier/recommended"),
+
+    plugins: {
+        "@typescript-eslint": typescriptEslint,
+        prettier,
+    },
+
+    rules: {
+        "prettier/prettier": ["error", {
+            parser: "@typescript-eslint/parser",
+        }],
+    },
+}]);
