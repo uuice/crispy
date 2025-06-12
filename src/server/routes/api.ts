@@ -7,7 +7,7 @@ const router = Router()
 
 // Create authentication middleware
 const authMiddleware: RequestHandler = (req, res, next) => {
-  console.log(req)
+  console.log(req.path)
   if (req.path === '/login' || req.path === '/login/') {
     next()
     return

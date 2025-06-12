@@ -6,6 +6,7 @@ import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
+import testRoutes from './server/routes/test'
 
 const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
@@ -16,6 +17,8 @@ applyMiddleware(app)
 
 // 2. API routes
 app.use(env['API_PREFIX'], apiRoutes)
+// Mount test routes
+app.use('/test', testRoutes)
 
 // 3. Static file serving
 app.use(

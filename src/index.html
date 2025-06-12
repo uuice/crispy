@@ -5,7 +5,34 @@
     <title>Crispy</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Crispy - A Modern Web Application" />
+    <meta name="keywords" content="crispy, web app, application" />
+    <meta name="author" content="Your Name" />
+    <meta name="robots" content="index, follow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Security Headers -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline';"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Crispy" />
+    <meta property="og:description" content="Crispy - A Modern Web Application" />
+    <meta property="og:type" content="website" />
+
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png" />
   </head>
   <body>
     <cs-root></cs-root>
