@@ -29,7 +29,24 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.less"],
+            "styles": [
+              {
+                "input": "node_modules/primeng/resources/themes/lara-light-blue/theme.css",
+                "bundleName": "primeng-theme",
+                "inject": true
+              },
+              {
+                "input": "node_modules/primeng/resources/primeng.min.css",
+                "bundleName": "primeng",
+                "inject": true
+              },
+              {
+                "input": "node_modules/primeicons/primeicons.css",
+                "bundleName": "primeicons",
+                "inject": true
+              },
+              "src/styles.less"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {

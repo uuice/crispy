@@ -5,6 +5,7 @@ import apiRoutes from './server/routes/api'
 import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
+import { env } from './server/config/env'
 
 const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
@@ -14,7 +15,7 @@ const angularApp = new AngularNodeAppEngine()
 applyMiddleware(app)
 
 // 2. API routes
-app.use('/api', apiRoutes)
+app.use(env['API_PREFIX'], apiRoutes)
 
 // 3. Static file serving
 app.use(
@@ -33,9 +34,10 @@ app.use(notFoundHandler)
 
 // Start server
 if (isMainModule(import.meta.url)) {
-  const port = process.env['PORT'] || 4000
+  const port = env['PORT']
   app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`)
+    console.log(`Environment: ${env['NODE_ENV']}`)
   })
 }
 

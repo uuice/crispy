@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
+import { env } from '../config/env'
 
 // Define user type
 export interface JwtUser {
@@ -14,9 +15,6 @@ declare module 'express' {
     user?: JwtUser
   }
 }
-
-// JWT secret key - should be moved to environment variables in production
-const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
 
 /**
  * JWT middleware to verify and decode JWT tokens
@@ -33,8 +31,8 @@ export const jwtMiddleware = (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    // Verify and decode token
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtUser
+    // Verify and decode token using environment variable
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtUser
 
     // Add user info to request object
     req.user = decoded
@@ -67,11 +65,21 @@ export const optionalJwtMiddleware = (req: Request, res: Response, next: NextFun
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtUser
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtUser
     req.user = decoded
     next()
   } catch (error) {
     // Continue without user info if token is invalid
     next()
   }
+}
+
+/**
+ * Generate JWT token for user
+ */
+export const generateToken = (user: JwtUser): string => {
+  const options: SignOptions = {
+    expiresIn: env.JWT_EXPIRES_IN
+  }
+  return jwt.sign(user, env.JWT_SECRET, options)
 }
