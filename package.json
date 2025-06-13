@@ -14,10 +14,13 @@
     "format": "prettier --write \"src/**/*.{ts,html,less,json}\"",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
+    "db:generate:prod": "prisma generate --no-engine",
+    "db:deploy": "prisma db push --accept-data-loss",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "db:push": "prisma db push",
-    "db:push:force": "prisma db push --force-reset"
+    "db:push:force": "prisma db push --force-reset",
+    "postinstall": "prisma generate"
   },
   "private": true,
   "dependencies": {
