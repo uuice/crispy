@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { prisma } from '../utils/prisma'
 
 const router = Router()
 
@@ -22,29 +21,7 @@ router.get('/b', (req, res) => {
 // Get users list
 router.get('/users', async (req, res) => {
   try {
-    const users = await prisma.users.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true,
-        status: true,
-        createdAt: true,
-        roles: {
-          select: {
-            name: true,
-            description: true
-          }
-        }
-      },
-      where: {
-        deletedAt: null
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
+    const users: any[] = []
     res.json({
       code: 0,
       data: users,
