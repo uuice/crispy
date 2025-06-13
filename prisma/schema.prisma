@@ -3,7 +3,7 @@ generator client {
   output        = "../src/prisma"
   runtime       = "bun"
   moduleFormat  = "esm"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "windows"]
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "windows", "darwin", "darwin-arm64", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
