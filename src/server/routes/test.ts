@@ -1,3 +1,4 @@
+import { db } from '@src/libs/db'
 import { Router } from 'express'
 
 const router = Router()
@@ -21,7 +22,7 @@ router.get('/b', (req, res) => {
 // Get users list
 router.get('/users', async (req, res) => {
   try {
-    const users: any[] = []
+    const users = await db.selectFrom('users').selectAll().execute()
     res.json({
       code: 0,
       data: users,

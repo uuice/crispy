@@ -11,7 +11,8 @@
     "lint": "eslint \"src/**/*.{ts,html}\"",
     "lint:fix": "eslint \"src/**/*.{ts,html}\" --fix",
     "lint:strict": "eslint \"src/**/*.{ts,html}\" --max-warnings=0",
-    "format": "prettier --write \"src/**/*.{ts,html,less,json}\""
+    "format": "prettier --write \"src/**/*.{ts,html,less,json}\"",
+    "db:generate": "kysely-codegen --out-file ./src/db/db.d.ts"
   },
   "private": true,
   "dependencies": {
@@ -31,6 +32,8 @@
     "express": "^5.1.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "kysely": "^0.28.2",
+    "mysql2": "^3.14.1",
     "primeicons": "^6.0.1",
     "primeng": "^19.0.0",
     "rxjs": "~7.8.0",
@@ -61,6 +64,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "kysely-codegen": "^0.18.5",
     "less": "^4.2.0",
     "prettier": "^3.5.3",
     "typescript": "~5.8.2"
