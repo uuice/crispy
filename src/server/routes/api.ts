@@ -1,25 +1,11 @@
-import { Router, RequestHandler } from 'express'
-import { jwtMiddleware } from '../middleware/jwt'
-import testRoutes from './test'
+import { Router } from 'express'
+import adminRoutes from './admin/routes'
 
 // Create API router
 const router = Router()
 
-// Create authentication middleware
-const authMiddleware: RequestHandler = (req, res, next) => {
-  console.log(req.path)
-  if (req.path === '/login' || req.path === '/login/') {
-    next()
-    return
-  }
-  jwtMiddleware(req, res, next)
-}
-
-// Apply authentication middleware
-router.use(authMiddleware)
-
-// Mount test routes
-router.use('/test', testRoutes)
+// Mount admin routes
+router.use('/admin', adminRoutes)
 
 // TODO: Add more API routes here
 // router.use('/users', userRoutes)

@@ -1,16 +1,22 @@
 import { Routes } from '@angular/router'
 import { BackstageLayoutComponent } from './layout/layout.component'
+import { AuthGuard } from './guards/auth.guard'
 
 export const BACKSTAGE_ROUTES: Routes = [
   {
     path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.page').then((m) => m.LoginPage)
+  },
+  {
+    path: '',
     component: BackstageLayoutComponent,
+    canActivate: [AuthGuard],
     children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage)
