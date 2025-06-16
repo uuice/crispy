@@ -1,7 +1,7 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import { jobService } from '../../services/jobService'
 
 // Validation schemas
 const createJobSchema = z.object({
@@ -27,12 +27,7 @@ export const getJob = async (req: Request, res: Response, next: NextFunction): P
       return
     }
 
-    const job = await db
-      .selectFrom('jobs')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const job = await jobService.getJobById(id)
 
     if (!job) {
       notFound(res, 'Job not found')
@@ -51,57 +46,20 @@ export const getJobs = async (req: Request, res: Response, next: NextFunction): 
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
     // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const typeName = req.query['typeName'] as string | undefined
-    const nature = req.query['nature'] as string | undefined
-    const branch = req.query['branch'] as string | undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('jobs').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
-    }
-    if (typeName) {
-      query = query.where('typeName', 'like', `%${typeName}%`)
-    }
-    if (nature) {
-      query = query.where('nature', 'like', `%${nature}%`)
-    }
-    if (branch) {
-      query = query.where('branch', 'like', `%${branch}%`)
-    }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
-    }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    const filters = {
+      title: req.query['title'] as string | undefined,
+      typeName: req.query['typeName'] as string | undefined,
+      nature: req.query['nature'] as string | undefined,
+      branch: req.query['branch'] as string | undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    const result = await jobService.getJobs(filters, { page, pageSize })
 
-    const [jobs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: jobs,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching jobs:', err)
     error(res, 'Internal server error')
@@ -113,24 +71,9 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
   try {
     const validatedData = createJobSchema.parse(req.body)
 
-    const now = Date.now()
-    const newJob = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
+    const result = await jobService.createJob(validatedData)
 
-    const result = await db.insertInto('jobs').values(newJob).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newJob
-      },
-      'Job created successfully'
-    )
+    success(res, result, 'Job created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -152,24 +95,14 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
 
     const validatedData = updateJobSchema.parse(req.body)
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const result = await jobService.updateJob(id, validatedData)
 
-    const result = await db
-      .updateTable('jobs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Job not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Job updated successfully')
+    success(res, { id, ...validatedData }, 'Job updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -189,17 +122,9 @@ export const deleteJob = async (req: Request, res: Response, next: NextFunction)
       return
     }
 
-    const result = await db
-      .updateTable('jobs')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const result = await jobService.deleteJob(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Job not found')
       return
     }

@@ -1,7 +1,12 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  roleService,
+  CreateRoleData,
+  UpdateRoleData,
+  RoleFilters
+} from '../../services/roleService'
 
 // Validation schemas
 const createRoleSchema = z.object({
@@ -25,12 +30,7 @@ export const getRole = async (req: Request, res: Response, next: NextFunction): 
       return
     }
 
-    const role = await db
-      .selectFrom('roles')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const role = await roleService.getRoleById(id)
 
     if (!role) {
       notFound(res, 'Role not found')
@@ -49,47 +49,24 @@ export const getRoles = async (req: Request, res: Response, next: NextFunction):
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const moduleId = req.query['module_id'] ? parseInt(req.query['module_id'] as string) : undefined
-    const typeId = req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-
-    let query = db.selectFrom('roles').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
+    // Build filters from query
+    const filters: RoleFilters = {}
+    if (req.query['title']) {
+      filters.title = req.query['title'] as string
     }
-    if (moduleId !== undefined && !isNaN(moduleId)) {
-      query = query.where('module_id', '=', moduleId)
+    if (req.query['module_id']) {
+      filters.module_id = parseInt(req.query['module_id'] as string)
     }
-    if (typeId !== undefined && !isNaN(typeId)) {
-      query = query.where('type_id', '=', typeId)
+    if (req.query['type_id']) {
+      filters.type_id = parseInt(req.query['type_id'] as string)
     }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
+    if (req.query['status']) {
+      filters.status = parseInt(req.query['status'] as string)
     }
 
-    // Order by sort asc, create_time desc by default
-    query = query.orderBy('sort', 'asc').orderBy('create_time', 'desc')
-
-    const [roles, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: roles,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await roleService.getRoles({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching roles:', err)
     error(res, 'Internal server error')
@@ -103,26 +80,10 @@ export const createRole = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedData = createRoleSchema.parse(req.body)
+    const validatedData = createRoleSchema.parse(req.body) as CreateRoleData
 
-    const now = Date.now()
-    const newRole = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('roles').values(newRole).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newRole
-      },
-      'Role created successfully'
-    )
+    const newRole = await roleService.createRole(validatedData)
+    success(res, newRole, 'Role created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -146,26 +107,16 @@ export const updateRole = async (
       return
     }
 
-    const validatedData = updateRoleSchema.parse(req.body)
+    const validatedData = updateRoleSchema.parse(req.body) as UpdateRoleData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await roleService.updateRole(id, validatedData)
 
-    const result = await db
-      .updateTable('roles')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Role not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Role updated successfully')
+    success(res, { id, ...validatedData }, 'Role updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -189,17 +140,9 @@ export const deleteRole = async (
       return
     }
 
-    const result = await db
-      .updateTable('roles')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await roleService.deleteRole(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Role not found')
       return
     }

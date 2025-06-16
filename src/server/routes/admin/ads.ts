@@ -1,6 +1,6 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
+import { adService } from '../../services/adService'
 import { success, error, validationError, notFound } from '../../utils/response'
 
 // Validation schemas
@@ -27,20 +27,13 @@ export const getAd = async (req: Request, res: Response, next: NextFunction): Pr
       return
     }
 
-    const ad = await db
-      .selectFrom('ads')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (!ad) {
+    const ad = await adService.getAdById(id)
+    success(res, ad)
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'Ad not found') {
       notFound(res, 'Ad not found')
       return
     }
-
-    success(res, ad)
-  } catch (err: unknown) {
     console.error('Error fetching ad:', err)
     error(res, 'Internal server error')
   }
@@ -51,32 +44,9 @@ export const getAds = async (req: Request, res: Response, next: NextFunction): P
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    const [ads, total] = await Promise.all([
-      db
-        .selectFrom('ads')
-        .selectAll()
-        .where('is_delete', '=', 0)
-        .limit(pageSize)
-        .offset(offset)
-        .execute(),
-      db
-        .selectFrom('ads')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('is_delete', '=', 0)
-        .executeTakeFirst()
-    ])
-
-    success(res, {
-      data: ads,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await adService.getAds({ page, pageSize })
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching ads:', err)
     error(res, 'Internal server error')
@@ -86,26 +56,8 @@ export const getAds = async (req: Request, res: Response, next: NextFunction): P
 // Create new ad
 export const createAd = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const validatedData = createAdSchema.parse(req.body)
-
-    const now = Date.now()
-    const newAd = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('ads').values(newAd).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newAd
-      },
-      'Ad created successfully'
-    )
+    const ad = await adService.createAd(req.body)
+    success(res, ad, 'Ad created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -125,29 +77,15 @@ export const updateAd = async (req: Request, res: Response, next: NextFunction):
       return
     }
 
-    const validatedData = updateAdSchema.parse(req.body)
-
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
-    const result = await db
-      .updateTable('ads')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      notFound(res, 'Ad not found')
-      return
-    }
-
-    success(res, { id, ...updateData }, 'Ad updated successfully')
+    const ad = await adService.updateAd(id, req.body)
+    success(res, ad, 'Ad updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
+      return
+    }
+    if (err instanceof Error && err.message === 'Ad not found') {
+      notFound(res, 'Ad not found')
       return
     }
     console.error('Error updating ad:', err)
@@ -164,23 +102,13 @@ export const deleteAd = async (req: Request, res: Response, next: NextFunction):
       return
     }
 
-    const result = await db
-      .updateTable('ads')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    await adService.deleteAd(id)
+    success(res, null, 'Ad deleted successfully')
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'Ad not found') {
       notFound(res, 'Ad not found')
       return
     }
-
-    success(res, null, 'Ad deleted successfully')
-  } catch (err: unknown) {
     console.error('Error deleting ad:', err)
     error(res, 'Internal server error')
   }

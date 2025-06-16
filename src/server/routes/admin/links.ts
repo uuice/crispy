@@ -1,12 +1,17 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  linkService,
+  CreateLinkData,
+  UpdateLinkData,
+  LinkFilters
+} from '../../services/linkService'
 
 // Validation schemas
 const createLinkSchema = z.object({
   site_name: z.string().min(1),
-  des: z.string().optional(),
+  des: z.string(),
   url: z.string().url(),
   logo: z.string().optional(),
   method: z.string().optional(),
@@ -26,12 +31,7 @@ export const getLink = async (req: Request, res: Response, next: NextFunction): 
       return
     }
 
-    const link = await db
-      .selectFrom('links')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const link = await linkService.getLinkById(id)
 
     if (!link) {
       notFound(res, 'Link not found')
@@ -50,53 +50,30 @@ export const getLinks = async (req: Request, res: Response, next: NextFunction):
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const siteName = req.query['site_name'] as string | undefined
-    const url = req.query['url'] as string | undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('links').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (siteName) {
-      query = query.where('site_name', 'like', `%${siteName}%`)
+    // Build filters from query
+    const filters: LinkFilters = {}
+    if (req.query['site_name']) {
+      filters.siteName = req.query['site_name'] as string
     }
-    if (url) {
-      query = query.where('url', 'like', `%${url}%`)
+    if (req.query['url']) {
+      filters.url = req.query['url'] as string
     }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
+    if (req.query['status']) {
+      filters.status = parseInt(req.query['status'] as string)
     }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
+    if (req.query['type_id']) {
+      filters.typeId = parseInt(req.query['type_id'] as string)
     }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    if (req.query['start_time']) {
+      filters.startTime = parseInt(req.query['start_time'] as string)
+    }
+    if (req.query['end_time']) {
+      filters.endTime = parseInt(req.query['end_time'] as string)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
-
-    const [links, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: links,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await linkService.getLinks({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching links:', err)
     error(res, 'Internal server error')
@@ -110,26 +87,10 @@ export const createLink = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedData = createLinkSchema.parse(req.body)
+    const validatedData = createLinkSchema.parse(req.body) as CreateLinkData
 
-    const now = Date.now()
-    const newLink = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('links').values(newLink).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newLink
-      },
-      'Link created successfully'
-    )
+    const newLink = await linkService.createLink(validatedData)
+    success(res, newLink, 'Link created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -153,26 +114,16 @@ export const updateLink = async (
       return
     }
 
-    const validatedData = updateLinkSchema.parse(req.body)
+    const validatedData = updateLinkSchema.parse(req.body) as UpdateLinkData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await linkService.updateLink(id, validatedData)
 
-    const result = await db
-      .updateTable('links')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Link not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Link updated successfully')
+    success(res, { id, ...validatedData }, 'Link updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -196,17 +147,9 @@ export const deleteLink = async (
       return
     }
 
-    const result = await db
-      .updateTable('links')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await linkService.deleteLink(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Link not found')
       return
     }

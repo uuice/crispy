@@ -1,7 +1,7 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import { attrService } from '../../services/attrService'
 
 // Validation schemas
 const createAttrSchema = z.object({
@@ -22,12 +22,7 @@ export const getAttr = async (req: Request, res: Response, next: NextFunction): 
       return
     }
 
-    const attr = await db
-      .selectFrom('attrs')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const attr = await attrService.getAttrById(id)
 
     if (!attr) {
       notFound(res, 'Attribute not found')
@@ -46,49 +41,18 @@ export const getAttrs = async (req: Request, res: Response, next: NextFunction):
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
     // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('attrs').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
-    }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
-    }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
-    }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    const filters = {
+      title: req.query['title'] as string | undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    const result = await attrService.getAttrs(filters, { page, pageSize })
 
-    const [attrs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: attrs,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching attributes:', err)
     error(res, 'Internal server error')
@@ -104,24 +68,9 @@ export const createAttr = async (
   try {
     const validatedData = createAttrSchema.parse(req.body)
 
-    const now = Date.now()
-    const newAttr = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
+    const result = await attrService.createAttr(validatedData)
 
-    const result = await db.insertInto('attrs').values(newAttr).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newAttr
-      },
-      'Attribute created successfully'
-    )
+    success(res, result, 'Attribute created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -147,24 +96,14 @@ export const updateAttr = async (
 
     const validatedData = updateAttrSchema.parse(req.body)
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const result = await attrService.updateAttr(id, validatedData)
 
-    const result = await db
-      .updateTable('attrs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Attribute not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Attribute updated successfully')
+    success(res, { id, ...validatedData }, 'Attribute updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -188,17 +127,9 @@ export const deleteAttr = async (
       return
     }
 
-    const result = await db
-      .updateTable('attrs')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const result = await attrService.deleteAttr(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Attribute not found')
       return
     }

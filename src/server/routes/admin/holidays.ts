@@ -1,7 +1,7 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import { holidayService } from '../../services/holidayService'
 
 // Validation schemas
 const createHolidaySchema = z.object({
@@ -21,12 +21,7 @@ export const getHoliday = async (req: Request, res: Response, next: NextFunction
       return
     }
 
-    const holiday = await db
-      .selectFrom('holidays')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const holiday = await holidayService.getHolidayById(id)
 
     if (!holiday) {
       notFound(res, 'Holiday not found')
@@ -45,49 +40,18 @@ export const getHolidays = async (req: Request, res: Response, next: NextFunctio
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
     // Get filters from query
-    const name = req.query['name'] as string | undefined
-    const value = req.query['value'] as string | undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('holidays').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (name) {
-      query = query.where('name', 'like', `%${name}%`)
-    }
-    if (value) {
-      query = query.where('value', 'like', `%${value}%`)
-    }
-    if (startTime) {
-      query = query.where('creat_time', '>=', startTime)
-    }
-    if (endTime) {
-      query = query.where('creat_time', '<=', endTime)
+    const filters = {
+      name: req.query['name'] as string | undefined,
+      value: req.query['value'] as string | undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
 
-    // Order by creat_time desc by default
-    query = query.orderBy('creat_time', 'desc')
+    const result = await holidayService.getHolidays(filters, { page, pageSize })
 
-    const [holidays, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: holidays,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching holidays:', err)
     error(res, 'Internal server error')
@@ -95,28 +59,17 @@ export const getHolidays = async (req: Request, res: Response, next: NextFunctio
 }
 
 // Create new holiday
-export const createHoliday = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createHoliday = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const validatedData = createHolidaySchema.parse(req.body)
 
-    const now = Date.now()
-    const newHoliday = {
-      ...validatedData,
-      creat_time: now,
-      update_time: now,
-      is_delete: 0
-    }
+    const result = await holidayService.createHoliday(validatedData)
 
-    const result = await db.insertInto('holidays').values(newHoliday).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newHoliday
-      },
-      'Holiday created successfully'
-    )
+    success(res, result, 'Holiday created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -128,7 +81,11 @@ export const createHoliday = async (req: Request, res: Response, next: NextFunct
 }
 
 // Update holiday
-export const updateHoliday = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateHoliday = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -138,24 +95,14 @@ export const updateHoliday = async (req: Request, res: Response, next: NextFunct
 
     const validatedData = updateHolidaySchema.parse(req.body)
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const result = await holidayService.updateHoliday(id, validatedData)
 
-    const result = await db
-      .updateTable('holidays')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Holiday not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Holiday updated successfully')
+    success(res, { id, ...validatedData }, 'Holiday updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -167,7 +114,11 @@ export const updateHoliday = async (req: Request, res: Response, next: NextFunct
 }
 
 // Delete holiday (logical delete)
-export const deleteHoliday = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteHoliday = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -175,17 +126,9 @@ export const deleteHoliday = async (req: Request, res: Response, next: NextFunct
       return
     }
 
-    const result = await db
-      .updateTable('holidays')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const result = await holidayService.deleteHoliday(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Holiday not found')
       return
     }

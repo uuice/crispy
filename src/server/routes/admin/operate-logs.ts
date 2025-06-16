@@ -1,7 +1,12 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  operateLogService,
+  CreateOperateLogData,
+  UpdateOperateLogData,
+  OperateLogFilters
+} from '../../services/operateLogService'
 
 // Validation schemas
 const createOperateLogSchema = z.object({
@@ -26,12 +31,7 @@ export const getOperateLog = async (
       return
     }
 
-    const log = await db
-      .selectFrom('operate_logs')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const log = await operateLogService.getOperateLogById(id)
 
     if (!log) {
       notFound(res, 'Operate log not found')
@@ -54,53 +54,27 @@ export const getOperateLogs = async (
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const code = req.query['code'] as string | undefined
-    const typeId = req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined
-    const userId = req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('operate_logs').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (code) {
-      query = query.where('code', 'like', `%${code}%`)
+    // Build filters from query
+    const filters: OperateLogFilters = {}
+    if (req.query['code']) {
+      filters.code = req.query['code'] as string
     }
-    if (typeId !== undefined && !isNaN(typeId)) {
-      query = query.where('type_id', '=', typeId)
+    if (req.query['type_id']) {
+      filters.typeId = parseInt(req.query['type_id'] as string)
     }
-    if (userId !== undefined && !isNaN(userId)) {
-      query = query.where('user_id', '=', userId)
+    if (req.query['user_id']) {
+      filters.userId = parseInt(req.query['user_id'] as string)
     }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
+    if (req.query['start_time']) {
+      filters.startTime = parseInt(req.query['start_time'] as string)
     }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    if (req.query['end_time']) {
+      filters.endTime = parseInt(req.query['end_time'] as string)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
-
-    const [logs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: logs,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await operateLogService.getOperateLogs({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching operate logs:', err)
     error(res, 'Internal server error')
@@ -114,26 +88,10 @@ export const createOperateLog = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedData = createOperateLogSchema.parse(req.body)
+    const validatedData = createOperateLogSchema.parse(req.body) as CreateOperateLogData
 
-    const now = Date.now()
-    const newLog = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('operate_logs').values(newLog).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newLog
-      },
-      'Operate log created successfully'
-    )
+    const newLog = await operateLogService.createOperateLog(validatedData)
+    success(res, newLog, 'Operate log created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -157,26 +115,16 @@ export const updateOperateLog = async (
       return
     }
 
-    const validatedData = updateOperateLogSchema.parse(req.body)
+    const validatedData = updateOperateLogSchema.parse(req.body) as UpdateOperateLogData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await operateLogService.updateOperateLog(id, validatedData)
 
-    const result = await db
-      .updateTable('operate_logs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Operate log not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Operate log updated successfully')
+    success(res, { id, ...validatedData }, 'Operate log updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -200,17 +148,9 @@ export const deleteOperateLog = async (
       return
     }
 
-    const result = await db
-      .updateTable('operate_logs')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await operateLogService.deleteOperateLog(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Operate log not found')
       return
     }

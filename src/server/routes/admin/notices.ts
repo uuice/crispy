@@ -1,14 +1,21 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  noticeService,
+  CreateNoticeData,
+  UpdateNoticeData,
+  NoticeFilters
+} from '../../services/noticeService'
 
 // Validation schemas
 const createNoticeSchema = z.object({
   title: z.string().min(1),
   content: z.string().min(1),
-  status: z.number().default(10),
-  sort: z.number().default(0)
+  from_user_id: z.number().min(1),
+  publish_time: z.number().optional(),
+  tolds: z.string().optional(),
+  status: z.number().default(10)
 })
 
 const updateNoticeSchema = createNoticeSchema.partial()
@@ -22,12 +29,7 @@ export const getNotice = async (req: Request, res: Response, next: NextFunction)
       return
     }
 
-    const notice = await db
-      .selectFrom('notices')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const notice = await noticeService.getNoticeById(id)
 
     if (!notice) {
       notFound(res, 'Notice not found')
@@ -50,49 +52,24 @@ export const getNotices = async (
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('notices').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
+    // Build filters from query
+    const filters: NoticeFilters = {}
+    if (req.query['title']) {
+      filters.title = req.query['title'] as string
     }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
+    if (req.query['status']) {
+      filters.status = parseInt(req.query['status'] as string)
     }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
+    if (req.query['start_time']) {
+      filters.startTime = parseInt(req.query['start_time'] as string)
     }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    if (req.query['end_time']) {
+      filters.endTime = parseInt(req.query['end_time'] as string)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
-
-    const [notices, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: notices,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await noticeService.getNotices({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching notices:', err)
     error(res, 'Internal server error')
@@ -106,26 +83,10 @@ export const createNotice = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedData = createNoticeSchema.parse(req.body)
+    const validatedData = createNoticeSchema.parse(req.body) as CreateNoticeData
 
-    const now = Date.now()
-    const newNotice = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('notices').values(newNotice).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newNotice
-      },
-      'Notice created successfully'
-    )
+    const newNotice = await noticeService.createNotice(validatedData)
+    success(res, newNotice, 'Notice created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -149,26 +110,16 @@ export const updateNotice = async (
       return
     }
 
-    const validatedData = updateNoticeSchema.parse(req.body)
+    const validatedData = updateNoticeSchema.parse(req.body) as UpdateNoticeData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await noticeService.updateNotice(id, validatedData)
 
-    const result = await db
-      .updateTable('notices')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Notice not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Notice updated successfully')
+    success(res, { id, ...validatedData }, 'Notice updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -192,17 +143,9 @@ export const deleteNotice = async (
       return
     }
 
-    const result = await db
-      .updateTable('notices')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await noticeService.deleteNotice(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Notice not found')
       return
     }

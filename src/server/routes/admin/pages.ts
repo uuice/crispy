@@ -1,7 +1,12 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  pageService,
+  CreatePageData,
+  UpdatePageData,
+  PageFilters
+} from '../../services/pageService'
 
 // Validation schemas
 const createPageSchema = z.object({
@@ -11,7 +16,6 @@ const createPageSchema = z.object({
   des: z.string().optional(),
   keywords: z.string().optional(),
   cover_image: z.string().optional(),
-  sort: z.number().default(0),
   status: z.number().default(10)
 })
 
@@ -26,12 +30,7 @@ export const getPage = async (req: Request, res: Response, next: NextFunction): 
       return
     }
 
-    const page = await db
-      .selectFrom('pages')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const page = await pageService.getPageById(id)
 
     if (!page) {
       notFound(res, 'Page not found')
@@ -50,53 +49,27 @@ export const getPages = async (req: Request, res: Response, next: NextFunction):
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const alias = req.query['alias'] as string | undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('pages').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
+    // Build filters from query
+    const filters: PageFilters = {}
+    if (req.query['title']) {
+      filters.title = req.query['title'] as string
     }
-    if (alias) {
-      query = query.where('alias', 'like', `%${alias}%`)
+    if (req.query['alias']) {
+      filters.alias = req.query['alias'] as string
     }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
+    if (req.query['status']) {
+      filters.status = parseInt(req.query['status'] as string)
     }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
+    if (req.query['start_time']) {
+      filters.startTime = parseInt(req.query['start_time'] as string)
     }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    if (req.query['end_time']) {
+      filters.endTime = parseInt(req.query['end_time'] as string)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
-
-    const [pages, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: pages,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await pageService.getPages({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching pages:', err)
     error(res, 'Internal server error')
@@ -104,28 +77,16 @@ export const getPages = async (req: Request, res: Response, next: NextFunction):
 }
 
 // Create new page
-export const createPage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createPage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const validatedData = createPageSchema.parse(req.body)
+    const validatedData = createPageSchema.parse(req.body) as CreatePageData
 
-    const now = Date.now()
-    const newPage = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('pages').values(newPage).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newPage
-      },
-      'Page created successfully'
-    )
+    const newPage = await pageService.createPage(validatedData)
+    success(res, newPage, 'Page created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -137,7 +98,11 @@ export const createPage = async (req: Request, res: Response, next: NextFunction
 }
 
 // Update page
-export const updatePage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updatePage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -145,26 +110,16 @@ export const updatePage = async (req: Request, res: Response, next: NextFunction
       return
     }
 
-    const validatedData = updatePageSchema.parse(req.body)
+    const validatedData = updatePageSchema.parse(req.body) as UpdatePageData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await pageService.updatePage(id, validatedData)
 
-    const result = await db
-      .updateTable('pages')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Page not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Page updated successfully')
+    success(res, { id, ...validatedData }, 'Page updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -176,7 +131,11 @@ export const updatePage = async (req: Request, res: Response, next: NextFunction
 }
 
 // Delete page (logical delete)
-export const deletePage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deletePage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -184,17 +143,9 @@ export const deletePage = async (req: Request, res: Response, next: NextFunction
       return
     }
 
-    const result = await db
-      .updateTable('pages')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await pageService.deletePage(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Page not found')
       return
     }

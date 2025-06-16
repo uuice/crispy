@@ -1,8 +1,7 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
-import { sql } from 'kysely'
+import { articleService } from '../../services/articleService'
 
 // Validation schemas
 const createArticleSchema = z.object({
@@ -37,12 +36,7 @@ export const getArticle = async (
       return
     }
 
-    const article = await db
-      .selectFrom('articles')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const article = await articleService.getArticleById(id)
 
     if (!article) {
       notFound(res, 'Article not found')
@@ -65,59 +59,22 @@ export const getArticles = async (
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
     // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const categoryId = req.query['category_id']
-      ? parseInt(req.query['category_id'] as string)
-      : undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const tag = req.query['tag'] as string | undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('articles').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where(sql.ref('title'), 'like', `%${title}%`)
-    }
-    if (categoryId !== undefined && !isNaN(categoryId)) {
-      query = query.where(sql.ref('category_id'), '=', categoryId)
-    }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where(sql.ref('status'), '=', status)
-    }
-    if (tag) {
-      query = query.where(sql.ref('tags'), 'like', `%${tag}%`)
-    }
-    if (startTime) {
-      query = query.where(sql.ref('create_time'), '>=', startTime)
-    }
-    if (endTime) {
-      query = query.where(sql.ref('create_time'), '<=', endTime)
+    const filters = {
+      title: req.query['title'] as string | undefined,
+      category_id: req.query['category_id']
+        ? parseInt(req.query['category_id'] as string)
+        : undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      tag: req.query['tag'] as string | undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    const result = await articleService.getArticles(filters, { page, pageSize })
 
-    const [articles, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: articles,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching articles:', err)
     error(res, 'Internal server error')
@@ -133,43 +90,16 @@ export const createArticle = async (
   try {
     const validatedData = createArticleSchema.parse(req.body)
 
-    // If category_id is provided, verify that the category exists
-    if (validatedData.category_id) {
-      const category = await db
-        .selectFrom('categories')
-        .select('id')
-        .where('id', '=', validatedData.category_id)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst()
+    const result = await articleService.createArticle(validatedData)
 
-      if (!category) {
-        error(res, 'Category not found', 400)
-        return
-      }
-    }
-
-    const now = Date.now()
-    const newArticle = {
-      ...validatedData,
-      type_id: validatedData.category_id,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('articles').values(newArticle).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newArticle
-      },
-      'Article created successfully'
-    )
+    success(res, result, 'Article created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
+      return
+    }
+    if (err instanceof Error && err.message === 'Category not found') {
+      error(res, 'Category not found', 400)
       return
     }
     console.error('Error creating article:', err)
@@ -192,43 +122,21 @@ export const updateArticle = async (
 
     const validatedData = updateArticleSchema.parse(req.body)
 
-    // If category_id is being updated, verify that the new category exists
-    if (validatedData.category_id !== undefined) {
-      const category = await db
-        .selectFrom('categories')
-        .select('id')
-        .where('id', '=', validatedData.category_id)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst()
+    const result = await articleService.updateArticle(id, validatedData)
 
-      if (!category) {
-        error(res, 'Category not found', 400)
-        return
-      }
-    }
-
-    const updateData = {
-      ...validatedData,
-      type_id: validatedData.category_id,
-      update_time: Date.now()
-    }
-
-    const result = await db
-      .updateTable('articles')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Article not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Article updated successfully')
+    success(res, { id, ...validatedData }, 'Article updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
+      return
+    }
+    if (err instanceof Error && err.message === 'Category not found') {
+      error(res, 'Category not found', 400)
       return
     }
     console.error('Error updating article:', err)
@@ -249,17 +157,9 @@ export const deleteArticle = async (
       return
     }
 
-    const result = await db
-      .updateTable('articles')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const result = await articleService.deleteArticle(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!result.success) {
       notFound(res, 'Article not found')
       return
     }

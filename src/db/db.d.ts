@@ -9,6 +9,42 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export interface AccessToken {
+  /**
+   * 应用名称
+   */
+  app_name: Generated<string>;
+  /**
+   * 渠道
+   */
+  channel: Generated<string>;
+  /**
+   * 创建时间
+   */
+  create_time: Generated<number>;
+  /**
+   * 自增id
+   */
+  id: Generated<number>;
+  is_delete: Generated<number>;
+  /**
+   * 启用状态 10 启用 -10 未启用
+   */
+  status: Generated<number>;
+  /**
+   * Token
+   */
+  token: string;
+  /**
+   * 更新时间
+   */
+  update_time: Generated<number>;
+  /**
+   * 用户id
+   */
+  user_id: Generated<number>;
+}
+
 export interface Additions {
   /**
    * 创建时间
@@ -1175,6 +1211,7 @@ export interface Votes {
 }
 
 export interface DB {
+  access_token: AccessToken;
   ad_items: AdItems;
   additions: Additions;
   ads: Ads;

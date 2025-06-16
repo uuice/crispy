@@ -1,21 +1,31 @@
-import { db } from '@src/libs/db'
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
+import {
+  keywordService,
+  CreateKeywordData,
+  UpdateKeywordData,
+  KeywordFilters
+} from '../../services/keywordService'
 
 // Validation schemas
 const createKeywordSchema = z.object({
   title: z.string().min(1),
   alias: z.string().min(1),
-  des: z.string().optional(),
-  sort: z.number().default(0),
+  value: z.string().optional(),
+  url: z.string().optional(),
+  type_id: z.number().optional(),
   status: z.number().default(10)
 })
 
 const updateKeywordSchema = createKeywordSchema.partial()
 
 // Get single keyword
-export const getKeyword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getKeyword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -23,12 +33,7 @@ export const getKeyword = async (req: Request, res: Response, next: NextFunction
       return
     }
 
-    const keyword = await db
-      .selectFrom('keywords')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const keyword = await keywordService.getKeywordById(id)
 
     if (!keyword) {
       notFound(res, 'Keyword not found')
@@ -43,57 +48,35 @@ export const getKeyword = async (req: Request, res: Response, next: NextFunction
 }
 
 // Get keywords list with pagination
-export const getKeywords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getKeywords = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const offset = (page - 1) * pageSize
 
-    // Get filters from query
-    const title = req.query['title'] as string | undefined
-    const alias = req.query['alias'] as string | undefined
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const startTime = req.query['start_time']
-      ? parseInt(req.query['start_time'] as string)
-      : undefined
-    const endTime = req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
-
-    let query = db.selectFrom('keywords').selectAll().where('is_delete', '=', 0)
-
-    // Add filters if provided
-    if (title) {
-      query = query.where('title', 'like', `%${title}%`)
+    // Build filters from query
+    const filters: KeywordFilters = {}
+    if (req.query['title']) {
+      filters.title = req.query['title'] as string
     }
-    if (alias) {
-      query = query.where('alias', 'like', `%${alias}%`)
+    if (req.query['alias']) {
+      filters.alias = req.query['alias'] as string
     }
-    if (status !== undefined && !isNaN(status)) {
-      query = query.where('status', '=', status)
+    if (req.query['status']) {
+      filters.status = parseInt(req.query['status'] as string)
     }
-    if (startTime) {
-      query = query.where('create_time', '>=', startTime)
+    if (req.query['start_time']) {
+      filters.startTime = parseInt(req.query['start_time'] as string)
     }
-    if (endTime) {
-      query = query.where('create_time', '<=', endTime)
+    if (req.query['end_time']) {
+      filters.endTime = parseInt(req.query['end_time'] as string)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
-
-    const [keywords, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
-    ])
-
-    success(res, {
-      data: keywords,
-      pagination: {
-        total: Number(total?.count) || 0,
-        page,
-        pageSize,
-        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
-      }
-    })
+    const result = await keywordService.getKeywords({ page, pageSize }, filters)
+    success(res, result)
   } catch (err: unknown) {
     console.error('Error fetching keywords:', err)
     error(res, 'Internal server error')
@@ -101,28 +84,16 @@ export const getKeywords = async (req: Request, res: Response, next: NextFunctio
 }
 
 // Create new keyword
-export const createKeyword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createKeyword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const validatedData = createKeywordSchema.parse(req.body)
+    const validatedData = createKeywordSchema.parse(req.body) as CreateKeywordData
 
-    const now = Date.now()
-    const newKeyword = {
-      ...validatedData,
-      create_time: now,
-      update_time: now,
-      is_delete: 0
-    }
-
-    const result = await db.insertInto('keywords').values(newKeyword).executeTakeFirst()
-
-    success(
-      res,
-      {
-        id: Number(result.insertId),
-        ...newKeyword
-      },
-      'Keyword created successfully'
-    )
+    const newKeyword = await keywordService.createKeyword(validatedData)
+    success(res, newKeyword, 'Keyword created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -134,7 +105,11 @@ export const createKeyword = async (req: Request, res: Response, next: NextFunct
 }
 
 // Update keyword
-export const updateKeyword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateKeyword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -142,26 +117,16 @@ export const updateKeyword = async (req: Request, res: Response, next: NextFunct
       return
     }
 
-    const validatedData = updateKeywordSchema.parse(req.body)
+    const validatedData = updateKeywordSchema.parse(req.body) as UpdateKeywordData
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
+    const updated = await keywordService.updateKeyword(id, validatedData)
 
-    const result = await db
-      .updateTable('keywords')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
+    if (!updated) {
       notFound(res, 'Keyword not found')
       return
     }
 
-    success(res, { id, ...updateData }, 'Keyword updated successfully')
+    success(res, { id, ...validatedData }, 'Keyword updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
       validationError(res, err.errors)
@@ -173,7 +138,11 @@ export const updateKeyword = async (req: Request, res: Response, next: NextFunct
 }
 
 // Delete keyword (logical delete)
-export const deleteKeyword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteKeyword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -181,17 +150,9 @@ export const deleteKeyword = async (req: Request, res: Response, next: NextFunct
       return
     }
 
-    const result = await db
-      .updateTable('keywords')
-      .set({
-        is_delete: 10,
-        update_time: Date.now()
-      })
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
+    const deleted = await keywordService.deleteKeyword(id)
 
-    if (result.numUpdatedRows === 0n) {
+    if (!deleted) {
       notFound(res, 'Keyword not found')
       return
     }
