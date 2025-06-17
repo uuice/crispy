@@ -3,6 +3,7 @@ import { Routes } from '@angular/router'
 export const VACATION_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./vacation.page').then((m) => m.VacationPage)
+    loadComponent: () => import('./vacation.page').then((m) => m.VacationPage),
+    data: { keepAlive: true }
   }
 ]

@@ -3,7 +3,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection
 } from '@angular/core'
-import { provideRouter } from '@angular/router'
+import { provideRouter, withRouterConfig, RouteReuseStrategy } from '@angular/router'
 
 import { routes } from './app.routes'
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser'
@@ -12,18 +12,33 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config'
 import Aura from '@primeng/themes/aura'
 import nora from '@primeng/themes/nora'
+import lara from '@primeng/themes/lara'
+
 import { MessageService } from 'primeng/api'
+import { CustomReuseStrategy } from './backstage/services/route-reuse.strategy'
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withRouterConfig({
+        onSameUrlNavigation: 'reload'
+      })
+    ),
+    {
+      provide: RouteReuseStrategy,
+      useClass: CustomReuseStrategy
+    },
     provideClientHydration(withEventReplay()),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: nora
+        preset: lara,
+        options: {
+          darkModeSelector: '.app-dark'
+        }
       }
     }),
     MessageService

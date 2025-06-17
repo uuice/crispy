@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, inject, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ConfirmationService } from 'primeng/api'
 import { DividerModule } from 'primeng/divider'
+import { SettingsService, AppSettings } from '../../services/settings.service'
 
 interface SiteSettings {
   siteName: string
@@ -49,6 +50,16 @@ interface StorageSettings {
   region: string
   domain: string
   uploadPath: string
+}
+
+interface LanguageOption {
+  label: string
+  value: string
+}
+
+interface ThemeOption {
+  label: string
+  value: string
 }
 
 @Component({
@@ -510,6 +521,10 @@ interface StorageSettings {
   `
 })
 export class SettingsPage implements OnInit {
+  protected settingsService = inject(SettingsService)
+
+  settings: AppSettings = this.settingsService.settings()
+
   siteSettings: SiteSettings = {
     siteName: '',
     siteDescription: '',
@@ -547,9 +562,10 @@ export class SettingsPage implements OnInit {
     uploadPath: 'uploads'
   }
 
-  languageOptions = [
+  languageOptions: LanguageOption[] = [
     { label: '简体中文', value: 'zh-CN' },
-    { label: 'English', value: 'en-US' }
+    { label: 'English', value: 'en-US' },
+    { label: '日本語', value: 'ja-JP' }
   ]
 
   timezoneOptions = [
@@ -573,6 +589,13 @@ export class SettingsPage implements OnInit {
     { label: '本地存储', value: 'local' },
     { label: '阿里云 OSS', value: 'oss' },
     { label: '腾讯云 COS', value: 'cos' }
+  ]
+
+  themeOptions: ThemeOption[] = [
+    { label: '默认主题', value: 'default' },
+    { label: '蓝色主题', value: 'blue' },
+    { label: '绿色主题', value: 'green' },
+    { label: '紫色主题', value: 'purple' }
   ]
 
   constructor(
@@ -666,5 +689,41 @@ export class SettingsPage implements OnInit {
       summary: '连接测试',
       detail: '存储服务连接测试成功'
     })
+  }
+
+  onDarkModeChange(event: any) {
+    this.settingsService.setDarkMode(event.checked)
+  }
+
+  onCompactModeChange(event: any) {
+    this.settingsService.setTheme(event.checked ? 'compact' : 'default')
+  }
+
+  onThemeChange(event: any) {
+    this.settingsService.setTheme(event.value)
+  }
+
+  onSidebarCollapsedChange(event: any) {
+    this.settingsService.setSidebarCollapsed(event.checked)
+  }
+
+  onLanguageChange(event: any) {
+    this.settingsService.setLanguage(event.value)
+  }
+
+  resetSettings() {
+    this.settingsService.resetSettings()
+    this.settings = this.settingsService.settings()
+  }
+
+  exportSettings() {
+    const settingsJson = this.settingsService.exportSettings()
+    const blob = new Blob([settingsJson], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'backstage-settings.json'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 }

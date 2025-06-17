@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, OnDestroy, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
-import { MenubarModule } from 'primeng/menubar'
-import { SidebarModule } from 'primeng/sidebar'
-import { ButtonModule } from 'primeng/button'
-import { TabViewModule } from 'primeng/tabview'
 import { MenuItem } from 'primeng/api'
 import { filter } from 'rxjs/operators'
+import { HeaderComponent } from './header.component'
+import { SidebarComponent } from './sidebar.component'
+import { FooterComponent } from './footer.component'
+import { PageTabsComponent } from './page-tabs.component'
+import { SettingsService } from '../services/settings.service'
 
 interface TabItem {
   label: string
@@ -18,84 +19,57 @@ interface TabItem {
 @Component({
   selector: 'cs-backstage-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, MenubarModule, SidebarModule, ButtonModule, TabViewModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HeaderComponent,
+    SidebarComponent,
+    FooterComponent,
+    PageTabsComponent
+  ],
   template: `
     <div class="backstage-layout">
-      <!-- Header -->
-      <header class="header">
-        <p-menubar [model]="menuItems" [style]="{ 'border-radius': '0' }" class="border-none">
-          <ng-template pTemplate="start">
-            <span class="logo">Crispy Backstage</span>
-          </ng-template>
-          <ng-template pTemplate="end">
-            <button
-              pButton
-              icon="pi pi-user"
-              class="p-button-text"
-              (click)="toggleUserMenu()"
-            ></button>
-          </ng-template>
-        </p-menubar>
-      </header>
+      <!-- 顶部 -->
+      <div class="header-container">
+        <cs-header [menuItems]="menuItems" (darkModeToggle)="onDarkModeToggle($event)"></cs-header>
+      </div>
 
-      <!-- Main Content -->
       <div class="main-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" [class.sidebar-collapsed]="isSidebarCollapsed">
-          <div class="sidebar-header">
-            <button
-              pButton
-              icon="pi pi-bars"
-              class="p-button-text"
-              (click)="toggleSidebar()"
-            ></button>
-          </div>
-          <nav class="sidebar-menu">
-            <ul>
-              <li *ngFor="let item of sidebarItems" [class.active]="isActive(item.routerLink)">
-                <a [routerLink]="item.routerLink" routerLinkActive="active">
-                  <i [class]="item.icon"></i>
-                  <span *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
+        <div
+          class="sidebar-container"
+          [class.collapsed]="settingsService.settings().sidebarCollapsed"
+        >
+          <!-- 侧边栏 -->
+          <cs-sidebar
+            [items]="sidebarItems"
+            [collapsed]="settingsService.settings().sidebarCollapsed"
+            (toggleSidebar)="toggleSidebar()"
+          ></cs-sidebar>
+        </div>
 
-        <!-- Content Area -->
-        <main class="content">
-          <!-- Tabs -->
-          <div class="tabs-container" *ngIf="tabs.length > 0">
-            <p-tabView (onChange)="onTabChange($event)" [activeIndex]="activeTabIndex">
-              <p-tabPanel
-                *ngFor="let tab of tabs; let i = index"
-                [header]="tab.label"
-                [closable]="tab.closable"
-              >
-                <ng-template pTemplate="header">
-                  <span>
-                    <i [class]="tab.icon" *ngIf="tab.icon"></i>
-                    {{ tab.label }}
-                  </span>
-                </ng-template>
-              </p-tabPanel>
-            </p-tabView>
+        <!-- 内容区 -->
+        <main class="content" [class.collapsed]="settingsService.settings().sidebarCollapsed">
+          <div class="page-tabs-container">
+            <cs-page-tabs
+              [tabs]="tabs"
+              [activeIndex]="activeTabIndex"
+              (tabChange)="onTabChange($event)"
+              (closeTab)="closeTab($event)"
+            ></cs-page-tabs>
           </div>
-
-          <!-- Page Content -->
           <div class="page-content">
             <router-outlet></router-outlet>
           </div>
         </main>
       </div>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <div class="footer-content">
-          <span>&copy; {{ currentYear }} Crispy Backstage. All rights reserved.</span>
-          <span class="version">Version 1.0.0</span>
-        </div>
-      </footer>
+      <!-- 底部 -->
+      <div class="footer-container">
+        <cs-footer
+          [year]="currentYear"
+          [class.footer-collapsed]="settingsService.settings().sidebarCollapsed"
+        ></cs-footer>
+      </div>
     </div>
   `,
   styles: [
@@ -103,248 +77,125 @@ interface TabItem {
       .backstage-layout {
         display: flex;
         flex-direction: column;
-        min-height: 100vh;
-        background: #f8f9fa;
+        height: 100vh;
+        overflow: hidden;
+        background-color: var(--ground-background);
+        color: var(--text-color);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
-      .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      .header-container {
+        flex-shrink: 0;
+        height: 60px;
+        border-bottom: 1px solid var(--p-content-border-color);
+      }
 
-        .logo {
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: #495057;
-          margin-right: 2rem;
-        }
+      .footer-container {
+        flex-shrink: 0;
+        height: 30px;
+        border-top: 1px solid var(--p-content-border-color);
       }
 
       .main-container {
         display: flex;
-        margin-top: 60px;
         flex: 1;
+        overflow: hidden;
       }
 
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 60px;
-        bottom: 0;
-        width: 250px;
-        background: #fff;
-        border-right: 1px solid #dee2e6;
-        transition: all 0.3s ease;
-        z-index: 900;
+      .sidebar-container {
+        flex-shrink: 0;
+        width: 220px;
+        transition: width 0.3s ease;
+      }
 
-        &.sidebar-collapsed {
-          width: 60px;
-
-          .sidebar-menu {
-            span {
-              display: none;
-            }
-          }
-        }
-
-        .sidebar-header {
-          padding: 1rem;
-          border-bottom: 1px solid #dee2e6;
-        }
-
-        .sidebar-menu {
-          padding: 1rem 0;
-
-          ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-
-            li {
-              a {
-                display: flex;
-                align-items: center;
-                padding: 0.75rem 1rem;
-                color: #495057;
-                text-decoration: none;
-                transition: all 0.3s ease;
-
-                i {
-                  margin-right: 0.75rem;
-                  font-size: 1.1rem;
-                }
-
-                &:hover {
-                  background: #f8f9fa;
-                  color: #007bff;
-                }
-
-                &.active {
-                  background: #e9ecef;
-                  color: #007bff;
-                  font-weight: 500;
-                }
-              }
-            }
-          }
-        }
+      .sidebar-container.collapsed {
+        width: 60px;
       }
 
       .content {
+        display: flex;
+        flex-direction: column;
         flex: 1;
-        margin-left: 250px;
-        transition: all 0.3s ease;
-        padding: 1rem;
-
-        .tabs-container {
-          background: #fff;
-          border-radius: 6px;
-          margin-bottom: 1rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-          ::ng-deep {
-            .p-tabview-nav {
-              border: none;
-              background: #f8f9fa;
-            }
-
-            .p-tabview-nav-link {
-              padding: 0.75rem 1rem;
-            }
-          }
-        }
-
-        .page-content {
-          background: #fff;
-          border-radius: 6px;
-          padding: 1.5rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+        overflow: hidden;
       }
 
-      .footer {
-        background: #fff;
-        border-top: 1px solid #dee2e6;
-        padding: 1rem;
-        margin-left: 250px;
-        transition: all 0.3s ease;
-
-        .footer-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          max-width: 1200px;
-          margin: 0 auto;
-          color: #6c757d;
-          font-size: 0.9rem;
-
-          .version {
-            color: #adb5bd;
-          }
-        }
+      .page-tabs-container {
+        flex-shrink: 0;
+        height: auto;
+        min-height: 50px;
       }
 
-      @media (max-width: 768px) {
-        .sidebar {
-          transform: translateX(-100%);
-
-          &.sidebar-collapsed {
-            transform: translateX(0);
-          }
-        }
-
-        .content {
-          margin-left: 0;
-        }
-
-        .footer {
-          margin-left: 0;
-        }
+      .page-content {
+        flex: 1;
+        transition: all 0.3s;
+        padding: 1rem;
+        overflow-y: auto;
+        height: 100%;
+        background: var(--p-content-background);
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
     `
   ]
 })
-export class BackstageLayoutComponent implements OnInit {
+export class BackstageLayoutComponent implements OnInit, OnDestroy {
   currentYear = new Date().getFullYear()
-  isSidebarCollapsed = false
   activeTabIndex = 0
   tabs: TabItem[] = []
 
+  protected settingsService = inject(SettingsService)
+
   menuItems: MenuItem[] = [
-    {
-      label: 'File',
-      icon: 'pi pi-fw pi-file',
-      items: [
-        {
-          label: 'New',
-          icon: 'pi pi-fw pi-plus',
-          items: [
-            { label: 'Document', icon: 'pi pi-fw pi-file' },
-            { label: 'Image', icon: 'pi pi-fw pi-image' }
-          ]
-        },
-        { label: 'Open', icon: 'pi pi-fw pi-folder-open' },
-        { label: 'Save', icon: 'pi pi-fw pi-save' }
-      ]
-    },
-    {
-      label: 'Edit',
-      icon: 'pi pi-fw pi-pencil',
-      items: [
-        { label: 'Undo', icon: 'pi pi-fw pi-undo' },
-        { label: 'Redo', icon: 'pi pi-fw pi-redo' }
-      ]
-    },
-    {
-      label: 'View',
-      icon: 'pi pi-fw pi-eye',
-      items: [
-        { label: 'Full Screen', icon: 'pi pi-fw pi-window-maximize' },
-        { label: 'Settings', icon: 'pi pi-fw pi-cog' }
-      ]
-    }
+    { label: '首页', icon: 'pi pi-home', routerLink: '/backstage/dashboard' },
+    { label: '系统管理', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
   ]
 
-  sidebarItems = [
-    { label: 'Dashboard', routerLink: '/backstage', icon: 'pi pi-fw pi-home' },
-    { label: 'Posts', routerLink: '/backstage/posts', icon: 'pi pi-fw pi-file' },
-    { label: 'Categories', routerLink: '/backstage/categories', icon: 'pi pi-fw pi-tags' },
-    { label: 'Tags', routerLink: '/backstage/tags', icon: 'pi pi-fw pi-tag' },
-    { label: 'Comments', routerLink: '/backstage/comments', icon: 'pi pi-fw pi-comments' },
-    { label: 'Users', routerLink: '/backstage/users', icon: 'pi pi-fw pi-users' },
-    { label: 'Settings', routerLink: '/backstage/settings', icon: 'pi pi-fw pi-cog' }
+  sidebarItems: MenuItem[] = [
+    { label: '仪表盘', icon: 'pi pi-home', routerLink: '/backstage/dashboard' },
+    { label: '文章管理', icon: 'pi pi-file', routerLink: '/backstage/posts' },
+    { label: '分类管理', icon: 'pi pi-tags', routerLink: '/backstage/categories' },
+    { label: '标签管理', icon: 'pi pi-tag', routerLink: '/backstage/tags' },
+    { label: '评论管理', icon: 'pi pi-comments', routerLink: '/backstage/comments' },
+    { label: '用户管理', icon: 'pi pi-users', routerLink: '/backstage/users' },
+    { label: '系统设置', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
   ]
 
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // Subscribe to router events to handle tab management
+    // Add default dashboard tab if no tabs exist
+    if (this.tabs.length === 0) {
+      this.tabs.push({
+        label: '仪表盘',
+        routerLink: '/backstage/dashboard',
+        icon: 'pi pi-home',
+        closable: false
+      })
+      this.activeTabIndex = 0
+    }
+
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.handleNavigation(event.urlAfterRedirects)
       })
+
+    // Set overflow hidden for backstage pages
+    document.body.style.overflow = 'hidden'
+  }
+
+  ngOnDestroy() {
+    // Restore overflow when leaving backstage
+    document.body.style.overflow = ''
   }
 
   toggleSidebar() {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed
+    this.settingsService.toggleSidebarCollapsed()
   }
 
-  toggleUserMenu() {
-    // Implement user menu toggle logic
-  }
-
-  isActive(routerLink: string): boolean {
-    return this.router.isActive(routerLink, {
-      paths: 'exact',
-      queryParams: 'exact',
-      fragment: 'ignored',
-      matrixParams: 'ignored'
-    })
+  onDarkModeToggle(enabled: boolean) {
+    console.log('Dark mode toggled:', enabled)
   }
 
   handleNavigation(url: string) {
@@ -352,25 +203,75 @@ export class BackstageLayoutComponent implements OnInit {
     const existingTab = this.tabs.find((tab) => tab.routerLink === path)
 
     if (!existingTab) {
+      // Try to find in sidebarItems first
       const menuItem = this.sidebarItems.find((item) => item.routerLink === path)
-      if (menuItem) {
+
+      // If not found in sidebarItems, create a default tab
+      if (!menuItem) {
+        // Extract the last part of the path as the label
+        const pathParts = path.split('/')
+        const lastPart = pathParts[pathParts.length - 1]
+        const label = lastPart.charAt(0).toUpperCase() + lastPart.slice(1)
+
+        // Get appropriate icon based on route
+        const icon = this.getRouteIcon(lastPart)
+
         this.tabs.push({
-          label: menuItem.label,
+          label: label,
           routerLink: path,
-          icon: menuItem.icon,
+          icon: icon,
           closable: true
         })
-        this.activeTabIndex = this.tabs.length - 1
+      } else {
+        this.tabs.push({
+          label: menuItem.label || '',
+          routerLink: path,
+          icon: menuItem.icon || '',
+          closable: true
+        })
       }
+
+      this.activeTabIndex = this.tabs.length - 1
     } else {
       this.activeTabIndex = this.tabs.indexOf(existingTab)
     }
   }
 
-  onTabChange(event: any) {
-    const tab = this.tabs[event.index]
+  private getRouteIcon(route: string): string {
+    const iconMap: { [key: string]: string } = {
+      dashboard: 'pi pi-home',
+      posts: 'pi pi-file',
+      categories: 'pi pi-tags',
+      tags: 'pi pi-tag',
+      comments: 'pi pi-comments',
+      users: 'pi pi-users',
+      settings: 'pi pi-cog',
+      admins: 'pi pi-user',
+      advertisements: 'pi pi-image',
+      menus: 'pi pi-list',
+      pages: 'pi pi-file-edit',
+      'friend-links': 'pi pi-link',
+      recruitment: 'pi pi-briefcase',
+      configuration: 'pi pi-cog',
+      system: 'pi pi-server',
+      vacation: 'pi pi-calendar',
+      'special-tags': 'pi pi-star'
+    }
+
+    return iconMap[route] || 'pi pi-file'
+  }
+
+  onTabChange(event: number) {
+    const tab = this.tabs[event]
     if (tab) {
       this.router.navigate([tab.routerLink])
     }
+  }
+
+  closeTab(index: number) {
+    this.tabs.splice(index, 1)
+    if (this.tabs.length === 0) return
+    this.activeTabIndex = Math.max(0, index - 1)
+    this.router.navigate([this.tabs[this.activeTabIndex].routerLink])
   }
 }

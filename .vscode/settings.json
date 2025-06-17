@@ -1,7 +1,13 @@
 {
     "cSpell.words": [
+        "codegen",
         "inputtext",
+        "Insertable",
         "Kysely",
-        "primeng"
+        "primeicons",
+        "primeng",
+        "tabview",
+        "Updateable",
+        "UUICE"
     ]
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import {
   FormsModule,
@@ -198,52 +198,61 @@ import { MessageService } from 'primeng/api'
           box-shadow 0.2s;
       }
       input[pInputText]:focus {
-        background: rgba(255, 255, 255, 0.28);
-        box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.1);
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 12px 0 rgba(31, 38, 135, 0.1);
+      }
+      input[pInputText]::placeholder {
+        color: #bdbdbd;
+        font-weight: 400;
+      }
+      input[pInputText].ng-invalid.ng-dirty {
+        background: rgba(255, 107, 107, 0.2);
+        border: 1px solid rgba(255, 107, 107, 0.5);
       }
       .login-btn {
         width: 100%;
-        border-radius: 2rem !important;
-        background: #11131a !important;
-        color: #fff !important;
-        font-size: 1.15rem !important;
-        font-weight: 600 !important;
-        padding: 0.95rem 0 !important;
-        margin-top: 0.5rem;
-        border: none !important;
-        box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.1);
-        transition:
-          background 0.2s,
-          box-shadow 0.2s;
+        padding: 0.9rem;
+        border-radius: 2rem;
+        border: none;
+        background: linear-gradient(135deg, #a259e6 0%, #5bc0eb 100%);
+        color: #fff;
+        font-size: 1.08rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px 0 rgba(162, 89, 230, 0.3);
       }
       .login-btn:hover:not(:disabled) {
-        background: #22243a !important;
-        box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.18);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px 0 rgba(162, 89, 230, 0.4);
+      }
+      .login-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
       }
       .forgot-link {
         color: #e0e0e0;
-        font-size: 1rem;
-        text-align: center;
-        margin-top: 0.5rem;
-        text-decoration: underline;
+        text-decoration: none;
+        font-size: 0.9rem;
         transition: color 0.2s;
-        display: block;
       }
       .forgot-link:hover {
-        color: #a259e6;
+        color: #fff;
       }
-      @media (max-width: 600px) {
+      @media (max-width: 480px) {
         .glass-card {
-          padding: 2rem 0.7rem 1.5rem 0.7rem;
+          width: 90vw;
+          padding: 2rem 1.5rem 1.5rem 1.5rem;
         }
         .login-title {
-          font-size: 1.3rem;
+          font-size: 1.5rem;
         }
       }
     `
   ]
 })
-export class LoginPage {
+export class LoginPage implements OnInit, OnDestroy {
   loginForm: FormGroup
   loading = false
 
@@ -258,21 +267,31 @@ export class LoginPage {
     })
   }
 
+  ngOnInit() {
+    // Set overflow hidden for login page
+    document.body.style.overflow = 'hidden'
+  }
+
+  ngOnDestroy() {
+    // Restore overflow when leaving login page
+    document.body.style.overflow = ''
+  }
+
   isFieldInvalid(field: string): boolean {
     const formControl = this.loginForm.get(field)
-    return formControl ? formControl.invalid && (formControl.dirty || formControl.touched) : false
+    return formControl ? formControl.invalid && formControl.dirty : false
   }
 
   getErrorMessage(field: string): string {
     const formControl = this.loginForm.get(field)
     if (!formControl) return ''
+
     if (formControl.hasError('required')) {
-      return 'This field is required.'
+      return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`
     }
     if (formControl.hasError('minlength')) {
-      return field === 'username'
-        ? 'Username must be at least 3 characters.'
-        : 'Password must be at least 6 characters.'
+      const requiredLength = field === 'username' ? 3 : 6
+      return `${field.charAt(0).toUpperCase() + field.slice(1)} must be at least ${requiredLength} characters`
     }
     return ''
   }
@@ -280,16 +299,21 @@ export class LoginPage {
   onSubmit() {
     if (this.loginForm.valid) {
       this.loading = true
-      // TODO: Implement real login logic
+      // Simulate login process
       setTimeout(() => {
         this.loading = false
         this.messageService.add({
           severity: 'success',
-          summary: 'Login Success',
-          detail: 'Redirecting to dashboard...'
+          summary: 'Success',
+          detail: 'Login successful!'
         })
-        this.router.navigate(['/backstage/dashboard'])
-      }, 1000)
+        // Navigate to dashboard after successful login
+        setTimeout(() => {
+          this.router.navigate(['/backstage/dashboard'])
+        }, 1000)
+      }, 2000)
+    } else {
+      this.loginForm.markAllAsTouched()
     }
   }
 }

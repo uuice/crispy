@@ -26,14 +26,7 @@ interface RecentPost {
 @Component({
   selector: 'cs-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    CardModule,
-    ChartModule,
-    TableModule,
-    ButtonModule,
-    RippleModule
-  ],
+  imports: [CommonModule, CardModule, ChartModule, TableModule, ButtonModule, RippleModule],
   template: `
     <div class="dashboard">
       <!-- Stats Cards -->
@@ -46,7 +39,12 @@ interface RecentPost {
             <div class="stat-info">
               <h3>{{ stat.title }}</h3>
               <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-change" *ngIf="stat.change" [class.positive]="stat.change > 0" [class.negative]="stat.change < 0">
+              <div
+                class="stat-change"
+                *ngIf="stat.change"
+                [class.positive]="stat.change > 0"
+                [class.negative]="stat.change < 0"
+              >
                 {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}%
               </div>
             </div>
@@ -66,9 +64,14 @@ interface RecentPost {
 
       <!-- Recent Posts -->
       <p-card header="Recent Posts" class="recent-posts">
-        <p-table [value]="recentPosts" [rows]="5" [showCurrentPageReport]="true" responsiveLayout="scroll"
+        <p-table
+          [value]="recentPosts"
+          [rows]="5"
+          [showCurrentPageReport]="true"
+          responsiveLayout="scroll"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} posts"
-          [rowsPerPageOptions]="[5,10,25]">
+          [rowsPerPageOptions]="[5, 10, 25]"
+        >
           <ng-template pTemplate="header">
             <tr>
               <th>Title</th>
@@ -92,8 +95,14 @@ interface RecentPost {
               <td>{{ post.views }}</td>
               <td>
                 <div class="action-buttons">
-                  <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"></button>
-                  <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger p-button-sm"></button>
+                  <p-button
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-text p-button-sm"
+                  ></p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  ></p-button>
                 </div>
               </td>
             </tr>
@@ -120,7 +129,7 @@ interface RecentPost {
         ::ng-deep .p-card {
           background: #fff;
           border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,.05);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .stat-content {
@@ -182,7 +191,7 @@ interface RecentPost {
         ::ng-deep .p-card {
           background: #fff;
           border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,.05);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
       }
 
@@ -190,7 +199,7 @@ interface RecentPost {
         ::ng-deep .p-card {
           background: #fff;
           border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,.05);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .status-badge {
