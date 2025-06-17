@@ -57,7 +57,9 @@ import { RouterModule } from '@angular/router'
           <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div class="flex justify-between items-start mb-2">
               <h3 class="text-lg font-semibold">精华标签</h3>
-              <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+              <span
+                class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+              >
                 自定义标签
               </span>
             </div>
@@ -77,7 +79,9 @@ import { RouterModule } from '@angular/router'
           <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div class="flex justify-between items-start mb-2">
               <h3 class="text-lg font-semibold">推荐标签</h3>
-              <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+              <span
+                class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
+              >
                 热门标签
               </span>
             </div>
@@ -97,9 +101,7 @@ import { RouterModule } from '@angular/router'
 
         <!-- 分页 -->
         <div class="mt-6 flex justify-between items-center">
-          <div class="text-sm text-gray-700">
-            显示 1 到 3 条，共 10 条
-          </div>
+          <div class="text-sm text-gray-700">显示 1 到 3 条，共 10 条</div>
           <div class="flex space-x-2">
             <button
               class="px-3 py-1 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"

@@ -75,9 +75,11 @@ import { RouterModule } from '@angular/router'
             </div>
             <div class="h-64 overflow-y-auto border rounded-lg p-4 bg-gray-50">
               <!-- TODO: Add log viewer component -->
-              <pre class="text-sm font-mono">[2024-03-21 10:00:00] INFO: System started
+              <pre class="text-sm font-mono">
+[2024-03-21 10:00:00] INFO: System started
 [2024-03-21 10:01:00] INFO: Database connection established
-[2024-03-21 10:02:00] INFO: Cache initialized</pre>
+[2024-03-21 10:02:00] INFO: Cache initialized</pre
+              >
             </div>
           </div>
         </div>
