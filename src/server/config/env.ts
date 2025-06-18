@@ -24,7 +24,7 @@ export const env = {
 
   // Database
   ['DB_HOST']: process.env['DB_HOST'] || 'localhost',
-  ['DB_PORT']: parseInt(process.env['DB_PORT'] || '27017', 10),
+  ['DB_PORT']: parseInt(process.env['DB_PORT'] || '3306', 10),
   ['DB_NAME']: process.env['DB_NAME'] || 'crispy',
   ['DB_USER']: process.env['DB_USER'] || '',
   ['DB_PASSWORD']: process.env['DB_PASSWORD'] || '',

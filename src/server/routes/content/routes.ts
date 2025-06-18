@@ -60,8 +60,8 @@ const authMiddleware: RequestHandler = async (req: Request, res, next) => {
   }
 
   try {
-    // Get app_name and channel from query parameters
-    const { app_name, channel } = req.query
+    // Get app_name and channel from headers
+    const { app_name, channel } = req.headers
     if (!app_name || !channel) {
       error(res, 'App name and channel are required', 400)
       return
