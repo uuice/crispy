@@ -30,7 +30,7 @@ export default defineConfig([globalIgnores([
 
     rules: {
         indent: ["off", 2],
-        "linebreak-style": ["error", "unix"],
+        "linebreak-style": "off",
 
         quotes: ["error", "single", {
             avoidEscape: true,
