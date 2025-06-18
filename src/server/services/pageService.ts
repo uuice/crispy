@@ -6,9 +6,9 @@ export interface CreatePageData {
   title: string
   alias: string
   content: string
-  des?: string
-  keywords?: string
-  cover_image?: string
+  seo_description?: string
+  seo_keywords?: string
+  image_list?: string
   status: number
 }
 

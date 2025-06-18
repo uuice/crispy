@@ -6,6 +6,7 @@ import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
+import { seedPagesData } from './server/mock/pages.mock'
 
 const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
@@ -38,6 +39,13 @@ if (isMainModule(import.meta.url)) {
   app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`)
     console.log(`Environment: ${env['NODE_ENV']}`)
+
+    // Seed mock data in development environment
+    if (env['NODE_ENV'] === 'development') {
+      seedPagesData()
+        .then(() => console.log('✅ Mock data seeded successfully'))
+        .catch((error) => console.error('❌ Failed to seed mock data:', error))
+    }
   })
 }
 
