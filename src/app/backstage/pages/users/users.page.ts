@@ -119,19 +119,19 @@ interface UsersResponse {
 
         <ng-template pTemplate="header">
           <tr>
-            <th style="min-width: 80px;">用户ID</th>
-            <th style="min-width: 80px;">头像</th>
-            <th style="min-width: 120px;">用户名</th>
-            <th style="min-width: 120px;">昵称</th>
-            <th style="min-width: 180px;">邮箱</th>
-            <th style="min-width: 120px;">手机号</th>
-            <th style="min-width: 80px;">状态</th>
-            <th style="min-width: 80px;">管理员</th>
-            <th style="min-width: 100px;">超级管理员</th>
-            <th style="min-width: 160px;">最后登录</th>
-            <th style="min-width: 160px;">创建时间</th>
-            <th style="min-width: 160px;">更新时间</th>
-            <th style="min-width: 120px;">操作</th>
+            <th style="min-width: 6rem;">用户ID</th>
+            <th style="min-width: 6rem;">头像</th>
+            <th style="min-width: 8rem;">用户名</th>
+            <th style="min-width: 8rem;">昵称</th>
+            <th style="min-width: 12rem;">邮箱</th>
+            <th style="min-width: 8rem;">手机号</th>
+            <th style="min-width: 5rem;">状态</th>
+            <th style="min-width: 5rem;">管理员</th>
+            <th style="min-width: 8rem;">超级管理员</th>
+            <th style="min-width: 14rem;">最后登录</th>
+            <th style="min-width: 14rem;">创建时间</th>
+            <th style="min-width: 14rem;">更新时间</th>
+            <th style="min-width: 8rem;">操作</th>
           </tr>
         </ng-template>
 
