@@ -227,7 +227,7 @@ router.delete('/vote-items/:id', voteItemController.deleteVoteItem)
 // Register access token routes
 router.get('/access-token', accessTokenController.getAccessTokens)
 router.post('/access-token', accessTokenController.createAccessToken)
-router.get('/access-token/:id', accessTokenController.getAccessToken)
+router.get('/access-token/:id', accessTokenController.getAccessTokenById)
 router.put('/access-token/:id', accessTokenController.updateAccessToken)
 router.delete('/access-token/:id', accessTokenController.deleteAccessToken)
 

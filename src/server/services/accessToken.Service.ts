@@ -1,6 +1,27 @@
 import { DB, AccessToken } from '@src/db/db.d'
 import { ExpressionBuilder, Insertable, Updateable } from 'kysely'
 import { db } from '@src/libs/db'
+import { DELETE_STATUS, PUBLISH_STATUS, STATUS_PUBLISHED } from '../config/const'
+
+// Types
+export interface PaginationOptions {
+  page: number
+  pageSize: number
+  app_name?: string
+  channel?: string
+  status?: number
+  user_id?: number
+}
+
+export interface PaginatedResult<T> {
+  dataList: T[]
+  pagination: {
+    total: number
+    page: number
+    pageSize: number
+    totalPages: number
+  }
+}
 
 /**
  * Service class for handling AccessToken operations
@@ -11,10 +32,23 @@ export class AccessTokenService {
    * @param data AccessToken data without id
    * @returns Created access token
    */
-  async create(data: Insertable<DB['access_token']>): Promise<AccessToken> {
-    const token = await db.insertInto('access_token').values(data).returningAll().executeTakeFirst()
-    if (!token) throw new Error('Failed to create access token')
-    return token as unknown as AccessToken
+  async create(data: Insertable<DB['access_token']>): Promise<any> {
+    const now = Date.now()
+    const newToken = {
+      ...data,
+      create_time: now,
+      update_time: now,
+      is_delete: DELETE_STATUS.UN_DELETE
+    }
+    const result = await db.insertInto('access_token').values(newToken).executeTakeFirst()
+    if (!result) throw new Error('创建token失败')
+
+    const { token: _, ...tokenWithoutToken } = {
+      id: Number(result.insertId),
+      ...newToken
+    }
+
+    return tokenWithoutToken
   }
 
   /**
@@ -26,7 +60,7 @@ export class AccessTokenService {
     const token = await db
       .selectFrom('access_token')
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .selectAll()
       .executeTakeFirst()
     return token as unknown as AccessToken | null
@@ -41,7 +75,7 @@ export class AccessTokenService {
     const token = await db
       .selectFrom('access_token')
       .where('user_id', '=', userId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .selectAll()
       .executeTakeFirst()
     return token as unknown as AccessToken | null
@@ -61,7 +95,7 @@ export class AccessTokenService {
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .returningAll()
       .executeTakeFirst()
     return token as unknown as AccessToken | null
@@ -76,63 +110,81 @@ export class AccessTokenService {
     const result = await db
       .updateTable('access_token')
       .set({
-        is_delete: 1,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
     return result.numUpdatedRows > 0
   }
 
   /**
-   * List access tokens with pagination
-   * @param page Page number
-   * @param pageSize Page size
-   * @param filters Optional filters
-   * @returns List of access tokens and total count
+   * Get access tokens list with pagination
+   * @param options Pagination and filter options
+   * @returns List of access tokens and pagination info
    */
-  async list(
-    page: number = 1,
-    pageSize: number = 10,
-    filters: {
-      app_name?: string
-      channel?: string
-      status?: number
-      user_id?: number
-    } = {}
-  ): Promise<{ items: AccessToken[]; total: number }> {
-    let query = db.selectFrom('access_token').where('is_delete', '=', 0)
+  async getAccessTokens(options: PaginationOptions): Promise<PaginatedResult<AccessToken>> {
+    const { page, pageSize, app_name, channel, status, user_id } = options
+    const offset = (page - 1) * pageSize
+
+    // Build query conditions
+    let query = db.selectFrom('access_token').selectAll()
 
     // Apply filters
-    if (filters.app_name) {
-      query = query.where('app_name', '=', filters.app_name)
-    }
-    if (filters.channel) {
-      query = query.where('channel', '=', filters.channel)
-    }
-    if (filters.status !== undefined) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters.user_id) {
-      query = query.where('user_id', '=', filters.user_id)
+    if (app_name) {
+      query = query.where('app_name', 'like', `%${app_name}%`)
     }
 
-    // Get total count
-    const total = await query
-      .select((eb: ExpressionBuilder<DB, 'access_token'>) => eb.fn.count('id').as('count'))
-      .executeTakeFirst()
-      .then((result: { count: string | number | bigint } | undefined) => Number(result?.count) || 0)
+    if (channel) {
+      query = query.where('channel', 'like', `%${channel}%`)
+    }
 
-    // Get paginated items
-    const items = await query
-      .selectAll()
-      .orderBy('create_time', 'desc')
-      .limit(pageSize)
-      .offset((page - 1) * pageSize)
-      .execute()
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
 
-    return { items: items as unknown as AccessToken[], total }
+    if (user_id) {
+      query = query.where('user_id', '=', user_id)
+    }
+
+    // Default to only non-deleted tokens
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+
+    const [tokens, total] = await Promise.all([
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('access_token')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (app_name) {
+            qb = qb.where('app_name', 'like', `%${app_name}%`)
+          }
+          if (channel) {
+            qb = qb.where('channel', 'like', `%${channel}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          if (user_id) {
+            qb = qb.where('user_id', '=', user_id)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
+    ])
+
+    return {
+      dataList: tokens as unknown as AccessToken[],
+      pagination: {
+        total: Number(total?.count) || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
+      }
+    }
   }
 
   /**
@@ -148,8 +200,8 @@ export class AccessTokenService {
       .where('app_name', '=', app_name)
       .where('channel', '=', channel)
       .where('token', '=', token)
-      .where('status', '=', 10)
-      .where('is_delete', '=', 0)
+      .where('status', '=', PUBLISH_STATUS.PUBLISHED)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .select('id')
       .executeTakeFirst()
 

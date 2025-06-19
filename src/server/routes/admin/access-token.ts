@@ -1,33 +1,20 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { AccessTokenService } from '../../services/accessToken.Service'
-import { success, error, validationError, notFound } from '../../utils/response'
-
+import { success, error, handleError } from '../../utils/response'
+import { generateRandomToken } from '@src/server/utils/token'
 // Initialize service
 const accessTokenService = new AccessTokenService()
 
 // Validation schemas
 const createSchema = z.object({
-  app_name: z.string(),
-  channel: z.string(),
-  user_id: z.number(),
-  status: z.number().default(10),
-  token: z.string(),
-  create_time: z.number().default(() => Date.now()),
-  update_time: z.number().default(() => Date.now()),
-  is_delete: z.number().default(0)
+  app_name: z.string().min(1, 'app_name不能为空'),
+  channel: z.string().min(1, 'channel不能为空'),
+  user_id: z.number().min(1, 'user_id不能为空'),
+  status: z.number().default(10)
 })
 
 const updateSchema = createSchema.partial()
-
-const listQuerySchema = z.object({
-  page: z.string().transform(Number).default('1'),
-  pageSize: z.string().transform(Number).default('10'),
-  app_name: z.string().optional(),
-  channel: z.string().optional(),
-  status: z.string().transform(Number).optional(),
-  user_id: z.string().transform(Number).optional()
-})
 
 // Create new access token
 export const createAccessToken = async (
@@ -37,20 +24,19 @@ export const createAccessToken = async (
 ): Promise<void> => {
   try {
     const validatedData = createSchema.parse(req.body)
-    const token = await accessTokenService.create(validatedData)
-    success(res, token, 'Access token created successfully')
+    const randomToken = generateRandomToken()
+    const token = await accessTokenService.create({
+      ...validatedData,
+      token: randomToken
+    })
+    success(res, token, '访问令牌创建成功')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    console.error('Error creating access token:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'createAccessToken')
   }
 }
 
 // Get single access token
-export const getAccessToken = async (
+export const getAccessTokenById = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -58,19 +44,18 @@ export const getAccessToken = async (
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     const token = await accessTokenService.getById(id)
     if (!token) {
-      notFound(res, 'Access token not found')
+      error(res, '访问令牌不存在', 404)
       return
     }
     success(res, token)
   } catch (err: unknown) {
-    console.error('Error fetching access token:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getAccessTokenById')
   }
 }
 
@@ -83,24 +68,19 @@ export const updateAccessToken = async (
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     const validatedData = updateSchema.parse(req.body)
     const token = await accessTokenService.update(id, validatedData)
     if (!token) {
-      notFound(res, 'Access token not found')
+      error(res, '访问令牌不存在', 404)
       return
     }
-    success(res, token, 'Access token updated successfully')
+    success(res, token, '访问令牌更新成功')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    console.error('Error updating access token:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'updateAccessToken')
   }
 }
 
@@ -113,19 +93,18 @@ export const deleteAccessToken = async (
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     const deleted = await accessTokenService.delete(id)
     if (!deleted) {
-      notFound(res, 'Access token not found')
+      error(res, '访问令牌不存在', 404)
       return
     }
-    success(res, null, 'Access token deleted successfully')
+    success(res, null, '访问令牌删除成功')
   } catch (err: unknown) {
-    console.error('Error deleting access token:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'deleteAccessToken')
   }
 }
 
@@ -136,25 +115,31 @@ export const getAccessTokens = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedQuery = listQuerySchema.parse(req.query)
-    const { page, pageSize, ...filters } = validatedQuery
+    const page = parseInt(req.query['page'] as string) || 1
+    const pageSize = parseInt(req.query['pageSize'] as string) || 10
+    const app_name = req.query['app_name'] as string
+    const channel = req.query['channel'] as string
+    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
+    const user_id = req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined
 
-    const result = await accessTokenService.list(page, pageSize, filters)
+    const result = await accessTokenService.getAccessTokens({
+      page,
+      pageSize,
+      app_name,
+      channel,
+      status,
+      user_id
+    })
     success(res, result)
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    console.error('Error fetching access tokens:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getAccessTokens')
   }
 }
 
 // Export all functions as a controller object
 export const accessTokenController = {
   createAccessToken,
-  getAccessToken,
+  getAccessTokenById,
   updateAccessToken,
   deleteAccessToken,
   getAccessTokens
