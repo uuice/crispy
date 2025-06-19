@@ -5,7 +5,10 @@ import { env } from '../config/env'
 // Define user type
 export interface JwtUser {
   id: string
-  username: string
+  user_name: string
+  real_name: string
+  nick_name: string
+  avatar_url: string
   // Add other user properties as needed
 }
 
