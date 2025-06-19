@@ -6,6 +6,10 @@ import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
+import { testDbConnection } from './libs/db'
+
+// test db connection
+testDbConnection()
 
 const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()

@@ -13,6 +13,9 @@ import { PasswordModule } from 'primeng/password'
 import { ButtonModule } from 'primeng/button'
 import { ToastModule } from 'primeng/toast'
 import { MessageService } from 'primeng/api'
+import { AuthService } from '../../services/auth.service'
+import { HttpService } from '../../services/http.service'
+import { finalize } from 'rxjs/operators'
 
 @Component({
   selector: 'app-login-page',
@@ -60,21 +63,21 @@ import { MessageService } from 'primeng/api'
             />
           </svg>
         </div>
-        <h2 class="login-title">Welcome Back</h2>
+        <h2 class="login-title">欢迎回来</h2>
         <div class="login-subtitle">
-          Don't have an account?
-          <a class="signup-link" href="#">Sign up</a>
+          没有账号？
+          <a class="signup-link" href="#">注册</a>
         </div>
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <div class="input-group">
             <span class="input-icon pi pi-user"></span>
             <input
-              id="username"
+              id="user_name"
               type="text"
               pInputText
-              formControlName="username"
-              placeholder="Username"
-              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('username') }"
+              formControlName="user_name"
+              placeholder="用户名"
+              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('user_name') }"
               autocomplete="username"
             />
           </div>
@@ -85,7 +88,7 @@ import { MessageService } from 'primeng/api'
               type="password"
               pInputText
               formControlName="password"
-              placeholder="Password"
+              placeholder="密码"
               [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('password') }"
               autocomplete="current-password"
             />
@@ -96,10 +99,10 @@ import { MessageService } from 'primeng/api'
             class="login-btn"
             [loading]="loading"
             [disabled]="loginForm.invalid"
-            label="Sign In"
+            label="登录"
           ></button>
         </form>
-        <a class="forgot-link" href="#">Forgot Password?</a>
+        <a class="forgot-link" href="#">忘记密码？</a>
       </div>
     </div>
   `,
@@ -259,10 +262,12 @@ export class LoginPage implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private authService: AuthService,
+    private httpService: HttpService
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      user_name: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     })
   }
@@ -287,11 +292,11 @@ export class LoginPage implements OnInit, OnDestroy {
     if (!formControl) return ''
 
     if (formControl.hasError('required')) {
-      return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`
+      return `${field === 'user_name' ? '用户名' : '密码'}不能为空`
     }
     if (formControl.hasError('minlength')) {
-      const requiredLength = field === 'username' ? 3 : 6
-      return `${field.charAt(0).toUpperCase() + field.slice(1)} must be at least ${requiredLength} characters`
+      const requiredLength = field === 'user_name' ? 3 : 6
+      return `${field === 'user_name' ? '用户名' : '密码'}至少需要${requiredLength}个字符`
     }
     return ''
   }
@@ -299,19 +304,47 @@ export class LoginPage implements OnInit, OnDestroy {
   onSubmit() {
     if (this.loginForm.valid) {
       this.loading = true
-      // Simulate login process
-      setTimeout(() => {
-        this.loading = false
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Login successful!'
+
+      const loginData = {
+        user_name: this.loginForm.value.user_name,
+        password: this.loginForm.value.password
+      }
+
+      // Call login API
+      this.httpService
+        .post<any>('/api/admin/login', loginData)
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe({
+          next: (response) => {
+            // Check if response is successful
+            if (response.success && response.data) {
+              // Save token and user info
+              this.authService.setToken(response.data.token)
+              this.authService.setUser(response.data.user)
+
+              this.messageService.add({
+                severity: '成功',
+                summary: '登录成功',
+                detail: response.message || '登录成功!'
+              })
+
+              // Navigate to dashboard after successful login
+              setTimeout(() => {
+                this.router.navigate(['/backstage/dashboard'])
+              }, 1000)
+            } else {
+              this.messageService.add({
+                severity: '失败',
+                summary: '登录失败',
+                detail: response.message || '登录失败，请重试'
+              })
+            }
+          },
+          error: (error) => {
+            // Error handling is already done in HttpService
+            console.error('Login failed:', error)
+          }
         })
-        // Navigate to dashboard after successful login
-        setTimeout(() => {
-          this.router.navigate(['/backstage/dashboard'])
-        }, 1000)
-      }, 2000)
     } else {
       this.loginForm.markAllAsTouched()
     }
