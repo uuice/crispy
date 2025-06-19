@@ -11,6 +11,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { SelectModule } from 'primeng/select'
+import { HttpService } from '../../services/http.service'
 
 interface User {
   id: number
@@ -25,6 +26,20 @@ interface User {
   avatar_url: string
   create_time: number
   update_time: number
+}
+
+interface UsersResponse {
+  success: boolean
+  message: string
+  data: {
+    dataList: User[]
+    pagination: {
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
+    }
+  }
 }
 
 @Component({
@@ -72,13 +87,13 @@ interface User {
         <ng-template pTemplate="caption">
           <div class="search-bar">
             <div class="search-controls">
-              <label for="user-search-keyword" class="sr-only">模糊搜索</label>
+              <label for="user-search-keyword" class="sr-only">用户名</label>
               <input
                 id="user-search-keyword"
                 pInputText
                 type="text"
-                [(ngModel)]="searchKeyword"
-                placeholder="搜索用户名、邮箱、昵称"
+                [(ngModel)]="user_name"
+                placeholder="用户名"
               />
               <label for="user-status-select" class="sr-only">用户状态</label>
               <p-select
@@ -86,6 +101,7 @@ interface User {
                 [options]="statusOptions()"
                 [(ngModel)]="statusValue"
                 optionLabel="label"
+                optionValue="value"
                 placeholder="用户状态"
               />
             </div>
@@ -138,19 +154,19 @@ interface User {
             <td>{{ user.phone }}</td>
             <td>
               <p-tag
-                [severity]="getStatusSeverity(user.status)"
+                [severity]="user.status === 10 ? 'success' : 'danger'"
                 [value]="user.status === 10 ? '正常' : '禁用'"
               ></p-tag>
             </td>
             <td>
               <p-tag
-                [severity]="user.is_admin === 1 ? 'info' : 'secondary'"
+                [severity]="user.is_admin === 1 ? 'success' : 'secondary'"
                 [value]="user.is_admin === 1 ? '是' : '否'"
               ></p-tag>
             </td>
             <td>
               <p-tag
-                [severity]="user.is_super_admin === 1 ? 'warning' : 'secondary'"
+                [severity]="user.is_super_admin === 1 ? 'danger' : 'secondary'"
                 [value]="user.is_super_admin === 1 ? '是' : '否'"
               ></p-tag>
             </td>
@@ -179,7 +195,7 @@ interface User {
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="text-center">没有找到用户。</td>
+            <td colspan="13" class="text-center">没有找到用户。</td>
           </tr>
         </ng-template>
       </p-table>
@@ -190,15 +206,16 @@ interface User {
 export class UsersPage implements OnInit {
   users: WritableSignal<User[]> = signal<User[]>([])
   loading = signal(false)
+  user_name = signal('')
   selectedStatus = signal<number | null>(null)
   statusOptions = signal([
     { label: '全部状态', value: null },
     { label: '正常', value: 10 },
     { label: '禁用', value: -10 }
   ])
-  searchKeyword = signal('')
-
-  totalRecords = signal(1000)
+  currentPage = signal(1)
+  pageSize = signal(20)
+  totalRecords = signal(0)
 
   get statusValue() {
     return this.selectedStatus()
@@ -209,99 +226,68 @@ export class UsersPage implements OnInit {
 
   constructor(
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private httpService: HttpService
   ) {}
 
-  ngOnInit() {
-    // this.loadUsers()
-  }
+  ngOnInit() {}
 
   onSearch() {
+    this.currentPage.set(1)
     this.loadUsers()
   }
 
   loadUsersLazy(event: any) {
+    // Update pagination from table event
+    this.currentPage.set(event.first / event.rows + 1)
+    this.pageSize.set(event.rows)
     this.loadUsers()
   }
 
   loadUsers() {
     this.loading.set(true)
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      this.users.set([
-        {
-          id: 1,
-          user_name: 'john_doe',
-          nick_name: 'John',
-          email: 'john@example.com',
-          phone: '1234567890',
-          status: 10,
-          is_admin: 0,
-          is_super_admin: 0,
-          last_login_time: 1710489000000,
-          avatar_url: '',
-          create_time: 1704038400000,
-          update_time: 1710489000000
-        },
-        {
-          id: 2,
-          user_name: 'jane_smith',
-          nick_name: 'Jane',
-          email: 'jane@example.com',
-          phone: '1234567891',
-          status: -10,
-          is_admin: 1,
-          is_super_admin: 0,
-          last_login_time: 1710411900000,
-          avatar_url: '',
-          create_time: 1705257600000,
-          update_time: 1710411900000
-        },
-        {
-          id: 3,
-          user_name: 'bob_wilson',
-          nick_name: 'Bob',
-          email: 'bob@example.com',
-          phone: '1234567892',
-          status: 10,
-          is_admin: 0,
-          is_super_admin: 1,
-          last_login_time: 1710058800000,
-          avatar_url: '',
-          create_time: 1706745600000,
-          update_time: 1710058800000
+
+    // Build query parameters
+    const params: any = {
+      page: this.currentPage(),
+      pageSize: this.pageSize()
+    }
+
+    // Add search filters
+    if (this.user_name()) {
+      params.user_name = this.user_name()
+    }
+
+    if (this.selectedStatus() !== null) {
+      params.status = this.selectedStatus()
+    }
+
+    // Call API to get users
+    this.httpService.get<UsersResponse>('/api/admin/users', params).subscribe({
+      next: (response) => {
+        console.log(response)
+        if (response.success === true && response.data) {
+          this.users.set(response.data.dataList)
+          this.totalRecords.set(response.data.pagination.total)
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '获取用户列表失败'
+          })
         }
-      ])
-      this.loading.set(false)
-    }, 1000)
-  }
-
-  getStatusSeverity(status: number): string {
-    switch (status) {
-      case 10:
-        return 'success'
-      case -10:
-        return 'danger'
-      default:
-        return 'info'
-    }
-  }
-
-  applyFilterGlobal(event: Event, matchMode: string) {
-    const table = document.querySelector('p-table')
-    if (table) {
-      const filterValue = (event.target as HTMLInputElement).value
-      // @ts-expect-error: PrimeNG Table instance is not strongly typed, filterGlobal is available at runtime
-      table.filterGlobal(filterValue, matchMode)
-    }
-  }
-
-  filterByStatus(event: any) {
-    const table = document.querySelector('p-table')
-    if (table) {
-      // @ts-expect-error: PrimeNG Table instance is not strongly typed, filter is available at runtime
-      table.filter(event.value, 'status', 'equals')
-    }
+        this.loading.set(false)
+      },
+      error: (error) => {
+        console.error('Error loading users:', error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: '获取用户列表失败'
+        })
+        this.loading.set(false)
+      }
+    })
   }
 
   confirmDelete(user: User) {
@@ -310,32 +296,52 @@ export class UsersPage implements OnInit {
       header: '删除确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // TODO: 实现删除用户
+        this.deleteUser(user.id)
+      }
+    })
+  }
+
+  deleteUser(userId: number) {
+    this.httpService.delete(`/api/admin/users/${userId}`).subscribe({
+      next: (response: any) => {
+        if (response.success === true) {
+          this.messageService.add({
+            severity: 'success',
+            summary: '成功',
+            detail: response.message || '用户删除成功'
+          })
+          // Reload users list
+          this.loadUsers()
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '删除用户失败'
+          })
+        }
+      },
+      error: (error) => {
+        console.error('Error deleting user:', error)
         this.messageService.add({
-          severity: 'success',
-          summary: '成功',
-          detail: `用户 ${user.user_name} 已删除`
+          severity: 'error',
+          summary: '错误',
+          detail: '删除用户失败'
         })
       }
     })
   }
 
   resetFilters() {
-    this.searchKeyword.set('')
+    this.user_name.set('')
     this.selectedStatus.set(null)
-    // 这里可以加刷新表格逻辑
-  }
-
-  onCollapse() {
-    // 这里写收缩/展开逻辑
+    this.currentPage.set(1)
+    this.loadUsers()
   }
 
   onPageChange(event: any) {
-    console.log(event)
-    // event.first: 当前页第一条数据的索引
-    // event.rows: 每页条数
-    // event.page: 当前页码（从0开始）
-    // event.pageCount: 总页数
-    // 你可以在这里发起 API 请求获取新页数据
+    console.log('Page change event:', event)
+    this.currentPage.set(event.page + 1)
+    this.pageSize.set(event.rows)
+    this.loadUsers()
   }
 }

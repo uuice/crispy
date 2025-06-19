@@ -321,9 +321,10 @@ export class LoginPage implements OnInit, OnDestroy {
               // Save token and user info
               this.authService.setToken(response.data.token)
               this.authService.setUser(response.data.user)
+              this.authService.setMenu(response.data.menus)
 
               this.messageService.add({
-                severity: '成功',
+                severity: 'success',
                 summary: '登录成功',
                 detail: response.message || '登录成功!'
               })
@@ -334,7 +335,7 @@ export class LoginPage implements OnInit, OnDestroy {
               }, 1000)
             } else {
               this.messageService.add({
-                severity: '失败',
+                severity: 'error',
                 summary: '登录失败',
                 detail: response.message || '登录失败，请重试'
               })

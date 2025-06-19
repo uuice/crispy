@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core'
 export class AuthService {
   private readonly TOKEN_KEY = 'jwt_token'
   private readonly USER_KEY = 'user_info'
+  private readonly MENU_KEY = 'menu_info'
 
   /**
    * Save JWT token to localStorage
@@ -48,12 +49,26 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY)
   }
 
+  setMenu(menu: any): void {
+    localStorage.setItem(this.MENU_KEY, JSON.stringify(menu))
+  }
+
+  getMenu<T = any>(): T | null {
+    const menu = localStorage.getItem(this.MENU_KEY)
+    return menu ? (JSON.parse(menu) as T) : null
+  }
+
+  clearMenu(): void {
+    localStorage.removeItem(this.MENU_KEY)
+  }
+
   /**
    * Clear all auth info (token and user)
    */
   clearAll(): void {
     this.clearToken()
     this.clearUser()
+    this.clearMenu()
   }
 
   /**
