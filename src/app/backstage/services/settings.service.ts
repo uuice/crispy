@@ -7,6 +7,8 @@ export interface AppSettings {
   language: string
   theme: string
   compactMode: boolean
+  /** 主色（primary color），如 #22c55e */
+  primaryColor?: string
 }
 
 @Injectable({
@@ -132,7 +134,8 @@ export class SettingsService {
       sidebarCollapsed: false,
       language: 'zh-CN',
       theme: 'default',
-      compactMode: false
+      compactMode: false,
+      primaryColor: '#22c55e'
     }
     this.updateSettings(defaultSettings)
   }
@@ -167,6 +170,20 @@ export class SettingsService {
 
     // Apply theme
     document.body.setAttribute('data-theme', settings.theme)
+
+    // Apply primary color (调用 updatePrimaryPalette)
+    if (settings.primaryColor) {
+      try {
+        // 动态导入，避免 SSR 报错
+        import('@primeng/themes').then((mod) => {
+          if (mod.updatePrimaryPalette) {
+            mod.updatePrimaryPalette(mod.palette(settings.primaryColor!))
+          }
+        })
+      } catch (e) {
+        // SSR 环境下忽略
+      }
+    }
   }
 
   /**
@@ -182,7 +199,8 @@ export class SettingsService {
           sidebarCollapsed: parsed.sidebarCollapsed ?? false,
           language: parsed.language ?? 'zh-CN',
           theme: parsed.theme ?? 'default',
-          compactMode: parsed.compactMode ?? false
+          compactMode: parsed.compactMode ?? false,
+          primaryColor: parsed.primaryColor ?? '#22c55e'
         }
       }
     } catch (error) {
@@ -195,7 +213,8 @@ export class SettingsService {
       sidebarCollapsed: false,
       language: 'zh-CN',
       theme: 'default',
-      compactMode: false
+      compactMode: false,
+      primaryColor: '#22c55e'
     }
   }
 
@@ -243,7 +262,27 @@ export class SettingsService {
       typeof settings.sidebarCollapsed === 'boolean' &&
       typeof settings.language === 'string' &&
       typeof settings.theme === 'string' &&
-      typeof settings.compactMode === 'boolean'
+      typeof settings.compactMode === 'boolean' &&
+      (settings.primaryColor === undefined || typeof settings.primaryColor === 'string')
     )
+  }
+
+  /**
+   * Set primary color (theme main color)
+   */
+  setPrimaryColor(color: string): void {
+    const currentSettings = this._settings()
+    const newSettings = {
+      ...currentSettings,
+      primaryColor: color
+    }
+    this.updateSettings(newSettings)
+  }
+
+  /**
+   * Get primary color
+   */
+  getPrimaryColor(): string {
+    return this._settings().primaryColor || '#22c55e'
   }
 }

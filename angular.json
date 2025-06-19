@@ -30,7 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.less"],
+            "styles": ["src/styles.less", "src/app.less"],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
