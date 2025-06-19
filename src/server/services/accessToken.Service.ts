@@ -2,6 +2,7 @@ import { DB, AccessToken } from '@src/db/db.d'
 import { ExpressionBuilder, Insertable, Updateable } from 'kysely'
 import { db } from '@src/libs/db'
 import { DELETE_STATUS, PUBLISH_STATUS, STATUS_PUBLISHED } from '../config/const'
+import z from 'zod'
 
 // Types
 export interface PaginationOptions {
@@ -22,6 +23,16 @@ export interface PaginatedResult<T> {
     totalPages: number
   }
 }
+
+// Validation schemas
+const createAccessTokenSchema = z.object({
+  app_name: z.string().min(1, 'app_name不能为空'),
+  channel: z.string().min(1, 'channel不能为空'),
+  user_id: z.number().min(1, 'user_id不能为空'),
+  status: z.number().default(10)
+})
+
+const updateAccessTokenSchema = createAccessTokenSchema.partial()
 
 /**
  * Service class for handling AccessToken operations
@@ -208,3 +219,8 @@ export class AccessTokenService {
     return !!result
   }
 }
+
+export const accessTokenService = new AccessTokenService()
+
+// Export schemas for validation
+export { createAccessTokenSchema, updateAccessTokenSchema }

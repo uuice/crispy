@@ -1,20 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { AccessTokenService } from '../../services/accessToken.Service'
 import { success, error, handleError } from '../../utils/response'
 import { generateRandomToken } from '@src/server/utils/token'
-// Initialize service
-const accessTokenService = new AccessTokenService()
-
-// Validation schemas
-const createSchema = z.object({
-  app_name: z.string().min(1, 'app_name不能为空'),
-  channel: z.string().min(1, 'channel不能为空'),
-  user_id: z.number().min(1, 'user_id不能为空'),
-  status: z.number().default(10)
-})
-
-const updateSchema = createSchema.partial()
+import { accessTokenService } from '../../services/accessToken.Service'
+import {
+  createAccessTokenSchema,
+  updateAccessTokenSchema
+} from '../../services/accessToken.Service'
 
 // Create new access token
 export const createAccessToken = async (
@@ -23,7 +14,7 @@ export const createAccessToken = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const validatedData = createSchema.parse(req.body)
+    const validatedData = createAccessTokenSchema.parse(req.body)
     const randomToken = generateRandomToken()
     const token = await accessTokenService.create({
       ...validatedData,
@@ -72,7 +63,7 @@ export const updateAccessToken = async (
       return
     }
 
-    const validatedData = updateSchema.parse(req.body)
+    const validatedData = updateAccessTokenSchema.parse(req.body)
     const token = await accessTokenService.update(id, validatedData)
     if (!token) {
       error(res, '访问令牌不存在', 404)
