@@ -1,15 +1,4 @@
-import { config } from 'dotenv'
-import { join } from 'path'
-import { fileURLToPath } from 'url'
 import jwt from 'jsonwebtoken'
-
-// Get the directory name of the current module
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
-
-// Load environment variables from .env file
-config({
-  path: join(__dirname, '../../../.env')
-})
 
 // Environment variables with type definitions
 export const env = {

@@ -9,6 +9,8 @@ export interface AppSettings {
   compactMode: boolean
   /** 主色（primary color），如 #22c55e */
   primaryColor?: string
+  /** 字体大小，如 16 */
+  fontSize?: number
 }
 
 @Injectable({
@@ -25,6 +27,9 @@ export class SettingsService {
 
   constructor() {
     this.applySettings(this._settings())
+    // Initialize font size
+    const fontSize = this._settings().fontSize || 16
+    document.documentElement.style.fontSize = `${fontSize}px`
   }
 
   /**
@@ -135,7 +140,8 @@ export class SettingsService {
       language: 'zh-CN',
       theme: 'default',
       compactMode: false,
-      primaryColor: '#22c55e'
+      primaryColor: '#22c55e',
+      fontSize: 14
     }
     this.updateSettings(defaultSettings)
   }
@@ -171,6 +177,10 @@ export class SettingsService {
     // Apply theme
     document.body.setAttribute('data-theme', settings.theme)
 
+    // Apply font size
+    const fontSize = settings.fontSize || 16
+    document.documentElement.style.fontSize = `${fontSize}px`
+
     // Apply primary color (调用 updatePrimaryPalette)
     if (settings.primaryColor) {
       try {
@@ -200,7 +210,8 @@ export class SettingsService {
           language: parsed.language ?? 'zh-CN',
           theme: parsed.theme ?? 'default',
           compactMode: parsed.compactMode ?? false,
-          primaryColor: parsed.primaryColor ?? '#22c55e'
+          primaryColor: parsed.primaryColor ?? '#22c55e',
+          fontSize: parsed.fontSize ?? 14
         }
       }
     } catch (error) {
@@ -214,7 +225,8 @@ export class SettingsService {
       language: 'zh-CN',
       theme: 'default',
       compactMode: false,
-      primaryColor: '#22c55e'
+      primaryColor: '#22c55e',
+      fontSize: 14
     }
   }
 
@@ -263,7 +275,8 @@ export class SettingsService {
       typeof settings.language === 'string' &&
       typeof settings.theme === 'string' &&
       typeof settings.compactMode === 'boolean' &&
-      (settings.primaryColor === undefined || typeof settings.primaryColor === 'string')
+      (settings.primaryColor === undefined || typeof settings.primaryColor === 'string') &&
+      (settings.fontSize === undefined || typeof settings.fontSize === 'number')
     )
   }
 
@@ -284,5 +297,24 @@ export class SettingsService {
    */
   getPrimaryColor(): string {
     return this._settings().primaryColor || '#22c55e'
+  }
+
+  /**
+   * Set font size
+   */
+  setFontSize(size: number): void {
+    const currentSettings = this._settings()
+    const newSettings = {
+      ...currentSettings,
+      fontSize: size
+    }
+    this.updateSettings(newSettings)
+  }
+
+  /**
+   * Get font size
+   */
+  getFontSize(): number {
+    return this._settings().fontSize || 14
   }
 }

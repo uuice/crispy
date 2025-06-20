@@ -75,7 +75,29 @@ import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
       [style]="{ width: '350px' }"
     >
       <div class="theme-settings">
-        <!-- Display all categories directly -->
+        <!-- Font Size Section -->
+        <div class="setting-section">
+          <div class="label">字体大小</div>
+          <div class="font-size-options">
+            @for (size of fontSizes; track size.value) {
+              <div
+                class="font-size-option"
+                [class.selected]="size.value === selectedFontSize"
+                (click)="selectFontSize(size.value)"
+                [title]="size.label"
+              >
+                <span class="font-size-text" [style.font-size.px]="size.value">{{
+                  size.label
+                }}</span>
+                @if (size.value === selectedFontSize) {
+                  <i class="pi pi-check"></i>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Color Categories -->
         @for (category of colorCategories; track category.name) {
           <div class="color-section">
             <div class="label">{{ category.name }}</div>
@@ -185,6 +207,10 @@ import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
         padding: 24px 16px 16px 16px;
       }
 
+      .setting-section {
+        margin-bottom: 32px;
+      }
+
       .color-section {
         margin-bottom: 24px;
       }
@@ -195,6 +221,46 @@ import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
         font-size: 1.1rem;
         color: var(--p-text-color);
       }
+
+      .font-size-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .font-size-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border: 2px solid var(--p-content-border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--p-content-background);
+      }
+
+      .font-size-option:hover {
+        border-color: var(--p-primary-color);
+        background: var(--p-hover-color);
+      }
+
+      .font-size-option.selected {
+        border-color: var(--p-primary-color);
+        background: var(--p-primary-color);
+        color: white;
+      }
+
+      .font-size-text {
+        font-weight: 500;
+      }
+
+      .font-size-option i.pi {
+        font-size: 1rem;
+        font-weight: bold;
+      }
+
       .color-row {
         display: flex;
         gap: 12px;
@@ -246,6 +312,19 @@ export class HeaderComponent {
   protected settingsService = inject(SettingsService)
 
   drawerVisible = false
+
+  // Font size options from 12px to 20px (5 levels)
+  fontSizes = [
+    { value: 12, label: '极小 (12px)' },
+    { value: 14, label: '小 (14px)' },
+    { value: 16, label: '标准 (16px)' },
+    { value: 18, label: '大 (18px)' },
+    { value: 20, label: '极大 (20px)' }
+  ]
+
+  get selectedFontSize(): number {
+    return this.settingsService.getFontSize()
+  }
 
   // Generate all available color palettes using the palette method
   colorCategories = [
@@ -372,6 +451,10 @@ export class HeaderComponent {
 
   selectPrimary(color: any) {
     this.settingsService.setPrimaryColor(color.palette[500])
+  }
+
+  selectFontSize(size: number) {
+    this.settingsService.setFontSize(size)
   }
 
   onSettings() {}
