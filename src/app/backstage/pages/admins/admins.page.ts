@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core'
+import { Component, OnInit, signal, WritableSignal, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -14,6 +14,7 @@ import { DialogModule } from 'primeng/dialog'
 import { SelectModule } from 'primeng/select'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
+import { AuthService } from '../../services/auth.service'
 import { AdminDetailComponent } from './admin-detail.component'
 
 interface Admin {
@@ -32,6 +33,23 @@ interface Admin {
   update_time: number
   role_id?: number
   type_id?: number
+  role?: {
+    id: number
+    title: string
+  }
+}
+
+interface Role {
+  id: number
+  title: string
+  des?: string
+  module_id: number
+  rule_ids: string
+  sort: number
+  status: number
+  type_id: number
+  create_time: number
+  update_time: number
 }
 
 interface AdminsResponse {
@@ -39,6 +57,20 @@ interface AdminsResponse {
   message: string
   data: {
     dataList: Admin[]
+    pagination: {
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
+    }
+  }
+}
+
+interface RolesResponse {
+  success: boolean
+  message: string
+  data: {
+    dataList: Role[]
     pagination: {
       total: number
       page: number
@@ -114,6 +146,15 @@ interface AdminsResponse {
                 optionValue="value"
                 placeholder="状态"
               />
+              <label for="admin-role-select" class="sr-only">角色</label>
+              <p-select
+                id="admin-role-select"
+                [options]="roleOptions()"
+                [(ngModel)]="roleValue"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="角色"
+              />
             </div>
             <div class="search-actions">
               <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
@@ -135,6 +176,7 @@ interface AdminsResponse {
             <th style="min-width: 8rem;">昵称</th>
             <th style="min-width: 12rem;">邮箱</th>
             <th style="min-width: 8rem;">手机号</th>
+            <th style="min-width: 8rem;">角色</th>
             <th style="min-width: 8rem;">管理员类型</th>
             <th style="min-width: 12rem;">状态</th>
             <th style="min-width: 14rem;">最后登录</th>
@@ -160,6 +202,10 @@ interface AdminsResponse {
             <td>{{ admin.nick_name || '-' }}</td>
             <td>{{ admin.email || '-' }}</td>
             <td>{{ admin.phone || '-' }}</td>
+            <td>
+              <span *ngIf="admin.role?.title">{{ admin.role.title }}</span>
+              <span *ngIf="!admin.role?.title" class="text-gray-500">-</span>
+            </td>
             <td>
               <div class="admin-type">
                 <p-tag
@@ -202,13 +248,15 @@ interface AdminsResponse {
                   tooltipPosition="top"
                   (click)="openEditDialog(admin)"
                 ></p-button>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  pTooltip="删除"
-                  tooltipPosition="top"
-                  (click)="confirmDelete(admin)"
-                ></p-button>
+                @if (isCurrentUserSuperAdmin() && admin.is_super_admin !== 1) {
+                  <p-button
+                    icon="pi pi-user-minus"
+                    severity="danger"
+                    pTooltip="取消管理员权限"
+                    tooltipPosition="top"
+                    (click)="confirmRevokeAdmin(admin)"
+                  ></p-button>
+                }
               </div>
             </td>
           </tr>
@@ -216,7 +264,7 @@ interface AdminsResponse {
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="11" class="text-center">没有找到管理员。</td>
+            <td colspan="12" class="text-center">没有找到管理员。</td>
           </tr>
         </ng-template>
       </p-table>
@@ -224,6 +272,7 @@ interface AdminsResponse {
       <!-- Admin Detail Component -->
       <cs-admin-detail
         [admin]="selectedAdmin()"
+        [roles]="roles()"
         (saved)="onAdminSaved($event)"
         (cancelled)="onAdminCancelled()"
       ></cs-admin-detail>
@@ -236,15 +285,21 @@ export class AdminsPage implements OnInit {
   loading = signal(false)
   user_name = signal('')
   selectedStatus = signal<number | null>(null)
+  selectedRole = signal<number | null>(null)
   selectedAdmin = signal<Admin | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
+  roles = signal<Role[]>([])
 
   statusOptions = signal([
     { label: '全部状态', value: null },
     { label: '启用', value: 10 },
     { label: '禁用', value: -10 }
+  ])
+
+  roleOptions = signal<{ label: string; value: number | null }[]>([
+    { label: '全部角色', value: null }
   ])
 
   get statusValue() {
@@ -254,6 +309,15 @@ export class AdminsPage implements OnInit {
     this.selectedStatus.set(val)
   }
 
+  get roleValue() {
+    return this.selectedRole()
+  }
+  set roleValue(val: number | null) {
+    this.selectedRole.set(val)
+  }
+
+  private authService = inject(AuthService)
+
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -262,6 +326,13 @@ export class AdminsPage implements OnInit {
 
   ngOnInit() {
     this.loadAdmins()
+    this.loadRoles()
+  }
+
+  // Check if current user is super admin
+  isCurrentUserSuperAdmin(): boolean {
+    const currentUser = this.authService.getUser<any>()
+    return currentUser?.is_super_admin === 1
   }
 
   onSearch() {
@@ -295,6 +366,10 @@ export class AdminsPage implements OnInit {
       params.status = this.selectedStatus()
     }
 
+    if (this.selectedRole() !== null) {
+      params.role_id = this.selectedRole()
+    }
+
     // Call API to get admins
     this.httpService.get<AdminsResponse>('/api/admin/users', params).subscribe({
       next: (response) => {
@@ -318,6 +393,27 @@ export class AdminsPage implements OnInit {
           detail: '获取管理员列表失败'
         })
         this.loading.set(false)
+      }
+    })
+  }
+
+  loadRoles() {
+    this.httpService.get<RolesResponse>('/api/admin/roles', { page: 1, pageSize: 1000 }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.roles.set(response.data.dataList)
+          // Update role options for search
+          this.roleOptions.set([
+            { label: '全部角色', value: null },
+            ...response.data.dataList.map((role) => ({
+              label: role.title,
+              value: role.id
+            }))
+          ])
+        }
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error)
       }
     })
   }
@@ -404,41 +500,46 @@ export class AdminsPage implements OnInit {
     this.selectedAdmin.set(null)
   }
 
-  confirmDelete(admin: Admin) {
+  confirmRevokeAdmin(admin: Admin) {
     this.confirmationService.confirm({
-      message: `确定要删除管理员 "${admin.user_name}" 吗？`,
-      header: '删除确认',
+      message: `确定要取消 "${admin.user_name}" 的管理员权限吗？取消后该用户将变为普通用户。`,
+      header: '取消管理员权限确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.deleteAdmin(admin.id)
+        this.revokeAdmin(admin.id)
       }
     })
   }
 
-  deleteAdmin(id: number) {
-    this.httpService.delete<any>(`/api/admin/users/${id}`).subscribe({
+  revokeAdmin(id: number) {
+    const updateData = {
+      is_admin: 0,
+      is_super_admin: 0
+    }
+
+    this.httpService.put<any>(`/api/admin/users/${id}`, updateData).subscribe({
       next: (response) => {
         if (response.success) {
           this.messageService.add({
             severity: 'success',
             summary: '成功',
-            detail: '管理员删除成功'
+            detail: '管理员权限已取消'
           })
           this.loadAdmins()
         } else {
           this.messageService.add({
             severity: 'error',
             summary: '错误',
-            detail: response.message || '删除管理员失败'
+            detail: response.message || '取消管理员权限失败'
           })
         }
       },
       error: (error) => {
-        console.error('Failed to delete admin:', error)
+        console.error('Failed to revoke admin:', error)
         this.messageService.add({
           severity: 'error',
           summary: '错误',
-          detail: '删除管理员失败'
+          detail: '取消管理员权限失败'
         })
       }
     })
@@ -447,6 +548,7 @@ export class AdminsPage implements OnInit {
   resetFilters() {
     this.user_name.set('')
     this.selectedStatus.set(null)
+    this.selectedRole.set(null)
     this.currentPage.set(1)
     this.loadAdmins()
   }

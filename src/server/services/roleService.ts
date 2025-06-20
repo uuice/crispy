@@ -41,7 +41,7 @@ export interface Role {
 }
 
 export interface PaginatedRolesResult {
-  data: Role[]
+  dataList: Role[]
   pagination: {
     total: number
     page: number
@@ -102,7 +102,7 @@ export class RoleService {
     ])
 
     return {
-      data: roles as unknown as Role[],
+      dataList: roles as unknown as Role[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

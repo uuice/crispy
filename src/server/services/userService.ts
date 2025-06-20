@@ -77,6 +77,7 @@ export interface PaginationOptions {
   status?: number
   isDelete?: number
   isAdmin?: number
+  role_id?: number
 }
 
 export interface PaginatedResult<T> {
@@ -137,30 +138,55 @@ export class UserService {
    * Get users list with pagination
    */
   async getUsers(options: PaginationOptions): Promise<PaginatedResult<any>> {
-    const { page, pageSize, user_name, status, isDelete, isAdmin } = options
+    const { page, pageSize, user_name, status, isDelete, isAdmin, role_id } = options
     const offset = (page - 1) * pageSize
 
-    // Build query conditions
-    let query = db.selectFrom('users').selectAll()
+    // Build query conditions with LEFT JOIN to get role information
+    let query = db
+      .selectFrom('users')
+      .leftJoin('roles', 'users.role_id', 'roles.id')
+      .select([
+        'users.id',
+        'users.user_name',
+        'users.nick_name',
+        'users.email',
+        'users.phone',
+        'users.status',
+        'users.is_admin',
+        'users.is_super_admin',
+        'users.is_black',
+        'users.last_login_time',
+        'users.avatar_url',
+        'users.create_time',
+        'users.update_time',
+        'users.role_id',
+        'users.type_id',
+        'roles.id as role_id',
+        'roles.title as role_title'
+      ])
 
     // Apply filters
     if (user_name) {
-      query = query.where('user_name', 'like', `%${user_name}%`)
+      query = query.where('users.user_name', 'like', `%${user_name}%`)
     }
 
     if (status !== undefined) {
-      query = query.where('status', '=', status)
+      query = query.where('users.status', '=', status)
     }
 
     if (isDelete !== undefined) {
-      query = query.where('is_delete', '=', isDelete)
+      query = query.where('users.is_delete', '=', isDelete)
     } else {
       // Default to only non-deleted users
-      query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
     }
 
     if (isAdmin !== undefined) {
-      query = query.where('is_admin', '=', isAdmin)
+      query = query.where('users.is_admin', '=', isAdmin)
+    }
+
+    if (role_id !== undefined) {
+      query = query.where('users.role_id', '=', role_id)
     }
 
     const [users, total] = await Promise.all([
@@ -184,13 +210,28 @@ export class UserService {
           if (isAdmin !== undefined) {
             qb = qb.where('is_admin', '=', isAdmin)
           }
+          if (role_id !== undefined) {
+            qb = qb.where('role_id', '=', role_id)
+          }
           return qb
         })
         .executeTakeFirst()
     ])
 
+    // Transform users data to include role information
+    const usersWithRoles = users.map((user) => ({
+      ...user,
+      role:
+        user.role_id && user.role_title
+          ? {
+              id: user.role_id,
+              title: user.role_title
+            }
+          : null
+    }))
+
     return {
-      dataList: users,
+      dataList: usersWithRoles,
       pagination: {
         total: Number(total?.count) || 0,
         page,

@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal, WritableSignal } from '@angular/core'
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
@@ -26,6 +34,19 @@ interface Admin {
   type_id?: number
 }
 
+interface Role {
+  id: number
+  title: string
+  des?: string
+  module_id: number
+  rule_ids: string
+  sort: number
+  status: number
+  type_id: number
+  create_time: number
+  update_time: number
+}
+
 @Component({
   selector: 'cs-admin-detail',
   standalone: true,
@@ -45,7 +66,7 @@ interface Admin {
     <p-dialog
       [visible]="visible()"
       (visibleChange)="visible.set($event)"
-      [header]="isEditMode() ? '编辑管理员' : '创建管理员'"
+      [header]="isEditMode ? '编辑管理员' : '创建管理员'"
       [modal]="true"
       [style]="{ width: '500px' }"
       [draggable]="false"
@@ -69,7 +90,7 @@ interface Admin {
           </small>
         </div>
 
-        <div class="field" *ngIf="!isEditMode()">
+        <div class="field" *ngIf="!isEditMode">
           <label for="password" class="block text-900 font-medium mb-2">密码 *</label>
           <input
             id="password"
@@ -130,6 +151,19 @@ interface Admin {
         </div>
 
         <div class="field">
+          <label for="role_id" class="block text-900 font-medium mb-2">角色</label>
+          <p-select
+            id="role_id"
+            [options]="roleOptions()"
+            formControlName="role_id"
+            optionLabel="title"
+            optionValue="id"
+            placeholder="请选择角色"
+            class="w-full"
+          ></p-select>
+        </div>
+
+        <div class="field">
           <label for="status" class="block text-900 font-medium mb-2">状态</label>
           <p-select
             id="status"
@@ -181,42 +215,29 @@ interface Admin {
 })
 export class AdminDetailComponent implements OnInit {
   @Input() set admin(value: Admin | null) {
+    this.currentAdmin.set(value)
     if (value) {
-      this.currentAdmin.set(value)
-      this.isEditMode.set(true)
-      this.loadAdminData(value)
       this.visible.set(true)
-    } else if (value === null) {
-      // Create mode
-      this.currentAdmin.set(null)
-      this.isEditMode.set(false)
-      this.resetForm()
-      this.visible.set(true)
+      this.loadFormData(value)
     } else {
-      // Hide dialog
       this.visible.set(false)
+      this.resetForm()
     }
+  }
+
+  @Input() set roles(value: Role[]) {
+    this.availableRoles.set(value)
   }
 
   @Output() saved = new EventEmitter<Admin>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(false)
-  isEditMode = signal(false)
-  submitting = signal(false)
   currentAdmin = signal<Admin | null>(null)
+  availableRoles = signal<Role[]>([])
+  submitting = signal(false)
 
   adminForm: FormGroup
-
-  statusOptions = signal([
-    { label: '启用', value: 10 },
-    { label: '禁用', value: -10 }
-  ])
-
-  blacklistOptions = signal([
-    { label: '正常', value: 0 },
-    { label: '黑名单', value: 1 }
-  ])
 
   constructor(
     private fb: FormBuilder,
@@ -228,78 +249,93 @@ export class AdminDetailComponent implements OnInit {
       nick_name: [''],
       email: ['', [Validators.email]],
       phone: ['', [Validators.pattern(/^1[3-9]\d{9}$/)]],
+      role_id: [null],
       status: [10],
       is_black: [0]
     })
   }
 
-  ngOnInit() {}
-
-  onDialogHide() {
-    this.onCancel()
+  ngOnInit() {
+    // No need to subscribe to signal changes as we handle them in the setter
   }
 
-  onCancel() {
-    this.visible.set(false)
-    this.resetForm()
-    this.cancelled.emit()
+  get isEditMode(): boolean {
+    return !!this.currentAdmin()?.id
   }
 
-  loadAdminData(admin: Admin) {
+  roleOptions() {
+    return this.availableRoles().map((role) => ({
+      id: role.id,
+      title: role.title
+    }))
+  }
+
+  statusOptions() {
+    return [
+      { label: '启用', value: 10 },
+      { label: '禁用', value: -10 }
+    ]
+  }
+
+  blacklistOptions() {
+    return [
+      { label: '正常', value: 0 },
+      { label: '黑名单', value: 1 }
+    ]
+  }
+
+  loadFormData(admin: Admin) {
     this.adminForm.patchValue({
       user_name: admin.user_name,
-      password: '', // Don't show password in edit mode
+      password: '', // Don't load password in edit mode
       nick_name: admin.nick_name || '',
       email: admin.email || '',
       phone: admin.phone || '',
+      role_id: admin.role_id || null,
       status: admin.status,
       is_black: admin.is_black
     })
-    // Remove password validation for edit mode
-    this.adminForm.get('password')?.clearValidators()
-    this.adminForm.get('password')?.updateValueAndValidity()
+
+    // Clear password validation in edit mode
+    if (this.isEditMode) {
+      this.adminForm.get('password')?.clearValidators()
+      this.adminForm.get('password')?.updateValueAndValidity()
+    }
   }
 
   resetForm() {
     this.adminForm.reset({
-      user_name: '',
-      password: '',
-      nick_name: '',
-      email: '',
-      phone: '',
       status: 10,
       is_black: 0
     })
-    // Restore password validation
-    this.adminForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)])
-    this.adminForm.get('password')?.updateValueAndValidity()
   }
 
-  isFieldInvalid(field: string): boolean {
-    const formControl = this.adminForm.get(field)
-    return formControl ? formControl.invalid && formControl.dirty : false
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.adminForm.get(fieldName)
+    return !!(field && field.invalid && (field.dirty || field.touched))
   }
 
-  getErrorMessage(field: string): string {
-    const formControl = this.adminForm.get(field)
-    if (!formControl) return ''
+  getErrorMessage(fieldName: string): string {
+    const field = this.adminForm.get(fieldName)
+    if (!field || !field.errors) return ''
 
-    if (formControl.hasError('required')) {
-      return '此字段为必填项'
-    }
-    if (formControl.hasError('minlength')) {
-      return `最少需要 ${formControl.errors?.['minlength'].requiredLength} 个字符`
-    }
-    if (formControl.hasError('maxlength')) {
-      return `最多只能 ${formControl.errors?.['maxlength'].requiredLength} 个字符`
-    }
-    if (formControl.hasError('email')) {
-      return '请输入有效的邮箱地址'
-    }
-    if (formControl.hasError('pattern')) {
-      return '请输入有效的手机号'
-    }
-    return ''
+    const errors = field.errors
+    if (errors['required']) return '此字段为必填项'
+    if (errors['minlength']) return `最少需要 ${errors['minlength'].requiredLength} 个字符`
+    if (errors['maxlength']) return `最多只能输入 ${errors['maxlength'].requiredLength} 个字符`
+    if (errors['email']) return '请输入有效的邮箱地址'
+    if (errors['pattern']) return '请输入有效的手机号'
+
+    return '输入格式不正确'
+  }
+
+  onDialogHide() {
+    this.cancelled.emit()
+  }
+
+  onCancel() {
+    this.visible.set(false)
+    this.cancelled.emit()
   }
 
   onSubmit() {
@@ -308,7 +344,7 @@ export class AdminDetailComponent implements OnInit {
       const formData = this.adminForm.value
 
       // Remove password if it's empty in edit mode
-      if (this.isEditMode() && !formData.password) {
+      if (this.isEditMode && !formData.password) {
         delete formData.password
       }
 

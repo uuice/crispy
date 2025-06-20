@@ -28,6 +28,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
     const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
     const isDelete = req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined
     const isAdmin = req.query['is_admin'] ? parseInt(req.query['is_admin'] as string) : undefined
+    const role_id = req.query['role_id'] ? parseInt(req.query['role_id'] as string) : undefined
 
     const result = await userService.getUsers({
       page,
@@ -35,7 +36,8 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
       user_name,
       status,
       isDelete,
-      isAdmin
+      isAdmin,
+      role_id
     })
     success(res, result)
   } catch (err: unknown) {
