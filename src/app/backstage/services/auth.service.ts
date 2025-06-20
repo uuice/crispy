@@ -77,4 +77,12 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.getToken()
   }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken()
+  }
+
+  logout(): void {
+    this.clearAll()
+  }
 }

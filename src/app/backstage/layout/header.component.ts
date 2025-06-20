@@ -1,19 +1,33 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core'
+import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ButtonModule } from 'primeng/button'
 import { AvatarModule } from 'primeng/avatar'
-import { MenuItem } from 'primeng/api'
+import { MenuItem, ConfirmationService } from 'primeng/api'
 import { NgClass } from '@angular/common'
-import { RouterModule } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { SettingsService } from '../services/settings.service'
 import { DrawerModule } from 'primeng/drawer'
 import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
+import { MenuModule } from 'primeng/menu'
+import { AuthService } from '../services/auth.service'
+import { ConfirmDialogModule } from 'primeng/confirmdialog'
 
 @Component({
   selector: 'cs-header',
   standalone: true,
-  imports: [CommonModule, ButtonModule, AvatarModule, NgClass, RouterModule, DrawerModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    AvatarModule,
+    NgClass,
+    RouterModule,
+    DrawerModule,
+    MenuModule,
+    ConfirmDialogModule
+  ],
+  providers: [ConfirmationService],
   template: `
+    <p-confirm-dialog></p-confirm-dialog>
     <header class="header" [class.dark-mode]="settingsService.settings().darkMode">
       <div class="header-content">
         <div class="header-left">
@@ -61,8 +75,9 @@ import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
             shape="circle"
             size="large"
             class="header-avatar"
-            (click)="onUserMenu()"
+            (click)="userMenu.toggle($event)"
           ></p-avatar>
+          <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
         </div>
       </div>
     </header>
@@ -303,15 +318,19 @@ import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
     `
   ]
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   @Input() menuItems: MenuItem[] = []
   @Output() sidebarToggle = new EventEmitter<void>()
   @Output() darkModeToggle = new EventEmitter<boolean>()
   hasNotification = true
 
   protected settingsService = inject(SettingsService)
+  private authService = inject(AuthService)
+  private router = inject(Router)
+  private confirmationService = inject(ConfirmationService)
 
   drawerVisible = false
+  userMenuItems: MenuItem[] = []
 
   // Font size options from 12px to 20px (5 levels)
   fontSizes = [
@@ -485,5 +504,31 @@ export class HeaderComponent {
   toggleDarkMode(): void {
     this.settingsService.toggleDarkMode()
     this.darkModeToggle.emit(this.settingsService.settings().darkMode)
+  }
+
+  ngOnInit(): void {
+    this.userMenuItems = [
+      { label: '设置', icon: 'pi pi-cog', command: () => this.onSettings() },
+      { separator: true },
+      { label: '退出登录', icon: 'pi pi-power-off', command: () => this.logout() }
+    ]
+  }
+
+  logout(): void {
+    this.confirmationService.confirm({
+      message: '您确定要退出登录吗？',
+      header: '退出登录',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: '确定',
+      rejectLabel: '取消',
+      acceptIcon: 'pi pi-check',
+      rejectIcon: 'pi pi-times',
+      acceptButtonStyleClass: 'p-button-success',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: () => {
+        this.authService.logout()
+        this.router.navigate(['/backstage/login'])
+      }
+    })
   }
 }
