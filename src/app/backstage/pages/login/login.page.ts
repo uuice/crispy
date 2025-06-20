@@ -64,10 +64,6 @@ import { finalize } from 'rxjs/operators'
           </svg>
         </div>
         <h2 class="login-title">欢迎回来</h2>
-        <div class="login-subtitle">
-          没有账号？
-          <a class="signup-link" href="#">注册</a>
-        </div>
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <div class="input-group">
             <span class="input-icon pi pi-user"></span>
@@ -102,7 +98,7 @@ import { finalize } from 'rxjs/operators'
             label="登录"
           ></button>
         </form>
-        <a class="forgot-link" href="#">忘记密码？</a>
+        <a class="forgot-link" href="#" (click)="onForgotPassword($event)">忘记密码？</a>
       </div>
     </div>
   `,
@@ -349,5 +345,14 @@ export class LoginPage implements OnInit, OnDestroy {
     } else {
       this.loginForm.markAllAsTouched()
     }
+  }
+
+  onForgotPassword(event: Event) {
+    event.preventDefault()
+    this.messageService.add({
+      severity: 'info',
+      summary: '忘记密码',
+      detail: '请联系管理员重置密码'
+    })
   }
 }

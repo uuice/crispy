@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
-import { FormsModule } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
@@ -10,17 +10,42 @@ import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
+import { DialogModule } from 'primeng/dialog'
+import { SelectModule } from 'primeng/select'
 import { ConfirmationService, MessageService } from 'primeng/api'
+import { HttpService } from '../../services/http.service'
+import { AdminDetailComponent } from './admin-detail.component'
 
 interface Admin {
   id: number
-  username: string
+  user_name: string
+  nick_name: string
   email: string
-  role: 'super_admin' | 'admin' | 'editor'
-  permissions: string[]
-  status: 'active' | 'inactive'
-  lastLogin: string
-  createdAt: string
+  phone: string
+  status: number // 10=正常，-10=禁用
+  is_admin: number // 1=管理员，0=普通用户
+  is_super_admin: number // 1=超级管理员，0=普通管理员
+  is_black: number // 1=黑名单，0=正常
+  last_login_time: number
+  avatar_url: string
+  create_time: number
+  update_time: number
+  role_id?: number
+  type_id?: number
+}
+
+interface AdminsResponse {
+  success: boolean
+  message: string
+  data: {
+    dataList: Admin[]
+    pagination: {
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
+    }
+  }
 }
 
 @Component({
@@ -30,6 +55,7 @@ interface Admin {
     CommonModule,
     RouterModule,
     FormsModule,
+    ReactiveFormsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -37,316 +63,397 @@ interface Admin {
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    DialogModule,
+    SelectModule,
+    AdminDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
-    <div class="admins-page">
+    <div class="page-container">
       <div class="page-header">
-        <h1>Admin Management</h1>
-        <button pButton label="Create Admin" icon="pi pi-plus" routerLink="create"></button>
+        <h1>管理员管理</h1>
+        <p-button label="新增管理员" icon="pi pi-plus" (click)="openCreateDialog()"></p-button>
       </div>
 
       <p-toast></p-toast>
       <p-confirmDialog></p-confirmDialog>
 
-      <div class="card">
-        <p-table
-          [value]="admins"
-          [paginator]="true"
-          [rows]="10"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} admins"
-          [rowsPerPageOptions]="[10, 25, 50]"
-          [loading]="loading"
-          [globalFilterFields]="['username', 'email', 'role']"
-          styleClass="p-datatable-sm"
-        >
-          <ng-template pTemplate="caption">
-            <div class="flex justify-content-between">
-              <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
-                <input
-                  pInputText
-                  type="text"
-                  (input)="applyFilterGlobal($event, 'contains')"
-                  placeholder="Search..."
-                />
-              </span>
-              <div class="flex gap-2">
-                <p-dropdown
-                  [options]="roleOptions"
-                  [(ngModel)]="selectedRole"
-                  placeholder="Filter by role"
-                  (onChange)="filterByRole($event)"
-                  styleClass="p-inputtext-sm"
-                ></p-dropdown>
-                <p-dropdown
-                  [options]="statusOptions"
-                  [(ngModel)]="selectedStatus"
-                  placeholder="Filter by status"
-                  (onChange)="filterByStatus($event)"
-                  styleClass="p-inputtext-sm"
-                ></p-dropdown>
-              </div>
+      <p-table
+        [value]="admins()"
+        [lazy]="true"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="totalRecords()"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条管理员"
+        [rowsPerPageOptions]="[10, 20, 25, 50]"
+        [loading]="loading()"
+        (onLazyLoad)="loadAdminsLazy($event)"
+        selectionMode="single"
+        scrollable="true"
+        (onPageChange)="onPageChange($event)"
+      >
+        <ng-template pTemplate="caption">
+          <div class="search-bar">
+            <div class="search-controls">
+              <label for="admin-search-keyword" class="sr-only">用户名</label>
+              <input
+                id="admin-search-keyword"
+                pInputText
+                type="text"
+                [(ngModel)]="user_name"
+                placeholder="用户名"
+              />
+              <label for="admin-status-select" class="sr-only">状态</label>
+              <p-select
+                id="admin-status-select"
+                [options]="statusOptions()"
+                [(ngModel)]="statusValue"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="状态"
+              />
             </div>
-          </ng-template>
+            <div class="search-actions">
+              <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
+              <p-button
+                label="搜索"
+                icon="pi pi-search"
+                (click)="onSearch()"
+                [loading]="loading()"
+              ></p-button>
+            </div>
+          </div>
+        </ng-template>
 
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Permissions</th>
-              <th>Status</th>
-              <th>Last Login</th>
-              <th>Created At</th>
-              <th>Actions</th>
-            </tr>
-          </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width: 6rem;">ID</th>
+            <th style="min-width: 6rem;">头像</th>
+            <th style="min-width: 8rem;">用户名</th>
+            <th style="min-width: 8rem;">昵称</th>
+            <th style="min-width: 12rem;">邮箱</th>
+            <th style="min-width: 8rem;">手机号</th>
+            <th style="min-width: 8rem;">管理员类型</th>
+            <th style="min-width: 12rem;">状态</th>
+            <th style="min-width: 14rem;">最后登录</th>
+            <th style="min-width: 14rem;">创建时间</th>
+            <th style="min-width: 8rem;">操作</th>
+          </tr>
+        </ng-template>
 
-          <ng-template pTemplate="body" let-admin>
-            <tr>
-              <td>{{ admin.username }}</td>
-              <td>{{ admin.email }}</td>
-              <td>
-                <p-tag [severity]="getRoleSeverity(admin.role)" [value]="admin.role"></p-tag>
-              </td>
-              <td>
-                <div class="permissions">
-                  <p-tag
-                    *ngFor="let permission of admin.permissions"
-                    [value]="permission"
-                    styleClass="mr-1"
-                    severity="info"
-                  ></p-tag>
-                </div>
-              </td>
-              <td>
-                <p-tag [severity]="getStatusSeverity(admin.status)" [value]="admin.status"></p-tag>
-              </td>
-              <td>{{ admin.lastLogin | date: 'medium' }}</td>
-              <td>{{ admin.createdAt | date: 'medium' }}</td>
-              <td>
-                <div class="action-buttons">
-                  <button
-                    pButton
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-text p-button-sm"
-                    pTooltip="Edit"
-                    tooltipPosition="top"
-                    [routerLink]="[admin.id, 'edit']"
-                  ></button>
-                  <button
-                    pButton
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                    pTooltip="Delete"
-                    tooltipPosition="top"
-                    (click)="confirmDelete(admin)"
-                  ></button>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
+        <ng-template pTemplate="body" let-admin>
+          <tr>
+            <td>{{ admin.id }}</td>
+            <td>
+              <img
+                *ngIf="admin.avatar_url"
+                [src]="admin.avatar_url"
+                alt="avatar"
+                width="32"
+                height="32"
+                style="border-radius:50%;"
+              />
+            </td>
+            <td>{{ admin.user_name }}</td>
+            <td>{{ admin.nick_name || '-' }}</td>
+            <td>{{ admin.email || '-' }}</td>
+            <td>{{ admin.phone || '-' }}</td>
+            <td>
+              <div class="admin-type">
+                <p-tag
+                  *ngIf="admin.is_super_admin === 1"
+                  value="超级管理员"
+                  severity="danger"
+                  styleClass="mr-1"
+                ></p-tag>
+                <p-tag
+                  *ngIf="admin.is_admin === 1 && admin.is_super_admin !== 1"
+                  value="管理员"
+                  severity="warning"
+                ></p-tag>
+                <span *ngIf="admin.is_admin !== 1 && admin.is_super_admin !== 1">普通用户</span>
+              </div>
+            </td>
+            <td>
+              <div class="status-tags flex flex-wrap gap-2">
+                <p-tag
+                  [severity]="getStatusSeverity(admin.status)"
+                  [value]="getStatusText(admin.status)"
+                  styleClass="mr-1"
+                ></p-tag>
+                <p-tag *ngIf="admin.is_black === 1" value="黑名单" severity="danger"></p-tag>
+              </div>
+            </td>
+            <td>
+              {{
+                admin.last_login_time
+                  ? (admin.last_login_time | date: 'yyyy-MM-dd HH:mm:ss')
+                  : '从未登录'
+              }}
+            </td>
+            <td>{{ admin.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td alignFrozen="right" pFrozenColumn [frozen]="true">
+              <div class="action-buttons">
+                <p-button
+                  icon="pi pi-pencil"
+                  pTooltip="编辑"
+                  tooltipPosition="top"
+                  (click)="openEditDialog(admin)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="删除"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(admin)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
 
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="8" class="text-center">No admins found.</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="11" class="text-center">没有找到管理员。</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Admin Detail Component -->
+      <cs-admin-detail
+        [admin]="selectedAdmin()"
+        (saved)="onAdminSaved($event)"
+        (cancelled)="onAdminCancelled()"
+      ></cs-admin-detail>
     </div>
   `,
-  styles: [
-    `
-      .admins-page {
-        padding: 1rem;
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-
-          h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-          }
-        }
-
-        .card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          padding: 1rem;
-        }
-
-        .permissions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.25rem;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        ::ng-deep {
-          .p-datatable {
-            .p-datatable-header {
-              background: transparent;
-              border: none;
-              padding: 0 0 1rem 0;
-            }
-
-            .p-datatable-thead > tr > th {
-              background: #f8f9fa;
-              font-weight: 600;
-            }
-
-            .p-datatable-tbody > tr > td {
-              padding: 0.75rem;
-            }
-          }
-        }
-      }
-    `
-  ]
+  styles: []
 })
 export class AdminsPage implements OnInit {
-  admins: Admin[] = []
-  loading = false
-  selectedRole: string | null = null
-  selectedStatus: string | null = null
+  admins: WritableSignal<Admin[]> = signal<Admin[]>([])
+  loading = signal(false)
+  user_name = signal('')
+  selectedStatus = signal<number | null>(null)
+  selectedAdmin = signal<Admin | null>(null)
+  currentPage = signal(1)
+  pageSize = signal(20)
+  totalRecords = signal(0)
 
-  roleOptions = [
-    { label: 'All Roles', value: null },
-    { label: 'Super Admin', value: 'super_admin' },
-    { label: 'Admin', value: 'admin' },
-    { label: 'Editor', value: 'editor' }
-  ]
+  statusOptions = signal([
+    { label: '全部状态', value: null },
+    { label: '启用', value: 10 },
+    { label: '禁用', value: -10 }
+  ])
 
-  statusOptions = [
-    { label: 'All Status', value: null },
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' }
-  ]
+  get statusValue() {
+    return this.selectedStatus()
+  }
+  set statusValue(val: number | null) {
+    this.selectedStatus.set(val)
+  }
 
   constructor(
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private httpService: HttpService
   ) {}
 
   ngOnInit() {
     this.loadAdmins()
   }
 
+  onSearch() {
+    this.currentPage.set(1)
+    this.loadAdmins()
+  }
+
+  loadAdminsLazy(event: any) {
+    // Update pagination from table event
+    this.currentPage.set(event.first / event.rows + 1)
+    this.pageSize.set(event.rows)
+    this.loadAdmins()
+  }
+
   loadAdmins() {
-    this.loading = true
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      this.admins = [
-        {
-          id: 1,
-          username: 'super_admin',
-          email: 'super@example.com',
-          role: 'super_admin',
-          permissions: ['all'],
-          status: 'active',
-          lastLogin: '2024-03-15T10:30:00',
-          createdAt: '2024-01-01T00:00:00'
-        },
-        {
-          id: 2,
-          username: 'content_admin',
-          email: 'content@example.com',
-          role: 'admin',
-          permissions: ['posts', 'categories', 'tags', 'comments'],
-          status: 'active',
-          lastLogin: '2024-03-14T15:45:00',
-          createdAt: '2024-01-15T00:00:00'
-        },
-        {
-          id: 3,
-          username: 'editor',
-          email: 'editor@example.com',
-          role: 'editor',
-          permissions: ['posts', 'comments'],
-          status: 'inactive',
-          lastLogin: '2024-03-10T08:20:00',
-          createdAt: '2024-02-01T00:00:00'
+    this.loading.set(true)
+
+    // Build query parameters
+    const params: any = {
+      page: this.currentPage(),
+      pageSize: this.pageSize(),
+      is_admin: 1 // Only load admins
+    }
+
+    // Add search filters
+    if (this.user_name()) {
+      params.user_name = this.user_name()
+    }
+
+    if (this.selectedStatus() !== null) {
+      params.status = this.selectedStatus()
+    }
+
+    // Call API to get admins
+    this.httpService.get<AdminsResponse>('/api/admin/users', params).subscribe({
+      next: (response) => {
+        if (response.success === true && response.data) {
+          this.admins.set(response.data.dataList)
+          this.totalRecords.set(response.data.pagination.total)
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '获取管理员列表失败'
+          })
         }
-      ]
-      this.loading = false
-    }, 1000)
+        this.loading.set(false)
+      },
+      error: (error) => {
+        console.error('Error loading admins:', error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: '获取管理员列表失败'
+        })
+        this.loading.set(false)
+      }
+    })
   }
 
-  getRoleSeverity(role: string): string {
-    switch (role) {
-      case 'super_admin':
-        return 'danger'
-      case 'admin':
-        return 'warning'
-      case 'editor':
-        return 'info'
-      default:
-        return 'info'
+  getStatusSeverity(status: number): string {
+    return status === 10 ? 'success' : 'warning'
+  }
+
+  getStatusText(status: number): string {
+    return status === 10 ? '启用' : '禁用'
+  }
+
+  openCreateDialog() {
+    this.selectedAdmin.set(null)
+  }
+
+  openEditDialog(admin: Admin) {
+    this.selectedAdmin.set(admin)
+  }
+
+  onAdminSaved(adminData: Admin) {
+    if (adminData.id) {
+      // Update admin
+      this.httpService.put<any>(`/api/admin/users/${adminData.id}`, adminData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.messageService.add({
+              severity: 'success',
+              summary: '成功',
+              detail: '管理员更新成功'
+            })
+            this.selectedAdmin.set(null)
+            this.loadAdmins()
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: '错误',
+              detail: response.message || '更新管理员失败'
+            })
+          }
+        },
+        error: (error) => {
+          console.error('Failed to update admin:', error)
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: '更新管理员失败'
+          })
+        }
+      })
+    } else {
+      // Create admin
+      this.httpService.post<any>('/api/admin/users', adminData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.messageService.add({
+              severity: 'success',
+              summary: '成功',
+              detail: '管理员创建成功'
+            })
+            this.selectedAdmin.set(null)
+            this.loadAdmins()
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: '错误',
+              detail: response.message || '创建管理员失败'
+            })
+          }
+        },
+        error: (error) => {
+          console.error('Failed to create admin:', error)
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: '创建管理员失败'
+          })
+        }
+      })
     }
   }
 
-  getStatusSeverity(status: string): string {
-    switch (status) {
-      case 'active':
-        return 'success'
-      case 'inactive':
-        return 'warning'
-      default:
-        return 'info'
-    }
-  }
-
-  applyFilterGlobal(event: Event, matchMode: string) {
-    const table = document.querySelector('p-table')
-    // if (table) {
-    //   const filterValue = (event.target as HTMLInputElement).value
-    //   // @ts-ignore
-    //   table.filterGlobal(filterValue, matchMode)
-    // }
-  }
-
-  filterByRole(event: any) {
-    const table = document.querySelector('p-table')
-    // if (table) {
-    //   // @ts-ignore
-    //   table.filter(event.value, 'role', 'equals')
-    // }
-  }
-
-  filterByStatus(event: any) {
-    const table = document.querySelector('p-table')
-    // if (table) {
-    //   // @ts-ignore
-    //   table.filter(event.value, 'status', 'equals')
-    // }
+  onAdminCancelled() {
+    this.selectedAdmin.set(null)
   }
 
   confirmDelete(admin: Admin) {
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete admin ${admin.username}?`,
-      header: 'Delete Confirmation',
+      message: `确定要删除管理员 "${admin.user_name}" 吗？`,
+      header: '删除确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // TODO: Implement delete admin
+        this.deleteAdmin(admin.id)
+      }
+    })
+  }
+
+  deleteAdmin(id: number) {
+    this.httpService.delete<any>(`/api/admin/users/${id}`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: '成功',
+            detail: '管理员删除成功'
+          })
+          this.loadAdmins()
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '删除管理员失败'
+          })
+        }
+      },
+      error: (error) => {
+        console.error('Failed to delete admin:', error)
         this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Admin ${admin.username} has been deleted`
+          severity: 'error',
+          summary: '错误',
+          detail: '删除管理员失败'
         })
       }
     })
+  }
+
+  resetFilters() {
+    this.user_name.set('')
+    this.selectedStatus.set(null)
+    this.currentPage.set(1)
+    this.loadAdmins()
+  }
+
+  onPageChange(event: any) {
+    this.currentPage.set(event.page + 1)
+    this.pageSize.set(event.rows)
+    this.loadAdmins()
   }
 }

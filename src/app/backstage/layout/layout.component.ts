@@ -158,6 +158,15 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
     { label: '标签管理', icon: 'pi pi-tag', routerLink: '/backstage/tags' },
     { label: '评论管理', icon: 'pi pi-comments', routerLink: '/backstage/comments' },
     { label: '用户管理', icon: 'pi pi-users', routerLink: '/backstage/users' },
+    {
+      label: '管理员管理',
+      icon: 'pi pi-user',
+      items: [
+        { label: '管理员列表', icon: 'pi pi-users', routerLink: '/backstage/admins' },
+        { label: '角色列表', icon: 'pi pi-id-card', routerLink: '/backstage/roles' },
+        { label: '规则列表', icon: 'pi pi-list', routerLink: '/backstage/rules' }
+      ]
+    },
     { label: '系统设置', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
   ]
 
@@ -247,6 +256,8 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
       users: 'pi pi-users',
       settings: 'pi pi-cog',
       admins: 'pi pi-user',
+      roles: 'pi pi-id-card',
+      rules: 'pi pi-list',
       advertisements: 'pi pi-image',
       menus: 'pi pi-list',
       pages: 'pi pi-file-edit',

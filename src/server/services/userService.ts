@@ -356,6 +356,9 @@ export class UserService {
         .filter((rule) => rule.parent_id === parentId)
         .map((rule) => ({
           ...rule,
+          icon: rule.icon || 'pi pi-home',
+          label: rule.title,
+          routerLink: rule.condition,
           children: buildMenuTree(rule.id)
         }))
     }

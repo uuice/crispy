@@ -97,6 +97,16 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
+        path: 'roles',
+        loadChildren: () => import('./pages/roles/roles.routes').then((m) => m.ROLES_ROUTES),
+        data: { keepAlive: true }
+      },
+      {
+        path: 'rules',
+        loadChildren: () => import('./pages/rules/rules.routes').then((m) => m.RULES_ROUTES),
+        data: { keepAlive: true }
+      },
+      {
         path: 'advertisements',
         loadComponent: () =>
           import('./pages/advertisements/advertisements.page').then((m) => m.AdvertisementsPage),
