@@ -15,6 +15,7 @@ import { SelectModule } from 'primeng/select'
 import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
+import { MessageModule } from 'primeng/message'
 
 interface Admin {
   id: number
@@ -57,7 +58,8 @@ interface Role {
     InputTextModule,
     SelectModule,
     DialogModule,
-    ToastModule
+    ToastModule,
+    MessageModule
   ],
   providers: [MessageService],
   template: `
@@ -66,7 +68,7 @@ interface Role {
     <p-dialog
       [visible]="visible()"
       (visibleChange)="visible.set($event)"
-      [header]="isEditMode ? '编辑管理员' : '创建管理员'"
+      [header]="dialogTitle"
       [modal]="true"
       [style]="{ width: '500px' }"
       [draggable]="false"
@@ -85,12 +87,15 @@ interface Role {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('user_name') }"
           />
-          <small *ngIf="isFieldInvalid('user_name')" class="p-error">
-            {{ getErrorMessage('user_name') }}
-          </small>
+          <p-message
+            *ngIf="isFieldInvalid('user_name')"
+            severity="error"
+            [text]="getErrorMessage('user_name')"
+            styleClass="mt-1"
+          ></p-message>
         </div>
 
-        <div class="field" *ngIf="!isEditMode">
+        <div class="field" *ngIf="isCreateMode">
           <label for="password" class="block text-900 font-medium mb-2">密码 *</label>
           <input
             id="password"
@@ -101,9 +106,12 @@ interface Role {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('password') }"
           />
-          <small *ngIf="isFieldInvalid('password')" class="p-error">
-            {{ getErrorMessage('password') }}
-          </small>
+          <p-message
+            *ngIf="isFieldInvalid('password')"
+            severity="error"
+            [text]="getErrorMessage('password')"
+            styleClass="mt-1"
+          ></p-message>
         </div>
 
         <div class="field">
@@ -129,9 +137,12 @@ interface Role {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('email') }"
           />
-          <small *ngIf="isFieldInvalid('email')" class="p-error">
-            {{ getErrorMessage('email') }}
-          </small>
+          <p-message
+            *ngIf="isFieldInvalid('email')"
+            severity="error"
+            [text]="getErrorMessage('email')"
+            styleClass="mt-1"
+          ></p-message>
         </div>
 
         <div class="field">
@@ -145,9 +156,12 @@ interface Role {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('phone') }"
           />
-          <small *ngIf="isFieldInvalid('phone')" class="p-error">
-            {{ getErrorMessage('phone') }}
-          </small>
+          <p-message
+            *ngIf="isFieldInvalid('phone')"
+            severity="error"
+            [text]="getErrorMessage('phone')"
+            styleClass="mt-1"
+          ></p-message>
         </div>
 
         <div class="field">
@@ -160,6 +174,7 @@ interface Role {
             optionValue="id"
             placeholder="请选择角色"
             class="w-full"
+            appendTo="body"
           ></p-select>
         </div>
 
@@ -171,6 +186,7 @@ interface Role {
             formControlName="status"
             placeholder="请选择状态"
             class="w-full"
+            appendTo="body"
           ></p-select>
         </div>
 
@@ -182,26 +198,25 @@ interface Role {
             formControlName="is_black"
             placeholder="请选择是否黑名单"
             class="w-full"
+            appendTo="body"
           ></p-select>
         </div>
       </form>
 
       <ng-template pTemplate="footer">
-        <button
-          pButton
-          label="取消"
+        <p-button
+          label="关闭"
           icon="pi pi-times"
           class="p-button-text"
           (click)="onCancel()"
-        ></button>
-        <button
-          pButton
+        ></p-button>
+        <p-button
           label="保存"
           icon="pi pi-check"
           [loading]="submitting()"
           [disabled]="adminForm.invalid"
           (click)="onSubmit()"
-        ></button>
+        ></p-button>
       </ng-template>
     </p-dialog>
   `,
@@ -214,27 +229,14 @@ interface Role {
   ]
 })
 export class AdminDetailComponent implements OnInit {
-  @Input() set admin(value: Admin | null) {
-    this.currentAdmin.set(value)
-    if (value) {
-      this.visible.set(true)
-      this.loadFormData(value)
-    } else {
-      this.visible.set(false)
-      this.resetForm()
-    }
-  }
-
-  @Input() set roles(value: Role[]) {
-    this.availableRoles.set(value)
-  }
+  @Input() admin: Admin | null = null
+  @Input() roles: Role[] = []
+  @Input() mode: 'edit' | 'create' = 'create'
 
   @Output() saved = new EventEmitter<Admin>()
   @Output() cancelled = new EventEmitter<void>()
 
-  visible = signal(false)
-  currentAdmin = signal<Admin | null>(null)
-  availableRoles = signal<Role[]>([])
+  visible = signal(true) // Always visible when component is rendered
   submitting = signal(false)
 
   adminForm: FormGroup
@@ -245,7 +247,7 @@ export class AdminDetailComponent implements OnInit {
   ) {
     this.adminForm = this.fb.group({
       user_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(32)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: [''],
       nick_name: [''],
       email: ['', [Validators.email]],
       phone: ['', [Validators.pattern(/^1[3-9]\d{9}$/)]],
@@ -256,11 +258,41 @@ export class AdminDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    // No need to subscribe to signal changes as we handle them in the setter
+    this.currentAdmin.set(this.admin)
+    this.availableRoles.set(this.roles)
+    this.currentMode.set(this.mode)
+
+    if (this.admin) {
+      this.loadFormData(this.admin)
+    } else {
+      this.resetForm()
+    }
+
+    // Log form status changes for debugging
+    this.adminForm.statusChanges.subscribe(() => {
+      this.logFormErrors()
+    })
   }
 
-  get isEditMode(): boolean {
-    return !!this.currentAdmin()?.id
+  logFormErrors() {
+    if (this.adminForm.invalid) {
+      console.log('--- Form is INVALID ---')
+      Object.keys(this.adminForm.controls).forEach((key) => {
+        const control = this.adminForm.get(key)
+        if (control && control.invalid) {
+          console.log(`Control '${key}' has errors:`, control.errors)
+        }
+      })
+    }
+  }
+
+  get isCreateMode(): boolean {
+    return this.currentMode() === 'create'
+  }
+
+  get dialogTitle(): string {
+    if (this.isCreateMode) return '创建管理员'
+    return '编辑管理员'
   }
 
   roleOptions() {
@@ -287,7 +319,7 @@ export class AdminDetailComponent implements OnInit {
   loadFormData(admin: Admin) {
     this.adminForm.patchValue({
       user_name: admin.user_name,
-      password: '', // Don't load password in edit mode
+      password: '',
       nick_name: admin.nick_name || '',
       email: admin.email || '',
       phone: admin.phone || '',
@@ -296,11 +328,14 @@ export class AdminDetailComponent implements OnInit {
       is_black: admin.is_black
     })
 
-    // Clear password validation in edit mode
-    if (this.isEditMode) {
-      this.adminForm.get('password')?.clearValidators()
-      this.adminForm.get('password')?.updateValueAndValidity()
-    }
+    this.adminForm.get('password')?.clearValidators()
+    this.adminForm.get('password')?.updateValueAndValidity()
+
+    this.adminForm.enable()
+
+    this.adminForm.markAllAsTouched()
+
+    this.logFormErrors()
   }
 
   resetForm() {
@@ -308,6 +343,9 @@ export class AdminDetailComponent implements OnInit {
       status: 10,
       is_black: 0
     })
+    this.adminForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)])
+    this.adminForm.get('password')?.updateValueAndValidity()
+    this.adminForm.enable()
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -343,16 +381,13 @@ export class AdminDetailComponent implements OnInit {
       this.submitting.set(true)
       const formData = this.adminForm.value
 
-      // Remove password if it's empty in edit mode
-      if (this.isEditMode && !formData.password) {
+      if (!this.isCreateMode && (formData.password === null || formData.password === '')) {
         delete formData.password
       }
 
-      // Add admin type fields
       formData.is_admin = 1
-      formData.is_super_admin = 0
+      // formData.is_super_admin = 0
 
-      // Create admin object
       const adminData: Partial<Admin> = {
         ...formData,
         id: this.currentAdmin()?.id || 0
@@ -364,4 +399,8 @@ export class AdminDetailComponent implements OnInit {
       this.adminForm.markAllAsTouched()
     }
   }
+
+  currentAdmin = signal<Admin | null>(null)
+  availableRoles = signal<Role[]>([])
+  currentMode = signal<'edit' | 'create'>('create')
 }

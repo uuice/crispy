@@ -211,39 +211,50 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
     const path = url.split('?')[0]
     const existingTab = this.tabs.find((tab) => tab.routerLink === path)
 
-    if (!existingTab) {
-      // Try to find in sidebarItems first
-      const menuItem = this.sidebarItems.find((item) => item.routerLink === path)
-
-      // If not found in sidebarItems, create a default tab
-      if (!menuItem) {
-        // Extract the last part of the path as the label
-        const pathParts = path.split('/')
-        const lastPart = pathParts[pathParts.length - 1]
-        const label = lastPart.charAt(0).toUpperCase() + lastPart.slice(1)
-
-        // Get appropriate icon based on route
-        const icon = this.getRouteIcon(lastPart)
-
-        this.tabs.push({
-          label: label,
-          routerLink: path,
-          icon: icon,
-          closable: true
-        })
-      } else {
-        this.tabs.push({
-          label: menuItem.label || '',
-          routerLink: path,
-          icon: menuItem.icon || '',
-          closable: true
-        })
-      }
-
-      this.activeTabIndex = this.tabs.length - 1
-    } else {
+    if (existingTab) {
       this.activeTabIndex = this.tabs.indexOf(existingTab)
+      return
     }
+
+    const menuItem = this.findMenuItem(path, this.sidebarItems)
+
+    if (menuItem) {
+      this.tabs.push({
+        label: menuItem.label || '',
+        routerLink: path,
+        icon: menuItem.icon || '',
+        closable: true
+      })
+    } else {
+      const pathParts = path.split('/')
+      const lastPart = pathParts[pathParts.length - 1]
+      const label = lastPart.charAt(0).toUpperCase() + lastPart.slice(1)
+      const icon = this.getRouteIcon(lastPart)
+
+      this.tabs.push({
+        label: label,
+        routerLink: path,
+        icon: icon,
+        closable: true
+      })
+    }
+
+    this.activeTabIndex = this.tabs.length - 1
+  }
+
+  private findMenuItem(url: string, items: MenuItem[]): MenuItem | undefined {
+    for (const item of items) {
+      if (item.routerLink === url) {
+        return item
+      }
+      if (item.items) {
+        const found = this.findMenuItem(url, item.items)
+        if (found) {
+          return found
+        }
+      }
+    }
+    return undefined
   }
 
   private getRouteIcon(route: string): string {

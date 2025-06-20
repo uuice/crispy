@@ -131,7 +131,7 @@ interface UsersResponse {
             <th style="min-width: 14rem;">最后登录</th>
             <th style="min-width: 14rem;">创建时间</th>
             <th style="min-width: 14rem;">更新时间</th>
-            <th style="min-width: 8rem;">操作</th>
+            <th style="min-width: 8rem;" alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
           </tr>
         </ng-template>
 

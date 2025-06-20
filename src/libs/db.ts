@@ -33,8 +33,8 @@ const dialect = new MysqlDialect({
     password: env['DB_PASSWORD'] || '',
     // Connection pool settings
     waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
+    connectionLimit: 20,
+    queueLimit: 10,
     // Timezone settings
     timezone: '+08:00',
     // Character set settings

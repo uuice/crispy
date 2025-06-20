@@ -181,7 +181,7 @@ interface RolesResponse {
             <th style="min-width: 12rem;">状态</th>
             <th style="min-width: 14rem;">最后登录</th>
             <th style="min-width: 14rem;">创建时间</th>
-            <th style="min-width: 8rem;">操作</th>
+            <th style="min-width: 8rem;" alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
           </tr>
         </ng-template>
 
@@ -248,15 +248,14 @@ interface RolesResponse {
                   tooltipPosition="top"
                   (click)="openEditDialog(admin)"
                 ></p-button>
-                @if (isCurrentUserSuperAdmin() && admin.is_super_admin !== 1) {
-                  <p-button
-                    icon="pi pi-user-minus"
-                    severity="danger"
-                    pTooltip="取消管理员权限"
-                    tooltipPosition="top"
-                    (click)="confirmRevokeAdmin(admin)"
-                  ></p-button>
-                }
+                <p-button
+                  *ngIf="isCurrentUserSuperAdmin() && admin.is_super_admin !== 1"
+                  icon="pi pi-user-minus"
+                  severity="secondary"
+                  pTooltip="取消管理员权限"
+                  tooltipPosition="top"
+                  (click)="confirmRevokeAdmin(admin)"
+                ></p-button>
               </div>
             </td>
           </tr>
@@ -271,8 +270,10 @@ interface RolesResponse {
 
       <!-- Admin Detail Component -->
       <cs-admin-detail
+        *ngIf="isDetailVisible()"
         [admin]="selectedAdmin()"
         [roles]="roles()"
+        [mode]="selectedAdmin() ? 'edit' : 'create'"
         (saved)="onAdminSaved($event)"
         (cancelled)="onAdminCancelled()"
       ></cs-admin-detail>
@@ -291,6 +292,7 @@ export class AdminsPage implements OnInit {
   pageSize = signal(20)
   totalRecords = signal(0)
   roles = signal<Role[]>([])
+  isDetailVisible = signal(false)
 
   statusOptions = signal([
     { label: '全部状态', value: null },
@@ -428,10 +430,12 @@ export class AdminsPage implements OnInit {
 
   openCreateDialog() {
     this.selectedAdmin.set(null)
+    this.isDetailVisible.set(true)
   }
 
   openEditDialog(admin: Admin) {
     this.selectedAdmin.set(admin)
+    this.isDetailVisible.set(true)
   }
 
   onAdminSaved(adminData: Admin) {
@@ -446,6 +450,7 @@ export class AdminsPage implements OnInit {
               detail: '管理员更新成功'
             })
             this.selectedAdmin.set(null)
+            this.isDetailVisible.set(false)
             this.loadAdmins()
           } else {
             this.messageService.add({
@@ -475,6 +480,7 @@ export class AdminsPage implements OnInit {
               detail: '管理员创建成功'
             })
             this.selectedAdmin.set(null)
+            this.isDetailVisible.set(false)
             this.loadAdmins()
           } else {
             this.messageService.add({
@@ -498,6 +504,7 @@ export class AdminsPage implements OnInit {
 
   onAdminCancelled() {
     this.selectedAdmin.set(null)
+    this.isDetailVisible.set(false)
   }
 
   confirmRevokeAdmin(admin: Admin) {
