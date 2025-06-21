@@ -372,6 +372,7 @@ export class UserService {
       .selectFrom('roles')
       .selectAll()
       .where('id', '=', user.role_id)
+      .where('status', '=', STATUS_TRUE)
       .executeTakeFirst()
 
     if (!role) {

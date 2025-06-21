@@ -189,37 +189,36 @@ interface RolesResponse {
           <tr>
             <td>{{ admin.id }}</td>
             <td>
-              <img
-                *ngIf="admin.avatar_url"
-                [src]="admin.avatar_url"
-                alt="avatar"
-                width="32"
-                height="32"
-                style="border-radius:50%;"
-              />
+              @if (admin.avatar_url) {
+                <img
+                  [src]="admin.avatar_url"
+                  alt="avatar"
+                  width="32"
+                  height="32"
+                  style="border-radius:50%;"
+                />
+              }
             </td>
             <td>{{ admin.user_name }}</td>
             <td>{{ admin.nick_name || '-' }}</td>
             <td>{{ admin.email || '-' }}</td>
             <td>{{ admin.phone || '-' }}</td>
             <td>
-              <span *ngIf="admin.role?.title">{{ admin.role.title }}</span>
-              <span *ngIf="!admin.role?.title" class="text-gray-500">-</span>
+              @if (admin.role?.title) {
+                <span>{{ admin.role.title }}</span>
+              } @else {
+                <span class="text-gray-500">-</span>
+              }
             </td>
             <td>
               <div class="admin-type">
-                <p-tag
-                  *ngIf="admin.is_super_admin === 1"
-                  value="超级管理员"
-                  severity="danger"
-                  styleClass="mr-1"
-                ></p-tag>
-                <p-tag
-                  *ngIf="admin.is_admin === 1 && admin.is_super_admin !== 1"
-                  value="管理员"
-                  severity="warning"
-                ></p-tag>
-                <span *ngIf="admin.is_admin !== 1 && admin.is_super_admin !== 1">普通用户</span>
+                @if (admin.is_super_admin === 1) {
+                  <p-tag value="超级管理员" severity="danger" styleClass="mr-1"></p-tag>
+                } @else if (admin.is_admin === 1 && admin.is_super_admin !== 1) {
+                  <p-tag value="管理员" severity="warning"></p-tag>
+                } @else {
+                  <span>普通用户</span>
+                }
               </div>
             </td>
             <td>
@@ -229,7 +228,9 @@ interface RolesResponse {
                   [value]="getStatusText(admin.status)"
                   styleClass="mr-1"
                 ></p-tag>
-                <p-tag *ngIf="admin.is_black === 1" value="黑名单" severity="danger"></p-tag>
+                @if (admin.is_black === 1) {
+                  <p-tag value="黑名单" severity="danger"></p-tag>
+                }
               </div>
             </td>
             <td>
@@ -248,14 +249,15 @@ interface RolesResponse {
                   tooltipPosition="top"
                   (click)="openEditDialog(admin)"
                 ></p-button>
-                <p-button
-                  *ngIf="isCurrentUserSuperAdmin() && admin.is_super_admin !== 1"
-                  icon="pi pi-user-minus"
-                  severity="secondary"
-                  pTooltip="取消管理员权限"
-                  tooltipPosition="top"
-                  (click)="confirmRevokeAdmin(admin)"
-                ></p-button>
+                @if (isCurrentUserSuperAdmin() && admin.is_super_admin !== 1) {
+                  <p-button
+                    icon="pi pi-user-minus"
+                    severity="secondary"
+                    pTooltip="取消管理员权限"
+                    tooltipPosition="top"
+                    (click)="confirmRevokeAdmin(admin)"
+                  ></p-button>
+                }
               </div>
             </td>
           </tr>
@@ -269,14 +271,15 @@ interface RolesResponse {
       </p-table>
 
       <!-- Admin Detail Component -->
-      <cs-admin-detail
-        *ngIf="isDetailVisible()"
-        [admin]="selectedAdmin()"
-        [roles]="roles()"
-        [mode]="selectedAdmin() ? 'edit' : 'create'"
-        (saved)="onAdminSaved($event)"
-        (cancelled)="onAdminCancelled()"
-      ></cs-admin-detail>
+      @if (isDetailVisible()) {
+        <cs-admin-detail
+          [admin]="selectedAdmin()"
+          [roles]="roles()"
+          [mode]="selectedAdmin() ? 'edit' : 'create'"
+          (saved)="onAdminSaved($event)"
+          (cancelled)="onAdminCancelled()"
+        ></cs-admin-detail>
+      }
     </div>
   `,
   styles: []
@@ -400,24 +403,26 @@ export class AdminsPage implements OnInit {
   }
 
   loadRoles() {
-    this.httpService.get<RolesResponse>('/api/admin/roles', { page: 1, pageSize: 1000 }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.roles.set(response.data.dataList)
-          // Update role options for search
-          this.roleOptions.set([
-            { label: '全部角色', value: null },
-            ...response.data.dataList.map((role) => ({
-              label: role.title,
-              value: role.id
-            }))
-          ])
+    this.httpService
+      .get<RolesResponse>('/api/admin/roles', { page: 1, pageSize: 1000, status: 10 })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.roles.set(response.data.dataList)
+            // Update role options for search
+            this.roleOptions.set([
+              { label: '全部角色', value: null },
+              ...response.data.dataList.map((role) => ({
+                label: role.title,
+                value: role.id
+              }))
+            ])
+          }
+        },
+        error: (error) => {
+          console.error('Error loading roles:', error)
         }
-      },
-      error: (error) => {
-        console.error('Error loading roles:', error)
-      }
-    })
+      })
   }
 
   getStatusSeverity(status: number): string {

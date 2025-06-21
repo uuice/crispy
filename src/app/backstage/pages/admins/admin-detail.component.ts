@@ -207,7 +207,7 @@ interface Role {
         <p-button
           label="关闭"
           icon="pi pi-times"
-          class="p-button-text"
+          severity="secondary"
           (click)="onCancel()"
         ></p-button>
         <p-button
