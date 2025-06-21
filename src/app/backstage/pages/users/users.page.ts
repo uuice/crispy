@@ -325,7 +325,7 @@ export class UsersPage implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: '错误',
-          detail: '删除用户失败'
+          detail: error.message || '删除用户失败'
         })
       }
     })

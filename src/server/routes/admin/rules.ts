@@ -1,26 +1,21 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { ruleService } from '../../services/ruleService'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { success, error, notFound, handleZodError, handleError } from '../../utils/response'
 
 // Get single rule
 export const getRule = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     const rule = await ruleService.getRuleById(id)
     success(res, rule)
   } catch (err: unknown) {
-    if (err instanceof Error && err.message === 'Rule not found') {
-      notFound(res, 'Rule not found')
-      return
-    }
-    console.error('Error fetching rule:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getRule')
   }
 }
 
@@ -43,8 +38,7 @@ export const getRules = async (req: Request, res: Response, next: NextFunction):
     const result = await ruleService.getRules({ page, pageSize }, filters)
     success(res, result)
   } catch (err: unknown) {
-    console.error('Error fetching rules:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getRules')
   }
 }
 
@@ -58,8 +52,7 @@ export const getRuleTree = async (
     const ruleTree = await ruleService.getRuleTree()
     success(res, ruleTree)
   } catch (err: unknown) {
-    console.error('Error fetching rule tree:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getRuleTree')
   }
 }
 
@@ -71,21 +64,9 @@ export const createRule = async (
 ): Promise<void> => {
   try {
     const rule = await ruleService.createRule(req.body)
-    success(res, rule, 'Rule created successfully')
+    success(res, rule, '规则创建成功')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    if (err instanceof Error) {
-      const message = err.message
-      if (message === 'Parent rule not found') {
-        error(res, 'Parent rule not found', 400)
-        return
-      }
-    }
-    console.error('Error creating rule:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'createRule')
   }
 }
 
@@ -98,34 +79,14 @@ export const updateRule = async (
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     const rule = await ruleService.updateRule(id, req.body)
-    success(res, rule, 'Rule updated successfully')
+    success(res, rule, '规则更新成功')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    if (err instanceof Error) {
-      const message = err.message
-      if (message === 'Rule not found') {
-        notFound(res, 'Rule not found')
-        return
-      }
-      if (message === 'Parent rule not found') {
-        error(res, 'Parent rule not found', 400)
-        return
-      }
-      if (message === 'Rule cannot be its own parent') {
-        error(res, 'Rule cannot be its own parent', 400)
-        return
-      }
-    }
-    console.error('Error updating rule:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'updateRule')
   }
 }
 
@@ -138,26 +99,14 @@ export const deleteRule = async (
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
-      error(res, 'Invalid ID', 400)
+      error(res, '无效的ID', 400)
       return
     }
 
     await ruleService.deleteRule(id)
-    success(res, null, 'Rule deleted successfully')
+    success(res, null, '规则删除成功')
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      const message = err.message
-      if (message === 'Rule not found') {
-        notFound(res, 'Rule not found')
-        return
-      }
-      if (message === 'Cannot delete rule with children') {
-        error(res, 'Cannot delete rule with children', 400)
-        return
-      }
-    }
-    console.error('Error deleting rule:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'deleteRule')
   }
 }
 

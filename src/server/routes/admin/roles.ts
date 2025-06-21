@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { success, error, notFound, handleError } from '../../utils/response'
 import {
   roleService,
   CreateRoleData,
@@ -39,8 +39,7 @@ export const getRole = async (req: Request, res: Response, next: NextFunction): 
 
     success(res, role)
   } catch (err: unknown) {
-    console.error('Error fetching role:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getRole')
   }
 }
 
@@ -68,8 +67,7 @@ export const getRoles = async (req: Request, res: Response, next: NextFunction):
     const result = await roleService.getRoles({ page, pageSize }, filters)
     success(res, result)
   } catch (err: unknown) {
-    console.error('Error fetching roles:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getRoles')
   }
 }
 
@@ -85,12 +83,7 @@ export const createRole = async (
     const newRole = await roleService.createRole(validatedData)
     success(res, newRole, 'Role created successfully')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    console.error('Error creating role:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'createRole')
   }
 }
 
@@ -118,12 +111,7 @@ export const updateRole = async (
 
     success(res, { id, ...validatedData }, 'Role updated successfully')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    console.error('Error updating role:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'updateRole')
   }
 }
 
@@ -140,17 +128,16 @@ export const deleteRole = async (
       return
     }
 
-    const deleted = await roleService.deleteRole(id)
+    const result = await roleService.deleteRole(id)
 
-    if (!deleted) {
-      notFound(res, 'Role not found')
-      return
+    if (result?.success) {
+      success(res, null, result.message)
+    } else {
+      // Use the message from the service if available, otherwise a generic one
+      notFound(res, result?.message || 'Role not found or could not be deleted')
     }
-
-    success(res, null, 'Role deleted successfully')
   } catch (err: unknown) {
-    console.error('Error deleting role:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'deleteRole')
   }
 }
 

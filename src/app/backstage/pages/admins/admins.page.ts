@@ -470,7 +470,7 @@ export class AdminsPage implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: '错误',
-            detail: '更新管理员失败'
+            detail: error.error.message || '更新管理员失败'
           })
         }
       })
@@ -500,7 +500,7 @@ export class AdminsPage implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: '错误',
-            detail: '创建管理员失败'
+            detail: error.error.message || '创建管理员失败'
           })
         }
       })
@@ -551,7 +551,7 @@ export class AdminsPage implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: '错误',
-          detail: '取消管理员权限失败'
+          detail: error.error.message || '取消管理员权限失败'
         })
       }
     })

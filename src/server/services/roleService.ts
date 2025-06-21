@@ -1,5 +1,6 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
+import { DELETE_STATUS } from '../config/const'
 
 // Data interfaces
 export interface CreateRoleData {
@@ -154,18 +155,37 @@ export class RoleService {
   /**
    * Delete role (logical delete)
    */
-  async deleteRole(id: number): Promise<boolean> {
+  async deleteRole(id: number): Promise<{ success: boolean; message?: string }> {
+    // Check if the role is currently assigned to any non-deleted users
+    const userCountResult = await db
+      .selectFrom('users')
+      .select((eb) => eb.fn.countAll().as('count'))
+      .where('role_id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+
+    console.log(userCountResult)
+
+    if (userCountResult && Number(userCountResult.count) > 0) {
+      throw new Error('该角色正在被使用，无法删除。')
+    }
+
     const result = await db
       .updateTable('roles')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    console.log(result)
+
+    if (result.numUpdatedRows > 0n) {
+      return { success: true, message: '角色删除成功。' }
+    }
+    return { success: false, message: '角色不存在或已被删除。' }
   }
 
   /**

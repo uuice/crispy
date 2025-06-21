@@ -1,24 +1,18 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
-import {
-  FormsModule,
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators
-} from '@angular/forms'
+import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
-import { DialogModule } from 'primeng/dialog'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
+import { RoleDetailComponent } from './role-detail.component'
 
 interface Role {
   id: number
@@ -33,6 +27,20 @@ interface Role {
   update_time: number
 }
 
+interface RolesResponse {
+  success: boolean
+  message: string
+  data: {
+    dataList: Role[]
+    pagination: {
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
+    }
+  }
+}
+
 @Component({
   selector: 'cs-roles',
   standalone: true,
@@ -40,498 +48,322 @@ interface Role {
     CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    DialogModule
+    RoleDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
-    <div class="roles-page">
+    <div class="page-container">
       <div class="page-header">
         <h1>角色管理</h1>
-        <button pButton label="创建角色" icon="pi pi-plus" (click)="openCreateDialog()"></button>
+        <p-button label="创建角色" icon="pi pi-plus" (click)="openCreateDialog()"></p-button>
       </div>
 
       <p-toast></p-toast>
       <p-confirmDialog></p-confirmDialog>
 
-      <div class="card">
-        <p-table
-          [value]="roles"
-          [paginator]="true"
-          [rows]="10"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条记录"
-          [rowsPerPageOptions]="[10, 25, 50]"
-          [loading]="loading"
-          [globalFilterFields]="['title', 'des']"
-          styleClass="p-datatable-sm"
-        >
-          <ng-template pTemplate="caption">
-            <div class="flex justify-content-between">
-              <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
-                <input
-                  pInputText
-                  type="text"
-                  (input)="applyFilterGlobal($event, 'contains')"
-                  placeholder="搜索角色..."
-                />
-              </span>
-              <div class="flex gap-2">
-                <p-dropdown
-                  [options]="statusOptions"
-                  [(ngModel)]="selectedStatus"
-                  placeholder="按状态筛选"
-                  (onChange)="filterByStatus($event)"
-                  styleClass="p-inputtext-sm"
-                ></p-dropdown>
-              </div>
-            </div>
-          </ng-template>
-
-          <ng-template pTemplate="header">
-            <tr>
-              <th>角色名称</th>
-              <th>描述</th>
-              <th>模块ID</th>
-              <th>排序</th>
-              <th>状态</th>
-              <th>创建时间</th>
-              <th>操作</th>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="body" let-role>
-            <tr>
-              <td>{{ role.title }}</td>
-              <td>{{ role.des || '-' }}</td>
-              <td>{{ role.module_id }}</td>
-              <td>{{ role.sort }}</td>
-              <td>
-                <p-tag
-                  [severity]="getStatusSeverity(role.status)"
-                  [value]="getStatusText(role.status)"
-                ></p-tag>
-              </td>
-              <td>{{ role.create_time | date: 'medium' }}</td>
-              <td>
-                <div class="action-buttons">
-                  <button
-                    pButton
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-text p-button-sm"
-                    pTooltip="编辑"
-                    tooltipPosition="top"
-                    (click)="openEditDialog(role)"
-                  ></button>
-                  <button
-                    pButton
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                    pTooltip="删除"
-                    tooltipPosition="top"
-                    (click)="confirmDelete(role)"
-                  ></button>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="7" class="text-center">暂无角色数据</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
-
-      <!-- Role Dialog -->
-      <p-dialog
-        [(visible)]="dialogVisible"
-        [header]="isEditMode ? '编辑角色' : '创建角色'"
-        [modal]="true"
-        [style]="{ width: '500px' }"
-        [draggable]="false"
-        [resizable]="false"
-        (onHide)="onDialogHide()"
+      <p-table
+        [value]="roles()"
+        [lazy]="true"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="totalRecords()"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条角色"
+        [rowsPerPageOptions]="[10, 20, 25, 50]"
+        [loading]="loading()"
+        (onLazyLoad)="loadRolesLazy($event)"
+        selectionMode="single"
+        scrollable="true"
+        (onPageChange)="onPageChange($event)"
       >
-        <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
-          <div class="field">
-            <label for="title" class="block text-900 font-medium mb-2">角色名称 *</label>
-            <input
-              id="title"
-              type="text"
-              pInputText
-              formControlName="title"
-              placeholder="请输入角色名称"
-              class="w-full"
-              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('title') }"
-            />
-            <small *ngIf="isFieldInvalid('title')" class="p-error">
-              {{ getErrorMessage('title') }}
-            </small>
+        <ng-template pTemplate="caption">
+          <div class="search-bar">
+            <div class="search-controls">
+              <label for="role-search-keyword" class="sr-only">角色名称</label>
+              <input
+                id="role-search-keyword"
+                pInputText
+                type="text"
+                [(ngModel)]="titleValue"
+                placeholder="角色名称"
+              />
+              <label for="role-status-select" class="sr-only">状态</label>
+              <p-select
+                id="role-status-select"
+                [options]="statusOptions()"
+                [(ngModel)]="statusValue"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="状态"
+              />
+            </div>
+            <div class="search-actions">
+              <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
+              <p-button
+                label="搜索"
+                icon="pi pi-search"
+                (click)="onSearch()"
+                [loading]="loading()"
+              ></p-button>
+            </div>
           </div>
-
-          <div class="field">
-            <label for="des" class="block text-900 font-medium mb-2">描述</label>
-            <textarea
-              id="des"
-              pInputTextarea
-              formControlName="des"
-              placeholder="请输入角色描述"
-              [rows]="3"
-              class="w-full"
-            ></textarea>
-          </div>
-
-          <div class="field">
-            <label for="module_id" class="block text-900 font-medium mb-2">模块ID</label>
-            <input
-              id="module_id"
-              type="number"
-              pInputText
-              formControlName="module_id"
-              placeholder="请输入模块ID"
-              class="w-full"
-            />
-          </div>
-
-          <div class="field">
-            <label for="sort" class="block text-900 font-medium mb-2">排序</label>
-            <input
-              id="sort"
-              type="number"
-              pInputText
-              formControlName="sort"
-              placeholder="请输入排序值"
-              class="w-full"
-            />
-          </div>
-
-          <div class="field">
-            <label for="status" class="block text-900 font-medium mb-2">状态</label>
-            <p-dropdown
-              id="status"
-              [options]="statusOptions"
-              formControlName="status"
-              placeholder="请选择状态"
-              class="w-full"
-            ></p-dropdown>
-          </div>
-
-          <div class="field">
-            <label for="type_id" class="block text-900 font-medium mb-2">类型ID</label>
-            <input
-              id="type_id"
-              type="number"
-              pInputText
-              formControlName="type_id"
-              placeholder="请输入类型ID"
-              class="w-full"
-            />
-          </div>
-        </form>
-
-        <ng-template pTemplate="footer">
-          <button
-            pButton
-            label="取消"
-            icon="pi pi-times"
-            class="p-button-text"
-            (click)="closeDialog()"
-          ></button>
-          <button
-            pButton
-            label="保存"
-            icon="pi pi-check"
-            [loading]="submitting"
-            [disabled]="roleForm.invalid"
-            (click)="onSubmit()"
-          ></button>
         </ng-template>
-      </p-dialog>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width: 6rem;">ID</th>
+            <th style="min-width: 10rem;">角色名称</th>
+            <th style="min-width: 15rem;">描述</th>
+            <th style="min-width: 6rem;">排序</th>
+            <th style="min-width: 8rem;">状态</th>
+            <th style="min-width: 14rem;">创建时间</th>
+            <th style="min-width: 8rem;" alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-role>
+          <tr>
+            <td>{{ role.id }}</td>
+            <td>{{ role.title }}</td>
+            <td>{{ role.des || '-' }}</td>
+            <td>{{ role.sort }}</td>
+            <td>
+              <p-tag
+                [severity]="getStatusSeverity(role.status)"
+                [value]="getStatusText(role.status)"
+              ></p-tag>
+            </td>
+            <td>{{ role.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td alignFrozen="right" pFrozenColumn [frozen]="true">
+              <div class="action-buttons">
+                <p-button
+                  icon="pi pi-pencil"
+                  pTooltip="编辑"
+                  tooltipPosition="top"
+                  (click)="openEditDialog(role)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="删除"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(role)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center">没有找到角色。</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      @if (isDetailVisible()) {
+        <cs-role-detail
+          [role]="selectedRole()"
+          [mode]="selectedRole() ? 'edit' : 'create'"
+          (saved)="onRoleSaved($event)"
+          (cancelled)="onRoleCancelled()"
+        ></cs-role-detail>
+      }
     </div>
   `,
   styles: [
     `
-      .roles-page {
+      .page-container {
         padding: 1rem;
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-
-          h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-          }
-        }
-
-        .card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          padding: 1rem;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .field {
-          margin-bottom: 1rem;
-        }
-
-        ::ng-deep {
-          .p-datatable {
-            .p-datatable-header {
-              background: transparent;
-              border: none;
-              padding: 0 0 1rem 0;
-            }
-
-            .p-datatable-thead > tr > th {
-              background: #f8f9fa;
-              font-weight: 600;
-            }
-
-            .p-datatable-tbody > tr > td {
-              padding: 0.75rem;
-            }
-          }
-        }
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .page-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .search-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .search-controls {
+        display: flex;
+        gap: 1rem;
+      }
+      .search-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
       }
     `
   ]
 })
 export class RolesPage implements OnInit {
-  roles: Role[] = []
-  loading = false
-  submitting = false
-  selectedStatus: number | null = null
-  dialogVisible = false
-  isEditMode = false
-  currentRoleId: number | null = null
+  roles: WritableSignal<Role[]> = signal([])
+  loading = signal(false)
+  title = signal('')
+  selectedStatus = signal<number | null>(null)
+  selectedRole = signal<Role | null>(null)
+  currentPage = signal(1)
+  pageSize = signal(20)
+  totalRecords = signal(0)
+  isDetailVisible = signal(false)
 
-  roleForm: FormGroup
-
-  statusOptions = [
+  statusOptions = signal([
+    { label: '全部状态', value: null },
     { label: '启用', value: 10 },
     { label: '禁用', value: 0 }
-  ]
+  ])
 
-  constructor(
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService,
-    private httpService: HttpService,
-    private fb: FormBuilder
-  ) {
-    this.roleForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(2)]],
-      des: [''],
-      module_id: [0],
-      rule_ids: [''],
-      sort: [0],
-      status: [10],
-      type_id: [0]
-    })
+  get titleValue() {
+    return this.title()
   }
+  set titleValue(val: string) {
+    this.title.set(val)
+  }
+
+  get statusValue() {
+    return this.selectedStatus()
+  }
+  set statusValue(val: number | null) {
+    this.selectedStatus.set(val)
+  }
+
+  private confirmationService = inject(ConfirmationService)
+  private messageService = inject(MessageService)
+  private httpService = inject(HttpService)
+
+  constructor() {}
 
   ngOnInit() {
     this.loadRoles()
   }
 
+  onSearch() {
+    this.currentPage.set(1)
+    this.loadRoles()
+  }
+
+  loadRolesLazy(event: any) {
+    this.currentPage.set(event.first / event.rows + 1)
+    this.pageSize.set(event.rows)
+    this.loadRoles()
+  }
+
   loadRoles() {
-    this.loading = true
-    this.httpService.get<any>('/api/admin/roles').subscribe({
+    this.loading.set(true)
+    const params: any = {
+      page: this.currentPage(),
+      pageSize: this.pageSize()
+    }
+
+    if (this.title()) {
+      params.title = this.title()
+    }
+    if (this.selectedStatus() !== null) {
+      params.status = this.selectedStatus()
+    }
+
+    this.httpService.get<RolesResponse>('/api/admin/roles', params).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.roles = response.data.data || []
+        if (response.success && response.data) {
+          this.roles.set(response.data.dataList)
+          this.totalRecords.set(response.data.pagination.total)
         } else {
           this.messageService.add({
             severity: 'error',
             summary: '错误',
-            detail: response.message || '加载角色列表失败'
+            detail: response.message || '获取角色列表失败'
           })
         }
+        this.loading.set(false)
       },
       error: (error) => {
-        console.error('Failed to load roles:', error)
+        console.error('Error loading roles:', error)
         this.messageService.add({
           severity: 'error',
           summary: '错误',
-          detail: '加载角色列表失败'
+          detail: '获取角色列表失败'
         })
-      },
-      complete: () => {
-        this.loading = false
+        this.loading.set(false)
       }
     })
   }
 
   getStatusSeverity(status: number): string {
-    return status === 10 ? 'success' : 'warning'
+    return status === 10 ? 'success' : 'danger'
   }
 
   getStatusText(status: number): string {
     return status === 10 ? '启用' : '禁用'
   }
 
-  applyFilterGlobal(event: Event, matchMode: string) {
-    const target = event.target as HTMLInputElement
-    const value = target.value
-    // Implement global filter logic here
-    console.log('Filter by:', value)
-  }
-
-  filterByStatus(event: any) {
-    this.selectedStatus = event.value
-    // Implement status filter logic here
-    console.log('Filter by status:', this.selectedStatus)
-  }
-
   openCreateDialog() {
-    this.isEditMode = false
-    this.currentRoleId = null
-    this.roleForm.reset({
-      title: '',
-      des: '',
-      module_id: 0,
-      rule_ids: '',
-      sort: 0,
-      status: 10,
-      type_id: 0
-    })
-    this.dialogVisible = true
+    this.selectedRole.set(null)
+    this.isDetailVisible.set(true)
   }
 
   openEditDialog(role: Role) {
-    this.isEditMode = true
-    this.currentRoleId = role.id
-    this.roleForm.patchValue({
-      title: role.title,
-      des: role.des || '',
-      module_id: role.module_id,
-      rule_ids: role.rule_ids,
-      sort: role.sort,
-      status: role.status,
-      type_id: role.type_id
-    })
-    this.dialogVisible = true
+    this.selectedRole.set({ ...role })
+    this.isDetailVisible.set(true)
   }
 
-  closeDialog() {
-    this.dialogVisible = false
-    this.roleForm.reset()
-  }
+  onRoleSaved(roleData: Partial<Role>) {
+    const apiCall = roleData.id
+      ? this.httpService.put<any>(`/api/admin/roles/${roleData.id}`, roleData)
+      : this.httpService.post<any>('/api/admin/roles', roleData)
 
-  onDialogHide() {
-    this.closeDialog()
-  }
+    const action = roleData.id ? '更新' : '创建'
 
-  isFieldInvalid(field: string): boolean {
-    const formControl = this.roleForm.get(field)
-    return formControl ? formControl.invalid && formControl.dirty : false
-  }
-
-  getErrorMessage(field: string): string {
-    const formControl = this.roleForm.get(field)
-    if (!formControl) return ''
-
-    if (formControl.hasError('required')) {
-      return '此字段为必填项'
-    }
-    if (formControl.hasError('minlength')) {
-      return `最少需要 ${formControl.errors?.['minlength'].requiredLength} 个字符`
-    }
-    return ''
-  }
-
-  onSubmit() {
-    if (this.roleForm.valid) {
-      this.submitting = true
-      const formData = this.roleForm.value
-
-      if (this.isEditMode && this.currentRoleId) {
-        // Update role
-        this.httpService.put<any>(`/api/admin/roles/${this.currentRoleId}`, formData).subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: '成功',
-                detail: '角色更新成功'
-              })
-              this.closeDialog()
-              this.loadRoles()
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: '错误',
-                detail: response.message || '更新角色失败'
-              })
-            }
-          },
-          error: (error) => {
-            console.error('Failed to update role:', error)
-            this.messageService.add({
-              severity: 'error',
-              summary: '错误',
-              detail: '更新角色失败'
-            })
-          },
-          complete: () => {
-            this.submitting = false
-          }
-        })
-      } else {
-        // Create role
-        this.httpService.post<any>('/api/admin/roles', formData).subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: '成功',
-                detail: '角色创建成功'
-              })
-              this.closeDialog()
-              this.loadRoles()
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: '错误',
-                detail: response.message || '创建角色失败'
-              })
-            }
-          },
-          error: (error) => {
-            console.error('Failed to create role:', error)
-            this.messageService.add({
-              severity: 'error',
-              summary: '错误',
-              detail: '创建角色失败'
-            })
-          },
-          complete: () => {
-            this.submitting = false
-          }
+    apiCall.subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: '成功',
+            detail: `角色${action}成功`
+          })
+          this.isDetailVisible.set(false)
+          this.loadRoles()
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || `${action}角色失败`
+          })
+        }
+      },
+      error: (error) => {
+        console.error(`Failed to ${action.toLowerCase()} role:`, error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: error.error.message || `${action}角色失败`
         })
       }
-    } else {
-      this.roleForm.markAllAsTouched()
-    }
+    })
+  }
+
+  onRoleCancelled() {
+    this.isDetailVisible.set(false)
   }
 
   confirmDelete(role: Role) {
@@ -568,9 +400,22 @@ export class RolesPage implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: '错误',
-          detail: '删除角色失败'
+          detail: error.error.message || '删除角色失败'
         })
       }
     })
+  }
+
+  resetFilters() {
+    this.title.set('')
+    this.selectedStatus.set(null)
+    this.currentPage.set(1)
+    this.loadRoles()
+  }
+
+  onPageChange(event: any) {
+    this.currentPage.set(event.page + 1)
+    this.pageSize.set(event.rows)
+    this.loadRoles()
   }
 }
