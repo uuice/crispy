@@ -53,7 +53,7 @@ export const error = (res: Response, message: string, statusCode = 500, error?: 
  * Send validation error response with beautiful formatting
  */
 export const validationError = (res: Response, zodErrors: z.ZodIssue[]): void => {
-  const details: ValidationErrorDetail[] = zodErrors.map(err => ({
+  const details: ValidationErrorDetail[] = zodErrors.map((err) => ({
     field: err.path.join('.'),
     message: err.message,
     code: err.code,
@@ -62,12 +62,12 @@ export const validationError = (res: Response, zodErrors: z.ZodIssue[]): void =>
 
   const response: ValidationErrorResponse = {
     success: false,
-    message: details.map(d => d.message).join('; '),
+    message: details.map((d) => d.message).join('; '),
     error: {
       type: 'validation',
       details,
       summary: `发生 ${details.length} 个验证错误`
-    },
+    }
   }
 
   res.status(400).json(response)
