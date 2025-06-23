@@ -17,34 +17,28 @@ import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 
-interface Rule {
+interface Category {
   id: number
   title: string
   alias: string
-  condition?: string
   des?: string
-  icon?: string
-  module_id: number
   parent_id: number
   sort: number
   status: number
-  type_id: number
   create_time: number
   update_time: number
 }
 
-interface RuleNode {
+interface CategoryNode {
   id: number
   title: string
   alias: string
-  children?: RuleNode[]
-  status?: number
-  sort?: number
-  condition?: string
+  des?: string
+  children?: CategoryNode[]
 }
 
 @Component({
-  selector: 'cs-rule-detail',
+  selector: 'cs-category-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -72,17 +66,17 @@ interface RuleNode {
       [resizable]="false"
       (onHide)="onDialogHide()"
     >
-      <form [formGroup]="ruleForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
         <div class="grid">
           <div class="col-12">
             <div class="field">
-              <label for="title" class="block text-900 font-medium mb-2">规则名称 *</label>
+              <label for="title" class="block text-900 font-medium mb-2">分类名称 *</label>
               <input
                 id="title"
                 type="text"
                 pInputText
                 formControlName="title"
-                placeholder="请输入规则名称"
+                placeholder="请输入分类名称"
                 class="w-full"
                 [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('title') }"
               />
@@ -104,7 +98,7 @@ interface RuleNode {
                 type="text"
                 pInputText
                 formControlName="alias"
-                placeholder="请输入规则别名"
+                placeholder="请输入分类别名"
                 class="w-full"
                 [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('alias') }"
               />
@@ -125,51 +119,23 @@ interface RuleNode {
                 id="des"
                 pInputTextarea
                 formControlName="des"
-                placeholder="请输入规则描述"
+                placeholder="请输入分类描述"
                 [rows]="3"
                 class="w-full"
               ></textarea>
             </div>
           </div>
 
-          <div class="col-12">
-            <div class="field">
-              <label for="condition" class="block text-900 font-medium mb-2">条件</label>
-              <input
-                id="condition"
-                type="text"
-                pInputText
-                formControlName="condition"
-                placeholder="请输入规则条件"
-                class="w-full"
-              />
-            </div>
-          </div>
-
           <div class="col-6">
             <div class="field">
-              <label for="icon" class="block text-900 font-medium mb-2">图标</label>
-              <input
-                id="icon"
-                type="text"
-                pInputText
-                formControlName="icon"
-                placeholder="请输入图标类名"
-                class="w-full"
-              />
-            </div>
-          </div>
-
-          <div class="col-6">
-            <div class="field">
-              <label for="parent_id" class="block text-900 font-medium mb-2">父级规则</label>
+              <label for="parent_id" class="block text-900 font-medium mb-2">父级分类</label>
               <p-select
                 id="parent_id"
                 [options]="parentOptions()"
                 formControlName="parent_id"
                 optionLabel="title"
                 optionValue="id"
-                placeholder="请选择父级规则"
+                placeholder="请选择父级分类"
                 class="w-full"
                 [showClear]="true"
                 appendTo="body"
@@ -220,7 +186,7 @@ interface RuleNode {
           label="保存"
           icon="pi pi-check"
           [loading]="submitting()"
-          [disabled]="ruleForm.invalid"
+          [disabled]="categoryForm.invalid"
           (click)="onSubmit()"
         ></button>
       </ng-template>
@@ -234,16 +200,16 @@ interface RuleNode {
     `
   ]
 })
-export class RuleDetailComponent implements OnInit, OnChanges {
-  @Input() rule: Rule | null = null
+export class CategoryDetailComponent implements OnInit, OnChanges {
+  @Input() category: Category | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true)
-  ruleForm: FormGroup
+  categoryForm: FormGroup
   submitting = signal(false)
-  parentOptions = signal<RuleNode[]>([])
+  parentOptions = signal<CategoryNode[]>([])
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -255,12 +221,10 @@ export class RuleDetailComponent implements OnInit, OnChanges {
     private httpService: HttpService,
     private fb: FormBuilder
   ) {
-    this.ruleForm = this.fb.group({
+    this.categoryForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       alias: ['', [Validators.required, Validators.minLength(2)]],
-      condition: [''],
       des: [''],
-      icon: [''],
       parent_id: [0],
       sort: [0],
       status: [10]
@@ -270,12 +234,10 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   ngOnInit() {
     setTimeout(() => {
       this.loadParentOptions()
-      this.ruleForm.reset({
+      this.categoryForm.reset({
         title: '',
         alias: '',
-        condition: '',
         des: '',
-        icon: '',
         parent_id: 0,
         sort: 0,
         status: 10
@@ -291,8 +253,8 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   }
 
   initializeForm() {
-    if (this.rule && this.mode === 'edit') {
-      this.loadRuleData()
+    if (this.category && this.mode === 'edit') {
+      this.loadCategoryData()
     } else if (this.mode === 'create') {
       this.resetForm()
     }
@@ -304,12 +266,12 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   }
 
   get dialogTitle(): string {
-    if (this.mode === 'create') return '创建规则'
-    return '编辑规则'
+    if (this.mode === 'create') return '创建分类'
+    return '编辑分类'
   }
 
   loadParentOptions() {
-    this.httpService.get<any>('/api/admin/rules/tree').subscribe({
+    this.httpService.get<any>('/api/admin/categories/tree').subscribe({
       next: (response) => {
         if (response.success) {
           this.parentOptions.set(this.flattenTreeData(response.data || []))
@@ -321,8 +283,8 @@ export class RuleDetailComponent implements OnInit, OnChanges {
     })
   }
 
-  flattenTreeData(nodes: RuleNode[]): RuleNode[] {
-    let result: RuleNode[] = []
+  flattenTreeData(nodes: CategoryNode[]): CategoryNode[] {
+    let result: CategoryNode[] = []
     nodes.forEach((node) => {
       result.push(node)
       if (node.children && node.children.length > 0) {
@@ -332,28 +294,24 @@ export class RuleDetailComponent implements OnInit, OnChanges {
     return result
   }
 
-  loadRuleData() {
-    if (this.rule) {
-      this.ruleForm.patchValue({
-        title: this.rule.title,
-        alias: this.rule.alias,
-        condition: this.rule.condition || '',
-        des: this.rule.des || '',
-        icon: this.rule.icon || '',
-        parent_id: this.rule.parent_id,
-        sort: this.rule.sort,
-        status: this.rule.status
+  loadCategoryData() {
+    if (this.category) {
+      this.categoryForm.patchValue({
+        title: this.category.title,
+        alias: this.category.alias,
+        des: this.category.des || '',
+        parent_id: this.category.parent_id,
+        sort: this.category.sort,
+        status: this.category.status
       })
     }
   }
 
   resetForm() {
-    this.ruleForm.reset({
+    this.categoryForm.reset({
       title: '',
       alias: '',
-      condition: '',
       des: '',
-      icon: '',
       parent_id: 0,
       sort: 0,
       status: 10
@@ -370,12 +328,12 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   }
 
   isFieldInvalid(field: string): boolean {
-    const formControl = this.ruleForm.get(field)
+    const formControl = this.categoryForm.get(field)
     return formControl ? formControl.invalid && (formControl.dirty || formControl.touched) : false
   }
 
   getErrorMessage(field: string): string {
-    const formControl = this.ruleForm.get(field)
+    const formControl = this.categoryForm.get(field)
     if (!formControl) return ''
 
     if (formControl.hasError('required')) {
@@ -388,35 +346,35 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    if (this.ruleForm.valid) {
+    if (this.categoryForm.valid) {
       this.submitting.set(true)
-      const formData = this.ruleForm.value
+      const formData = this.categoryForm.value
 
-      if (this.mode === 'edit' && this.rule) {
-        // Update rule
-        this.httpService.put<any>(`/api/admin/rules/${this.rule.id}`, formData).subscribe({
+      if (this.mode === 'edit' && this.category) {
+        // Update category
+        this.httpService.put<any>(`/api/admin/categories/${this.category.id}`, formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: '成功',
-                detail: '规则更新成功'
+                detail: '分类更新成功'
               })
               this.saved.emit()
             } else {
               this.messageService.add({
                 severity: 'error',
                 summary: '错误',
-                detail: response.message || '更新规则失败'
+                detail: response.message || '更新分类失败'
               })
             }
           },
           error: (error) => {
-            console.error('Failed to update rule:', error)
+            console.error('Failed to update category:', error)
             this.messageService.add({
               severity: 'error',
               summary: '错误',
-              detail: error.error.message || '更新规则失败'
+              detail: error.error.message || '更新分类失败'
             })
           },
           complete: () => {
@@ -424,30 +382,30 @@ export class RuleDetailComponent implements OnInit, OnChanges {
           }
         })
       } else {
-        // Create rule
-        this.httpService.post<any>('/api/admin/rules', formData).subscribe({
+        // Create category
+        this.httpService.post<any>('/api/admin/categories', formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: '成功',
-                detail: '规则创建成功'
+                detail: '分类创建成功'
               })
               this.saved.emit()
             } else {
               this.messageService.add({
                 severity: 'error',
                 summary: '错误',
-                detail: response.message || '创建规则失败'
+                detail: response.message || '创建分类失败'
               })
             }
           },
           error: (error) => {
-            console.error('Failed to create rule:', error)
+            console.error('Failed to create category:', error)
             this.messageService.add({
               severity: 'error',
               summary: '错误',
-              detail: error.error.message || '创建规则失败'
+              detail: error.error.message || '创建分类失败'
             })
           },
           complete: () => {
@@ -456,7 +414,7 @@ export class RuleDetailComponent implements OnInit, OnChanges {
         })
       }
     } else {
-      this.ruleForm.markAllAsTouched()
+      this.categoryForm.markAllAsTouched()
     }
   }
 }

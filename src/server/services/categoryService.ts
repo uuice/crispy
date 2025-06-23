@@ -1,10 +1,11 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
+import { DELETE_STATUS } from '../config/const'
 
 export interface CreateCategoryData {
   title: string
-  alias?: string
-  des: string // 备注描述，必填
+  alias: string
+  des?: string
   parent_id?: number
   sort?: number
   status?: number
@@ -106,36 +107,65 @@ export class CategoryService {
   }
 
   /**
-   * Get category tree structure
+   * Recursively builds a subtree for a given parent ID.
    */
-  async getCategoryTree(): Promise<CategoryNode[]> {
-    const categories = await db
+  private async buildSubTree(parentId: number): Promise<CategoryNode[]> {
+    const children = await db
       .selectFrom('categories')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('parent_id', '=', parentId)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    // Build tree structure
-    const categoryMap = new Map()
-    categories.forEach((cat) => {
-      categoryMap.set(cat.id, { ...cat, children: [] })
-    })
-    const tree: CategoryNode[] = []
-
-    for (const category of categoryMap.values()) {
-      if (category.parent_id) {
-        const parent = categoryMap.get(category.parent_id)
-        if (parent) {
-          parent.children.push(category)
-        }
-      } else {
-        tree.push(category)
-      }
+    if (children.length === 0) {
+      return []
     }
 
-    return tree
+    return Promise.all(
+      children.map(async (child) => ({
+        ...(child as any),
+        children: await this.buildSubTree(child.id)
+      }))
+    )
+  }
+
+  /**
+   * Get category tree structure.
+   * If rootId or rootAlias is provided, it returns the subtree starting from that category.
+   * Otherwise, it returns the full category tree.
+   */
+  async getCategoryTree(options?: {
+    rootId?: number
+    rootAlias?: string
+  }): Promise<CategoryNode[]> {
+    // If a root is specified, build the subtree from there
+    if (options?.rootId || options?.rootAlias) {
+      let rootCategory
+      if (options.rootId) {
+        rootCategory = await this.getCategoryById(options.rootId)
+      } else if (options.rootAlias) {
+        rootCategory = await this.getCategoryByAlias(options.rootAlias)
+      }
+
+      if (!rootCategory) {
+        return [] // Root not found, return empty tree
+      }
+
+      // Recursively fetch children for the root
+      const children = await this.buildSubTree(rootCategory.id)
+
+      return [
+        {
+          ...(rootCategory as any),
+          children
+        }
+      ]
+    }
+
+    // Recursively build the full tree starting from the root (parent_id = 0)
+    return this.buildSubTree(0)
   }
 
   /**
@@ -146,7 +176,7 @@ export class CategoryService {
       .selectFrom('categories')
       .select('id')
       .where('id', '=', parentId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
   }
 
@@ -167,7 +197,7 @@ export class CategoryService {
         .selectFrom('categories')
         .select('parent_id')
         .where('id', '=', currentParentId)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
       currentParentId = currentParent?.parent_id || 0
     }
@@ -183,7 +213,7 @@ export class CategoryService {
       .selectFrom('categories')
       .select('id')
       .where('parent_id', '=', categoryId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
   }
 
@@ -195,7 +225,7 @@ export class CategoryService {
     if (data.parent_id) {
       const parent = await this.verifyParentExists(data.parent_id)
       if (!parent) {
-        throw new Error('Parent category not found')
+        throw new Error('父级分类不存在')
       }
     }
 
@@ -203,13 +233,13 @@ export class CategoryService {
     const newCategory = {
       title: data.title,
       alias: data.alias || '',
-      des: data.des,
+      des: data.des || '',
       parent_id: data.parent_id || 0,
       sort: data.sort || 0,
       status: data.status || 10,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
     const result = await db.insertInto('categories').values(newCategory).executeTakeFirst()
@@ -227,18 +257,18 @@ export class CategoryService {
     // If parent_id is being updated, verify that the new parent exists and is not a descendant
     if (data.parent_id !== undefined) {
       if (data.parent_id === id) {
-        throw new Error('Category cannot be its own parent')
+        throw new Error('分类不能是自己的父级')
       }
 
       const parent = await this.verifyParentExists(data.parent_id)
       if (!parent) {
-        throw new Error('Parent category not found')
+        throw new Error('父级分类不存在')
       }
 
       // Check for circular reference
       const hasCircularReference = await this.checkCircularReference(id, data.parent_id)
       if (hasCircularReference) {
-        throw new Error('Circular reference detected')
+        throw new Error('循环引用检测到')
       }
     }
 
@@ -251,7 +281,7 @@ export class CategoryService {
       .updateTable('categories')
       .set(updateData)
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return {
@@ -277,7 +307,7 @@ export class CategoryService {
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return {
@@ -294,7 +324,7 @@ export class CategoryService {
       .selectFrom('categories')
       .selectAll()
       .where('parent_id', '=', parentId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -309,7 +339,7 @@ export class CategoryService {
       .selectFrom('categories')
       .selectAll()
       .where('parent_id', '=', 0)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -324,7 +354,7 @@ export class CategoryService {
       .selectFrom('categories')
       .selectAll()
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
   }
 
@@ -336,7 +366,7 @@ export class CategoryService {
       .selectFrom('categories')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)

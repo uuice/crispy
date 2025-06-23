@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { success, error, validationError, notFound, handleError } from '../../utils/response'
 import { categoryService } from '../../services/categoryService'
 
 // Validation schemas
 const createCategorySchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().optional(),
-  des: z.string(), // 备注描述，必填
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  des: z.string().optional(), // 备注描述，必填
   parent_id: z.number().optional(),
   sort: z.number().default(0),
   status: z.number().default(10)
@@ -37,8 +37,7 @@ export const getCategory = async (
 
     success(res, category)
   } catch (err: unknown) {
-    console.error('Error fetching category:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getCategory')
   }
 }
 
@@ -64,8 +63,7 @@ export const getCategories = async (
 
     success(res, result)
   } catch (err: unknown) {
-    console.error('Error fetching categories:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getCategories')
   }
 }
 
@@ -76,12 +74,16 @@ export const getCategoryTree = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const tree = await categoryService.getCategoryTree()
+    const { id, alias } = req.query
+    const options = {
+      rootId: id ? parseInt(id as string) : undefined,
+      rootAlias: alias as string | undefined
+    }
+    const tree = await categoryService.getCategoryTree(options)
 
     success(res, tree)
   } catch (err: unknown) {
-    console.error('Error fetching category tree:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'getCategoryTree')
   }
 }
 
@@ -98,16 +100,7 @@ export const createCategory = async (
 
     success(res, result, 'Category created successfully')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    if (err instanceof Error && err.message === 'Parent category not found') {
-      error(res, 'Parent category not found', 400)
-      return
-    }
-    console.error('Error creating category:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'createCategory')
   }
 }
 
@@ -135,26 +128,7 @@ export const updateCategory = async (
 
     success(res, { id, ...validatedData }, 'Category updated successfully')
   } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
-      return
-    }
-    if (err instanceof Error) {
-      if (err.message === 'Parent category not found') {
-        error(res, 'Parent category not found', 400)
-        return
-      }
-      if (err.message === 'Category cannot be its own parent') {
-        error(res, 'Category cannot be its own parent', 400)
-        return
-      }
-      if (err.message === 'Circular reference detected') {
-        error(res, 'Circular reference detected', 400)
-        return
-      }
-    }
-    console.error('Error updating category:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'updateCategory')
   }
 }
 
@@ -180,12 +154,7 @@ export const deleteCategory = async (
 
     success(res, null, 'Category deleted successfully')
   } catch (err: unknown) {
-    if (err instanceof Error && err.message === 'Cannot delete category with children') {
-      error(res, 'Cannot delete category with children', 400)
-      return
-    }
-    console.error('Error deleting category:', err)
-    error(res, 'Internal server error')
+    handleError(res, err, 'deleteCategory')
   }
 }
 

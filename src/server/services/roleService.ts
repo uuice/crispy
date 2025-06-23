@@ -1,6 +1,6 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
-import { DELETE_STATUS } from '../config/const'
+import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 
 // Data interfaces
 export interface CreateRoleData {
@@ -122,7 +122,8 @@ export class RoleService {
       ...data,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      status: PUBLISH_STATUS.PUBLISHED,
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
     const result = await db.insertInto('roles').values(newRole).executeTakeFirst()

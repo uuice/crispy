@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { FormsModule } from '@angular/forms'
@@ -61,8 +61,8 @@ interface RuleNode {
       <p-confirmDialog></p-confirmDialog>
 
       <p-treeTable
-        [value]="rules"
-        [loading]="loading"
+        [value]="rules()"
+        [loading]="loading()"
         styleClass="p-treetable-sm"
         [scrollable]="true"
         scrollHeight="600px"
@@ -90,7 +90,7 @@ interface RuleNode {
             <th>排序</th>
             <th>状态</th>
             <th>创建时间</th>
-            <th>操作</th>
+            <th alignFrozen="right" pFrozenColumn>操作</th>
           </tr>
         </ng-template>
 
@@ -117,7 +117,7 @@ interface RuleNode {
               ></p-tag>
             </td>
             <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-            <td>
+            <td alignFrozen="right" pFrozenColumn>
               <div class="action-buttons">
                 <p-button
                   icon="pi pi-pencil"
@@ -144,13 +144,15 @@ interface RuleNode {
         </ng-template>
       </p-treeTable>
 
-      <!-- Rule Detail Dialog -->
-      <cs-rule-detail
-        [(visible)]="dialogVisible"
-        [rule]="currentRule"
-        [isEditMode]="isEditMode"
-        (saved)="onRuleSaved()"
-      ></cs-rule-detail>
+      <!-- Rule Detail Component -->
+      @if (isDetailVisible()) {
+        <cs-rule-detail
+          [rule]="selectedRule()"
+          [mode]="selectedRule() ? 'edit' : 'create'"
+          (saved)="onRuleSaved()"
+          (cancelled)="onRuleCancelled()"
+        ></cs-rule-detail>
+      }
     </div>
   `,
   styles: [
@@ -186,11 +188,10 @@ interface RuleNode {
   ]
 })
 export class RulesPage implements OnInit {
-  rules: TreeNode[] = []
-  loading = false
-  dialogVisible = false
-  isEditMode = false
-  currentRule: RuleNode | null = null
+  rules = signal<TreeNode[]>([])
+  loading = signal(false)
+  selectedRule = signal<RuleNode | null>(null)
+  isDetailVisible = signal(false)
 
   constructor(
     private confirmationService: ConfirmationService,
@@ -199,15 +200,18 @@ export class RulesPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadRules()
+    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      this.loadRules()
+    })
   }
 
   loadRules() {
-    this.loading = true
+    this.loading.set(true)
     this.httpService.get<any>('/api/admin/rules/tree').subscribe({
       next: (response) => {
         if (response.success) {
-          this.rules = this.convertToTreeNodes(response.data || [])
+          this.rules.set(this.convertToTreeNodes(response.data || []))
         } else {
           this.messageService.add({
             severity: 'error',
@@ -225,7 +229,7 @@ export class RulesPage implements OnInit {
         })
       },
       complete: () => {
-        this.loading = false
+        this.loading.set(false)
       }
     })
   }
@@ -247,19 +251,24 @@ export class RulesPage implements OnInit {
   }
 
   openCreateDialog() {
-    this.isEditMode = false
-    this.currentRule = null
-    this.dialogVisible = true
+    this.selectedRule.set(null)
+    this.isDetailVisible.set(true)
   }
 
   openEditDialog(rule: RuleNode) {
-    this.isEditMode = true
-    this.currentRule = rule
-    this.dialogVisible = true
+    this.selectedRule.set(rule)
+    this.isDetailVisible.set(true)
   }
 
   onRuleSaved() {
     this.loadRules()
+    this.selectedRule.set(null)
+    this.isDetailVisible.set(false)
+  }
+
+  onRuleCancelled() {
+    this.selectedRule.set(null)
+    this.isDetailVisible.set(false)
   }
 
   confirmDelete(rule: RuleNode) {
