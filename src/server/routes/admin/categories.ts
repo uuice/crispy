@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound, handleError } from '../../utils/response'
 import { categoryService } from '../../services/categoryService'
+import { SYSTEM_CATEGORY_ALIAS_MAP } from '@src/server/config/const'
 
 // Validation schemas
 const createCategorySchema = z.object({
@@ -78,6 +79,9 @@ export const getCategoryTree = async (
     const options = {
       rootId: id ? parseInt(id as string) : undefined,
       rootAlias: alias as string | undefined
+    }
+    if (alias) {
+      options.rootAlias = SYSTEM_CATEGORY_ALIAS_MAP[alias as keyof typeof SYSTEM_CATEGORY_ALIAS_MAP] || alias
     }
     const tree = await categoryService.getCategoryTree(options)
 

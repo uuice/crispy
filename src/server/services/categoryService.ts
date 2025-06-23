@@ -140,6 +140,7 @@ export class CategoryService {
     rootId?: number
     rootAlias?: string
   }): Promise<CategoryNode[]> {
+    console.log('options', options)
     // If a root is specified, build the subtree from there
     if (options?.rootId || options?.rootAlias) {
       let rootCategory
@@ -350,6 +351,7 @@ export class CategoryService {
    * Get category by alias
    */
   async getCategoryByAlias(alias: string) {
+    console.log('alias', alias)
     return await db
       .selectFrom('categories')
       .selectAll()

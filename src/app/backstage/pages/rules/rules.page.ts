@@ -65,11 +65,25 @@ interface RuleNode {
         [loading]="loading()"
         styleClass="p-treetable-sm"
         [scrollable]="true"
-        scrollHeight="600px"
       >
+        <ng-template pTemplate="caption">
+          <div class="search-bar">
+            <div class="search-controls">
+              <label for="rule-search-keyword" class="sr-only" style="opacity: 0">规则名称</label>
+            </div>
+            <div class="search-actions">
+              <p-button
+                label="搜索"
+                icon="pi pi-search"
+                (click)="loadRules()"
+                [loading]="loading()"
+              ></p-button>
+            </div>
+          </div>
+        </ng-template>
         <ng-template pTemplate="colgroup">
           <colgroup>
-            <col style="min-width: 17rem;" />
+            <col style="min-width: 35rem;" />
             <col style="min-width: 7.5rem;" />
             <col style="min-width: 9.375rem;" />
             <col style="min-width: 7.5rem;" />

@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { RouterModule } from '@angular/router'
+import { RouterModule, ActivatedRoute } from '@angular/router'
 import { FormsModule } from '@angular/forms'
 import { TreeTableModule } from 'primeng/treetable'
 import { ButtonModule } from 'primeng/button'
@@ -66,15 +66,30 @@ interface CategoryNode {
         [loading]="loading()"
         styleClass="p-treetable-sm"
         [scrollable]="true"
-        scrollHeight="600px"
       >
+          <ng-template pTemplate="caption">
+          <div class="search-bar">
+            <div class="search-controls">
+              <label for="rule-search-keyword" class="sr-only" style="opacity: 0">规则名称</label>
+            </div>
+            <div class="search-actions">
+              <p-button
+                label="搜索"
+                icon="pi pi-search"
+                (click)="loadCategories()"
+                [loading]="loading()"
+              ></p-button>
+            </div>
+          </div>
+        </ng-template>
         <ng-template pTemplate="colgroup">
           <colgroup>
-            <col style="min-width: 17rem;" />
+            <col style="min-width: 30rem;" />
             <col style="min-width: 10rem;" />
             <col style="min-width: 15rem;" />
             <col style="min-width: 5rem;" />
             <col style="min-width: 5rem;" />
+            <col style="min-width: 8rem;" />
             <col style="min-width: 12rem;" />
             <col style="min-width: 6.25rem;" />
           </colgroup>
@@ -86,6 +101,7 @@ interface CategoryNode {
             <th>描述</th>
             <th>排序</th>
             <th>状态</th>
+            <th>系统分类</th>
             <th>创建时间</th>
             <th class="sticky-right">操作</th>
           </tr>
@@ -104,6 +120,16 @@ interface CategoryNode {
               <p-tag
                 [severity]="getStatusSeverity(rowData.status)"
                 [value]="getStatusText(rowData.status)"
+              ></p-tag>
+            </td>
+            <td class="flex flex-row gap-2">
+              <p-tag
+                [severity]="isSystemCategory(rowData) ? 'danger' : 'info'"
+                [value]="isSystemCategory(rowData) ? '系统分类' : '普通分类'"
+              ></p-tag>
+              <p-tag
+                [severity]="isSystemCategory(rowData) ? 'danger' : 'info'"
+                [value]="isSystemCategory(rowData) ? '不可编辑' : '可以删除'"
               ></p-tag>
             </td>
             <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
@@ -131,7 +157,7 @@ interface CategoryNode {
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="text-center">暂无分类数据</td>
+            <td colspan="8" class="text-center">暂无分类数据</td>
           </tr>
         </ng-template>
       </p-treeTable>
@@ -176,24 +202,33 @@ export class CategoriesPage implements OnInit {
   loading = signal(false)
   selectedCategory = signal<CategoryNode | null>(null)
   isDetailVisible = signal(false)
+  alias = signal<string | null>(null)
 
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
-    setTimeout(() => {
-      this.loadCategories()
+    // Get alias parameter from route
+    this.route.params.subscribe((params: any) => {
+      this.alias.set(params['alias'] || null)
+      // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.loadCategories()
+      })
     })
   }
 
   loadCategories() {
     this.loading.set(true)
-    this.httpService.get<any>('/api/admin/categories/tree').subscribe({
-      next: (response) => {
+    const alias = this.alias()
+    const url = alias ? `/api/admin/categories/tree?alias=${alias}` : '/api/admin/categories/tree'
+
+    this.httpService.get<any>(url).subscribe({
+      next: (response: any) => {
         if (response.success) {
           this.categories.set(this.convertToTreeNodes(response.data || []))
         } else {
@@ -204,7 +239,7 @@ export class CategoriesPage implements OnInit {
           })
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to load categories:', error)
         this.messageService.add({
           severity: 'error',
@@ -284,7 +319,7 @@ export class CategoriesPage implements OnInit {
 
   deleteCategory(id: number) {
     this.httpService.delete<any>(`/api/admin/categories/${id}`).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         if (response.success) {
           this.messageService.add({
             severity: 'success',
@@ -300,7 +335,7 @@ export class CategoriesPage implements OnInit {
           })
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to delete category:', error)
         this.messageService.add({
           severity: 'error',
