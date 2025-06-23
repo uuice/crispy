@@ -4,6 +4,77 @@
 
 This document describes the database setup and usage with Kysely ORM in our application.
 
+## Database Connection Pool Optimization
+
+### Current Configuration
+
+The database connection pool is configured in `src/libs/db.ts` with the following optimized settings:
+
+```typescript
+const pool = createPool({
+  host: env['DB_HOST'] || 'localhost',
+  port: Number(env['DB_PORT']) || 3306,
+  database: env['DB_NAME'] || 'crispy',
+  user: env['DB_USER'] || 'root',
+  password: env['DB_PASSWORD'] || '',
+  // Connection pool settings - optimized to prevent "many connection" errors
+  waitForConnections: true,
+  connectionLimit: 10, // Reduced from 20 to 10
+  queueLimit: 0, // Unlimited queue to prevent connection errors
+  // Timezone settings
+  timezone: '+08:00',
+  // Character set settings
+  charset: 'utf8mb4'
+})
+```
+
+### Key Optimizations
+
+1. **Reduced Connection Limit**: From 20 to 10 connections to prevent overwhelming the database
+2. **Unlimited Queue**: `queueLimit: 0` allows unlimited queuing of connection requests
+3. **Wait for Connections**: `waitForConnections: true` ensures requests wait for available connections
+
+### Troubleshooting "Many Connection" Errors
+
+If you encounter "many connection" errors, try the following:
+
+1. **Check Current Connections**:
+
+   ```sql
+   SHOW PROCESSLIST;
+   ```
+
+2. **Monitor Pool Status**:
+
+   ```typescript
+   import { getPoolStatus } from '@src/libs/db'
+   console.log('Pool status:', getPoolStatus())
+   ```
+
+3. **Reduce Connection Limit Further**:
+
+   ```typescript
+   connectionLimit: 5, // Reduce if still having issues
+   ```
+
+4. **Add Connection Timeout**:
+
+   ```typescript
+   acquireTimeout: 30000, // 30 seconds timeout
+   ```
+
+5. **Check for Connection Leaks**:
+   - Ensure all database operations are properly awaited
+   - Use transactions when multiple operations are needed
+   - Close connections explicitly if using raw connections
+
+### Best Practices
+
+1. **Use Transactions**: Group related operations in transactions to reduce connection usage
+2. **Avoid N+1 Queries**: Use joins or batch operations instead of multiple queries
+3. **Proper Error Handling**: Always handle database errors to prevent connection leaks
+4. **Connection Monitoring**: Monitor connection pool status in development
+
 ## Setup
 
 The database connection is configured in `src/libs/db.ts`. It uses Kysely with MySQL dialect and includes type safety with generated types.
@@ -188,118 +259,3 @@ DB_NAME=crispy
 DB_USER=root
 DB_PASSWORD=your_password
 ```
-
-````
-
-然后，修改 `db.ts` 的注释为英文：
-
-```typescript
-// src/libs/db.ts
-import { Kysely, MySQLDialect } from 'kysely'
-import { createPool } from 'mysql2'
-import { config } from 'dotenv'
-import { join } from 'path'
-import { fileURLToPath } from 'url'
-import type { DB } from '../db/db.d.ts'
-
-// Get the directory name of the current module
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
-
-// Load environment variables
-config({
-  path: join(__dirname, '../../.env')
-})
-
-// Create database connection pool
-const dialect = new MySQLDialect({
-  pool: createPool({
-    host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT) || 3306,
-    database: process.env.DB_NAME || 'crispy',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    // Connection pool settings
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    // Timezone settings
-    timezone: '+08:00',
-    // Character set settings
-    charset: 'utf8mb4'
-  })
-})
-
-// Create Kysely instance
-export const db = new Kysely<DB>({
-  dialect,
-  // Logging configuration
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error'] : ['error']
-})
-
-// Export types
-export type { DB }
-
-// Export table types
-export type {
-  Users,
-  Roles,
-  Rules,
-  Menus,
-  Articles,
-  Pages,
-  Categories,
-  Tags,
-  Comments,
-  Configs,
-  Enums,
-  Links,
-  Keywords,
-  Ads,
-  AdItems,
-  Notices,
-  Todos,
-  Jobs,
-  Holidays,
-  UserTypes,
-  OperateLogs,
-  ApiLogs,
-  Caches,
-  Additions,
-  Attrs,
-  Votes,
-  VoteItems
-} from '../db/db.d.ts'
-
-// Utility function: Transform BigInt values
-export const transformBigInt = (data: any): any => {
-  if (data === null || data === undefined) {
-    return data
-  }
-
-  if (typeof data === 'bigint') {
-    return data.toString()
-  }
-
-  if (Array.isArray(data)) {
-    return data.map(transformBigInt)
-  }
-
-  if (typeof data === 'object') {
-    const transformed: any = {}
-    for (const key in data) {
-      transformed[key] = transformBigInt(data[key])
-    }
-    return transformed
-  }
-
-  return data
-}
-
-// Middleware: Transform BigInt in query results
-export const withBigIntTransform = async <T>(
-  query: Promise<T>
-): Promise<T> => {
-  const result = await query
-  return transformBigInt(result)
-}
-````

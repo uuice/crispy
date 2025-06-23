@@ -24,23 +24,23 @@ console.log('DB_NAME:', env['DB_NAME'])
 console.log('DB_USER:', env['DB_USER'])
 
 // Create database connection pool
-const dialect = new MysqlDialect({
-  pool: createPool({
-    host: env['DB_HOST'] || 'localhost',
-    port: Number(env['DB_PORT']) || 3306,
-    database: env['DB_NAME'] || 'crispy',
-    user: env['DB_USER'] || 'root',
-    password: env['DB_PASSWORD'] || '',
-    // Connection pool settings
-    waitForConnections: true,
-    connectionLimit: 20,
-    queueLimit: 10,
-    // Timezone settings
-    timezone: '+08:00',
-    // Character set settings
-    charset: 'utf8mb4'
-  })
+const pool = createPool({
+  host: env['DB_HOST'] || 'localhost',
+  port: Number(env['DB_PORT']) || 3306,
+  database: env['DB_NAME'] || 'crispy',
+  user: env['DB_USER'] || 'root',
+  password: env['DB_PASSWORD'] || '',
+  // Connection pool settings - optimized to prevent "many connection" errors
+  waitForConnections: true,
+  connectionLimit: 10, // Reduced from 20 to 10
+  queueLimit: 0, // Unlimited queue to prevent connection errors
+  // Timezone settings
+  timezone: '+08:00',
+  // Character set settings
+  charset: 'utf8mb4'
 })
+
+const dialect = new MysqlDialect({ pool })
 
 // Create Kysely instance
 export const db = new Kysely<DB>({
@@ -133,3 +133,18 @@ export const testDbConnection = async (): Promise<boolean> => {
 
 // Test database connection
 testDbConnection()
+
+// Monitor connection pool status
+export const getPoolStatus = () => {
+  return {
+    connectionLimit: pool.config.connectionLimit,
+    queueLimit: pool.config.queueLimit
+  }
+}
+
+// Log pool status periodically in development
+if (env['NODE_ENV'] === 'development') {
+  setInterval(() => {
+    console.log('Database pool status:', getPoolStatus())
+  }, 30000) // Log every 30 seconds
+}
