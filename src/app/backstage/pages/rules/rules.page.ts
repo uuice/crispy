@@ -76,7 +76,7 @@ interface RuleNode {
             <col style="min-width: 5rem;" />
             <col style="min-width: 3.75rem;" />
             <col style="min-width: 5rem;" />
-            <col style="min-width: 18rem;" />
+            <col style="min-width: 24rem;" />
             <col style="min-width: 6.25rem;" />
           </colgroup>
         </ng-template>
@@ -90,7 +90,7 @@ interface RuleNode {
             <th>排序</th>
             <th>状态</th>
             <th>创建时间</th>
-            <th alignFrozen="right" pFrozenColumn>操作</th>
+            <th class="sticky-right">操作</th>
           </tr>
         </ng-template>
 
@@ -117,7 +117,7 @@ interface RuleNode {
               ></p-tag>
             </td>
             <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-            <td alignFrozen="right" pFrozenColumn>
+            <td class="sticky-right">
               <div class="action-buttons">
                 <p-button
                   icon="pi pi-pencil"
@@ -155,7 +155,29 @@ interface RuleNode {
       }
     </div>
   `,
-  styles: []
+  styles: [
+    `
+      ::ng-deep .p-treetable {
+        .sticky-right {
+          position: sticky !important;
+          right: 0 !important;
+          background: var(--p-treetable-header-cell-background);
+          z-index: 10 !important;
+        }
+
+        .p-treetable-thead .sticky-right {
+          background: var(--p-treetable-header-cell-background);
+        }
+
+        .p-treetable-tbody .sticky-right {
+          background: var(--p-treetable-header-cell-background);
+        }
+
+        .p-treetable-tbody tr:hover .sticky-right {
+        }
+      }
+    `
+  ]
 })
 export class RulesPage implements OnInit {
   rules = signal<TreeNode[]>([])
