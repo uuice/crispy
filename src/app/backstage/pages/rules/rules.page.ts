@@ -69,15 +69,15 @@ interface RuleNode {
       >
         <ng-template pTemplate="colgroup">
           <colgroup>
-            <col style="width: 17rem;" />
-            <col style="width: 7.5rem;" />
-            <col style="width: 9.375rem;" />
-            <col style="width: 7.5rem;" />
-            <col style="width: 5rem;" />
-            <col style="width: 3.75rem;" />
-            <col style="width: 5rem;" />
-            <col style="width: 18rem;" />
-            <col style="width: 6.25rem;" />
+            <col style="min-width: 17rem;" />
+            <col style="min-width: 7.5rem;" />
+            <col style="min-width: 9.375rem;" />
+            <col style="min-width: 7.5rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 3.75rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 18rem;" />
+            <col style="min-width: 6.25rem;" />
           </colgroup>
         </ng-template>
         <ng-template pTemplate="header">

@@ -60,13 +60,13 @@ interface CategoryNode {
       >
         <ng-template pTemplate="colgroup">
           <colgroup>
-            <col style="width: 17rem;" />
-            <col style="width: 10rem;" />
-            <col style="width: 15rem;" />
-            <col style="width: 5rem;" />
-            <col style="width: 5rem;" />
-            <col style="width: 12rem;" />
-            <col style="width: 6.25rem;" />
+            <col style="min-width: 17rem;" />
+            <col style="min-width: 10rem;" />
+            <col style="min-width: 15rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 12rem;" />
+            <col style="min-width: 6.25rem;" />
           </colgroup>
         </ng-template>
         <ng-template pTemplate="header">
