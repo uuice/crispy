@@ -155,37 +155,7 @@ interface RuleNode {
       }
     </div>
   `,
-  styles: [
-    `
-      .page-container {
-        padding: 1rem;
-      }
-
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .page-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-
-      .rule-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-      }
-    `
-  ]
+  styles: []
 })
 export class RulesPage implements OnInit {
   rules = signal<TreeNode[]>([])

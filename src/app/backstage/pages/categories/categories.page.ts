@@ -135,31 +135,7 @@ interface CategoryNode {
       }
     </div>
   `,
-  styles: [
-    `
-      .page-container {
-        padding: 1rem;
-      }
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .page-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-      }
-      ::ng-deep .p-treetable .p-treetable-tbody > tr > td {
-        vertical-align: middle;
-      }
-    `
-  ]
+  styles: []
 })
 export class CategoriesPage implements OnInit {
   categories = signal<TreeNode[]>([])
