@@ -2,7 +2,13 @@ import { db } from '@src/libs/db'
 import { z } from 'zod'
 import { generateToken } from '../middleware/jwt'
 import bcrypt from 'bcryptjs'
-import { DELETE_STATUS, PUBLISH_STATUS, STATUS_FALSE, STATUS_TRUE, USER_STATUS } from '../config/const'
+import {
+  DELETE_STATUS,
+  PUBLISH_STATUS,
+  STATUS_FALSE,
+  STATUS_TRUE,
+  USER_STATUS
+} from '../config/const'
 
 // Validation schemas
 const createUserSchema = z.object({

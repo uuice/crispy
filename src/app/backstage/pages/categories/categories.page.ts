@@ -8,9 +8,11 @@ import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
+import { MessageModule } from 'primeng/message'
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CategoryDetailComponent } from './category-detail.component'
+import { SYSTEM_CATEGORY_ALIAS, SYSTEM_CATEGORY_PARENT_ID_LIST } from '@src/server/config/const'
 
 interface CategoryNode {
   id: number
@@ -38,11 +40,19 @@ interface CategoryNode {
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
+    MessageModule,
     CategoryDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
     <div class="page-container">
+      <p-message
+        severity="error"
+        text="系统分类不能修改"
+        class="mb-3"
+        icon="pi pi-exclamation-triangle"
+      >
+      </p-message>
       <div class="page-header">
         <h1>分类管理</h1>
         <p-button label="创建分类" icon="pi pi-plus" (click)="openCreateDialog()"></p-button>
@@ -104,6 +114,7 @@ interface CategoryNode {
                   pTooltip="编辑"
                   tooltipPosition="top"
                   (click)="openEditDialog(rowData)"
+                  [disabled]="isSystemCategory(rowData)"
                 ></p-button>
                 <p-button
                   icon="pi pi-trash"
@@ -111,6 +122,7 @@ interface CategoryNode {
                   pTooltip="删除"
                   tooltipPosition="top"
                   (click)="confirmDelete(rowData)"
+                  [disabled]="isSystemCategory(rowData)"
                 ></p-button>
               </div>
             </td>
@@ -228,6 +240,14 @@ export class CategoriesPage implements OnInit {
   }
 
   openEditDialog(category: CategoryNode) {
+    if (this.isSystemCategory(category)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: '错误',
+        detail: '系统分类不能删除'
+      })
+      return
+    }
     this.selectedCategory.set(category)
     this.isDetailVisible.set(true)
   }
@@ -244,6 +264,14 @@ export class CategoriesPage implements OnInit {
   }
 
   confirmDelete(category: CategoryNode) {
+    if (this.isSystemCategory(category)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: '错误',
+        detail: '系统分类不能删除'
+      })
+      return
+    }
     this.confirmationService.confirm({
       message: `确定要删除分类 "${category.title}" 吗？`,
       header: '删除确认',
@@ -281,5 +309,12 @@ export class CategoriesPage implements OnInit {
         })
       }
     })
+  }
+
+  isSystemCategory(category: CategoryNode): boolean {
+    return (
+      SYSTEM_CATEGORY_PARENT_ID_LIST.includes(category.parent_id) &&
+      category.alias.endsWith(SYSTEM_CATEGORY_ALIAS)
+    )
   }
 }

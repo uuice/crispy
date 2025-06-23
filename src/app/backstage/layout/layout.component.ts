@@ -8,12 +8,22 @@ import { SidebarComponent } from './sidebar.component'
 import { FooterComponent } from './footer.component'
 import { PageTabsComponent } from './page-tabs.component'
 import { SettingsService } from '../services/settings.service'
+import { AuthService } from '../services/auth.service'
 
 interface TabItem {
   label: string
   routerLink: string
   icon?: string
   closable: boolean
+}
+
+interface MenuData {
+  id: number
+  name: string
+  icon?: string
+  url?: string
+  parent_id?: number
+  children?: MenuData[]
 }
 
 @Component({
@@ -145,34 +155,21 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
   tabs: TabItem[] = []
 
   protected settingsService = inject(SettingsService)
+  private authService = inject(AuthService)
 
   menuItems: MenuItem[] = [
     { label: '首页', icon: 'pi pi-home', routerLink: '/backstage/dashboard' },
     { label: '系统管理', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
   ]
 
-  sidebarItems: MenuItem[] = [
-    { label: '仪表盘', icon: 'pi pi-home', routerLink: '/backstage/dashboard' },
-    { label: '文章管理', icon: 'pi pi-file', routerLink: '/backstage/posts' },
-    { label: '分类管理', icon: 'pi pi-tags', routerLink: '/backstage/categories' },
-    { label: '标签管理', icon: 'pi pi-tag', routerLink: '/backstage/tags' },
-    { label: '评论管理', icon: 'pi pi-comments', routerLink: '/backstage/comments' },
-    { label: '用户管理', icon: 'pi pi-users', routerLink: '/backstage/users' },
-    {
-      label: '管理员管理',
-      icon: 'pi pi-user',
-      items: [
-        { label: '管理员列表', icon: 'pi pi-users', routerLink: '/backstage/admins' },
-        { label: '角色列表', icon: 'pi pi-id-card', routerLink: '/backstage/roles' },
-        { label: '规则列表', icon: 'pi pi-list', routerLink: '/backstage/rules' }
-      ]
-    },
-    { label: '系统设置', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
-  ]
+  sidebarItems: MenuItem[] = []
 
   constructor(private router: Router) {}
 
   ngOnInit() {
+    // Load menu items from user info
+    this.loadMenuItems()
+
     // Add default dashboard tab if no tabs exist
     if (this.tabs.length === 0) {
       this.tabs.push({
@@ -197,6 +194,81 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Restore overflow when leaving backstage
     document.body.style.overflow = ''
+  }
+
+  /**
+   * Load menu items from user authentication data
+   */
+  private loadMenuItems() {
+    const menuData = this.authService.getMenu<MenuData[]>()
+    if (menuData && menuData.length > 0) {
+      this.sidebarItems = this.convertMenuDataToMenuItems(menuData)
+    } else {
+      // Fallback to default menu if no menu data available
+      this.sidebarItems = this.getDefaultMenuItems()
+    }
+  }
+
+  /**
+   * Convert menu data from API to PrimeNG MenuItem format
+   */
+  private convertMenuDataToMenuItems(menuData: MenuData[]): MenuItem[] {
+    return menuData.map((item) => ({
+      label: item.name,
+      icon: item.icon || this.getDefaultIcon(item.name),
+      routerLink: item.url || undefined,
+      items: item.children ? this.convertMenuDataToMenuItems(item.children) : undefined
+    }))
+  }
+
+  /**
+   * Get default menu items as fallback
+   */
+  private getDefaultMenuItems(): MenuItem[] {
+    return [
+      { label: '仪表盘', icon: 'pi pi-home', routerLink: '/backstage/dashboard' },
+      { label: '文章管理', icon: 'pi pi-file', routerLink: '/backstage/posts' },
+      { label: '分类管理', icon: 'pi pi-tags', routerLink: '/backstage/categories' },
+      { label: '标签管理', icon: 'pi pi-tag', routerLink: '/backstage/tags' },
+      { label: '评论管理', icon: 'pi pi-comments', routerLink: '/backstage/comments' },
+      { label: '用户管理', icon: 'pi pi-users', routerLink: '/backstage/users' },
+      {
+        label: '管理员管理',
+        icon: 'pi pi-user',
+        items: [
+          { label: '管理员列表', icon: 'pi pi-users', routerLink: '/backstage/admins' },
+          { label: '角色列表', icon: 'pi pi-id-card', routerLink: '/backstage/roles' },
+          { label: '规则列表', icon: 'pi pi-list', routerLink: '/backstage/rules' }
+        ]
+      },
+      { label: '系统设置', icon: 'pi pi-cog', routerLink: '/backstage/settings' }
+    ]
+  }
+
+  /**
+   * Get default icon based on menu name
+   */
+  private getDefaultIcon(menuName: string): string {
+    const iconMap: { [key: string]: string } = {
+      仪表盘: 'pi pi-home',
+      文章管理: 'pi pi-file',
+      分类管理: 'pi pi-tags',
+      标签管理: 'pi pi-tag',
+      评论管理: 'pi pi-comments',
+      用户管理: 'pi pi-users',
+      管理员管理: 'pi pi-user',
+      系统设置: 'pi pi-cog',
+      菜单管理: 'pi pi-list',
+      页面管理: 'pi pi-file-edit',
+      广告管理: 'pi pi-image',
+      友情链接: 'pi pi-link',
+      招聘管理: 'pi pi-briefcase',
+      配置管理: 'pi pi-cog',
+      系统管理: 'pi pi-server',
+      假期管理: 'pi pi-calendar',
+      特殊标签: 'pi pi-tag'
+    }
+    return iconMap[menuName] || 'pi pi-file'
   }
 
   toggleSidebar() {
@@ -277,7 +349,7 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
       configuration: 'pi pi-cog',
       system: 'pi pi-server',
       vacation: 'pi pi-calendar',
-      'special-tags': 'pi pi-star'
+      'special-tags': 'pi pi-tag'
     }
 
     return iconMap[route] || 'pi pi-file'
