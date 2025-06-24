@@ -3,12 +3,16 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { MessageService } from 'primeng/api'
+import { AuthService } from './auth.service'
+import { Router } from '@angular/router'
 
 @Injectable({ providedIn: 'root' })
 export class HttpService {
   constructor(
     private http: HttpClient,
-    private message: MessageService
+    private message: MessageService,
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   /**
@@ -34,6 +38,20 @@ export class HttpService {
    * Handle HTTP errors and show toast
    */
   private handleError(error: HttpErrorResponse) {
+    if (error.status === 401) {
+      this.authService.clearAll()
+
+      this.message.add({
+        severity: 'warn',
+        summary: '会话过期',
+        detail: '您的登录已过期，请重新登录'
+      })
+
+      this.router.navigate(['/backstage/login'])
+
+      return throwError(() => error)
+    }
+
     let msg = 'Request failed.'
     if (error.error && error.error.message) {
       msg = error.error.message

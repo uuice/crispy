@@ -67,7 +67,7 @@ interface CategoryNode {
         styleClass="p-treetable-sm"
         [scrollable]="true"
       >
-          <ng-template pTemplate="caption">
+        <ng-template pTemplate="caption">
           <div class="search-bar">
             <div class="search-controls">
               <label for="rule-search-keyword" class="sr-only" style="opacity: 0">规则名称</label>
