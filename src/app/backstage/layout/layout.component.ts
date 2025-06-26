@@ -89,7 +89,7 @@ interface MenuData {
         flex-direction: column;
         height: 100vh;
         overflow: hidden;
-        background-color: var(--ground-background);
+        background-color: var(--p-content-background);
         color: var(--text-color);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

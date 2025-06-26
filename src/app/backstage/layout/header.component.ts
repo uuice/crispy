@@ -7,10 +7,11 @@ import { NgClass } from '@angular/common'
 import { Router, RouterModule } from '@angular/router'
 import { SettingsService } from '../services/settings.service'
 import { DrawerModule } from 'primeng/drawer'
-import { usePreset, updatePrimaryPalette, palette } from '@primeng/themes'
+import { usePreset, updatePrimaryPalette, palette, updateSurfacePalette } from '@primeng/themes'
 import { MenuModule } from 'primeng/menu'
 import { AuthService } from '../services/auth.service'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
+import { FormsModule } from '@angular/forms'
 
 @Component({
   selector: 'cs-header',
@@ -23,7 +24,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
     RouterModule,
     DrawerModule,
     MenuModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    FormsModule
   ],
   providers: [ConfirmationService],
   template: `
@@ -87,9 +89,32 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
       [modal]="true"
       [dismissible]="true"
       header="主题设置"
-      [style]="{ width: '350px' }"
+      [style]="{ width: '700px' }"
     >
       <div class="theme-settings">
+        <div class="setting-section">
+          <div class="label">Surface 配置</div>
+          <div class="surface-color-options-row">
+            @for (surfaceColor of surfaceColors; track surfaceColor.name) {
+              <div
+                class="surface-color-option"
+                [class.selected]="surfaceColor.value === selectedSurfaceColor"
+                (click)="selectSurfaceColor(surfaceColor.value)"
+                [title]="surfaceColor.name"
+              >
+                <div
+                  class="surface-color-preview"
+                  [ngStyle]="{ background: surfaceColor.preview }"
+                ></div>
+                <span class="surface-color-name">{{ surfaceColor.name }}</span>
+                @if (surfaceColor.value === selectedSurfaceColor) {
+                  <i class="pi pi-check"></i>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
         <!-- Font Size Section -->
         <div class="setting-section">
           <div class="label">字体大小</div>
@@ -219,41 +244,97 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
       }
 
       .theme-settings {
-        padding: 24px 16px 16px 16px;
+        padding: 1.5rem 1rem 1rem 1rem;
       }
 
       .setting-section {
-        margin-bottom: 32px;
+        margin-bottom: 2rem;
       }
 
       .color-section {
-        margin-bottom: 24px;
+        margin-bottom: 1.5rem;
       }
 
       .label {
         font-weight: bold;
-        margin: 18px 0 8px 0;
+        margin: 1.5rem 0 1rem 0;
         font-size: 1.1rem;
+        line-height: 1.1;
+        letter-spacing: 0.01em;
         color: var(--p-text-color);
+      }
+
+      .surface-color-options-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0;
+      }
+
+      .surface-color-option {
+        flex: 0 0 25%;
+        max-width: 25%;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background 0.18s;
+        font-size: 0.9rem;
+        line-height: 1.1;
+        letter-spacing: 0.01em;
+        text-align: center;
+      }
+
+      .surface-color-option.selected {
+        background: rgba(33, 150, 243, 0.1);
+      }
+
+      .surface-color-preview {
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 50%;
+        border: 0.125rem solid transparent;
+        box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.08);
+        margin-right: 0.125rem;
+        transition: border 0.2s;
+      }
+
+      .surface-color-option.selected .surface-color-preview {
+        border-color: #2196f3;
+        box-shadow: 0 0 0 0.125rem #2196f3;
+      }
+
+      .surface-color-name {
+        font-size: 1.1rem;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
       }
 
       .font-size-options {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 12px;
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
       }
 
       .font-size-option {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 12px 16px;
-        border: 2px solid var(--p-content-border-color);
-        border-radius: 8px;
+        justify-content: center;
+        padding: 0.2rem 0.5rem;
+        border: 0.125rem solid var(--p-content-border-color);
+        border-radius: 0.5rem;
         cursor: pointer;
         transition: all 0.2s ease;
         background: var(--p-content-background);
+        font-size: 0.9rem;
+        line-height: 1.1;
       }
 
       .font-size-option:hover {
@@ -331,6 +412,36 @@ export class HeaderComponent implements OnInit {
 
   drawerVisible = false
   userMenuItems: MenuItem[] = []
+
+  // Surface configuration properties
+  selectedSurfaceColor = 'zinc'
+
+  // Surface color options with proper palettes
+  surfaceColors = [
+    { name: 'Zinc（白灰）', value: 'zinc', preview: '#fafafa' },
+    { name: 'Gray（灰）', value: 'gray', preview: '#6b7280' },
+    { name: 'Slate（深灰）', value: 'slate', preview: '#475569' },
+    { name: 'Neutral（黑）', value: 'neutral', preview: '#171717' },
+    { name: 'Stone（米色）', value: 'stone', preview: '#f5f5f4' },
+    { name: 'Amber（象牙白）', value: 'amber', preview: '#fffbeb' },
+    { name: 'Red（红）', value: 'red', preview: '#ef4444' },
+    { name: 'Orange（橙）', value: 'orange', preview: '#f97316' },
+    { name: 'Yellow（黄）', value: 'yellow', preview: '#eab308' },
+    { name: 'Lime（柠檬绿）', value: 'lime', preview: '#84cc16' },
+    { name: 'Green（绿）', value: 'green', preview: '#22c55e' },
+    { name: 'Emerald（祖母绿）', value: 'emerald', preview: '#10b981' },
+    { name: 'Teal（蓝绿）', value: 'teal', preview: '#14b8a6' },
+    { name: 'Cyan（青）', value: 'cyan', preview: '#06b6d4' },
+    { name: 'Sky（天蓝）', value: 'sky', preview: '#0ea5e9' },
+    { name: 'Blue（蓝）', value: 'blue', preview: '#3b82f6' },
+    { name: 'Indigo（靛蓝）', value: 'indigo', preview: '#6366f1' },
+    { name: 'Violet（紫罗兰）', value: 'violet', preview: '#8b5cf6' },
+    { name: 'Purple（紫）', value: 'purple', preview: '#a855f7' },
+    { name: 'Fuchsia（紫红）', value: 'fuchsia', preview: '#d946ef' },
+    { name: 'Pink（粉）', value: 'pink', preview: '#ec4899' },
+    { name: 'Rose（玫红）', value: 'rose', preview: '#f43f5e' }
+    // 你也可以根据 PrimeNG 主题文档继续扩展其它 token
+  ]
 
   // Font size options from 12px to 20px (5 levels)
   fontSizes = [
@@ -476,6 +587,33 @@ export class HeaderComponent implements OnInit {
     this.settingsService.setFontSize(size)
   }
 
+  // Surface configuration methods
+  selectSurfaceColor(color: string) {
+    this.selectedSurfaceColor = color
+    this.applySurfaceConfiguration()
+  }
+
+  // 生成标准 token 名称的色阶对象
+  private getSurfacePaletteByToken(token: string) {
+    const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+    const palette: Record<number, string> = {}
+    for (const step of steps) {
+      palette[step] = `{${token}.${step}}`
+    }
+    return palette
+  }
+
+  private applySurfaceConfiguration() {
+    const selectedColor = this.surfaceColors.find((c) => c.value === this.selectedSurfaceColor)
+    if (selectedColor) {
+      const paletteByToken = this.getSurfacePaletteByToken(selectedColor.value)
+      updateSurfacePalette(paletteByToken)
+    }
+    this.settingsService.setSurfaceConfig({
+      color: this.selectedSurfaceColor
+    })
+  }
+
   onSettings() {}
   onFullscreen() {
     // Check if fullscreen is supported
@@ -512,6 +650,11 @@ export class HeaderComponent implements OnInit {
       { separator: true },
       { label: '退出登录', icon: 'pi pi-power-off', command: () => this.logout() }
     ]
+
+    // Initialize surface configuration from settings
+    const surfaceConfig = this.settingsService.getSurfaceConfig()
+    this.selectedSurfaceColor = surfaceConfig.color
+    this.applySurfaceConfiguration()
   }
 
   logout(): void {

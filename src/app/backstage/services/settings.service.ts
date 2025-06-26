@@ -11,6 +11,7 @@ export interface AppSettings {
   primaryColor?: string
   /** 字体大小，如 16 */
   fontSize?: number
+  surfaceConfig?: { color: string }
 }
 
 @Injectable({
@@ -211,7 +212,10 @@ export class SettingsService {
           theme: parsed.theme ?? 'default',
           compactMode: parsed.compactMode ?? false,
           primaryColor: parsed.primaryColor ?? '#22c55e',
-          fontSize: parsed.fontSize ?? 14
+          fontSize: parsed.fontSize ?? 14,
+          surfaceConfig: parsed.surfaceConfig ?? {
+            color: 'zinc'
+          }
         }
       }
     } catch (error) {
@@ -226,7 +230,10 @@ export class SettingsService {
       theme: 'default',
       compactMode: false,
       primaryColor: '#22c55e',
-      fontSize: 14
+      fontSize: 14,
+      surfaceConfig: {
+        color: 'zinc'
+      }
     }
   }
 
@@ -276,7 +283,8 @@ export class SettingsService {
       typeof settings.theme === 'string' &&
       typeof settings.compactMode === 'boolean' &&
       (settings.primaryColor === undefined || typeof settings.primaryColor === 'string') &&
-      (settings.fontSize === undefined || typeof settings.fontSize === 'number')
+      (settings.fontSize === undefined || typeof settings.fontSize === 'number') &&
+      (settings.surfaceConfig === undefined || typeof settings.surfaceConfig.color === 'string')
     )
   }
 
@@ -316,5 +324,28 @@ export class SettingsService {
    */
   getFontSize(): number {
     return this._settings().fontSize || 14
+  }
+
+  /**
+   * Set Surface configuration
+   */
+  setSurfaceConfig(config: { color: string }): void {
+    const currentSettings = this._settings()
+    const newSettings = {
+      ...currentSettings,
+      surfaceConfig: config
+    }
+    this.updateSettings(newSettings)
+  }
+
+  /**
+   * Get Surface configuration
+   */
+  getSurfaceConfig(): { color: string } {
+    return (
+      this._settings().surfaceConfig || {
+        color: 'zinc'
+      }
+    )
   }
 }
