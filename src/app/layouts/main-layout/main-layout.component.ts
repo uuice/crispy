@@ -1,43 +1,120 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
+import { MenubarModule } from 'primeng/menubar'
+import { ButtonModule } from 'primeng/button'
+import { AvatarModule } from 'primeng/avatar'
+import { BadgeModule } from 'primeng/badge'
+import { InputTextModule } from 'primeng/inputtext'
+import { RippleModule } from 'primeng/ripple'
+import { TooltipModule } from 'primeng/tooltip'
+import { MenuItem } from 'primeng/api'
 
 @Component({
   selector: 'cs-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MenubarModule,
+    ButtonModule,
+    AvatarModule,
+    BadgeModule,
+    InputTextModule,
+    RippleModule,
+    TooltipModule
+  ],
   template: `
     <div class="main-layout">
       <header class="header">
-        <nav class="nav">
-          <a routerLink="/" class="logo">Crispy</a>
-          <div class="nav-links">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-              >Home</a
-            >
-            <a routerLink="/about" routerLinkActive="active">About</a>
-            <a routerLink="/archives" routerLinkActive="active">Archives</a>
-            <a routerLink="/categories" routerLinkActive="active">Categories</a>
-            <a routerLink="/tags" routerLinkActive="active">Tags</a>
-            <a routerLink="/links" routerLinkActive="active">Links</a>
-            <a routerLink="/author" routerLinkActive="active">Author</a>
-            <a routerLink="/disclaimer" routerLinkActive="active">Disclaimer</a>
-          </div>
-        </nav>
+        <p-menubar [model]="menuItems" class="custom-menubar">
+          <ng-template pTemplate="start">
+            <a routerLink="/" class="logo-link">
+              <span class="logo">🍪 Crispy</span>
+            </a>
+          </ng-template>
+          <ng-template pTemplate="end">
+            <div class="header-actions">
+              <p-button
+                icon="pi pi-search"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                size="small"
+                pTooltip="Search"
+                tooltipPosition="bottom"
+              >
+              </p-button>
+              <p-button
+                icon="pi pi-moon"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                size="small"
+                pTooltip="Toggle Dark Mode"
+                tooltipPosition="bottom"
+              >
+              </p-button>
+            </div>
+          </ng-template>
+        </p-menubar>
       </header>
 
-      <main class="main">
-        <router-outlet></router-outlet>
+      <main class="main-content">
+        <div class="content-container">
+          <router-outlet></router-outlet>
+        </div>
       </main>
 
       <footer class="footer">
         <div class="footer-content">
-          <div class="footer-links">
-            <a href="/rss" target="_blank" rel="noopener noreferrer">RSS</a>
-            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer">Sitemap</a>
-            <a routerLink="/disclaimer">Disclaimer</a>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <div class="footer-links">
+              <a href="/rss" target="_blank" rel="noopener noreferrer">
+                <i class="pi pi-rss"></i> RSS Feed
+              </a>
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer">
+                <i class="pi pi-sitemap"></i> Sitemap
+              </a>
+              <a routerLink="/disclaimer"> <i class="pi pi-info-circle"></i> Disclaimer </a>
+            </div>
           </div>
-          <div class="copyright">© {{ currentYear }} Crispy. All rights reserved.</div>
+          <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+              <p-button
+                icon="pi pi-github"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                size="small"
+              >
+              </p-button>
+              <p-button
+                icon="pi pi-twitter"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                size="small"
+              >
+              </p-button>
+              <p-button
+                icon="pi pi-linkedin"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                size="small"
+              >
+              </p-button>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <div class="copyright">
+              <i class="pi pi-copyright"></i>
+              {{ currentYear }} Crispy. All rights reserved.
+            </div>
+          </div>
         </div>
       </footer>
     </div>
@@ -48,120 +125,141 @@ import { RouterModule } from '@angular/router'
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+        background: var(--p-surface-ground);
+      }
 
-        .header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          padding: 1rem;
-          background: #fff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: var(--p-shadow-2);
+      }
 
-          .nav {
-            max-width: 1200px;
-            margin: 0 auto;
+      .custom-menubar {
+        border: none;
+        border-radius: 0;
+        background: var(--p-surface-card);
+        padding: 0.5rem 1rem;
+
+        .logo-link {
+          text-decoration: none;
+
+          .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--p-primary-color);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-
-            .logo {
-              font-size: 1.5rem;
-              font-weight: bold;
-              color: #333;
-              text-decoration: none;
-
-              &:hover {
-                color: #007bff;
-              }
-            }
-
-            .nav-links {
-              display: flex;
-              gap: 1.5rem;
-              align-items: center;
-
-              a {
-                color: #666;
-                text-decoration: none;
-                font-size: 0.95rem;
-                transition: color 0.3s ease;
-
-                &:hover {
-                  color: #007bff;
-                }
-
-                &.active {
-                  color: #007bff;
-                  font-weight: 500;
-                }
-              }
-            }
+            gap: 0.5rem;
           }
         }
 
-        .main {
-          flex: 1;
-          max-width: 1200px;
-          width: 100%;
-          margin: 0 auto;
-          padding: 2rem 1rem;
+        .header-actions {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
         }
+      }
 
-        .footer {
-          background: #f8f9fa;
-          padding: 2rem 1rem;
-          margin-top: auto;
+      .main-content {
+        flex: 1;
+        padding: 2rem 0;
 
-          .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
+        .content-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 1rem;
+        }
+      }
+
+      .footer {
+        background: var(--p-surface-section);
+        padding: 3rem 1rem 1rem;
+        margin-top: auto;
+        border-top: 1px solid var(--p-surface-border);
+
+        .footer-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 2rem;
+          margin-bottom: 2rem;
+
+          .footer-section {
+            h4 {
+              color: var(--p-text-color);
+              margin-bottom: 1rem;
+              font-size: 1.1rem;
+              font-weight: 600;
+            }
 
             .footer-links {
-              margin-bottom: 1rem;
+              display: flex;
+              flex-direction: column;
+              gap: 0.75rem;
 
               a {
-                color: #666;
+                color: var(--p-text-color-secondary);
                 text-decoration: none;
-                margin: 0 0.75rem;
-                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: color 0.3s ease;
 
                 &:hover {
-                  color: #007bff;
+                  color: var(--p-primary-color);
+                }
+
+                i {
+                  font-size: 0.9rem;
                 }
               }
             }
 
+            .social-links {
+              display: flex;
+              gap: 0.5rem;
+            }
+          }
+
+          .footer-bottom {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--p-surface-border);
+
             .copyright {
-              color: #999;
+              color: var(--p-text-color-secondary);
               font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.5rem;
             }
           }
         }
       }
 
       @media (max-width: 768px) {
-        .main-layout {
-          .header {
-            .nav {
-              flex-direction: column;
-              gap: 1rem;
+        .main-content {
+          padding: 1rem 0;
+        }
 
-              .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-              }
-            }
-          }
+        .footer {
+          .footer-content {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
 
-          .footer {
-            .footer-content {
+            .footer-section {
+              text-align: center;
+
               .footer-links {
-                a {
-                  display: inline-block;
-                  margin: 0.5rem;
-                }
+                align-items: center;
+              }
+
+              .social-links {
+                justify-content: center;
               }
             }
           }
@@ -170,6 +268,48 @@ import { RouterModule } from '@angular/router'
     `
   ]
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   currentYear = new Date().getFullYear()
+  menuItems: MenuItem[] = []
+
+  ngOnInit() {
+    this.menuItems = [
+      {
+        label: '首页',
+        icon: 'pi pi-home',
+        routerLink: '/',
+        routerLinkActiveOptions: { exact: true }
+      },
+      {
+        label: '关于',
+        icon: 'pi pi-user',
+        routerLink: '/about'
+      },
+      {
+        label: '归档',
+        icon: 'pi pi-calendar',
+        routerLink: '/archives'
+      },
+      {
+        label: '分类',
+        icon: 'pi pi-tags',
+        routerLink: '/categories'
+      },
+      {
+        label: '标签',
+        icon: 'pi pi-tag',
+        routerLink: '/tags'
+      },
+      {
+        label: '链接',
+        icon: 'pi pi-link',
+        routerLink: '/links'
+      },
+      {
+        label: '作者',
+        icon: 'pi pi-id-card',
+        routerLink: '/author'
+      }
+    ]
+  }
 }
