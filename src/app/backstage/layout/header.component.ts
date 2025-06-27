@@ -126,7 +126,7 @@ import { SelectButtonModule } from 'primeng/selectbutton'
               <div
                 class="surface-color-option"
                 [class.selected]="surfaceColor.value === selectedSurfaceColor"
-                (click)="selectSurfaceColor(surfaceColor.value)"
+                (click)="onSelectSurfaceColor(surfaceColor.value)"
                 [title]="surfaceColor.name"
               >
                 <div
@@ -165,7 +165,7 @@ import { SelectButtonModule } from 'primeng/selectbutton'
                   class="color-dot"
                   [ngStyle]="{ background: color.palette[500] }"
                   [class.selected]="color === selectedPrimary"
-                  (click)="selectPrimary(color)"
+                  (click)="onSelectPrimary(color)"
                   [title]="color.name"
                 >
                   @if (color === selectedPrimary) {
@@ -581,18 +581,26 @@ export class HeaderComponent implements OnInit {
     )
   }
 
-  selectPrimary(color: any) {
-    this.settingsService.setPrimaryColor(color.palette[500])
-  }
+  ngOnInit(): void {
+    this.userMenuItems = [
+      { label: '设置', icon: 'pi pi-cog', command: () => this.onSettings() },
+      { separator: true },
+      { label: '退出登录', icon: 'pi pi-power-off', command: () => this.logout() }
+    ]
 
-  selectFontSize(size: number) {
-    this.settingsService.setFontSize(size)
-  }
+    // Initialize font size
+    this.selectedFontSize = this.settingsService.getFontSize()
 
-  // Surface configuration methods
-  selectSurfaceColor(color: string) {
-    this.selectedSurfaceColor = color
-    this.settingsService.setSurfaceConfig({ color: color })
+    // Initialize dark mode
+    this.selectedDarkMode = this.settingsService.settings().darkMode
+
+    // Initialize theme settings
+    const currentTheme = this.settingsService.settings().theme || 'lara'
+    this.selectedPreset = currentTheme
+
+    // Initialize surface configuration from settings
+    const surfaceConfig = this.settingsService.getSurfaceConfig()
+    this.selectedSurfaceColor = surfaceConfig.color
   }
 
   onSettings() {}
@@ -625,28 +633,6 @@ export class HeaderComponent implements OnInit {
     this.darkModeToggle.emit(this.settingsService.settings().darkMode)
   }
 
-  ngOnInit(): void {
-    this.userMenuItems = [
-      { label: '设置', icon: 'pi pi-cog', command: () => this.onSettings() },
-      { separator: true },
-      { label: '退出登录', icon: 'pi pi-power-off', command: () => this.logout() }
-    ]
-
-    // Initialize font size
-    this.selectedFontSize = this.settingsService.getFontSize()
-
-    // Initialize dark mode
-    this.selectedDarkMode = this.settingsService.settings().darkMode
-
-    // Initialize theme settings
-    const currentTheme = this.settingsService.settings().theme || 'lara'
-    this.selectedPreset = currentTheme
-
-    // Initialize surface configuration from settings
-    const surfaceConfig = this.settingsService.getSurfaceConfig()
-    this.selectedSurfaceColor = surfaceConfig.color
-  }
-
   logout(): void {
     this.confirmationService.confirm({
       message: '您确定要退出登录吗？',
@@ -663,6 +649,15 @@ export class HeaderComponent implements OnInit {
         this.router.navigate(['/backstage/login'])
       }
     })
+  }
+
+  onSelectPrimary(color: any) {
+    this.settingsService.setPrimaryColor(color.palette[500])
+  }
+
+  onSelectSurfaceColor(color: string) {
+    this.selectedSurfaceColor = color
+    this.settingsService.setSurfaceConfig({ color: color })
   }
 
   onFontSizeChange(event: any) {
