@@ -1,4 +1,5 @@
 import { Injectable, signal, WritableSignal } from '@angular/core'
+import { palette, updatePrimaryPalette, usePreset } from '@primeng/themes'
 import { BehaviorSubject, Observable } from 'rxjs'
 
 export interface AppSettings {
@@ -28,9 +29,6 @@ export class SettingsService {
 
   constructor() {
     this.applySettings(this._settings())
-    // Initialize font size
-    const fontSize = this._settings().fontSize || 16
-    document.documentElement.style.fontSize = `${fontSize}px`
   }
 
   /**
@@ -56,6 +54,14 @@ export class SettingsService {
       ...currentSettings,
       darkMode: !currentSettings.darkMode
     }
+
+    // Apply dark mode
+    if (newSettings.darkMode) {
+      document.documentElement.classList.add('app-dark')
+    } else {
+      document.documentElement.classList.remove('app-dark')
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -68,6 +74,14 @@ export class SettingsService {
       ...currentSettings,
       darkMode: enabled
     }
+
+    // Apply dark mode
+    if (enabled) {
+      document.documentElement.classList.add('app-dark')
+    } else {
+      document.documentElement.classList.remove('app-dark')
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -80,6 +94,14 @@ export class SettingsService {
       ...currentSettings,
       sidebarCollapsed: !currentSettings.sidebarCollapsed
     }
+
+    // Apply sidebar collapsed state
+    if (newSettings.sidebarCollapsed) {
+      document.documentElement.classList.add('sidebar-collapsed')
+    } else {
+      document.documentElement.classList.remove('sidebar-collapsed')
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -92,6 +114,14 @@ export class SettingsService {
       ...currentSettings,
       sidebarCollapsed: collapsed
     }
+
+    // Apply sidebar collapsed state
+    if (collapsed) {
+      document.documentElement.classList.add('sidebar-collapsed')
+    } else {
+      document.documentElement.classList.remove('sidebar-collapsed')
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -116,6 +146,38 @@ export class SettingsService {
       ...currentSettings,
       theme
     }
+
+    // Apply theme attribute
+    document.body.setAttribute('data-theme', theme)
+
+    this.updateSettings(newSettings)
+  }
+
+  /**
+   * Set preset theme with surface configuration
+   */
+  setPresetTheme(themeName: string): void {
+    const currentSettings = this._settings()
+    const newSettings = {
+      ...currentSettings,
+      theme: themeName
+    }
+
+    // Apply theme attribute
+    document.body.setAttribute('data-theme', themeName)
+
+    // Apply preset theme
+    if (['lara', 'aura', 'nora', 'material'].includes(themeName)) {
+      this.loadPresetTheme(themeName).then((presetTheme) => {
+        if (presetTheme) {
+          usePreset(presetTheme)
+          // Apply surface configuration after preset theme
+          this.applySurfaceConfiguration()
+          this.applyPrimaryColor(currentSettings.primaryColor)
+        }
+      })
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -128,6 +190,14 @@ export class SettingsService {
       ...currentSettings,
       compactMode: !currentSettings.compactMode
     }
+
+    // Apply compact mode
+    if (newSettings.compactMode) {
+      document.documentElement.classList.add('compact-mode')
+    } else {
+      document.documentElement.classList.remove('compact-mode')
+    }
+
     this.updateSettings(newSettings)
   }
 
@@ -154,11 +224,11 @@ export class SettingsService {
     this._settings.set(newSettings)
     this.settingsSubject.next(newSettings)
     this.saveSettings(newSettings)
-    this.applySettings(newSettings)
+    // this.applySettings(newSettings)
   }
 
   /**
-   * Apply settings to DOM and CSS
+   * Apply settings to DOM and CSS (only for initialization)
    */
   private applySettings(settings: AppSettings): void {
     // Apply dark mode
@@ -168,6 +238,13 @@ export class SettingsService {
       document.documentElement.classList.remove('app-dark')
     }
 
+    // Apply sidebar collapsed state
+    if (settings.sidebarCollapsed) {
+      document.documentElement.classList.add('sidebar-collapsed')
+    } else {
+      document.documentElement.classList.remove('sidebar-collapsed')
+    }
+
     // Apply compact mode
     if (settings.compactMode) {
       document.documentElement.classList.add('compact-mode')
@@ -175,45 +252,43 @@ export class SettingsService {
       document.documentElement.classList.remove('compact-mode')
     }
 
-    // Apply theme
+    // Apply theme attribute
     document.body.setAttribute('data-theme', settings.theme)
+
+    // Apply font size
+    const fontSize = settings.fontSize || 16
+    document.documentElement.style.fontSize = `${fontSize}px`
 
     // Apply preset theme if it's one of the supported presets
     if (settings.theme && ['lara', 'aura', 'nora', 'material'].includes(settings.theme)) {
       try {
-        // Dynamic import to avoid SSR issues
-        import('@primeng/themes').then((mod) => {
-          if (mod.usePreset) {
-            // Import the specific preset theme
-            this.loadPresetTheme(settings.theme).then((presetTheme) => {
-              if (presetTheme) {
-                mod.usePreset(presetTheme)
-              }
-            })
+        // Import and apply preset theme
+        this.loadPresetTheme(settings.theme).then((presetTheme) => {
+          if (presetTheme) {
+            usePreset(presetTheme)
+            // Apply surface configuration after preset theme
+            this.applySurfaceConfiguration()
+            // Apply primary color after surface configuration to ensure it takes precedence
+            this.applyPrimaryColor(settings.primaryColor)
           }
         })
       } catch (e) {
         // Ignore in SSR environment
         console.warn('Failed to apply preset theme:', e)
       }
+    } else {
+      // If no preset theme, just apply surface configuration and primary color
+      this.applySurfaceConfiguration()
+      this.applyPrimaryColor(settings.primaryColor)
     }
+  }
 
-    // Apply font size
-    const fontSize = settings.fontSize || 16
-    document.documentElement.style.fontSize = `${fontSize}px`
-
-    // Apply primary color (调用 updatePrimaryPalette)
-    if (settings.primaryColor) {
-      try {
-        // 动态导入，避免 SSR 报错
-        import('@primeng/themes').then((mod) => {
-          if (mod.updatePrimaryPalette) {
-            mod.updatePrimaryPalette(mod.palette(settings.primaryColor!))
-          }
-        })
-      } catch (e) {
-        // SSR 环境下忽略
-      }
+  /**
+   * Apply primary color
+   */
+  private applyPrimaryColor(color?: string): void {
+    if (color) {
+      updatePrimaryPalette(palette(color))
     }
   }
 
@@ -340,6 +415,9 @@ export class SettingsService {
       ...currentSettings,
       primaryColor: color
     }
+
+    // Apply primary color
+    updatePrimaryPalette(palette(color))
     this.updateSettings(newSettings)
   }
 
@@ -359,6 +437,11 @@ export class SettingsService {
       ...currentSettings,
       fontSize: size
     }
+
+    // Apply font size
+    const fontSize = size || 16
+    document.documentElement.style.fontSize = `${fontSize}px`
+
     this.updateSettings(newSettings)
   }
 
@@ -370,7 +453,7 @@ export class SettingsService {
   }
 
   /**
-   * Set Surface configuration
+   * Set Surface configuration with immediate application
    */
   setSurfaceConfig(config: { color: string }): void {
     const currentSettings = this._settings()
@@ -378,7 +461,10 @@ export class SettingsService {
       ...currentSettings,
       surfaceConfig: config
     }
+
     this.updateSettings(newSettings)
+    // Apply surface configuration immediately
+    this.applySurfaceConfiguration()
   }
 
   /**
@@ -390,5 +476,29 @@ export class SettingsService {
         color: 'zinc'
       }
     )
+  }
+
+  /**
+   * Apply surface configuration
+   */
+  applySurfaceConfiguration(): void {
+    const surfaceConfig = this.getSurfaceConfig()
+    if (surfaceConfig && surfaceConfig.color && surfaceConfig.color !== 'zinc') {
+      try {
+        import('@primeng/themes').then((mod) => {
+          if (mod.updateSurfacePalette) {
+            const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+            const palette: Record<number, string> = {}
+            for (const step of steps) {
+              palette[step] = `{${surfaceConfig.color}.${step}}`
+            }
+            mod.updateSurfacePalette(palette)
+          }
+        })
+      } catch (e) {
+        // Ignore in SSR environment
+        console.warn('Failed to apply surface configuration:', e)
+      }
+    }
   }
 }

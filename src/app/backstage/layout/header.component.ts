@@ -7,17 +7,11 @@ import { NgClass } from '@angular/common'
 import { Router, RouterModule } from '@angular/router'
 import { SettingsService } from '../services/settings.service'
 import { DrawerModule } from 'primeng/drawer'
-import { usePreset, updatePrimaryPalette, palette, updateSurfacePalette } from '@primeng/themes'
 import { MenuModule } from 'primeng/menu'
 import { AuthService } from '../services/auth.service'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { FormsModule } from '@angular/forms'
 import { SelectButtonModule } from 'primeng/selectbutton'
-// Import preset themes
-import Aura from '@primeng/themes/aura'
-import nora from '@primeng/themes/nora'
-import lara from '@primeng/themes/lara'
-import material from '@primeng/themes/material'
 
 @Component({
   selector: 'cs-header',
@@ -459,127 +453,118 @@ export class HeaderComponent implements OnInit {
     { value: 'lara', label: 'Lara' },
     { value: 'aura', label: 'Aura' },
     { value: 'nora', label: 'Nora' },
-    { value: 'material', label: 'Material' },
-    { value: 'custom', label: '自定义 Surface' }
+    { value: 'material', label: 'Material' }
   ]
 
   selectedPreset: string = 'lara'
-
-  // Preset theme mappings
-  presetThemes = {
-    lara: lara,
-    aura: Aura,
-    nora: nora,
-    material: material
-  }
 
   // Generate all available color palettes using the palette method
   colorCategories = [
     {
       name: '基础色彩',
       colors: [
-        { name: 'Green', palette: palette('#22c55e') },
-        { name: 'Blue', palette: palette('#3b82f6') },
-        { name: 'Purple', palette: palette('#a855f7') },
-        { name: 'Red', palette: palette('#f43f5e') },
-        { name: 'Orange', palette: palette('#f59e42') },
-        { name: 'Yellow', palette: palette('#eab308') },
-        { name: 'Pink', palette: palette('#ec4899') },
-        { name: 'Gray', palette: palette('#6b7280') }
+        { name: 'Green', palette: { 500: '#22c55e' } },
+        { name: 'Blue', palette: { 500: '#3b82f6' } },
+        { name: 'Purple', palette: { 500: '#a855f7' } },
+        { name: 'Red', palette: { 500: '#f43f5e' } },
+        { name: 'Orange', palette: { 500: '#f59e42' } },
+        { name: 'Yellow', palette: { 500: '#eab308' } },
+        { name: 'Pink', palette: { 500: '#ec4899' } },
+        { name: 'Gray', palette: { 500: '#6b7280' } }
       ]
     },
     {
       name: 'Tailwind 标准色',
       colors: [
-        { name: 'Red-500', palette: palette('#ef4444') },
-        { name: 'Orange-500', palette: palette('#f97316') },
-        { name: 'Amber-500', palette: palette('#f59e0b') },
-        { name: 'Yellow-500', palette: palette('#eab308') },
-        { name: 'Lime-500', palette: palette('#84cc16') },
-        { name: 'Green-500', palette: palette('#22c55e') },
-        { name: 'Emerald-500', palette: palette('#10b981') },
-        { name: 'Teal-500', palette: palette('#14b8a6') },
-        { name: 'Cyan-500', palette: palette('#06b6d4') },
-        { name: 'Sky-500', palette: palette('#0ea5e9') },
-        { name: 'Blue-500', palette: palette('#3b82f6') },
-        { name: 'Indigo-500', palette: palette('#6366f1') },
-        { name: 'Violet-500', palette: palette('#8b5cf6') },
-        { name: 'Purple-500', palette: palette('#a855f7') },
-        { name: 'Fuchsia-500', palette: palette('#d946ef') },
-        { name: 'Pink-500', palette: palette('#ec4899') },
-        { name: 'Rose-500', palette: palette('#f43f5e') }
+        { name: 'Red-500', palette: { 500: '#ef4444' } },
+        { name: 'Orange-500', palette: { 500: '#f97316' } },
+        { name: 'Amber-500', palette: { 500: '#f59e0b' } },
+        { name: 'Yellow-500', palette: { 500: '#eab308' } },
+        { name: 'Lime-500', palette: { 500: '#84cc16' } },
+        { name: 'Green-500', palette: { 500: '#22c55e' } },
+        { name: 'Emerald-500', palette: { 500: '#10b981' } },
+        { name: 'Teal-500', palette: { 500: '#14b8a6' } },
+        { name: 'Cyan-500', palette: { 500: '#06b6d4' } },
+        { name: 'Sky-500', palette: { 500: '#0ea5e9' } },
+        { name: 'Blue-500', palette: { 500: '#3b82f6' } },
+        { name: 'Indigo-500', palette: { 500: '#6366f1' } },
+        { name: 'Violet-500', palette: { 500: '#8b5cf6' } },
+        { name: 'Purple-500', palette: { 500: '#a855f7' } },
+        { name: 'Fuchsia-500', palette: { 500: '#d946ef' } },
+        { name: 'Pink-500', palette: { 500: '#ec4899' } },
+        { name: 'Rose-500', palette: { 500: '#f43f5e' } }
       ]
     },
     {
       name: '宝石色彩',
       colors: [
-        { name: 'Ruby', palette: palette('#dc2626') },
-        { name: 'Sapphire', palette: palette('#2563eb') },
-        { name: 'Emerald', palette: palette('#059669') },
-        { name: 'Topaz', palette: palette('#d97706') },
-        { name: 'Amethyst', palette: palette('#7c3aed') },
-        { name: 'Garnet', palette: palette('#be123c') },
-        { name: 'Aquamarine', palette: palette('#0891b2') },
-        { name: 'Peridot', palette: palette('#65a30d') },
-        { name: 'Opal', palette: palette('#f0f9ff') },
-        { name: 'Jade', palette: palette('#047857') },
-        { name: 'Turquoise', palette: palette('#0d9488') }
+        { name: 'Ruby', palette: { 500: '#dc2626' } },
+        { name: 'Sapphire', palette: { 500: '#2563eb' } },
+        { name: 'Emerald', palette: { 500: '#059669' } },
+        { name: 'Topaz', palette: { 500: '#d97706' } },
+        { name: 'Amethyst', palette: { 500: '#7c3aed' } },
+        { name: 'Garnet', palette: { 500: '#be123c' } },
+        { name: 'Aquamarine', palette: { 500: '#0891b2' } },
+        { name: 'Peridot', palette: { 500: '#65a30d' } },
+        { name: 'Opal', palette: { 500: '#f0f9ff' } },
+        { name: 'Jade', palette: { 500: '#047857' } },
+        { name: 'Turquoise', palette: { 500: '#0d9488' } }
       ]
     },
     {
       name: '金属质感',
       colors: [
-        { name: 'Gold', palette: palette('#ca8a04') },
-        { name: 'Silver', palette: palette('#6b7280') },
-        { name: 'Bronze', palette: palette('#92400e') },
-        { name: 'Copper', palette: palette('#b45309') },
-        { name: 'Platinum', palette: palette('#374151') },
-        { name: 'Titanium', palette: palette('#4b5563') },
-        { name: 'Steel', palette: palette('#6b7280') },
-        { name: 'Iron', palette: palette('#374151') },
-        { name: 'Carbon', palette: palette('#111827') },
-        { name: 'Obsidian', palette: palette('#030712') }
+        { name: 'Gold', palette: { 500: '#ca8a04' } },
+        { name: 'Silver', palette: { 500: '#6b7280' } },
+        { name: 'Bronze', palette: { 500: '#92400e' } },
+        { name: 'Copper', palette: { 500: '#b45309' } },
+        { name: 'Platinum', palette: { 500: '#374151' } },
+        { name: 'Titanium', palette: { 500: '#4b5563' } },
+        { name: 'Steel', palette: { 500: '#6b7280' } },
+        { name: 'Iron', palette: { 500: '#374151' } },
+        { name: 'Carbon', palette: { 500: '#111827' } },
+        { name: 'Obsidian', palette: { 500: '#030712' } }
       ]
     },
     {
       name: '自然色彩',
       colors: [
-        { name: 'Ocean', palette: palette('#0891b2') },
-        { name: 'Forest', palette: palette('#059669') },
-        { name: 'Sunset', palette: palette('#ea580c') },
-        { name: 'Berry', palette: palette('#be185d') },
-        { name: 'Lavender', palette: palette('#7c3aed') },
-        { name: 'Mint', palette: palette('#059669') },
-        { name: 'Coral', palette: palette('#fb7185') },
-        { name: 'Salmon', palette: palette('#fda4af') },
-        { name: 'Peach', palette: palette('#fed7aa') },
-        { name: 'Cream', palette: palette('#fef3c7') },
-        { name: 'Ivory', palette: palette('#fefce8') },
-        { name: 'Beige', palette: palette('#f5f5dc') },
-        { name: 'Tan', palette: palette('#d2b48c') },
-        { name: 'Khaki', palette: palette('#c3b091') },
-        { name: 'Olive', palette: palette('#808000') }
+        { name: 'Ocean', palette: { 500: '#0891b2' } },
+        { name: 'Forest', palette: { 500: '#059669' } },
+        { name: 'Sunset', palette: { 500: '#ea580c' } },
+        { name: 'Berry', palette: { 500: '#be185d' } },
+        { name: 'Lavender', palette: { 500: '#7c3aed' } },
+        { name: 'Mint', palette: { 500: '#059669' } },
+        { name: 'Coral', palette: { 500: '#fb7185' } },
+        { name: 'Salmon', palette: { 500: '#fda4af' } },
+        { name: 'Peach', palette: { 500: '#fed7aa' } },
+        { name: 'Cream', palette: { 500: '#fef3c7' } },
+        { name: 'Ivory', palette: { 500: '#fefce8' } },
+        { name: 'Beige', palette: { 500: '#f5f5dc' } },
+        { name: 'Tan', palette: { 500: '#d2b48c' } },
+        { name: 'Khaki', palette: { 500: '#c3b091' } },
+        { name: 'Olive', palette: { 500: '#808000' } }
       ]
     },
     {
       name: '经典色彩',
       colors: [
-        { name: 'Navy', palette: palette('#1e3a8a') },
-        { name: 'Maroon', palette: palette('#800000') },
-        { name: 'Burgundy', palette: palette('#800020') },
-        { name: 'Wine', palette: palette('#722f37') },
-        { name: 'Plum', palette: palette('#8b4513') },
-        { name: 'Eggplant', palette: palette('#614051') },
-        { name: 'Charcoal', palette: palette('#36454f') },
-        { name: 'Slate', palette: palette('#708090') },
-        { name: 'Smoke', palette: palette('#848884') },
-        { name: 'Ash', palette: palette('#b2beb5') },
-        { name: 'Fog', palette: palette('#d3d3d3') },
-        { name: 'Mist', palette: palette('#e6e6fa') },
-        { name: 'Frost', palette: palette('#f0f8ff') },
-        { name: 'Snow', palette: palette('#fffafa') },
-        { name: 'Pearl', palette: palette('#f9fafb') },
-        { name: 'Diamond', palette: palette('#ffffff') }
+        { name: 'Navy', palette: { 500: '#1e3a8a' } },
+        { name: 'Maroon', palette: { 500: '#800000' } },
+        { name: 'Burgundy', palette: { 500: '#800020' } },
+        { name: 'Wine', palette: { 500: '#722f37' } },
+        { name: 'Plum', palette: { 500: '#8b4513' } },
+        { name: 'Eggplant', palette: { 500: '#614051' } },
+        { name: 'Charcoal', palette: { 500: '#36454f' } },
+        { name: 'Slate', palette: { 500: '#708090' } },
+        { name: 'Smoke', palette: { 500: '#848884' } },
+        { name: 'Ash', palette: { 500: '#b2beb5' } },
+        { name: 'Fog', palette: { 500: '#d3d3d3' } },
+        { name: 'Mist', palette: { 500: '#e6e6fa' } },
+        { name: 'Frost', palette: { 500: '#f0f8ff' } },
+        { name: 'Snow', palette: { 500: '#fffafa' } },
+        { name: 'Pearl', palette: { 500: '#f9fafb' } },
+        { name: 'Diamond', palette: { 500: '#ffffff' } }
       ]
     }
   ]
@@ -607,31 +592,7 @@ export class HeaderComponent implements OnInit {
   // Surface configuration methods
   selectSurfaceColor(color: string) {
     this.selectedSurfaceColor = color
-    this.applySurfaceConfiguration()
-    // Clear preset theme when surface configuration is selected
-    this.selectedPreset = 'custom'
-    this.settingsService.setTheme('custom')
-  }
-
-  // 生成标准 token 名称的色阶对象
-  private getSurfacePaletteByToken(token: string) {
-    const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
-    const palette: Record<number, string> = {}
-    for (const step of steps) {
-      palette[step] = `{${token}.${step}}`
-    }
-    return palette
-  }
-
-  private applySurfaceConfiguration() {
-    const selectedColor = this.surfaceColors.find((c) => c.value === this.selectedSurfaceColor)
-    if (selectedColor) {
-      const paletteByToken = this.getSurfacePaletteByToken(selectedColor.value)
-      updateSurfacePalette(paletteByToken)
-    }
-    this.settingsService.setSurfaceConfig({
-      color: this.selectedSurfaceColor
-    })
+    this.settingsService.setSurfaceConfig({ color: color })
   }
 
   onSettings() {}
@@ -684,18 +645,6 @@ export class HeaderComponent implements OnInit {
     // Initialize surface configuration from settings
     const surfaceConfig = this.settingsService.getSurfaceConfig()
     this.selectedSurfaceColor = surfaceConfig.color
-
-    // Apply theme based on current setting
-    if (['lara', 'aura', 'nora', 'material'].includes(currentTheme)) {
-      // Apply preset theme
-      const selectedTheme = this.presetThemes[currentTheme as keyof typeof this.presetThemes]
-      if (selectedTheme) {
-        usePreset(selectedTheme)
-      }
-    } else {
-      // Apply surface configuration for custom theme
-      this.applySurfaceConfiguration()
-    }
   }
 
   logout(): void {
@@ -728,26 +677,6 @@ export class HeaderComponent implements OnInit {
 
   onPresetChange(event: any) {
     this.selectedPreset = event.value
-
-    if (this.selectedPreset === 'custom') {
-      // Apply surface configuration for custom theme
-      this.settingsService.setTheme('custom')
-      this.applySurfaceConfiguration()
-    } else {
-      // Apply preset theme
-      const selectedTheme = this.presetThemes[this.selectedPreset as keyof typeof this.presetThemes]
-      if (selectedTheme) {
-        usePreset(selectedTheme)
-        this.settingsService.setTheme(this.selectedPreset)
-        // Clear surface configuration when preset theme is selected
-        this.selectedSurfaceColor = 'zinc' // Reset to default
-        this.settingsService.setSurfaceConfig({ color: 'zinc' })
-      }
-    }
-  }
-
-  // Method to reapply surface configuration
-  reapplySurfaceConfiguration() {
-    this.applySurfaceConfiguration()
+    this.settingsService.setPresetTheme(this.selectedPreset)
   }
 }
