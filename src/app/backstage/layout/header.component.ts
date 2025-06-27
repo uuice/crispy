@@ -12,6 +12,12 @@ import { MenuModule } from 'primeng/menu'
 import { AuthService } from '../services/auth.service'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { FormsModule } from '@angular/forms'
+import { SelectButtonModule } from 'primeng/selectbutton'
+// Import preset themes
+import Aura from '@primeng/themes/aura'
+import nora from '@primeng/themes/nora'
+import lara from '@primeng/themes/lara'
+import material from '@primeng/themes/material'
 
 @Component({
   selector: 'cs-header',
@@ -25,7 +31,8 @@ import { FormsModule } from '@angular/forms'
     DrawerModule,
     MenuModule,
     ConfirmDialogModule,
-    FormsModule
+    FormsModule,
+    SelectButtonModule
   ],
   providers: [ConfirmationService],
   template: `
@@ -92,6 +99,32 @@ import { FormsModule } from '@angular/forms'
       [style]="{ width: '700px' }"
     >
       <div class="theme-settings">
+        <!-- Dark Mode Section -->
+        <div class="setting-section">
+          <div class="label">暗黑模式</div>
+          <p-selectButton
+            [options]="darkModeOptions"
+            [(ngModel)]="selectedDarkMode"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onDarkModeChange($event)"
+            [style]="{ width: '100%' }"
+          ></p-selectButton>
+        </div>
+
+        <!-- Preset Themes Section -->
+        <div class="setting-section">
+          <div class="label">预设主题</div>
+          <p-selectButton
+            [options]="presetOptions"
+            [(ngModel)]="selectedPreset"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onPresetChange($event)"
+            [style]="{ width: '100%' }"
+          ></p-selectButton>
+        </div>
+
         <div class="setting-section">
           <div class="label">Surface 配置</div>
           <div class="surface-color-options-row">
@@ -118,23 +151,14 @@ import { FormsModule } from '@angular/forms'
         <!-- Font Size Section -->
         <div class="setting-section">
           <div class="label">字体大小</div>
-          <div class="font-size-options">
-            @for (size of fontSizes; track size.value) {
-              <div
-                class="font-size-option"
-                [class.selected]="size.value === selectedFontSize"
-                (click)="selectFontSize(size.value)"
-                [title]="size.label"
-              >
-                <span class="font-size-text" [style.font-size.px]="size.value">{{
-                  size.label
-                }}</span>
-                @if (size.value === selectedFontSize) {
-                  <i class="pi pi-check"></i>
-                }
-              </div>
-            }
-          </div>
+          <p-selectButton
+            [options]="fontSizes"
+            [(ngModel)]="selectedFontSize"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onFontSizeChange($event)"
+            [style]="{ width: '100%' }"
+          ></p-selectButton>
         </div>
 
         <!-- Color Categories -->
@@ -316,47 +340,6 @@ import { FormsModule } from '@angular/forms'
         text-align: left;
       }
 
-      .font-size-options {
-        display: flex;
-        flex-direction: row;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-      }
-
-      .font-size-option {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.2rem 0.5rem;
-        border: 0.125rem solid var(--p-content-border-color);
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: var(--p-content-background);
-        font-size: 0.9rem;
-        line-height: 1.1;
-      }
-
-      .font-size-option:hover {
-        border-color: var(--p-primary-color);
-        background: var(--p-hover-color);
-      }
-
-      .font-size-option.selected {
-        border-color: var(--p-primary-color);
-        background: var(--p-primary-color);
-        color: white;
-      }
-
-      .font-size-text {
-        font-weight: 500;
-      }
-
-      .font-size-option i.pi {
-        font-size: 1rem;
-        font-weight: bold;
-      }
-
       .color-row {
         display: flex;
         gap: 12px;
@@ -395,6 +378,15 @@ import { FormsModule } from '@angular/forms'
         color: #fff;
         font-size: 1.3rem;
         font-weight: bold;
+      }
+
+      .p-selectbutton {
+        margin-top: 0.5rem;
+        width: 100%;
+      }
+      .p-selectbutton .p-button {
+        font-size: 0.95rem;
+        padding: 0.3rem 1.2rem;
       }
     `
   ]
@@ -452,8 +444,33 @@ export class HeaderComponent implements OnInit {
     { value: 20, label: '极大 (20px)' }
   ]
 
-  get selectedFontSize(): number {
-    return this.settingsService.getFontSize()
+  selectedFontSize: number = 16 // 默认值
+
+  // Dark mode options
+  darkModeOptions = [
+    { value: false, label: '亮色模式' },
+    { value: true, label: '暗色模式' }
+  ]
+
+  selectedDarkMode: boolean = false
+
+  // Preset theme options
+  presetOptions = [
+    { value: 'lara', label: 'Lara' },
+    { value: 'aura', label: 'Aura' },
+    { value: 'nora', label: 'Nora' },
+    { value: 'material', label: 'Material' },
+    { value: 'custom', label: '自定义 Surface' }
+  ]
+
+  selectedPreset: string = 'lara'
+
+  // Preset theme mappings
+  presetThemes = {
+    lara: lara,
+    aura: Aura,
+    nora: nora,
+    material: material
   }
 
   // Generate all available color palettes using the palette method
@@ -591,6 +608,9 @@ export class HeaderComponent implements OnInit {
   selectSurfaceColor(color: string) {
     this.selectedSurfaceColor = color
     this.applySurfaceConfiguration()
+    // Clear preset theme when surface configuration is selected
+    this.selectedPreset = 'custom'
+    this.settingsService.setTheme('custom')
   }
 
   // 生成标准 token 名称的色阶对象
@@ -651,10 +671,31 @@ export class HeaderComponent implements OnInit {
       { label: '退出登录', icon: 'pi pi-power-off', command: () => this.logout() }
     ]
 
+    // Initialize font size
+    this.selectedFontSize = this.settingsService.getFontSize()
+
+    // Initialize dark mode
+    this.selectedDarkMode = this.settingsService.settings().darkMode
+
+    // Initialize theme settings
+    const currentTheme = this.settingsService.settings().theme || 'lara'
+    this.selectedPreset = currentTheme
+
     // Initialize surface configuration from settings
     const surfaceConfig = this.settingsService.getSurfaceConfig()
     this.selectedSurfaceColor = surfaceConfig.color
-    this.applySurfaceConfiguration()
+
+    // Apply theme based on current setting
+    if (['lara', 'aura', 'nora', 'material'].includes(currentTheme)) {
+      // Apply preset theme
+      const selectedTheme = this.presetThemes[currentTheme as keyof typeof this.presetThemes]
+      if (selectedTheme) {
+        usePreset(selectedTheme)
+      }
+    } else {
+      // Apply surface configuration for custom theme
+      this.applySurfaceConfiguration()
+    }
   }
 
   logout(): void {
@@ -673,5 +714,40 @@ export class HeaderComponent implements OnInit {
         this.router.navigate(['/backstage/login'])
       }
     })
+  }
+
+  onFontSizeChange(event: any) {
+    this.selectedFontSize = event.value
+    this.settingsService.setFontSize(this.selectedFontSize)
+  }
+
+  onDarkModeChange(event: any) {
+    this.selectedDarkMode = event.value
+    this.settingsService.setDarkMode(this.selectedDarkMode)
+  }
+
+  onPresetChange(event: any) {
+    this.selectedPreset = event.value
+
+    if (this.selectedPreset === 'custom') {
+      // Apply surface configuration for custom theme
+      this.settingsService.setTheme('custom')
+      this.applySurfaceConfiguration()
+    } else {
+      // Apply preset theme
+      const selectedTheme = this.presetThemes[this.selectedPreset as keyof typeof this.presetThemes]
+      if (selectedTheme) {
+        usePreset(selectedTheme)
+        this.settingsService.setTheme(this.selectedPreset)
+        // Clear surface configuration when preset theme is selected
+        this.selectedSurfaceColor = 'zinc' // Reset to default
+        this.settingsService.setSurfaceConfig({ color: 'zinc' })
+      }
+    }
+  }
+
+  // Method to reapply surface configuration
+  reapplySurfaceConfiguration() {
+    this.applySurfaceConfiguration()
   }
 }

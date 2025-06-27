@@ -14,6 +14,7 @@ import { providePrimeNG } from 'primeng/config'
 import Aura from '@primeng/themes/aura'
 import nora from '@primeng/themes/nora'
 import lara from '@primeng/themes/lara'
+import material from '@primeng/themes/material'
 
 import { MessageService } from 'primeng/api'
 import { CustomReuseStrategy } from './backstage/services/route-reuse.strategy'

@@ -139,7 +139,7 @@ export class SettingsService {
       darkMode: false,
       sidebarCollapsed: false,
       language: 'zh-CN',
-      theme: 'default',
+      theme: 'lara',
       compactMode: false,
       primaryColor: '#22c55e',
       fontSize: 14
@@ -178,6 +178,26 @@ export class SettingsService {
     // Apply theme
     document.body.setAttribute('data-theme', settings.theme)
 
+    // Apply preset theme if it's one of the supported presets
+    if (settings.theme && ['lara', 'aura', 'nora', 'material'].includes(settings.theme)) {
+      try {
+        // Dynamic import to avoid SSR issues
+        import('@primeng/themes').then((mod) => {
+          if (mod.usePreset) {
+            // Import the specific preset theme
+            this.loadPresetTheme(settings.theme).then((presetTheme) => {
+              if (presetTheme) {
+                mod.usePreset(presetTheme)
+              }
+            })
+          }
+        })
+      } catch (e) {
+        // Ignore in SSR environment
+        console.warn('Failed to apply preset theme:', e)
+      }
+    }
+
     // Apply font size
     const fontSize = settings.fontSize || 16
     document.documentElement.style.fontSize = `${fontSize}px`
@@ -198,6 +218,29 @@ export class SettingsService {
   }
 
   /**
+   * Load preset theme dynamically
+   */
+  private async loadPresetTheme(themeName: string): Promise<any> {
+    try {
+      switch (themeName) {
+        case 'lara':
+          return (await import('@primeng/themes/lara')).default
+        case 'aura':
+          return (await import('@primeng/themes/aura')).default
+        case 'nora':
+          return (await import('@primeng/themes/nora')).default
+        case 'material':
+          return (await import('@primeng/themes/material')).default
+        default:
+          return null
+      }
+    } catch (error) {
+      console.warn(`Failed to load preset theme ${themeName}:`, error)
+      return null
+    }
+  }
+
+  /**
    * Load settings from localStorage
    */
   private loadSettings(): AppSettings {
@@ -209,7 +252,7 @@ export class SettingsService {
           darkMode: parsed.darkMode ?? false,
           sidebarCollapsed: parsed.sidebarCollapsed ?? false,
           language: parsed.language ?? 'zh-CN',
-          theme: parsed.theme ?? 'default',
+          theme: parsed.theme ?? 'lara',
           compactMode: parsed.compactMode ?? false,
           primaryColor: parsed.primaryColor ?? '#22c55e',
           fontSize: parsed.fontSize ?? 14,
@@ -227,7 +270,7 @@ export class SettingsService {
       darkMode: false,
       sidebarCollapsed: false,
       language: 'zh-CN',
-      theme: 'default',
+      theme: 'lara',
       compactMode: false,
       primaryColor: '#22c55e',
       fontSize: 14,
