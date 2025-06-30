@@ -1,0 +1,371 @@
+/* CKEditor 样式 - 使用 PrimeNG CSS 变量 */
+
+/* 编辑器容器 */
+.ck.ck-editor {
+  border-color: var(--p-content-border-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+/* 工具栏样式 */
+.ck.ck-toolbar {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) var(--p-border-radius) 0 0 !important;
+}
+
+.ck.ck-editor__top .ck-sticky-panel .ck-sticky-panel__content {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) var(--p-border-radius) 0 0 !important;
+}
+
+/* 工具栏按钮 */
+.ck.ck-toolbar .ck-button {
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ck.ck-toolbar .ck-button:not(.ck-disabled):hover {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+}
+
+.ck.ck-toolbar .ck-button.ck-on {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+.ck.ck-toolbar .ck-button:focus {
+  box-shadow: 0 0 0 2px var(--p-primary-color) !important;
+}
+
+/* 工具栏分隔符 */
+.ck.ck-toolbar .ck-toolbar__separator {
+  background: var(--p-content-border-color) !important;
+}
+
+/* 下拉菜单 */
+.ck.ck-dropdown__panel {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+}
+
+.ck.ck-list__item .ck-button {
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ck.ck-list__item .ck-button:hover {
+  background: var(--p-content-hover-background) !important;
+}
+
+.ck.ck-list__item .ck-button.ck-on {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+/* 编辑区域 */
+.ck.ck-editor__editable {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  min-height: 300px;
+  padding: 1rem !important;
+  border-radius: 0 0 var(--p-border-radius) var(--p-border-radius) !important;
+  font-family: var(--p-font-family) !important;
+  font-size: var(--p-font-size) !important;
+  line-height: 1.6 !important;
+}
+
+.ck.ck-editor__editable:focus {
+  border-color: var(--p-primary-color) !important;
+  box-shadow: 0 0 0 1px var(--p-primary-color) !important;
+  outline: none !important;
+}
+
+/* 错误状态 */
+.ck.ck-editor__editable.ng-invalid.ng-dirty {
+  border-color: var(--p-red-500) !important;
+  box-shadow: 0 0 0 1px var(--p-red-500) !important;
+}
+
+/* 占位符文本 */
+.ck.ck-editor__editable .ck-placeholder::before {
+  color: var(--p-text-muted-color) !important;
+  font-style: italic;
+}
+
+/* 表格样式 */
+.ck.ck-editor__editable .table {
+  border-color: var(--p-content-border-color) !important;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.ck.ck-editor__editable .table td,
+.ck.ck-editor__editable .table th {
+  border-color: var(--p-content-border-color) !important;
+  padding: 0.5rem;
+}
+
+.ck.ck-editor__editable .table th {
+  background: var(--p-content-hover-background) !important;
+  font-weight: 600;
+}
+
+/* 链接样式 */
+.ck.ck-editor__editable a {
+  color: var(--p-primary-color) !important;
+  text-decoration: underline;
+}
+
+.ck.ck-editor__editable a:hover {
+  color: var(--p-primary-600) !important;
+}
+
+/* 引用块样式 */
+.ck.ck-editor__editable blockquote {
+  border-left: 4px solid var(--p-primary-color) !important;
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+  margin: 1rem 0;
+  padding: 1rem;
+  font-style: italic;
+  border-radius: 0 var(--p-border-radius) var(--p-border-radius) 0 !important;
+}
+
+/* 代码块样式 */
+.ck.ck-editor__editable pre {
+  background: var(--p-content-hover-background) !important;
+  border: 1px solid var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  padding: 1rem;
+  border-radius: var(--p-border-radius) !important;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  margin: 1rem 0;
+}
+
+/* 内联代码样式 */
+.ck.ck-editor__editable code {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--p-border-radius) !important;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* 列表样式 */
+.ck.ck-editor__editable ul,
+.ck.ck-editor__editable ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.ck.ck-editor__editable li {
+  margin: 0.5rem 0;
+}
+
+/* 标题样式 */
+.ck.ck-editor__editable h1,
+.ck.ck-editor__editable h2,
+.ck.ck-editor__editable h3,
+.ck.ck-editor__editable h4,
+.ck.ck-editor__editable h5,
+.ck.ck-editor__editable h6 {
+  color: var(--p-text-color) !important;
+  margin: 1.5rem 0 1rem 0;
+  font-weight: 600;
+}
+
+.ck.ck-editor__editable h1 {
+  font-size: 2rem;
+}
+.ck.ck-editor__editable h2 {
+  font-size: 1.75rem;
+}
+.ck.ck-editor__editable h3 {
+  font-size: 1.5rem;
+}
+.ck.ck-editor__editable h4 {
+  font-size: 1.25rem;
+}
+.ck.ck-editor__editable h5 {
+  font-size: 1.125rem;
+}
+.ck.ck-editor__editable h6 {
+  font-size: 1rem;
+}
+
+/* 图片样式 */
+.ck.ck-editor__editable img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--p-border-radius) !important;
+  margin: 1rem 0;
+}
+
+/* 图片工具栏 */
+.ck.ck-image-toolbar {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+}
+
+.ck.ck-image-toolbar .ck-button {
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ck.ck-image-toolbar .ck-button:hover {
+  background: var(--p-content-hover-background) !important;
+}
+
+/* 表格工具栏 */
+.ck.ck-table-toolbar {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+}
+
+/* 气球工具栏 */
+.ck.ck-balloon-panel {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+}
+
+.ck.ck-balloon-panel .ck-button {
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ck.ck-balloon-panel .ck-button:hover {
+  background: var(--p-content-hover-background) !important;
+}
+
+/* 输入框样式 */
+.ck.ck-input {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  padding: 0.5rem !important;
+}
+
+.ck.ck-input:focus {
+  border-color: var(--p-primary-color) !important;
+  box-shadow: 0 0 0 1px var(--p-primary-color) !important;
+  outline: none !important;
+}
+
+/* 标签样式 */
+.ck.ck-label {
+  color: var(--p-text-color) !important;
+  font-weight: 500;
+}
+
+/* 工具提示 */
+.ck.ck-tooltip {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+  font-size: 0.875rem;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+  .ck.ck-toolbar {
+    flex-wrap: wrap;
+    padding: 0.5rem !important;
+  }
+
+  .ck.ck-editor__editable {
+    min-height: 200px;
+    padding: 0.75rem !important;
+  }
+
+  .ck.ck-toolbar .ck-button {
+    margin: 0.125rem !important;
+  }
+}
+
+/* 加载状态 */
+.ck.ck-editor.ck-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.ck.ck-editor.ck-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--p-primary-color);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: ck-loading-spin 1s linear infinite;
+}
+
+@keyframes ck-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 禁用状态 */
+.ck.ck-editor.ck-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ck.ck-editor.ck-disabled .ck-editor__editable {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-muted-color) !important;
+}
+
+/* 焦点指示器 */
+.ck.ck-editor__editable:focus-visible {
+  outline: 2px solid var(--p-primary-color) !important;
+  outline-offset: 2px;
+}
+
+/* 选择文本样式 */
+.ck.ck-editor__editable ::selection {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+/* 滚动条样式 */
+.ck.ck-editor__editable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ck.ck-editor__editable::-webkit-scrollbar-track {
+  background: var(--p-content-background);
+}
+
+.ck.ck-editor__editable::-webkit-scrollbar-thumb {
+  background: var(--p-content-border-color);
+  border-radius: 4px;
+}
+
+.ck.ck-editor__editable::-webkit-scrollbar-thumb:hover {
+  background: var(--p-text-muted-color);
+}

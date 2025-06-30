@@ -13,9 +13,12 @@ import { InputTextModule } from 'primeng/inputtext'
 import { DropdownModule } from 'primeng/dropdown'
 import { MultiSelectModule } from 'primeng/multiselect'
 import { CalendarModule } from 'primeng/calendar'
-import { EditorModule } from 'primeng/editor'
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { ToastModule } from 'primeng/toast'
 import { MessageService } from 'primeng/api'
+import { UploadAdapter } from '../../../../adapter'
+import { HttpService } from '../../../services/http.service'
 
 @Component({
   selector: 'app-create-post',
@@ -29,7 +32,7 @@ import { MessageService } from 'primeng/api'
     DropdownModule,
     MultiSelectModule,
     CalendarModule,
-    EditorModule,
+    CKEditorModule,
     ToastModule
   ],
   providers: [MessageService],
@@ -86,12 +89,14 @@ import { MessageService } from 'primeng/api'
                 <label for="content" class="block text-sm font-medium text-gray-700 mb-2"
                   >内容</label
                 >
-                <p-editor
+                <ckeditor
                   id="content"
+                  [editor]="Editor"
                   formControlName="content"
-                  [style]="{ height: '400px' }"
+                  [config]="editorConfig"
                   [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
-                ></p-editor>
+                  (ready)="onReady($event)"
+                ></ckeditor>
                 <small class="p-error" *ngIf="isFieldInvalid('content')">请输入文章内容</small>
               </div>
             </div>
@@ -166,6 +171,162 @@ import { MessageService } from 'primeng/api'
 export class CreatePostPage {
   postForm: FormGroup
 
+  // CKEditor 配置 - 显示 Classic Editor 支持的所有免费功能
+  public Editor = ClassicEditor
+  public editorConfig: any = {
+    licenseKey: 'GPL', // 使用 GPL 许可证用于开源项目
+    toolbar: {
+      items: [
+        // 标题和段落
+        'heading',
+        '|',
+        // 基本格式
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        'subscript',
+        'superscript',
+        'code',
+        '|',
+        // 字体样式 (Classic Build 支持)
+        'fontSize',
+        'fontFamily',
+        'fontColor',
+        'fontBackgroundColor',
+        '|',
+        // 段落对齐
+        'alignment',
+        '|',
+        // 列表和缩进
+        'bulletedList',
+        'numberedList',
+        'todoList',
+        '|',
+        'outdent',
+        'indent',
+        '|',
+        // 插入内容
+        'link',
+        'imageUpload',
+        'insertTable',
+        'mediaEmbed',
+        'blockQuote',
+        'codeBlock',
+        'horizontalLine',
+        'pageBreak',
+        'specialCharacters',
+        '|',
+        // 查找替换
+        'findAndReplace',
+        '|',
+        // 撤销重做
+        'undo',
+        'redo',
+        '|',
+        // 源码编辑
+        'sourceEditing'
+      ],
+      shouldNotGroupWhenFull: true // 防止工具栏项目被分组隐藏
+    },
+    // 标题配置
+    heading: {
+      options: [
+        { model: 'paragraph', title: '段落', class: 'ck-heading_paragraph' },
+        { model: 'heading1', view: 'h1', title: '标题 1', class: 'ck-heading_heading1' },
+        { model: 'heading2', view: 'h2', title: '标题 2', class: 'ck-heading_heading2' },
+        { model: 'heading3', view: 'h3', title: '标题 3', class: 'ck-heading_heading3' },
+        { model: 'heading4', view: 'h4', title: '标题 4', class: 'ck-heading_heading4' },
+        { model: 'heading5', view: 'h5', title: '标题 5', class: 'ck-heading_heading5' },
+        { model: 'heading6', view: 'h6', title: '标题 6', class: 'ck-heading_heading6' }
+      ]
+    },
+    // 字体大小配置
+    fontSize: {
+      options: [9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36]
+    },
+    // 字体系列配置
+    fontFamily: {
+      options: [
+        'default',
+        'Arial, Helvetica, sans-serif',
+        'Courier New, Courier, monospace',
+        'Georgia, serif',
+        'Times New Roman, Times, serif',
+        'Trebuchet MS, Helvetica, sans-serif',
+        'Verdana, Geneva, sans-serif',
+        '微软雅黑, Microsoft YaHei',
+        '宋体, SimSun',
+        '黑体, SimHei',
+        '楷体, KaiTi'
+      ]
+    },
+    // 对齐方式配置
+    alignment: {
+      options: ['left', 'center', 'right', 'justify']
+    },
+    // 图片配置
+    image: {
+      toolbar: [
+        'imageStyle:inline',
+        'imageStyle:block',
+        'imageStyle:side',
+        '|',
+        'imageStyle:alignLeft',
+        'imageStyle:alignCenter',
+        'imageStyle:alignRight',
+        '|',
+        'toggleImageCaption',
+        'imageTextAlternative'
+      ],
+      styles: ['full', 'side', 'alignLeft', 'alignCenter', 'alignRight']
+    },
+    // 表格配置
+    table: {
+      contentToolbar: [
+        'tableColumn',
+        'tableRow',
+        'mergeTableCells',
+        'tableProperties',
+        'tableCellProperties'
+      ]
+    },
+    // 链接配置
+    link: {
+      decorators: {
+        openInNewTab: {
+          mode: 'manual',
+          label: '在新标签页中打开',
+          attributes: {
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          }
+        }
+      }
+    },
+    // 代码块语言配置
+    codeBlock: {
+      languages: [
+        { language: 'plaintext', label: '纯文本' },
+        { language: 'c', label: 'C' },
+        { language: 'cs', label: 'C#' },
+        { language: 'cpp', label: 'C++' },
+        { language: 'css', label: 'CSS' },
+        { language: 'diff', label: 'Diff' },
+        { language: 'html', label: 'HTML' },
+        { language: 'java', label: 'Java' },
+        { language: 'javascript', label: 'JavaScript' },
+        { language: 'php', label: 'PHP' },
+        { language: 'python', label: 'Python' },
+        { language: 'ruby', label: 'Ruby' },
+        { language: 'typescript', label: 'TypeScript' },
+        { language: 'xml', label: 'XML' }
+      ]
+    },
+
+    language: 'zh-cn'
+  }
+
   categoryOptions = [
     { label: '技术', value: 'tech' },
     { label: '生活', value: 'life' },
@@ -183,7 +344,8 @@ export class CreatePostPage {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private httpService: HttpService
   ) {
     this.postForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
@@ -248,5 +410,12 @@ export class CreatePostPage {
 
   goBack() {
     // this.router.navigate(['../'], { relativeTo: this.router.routeConfig?.path })
+  }
+
+  // CKEditor 图片上传适配器
+  onReady(editor: any) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
+      return new UploadAdapter(loader, this.httpService, this.messageService)
+    }
   }
 }

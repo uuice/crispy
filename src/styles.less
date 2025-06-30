@@ -6,6 +6,7 @@
 /* Global styles */
 /* You can add global styles to this file, and also import other style files */
 @import '../node_modules/primeicons/primeicons.css';
+@import './styles/ckeditor.less';
 
 /* Global PrimeNG size configuration */
 :root {
@@ -63,41 +64,3 @@ body {
   }
 }
 // backstage page
-
-
-.p-editor-toolbar {
-  display: none !important;
-}
-
-/* 适配 PrimeNG 主题变量的 Quill 工具栏样式 */
-.ql-toolbar.ql-snow {
-  background: var(--p-content-background) !important;
-  border-color: var(--p-content-border-color) !important;
-  color: var(--p-text-color) !important;
-}
-.ql-toolbar.ql-snow .ql-picker-label,
-.ql-toolbar.ql-snow .ql-picker-item,
-.ql-toolbar.ql-snow .ql-stroke {
-  color: var(--p-text-color) !important;
-  stroke: var(--p-text-color) !important;
-  fill: var(--p-content-background) !important;
-}
-.ql-toolbar.ql-snow .ql-picker-options {
-  background: var(--p-content-background) !important;
-  color: var(--p-text-color) !important;
-}
-.ql-toolbar.ql-snow .ql-picker-item.ql-selected,
-.ql-toolbar.ql-snow .ql-picker-item:hover {
-  background: var(--p-content-hover-background) !important;
-  color: var(--p-text-color) !important;
-}
-.ql-toolbar.ql-snow .ql-picker-label:hover,
-.ql-toolbar.ql-snow .ql-picker-label.ql-active {
-  color: var(--p-text-color) !important;
-}
-.ql-toolbar.ql-snow button {
-  color: var(--p-text-color) !important;
-}
-.ql-toolbar.ql-snow .ql-fill {
-  fill: var(--p-text-color) !important;
-}
