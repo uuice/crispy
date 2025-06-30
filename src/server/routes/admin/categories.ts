@@ -81,7 +81,8 @@ export const getCategoryTree = async (
       rootAlias: alias as string | undefined
     }
     if (alias) {
-      options.rootAlias = SYSTEM_CATEGORY_ALIAS_MAP[alias as keyof typeof SYSTEM_CATEGORY_ALIAS_MAP] || alias
+      options.rootAlias =
+        SYSTEM_CATEGORY_ALIAS_MAP[alias as keyof typeof SYSTEM_CATEGORY_ALIAS_MAP] || alias
     }
     const tree = await categoryService.getCategoryTree(options)
 

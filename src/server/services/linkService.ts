@@ -45,7 +45,7 @@ export interface Link {
 }
 
 export interface PaginatedLinksResult {
-  data: Link[]
+  dataList: Link[]
   pagination: {
     total: number
     page: number
@@ -112,7 +112,7 @@ export class LinkService {
     ])
 
     return {
-      data: links as Link[],
+      dataList: links as Link[],
       pagination: {
         total: Number(total?.count) || 0,
         page,
