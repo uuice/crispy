@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 // Validation schemas
 const createRuleSchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().min(1),
+  title: z.string().min(1, '规则名称不能为空'),
+  alias: z.string().min(1, '规则别名不能为空'),
   condition: z.string().optional(),
   des: z.string().optional(),
   icon: z.string().optional(),

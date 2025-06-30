@@ -6,9 +6,17 @@ export interface CreatePageData {
   title: string
   alias: string
   content: string
+  abstract?: string
+  sub_title?: string
+  seo_title?: string
   seo_description?: string
   seo_keywords?: string
   image_list?: string
+  tags?: string
+  remark?: string
+  type_id?: number
+  author_id?: number
+  user_id?: number
   status: number
 }
 
@@ -18,6 +26,7 @@ export interface PageFilters {
   title?: string
   alias?: string
   status?: number
+  typeId?: number
   startTime?: number
   endTime?: number
 }
@@ -71,12 +80,47 @@ export class PageService {
   async getPageById(id: number): Promise<Page | null> {
     const result = await db
       .selectFrom('pages')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .leftJoin('categories', 'categories.id', 'pages.type_id')
+      .select([
+        'pages.id',
+        'pages.title',
+        'pages.alias',
+        'pages.content',
+        'pages.abstract',
+        'pages.sub_title',
+        'pages.seo_title',
+        'pages.seo_description',
+        'pages.seo_keywords',
+        'pages.image_list',
+        'pages.tags',
+        'pages.remark',
+        'pages.type_id',
+        'pages.author_id',
+        'pages.user_id',
+        'pages.status',
+        'pages.create_time',
+        'pages.update_time',
+        'pages.is_delete',
+        'categories.id as type_id',
+        'categories.title as type_title'
+      ])
+      .where('pages.id', '=', id)
+      .where('pages.is_delete', '=', 0)
       .executeTakeFirst()
 
-    return result as unknown as Page | null
+    if (!result) {
+      return null
+    }
+
+    // Transform the result to include type information
+    const page = result as any
+    return {
+      ...page,
+      type: page.type_id ? {
+        id: page.type_id,
+        title: page.type_title
+      } : null
+    } as Page
   }
 
   /**
@@ -103,37 +147,75 @@ export class PageService {
     const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('pages').selectAll().where('is_delete', '=', 0)
+    let query = db
+      .selectFrom('pages')
+      .leftJoin('categories', 'categories.id', 'pages.type_id')
+      .select([
+        'pages.id',
+        'pages.title',
+        'pages.alias',
+        'pages.content',
+        'pages.abstract',
+        'pages.sub_title',
+        'pages.seo_title',
+        'pages.seo_description',
+        'pages.seo_keywords',
+        'pages.image_list',
+        'pages.tags',
+        'pages.remark',
+        'pages.type_id',
+        'pages.author_id',
+        'pages.user_id',
+        'pages.status',
+        'pages.create_time',
+        'pages.update_time',
+        'pages.is_delete',
+        'categories.id as type_id',
+        'categories.title as type_title'
+      ])
+      .where('pages.is_delete', '=', 0)
 
     // Apply filters
     if (filters) {
       if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
+        query = query.where('pages.title', 'like', `%${filters.title}%`)
       }
       if (filters.alias) {
-        query = query.where('alias', 'like', `%${filters.alias}%`)
+        query = query.where('pages.alias', 'like', `%${filters.alias}%`)
       }
       if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
+        query = query.where('pages.status', '=', filters.status)
+      }
+      if (filters.typeId !== undefined) {
+        query = query.where('pages.type_id', '=', filters.typeId)
       }
       if (filters.startTime) {
-        query = query.where('create_time', '>=', filters.startTime)
+        query = query.where('pages.create_time', '>=', filters.startTime)
       }
       if (filters.endTime) {
-        query = query.where('create_time', '<=', filters.endTime)
+        query = query.where('pages.create_time', '<=', filters.endTime)
       }
     }
 
     // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    query = query.orderBy('pages.create_time', 'desc')
 
     const [pages, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.select((eb) => [eb.fn.count('pages.id').as('count')]).executeTakeFirst()
     ])
 
+    // Transform the result to include type information
+    const transformedPages = pages.map((page: any) => ({
+      ...page,
+      type: page.type_id ? {
+        id: page.type_id,
+        title: page.type_title
+      } : null
+    }))
+
     return {
-      data: pages as unknown as Page[],
+      data: transformedPages as unknown as Page[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

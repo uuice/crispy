@@ -10,7 +10,7 @@ import {
 
 // Validation schemas
 const createRoleSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '角色名称不能为空'),
   des: z.string().optional(),
   module_id: z.number().default(0),
   rule_ids: z.string().default(''),

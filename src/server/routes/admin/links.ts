@@ -10,9 +10,9 @@ import {
 
 // Validation schemas
 const createLinkSchema = z.object({
-  site_name: z.string().min(1),
-  des: z.string(),
-  url: z.string().url(),
+  site_name: z.string().min(1, '站点名称不能为空'),
+  des: z.string().min(1, '描述不能为空'),
+  url: z.string().url('请输入有效的URL地址'),
   logo: z.string().optional(),
   method: z.string().optional(),
   type_id: z.number().default(0),

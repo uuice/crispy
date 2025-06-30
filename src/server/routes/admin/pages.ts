@@ -10,12 +10,53 @@ import {
 
 // Validation schemas
 const createPageSchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().min(1),
-  content: z.string().min(1),
-  des: z.string().optional(),
-  keywords: z.string().optional(),
-  cover_image: z.string().optional(),
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  abstract: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  sub_title: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  seo_title: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  seo_description: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  seo_keywords: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  image_list: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  tags: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  remark: z
+    .string()
+    .optional()
+    .transform((val) => val || ''),
+  type_id: z
+    .number()
+    .optional()
+    .transform((val) => val || 0),
+  author_id: z
+    .number()
+    .optional()
+    .transform((val) => val || 0),
+  user_id: z
+    .number()
+    .optional()
+    .transform((val) => val || 0),
   status: z.number().default(10)
 })
 
@@ -60,6 +101,9 @@ export const getPages = async (req: Request, res: Response, next: NextFunction):
     }
     if (req.query['status']) {
       filters.status = parseInt(req.query['status'] as string)
+    }
+    if (req.query['type_id']) {
+      filters.typeId = parseInt(req.query['type_id'] as string)
     }
     if (req.query['start_time']) {
       filters.startTime = parseInt(req.query['start_time'] as string)
