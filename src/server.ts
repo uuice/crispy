@@ -30,6 +30,9 @@ app.use(
   })
 )
 
+// Serve uploaded files
+app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
+
 // 4. Angular application routes
 app.use(createAngularHandler(angularApp))
 

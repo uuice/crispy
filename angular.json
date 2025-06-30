@@ -31,6 +31,7 @@
               }
             ],
             "styles": ["src/styles.less"],
+            "scripts": ["node_modules/quill/dist/quill.js"],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {

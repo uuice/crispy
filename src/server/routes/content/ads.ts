@@ -53,7 +53,7 @@ export const getAds = async (req: Request, res: Response, next: NextFunction): P
   }
 }
 
-export const AdController = {
+export const adController = {
   getAd,
   getAds
 }

@@ -1,11 +1,11 @@
 import { RequestHandler, Router } from 'express'
-import * as userController from './users'
-import * as adController from './ads'
-import * as additionController from './additions'
-import * as adItemController from './ad-items'
-import * as apiLogController from './api-logs'
-import * as articleController from './articles'
-import * as categoryController from './categories'
+import { userController } from './users'
+import { adController } from './ads'
+import { additionController } from './additions'
+import { adItemController } from './ad-items'
+import { apiLogController } from './api-logs'
+import { articleController } from './articles'
+import { categoryController } from './categories'
 import { attrController } from './attrs'
 import { cacheController } from './caches'
 import { configController } from './configs'
@@ -26,6 +26,7 @@ import { voteController } from './votes'
 import { voteItemController } from './vote-items'
 import { jwtMiddleware } from '@src/server/middleware'
 import { accessTokenController } from './access-token'
+import { uploadController } from './upload'
 
 const router = Router()
 
@@ -230,5 +231,8 @@ router.post('/access-token', accessTokenController.createAccessToken)
 router.get('/access-token/:id', accessTokenController.getAccessTokenById)
 router.put('/access-token/:id', accessTokenController.updateAccessToken)
 router.delete('/access-token/:id', accessTokenController.deleteAccessToken)
+
+// Upload routes
+router.post('/upload/image', uploadController.uploadImage)
 
 export default router

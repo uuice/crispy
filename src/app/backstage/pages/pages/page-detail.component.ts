@@ -5,7 +5,8 @@ import {
   OnInit,
   Output,
   signal,
-  WritableSignal
+  WritableSignal,
+  ViewChild
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
@@ -18,7 +19,7 @@ import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { ChipsModule } from 'primeng/chips'
-import { EditorModule } from 'primeng/editor'
+import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 
 interface Page {
@@ -164,6 +165,8 @@ interface CategoriesResponse {
             formControlName="content"
             [style]="{ height: '300px' }"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
+            [modules]="editorModules"
+            #editorRef
           ></p-editor>
           <p-message
             *ngIf="isFieldInvalid('content')"
@@ -407,6 +410,34 @@ export class PageDetailComponent implements OnInit {
 
   pageForm: FormGroup
 
+  @ViewChild('editorRef') editorComponent!: Editor
+
+  public editorModules = {
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ direction: 'rtl' }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ color: [] }, { background: [] }],
+        [{ font: [] }],
+        [{ align: [] }],
+        ['clean'],
+        ['link', 'image', 'video']
+      ],
+      handlers: {
+        image: () => {
+          this.selectLocalImage()
+        }
+      }
+    }
+  }
+
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
@@ -605,6 +636,8 @@ export class PageDetailComponent implements OnInit {
         id: this.currentPage()?.id || 0
       }
 
+      console.log('content:', formData.content)
+
       this.saved.emit(pageData as Page)
       this.submitting.set(false)
     } else {
@@ -647,5 +680,54 @@ export class PageDetailComponent implements OnInit {
           console.error('Error fetching categories:', error)
         }
       })
+  }
+
+  selectLocalImage() {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.click()
+
+    input.onchange = () => {
+      const file = input.files?.[0]
+      if (file) {
+        const formData = new FormData()
+        formData.append('image', file)
+        this.httpService.post('/api/admin/upload/image', formData).subscribe({
+          next: (response: any) => {
+            if (response.success) {
+              // 通过ViewChild拿到quill实例
+              const quillEditor = this.editorComponent?.quill
+              if (quillEditor) {
+                const range = quillEditor.getSelection(true)
+                quillEditor.insertEmbed(range.index, 'image', response.data.url)
+                quillEditor.setSelection(range.index + 1)
+                // 关键：同步内容到表单
+                const html = quillEditor.root.innerHTML
+                this.pageForm.get('content')?.setValue(html)
+              }
+              this.messageService.add({
+                severity: 'success',
+                summary: '上传成功',
+                detail: '图片上传成功'
+              })
+            } else {
+              this.messageService.add({
+                severity: 'error',
+                summary: '上传失败',
+                detail: response.message || '图片上传失败'
+              })
+            }
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: '上传失败',
+              detail: '图片上传失败，请重试'
+            })
+          }
+        })
+      }
+    }
   }
 }

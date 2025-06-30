@@ -113,3 +113,12 @@ export const deleteAd = async (req: Request, res: Response, next: NextFunction):
     error(res, 'Internal server error')
   }
 }
+
+// Export all functions as a controller object
+export const adController = {
+  getAd,
+  getAds,
+  createAd,
+  updateAd,
+  deleteAd
+}
