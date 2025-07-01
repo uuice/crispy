@@ -452,7 +452,7 @@ export class PageDetailComponent implements OnInit {
       sub_title: [''],
       abstract: [''],
       content: ['', [Validators.required, Validators.minLength(10)]],
-      type_id: [null],
+      type_id: [undefined],
       status: [10],
       tags: [[]],
       seo_title: [''],

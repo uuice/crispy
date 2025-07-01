@@ -238,7 +238,7 @@ export class FriendLinkDetailComponent implements OnInit, OnChanges {
       url: ['', [Validators.required, Validators.pattern('https?://.+')]],
       description: [''],
       logo: [''],
-      type_id: [null],
+      type_id: [undefined],
       sort: [0],
       status: [10]
     })

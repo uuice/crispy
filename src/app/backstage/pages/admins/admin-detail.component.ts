@@ -252,7 +252,7 @@ export class AdminDetailComponent implements OnInit {
       nick_name: [''],
       email: ['', [Validators.email]],
       phone: ['', [Validators.pattern(/^1[3-9]\d{9}$/)]],
-      role_id: [null],
+      role_id: [undefined],
       status: [10],
       is_black: [0]
     })
