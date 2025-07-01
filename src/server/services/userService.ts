@@ -264,7 +264,7 @@ export class UserService {
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.insertInto('users').values(newUser).executeTakeFirst()
+    const result = await db.safeInsertInto('users').values(newUser).executeTakeFirst()
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = {
@@ -293,7 +293,7 @@ export class UserService {
     }
 
     const result = await db
-      .updateTable('users')
+      .safeUpdateTable('users')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
@@ -313,7 +313,7 @@ export class UserService {
    */
   async deleteUser(id: number): Promise<void> {
     const result = await db
-      .updateTable('users')
+      .safeUpdateTable('users')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
@@ -366,7 +366,7 @@ export class UserService {
 
     // Update last login time
     await db
-      .updateTable('users')
+      .safeUpdateTable('users')
       .set({
         last_login_time: Date.now()
       })
@@ -500,7 +500,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(new_password, salt)
     // Update password
     const result = await db
-      .updateTable('users')
+      .safeUpdateTable('users')
       .set({
         password: hashedPassword,
         update_time: Date.now()

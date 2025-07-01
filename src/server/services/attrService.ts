@@ -101,7 +101,7 @@ export class AttrService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('attrs').values(newAttr).executeTakeFirst()
+    const result = await db.safeInsertInto('attrs').values(newAttr).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -119,7 +119,7 @@ export class AttrService {
     }
 
     const result = await db
-      .updateTable('attrs')
+      .safeUpdateTable('attrs')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -136,7 +136,7 @@ export class AttrService {
    */
   async deleteAttr(id: number) {
     const result = await db
-      .updateTable('attrs')
+      .safeUpdateTable('attrs')
       .set({
         is_delete: 10,
         update_time: Date.now()

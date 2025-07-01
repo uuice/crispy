@@ -122,7 +122,7 @@ export class NoticeService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('notices').values(newNotice).executeTakeFirst()
+    const result = await db.safeInsertInto('notices').values(newNotice).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -140,7 +140,7 @@ export class NoticeService {
     }
 
     const result = await db
-      .updateTable('notices')
+      .safeUpdateTable('notices')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -154,7 +154,7 @@ export class NoticeService {
    */
   async deleteNotice(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('notices')
+      .safeUpdateTable('notices')
       .set({
         is_delete: 10,
         update_time: Date.now()

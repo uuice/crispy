@@ -216,7 +216,7 @@ export class RuleService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('rules').values(newRule).executeTakeFirst()
+    const result = await db.safeInsertInto('rules').values(newRule).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -256,7 +256,7 @@ export class RuleService {
     }
 
     const result = await db
-      .updateTable('rules')
+      .safeUpdateTable('rules')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -286,7 +286,7 @@ export class RuleService {
     }
 
     const result = await db
-      .updateTable('rules')
+      .safeUpdateTable('rules')
       .set({
         is_delete: 10,
         update_time: Date.now()

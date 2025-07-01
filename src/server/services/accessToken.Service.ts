@@ -51,7 +51,7 @@ export class AccessTokenService {
       update_time: now,
       is_delete: DELETE_STATUS.UN_DELETE
     }
-    const result = await db.insertInto('access_token').values(newToken).executeTakeFirst()
+    const result = await db.safeInsertInto('access_token').values(newToken).executeTakeFirst()
     if (!result) throw new Error('创建token失败')
 
     const { token: _, ...tokenWithoutToken } = {
@@ -100,7 +100,7 @@ export class AccessTokenService {
    */
   async update(id: number, data: Updateable<DB['access_token']>): Promise<AccessToken | null> {
     const token = await db
-      .updateTable('access_token')
+      .safeUpdateTable('access_token')
       .set({
         ...data,
         update_time: Date.now()
@@ -119,7 +119,7 @@ export class AccessTokenService {
    */
   async delete(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('access_token')
+      .safeUpdateTable('access_token')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()

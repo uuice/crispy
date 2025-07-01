@@ -118,7 +118,7 @@ export class ApiLogService {
       body: ''
     }
 
-    const result = await db.insertInto('api_logs').values(newApiLog).executeTakeFirst()
+    const result = await db.safeInsertInto('api_logs').values(newApiLog).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -136,7 +136,7 @@ export class ApiLogService {
     }
 
     const result = await db
-      .updateTable('api_logs')
+      .safeUpdateTable('api_logs')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -153,7 +153,7 @@ export class ApiLogService {
    */
   async deleteApiLog(id: number) {
     const result = await db
-      .updateTable('api_logs')
+      .safeUpdateTable('api_logs')
       .set({
         is_delete: 10,
         update_time: Date.now()

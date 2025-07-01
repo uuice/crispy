@@ -127,7 +127,7 @@ export class UserTypeService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('user_types').values(newUserType).executeTakeFirst()
+    const result = await db.safeInsertInto('user_types').values(newUserType).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -148,7 +148,7 @@ export class UserTypeService {
     }
 
     const result = await db
-      .updateTable('user_types')
+      .safeUpdateTable('user_types')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -178,7 +178,7 @@ export class UserTypeService {
     }
 
     const result = await db
-      .updateTable('user_types')
+      .safeUpdateTable('user_types')
       .set({
         is_delete: 10,
         update_time: Date.now()

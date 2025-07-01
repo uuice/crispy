@@ -132,7 +132,7 @@ export class VoteItemService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('vote_items').values(newVoteItem).executeTakeFirst()
+    const result = await db.safeInsertInto('vote_items').values(newVoteItem).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -164,7 +164,7 @@ export class VoteItemService {
     }
 
     const result = await db
-      .updateTable('vote_items')
+      .safeUpdateTable('vote_items')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -178,7 +178,7 @@ export class VoteItemService {
    */
   async deleteVoteItem(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('vote_items')
+      .safeUpdateTable('vote_items')
       .set({
         is_delete: 10,
         update_time: Date.now()

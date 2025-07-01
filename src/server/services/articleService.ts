@@ -1,5 +1,6 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
+import { sql, ExpressionBuilder } from 'kysely'
+import type { DB } from '@src/db/db.d'
 
 export interface CreateArticleData {
   title: string
@@ -141,7 +142,7 @@ export class ArticleService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('articles').values(newArticle).executeTakeFirst()
+    const result = await db.safeInsertInto('articles').values(newArticle).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -168,7 +169,7 @@ export class ArticleService {
     }
 
     const result = await db
-      .updateTable('articles')
+      .safeUpdateTable('articles')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -185,7 +186,7 @@ export class ArticleService {
    */
   async deleteArticle(id: number) {
     const result = await db
-      .updateTable('articles')
+      .safeUpdateTable('articles')
       .set({
         is_delete: 10,
         update_time: Date.now()
@@ -247,8 +248,8 @@ export class ArticleService {
    */
   async incrementViewCount(id: number) {
     return await db
-      .updateTable('articles')
-      .set((eb) => ({
+      .safeUpdateTable('articles')
+      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
         view_count: eb(sql.ref('view_count'), '+', 1),
         update_time: Date.now()
       }))
@@ -262,8 +263,8 @@ export class ArticleService {
    */
   async incrementLikeCount(id: number) {
     return await db
-      .updateTable('articles')
-      .set((eb) => ({
+      .safeUpdateTable('articles')
+      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
         like_count: eb(sql.ref('like_count'), '+', 1),
         update_time: Date.now()
       }))
@@ -277,8 +278,8 @@ export class ArticleService {
    */
   async incrementCommentCount(id: number) {
     return await db
-      .updateTable('articles')
-      .set((eb) => ({
+      .safeUpdateTable('articles')
+      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
         comment_count: eb(sql.ref('comment_count'), '+', 1),
         update_time: Date.now()
       }))

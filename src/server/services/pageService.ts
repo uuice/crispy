@@ -116,10 +116,12 @@ export class PageService {
     const page = result as any
     return {
       ...page,
-      type: page.type_id ? {
-        id: page.type_id,
-        title: page.type_title
-      } : null
+      type: page.type_id
+        ? {
+            id: page.type_id,
+            title: page.type_title
+          }
+        : null
     } as Page
   }
 
@@ -208,10 +210,12 @@ export class PageService {
     // Transform the result to include type information
     const transformedPages = pages.map((page: any) => ({
       ...page,
-      type: page.type_id ? {
-        id: page.type_id,
-        title: page.type_title
-      } : null
+      type: page.type_id
+        ? {
+            id: page.type_id,
+            title: page.type_title
+          }
+        : null
     }))
 
     return {
@@ -237,7 +241,7 @@ export class PageService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('pages').values(newPage).executeTakeFirst()
+    const result = await db.safeInsertInto('pages').values(newPage).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -255,7 +259,7 @@ export class PageService {
     }
 
     const result = await db
-      .updateTable('pages')
+      .safeUpdateTable('pages')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -269,7 +273,7 @@ export class PageService {
    */
   async deletePage(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('pages')
+      .safeUpdateTable('pages')
       .set({
         is_delete: 10,
         update_time: Date.now()

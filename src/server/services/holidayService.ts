@@ -100,7 +100,7 @@ export class HolidayService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('holidays').values(newHoliday).executeTakeFirst()
+    const result = await db.safeInsertInto('holidays').values(newHoliday).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -118,7 +118,7 @@ export class HolidayService {
     }
 
     const result = await db
-      .updateTable('holidays')
+      .safeUpdateTable('holidays')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -135,7 +135,7 @@ export class HolidayService {
    */
   async deleteHoliday(id: number) {
     const result = await db
-      .updateTable('holidays')
+      .safeUpdateTable('holidays')
       .set({
         is_delete: 10,
         update_time: Date.now()

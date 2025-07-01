@@ -126,7 +126,7 @@ export class RoleService {
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.insertInto('roles').values(newRole).executeTakeFirst()
+    const result = await db.safeInsertInto('roles').values(newRole).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -144,7 +144,7 @@ export class RoleService {
     }
 
     const result = await db
-      .updateTable('roles')
+      .safeUpdateTable('roles')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -172,7 +172,7 @@ export class RoleService {
     }
 
     const result = await db
-      .updateTable('roles')
+      .safeUpdateTable('roles')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()

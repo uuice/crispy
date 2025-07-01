@@ -122,7 +122,7 @@ export class OperateLogService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('operate_logs').values(newLog).executeTakeFirst()
+    const result = await db.safeInsertInto('operate_logs').values(newLog).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -140,7 +140,7 @@ export class OperateLogService {
     }
 
     const result = await db
-      .updateTable('operate_logs')
+      .safeUpdateTable('operate_logs')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -154,7 +154,7 @@ export class OperateLogService {
    */
   async deleteOperateLog(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('operate_logs')
+      .safeUpdateTable('operate_logs')
       .set({
         is_delete: 10,
         update_time: Date.now()

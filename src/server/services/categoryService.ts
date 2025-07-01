@@ -243,7 +243,7 @@ export class CategoryService {
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.insertInto('categories').values(newCategory).executeTakeFirst()
+    const result = await db.safeInsertInto('categories').values(newCategory).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -279,7 +279,7 @@ export class CategoryService {
     }
 
     const result = await db
-      .updateTable('categories')
+      .safeUpdateTable('categories')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
@@ -302,7 +302,7 @@ export class CategoryService {
     }
 
     const result = await db
-      .updateTable('categories')
+      .safeUpdateTable('categories')
       .set({
         is_delete: 10,
         update_time: Date.now()

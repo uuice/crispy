@@ -134,7 +134,7 @@ export class LinkService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('links').values(newLink).executeTakeFirst()
+    const result = await db.safeInsertInto('links').values(newLink).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -152,7 +152,7 @@ export class LinkService {
     }
 
     const result = await db
-      .updateTable('links')
+      .safeUpdateTable('links')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -166,7 +166,7 @@ export class LinkService {
    */
   async deleteLink(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('links')
+      .safeUpdateTable('links')
       .set({
         is_delete: 10,
         update_time: Date.now()

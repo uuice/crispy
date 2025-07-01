@@ -111,7 +111,7 @@ export class EnumService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('enums').values(newEnum).executeTakeFirst()
+    const result = await db.safeInsertInto('enums').values(newEnum).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -129,7 +129,7 @@ export class EnumService {
     }
 
     const result = await db
-      .updateTable('enums')
+      .safeUpdateTable('enums')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -146,7 +146,7 @@ export class EnumService {
    */
   async deleteEnum(id: number) {
     const result = await db
-      .updateTable('enums')
+      .safeUpdateTable('enums')
       .set({
         is_delete: 10,
         update_time: Date.now()

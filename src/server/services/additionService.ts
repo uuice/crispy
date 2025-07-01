@@ -114,7 +114,7 @@ export class AdditionService {
       fields_json: '{}' // Add default empty JSON object
     }
 
-    const result = await db.insertInto('additions').values(newAddition).executeTakeFirst()
+    const result = await db.safeInsertInto('additions').values(newAddition).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -135,7 +135,7 @@ export class AdditionService {
     }
 
     const result = await db
-      .updateTable('additions')
+      .safeUpdateTable('additions')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -153,7 +153,7 @@ export class AdditionService {
    */
   async deleteAddition(id: number): Promise<void> {
     const result = await db
-      .updateTable('additions')
+      .safeUpdateTable('additions')
       .set({
         is_delete: 10,
         update_time: Date.now()

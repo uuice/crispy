@@ -111,7 +111,7 @@ export class JobService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('jobs').values(newJob).executeTakeFirst()
+    const result = await db.safeInsertInto('jobs').values(newJob).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -129,7 +129,7 @@ export class JobService {
     }
 
     const result = await db
-      .updateTable('jobs')
+      .safeUpdateTable('jobs')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -146,7 +146,7 @@ export class JobService {
    */
   async deleteJob(id: number) {
     const result = await db
-      .updateTable('jobs')
+      .safeUpdateTable('jobs')
       .set({
         is_delete: 10,
         update_time: Date.now()

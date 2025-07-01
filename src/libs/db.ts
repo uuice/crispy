@@ -1,4 +1,10 @@
-import { Kysely, MysqlDialect } from 'kysely'
+import {
+  Kysely,
+  MysqlDialect,
+  KyselyPlugin,
+  PluginTransformQueryArgs,
+  PluginTransformResultArgs
+} from 'kysely'
 import { createPool } from 'mysql2'
 
 import { join } from 'path'
@@ -7,6 +13,72 @@ import type { DB } from '../db/db.d.ts'
 import { sql } from 'kysely'
 
 import { env } from '../server/config/env'
+
+// 工具函数：过滤 undefined 字段
+export const filterUndefined = <T extends Record<string, any>>(obj: T): Partial<T> => {
+  const filtered: Partial<T> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      filtered[key as keyof T] = value
+    }
+  }
+  return filtered
+}
+
+// 过滤 undefined 字段的插件
+class FilterUndefinedPlugin implements KyselyPlugin {
+  transformQuery(args: PluginTransformQueryArgs): any {
+    const { node } = args
+
+    // 对于 INSERT 和 UPDATE 查询，我们在这里不做处理
+    // 而是通过扩展方法来实现过滤功能
+    return node
+  }
+
+  transformResult(args: PluginTransformResultArgs): any {
+    return args.result
+  }
+}
+
+// 扩展 Kysely 实例的方法
+export const createDbWithHelpers = (kyselyInstance: Kysely<DB>) => {
+  // 直接在原始实例上添加方法，避免破坏内部结构
+  const enhanced = kyselyInstance as any
+
+  // 添加安全插入方法
+  enhanced.safeInsertInto = <T extends keyof DB>(table: T) => {
+    return {
+      values: (data: any) => {
+        const filteredData = filterUndefined(data) as any
+        return kyselyInstance.insertInto(table).values(filteredData)
+      }
+    }
+  }
+
+  // 添加安全更新方法
+  enhanced.safeUpdateTable = <T extends keyof DB>(table: T) => {
+    return {
+      set: (data: any) => {
+        const filteredData = filterUndefined(data)
+        return (kyselyInstance.updateTable(table) as any).set(filteredData)
+      }
+    }
+  }
+
+  return enhanced as Kysely<DB> & {
+    safeInsertInto: <T extends keyof DB>(
+      table: T
+    ) => {
+      values: (data: any) => any
+    }
+    safeUpdateTable: <T extends keyof DB>(
+      table: T
+    ) => {
+      set: (data: any) => any
+    }
+  }
+}
+
 // Get the directory name of the current module
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -42,12 +114,16 @@ const pool = createPool({
 
 const dialect = new MysqlDialect({ pool })
 
-// Create Kysely instance
-export const db = new Kysely<DB>({
+// Create Kysely instance with plugin
+const kyselyInstance = new Kysely<DB>({
   dialect,
   // Logging configuration
-  log: env['NODE_ENV'] === 'development' ? ['query', 'error'] : ['error']
+  log: env['NODE_ENV'] === 'development' ? ['query', 'error'] : ['error'],
+  plugins: [new FilterUndefinedPlugin()]
 })
+
+// Export enhanced db instance with helper methods
+export const db = createDbWithHelpers(kyselyInstance)
 
 // Export types
 export type { DB }

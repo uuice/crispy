@@ -1,4 +1,4 @@
-import { db } from '@src/libs/db'
+import { db, filterUndefined } from '@src/libs/db'
 import { sql } from 'kysely'
 
 // Data interfaces
@@ -178,7 +178,10 @@ export class VoteService {
     // Start a transaction
     const result = await db.transaction().execute(async (trx) => {
       // Insert vote
-      const voteResult = await trx.insertInto('votes').values(newVote).executeTakeFirst()
+      const voteResult = await trx
+        .insertInto('votes')
+        .values(filterUndefined(newVote))
+        .executeTakeFirst()
       const voteId = Number(voteResult.insertId)
 
       // Insert vote items if provided
@@ -227,7 +230,7 @@ export class VoteService {
       // Update vote
       const voteResult = await trx
         .updateTable('votes')
-        .set(voteUpdateData)
+        .set(filterUndefined(voteUpdateData))
         .where('id', '=', id)
         .where('is_delete', '=', 0)
         .executeTakeFirst()
@@ -396,7 +399,6 @@ export class VoteService {
     multiple: number
     single: number
   }> {
-    const now = Date.now()
     const stats = await db
       .selectFrom('votes')
       .select([

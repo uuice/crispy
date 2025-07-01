@@ -126,7 +126,7 @@ export class KeywordService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('keywords').values(newKeyword).executeTakeFirst()
+    const result = await db.safeInsertInto('keywords').values(newKeyword).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -144,7 +144,7 @@ export class KeywordService {
     }
 
     const result = await db
-      .updateTable('keywords')
+      .safeUpdateTable('keywords')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -158,7 +158,7 @@ export class KeywordService {
    */
   async deleteKeyword(id: number): Promise<boolean> {
     const result = await db
-      .updateTable('keywords')
+      .safeUpdateTable('keywords')
       .set({
         is_delete: 10,
         update_time: Date.now()

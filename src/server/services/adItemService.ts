@@ -126,7 +126,7 @@ export class AdItemService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('ad_items').values(newAdItem).executeTakeFirst()
+    const result = await db.safeInsertInto('ad_items').values(newAdItem).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -161,7 +161,7 @@ export class AdItemService {
     }
 
     const result = await db
-      .updateTable('ad_items')
+      .safeUpdateTable('ad_items')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -179,7 +179,7 @@ export class AdItemService {
    */
   async deleteAdItem(id: number): Promise<void> {
     const result = await db
-      .updateTable('ad_items')
+      .safeUpdateTable('ad_items')
       .set({
         is_delete: 10,
         update_time: Date.now()

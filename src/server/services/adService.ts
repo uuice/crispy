@@ -131,7 +131,7 @@ export class AdService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('ads').values(newAd).executeTakeFirst()
+    const result = await db.safeInsertInto('ads').values(newAd).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -152,7 +152,7 @@ export class AdService {
     }
 
     const result = await db
-      .updateTable('ads')
+      .safeUpdateTable('ads')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -170,7 +170,7 @@ export class AdService {
    */
   async deleteAd(id: number): Promise<void> {
     const result = await db
-      .updateTable('ads')
+      .safeUpdateTable('ads')
       .set({
         is_delete: 10,
         update_time: Date.now()

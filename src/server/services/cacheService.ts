@@ -100,7 +100,7 @@ export class CacheService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('caches').values(newCache).executeTakeFirst()
+    const result = await db.safeInsertInto('caches').values(newCache).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -118,7 +118,7 @@ export class CacheService {
     }
 
     const result = await db
-      .updateTable('caches')
+      .safeUpdateTable('caches')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -135,7 +135,7 @@ export class CacheService {
    */
   async deleteCache(id: number) {
     const result = await db
-      .updateTable('caches')
+      .safeUpdateTable('caches')
       .set({
         is_delete: 10,
         update_time: Date.now()
@@ -181,7 +181,7 @@ export class CacheService {
    */
   async clearExpiredCaches(expireTime: number) {
     const result = await db
-      .updateTable('caches')
+      .safeUpdateTable('caches')
       .set({
         is_delete: 10,
         update_time: Date.now()

@@ -187,7 +187,7 @@ export class MenuService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('menus').values(newMenu).executeTakeFirst()
+    const result = await db.safeInsertInto('menus').values(newMenu).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -218,7 +218,7 @@ export class MenuService {
     }
 
     const result = await db
-      .updateTable('menus')
+      .safeUpdateTable('menus')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -238,7 +238,7 @@ export class MenuService {
     }
 
     const result = await db
-      .updateTable('menus')
+      .safeUpdateTable('menus')
       .set({
         is_delete: 10,
         update_time: Date.now()

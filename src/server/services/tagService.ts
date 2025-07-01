@@ -127,7 +127,7 @@ export class TagService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('tags').values(newTag).executeTakeFirst()
+    const result = await db.safeInsertInto('tags').values(newTag).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -148,7 +148,7 @@ export class TagService {
     }
 
     const result = await db
-      .updateTable('tags')
+      .safeUpdateTable('tags')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -166,7 +166,7 @@ export class TagService {
    */
   async deleteTag(id: number): Promise<void> {
     const result = await db
-      .updateTable('tags')
+      .safeUpdateTable('tags')
       .set({
         is_delete: 10,
         update_time: Date.now()

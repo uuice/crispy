@@ -112,7 +112,7 @@ export class ConfigService {
       is_delete: 0
     }
 
-    const result = await db.insertInto('configs').values(newConfig).executeTakeFirst()
+    const result = await db.safeInsertInto('configs').values(newConfig).executeTakeFirst()
 
     return {
       id: Number(result.insertId),
@@ -130,7 +130,7 @@ export class ConfigService {
     }
 
     const result = await db
-      .updateTable('configs')
+      .safeUpdateTable('configs')
       .set(updateData)
       .where('id', '=', id)
       .where('is_delete', '=', 0)
@@ -147,7 +147,7 @@ export class ConfigService {
    */
   async deleteConfig(id: number) {
     const result = await db
-      .updateTable('configs')
+      .safeUpdateTable('configs')
       .set({
         is_delete: 10,
         update_time: Date.now()
