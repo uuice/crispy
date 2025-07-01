@@ -52,7 +52,6 @@
   color: var(--p-text-color) !important;
   border-radius: var(--p-border-radius) !important;
   box-shadow: var(--p-overlay-shadow) !important;
-  z-index: 9999 !important;
 }
 
 .ql-toolbar.ql-snow .ql-picker-item {
@@ -124,12 +123,28 @@
   border: 1px solid var(--p-content-border-color) !important;
   color: var(--p-text-color) !important;
   border-radius: var(--p-border-radius) !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto !important;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace !important;
+  font-size: 0.9em !important;
+  line-height: 1.4 !important;
 }
 
 .ql-editor code {
   background: var(--p-content-hover-background) !important;
   color: var(--p-text-color) !important;
   border-radius: var(--p-border-radius) !important;
+  padding: 0.2rem 0.4rem !important;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace !important;
+  font-size: 0.9em !important;
+}
+
+/* 代码高亮样式适配 PrimeNG 主题 */
+.ql-editor pre.ql-syntax {
+  background: var(--p-content-hover-background) !important;
+  border: 1px solid var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
 }
 
 /* 表格样式 */
@@ -183,7 +198,6 @@
   color: var(--p-text-color) !important;
   border-radius: var(--p-border-radius) !important;
   box-shadow: var(--p-overlay-shadow) !important;
-  z-index: 10000 !important;
 }
 
 .ql-tooltip input {
@@ -260,37 +274,8 @@
   color: var(--p-primary-contrast-color) !important;
 }
 
-/* PrimeNG Dialog 中的 Quill 编辑器特殊处理 */
-.p-dialog .ql-toolbar.ql-snow,
-.p-dialog .ql-container.ql-snow {
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-.p-dialog .ql-tooltip {
-  z-index: 10002 !important;
-}
-
-.p-dialog .ql-toolbar.ql-snow .ql-picker-options {
-  z-index: 10001 !important;
-}
-
-/* 确保在弹框中的编辑器正常显示 */
-.p-dialog .p-editor {
-  position: relative !important;
-}
-
 .p-dialog .p-editor .ql-editor {
   min-height: 200px !important;
-}
-
-/* 修复可能的层级问题 */
-.ql-snow .ql-tooltip {
-  position: absolute !important;
-}
-
-.ql-snow .ql-picker-options {
-  position: absolute !important;
 }
 
 /* 暗色主题适配 */

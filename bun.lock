@@ -23,6 +23,7 @@
         "chart.js": "^4.4.1",
         "express": "^5.1.0",
         "helmet": "^7.1.0",
+        "highlight.js": "^11.11.1",
         "jsonwebtoken": "^9.0.2",
         "kysely": "^0.28.2",
         "multer": "^2.0.1",
@@ -1017,6 +1018,8 @@
     "hasown": ["hasown@2.0.2", "https://mirrors.cloud.tencent.com/npm/hasown/-/hasown-2.0.2.tgz", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ=="],
 
     "helmet": ["helmet@7.2.0", "https://mirrors.cloud.tencent.com/npm/helmet/-/helmet-7.2.0.tgz", {}, "sha512-ZRiwvN089JfMXokizgqEPXsl2Guk094yExfoDXR0cBYWxtBbaSww/w+vT4WEJsBW2iTUi1GgZ6swmoug3Oy4Xw=="],
+
+    "highlight.js": ["highlight.js@11.11.1", "https://mirrors.cloud.tencent.com/npm/highlight.js/-/highlight.js-11.11.1.tgz", {}, "sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w=="],
 
     "hosted-git-info": ["hosted-git-info@8.1.0", "https://mirrors.cloud.tencent.com/npm/hosted-git-info/-/hosted-git-info-8.1.0.tgz", { "dependencies": { "lru-cache": "^10.0.1" } }, "sha512-Rw/B2DNQaPBICNXEm8balFz9a6WpZrkCGpcWFpy7nCj+NyhSdqXipmfvtmWt9xGfp0wZnBxB+iVpLmQMYt47Tw=="],
 

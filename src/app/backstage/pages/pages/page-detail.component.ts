@@ -21,6 +21,7 @@ import { MessageModule } from 'primeng/message'
 import { ChipsModule } from 'primeng/chips'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
+import hljs from 'highlight.js'
 
 interface Page {
   id: number
@@ -435,7 +436,8 @@ export class PageDetailComponent implements OnInit {
           this.selectLocalImage()
         }
       }
-    }
+    },
+    syntax: { hljs }
   }
 
   constructor(
@@ -464,6 +466,30 @@ export class PageDetailComponent implements OnInit {
     // Initialize with current values
     this.currentPage.set(this.page)
     this.currentMode.set(this.mode)
+
+    // 配置 highlight.js
+    hljs.configure({
+      languages: [
+        'javascript',
+        'typescript',
+        'html',
+        'css',
+        'python',
+        'java',
+        'cpp',
+        'c',
+        'php',
+        'ruby',
+        'go',
+        'rust',
+        'sql',
+        'json',
+        'xml',
+        'yaml',
+        'bash',
+        'shell'
+      ]
+    })
 
     // Load categories
     this.fetchCategories()
