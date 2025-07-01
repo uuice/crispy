@@ -200,6 +200,7 @@ interface Post {
         [draggable]="false"
         [resizable]="false"
         header="文章预览"
+        [closeOnEscape]="false"
       >
         <div *ngIf="selectedPost" class="p-4">
           <h2 class="text-2xl font-bold mb-4">{{ selectedPost.title }}</h2>

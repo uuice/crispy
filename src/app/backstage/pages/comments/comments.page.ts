@@ -237,6 +237,7 @@ interface Comment {
         [draggable]="false"
         [resizable]="false"
         header="回复评论"
+        [closeOnEscape]="false"
       >
         <div *ngIf="selectedComment" class="p-4">
           <div class="mb-4">

@@ -93,6 +93,7 @@ interface CategoriesResponse {
       [draggable]="false"
       [resizable]="false"
       (onHide)="onDialogHide()"
+      [closeOnEscape]="false"
     >
       <form [formGroup]="pageForm" (ngSubmit)="onSubmit()">
         <div class="grid grid-cols-2 gap-4">

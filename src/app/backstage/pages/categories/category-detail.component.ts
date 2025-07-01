@@ -65,6 +65,7 @@ interface CategoryNode {
       [draggable]="false"
       [resizable]="false"
       (onHide)="onDialogHide()"
+      [closeOnEscape]="false"
     >
       <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
         <div class="grid">

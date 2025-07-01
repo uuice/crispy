@@ -79,6 +79,7 @@ interface Category {
       [style]="{ width: '600px' }"
       [draggable]="false"
       [resizable]="false"
+      [closeOnEscape]="false"
     >
       <form [formGroup]="friendLinkForm" (ngSubmit)="onSubmit()">
         <div class="formgrid grid">

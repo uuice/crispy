@@ -89,6 +89,7 @@ interface RulesTreeResponse {
       [style]="{ width: '800px' }"
       [draggable]="false"
       [resizable]="false"
+      [closeOnEscape]="false"
     >
       <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
         <div class="formgrid grid">
