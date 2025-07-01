@@ -91,7 +91,6 @@ import { HttpService } from '../../../services/http.service'
                 >
                 <ckeditor
                   id="content"
-                  [editor]="Editor"
                   formControlName="content"
                   [config]="editorConfig"
                   [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"

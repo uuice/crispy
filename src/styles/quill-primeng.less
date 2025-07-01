@@ -1,0 +1,321 @@
+/* Quill Editor 样式重置 - 适配 PrimeNG 主题系统 */
+
+/* 工具栏样式 */
+.ql-toolbar.ql-snow {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) var(--p-border-radius) 0 0 !important;
+}
+
+/* 工具栏按钮 */
+.ql-toolbar.ql-snow .ql-picker-label,
+.ql-toolbar.ql-snow .ql-picker-item,
+.ql-toolbar.ql-snow button {
+  color: var(--p-text-color) !important;
+}
+
+.ql-toolbar.ql-snow .ql-stroke {
+  stroke: var(--p-text-color) !important;
+}
+
+.ql-toolbar.ql-snow .ql-fill {
+  fill: var(--p-text-color) !important;
+}
+
+/* 工具栏按钮悬停状态 */
+.ql-toolbar.ql-snow button:hover,
+.ql-toolbar.ql-snow .ql-picker-label:hover {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+}
+
+/* 工具栏按钮激活状态 */
+.ql-toolbar.ql-snow button.ql-active,
+.ql-toolbar.ql-snow .ql-picker-label.ql-active {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+.ql-toolbar.ql-snow button.ql-active .ql-stroke {
+  stroke: var(--p-primary-contrast-color) !important;
+}
+
+.ql-toolbar.ql-snow button.ql-active .ql-fill {
+  fill: var(--p-primary-contrast-color) !important;
+}
+
+/* 下拉菜单 */
+.ql-toolbar.ql-snow .ql-picker-options {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+  z-index: 9999 !important;
+}
+
+.ql-toolbar.ql-snow .ql-picker-item {
+  color: var(--p-text-color) !important;
+}
+
+.ql-toolbar.ql-snow .ql-picker-item:hover {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+}
+
+.ql-toolbar.ql-snow .ql-picker-item.ql-selected {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+/* 编辑区域 */
+.ql-container.ql-snow {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: 0 0 var(--p-border-radius) var(--p-border-radius) !important;
+  font-family: var(--p-font-family) !important;
+}
+
+.ql-editor {
+  background: var(--p-content-background) !important;
+  color: var(--p-text-color) !important;
+  font-family: var(--p-font-family) !important;
+  font-size: var(--p-font-size) !important;
+  line-height: 1.6 !important;
+}
+
+/* 编辑器焦点状态 */
+.ql-container.ql-snow:focus-within {
+  border-color: var(--p-primary-color) !important;
+  box-shadow: 0 0 0 1px var(--p-primary-color) !important;
+}
+
+/* 占位符文本 */
+.ql-editor.ql-blank::before {
+  color: var(--p-text-muted-color) !important;
+  font-style: italic;
+}
+
+/* 链接样式 */
+.ql-editor a {
+  color: var(--p-primary-color) !important;
+  text-decoration: underline;
+}
+
+.ql-editor a:hover {
+  color: var(--p-primary-600) !important;
+}
+
+/* 引用块样式 */
+.ql-editor blockquote {
+  border-left: 4px solid var(--p-primary-color) !important;
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0 var(--p-border-radius) var(--p-border-radius) 0 !important;
+}
+
+/* 代码块样式 */
+.ql-editor pre {
+  background: var(--p-content-hover-background) !important;
+  border: 1px solid var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ql-editor code {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+/* 表格样式 */
+.ql-editor table {
+  border-color: var(--p-content-border-color) !important;
+}
+
+.ql-editor table td,
+.ql-editor table th {
+  border-color: var(--p-content-border-color) !important;
+}
+
+.ql-editor table th {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-color) !important;
+}
+
+/* 列表样式 */
+.ql-editor ul,
+.ql-editor ol {
+  color: var(--p-text-color) !important;
+}
+
+/* 标题样式 */
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+  color: var(--p-text-color) !important;
+  font-weight: 600;
+}
+
+/* 图片样式 */
+.ql-editor img {
+  border-radius: var(--p-border-radius) !important;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 视频样式 */
+.ql-editor iframe {
+  border-radius: var(--p-border-radius) !important;
+}
+
+/* 工具提示 */
+.ql-tooltip {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+  box-shadow: var(--p-overlay-shadow) !important;
+  z-index: 10000 !important;
+}
+
+.ql-tooltip input {
+  background: var(--p-content-background) !important;
+  border-color: var(--p-content-border-color) !important;
+  color: var(--p-text-color) !important;
+  border-radius: var(--p-border-radius) !important;
+}
+
+.ql-tooltip input:focus {
+  border-color: var(--p-primary-color) !important;
+  box-shadow: 0 0 0 1px var(--p-primary-color) !important;
+}
+
+.ql-tooltip a {
+  color: var(--p-primary-color) !important;
+}
+
+/* 错误状态 */
+.p-editor.ng-invalid.ng-dirty .ql-container {
+  border-color: var(--p-red-500) !important;
+}
+
+.p-editor.ng-invalid.ng-dirty .ql-toolbar {
+  border-color: var(--p-red-500) !important;
+}
+
+/* 禁用状态 */
+.p-editor.p-disabled .ql-toolbar,
+.p-editor.p-disabled .ql-container {
+  background: var(--p-content-hover-background) !important;
+  color: var(--p-text-muted-color) !important;
+  opacity: 0.6;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+  .ql-toolbar.ql-snow {
+    padding: 0.5rem !important;
+  }
+
+  .ql-toolbar.ql-snow button {
+    padding: 0.25rem !important;
+    margin: 0.125rem !important;
+  }
+
+  .ql-editor {
+    padding: 0.75rem !important;
+    min-height: 200px !important;
+  }
+}
+
+/* 滚动条样式 */
+.ql-editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ql-editor::-webkit-scrollbar-track {
+  background: var(--p-content-background);
+}
+
+.ql-editor::-webkit-scrollbar-thumb {
+  background: var(--p-content-border-color);
+  border-radius: 4px;
+}
+
+.ql-editor::-webkit-scrollbar-thumb:hover {
+  background: var(--p-text-muted-color);
+}
+
+/* 选择文本样式 */
+.ql-editor ::selection {
+  background: var(--p-primary-color) !important;
+  color: var(--p-primary-contrast-color) !important;
+}
+
+/* PrimeNG Dialog 中的 Quill 编辑器特殊处理 */
+.p-dialog .ql-toolbar.ql-snow,
+.p-dialog .ql-container.ql-snow {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.p-dialog .ql-tooltip {
+  z-index: 10002 !important;
+}
+
+.p-dialog .ql-toolbar.ql-snow .ql-picker-options {
+  z-index: 10001 !important;
+}
+
+/* 确保在弹框中的编辑器正常显示 */
+.p-dialog .p-editor {
+  position: relative !important;
+}
+
+.p-dialog .p-editor .ql-editor {
+  min-height: 200px !important;
+}
+
+/* 修复可能的层级问题 */
+.ql-snow .ql-tooltip {
+  position: absolute !important;
+}
+
+.ql-snow .ql-picker-options {
+  position: absolute !important;
+}
+
+/* 暗色主题适配 */
+[data-theme='dark'] .ql-toolbar.ql-snow,
+[data-theme='dark'] .ql-container.ql-snow {
+  border-color: var(--p-content-border-color) !important;
+}
+
+[data-theme='dark'] .ql-editor {
+  background: var(--p-content-background) !important;
+  color: var(--p-text-color) !important;
+}
+
+/* 高对比度模式适配 */
+@media (prefers-contrast: high) {
+  .ql-toolbar.ql-snow button:hover,
+  .ql-toolbar.ql-snow .ql-picker-label:hover {
+    border: 2px solid var(--p-primary-color) !important;
+  }
+
+  .ql-container.ql-snow:focus-within {
+    border-width: 2px !important;
+  }
+}
+
+.p-editor-toolbar {
+  display: none !important;
+}

@@ -6,7 +6,7 @@ import {
   Output,
   signal,
   WritableSignal,
-  HostListener
+  ViewChild
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
@@ -19,10 +19,8 @@ import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { ChipsModule } from 'primeng/chips'
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
-import { UploadAdapter } from '../../../adapter'
 
 interface Page {
   id: number
@@ -79,7 +77,7 @@ interface CategoriesResponse {
     ToastModule,
     MessageModule,
     ChipsModule,
-    CKEditorModule
+    EditorModule
   ],
   providers: [MessageService],
   template: `
@@ -162,15 +160,14 @@ interface CategoriesResponse {
 
         <div class="field">
           <label for="content" class="block text-900 font-medium mb-2">内容 *</label>
-          <ckeditor
+          <p-editor
             id="content"
-            [editor]="Editor"
             formControlName="content"
-            [config]="editorConfig"
+            [style]="{ height: '300px' }"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
-            (ready)="onReady($event)"
+            [modules]="editorModules"
             #editorRef
-          ></ckeditor>
+          ></p-editor>
           <p-message
             *ngIf="isFieldInvalid('content')"
             severity="error"
@@ -413,127 +410,32 @@ export class PageDetailComponent implements OnInit {
 
   pageForm: FormGroup
 
-  // CKEditor 配置 - 显示 Classic Editor 支持的所有免费功能
-  public Editor = ClassicEditor
-  public editorConfig: any = {
-    licenseKey: 'GPL', // 使用 GPL 许可证用于开源项目
-    toolbar: [
-      'heading',
-      '|',
-      'bold',
-      'italic',
-      'link',
-      '|',
-      'bulletedList',
-      'numberedList',
-      '|',
-      'outdent',
-      'indent',
-      '|',
-      'imageUpload',
-      'blockQuote',
-      'insertTable',
-      '|',
-      'undo',
-      'redo'
-    ],
-    // 标题配置
-    heading: {
-      options: [
-        { model: 'paragraph', title: '段落', class: 'ck-heading_paragraph' },
-        { model: 'heading1', view: 'h1', title: '标题 1', class: 'ck-heading_heading1' },
-        { model: 'heading2', view: 'h2', title: '标题 2', class: 'ck-heading_heading2' },
-        { model: 'heading3', view: 'h3', title: '标题 3', class: 'ck-heading_heading3' },
-        { model: 'heading4', view: 'h4', title: '标题 4', class: 'ck-heading_heading4' },
-        { model: 'heading5', view: 'h5', title: '标题 5', class: 'ck-heading_heading5' },
-        { model: 'heading6', view: 'h6', title: '标题 6', class: 'ck-heading_heading6' }
-      ]
-    },
+  @ViewChild('editorRef') editorComponent!: Editor
 
-    // 字体大小配置
-    fontSize: {
-      options: [9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36]
-    },
-    // 字体系列配置
-    fontFamily: {
-      options: [
-        'default',
-        'Arial, Helvetica, sans-serif',
-        'Courier New, Courier, monospace',
-        'Georgia, serif',
-        'Times New Roman, Times, serif',
-        'Trebuchet MS, Helvetica, sans-serif',
-        'Verdana, Geneva, sans-serif',
-        '微软雅黑, Microsoft YaHei',
-        '宋体, SimSun',
-        '黑体, SimHei',
-        '楷体, KaiTi'
-      ]
-    },
-    // 对齐方式配置
-    alignment: {
-      options: ['left', 'center', 'right', 'justify']
-    },
-    // 图片配置
-    image: {
-      toolbar: [
-        'imageStyle:inline',
-        'imageStyle:block',
-        'imageStyle:side',
-        '|',
-        'imageStyle:alignLeft',
-        'imageStyle:alignCenter',
-        'imageStyle:alignRight',
-        '|',
-        'toggleImageCaption',
-        'imageTextAlternative'
+  public editorModules = {
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ indent: '-1' }, { indent: '+1' }],
+        [{ direction: 'rtl' }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ color: [] }, { background: [] }],
+        [{ font: [] }],
+        [{ align: [] }],
+        ['clean'],
+        ['link', 'image', 'video']
       ],
-      styles: ['full', 'side', 'alignLeft', 'alignCenter', 'alignRight']
-    },
-    // 表格配置
-    table: {
-      contentToolbar: [
-        'tableColumn',
-        'tableRow',
-        'mergeTableCells',
-        'tableProperties',
-        'tableCellProperties'
-      ]
-    },
-    // 链接配置
-    link: {
-      decorators: {
-        openInNewTab: {
-          mode: 'manual',
-          label: '在新标签页中打开',
-          attributes: {
-            target: '_blank',
-            rel: 'noopener noreferrer'
-          }
+      handlers: {
+        image: () => {
+          this.selectLocalImage()
         }
       }
-    },
-    // 代码块语言配置
-    codeBlock: {
-      languages: [
-        { language: 'plaintext', label: '纯文本' },
-        { language: 'c', label: 'C' },
-        { language: 'cs', label: 'C#' },
-        { language: 'cpp', label: 'C++' },
-        { language: 'css', label: 'CSS' },
-        { language: 'diff', label: 'Diff' },
-        { language: 'html', label: 'HTML' },
-        { language: 'java', label: 'Java' },
-        { language: 'javascript', label: 'JavaScript' },
-        { language: 'php', label: 'PHP' },
-        { language: 'python', label: 'Python' },
-        { language: 'ruby', label: 'Ruby' },
-        { language: 'typescript', label: 'TypeScript' },
-        { language: 'xml', label: 'XML' }
-      ]
-    },
-
-    language: 'zh-cn'
+    }
   }
 
   constructor(
@@ -780,10 +682,52 @@ export class PageDetailComponent implements OnInit {
       })
   }
 
-  // CKEditor 图片上传适配器
-  onReady(editor: any) {
-    editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
-      return new UploadAdapter(loader, this.httpService, this.messageService)
+  selectLocalImage() {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.click()
+
+    input.onchange = () => {
+      const file = input.files?.[0]
+      if (file) {
+        const formData = new FormData()
+        formData.append('image', file)
+        this.httpService.post('/api/admin/upload/image', formData).subscribe({
+          next: (response: any) => {
+            if (response.success) {
+              // 通过ViewChild拿到quill实例
+              const quillEditor = this.editorComponent?.quill
+              if (quillEditor) {
+                const range = quillEditor.getSelection(true)
+                quillEditor.insertEmbed(range.index, 'image', response.data.url)
+                quillEditor.setSelection(range.index + 1)
+                // 关键：同步内容到表单
+                const html = quillEditor.root.innerHTML
+                this.pageForm.get('content')?.setValue(html)
+              }
+              this.messageService.add({
+                severity: 'success',
+                summary: '上传成功',
+                detail: '图片上传成功'
+              })
+            } else {
+              this.messageService.add({
+                severity: 'error',
+                summary: '上传失败',
+                detail: response.message || '图片上传失败'
+              })
+            }
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: '上传失败',
+              detail: '图片上传失败，请重试'
+            })
+          }
+        })
+      }
     }
   }
 }
