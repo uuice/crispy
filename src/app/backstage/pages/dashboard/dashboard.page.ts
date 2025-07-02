@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { ChartModule } from 'primeng/chart'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { RippleModule } from 'primeng/ripple'
+import { ToastModule } from 'primeng/toast'
+import { MessageService } from 'primeng/api'
+import { HttpService } from '../../services/http.service'
+import { TagModule } from 'primeng/tag'
 
 interface StatCard {
   title: string
@@ -26,12 +30,23 @@ interface RecentPost {
 @Component({
   selector: 'cs-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, ChartModule, TableModule, ButtonModule, RippleModule],
+  imports: [
+    CommonModule,
+    CardModule,
+    ChartModule,
+    TableModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    TagModule
+  ],
+  providers: [MessageService],
   template: `
+    <p-toast></p-toast>
     <div class="dashboard">
       <!-- Stats Cards -->
       <div class="stats-grid">
-        <p-card *ngFor="let stat of stats" class="stat-card">
+        <p-card *ngFor="let stat of stats()" class="stat-card">
           <div class="stat-content">
             <div class="stat-icon" [style.background-color]="stat.color">
               <i [class]="stat.icon"></i>
@@ -41,7 +56,7 @@ interface RecentPost {
               <div class="stat-value">{{ stat.value }}</div>
               <div
                 class="stat-change"
-                *ngIf="stat.change"
+                *ngIf="stat.change !== undefined"
                 [class.positive]="stat.change > 0"
                 [class.negative]="stat.change < 0"
               >
@@ -54,18 +69,18 @@ interface RecentPost {
 
       <!-- Charts -->
       <div class="charts-grid">
-        <p-card header="Visitors" class="chart-card">
-          <p-chart type="line" [data]="visitorsData" [options]="chartOptions"></p-chart>
+        <p-card header="访问趋势" class="chart-card">
+          <p-chart type="line" [data]="visitorsData()" [options]="chartOptions"></p-chart>
         </p-card>
-        <p-card header="Posts by Category" class="chart-card">
-          <p-chart type="pie" [data]="categoryData" [options]="pieOptions"></p-chart>
+        <p-card header="分类分布" class="chart-card">
+          <p-chart type="pie" [data]="categoryData()" [options]="pieOptions"></p-chart>
         </p-card>
       </div>
 
       <!-- Recent Posts -->
-      <p-card header="Recent Posts" class="recent-posts">
+      <p-card header="最新文章" class="recent-posts">
         <p-table
-          [value]="recentPosts"
+          [value]="recentPosts()"
           [rows]="5"
           [showCurrentPageReport]="true"
           responsiveLayout="scroll"
@@ -74,12 +89,11 @@ interface RecentPost {
         >
           <ng-template pTemplate="header">
             <tr>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Actions</th>
+              <th>标题</th>
+              <th>作者</th>
+              <th>日期</th>
+              <th>状态</th>
+              <th>浏览量</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-post>
@@ -88,23 +102,11 @@ interface RecentPost {
               <td>{{ post.author }}</td>
               <td>{{ post.date }}</td>
               <td>
-                <span class="status-badge" [class]="post.status.toLowerCase()">
-                  {{ post.status }}
+                <span class="status-badge">
+                  <p-tag [value]="post.status"></p-tag>
                 </span>
               </td>
-              <td>{{ post.views }}</td>
-              <td>
-                <div class="action-buttons">
-                  <p-button
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-text p-button-sm"
-                  ></p-button>
-                  <p-button
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                  ></p-button>
-                </div>
-              </td>
+              <td>{{ post.click || 0 }}</td>
             </tr>
           </ng-template>
         </p-table>
@@ -118,25 +120,16 @@ interface RecentPost {
         flex-direction: column;
         gap: 1.5rem;
       }
-
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1rem;
       }
-
       .stat-card {
-        ::ng-deep .p-card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
         .stat-content {
           display: flex;
           align-items: center;
           gap: 1rem;
-
           .stat-icon {
             width: 48px;
             height: 48px;
@@ -146,90 +139,65 @@ interface RecentPost {
             justify-content: center;
             color: #fff;
             font-size: 1.5rem;
+            background: var(--p-primary-color);
           }
-
           .stat-info {
             flex: 1;
-
             h3 {
               margin: 0;
               font-size: 0.9rem;
-              color: #6c757d;
+              color: var(--p-text-muted-color);
               font-weight: 500;
             }
-
             .stat-value {
               font-size: 1.5rem;
               font-weight: 600;
-              color: #212529;
+              color: var(--p-text-color);
               margin: 0.25rem 0;
             }
-
             .stat-change {
               font-size: 0.875rem;
               font-weight: 500;
-
-              &.positive {
-                color: #28a745;
-              }
-
-              &.negative {
-                color: #dc3545;
-              }
+            }
+            .stat-change.positive {
+              color: var(--p-success-color);
+            }
+            .stat-change.negative {
+              color: var(--p-red-500);
             }
           }
         }
       }
-
       .charts-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         gap: 1rem;
       }
 
-      .chart-card {
-        ::ng-deep .p-card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-      }
-
       .recent-posts {
-        ::ng-deep .p-card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
         .status-badge {
           padding: 0.25rem 0.5rem;
           border-radius: 4px;
           font-size: 0.875rem;
           font-weight: 500;
-
           &.published {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: var(--p-success-color, #e8f5e9);
+            color: var(--p-success-color, #2e7d32);
           }
-
           &.draft {
             background: #fff3e0;
-            color: #ef6c00;
+            color: #f59e42;
           }
-
           &.pending {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: var(--p-primary-100, #e3f2fd);
+            color: var(--p-primary-400, #1976d2);
           }
         }
-
         .action-buttons {
           display: flex;
           gap: 0.5rem;
         }
       }
-
       @media (max-width: 768px) {
         .charts-grid {
           grid-template-columns: 1fr;
@@ -239,86 +207,11 @@ interface RecentPost {
   ]
 })
 export class DashboardPage implements OnInit {
-  stats: StatCard[] = [
-    {
-      title: 'Total Posts',
-      value: 156,
-      icon: 'pi pi-file',
-      color: '#4CAF50',
-      change: 12
-    },
-    {
-      title: 'Total Views',
-      value: 24580,
-      icon: 'pi pi-eye',
-      color: '#2196F3',
-      change: 8
-    },
-    {
-      title: 'Total Comments',
-      value: 892,
-      icon: 'pi pi-comments',
-      color: '#FF9800',
-      change: -3
-    },
-    {
-      title: 'Total Users',
-      value: 45,
-      icon: 'pi pi-users',
-      color: '#9C27B0',
-      change: 5
-    }
-  ]
-
-  visitorsData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Visitors',
-        data: [1200, 1900, 1500, 2100, 1800, 2400],
-        borderColor: '#2196F3',
-        tension: 0.4,
-        fill: false
-      }
-    ]
-  }
-
-  categoryData = {
-    labels: ['Technology', 'Design', 'Business', 'Lifestyle'],
-    datasets: [
-      {
-        data: [35, 25, 20, 20],
-        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0']
-      }
-    ]
-  }
-
-  recentPosts: RecentPost[] = [
-    {
-      id: 1,
-      title: 'Getting Started with Angular SSR',
-      author: 'John Doe',
-      date: '2024-03-15',
-      status: 'Published',
-      views: 1234
-    },
-    {
-      id: 2,
-      title: 'TypeScript Best Practices',
-      author: 'Jane Smith',
-      date: '2024-03-14',
-      status: 'Draft',
-      views: 0
-    },
-    {
-      id: 3,
-      title: 'Web Development Trends 2024',
-      author: 'Mike Johnson',
-      date: '2024-03-13',
-      status: 'Pending',
-      views: 856
-    }
-  ]
+  stats = signal<StatCard[]>([])
+  visitorsData = signal<any>({ labels: [], datasets: [] })
+  categoryData = signal<any>({ labels: [], datasets: [] })
+  recentPosts = signal<RecentPost[]>([])
+  loading = signal(false)
 
   chartOptions = {
     plugins: {
@@ -341,7 +234,107 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  constructor() {}
+  constructor(
+    private httpService: HttpService,
+    private messageService: MessageService
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadDashboardData()
+  }
+
+  loadDashboardData() {
+    this.loading.set(true)
+    this.httpService.get<any>('/api/admin/dashboard/overview').subscribe({
+      next: (res) => {
+        if (res.success) {
+          // 统计卡片
+          const statsRaw = res.data.stats || {}
+          this.stats.set([
+            {
+              title: '文章总数',
+              value: statsRaw.totalPosts || 0,
+              icon: 'pi pi-file',
+              color: 'var(--p-primary-color)',
+              change: statsRaw.postsChange || 0
+            },
+            {
+              title: '总浏览',
+              value: statsRaw.totalViews || 0,
+              icon: 'pi pi-eye',
+              color: 'var(--p-primary-400)',
+              change: statsRaw.viewsChange || 0
+            },
+            {
+              title: '评论总数',
+              value: statsRaw.totalComments || 0,
+              icon: 'pi pi-comments',
+              color: '#f59e42',
+              change: statsRaw.commentsChange || 0
+            },
+            {
+              title: '用户总数',
+              value: statsRaw.totalUsers || 0,
+              icon: 'pi pi-users',
+              color: 'var(--p-primary-700)',
+              change: statsRaw.usersChange || 0
+            }
+          ])
+          // 访问趋势
+          const trend = res.data.visitorsTrend || { labels: [], data: [] }
+          this.visitorsData.set({
+            labels: trend.labels,
+            datasets: [
+              {
+                label: 'Visitors',
+                data: trend.data,
+                borderColor: 'var(--p-primary-400)',
+                backgroundColor: 'rgba(16,185,129,0.08)',
+                tension: 0.4,
+                fill: true
+              }
+            ]
+          })
+          // 分类分布
+          const cat = res.data.categoryDistribution || { labels: [], data: [] }
+          this.categoryData.set({
+            labels: cat.labels,
+            datasets: [
+              {
+                data: cat.data,
+                backgroundColor: [
+                  '#34d399', // emerald-400
+                  '#059669', // emerald-600
+                  '#f59e42', // amber-400
+                  '#fbbf24', // amber-300
+                  '#60a5fa', // blue-400
+                  '#ef4444', // red-500
+                  '#a5b4fc', // indigo-300
+                  '#6366f1' // indigo-500
+                ]
+              }
+            ]
+          })
+          // 最新文章
+          this.recentPosts.set(res.data.recentPosts || [])
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: res.message || '获取仪表盘数据失败'
+          })
+        }
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: err?.message || '请求失败'
+        })
+      },
+      complete: () => {
+        this.loading.set(false)
+      }
+    })
+  }
 }

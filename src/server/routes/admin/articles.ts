@@ -16,7 +16,7 @@ const createArticleSchema = z.object({
   category_id: z.number().optional(),
   status: z.number().default(10), // 10: draft, 20: published
   sort: z.number().default(0),
-  view_count: z.number().default(0),
+  click: z.number().default(0),
   like_count: z.number().default(0),
   comment_count: z.number().default(0)
 })

@@ -1,6 +1,7 @@
 import { db } from '@src/libs/db'
 import { sql, ExpressionBuilder } from 'kysely'
 import type { DB } from '@src/db/db.d'
+import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 
 export interface CreateArticleData {
   title: string
@@ -14,7 +15,7 @@ export interface CreateArticleData {
   category_id?: number
   status?: number // 10: draft, 20: published
   sort?: number
-  view_count?: number
+  click?: number
   like_count?: number
   comment_count?: number
 }
@@ -250,7 +251,7 @@ export class ArticleService {
     return await db
       .safeUpdateTable('articles')
       .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
-        view_count: eb(sql.ref('view_count'), '+', 1),
+        click: eb(sql.ref('click'), '+', 1),
         update_time: Date.now()
       }))
       .where('id', '=', id)
@@ -286,6 +287,48 @@ export class ArticleService {
       .where('id', '=', id)
       .where('is_delete', '=', 0)
       .executeTakeFirst()
+  }
+
+  // 统计文章总数
+  async countArticles(): Promise<number> {
+    const result = await db
+      .selectFrom('articles')
+      .select((eb) => [eb.fn.count('id').as('count')])
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+    return Number(result?.count) || 0
+  }
+
+  // 统计所有文章浏览量总和
+  async sumArticleViews(): Promise<number> {
+    const result = await db
+      .selectFrom('articles')
+      .select((eb) => [eb.fn.sum(sql.ref('click')).as('views')])
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+    return Number(result?.views) || 0
+  }
+
+  // 按分类统计文章数
+  async countArticlesByCategoryId(typeId: number): Promise<number> {
+    const result = await db
+      .selectFrom('articles')
+      .select((eb) => [eb.fn.count('id').as('count')])
+      .where('type_id', '=', typeId)
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+    return Number(result?.count) || 0
+  }
+
+  // 获取最新文章
+  async getRecentArticles(limit: number = 5): Promise<any[]> {
+    return await db
+      .selectFrom('articles')
+      .selectAll()
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .orderBy('create_time', 'desc')
+      .limit(limit)
+      .execute()
   }
 }
 

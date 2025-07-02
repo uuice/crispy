@@ -541,6 +541,16 @@ export class UserService {
 
     return !!user
   }
+
+  // 统计用户总数
+  async countUsers(): Promise<number> {
+    const result = await db
+      .selectFrom('users')
+      .select((eb) => [eb.fn.count('id').as('count')])
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+    return Number(result?.count) || 0
+  }
 }
 
 // Export service instance

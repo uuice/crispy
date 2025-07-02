@@ -57,14 +57,19 @@ interface Config {
 
       <p-table
         [value]="configs()"
+        [lazy]="true"
         [loading]="loading()"
         [paginator]="true"
-        [rows]="10"
+        [rows]="20"
         [totalRecords]="total()"
-        [lazy]="true"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条页面"
         (onLazyLoad)="onLazyLoad($event)"
-        [rowsPerPageOptions]="[10, 20, 50]"
+        [rowsPerPageOptions]="[10, 20, 25, 50]"
+        selectionMode="single"
+        scrollable="true"
         styleClass="p-datatable-sm"
+        (onPageChange)="onPageChange($event)"
       >
         <ng-template pTemplate="colgroup">
           <colgroup>
@@ -143,7 +148,7 @@ interface Config {
             <th>状态</th>
             <th>排序</th>
             <th>创建时间</th>
-            <th>操作</th>
+            <th alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rowData>
@@ -160,20 +165,22 @@ interface Config {
             </td>
             <td>{{ rowData.sort }}</td>
             <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-            <td>
-              <p-button
-                icon="pi pi-pencil"
-                pTooltip="编辑"
-                tooltipPosition="top"
-                (click)="openEditDialog(rowData)"
-              ></p-button>
-              <p-button
-                icon="pi pi-trash"
-                severity="danger"
-                pTooltip="删除"
-                tooltipPosition="top"
-                (click)="confirmDelete(rowData)"
-              ></p-button>
+            <td alignFrozen="right" pFrozenColumn [frozen]="true">
+              <div class="action-buttons">
+                <p-button
+                  icon="pi pi-pencil"
+                  pTooltip="编辑"
+                  tooltipPosition="top"
+                  (click)="openEditDialog(rowData)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="删除"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(rowData)"
+                ></p-button>
+              </div>
             </td>
           </tr>
         </ng-template>
@@ -363,5 +370,11 @@ export class ConfigurationPage implements OnInit {
         })
       }
     })
+  }
+
+  onPageChange(event: any) {
+    this.page = event.page + 1
+    this.pageSize = event.rows
+    this.loadConfigs(this.page, this.pageSize)
   }
 }

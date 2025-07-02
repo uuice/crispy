@@ -396,6 +396,11 @@ export class CategoryService {
 
     return path
   }
+
+  // 获取所有分类
+  async getAllCategories(): Promise<any[]> {
+    return await db.selectFrom('categories').selectAll().where('is_delete', '=', 0).execute()
+  }
 }
 
 export const categoryService = new CategoryService()

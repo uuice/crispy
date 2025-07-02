@@ -27,6 +27,8 @@ import { voteItemController } from './vote-items'
 import { jwtMiddleware } from '@src/server/middleware'
 import { accessTokenController } from './access-token'
 import { uploadController } from './upload'
+import { getSystemInfo } from './system'
+import { getDashboardOverview } from './dashboard'
 
 const router = Router()
 
@@ -234,5 +236,11 @@ router.delete('/access-token/:id', accessTokenController.deleteAccessToken)
 
 // Upload routes
 router.post('/upload/image', uploadController.uploadImage)
+
+// 注册system信息接口
+router.get('/system/getSystemInfo', getSystemInfo)
+
+// Register dashboard overview route
+router.get('/dashboard/overview', getDashboardOverview)
 
 export default router
