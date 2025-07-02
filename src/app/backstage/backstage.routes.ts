@@ -63,9 +63,8 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'recruitment',
-        loadChildren: () =>
-          import('./pages/recruitment/recruitment.routes').then((m) => m.RECRUITMENT_ROUTES),
+        path: 'jobs',
+        loadChildren: () => import('./pages/jobs/job.routes').then((m) => m.JOB_ROUTES),
         data: { keepAlive: true }
       },
       {
