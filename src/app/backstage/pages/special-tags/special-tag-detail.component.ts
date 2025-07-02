@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, signal } from '@angular/core'
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import {
   FormsModule,
@@ -9,29 +9,26 @@ import {
 } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { TextareaModule } from 'primeng/textarea'
-import { SelectModule } from 'primeng/select'
 import { DialogModule } from 'primeng/dialog'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 
-interface Config {
+export interface SpecialTag {
   id: number
   title: string
   alias?: string
-  value: string
-  type_id?: number
-  type_ids?: string
-  sort: number
+  type: number
   status: number
+  sort: number
+  remark?: string
   create_time: number
   update_time: number
 }
 
 @Component({
-  selector: 'cs-config-detail',
+  selector: 'cs-special-tag-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -39,8 +36,6 @@ interface Config {
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
-    TextareaModule,
-    SelectModule,
     DialogModule,
     ToastModule,
     MessageModule
@@ -48,29 +43,28 @@ interface Config {
   providers: [MessageService],
   template: `
     <p-toast></p-toast>
-
     <p-dialog
       [visible]="visible()"
       (visibleChange)="visible.set($event)"
       [header]="dialogTitle"
       [modal]="true"
-      [style]="{ width: '600px' }"
+      [style]="{ width: '500px' }"
       [draggable]="false"
       [resizable]="false"
       (onHide)="onDialogHide()"
       [closeOnEscape]="false"
     >
-      <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="tagForm" (ngSubmit)="onSubmit()">
         <div class="grid">
           <div class="col-12">
             <div class="field">
-              <label for="title" class="block text-900 font-medium mb-2">配置标题 *</label>
+              <label for="title" class="block text-900 font-medium mb-2">标签名称 *</label>
               <input
                 id="title"
                 type="text"
                 pInputText
                 formControlName="title"
-                placeholder="请输入配置标题"
+                placeholder="请输入标签名称"
                 class="w-full"
                 [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('title') }"
               />
@@ -83,7 +77,6 @@ interface Config {
               }
             </div>
           </div>
-
           <div class="col-12">
             <div class="field">
               <label for="alias" class="block text-900 font-medium mb-2">别名</label>
@@ -92,62 +85,20 @@ interface Config {
                 type="text"
                 pInputText
                 formControlName="alias"
-                placeholder="请输入配置别名"
+                placeholder="请输入标签别名"
                 class="w-full"
               />
             </div>
           </div>
-
-          <div class="col-12">
-            <div class="field">
-              <label for="value" class="block text-900 font-medium mb-2">配置值 *</label>
-              <textarea
-                id="value"
-                pInputTextarea
-                formControlName="value"
-                placeholder="请输入配置值"
-                [rows]="4"
-                class="w-full"
-                [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('value') }"
-              ></textarea>
-              @if (isFieldInvalid('value')) {
-                <p-message
-                  severity="error"
-                  [text]="getErrorMessage('value')"
-                  styleClass="mt-1"
-                ></p-message>
-              }
-            </div>
-          </div>
-
           <div class="col-6">
             <div class="field">
-              <label for="type_id" class="block text-900 font-medium mb-2">类型ID</label>
-              <input
-                id="type_id"
-                type="number"
-                pInputText
-                formControlName="type_id"
-                placeholder="请输入类型ID"
-                class="w-full"
-              />
+              <label for="status" class="block text-900 font-medium mb-2">状态</label>
+              <select id="status" formControlName="status" class="w-full p-inputtext">
+                <option [ngValue]="10">启用</option>
+                <option [ngValue]="-10">禁用</option>
+              </select>
             </div>
           </div>
-
-          <div class="col-6">
-            <div class="field">
-              <label for="type_ids" class="block text-900 font-medium mb-2">类型IDs</label>
-              <input
-                id="type_ids"
-                type="text"
-                pInputText
-                formControlName="type_ids"
-                placeholder="请输入类型IDs"
-                class="w-full"
-              />
-            </div>
-          </div>
-
           <div class="col-6">
             <div class="field">
               <label for="sort" class="block text-900 font-medium mb-2">排序</label>
@@ -161,23 +112,21 @@ interface Config {
               />
             </div>
           </div>
-
-          <div class="col-6">
+          <div class="col-12">
             <div class="field">
-              <label for="status" class="block text-900 font-medium mb-2">状态</label>
-              <p-select
-                id="status"
-                [options]="statusOptions"
-                formControlName="status"
-                placeholder="请选择状态"
+              <label for="remark" class="block text-900 font-medium mb-2">备注</label>
+              <input
+                id="remark"
+                type="text"
+                pInputText
+                formControlName="remark"
+                placeholder="请输入备注"
                 class="w-full"
-                appendTo="body"
-              ></p-select>
+              />
             </div>
           </div>
         </div>
       </form>
-
       <ng-template pTemplate="footer">
         <button
           pButton
@@ -191,7 +140,7 @@ interface Config {
           label="保存"
           icon="pi pi-check"
           [loading]="submitting()"
-          [disabled]="configForm.invalid"
+          [disabled]="tagForm.invalid"
           (click)="onSubmit()"
         ></button>
       </ng-template>
@@ -205,47 +154,38 @@ interface Config {
     `
   ]
 })
-export class ConfigDetailComponent implements OnInit, OnChanges {
-  @Input() config: Config | null = null
+export class SpecialTagDetailComponent implements OnInit, OnChanges {
+  @Input() tag: SpecialTag | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true)
-  configForm: FormGroup
+  tagForm: FormGroup
   submitting = signal(false)
-
-  statusOptions = [
-    { label: '启用', value: 10 },
-    { label: '禁用', value: -10 }
-  ]
 
   constructor(
     private messageService: MessageService,
     private httpService: HttpService,
     private fb: FormBuilder
   ) {
-    this.configForm = this.fb.group({
+    this.tagForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       alias: [''],
-      value: ['', [Validators.required]],
-      type_id: [undefined],
-      type_ids: [''],
+      status: [10],
       sort: [0],
-      status: [10]
+      remark: ['']
     })
   }
 
   ngOnInit() {
     setTimeout(() => {
-      this.configForm.reset({
+      this.tagForm.reset({
         title: '',
         alias: '',
-        value: '',
-        type_id: null,
-        type_ids: '',
+        status: 10,
         sort: 0,
-        status: 10
+        remark: ''
       })
       this.initializeForm()
     })
@@ -257,47 +197,32 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
     })
   }
 
+  get dialogTitle(): string {
+    return this.mode === 'create' ? '新建特殊标签' : '编辑特殊标签'
+  }
+
   initializeForm() {
-    if (this.config && this.mode === 'edit') {
-      this.loadConfigData()
+    if (this.tag && this.mode === 'edit') {
+      this.tagForm.patchValue({
+        title: this.tag.title,
+        alias: this.tag.alias || '',
+        status: this.tag.status,
+        sort: this.tag.sort,
+        remark: this.tag.remark || ''
+      })
     } else if (this.mode === 'create') {
       this.resetForm()
     }
     this.submitting.set(false)
   }
 
-  get isEditMode(): boolean {
-    return this.mode === 'edit'
-  }
-
-  get dialogTitle(): string {
-    if (this.mode === 'create') return '创建配置'
-    return '编辑配置'
-  }
-
-  loadConfigData() {
-    if (this.config) {
-      this.configForm.patchValue({
-        title: this.config.title,
-        alias: this.config.alias || '',
-        value: this.config.value,
-        type_id: this.config.type_id || null,
-        type_ids: this.config.type_ids || '',
-        sort: this.config.sort,
-        status: this.config.status
-      })
-    }
-  }
-
   resetForm() {
-    this.configForm.reset({
+    this.tagForm.reset({
       title: '',
       alias: '',
-      value: '',
-      type_id: null,
-      type_ids: '',
+      status: 10,
       sort: 0,
-      status: 10
+      remark: ''
     })
   }
 
@@ -311,14 +236,13 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
   }
 
   isFieldInvalid(field: string): boolean {
-    const formControl = this.configForm.get(field)
+    const formControl = this.tagForm.get(field)
     return formControl ? formControl.invalid && (formControl.dirty || formControl.touched) : false
   }
 
   getErrorMessage(field: string): string {
-    const formControl = this.configForm.get(field)
+    const formControl = this.tagForm.get(field)
     if (!formControl) return ''
-
     if (formControl.hasError('required')) {
       return '此字段为必填项'
     }
@@ -329,35 +253,32 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    if (this.configForm.valid) {
+    if (this.tagForm.valid) {
       this.submitting.set(true)
-      const formData = this.configForm.value
-
-      if (this.mode === 'edit' && this.config) {
-        // Update config
-        this.httpService.put<any>(`/api/admin/configs/${this.config.id}`, formData).subscribe({
+      const formData = this.tagForm.value
+      if (this.mode === 'edit' && this.tag) {
+        this.httpService.put<any>(`/api/admin/special-tags/${this.tag.id}`, formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: '成功',
-                detail: '配置更新成功'
+                detail: '特殊标签更新成功'
               })
               this.saved.emit()
             } else {
               this.messageService.add({
                 severity: 'error',
                 summary: '错误',
-                detail: response.message || '更新配置失败'
+                detail: response.message || '更新特殊标签失败'
               })
             }
           },
           error: (error) => {
-            console.error('Failed to update config:', error)
             this.messageService.add({
               severity: 'error',
               summary: '错误',
-              detail: error.error.message || '更新配置失败'
+              detail: error.error.message || '更新特殊标签失败'
             })
           },
           complete: () => {
@@ -365,30 +286,28 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
           }
         })
       } else {
-        // Create config
-        this.httpService.post<any>('/api/admin/configs', formData).subscribe({
+        this.httpService.post<any>('/api/admin/special-tags', formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: '成功',
-                detail: '配置创建成功'
+                detail: '特殊标签创建成功'
               })
               this.saved.emit()
             } else {
               this.messageService.add({
                 severity: 'error',
                 summary: '错误',
-                detail: response.message || '创建配置失败'
+                detail: response.message || '创建特殊标签失败'
               })
             }
           },
           error: (error) => {
-            console.error('Failed to create config:', error)
             this.messageService.add({
               severity: 'error',
               summary: '错误',
-              detail: error.error.message || '创建配置失败'
+              detail: error.error.message || '创建特殊标签失败'
             })
           },
           complete: () => {
@@ -397,7 +316,7 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
         })
       }
     } else {
-      this.configForm.markAllAsTouched()
+      this.tagForm.markAllAsTouched()
     }
   }
 }
