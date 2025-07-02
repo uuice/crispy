@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { FormsModule } from '@angular/forms'
-import { TreeModule } from 'primeng/tree'
 import { TreeTableModule } from 'primeng/treetable'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
@@ -13,17 +12,25 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { TreeNode } from 'primeng/api'
+import { HttpService } from '../../services/http.service'
+import { MenuDetailComponent } from './menu-detail.component'
+// TODO: import MenuDetailComponent when implemented
 
-interface MenuItem {
+// 菜单节点类型，递归结构
+interface MenuNode {
   id: number
-  name: string
-  type: 'link' | 'category' | 'page' | 'custom'
-  url: string
+  title: string
+  alias: string
   icon?: string
-  order: number
-  parentId: number | null
-  status: 'active' | 'inactive'
-  children?: MenuItem[]
+  url?: string
+  image_url?: string
+  method?: string
+  sort: number
+  status: number
+  parent_id: number
+  create_time: number
+  update_time: number
+  children?: MenuNode[]
 }
 
 @Component({
@@ -33,7 +40,6 @@ interface MenuItem {
     CommonModule,
     RouterModule,
     FormsModule,
-    TreeModule,
     TreeTableModule,
     ButtonModule,
     InputTextModule,
@@ -41,303 +47,251 @@ interface MenuItem {
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    MenuDetailComponent
+    // MenuDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
-    <div class="menus-page">
+    <div class="page-container">
       <div class="page-header">
-        <h1>Menu Management</h1>
-        <button pButton label="Create Menu Item" icon="pi pi-plus" routerLink="create"></button>
+        <h1>菜单管理</h1>
+        <p-button label="创建菜单" icon="pi pi-plus" (click)="openCreateDialog()"></p-button>
       </div>
 
       <p-toast></p-toast>
       <p-confirmDialog></p-confirmDialog>
 
-      <div class="card">
-        <div class="menu-tree">
-          <p-treeTable
-            [value]="menuTree"
-            [scrollable]="true"
-            [scrollHeight]="'400px'"
-            styleClass="p-treetable-sm"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th style="width: 30%">Name</th>
-                <th style="width: 15%">Type</th>
-                <th style="width: 25%">URL</th>
-                <th style="width: 10%">Order</th>
-                <th style="width: 10%">Status</th>
-                <th style="width: 10%">Actions</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-              <tr [ttRow]="rowNode">
-                <td>
-                  <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                  <span class="menu-item-name">
-                    <i *ngIf="rowData.icon" [class]="rowData.icon" class="mr-2"></i>
-                    {{ rowData.name }}
-                  </span>
-                </td>
-                <td>
-                  <p-tag [severity]="getTypeSeverity(rowData.type)" [value]="rowData.type"></p-tag>
-                </td>
-                <td>
-                  <span class="menu-url" [pTooltip]="rowData.url" tooltipPosition="top">
-                    {{ rowData.url }}
-                  </span>
-                </td>
-                <td>{{ rowData.order }}</td>
-                <td>
-                  <p-tag
-                    [severity]="getStatusSeverity(rowData.status)"
-                    [value]="rowData.status"
-                  ></p-tag>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button
-                      pButton
-                      icon="pi pi-pencil"
-                      class="p-button-rounded p-button-text p-button-sm"
-                      pTooltip="Edit"
-                      tooltipPosition="top"
-                      [routerLink]="[rowData.id, 'edit']"
-                    ></button>
-                    <button
-                      pButton
-                      icon="pi pi-trash"
-                      class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                      pTooltip="Delete"
-                      tooltipPosition="top"
-                      (click)="confirmDelete(rowData)"
-                    ></button>
-                  </div>
-                </td>
-              </tr>
-            </ng-template>
-          </p-treeTable>
-        </div>
-      </div>
+      <p-treeTable
+        [value]="menus()"
+        [loading]="loading()"
+        styleClass="p-treetable-sm"
+        [scrollable]="true"
+      >
+        <ng-template pTemplate="colgroup">
+          <colgroup>
+            <col style="min-width: 20rem;" />
+            <col style="min-width: 8rem;" />
+            <col style="min-width: 8rem;" />
+            <col style="min-width: 8rem;" />
+            <col style="min-width: 8rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 5rem;" />
+            <col style="min-width: 10rem;" />
+          </colgroup>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th>菜单名称</th>
+            <th>别名</th>
+            <th>图标</th>
+            <th>链接</th>
+            <th>打开方式</th>
+            <th>排序</th>
+            <th>状态</th>
+            <th class="sticky-right">操作</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+          <tr [ttRow]="rowNode">
+            <td>
+              <div class="flex align-items-center">
+                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                <span class="menu-title">
+                  <i *ngIf="rowData.icon" [class]="rowData.icon" class="mr-2"></i>
+                  {{ rowData.title }}
+                </span>
+              </div>
+            </td>
+            <td>{{ rowData.alias }}</td>
+            <td>{{ rowData.icon || '-' }}</td>
+            <td>
+              <span class="menu-url" [pTooltip]="rowData.url" tooltipPosition="top">
+                {{ rowData.url || '-' }}
+              </span>
+            </td>
+            <td>{{ rowData.method || '-' }}</td>
+            <td>{{ rowData.sort }}</td>
+            <td>
+              <p-tag
+                [severity]="getStatusSeverity(rowData.status)"
+                [value]="getStatusText(rowData.status)"
+              ></p-tag>
+            </td>
+            <td class="sticky-right">
+              <div class="action-buttons">
+                <p-button
+                  icon="pi pi-pencil"
+                  pTooltip="编辑"
+                  tooltipPosition="top"
+                  (click)="openEditDialog(rowData)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="删除"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(rowData)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center">暂无菜单数据</td>
+          </tr>
+        </ng-template>
+      </p-treeTable>
+
+      <!-- Menu Detail Component -->
+      @if (isDetailVisible()) {
+        <cs-menu-detail
+          [menu]="selectedMenu()"
+          [mode]="selectedMenu() ? 'edit' : 'create'"
+          (saved)="onMenuSaved()"
+          (cancelled)="onMenuCancelled()"
+        ></cs-menu-detail>
+      }
     </div>
   `,
   styles: [
     `
-      .menus-page {
-        padding: 1rem;
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-
-          h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-          }
+      ::ng-deep .p-treetable {
+        .sticky-right {
+          position: sticky !important;
+          right: 0 !important;
+          background: var(--p-treetable-header-cell-background);
+          z-index: 10 !important;
         }
-
-        .card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          padding: 1rem;
+        .p-treetable-thead .sticky-right {
+          background: var(--p-treetable-header-cell-background);
         }
-
-        .menu-tree {
-          ::ng-deep {
-            .p-treetable {
-              .p-treetable-header {
-                background: transparent;
-                border: none;
-                padding: 0 0 1rem 0;
-              }
-
-              .p-treetable-thead > tr > th {
-                background: #f8f9fa;
-                font-weight: 600;
-              }
-
-              .p-treetable-tbody > tr > td {
-                padding: 0.75rem;
-              }
-
-              .menu-item-name {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-              }
-
-              .menu-url {
-                display: inline-block;
-                max-width: 200px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                color: #6c757d;
-              }
-            }
-          }
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 0.5rem;
+        .p-treetable-tbody .sticky-right {
+          background: var(--p-treetable-header-cell-background);
         }
       }
     `
   ]
 })
 export class MenusPage implements OnInit {
-  menuTree: TreeNode[] = []
+  menus = signal<TreeNode[]>([])
+  loading = signal(false)
+  selectedMenu = signal<MenuNode | null>(null)
+  isDetailVisible = signal(false)
 
   constructor(
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private httpService: HttpService
   ) {}
 
   ngOnInit() {
-    this.loadMenuTree()
-  }
-
-  loadMenuTree() {
-    // TODO: Replace with actual API call
-    const menuItems: MenuItem[] = [
-      {
-        id: 1,
-        name: 'Home',
-        type: 'link',
-        url: '/',
-        icon: 'pi pi-home',
-        order: 1,
-        parentId: null,
-        status: 'active'
-      },
-      {
-        id: 2,
-        name: 'Blog',
-        type: 'category',
-        url: '/blog',
-        icon: 'pi pi-book',
-        order: 2,
-        parentId: null,
-        status: 'active',
-        children: [
-          {
-            id: 3,
-            name: 'Technology',
-            type: 'category',
-            url: '/blog/technology',
-            order: 1,
-            parentId: 2,
-            status: 'active'
-          },
-          {
-            id: 4,
-            name: 'Design',
-            type: 'category',
-            url: '/blog/design',
-            order: 2,
-            parentId: 2,
-            status: 'active'
-          }
-        ]
-      },
-      {
-        id: 5,
-        name: 'About',
-        type: 'page',
-        url: '/about',
-        icon: 'pi pi-info-circle',
-        order: 3,
-        parentId: null,
-        status: 'active'
-      },
-      {
-        id: 6,
-        name: 'Custom Link',
-        type: 'custom',
-        url: 'https://example.com',
-        icon: 'pi pi-external-link',
-        order: 4,
-        parentId: null,
-        status: 'inactive'
-      }
-    ]
-
-    this.menuTree = this.convertToTreeNodes(menuItems)
-  }
-
-  convertToTreeNodes(items: MenuItem[]): TreeNode[] {
-    const nodeMap = new Map<number, TreeNode>()
-    const rootNodes: TreeNode[] = []
-
-    // First pass: create all nodes
-    items.forEach((item) => {
-      nodeMap.set(item.id, {
-        data: item,
-        children: []
-      })
+    setTimeout(() => {
+      this.loadMenus()
     })
+  }
 
-    // Second pass: build tree structure
-    items.forEach((item) => {
-      const node = nodeMap.get(item.id)!
-      if (item.parentId === null) {
-        rootNodes.push(node)
-      } else {
-        const parentNode = nodeMap.get(item.parentId)
-        if (parentNode) {
-          parentNode.children = parentNode.children || []
-          parentNode.children.push(node)
+  loadMenus() {
+    this.loading.set(true)
+    this.httpService.get<any>('/api/admin/menus/tree').subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.menus.set(this.convertToTreeNodes(response.data || []))
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '加载菜单列表失败'
+          })
         }
+      },
+      error: (error) => {
+        console.error('Failed to load menus:', error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: '加载菜单列表失败'
+        })
+      },
+      complete: () => {
+        this.loading.set(false)
       }
     })
-
-    return rootNodes
   }
 
-  getTypeSeverity(type: string): string {
-    switch (type) {
-      case 'link':
-        return 'info'
-      case 'category':
-        return 'success'
-      case 'page':
-        return 'warning'
-      case 'custom':
-        return 'help'
-      default:
-        return 'info'
-    }
+  convertToTreeNodes(menus: MenuNode[]): TreeNode[] {
+    return menus.map((menu) => ({
+      data: menu,
+      children: menu.children ? this.convertToTreeNodes(menu.children) : undefined,
+      expanded: true
+    }))
   }
 
-  getStatusSeverity(status: string): string {
-    switch (status) {
-      case 'active':
-        return 'success'
-      case 'inactive':
-        return 'warning'
-      default:
-        return 'info'
-    }
+  getStatusSeverity(status: number): string {
+    return status === 10 ? 'success' : 'danger'
   }
 
-  confirmDelete(item: MenuItem) {
+  getStatusText(status: number): string {
+    return status === 10 ? '启用' : '禁用'
+  }
+
+  openCreateDialog() {
+    this.selectedMenu.set(null)
+    this.isDetailVisible.set(true)
+  }
+
+  openEditDialog(menu: MenuNode) {
+    this.selectedMenu.set(menu)
+    this.isDetailVisible.set(true)
+  }
+
+  onMenuSaved() {
+    this.loadMenus()
+    this.selectedMenu.set(null)
+    this.isDetailVisible.set(false)
+  }
+
+  onMenuCancelled() {
+    this.selectedMenu.set(null)
+    this.isDetailVisible.set(false)
+  }
+
+  confirmDelete(menu: MenuNode) {
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete menu item "${item.name}"?`,
-      header: 'Delete Confirmation',
+      message: `确定要删除菜单 "${menu.title}" 吗？`,
+      header: '删除确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // TODO: Implement delete menu item
+        this.deleteMenu(menu.id)
+      }
+    })
+  }
+
+  deleteMenu(id: number) {
+    this.httpService.delete<any>(`/api/admin/menus/${id}`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: '成功',
+            detail: '菜单删除成功'
+          })
+          this.loadMenus()
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: response.message || '删除菜单失败'
+          })
+        }
+      },
+      error: (error) => {
+        console.error('Failed to delete menu:', error)
         this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Menu item "${item.name}" has been deleted`
+          severity: 'error',
+          summary: '错误',
+          detail: '删除菜单失败'
         })
       }
     })

@@ -107,9 +107,8 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'advertisements',
-        loadComponent: () =>
-          import('./pages/advertisements/advertisements.page').then((m) => m.AdvertisementsPage),
+        path: 'ads',
+        loadChildren: () => import('./pages/ads/ads.routes').then((m) => m.ADS_ROUTES),
         data: { keepAlive: true }
       },
       {
