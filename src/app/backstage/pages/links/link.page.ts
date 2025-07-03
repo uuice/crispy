@@ -12,7 +12,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { FriendLinkDetailComponent } from './friend-link-detail.component'
+import { LinkDetailComponent } from './link-detail.component'
 
 interface FriendLink {
   id: number
@@ -55,7 +55,7 @@ interface FriendLinksResponse {
 }
 
 @Component({
-  selector: 'cs-friend-links',
+  selector: 'cs-links',
   standalone: true,
   imports: [
     CommonModule,
@@ -69,7 +69,7 @@ interface FriendLinksResponse {
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    FriendLinkDetailComponent
+    LinkDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -201,12 +201,12 @@ interface FriendLinksResponse {
       </p-table>
 
       @if (isDetailVisible()) {
-        <cs-friend-link-detail
+        <cs-link-detail
           [friendLink]="selectedFriendLink()"
           [mode]="selectedFriendLink() ? 'edit' : 'create'"
           (saved)="onFriendLinkSaved($event)"
           (cancelled)="onFriendLinkCancelled()"
-        ></cs-friend-link-detail>
+        ></cs-link-detail>
       }
     </div>
   `,
@@ -255,7 +255,7 @@ interface FriendLinksResponse {
     `
   ]
 })
-export class FriendLinksPage implements OnInit {
+export class LinksPage implements OnInit {
   friendLinks: WritableSignal<FriendLink[]> = signal([])
   categories: WritableSignal<Category[]> = signal([])
   loading = signal(false)

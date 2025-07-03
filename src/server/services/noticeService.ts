@@ -39,7 +39,7 @@ export interface Notice {
 }
 
 export interface PaginatedNoticesResult {
-  data: Notice[]
+  dataList: Notice[]
   pagination: {
     total: number
     page: number
@@ -100,7 +100,7 @@ export class NoticeService {
     ])
 
     return {
-      data: notices as Notice[],
+      dataList: notices as Notice[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

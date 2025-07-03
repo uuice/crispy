@@ -34,7 +34,7 @@ export interface VoteItem {
 }
 
 export interface PaginatedVoteItemsResult {
-  data: VoteItem[]
+  dataList: VoteItem[]
   pagination: {
     total: number
     page: number
@@ -98,7 +98,7 @@ export class VoteItemService {
     ])
 
     return {
-      data: voteItems as unknown as VoteItem[],
+      dataList: voteItems as unknown as VoteItem[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

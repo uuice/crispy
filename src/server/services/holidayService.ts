@@ -1,7 +1,7 @@
 import { db } from '@src/libs/db'
 
 export interface CreateHolidayData {
-  name: string
+  title: string
   value: string
   sort?: number
 }
@@ -9,7 +9,7 @@ export interface CreateHolidayData {
 export type UpdateHolidayData = Partial<CreateHolidayData>
 
 export interface HolidayFilters {
-  name?: string
+  title?: string
   value?: string
   start_time?: number
   end_time?: number
@@ -21,7 +21,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResult<T> {
-  data: T[]
+  dataList: T[]
   pagination: {
     total: number
     page: number
@@ -56,8 +56,8 @@ export class HolidayService {
     let query = db.selectFrom('holidays').selectAll().where('is_delete', '=', 0)
 
     // Add filters if provided
-    if (filters.name) {
-      query = query.where('name', 'like', `%${filters.name}%`)
+    if (filters.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
     }
     if (filters.value) {
       query = query.where('value', 'like', `%${filters.value}%`)
@@ -78,7 +78,7 @@ export class HolidayService {
     ])
 
     return {
-      data: holidays,
+      dataList: holidays,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -153,11 +153,11 @@ export class HolidayService {
   /**
    * Get holiday by name
    */
-  async getHolidayByName(name: string) {
+  async getHolidayByName(title: string) {
     return await db
       .selectFrom('holidays')
       .selectAll()
-      .where('name', '=', name)
+      .where('title', '=', title)
       .where('is_delete', '=', 0)
       .executeTakeFirst()
   }
@@ -177,11 +177,11 @@ export class HolidayService {
   /**
    * Get holidays by name (search)
    */
-  async searchHolidaysByName(name: string, limit = 10) {
+  async searchHolidaysByName(title: string, limit = 10) {
     return await db
       .selectFrom('holidays')
       .selectAll()
-      .where('name', 'like', `%${name}%`)
+      .where('title', 'like', `%${title}%`)
       .where('is_delete', '=', 0)
       .orderBy('sort', 'asc')
       .orderBy('creat_time', 'desc')
@@ -205,11 +205,11 @@ export class HolidayService {
   /**
    * Check if holiday name already exists
    */
-  async checkNameExists(name: string, excludeId?: number) {
+  async checkNameExists(title: string, excludeId?: number) {
     let query = db
       .selectFrom('holidays')
       .select('id')
-      .where('name', '=', name)
+      .where('title', '=', title)
       .where('is_delete', '=', 0)
 
     if (excludeId) {

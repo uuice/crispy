@@ -36,7 +36,7 @@ export interface OperateLog {
 }
 
 export interface PaginatedOperateLogsResult {
-  data: OperateLog[]
+  dataList: OperateLog[]
   pagination: {
     total: number
     page: number
@@ -100,7 +100,7 @@ export class OperateLogService {
     ])
 
     return {
-      data: logs as OperateLog[],
+      dataList: logs as OperateLog[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

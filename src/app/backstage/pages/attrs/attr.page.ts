@@ -11,10 +11,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { SpecialTagDetailComponent, SpecialTag } from './special-tag-detail.component'
+import { AttrDetailComponent, SpecialTag } from './attr-detail.component'
 
 @Component({
-  selector: 'app-special-tags',
+  selector: 'cs-attrs',
   standalone: true,
   imports: [
     CommonModule,
@@ -27,7 +27,7 @@ import { SpecialTagDetailComponent, SpecialTag } from './special-tag-detail.comp
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    SpecialTagDetailComponent
+    AttrDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -157,17 +157,17 @@ import { SpecialTagDetailComponent, SpecialTag } from './special-tag-detail.comp
         </ng-template>
       </p-table>
       @if (isDetailVisible()) {
-        <cs-special-tag-detail
+        <cs-attr-detail
           [tag]="selectedTag()"
           [mode]="selectedTag() ? 'edit' : 'create'"
           (saved)="onTagSaved()"
           (cancelled)="onTagCancelled()"
-        ></cs-special-tag-detail>
+        ></cs-attr-detail>
       }
     </div>
   `
 })
-export class SpecialTagsPage implements OnInit {
+export class AttrsPage implements OnInit {
   tags = signal<any[]>([])
   loading = signal(false)
   total = signal(0)
@@ -212,7 +212,7 @@ export class SpecialTagsPage implements OnInit {
     this.httpService.get<any>(`/api/admin/attrs?${params.toString()}`).subscribe({
       next: (response) => {
         if (response.success) {
-          this.tags.set(response.data.data || [])
+          this.tags.set(response.data.dataList || [])
           this.total.set(response.data.pagination?.total || 0)
         } else {
           this.messageService.add({

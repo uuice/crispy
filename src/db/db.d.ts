@@ -534,8 +534,8 @@ export interface Holidays {
   creat_time: Generated<number>;
   id: Generated<number>;
   is_delete: Generated<number>;
-  name: string;
   sort: Generated<number>;
+  title: string;
   update_time: Generated<number>;
   value: string;
 }

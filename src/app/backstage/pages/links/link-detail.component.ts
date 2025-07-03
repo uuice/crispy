@@ -54,7 +54,7 @@ interface Category {
 }
 
 @Component({
-  selector: 'cs-friend-link-detail',
+  selector: 'cs-link-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -213,7 +213,7 @@ interface Category {
     `
   ]
 })
-export class FriendLinkDetailComponent implements OnInit, OnChanges {
+export class LinkDetailComponent implements OnInit, OnChanges {
   @Input() friendLink: FriendLink | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<Partial<FriendLink>>()

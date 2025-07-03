@@ -38,7 +38,7 @@ interface JobsResponse {
   success: boolean
   message: string
   data: {
-    data: Job[]
+    dataList: Job[]
     pagination: {
       total: number
       page: number
@@ -342,7 +342,7 @@ export class JobPage implements OnInit {
     this.httpService.get<JobsResponse>('/api/admin/jobs', params).subscribe({
       next: (response) => {
         if (response.success === true && response.data) {
-          this.jobs.set(response.data.data)
+          this.jobs.set(response.data.dataList)
           this.totalRecords.set(response.data.pagination.total)
         } else {
           this.messageService.add({

@@ -37,7 +37,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResult<T> {
-  data: T[]
+  dataList: T[]
   pagination: {
     total: number
     page: number
@@ -100,7 +100,7 @@ export class ArticleService {
     ])
 
     return {
-      data: articles,
+      dataList: articles,
       pagination: {
         total: Number(total?.count) || 0,
         page,

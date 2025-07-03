@@ -40,7 +40,7 @@ export interface Keyword {
 }
 
 export interface PaginatedKeywordsResult {
-  data: Keyword[]
+  dataList: Keyword[]
   pagination: {
     total: number
     page: number
@@ -104,7 +104,7 @@ export class KeywordService {
     ])
 
     return {
-      data: keywords as Keyword[],
+      dataList: keywords as Keyword[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

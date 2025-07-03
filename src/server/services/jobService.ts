@@ -29,7 +29,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResult<T> {
-  data: T[]
+  dataList: T[]
   pagination: {
     total: number
     page: number
@@ -89,7 +89,7 @@ export class JobService {
     ])
 
     return {
-      data: jobs,
+      dataList: jobs,
       pagination: {
         total: Number(total?.count) || 0,
         page,

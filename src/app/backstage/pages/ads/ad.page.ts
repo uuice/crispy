@@ -14,6 +14,7 @@ import { CalendarModule } from 'primeng/calendar'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AdDetailComponent } from './ad-detail.component'
+import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
 
 interface Advertisement {
   id: number
@@ -31,7 +32,7 @@ interface Advertisement {
 }
 
 @Component({
-  selector: 'cs-advertisements',
+  selector: 'cs-ads',
   standalone: true,
   imports: [
     CommonModule,
@@ -46,7 +47,8 @@ interface Advertisement {
     ConfirmDialogModule,
     ToastModule,
     CalendarModule,
-    AdDetailComponent
+    AdDetailComponent,
+    AdItemListDialogComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -146,6 +148,12 @@ interface Advertisement {
             <td>
               <div class="action-buttons">
                 <p-button
+                  icon="pi pi-eye"
+                  pTooltip="查看详情"
+                  tooltipPosition="top"
+                  (click)="openAdItemListDialog(ad)"
+                ></p-button>
+                <p-button
                   icon="pi pi-pencil"
                   pTooltip="编辑"
                   tooltipPosition="top"
@@ -177,6 +185,13 @@ interface Advertisement {
           (cancelled)="onAdCancelled()"
         ></cs-ad-detail>
       }
+
+      @if (isAdItemListVisible) {
+        <cs-ad-item-list-dialog
+          [adId]="selectedAdId"
+          [visible]="isAdItemListVisible"
+        ></cs-ad-item-list-dialog>
+      }
     </div>
   `,
   styles: [``]
@@ -190,6 +205,8 @@ export class AdvertisementsPage implements OnInit {
   searchStatus: number | null = null
   isDetailVisible = false
   selectedAd: any = null
+  isAdItemListVisible = false
+  selectedAdId: number = 0
 
   statusOptions = [
     { label: '全部状态', value: null },
@@ -253,6 +270,11 @@ export class AdvertisementsPage implements OnInit {
   onAdCancelled() {
     this.isDetailVisible = false
     this.selectedAd = null
+  }
+
+  openAdItemListDialog(ad: any) {
+    this.selectedAdId = ad.id
+    this.isAdItemListVisible = true
   }
 
   onLazyLoad(event: any) {

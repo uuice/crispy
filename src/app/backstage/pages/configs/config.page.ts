@@ -203,7 +203,7 @@ interface Config {
     </div>
   `
 })
-export class ConfigurationPage implements OnInit {
+export class ConfigPage implements OnInit {
   configs = signal<Config[]>([])
   loading = signal(false)
   total = signal(0)
@@ -256,7 +256,7 @@ export class ConfigurationPage implements OnInit {
     this.httpService.get<any>(`/api/admin/configs?${params.toString()}`).subscribe({
       next: (response) => {
         if (response.success) {
-          this.configs.set(response.data.data || [])
+          this.configs.set(response.data.dataList || [])
           this.total.set(response.data.pagination?.total || 0)
         } else {
           this.messageService.add({

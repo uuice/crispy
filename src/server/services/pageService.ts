@@ -64,7 +64,7 @@ export interface Page {
 }
 
 export interface PaginatedPagesResult {
-  data: Page[]
+  dataList: Page[]
   pagination: {
     total: number
     page: number
@@ -219,7 +219,7 @@ export class PageService {
     }))
 
     return {
-      data: transformedPages as unknown as Page[],
+      dataList: transformedPages as unknown as Page[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

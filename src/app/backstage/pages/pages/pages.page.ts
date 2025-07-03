@@ -60,7 +60,7 @@ interface PagesResponse {
   success: boolean
   message: string
   data: {
-    data: Page[]
+    dataList: Page[]
     pagination: {
       total: number
       page: number
@@ -430,7 +430,7 @@ export class PagesPage implements OnInit {
     this.httpService.get<PagesResponse>('/api/admin/pages', params).subscribe({
       next: (response) => {
         if (response.success === true && response.data) {
-          this.pages.set(response.data.data)
+          this.pages.set(response.data.dataList)
           this.totalRecords.set(response.data.pagination.total)
         } else {
           this.messageService.add({

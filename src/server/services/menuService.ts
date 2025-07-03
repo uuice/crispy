@@ -48,7 +48,7 @@ export interface Menu {
 }
 
 export interface PaginatedMenusResult {
-  data: Menu[]
+  dataList: Menu[]
   pagination: {
     total: number
     page: number
@@ -115,7 +115,7 @@ export class MenuService {
     ])
 
     return {
-      data: menus as Menu[],
+      dataList: menus as Menu[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

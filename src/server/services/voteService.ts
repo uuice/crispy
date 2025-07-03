@@ -54,7 +54,7 @@ export interface VoteItem {
 }
 
 export interface PaginatedVotesResult {
-  data: VoteWithItems[]
+  dataList: VoteWithItems[]
   pagination: {
     total: number
     page: number
@@ -146,7 +146,7 @@ export class VoteService {
     )
 
     return {
-      data: votesWithItems as VoteWithItems[],
+      dataList: votesWithItems as VoteWithItems[],
       pagination: {
         total: Number(total?.count) || 0,
         page,

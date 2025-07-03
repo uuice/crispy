@@ -57,9 +57,8 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'friend-links',
-        loadChildren: () =>
-          import('./pages/friend-links/friend-links.routes').then((m) => m.FRIEND_LINKS_ROUTES),
+        path: 'links',
+        loadChildren: () => import('./pages/links/links.routes').then((m) => m.LINKS_ROUTES),
         data: { keepAlive: true }
       },
       {
@@ -68,26 +67,24 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'configuration',
-        loadChildren: () =>
-          import('./pages/configuration/configuration.routes').then((m) => m.CONFIGURATION_ROUTES),
+        path: 'configs',
+        loadChildren: () => import('./pages/configs/config.routes').then((m) => m.CONFIG_ROUTES),
         data: { keepAlive: true }
       },
       {
-        path: 'system',
+        path: 'systems',
         loadChildren: () => import('./pages/system/system.routes').then((m) => m.SYSTEM_ROUTES),
         data: { keepAlive: true }
       },
       {
-        path: 'vacation',
+        path: 'holidays',
         loadChildren: () =>
-          import('./pages/vacation/vacation.routes').then((m) => m.VACATION_ROUTES),
+          import('./pages/holidays/holidays.routes').then((m) => m.HOLIDAYS_ROUTES),
         data: { keepAlive: true }
       },
       {
-        path: 'special-tags',
-        loadChildren: () =>
-          import('./pages/special-tags/special-tags.routes').then((m) => m.SPECIAL_TAGS_ROUTES),
+        path: 'attrs',
+        loadChildren: () => import('./pages/attrs/attrs.routes').then((m) => m.ATTRS_ROUTES),
         data: { keepAlive: true }
       },
       {

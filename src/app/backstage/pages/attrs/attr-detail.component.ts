@@ -28,7 +28,7 @@ export interface SpecialTag {
 }
 
 @Component({
-  selector: 'cs-special-tag-detail',
+  selector: 'cs-attr-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -154,7 +154,7 @@ export interface SpecialTag {
     `
   ]
 })
-export class SpecialTagDetailComponent implements OnInit, OnChanges {
+export class AttrDetailComponent implements OnInit, OnChanges {
   @Input() tag: SpecialTag | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()

@@ -21,7 +21,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResult<T> {
-  data: T[]
+  dataList: T[]
   pagination: {
     total: number
     page: number
@@ -78,7 +78,7 @@ export class CacheService {
     ])
 
     return {
-      data: caches,
+      dataList: caches,
       pagination: {
         total: Number(total?.count) || 0,
         page,

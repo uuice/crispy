@@ -5,15 +5,19 @@ import { holidayService } from '../../services/holidayService'
 
 // Validation schemas
 const createHolidaySchema = z.object({
-  name: z.string().min(1),
-  value: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
+  value: z.string().min(1, '日期不能为空'),
   sort: z.number().default(0)
 })
 
 const updateHolidaySchema = createHolidaySchema.partial()
 
 // Get single holiday
-export const getHoliday = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getHoliday = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
     if (isNaN(id)) {
@@ -36,14 +40,18 @@ export const getHoliday = async (req: Request, res: Response, next: NextFunction
 }
 
 // Get holidays list with pagination
-export const getHolidays = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getHolidays = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
     // Get filters from query
     const filters = {
-      name: req.query['name'] as string | undefined,
+      title: req.query['title'] as string | undefined,
       value: req.query['value'] as string | undefined,
       start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
       end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
