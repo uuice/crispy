@@ -12,6 +12,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
+import { UserDetailComponent } from './user-detail.component'
 
 interface User {
   id: number
@@ -22,6 +23,7 @@ interface User {
   status: number // 10=正常，-10=禁用/黑名单
   is_admin: number
   is_super_admin: number
+  is_black: number // 1=黑名单，0=正常
   last_login_time: number
   avatar_url: string
   create_time: number
@@ -56,14 +58,15 @@ interface UsersResponse {
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    SelectModule
+    SelectModule,
+    UserDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
     <div class="page-container">
       <div class="page-header">
         <h1>用户管理</h1>
-        <p-button label="新增用户" icon="pi pi-plus" routerLink="create"></p-button>
+        <p-button label="新增用户" icon="pi pi-plus" (click)="openCreateDialog()"></p-button>
       </div>
 
       <p-toast></p-toast>
@@ -179,7 +182,7 @@ interface UsersResponse {
                   icon="pi pi-pencil"
                   pTooltip="编辑"
                   tooltipPosition="top"
-                  [routerLink]="[user.id, 'edit']"
+                  (click)="openEditDialog(user)"
                 ></p-button>
                 <p-button
                   icon="pi pi-trash"
@@ -199,6 +202,16 @@ interface UsersResponse {
           </tr>
         </ng-template>
       </p-table>
+
+      <!-- User Detail Component -->
+      @if (isDetailVisible()) {
+        <cs-user-detail
+          [user]="selectedUser()"
+          [mode]="selectedUser() ? 'edit' : 'create'"
+          (saved)="onUserSaved()"
+          (cancelled)="onUserCancelled()"
+        ></cs-user-detail>
+      }
     </div>
   `,
   styles: []
@@ -216,6 +229,8 @@ export class UsersPage implements OnInit {
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
+  selectedUser = signal<User | null>(null)
+  isDetailVisible = signal(false)
 
   get statusValue() {
     return this.selectedStatus()
@@ -343,5 +358,26 @@ export class UsersPage implements OnInit {
     this.currentPage.set(event.page + 1)
     this.pageSize.set(event.rows)
     this.loadUsers()
+  }
+
+  openCreateDialog() {
+    this.selectedUser.set(null)
+    this.isDetailVisible.set(true)
+  }
+
+  openEditDialog(user: User) {
+    this.selectedUser.set(user)
+    this.isDetailVisible.set(true)
+  }
+
+  onUserSaved() {
+    this.loadUsers()
+    this.selectedUser.set(null)
+    this.isDetailVisible.set(false)
+  }
+
+  onUserCancelled() {
+    this.selectedUser.set(null)
+    this.isDetailVisible.set(false)
   }
 }

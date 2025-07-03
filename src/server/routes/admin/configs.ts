@@ -16,7 +16,7 @@ const createConfigSchema = z.object({
 
 const updateConfigSchema = createConfigSchema.partial()
 
-// Get single config
+// Get single config by ID
 export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
@@ -35,6 +35,33 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
     success(res, config)
   } catch (err: unknown) {
     console.error('Error fetching config:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+// Get single config by alias
+export const getConfigByAlias = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const alias = req.params['alias']
+    if (!alias) {
+      error(res, 'Alias is required', 400)
+      return
+    }
+
+    const config = await configService.getConfigByAlias(alias)
+
+    if (!config) {
+      notFound(res, 'Config not found')
+      return
+    }
+
+    success(res, config)
+  } catch (err: unknown) {
+    console.error('Error fetching config by alias:', err)
     error(res, 'Internal server error')
   }
 }
@@ -86,6 +113,34 @@ export const createConfig = async (
       return
     }
     console.error('Error creating config:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+// Upsert config by alias
+export const upsertConfig = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const validatedData = createConfigSchema.parse(req.body)
+
+    if (!validatedData.alias) {
+      error(res, 'Alias is required for upsert operation', 400)
+      return
+    }
+
+    const result = await configService.upsertConfigByAlias(validatedData)
+
+    const message = result.isUpdated ? 'Config updated successfully' : 'Config created successfully'
+    success(res, result, message)
+  } catch (err: unknown) {
+    if (err instanceof z.ZodError) {
+      validationError(res, err.errors)
+      return
+    }
+    console.error('Error upserting config:', err)
     error(res, 'Internal server error')
   }
 }
@@ -153,8 +208,10 @@ export const deleteConfig = async (
 // Export all functions as a controller object
 export const configController = {
   getConfig,
+  getConfigByAlias,
   getConfigs,
   createConfig,
+  upsertConfig,
   updateConfig,
   deleteConfig
 }

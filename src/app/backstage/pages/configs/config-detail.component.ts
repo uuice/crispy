@@ -109,11 +109,19 @@ interface Config {
                 [rows]="4"
                 class="w-full"
                 [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('value') }"
+                (input)="onValueInput($event)"
               ></textarea>
               @if (isFieldInvalid('value')) {
                 <p-message
                   severity="error"
                   [text]="getErrorMessage('value')"
+                  styleClass="mt-1"
+                ></p-message>
+              }
+              @if (jsonValidationMessage()) {
+                <p-message
+                  [severity]="jsonValidationSeverity()"
+                  [text]="jsonValidationMessage()"
                   styleClass="mt-1"
                 ></p-message>
               }
@@ -214,6 +222,8 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
   visible = signal(true)
   configForm: FormGroup
   submitting = signal(false)
+  jsonValidationMessage = signal('')
+  jsonValidationSeverity = signal<'success' | 'warn' | 'error'>('success')
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -286,6 +296,9 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
         sort: this.config.sort,
         status: this.config.status
       })
+
+      // Validate JSON format for existing value
+      this.validateJsonFormat(this.config.value)
     }
   }
 
@@ -326,6 +339,72 @@ export class ConfigDetailComponent implements OnInit, OnChanges {
       return `最少需要 ${formControl.errors?.['minlength'].requiredLength} 个字符`
     }
     return ''
+  }
+
+  onValueInput(event: any) {
+    const value = event.target.value
+    this.validateJsonFormat(value)
+  }
+
+  validateJsonFormat(value: string) {
+    if (!value || value.trim() === '') {
+      this.jsonValidationMessage.set('')
+      return
+    }
+
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(value)
+
+      // Only consider object and array as valid JSON format
+      if (typeof parsed === 'object' && parsed !== null) {
+        this.jsonValidationMessage.set('✅ 有效的 JSON 格式')
+        this.jsonValidationSeverity.set('success')
+      } else {
+        // For primitive values, treat them as non-JSON format
+        if (typeof parsed === 'string') {
+          this.jsonValidationMessage.set('📝 字符串类型')
+          this.jsonValidationSeverity.set('warn')
+        } else if (typeof parsed === 'number') {
+          this.jsonValidationMessage.set('📊 数值类型')
+          this.jsonValidationSeverity.set('warn')
+        } else if (typeof parsed === 'boolean') {
+          this.jsonValidationMessage.set('🔘 布尔值类型')
+          this.jsonValidationSeverity.set('warn')
+        } else {
+          this.jsonValidationMessage.set('⚠️ 是有效的 JSON，但建议使用对象或数组格式')
+          this.jsonValidationSeverity.set('warn')
+        }
+      }
+    } catch (error) {
+      // Check if it's a primitive type that's not JSON
+      const trimmedValue = value.trim()
+
+      // Check if it's a number
+      if (!isNaN(Number(trimmedValue)) && trimmedValue !== '') {
+        this.jsonValidationMessage.set('📊 数值类型')
+        this.jsonValidationSeverity.set('warn')
+      }
+      // Check if it's a boolean
+      else if (trimmedValue.toLowerCase() === 'true' || trimmedValue.toLowerCase() === 'false') {
+        this.jsonValidationMessage.set('🔘 布尔值类型')
+        this.jsonValidationSeverity.set('warn')
+      }
+      // Check if it's a string (not wrapped in quotes)
+      else if (
+        trimmedValue.length > 0 &&
+        !trimmedValue.startsWith('"') &&
+        !trimmedValue.endsWith('"')
+      ) {
+        this.jsonValidationMessage.set('📝 字符串类型')
+        this.jsonValidationSeverity.set('warn')
+      }
+      // Otherwise it's invalid JSON
+      else {
+        this.jsonValidationMessage.set('❌ 不是有效的 JSON 格式，请检查语法')
+        this.jsonValidationSeverity.set('error')
+      }
+    }
   }
 
   onSubmit() {

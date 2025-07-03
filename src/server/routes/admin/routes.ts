@@ -115,8 +115,10 @@ router.delete('/caches/:id', cacheController.deleteCache)
 
 // Configs routes
 router.get('/configs', configController.getConfigs)
+router.get('/configs/alias/:alias', configController.getConfigByAlias)
 router.get('/configs/:id', configController.getConfig)
 router.post('/configs', configController.createConfig)
+router.post('/configs/upsert', configController.upsertConfig)
 router.put('/configs/:id', configController.updateConfig)
 router.delete('/configs/:id', configController.deleteConfig)
 

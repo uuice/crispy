@@ -143,6 +143,54 @@ export class ConfigService {
   }
 
   /**
+   * Upsert a config by alias (insert if not exists, update if exists)
+   */
+  async upsertConfigByAlias(data: CreateConfigData) {
+    const now = Date.now()
+
+    // Check if config exists by alias
+    const existingConfig = await this.getConfigByAlias(data.alias || '')
+
+    if (existingConfig) {
+      // Update existing config
+      const updateData = {
+        ...data,
+        update_time: now
+      }
+
+      const result = await db
+        .safeUpdateTable('configs')
+        .set(updateData)
+        .where('id', '=', existingConfig.id)
+        .where('is_delete', '=', 0)
+        .executeTakeFirst()
+
+      return {
+        id: existingConfig.id,
+        ...updateData,
+        create_time: existingConfig.create_time,
+        isUpdated: true
+      }
+    } else {
+      // Create new config
+      const newConfig = {
+        ...data,
+        create_time: now,
+        update_time: now,
+        is_delete: 0
+      }
+
+      const result = await db.safeInsertInto('configs').values(newConfig).executeTakeFirst()
+
+      return {
+        id: Number(result.insertId),
+        ...newConfig,
+        isUpdated: false
+      }
+    }
+  }
+
+  /**
    * Delete a config (logical delete)
    */
   async deleteConfig(id: number) {

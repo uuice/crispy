@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core'
+import { Component, inject, OnInit, signal } from '@angular/core'
+import { firstValueFrom } from 'rxjs'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
@@ -13,7 +14,10 @@ import { MessageService } from 'primeng/api'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ConfirmationService } from 'primeng/api'
 import { DividerModule } from 'primeng/divider'
+import { TextareaModule } from 'primeng/textarea'
 import { SettingsService, AppSettings } from '../../services/settings.service'
+import { HttpService } from '../../services/http.service'
+import { SYSTEM_SETTINGS_CATEGORY_ALIAS } from '../../../../server/config/const'
 
 interface SiteSettings {
   siteName: string
@@ -77,7 +81,8 @@ interface ThemeOption {
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
-    DividerModule
+    DividerModule,
+    TextareaModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -93,6 +98,7 @@ interface ThemeOption {
             label="保存配置"
             icon="pi pi-save"
             class="p-button-success"
+            [loading]="saving()"
             (click)="saveSettings()"
           ></button>
           <button
@@ -114,9 +120,7 @@ interface ThemeOption {
                 <ng-template pTemplate="title">网站信息</ng-template>
                 <ng-template pTemplate="content">
                   <div class="field">
-                    <label for="siteName" class="block text-sm font-medium text-gray-700 mb-2"
-                      >网站名称</label
-                    >
+                    <label for="siteName" class="block text-900 font-medium mb-2">网站名称</label>
                     <input
                       id="siteName"
                       type="text"
@@ -127,9 +131,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label
-                      for="siteDescription"
-                      class="block text-sm font-medium text-gray-700 mb-2"
+                    <label for="siteDescription" class="block text-900 font-medium mb-2"
                       >网站描述</label
                     >
                     <textarea
@@ -142,7 +144,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="siteKeywords" class="block text-sm font-medium text-gray-700 mb-2"
+                    <label for="siteKeywords" class="block text-900 font-medium mb-2"
                       >网站关键词</label
                     >
                     <input
@@ -155,9 +157,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="siteLogo" class="block text-sm font-medium text-gray-700 mb-2"
-                      >网站 Logo</label
-                    >
+                    <label for="siteLogo" class="block text-900 font-medium mb-2">网站 Logo</label>
                     <input
                       id="siteLogo"
                       type="text"
@@ -168,7 +168,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="siteFavicon" class="block text-sm font-medium text-gray-700 mb-2"
+                    <label for="siteFavicon" class="block text-900 font-medium mb-2"
                       >网站图标</label
                     >
                     <input
@@ -181,9 +181,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="siteFooter" class="block text-sm font-medium text-gray-700 mb-2"
-                      >页脚信息</label
-                    >
+                    <label for="siteFooter" class="block text-900 font-medium mb-2">页脚信息</label>
                     <textarea
                       id="siteFooter"
                       pInputTextarea
@@ -201,24 +199,22 @@ interface ThemeOption {
                 <ng-template pTemplate="title">功能设置</ng-template>
                 <ng-template pTemplate="content">
                   <div class="field">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">用户注册</label>
+                    <label class="block text-900 font-medium mb-2">用户注册</label>
                     <p-inputSwitch [(ngModel)]="siteSettings.allowRegistration"></p-inputSwitch>
                   </div>
 
                   <div class="field mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">评论功能</label>
+                    <label class="block text-900 font-medium mb-2">评论功能</label>
                     <p-inputSwitch [(ngModel)]="siteSettings.allowComment"></p-inputSwitch>
                   </div>
 
                   <div class="field mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">评论审核</label>
+                    <label class="block text-900 font-medium mb-2">评论审核</label>
                     <p-inputSwitch [(ngModel)]="siteSettings.commentAudit"></p-inputSwitch>
                   </div>
 
                   <div class="field mt-4">
-                    <label
-                      for="defaultLanguage"
-                      class="block text-sm font-medium text-gray-700 mb-2"
+                    <label for="defaultLanguage" class="block text-900 font-medium mb-2"
                       >默认语言</label
                     >
                     <p-dropdown
@@ -231,9 +227,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2"
-                      >时区设置</label
-                    >
+                    <label for="timezone" class="block text-900 font-medium mb-2">时区设置</label>
                     <p-dropdown
                       id="timezone"
                       [options]="timezoneOptions"
@@ -244,9 +238,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="dateFormat" class="block text-sm font-medium text-gray-700 mb-2"
-                      >日期格式</label
-                    >
+                    <label for="dateFormat" class="block text-900 font-medium mb-2">日期格式</label>
                     <p-dropdown
                       id="dateFormat"
                       [options]="dateFormatOptions"
@@ -257,9 +249,7 @@ interface ThemeOption {
                   </div>
 
                   <div class="field mt-4">
-                    <label for="timeFormat" class="block text-sm font-medium text-gray-700 mb-2"
-                      >时间格式</label
-                    >
+                    <label for="timeFormat" class="block text-900 font-medium mb-2">时间格式</label>
                     <p-dropdown
                       id="timeFormat"
                       [options]="timeFormatOptions"
@@ -284,7 +274,7 @@ interface ThemeOption {
                   <div class="grid">
                     <div class="col-12 md:col-6">
                       <div class="field">
-                        <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="smtpHost" class="block text-900 font-medium mb-2"
                           >SMTP 服务器</label
                         >
                         <input
@@ -297,7 +287,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="smtpPort" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="smtpPort" class="block text-900 font-medium mb-2"
                           >SMTP 端口</label
                         >
                         <input
@@ -310,7 +300,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="smtpUser" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="smtpUser" class="block text-900 font-medium mb-2"
                           >SMTP 用户名</label
                         >
                         <input
@@ -323,9 +313,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label
-                          for="smtpPassword"
-                          class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="smtpPassword" class="block text-900 font-medium mb-2"
                           >SMTP 密码</label
                         >
                         <input
@@ -340,12 +328,12 @@ interface ThemeOption {
 
                     <div class="col-12 md:col-6">
                       <div class="field">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">SSL/TLS</label>
+                        <label class="block text-900 font-medium mb-2">SSL/TLS</label>
                         <p-inputSwitch [(ngModel)]="emailSettings.smtpSecure"></p-inputSwitch>
                       </div>
 
                       <div class="field mt-4">
-                        <label for="fromEmail" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="fromEmail" class="block text-900 font-medium mb-2"
                           >发件人邮箱</label
                         >
                         <input
@@ -358,7 +346,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="fromName" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="fromName" class="block text-900 font-medium mb-2"
                           >发件人名称</label
                         >
                         <input
@@ -371,9 +359,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2"
-                          >启用邮件通知</label
-                        >
+                        <label class="block text-900 font-medium mb-2">启用邮件通知</label>
                         <p-inputSwitch
                           [(ngModel)]="emailSettings.enableEmailNotification"
                         ></p-inputSwitch>
@@ -404,7 +390,7 @@ interface ThemeOption {
                 <ng-template pTemplate="title">存储配置</ng-template>
                 <ng-template pTemplate="content">
                   <div class="field">
-                    <label for="storageType" class="block text-sm font-medium text-gray-700 mb-2"
+                    <label for="storageType" class="block text-900 font-medium mb-2"
                       >存储类型</label
                     >
                     <p-dropdown
@@ -421,7 +407,7 @@ interface ThemeOption {
                   <div class="grid" *ngIf="storageSettings.storageType !== 'local'">
                     <div class="col-12 md:col-6">
                       <div class="field">
-                        <label for="accessKey" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="accessKey" class="block text-900 font-medium mb-2"
                           >Access Key</label
                         >
                         <input
@@ -434,7 +420,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="secretKey" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="secretKey" class="block text-900 font-medium mb-2"
                           >Secret Key</label
                         >
                         <input
@@ -449,9 +435,7 @@ interface ThemeOption {
 
                     <div class="col-12 md:col-6">
                       <div class="field">
-                        <label for="bucket" class="block text-sm font-medium text-gray-700 mb-2"
-                          >Bucket</label
-                        >
+                        <label for="bucket" class="block text-900 font-medium mb-2">Bucket</label>
                         <input
                           id="bucket"
                           type="text"
@@ -462,9 +446,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="region" class="block text-sm font-medium text-gray-700 mb-2"
-                          >Region</label
-                        >
+                        <label for="region" class="block text-900 font-medium mb-2">Region</label>
                         <input
                           id="region"
                           type="text"
@@ -475,9 +457,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="domain" class="block text-sm font-medium text-gray-700 mb-2"
-                          >域名</label
-                        >
+                        <label for="domain" class="block text-900 font-medium mb-2">域名</label>
                         <input
                           id="domain"
                           type="text"
@@ -488,7 +468,7 @@ interface ThemeOption {
                       </div>
 
                       <div class="field mt-4">
-                        <label for="uploadPath" class="block text-sm font-medium text-gray-700 mb-2"
+                        <label for="uploadPath" class="block text-900 font-medium mb-2"
                           >上传路径</label
                         >
                         <input
@@ -522,8 +502,10 @@ interface ThemeOption {
 })
 export class SettingsPage implements OnInit {
   protected settingsService = inject(SettingsService)
+  protected httpService = inject(HttpService)
 
   settings: AppSettings = this.settingsService.settings()
+  saving = signal(false)
 
   siteSettings: SiteSettings = {
     siteName: '',
@@ -608,53 +590,130 @@ export class SettingsPage implements OnInit {
   }
 
   loadSettings() {
-    // TODO: Implement API call to load settings
-    // Mock data for now
-    this.siteSettings = {
-      siteName: '我的博客',
-      siteDescription: '一个基于 Angular 的博客系统',
-      siteKeywords: 'Angular, TypeScript, Blog',
-      siteLogo: '/assets/images/logo.png',
-      siteFavicon: '/assets/images/favicon.ico',
-      siteFooter: '© 2024 我的博客. All rights reserved.',
-      allowRegistration: true,
-      allowComment: true,
-      commentAudit: true,
-      defaultLanguage: 'zh-CN',
-      timezone: 'Asia/Shanghai',
-      dateFormat: 'YYYY-MM-DD',
-      timeFormat: 'HH:mm:ss'
-    }
+    // Load settings from configs table
+    this.loadConfigSettings()
+  }
 
-    this.emailSettings = {
-      smtpHost: 'smtp.example.com',
-      smtpPort: 465,
-      smtpUser: 'noreply@example.com',
-      smtpPassword: '',
-      smtpSecure: true,
-      fromEmail: 'noreply@example.com',
-      fromName: '我的博客',
-      enableEmailNotification: true
-    }
+  async loadConfigSettings() {
+    try {
+      // Load site settings
+      try {
+        const siteConfig = await firstValueFrom(
+          this.httpService.get<any>(
+            `/api/admin/configs/alias/${SYSTEM_SETTINGS_CATEGORY_ALIAS.SITE_SETTINGS}`
+          )
+        )
 
-    this.storageSettings = {
-      storageType: 'local',
-      accessKey: '',
-      secretKey: '',
-      bucket: '',
-      region: '',
-      domain: '',
-      uploadPath: 'uploads'
+        if (siteConfig?.success && siteConfig.data) {
+          const config = siteConfig.data
+          try {
+            this.siteSettings = { ...this.siteSettings, ...JSON.parse(config.value) }
+          } catch (e) {
+            console.error('Failed to parse site settings:', e)
+          }
+        }
+      } catch (error: any) {
+        console.log('Site settings not found, using defaults')
+      }
+
+      // Load email settings
+      try {
+        const emailConfig = await firstValueFrom(
+          this.httpService.get<any>(
+            `/api/admin/configs/alias/${SYSTEM_SETTINGS_CATEGORY_ALIAS.EMAIL_SETTINGS}`
+          )
+        )
+
+        if (emailConfig?.success && emailConfig.data) {
+          const config = emailConfig.data
+          try {
+            this.emailSettings = { ...this.emailSettings, ...JSON.parse(config.value) }
+          } catch (e) {
+            console.error('Failed to parse email settings:', e)
+          }
+        }
+      } catch (error: any) {
+        console.log('Email settings not found, using defaults')
+      }
+
+      // Load storage settings
+      try {
+        const storageConfig = await firstValueFrom(
+          this.httpService.get<any>(
+            `/api/admin/configs/alias/${SYSTEM_SETTINGS_CATEGORY_ALIAS.STORAGE_SETTINGS}`
+          )
+        )
+
+        if (storageConfig?.success && storageConfig.data) {
+          const config = storageConfig.data
+          try {
+            this.storageSettings = { ...this.storageSettings, ...JSON.parse(config.value) }
+          } catch (e) {
+            console.error('Failed to parse storage settings:', e)
+          }
+        }
+      } catch (error: any) {
+        console.log('Storage settings not found, using defaults')
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error)
+      // Use default settings if loading fails
     }
   }
 
-  saveSettings() {
-    // TODO: Implement API call to save settings
-    this.messageService.add({
-      severity: 'success',
-      summary: '成功',
-      detail: '配置已保存'
-    })
+  async saveSettings() {
+    this.saving.set(true)
+
+    try {
+      // Save site settings
+      await this.saveConfigSetting(
+        SYSTEM_SETTINGS_CATEGORY_ALIAS.SITE_SETTINGS,
+        '网站设置',
+        this.siteSettings
+      )
+
+      // Save email settings
+      await this.saveConfigSetting(
+        SYSTEM_SETTINGS_CATEGORY_ALIAS.EMAIL_SETTINGS,
+        '邮件设置',
+        this.emailSettings
+      )
+
+      // Save storage settings
+      await this.saveConfigSetting(
+        SYSTEM_SETTINGS_CATEGORY_ALIAS.STORAGE_SETTINGS,
+        '存储设置',
+        this.storageSettings
+      )
+
+      this.messageService.add({
+        severity: 'success',
+        summary: '成功',
+        detail: '配置已保存'
+      })
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+      this.messageService.add({
+        severity: 'error',
+        summary: '错误',
+        detail: '保存配置失败'
+      })
+    } finally {
+      this.saving.set(false)
+    }
+  }
+
+  async saveConfigSetting(alias: string, title: string, data: any) {
+    const configValue = JSON.stringify(data)
+
+    // Use upsert endpoint - insert if not exists, update if exists
+    await firstValueFrom(
+      this.httpService.post<any>('/api/admin/configs/upsert', {
+        title,
+        alias,
+        value: configValue
+      })
+    )
   }
 
   confirmReset() {
@@ -667,7 +726,7 @@ export class SettingsPage implements OnInit {
         this.messageService.add({
           severity: 'info',
           summary: '已重置',
-          detail: '配置已恢复默认设置'
+          detail: '配置已恢复上一次保存的设置'
         })
       }
     })

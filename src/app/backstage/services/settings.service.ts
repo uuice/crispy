@@ -1,6 +1,7 @@
 import { Injectable, signal, WritableSignal } from '@angular/core'
 import { palette, updatePrimaryPalette, usePreset } from '@primeng/themes'
-import { BehaviorSubject, Observable } from 'rxjs'
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs'
+import { HttpService } from './http.service'
 
 export interface AppSettings {
   darkMode: boolean
@@ -27,7 +28,7 @@ export class SettingsService {
   // BehaviorSubject for traditional Observable pattern
   private settingsSubject = new BehaviorSubject<AppSettings>(this.loadSettings())
 
-  constructor() {
+  constructor(private httpService: HttpService) {
     this.applySettings(this._settings())
   }
 
@@ -499,6 +500,53 @@ export class SettingsService {
         // Ignore in SSR environment
         console.warn('Failed to apply surface configuration:', e)
       }
+    }
+  }
+
+  /**
+   * Load configuration by alias
+   * @param alias Configuration alias
+   * @returns Promise with configuration data
+   */
+  async loadConfigByAlias(alias: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<any>(`/api/admin/configs/alias/${alias}`)
+      )
+      if (response?.success && response.data) {
+        return JSON.parse(response.data.value)
+      }
+      return null
+    } catch (error) {
+      console.error(`Failed to load config by alias ${alias}:`, error)
+      return null
+    }
+  }
+
+  /**
+   * Save configuration by alias
+   * @param alias Configuration alias
+   * @param title Configuration title
+   * @param data Configuration data
+   * @returns Promise with save result
+   */
+  async saveConfigByAlias(alias: string, title: string, data: any): Promise<boolean> {
+    try {
+      const configValue = JSON.stringify(data)
+
+      // Use upsert endpoint - insert if not exists, update if exists
+      await firstValueFrom(
+        this.httpService.post<any>('/api/admin/configs/upsert', {
+          title,
+          alias,
+          value: configValue
+        })
+      )
+
+      return true
+    } catch (error) {
+      console.error(`Failed to save config by alias ${alias}:`, error)
+      return false
     }
   }
 }

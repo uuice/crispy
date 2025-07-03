@@ -259,7 +259,7 @@ interface Comment {
           </div>
 
           <div class="field">
-            <label for="replyContent" class="block text-sm font-medium text-gray-700 mb-2"
+            <label for="replyContent" class="block text-900 font-medium mb-2"
               >回复内容</label
             >
             <textarea

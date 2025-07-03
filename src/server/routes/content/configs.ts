@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
 import { configService } from '../../services/configService'
 
-// Get single config
+// Get single config by ID
 export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = parseInt(req.params['id'])
@@ -22,6 +22,33 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
     success(res, config)
   } catch (err: unknown) {
     console.error('Error fetching config:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+// Get single config by alias
+export const getConfigByAlias = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const alias = req.params['alias']
+    if (!alias) {
+      error(res, 'Alias is required', 400)
+      return
+    }
+
+    const config = await configService.getConfigByAlias(alias)
+
+    if (!config) {
+      notFound(res, 'Config not found')
+      return
+    }
+
+    success(res, config)
+  } catch (err: unknown) {
+    console.error('Error fetching config by alias:', err)
     error(res, 'Internal server error')
   }
 }
@@ -58,5 +85,6 @@ export const getConfigs = async (
 // Export all functions as a controller object
 export const configController = {
   getConfig,
+  getConfigByAlias,
   getConfigs
 }

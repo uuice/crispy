@@ -133,6 +133,7 @@ router.get('/caches/:id', cacheController.getCache)
 
 // Configs routes
 router.get('/configs', configController.getConfigs)
+router.get('/configs/alias/:alias', configController.getConfigByAlias)
 router.get('/configs/:id', configController.getConfig)
 
 // Enums routes

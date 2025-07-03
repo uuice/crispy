@@ -73,7 +73,7 @@ import { HttpService } from '../../../services/http.service'
             <!-- 左侧主要内容 -->
             <div class="col-12 md:col-8">
               <div class="field">
-                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">标题</label>
+                <label for="title" class="block text-900 font-medium mb-2">标题</label>
                 <input
                   id="title"
                   type="text"
@@ -86,7 +86,7 @@ import { HttpService } from '../../../services/http.service'
               </div>
 
               <div class="field mt-4">
-                <label for="content" class="block text-sm font-medium text-gray-700 mb-2"
+                <label for="content" class="block text-900 font-medium mb-2"
                   >内容</label
                 >
                 <ckeditor
@@ -104,7 +104,7 @@ import { HttpService } from '../../../services/http.service'
             <div class="col-12 md:col-4">
               <div class="card">
                 <div class="field">
-                  <label for="category" class="block text-sm font-medium text-gray-700 mb-2"
+                  <label for="category" class="block text-900 font-medium mb-2"
                     >分类</label
                   >
                   <p-dropdown
@@ -118,7 +118,7 @@ import { HttpService } from '../../../services/http.service'
                 </div>
 
                 <div class="field mt-4">
-                  <label for="tags" class="block text-sm font-medium text-gray-700 mb-2"
+                  <label for="tags" class="block text-900 font-medium mb-2"
                     >标签</label
                   >
                   <p-multiSelect
@@ -132,7 +132,7 @@ import { HttpService } from '../../../services/http.service'
                 </div>
 
                 <div class="field mt-4">
-                  <label for="publishDate" class="block text-sm font-medium text-gray-700 mb-2"
+                  <label for="publishDate" class="block text-900 font-medium mb-2"
                     >发布日期</label
                   >
                   <p-calendar
@@ -148,7 +148,7 @@ import { HttpService } from '../../../services/http.service'
                 </div>
 
                 <div class="field mt-4">
-                  <label for="summary" class="block text-sm font-medium text-gray-700 mb-2"
+                  <label for="summary" class="block text-900 font-medium mb-2"
                     >摘要</label
                   >
                   <textarea
