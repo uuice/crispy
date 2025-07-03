@@ -16,6 +16,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { PostDetailComponent } from './post-detail.component'
+import { CheckboxModule } from 'primeng/checkbox'
 
 interface Article {
   id: number
@@ -99,7 +100,8 @@ interface CategoriesResponse {
     ToastModule,
     DialogModule,
     SelectModule,
-    PostDetailComponent
+    PostDetailComponent,
+    CheckboxModule
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -188,6 +190,7 @@ interface CategoriesResponse {
             <th style="min-width: 8rem;">点击量</th>
             <th style="min-width: 14rem;">创建时间</th>
             <th style="min-width: 14rem;">更新时间</th>
+            <th style="min-width: 10rem;">属性</th>
             <th style="min-width: 8rem;" alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
           </tr>
         </ng-template>
@@ -249,6 +252,23 @@ interface CategoriesResponse {
             <td>{{ article.click || 0 }}</td>
             <td>{{ article.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
             <td>{{ article.update_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td>
+              <div class="flex flex-wrap gap-2">
+                @for (opt of attrsOptions(); track opt) {
+                  <p-checkbox
+                    [inputId]="'attr-' + article.id + '-' + opt.value"
+                    [value]="opt.value"
+                    [name]="'attr-' + article.id"
+                    [(ngModel)]="attrsCheckedMap[article.id]"
+                    (ngModelChange)="onAttrsChange(article, $event)"
+                    styleClass="mr-2"
+                  ></p-checkbox>
+                  <label [for]="'attr-' + article.id + '-' + opt.value" class="mr-3">{{
+                    opt.label
+                  }}</label>
+                }
+              </div>
+            </td>
             <td alignFrozen="right" pFrozenColumn [frozen]="true">
               <div class="action-buttons">
                 <p-button
@@ -419,6 +439,8 @@ export class PostsPage implements OnInit {
   isDetailVisible = signal(false)
   previewVisible = signal(false)
   previewArticleData = signal<Article | null>(null)
+  attrsOptions = signal<{ label: string; value: string }[]>([])
+  attrsCheckedMap: { [id: number]: string[] } = {}
 
   statusOptions = signal([
     { label: '全部状态', value: null },
@@ -457,6 +479,7 @@ export class PostsPage implements OnInit {
   ngOnInit() {
     this.loadArticles()
     this.loadCategories()
+    this.loadAttrs()
   }
 
   onSearch() {
@@ -503,6 +526,10 @@ export class PostsPage implements OnInit {
         if (response.success === true && response.data) {
           this.articles.set(response.data.dataList)
           this.totalRecords.set(response.data.pagination.total)
+          // Initialize checked attrs for each article
+          response.data.dataList.forEach((article) => {
+            this.attrsCheckedMap[article.id] = this.getArticleAttrsArray(article.attrs)
+          })
         } else {
           this.messageService.add({
             severity: 'error',
@@ -758,5 +785,49 @@ export class PostsPage implements OnInit {
     this.currentPage.set(event.page + 1)
     this.pageSize.set(event.rows)
     this.loadArticles()
+  }
+
+  // Load attribute options from attrs table
+  loadAttrs() {
+    this.httpService.get<any>('/api/admin/attrs', { page: 1, pageSize: 100 }).subscribe({
+      next: (res) => {
+        if (res.success && res.data?.dataList) {
+          this.attrsOptions.set(
+            res.data.dataList.map((item: any) => ({
+              label: item.title,
+              value: item.alias
+            }))
+          )
+        }
+      }
+    })
+  }
+
+  // Convert attrs string to array
+  getArticleAttrsArray(attrs: string | undefined): string[] {
+    return attrs
+      ? attrs
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : []
+  }
+
+  // Handle attribute checkbox change
+  onAttrsChange(article: Article, checkedList: string[]) {
+    const newAttrs = checkedList.join(',')
+    this.httpService.put<any>(`/api/admin/articles/${article.id}`, { attrs: newAttrs }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: '属性更新成功'
+          })
+          article.attrs = newAttrs
+          this.attrsCheckedMap[article.id] = checkedList
+        }
+      }
+    })
   }
 }
