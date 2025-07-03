@@ -7,11 +7,6 @@ export const POSTS_ROUTES: Routes = [
     data: { keepAlive: true }
   },
   {
-    path: 'create',
-    loadComponent: () => import('./create/create.page').then((m) => m.CreatePostPage),
-    data: { keepAlive: true }
-  },
-  {
     path: 'post-sys-cat/categories',
     redirectTo: '/backstage/categories/post-sys-cat',
     pathMatch: 'full'
