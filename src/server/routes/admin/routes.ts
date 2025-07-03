@@ -29,6 +29,7 @@ import { accessTokenController } from './access-token'
 import { uploadController } from './upload'
 import { getSystemInfo } from './system'
 import { getDashboardOverview } from './dashboard'
+import { operateLogService } from '@src/server/services/operateLogService'
 
 const router = Router()
 
@@ -43,8 +44,44 @@ const authMiddleware: RequestHandler = (req, res, next) => {
   jwtMiddleware(req, res, next)
 }
 
+// Operation log middleware for POST, PUT, DELETE requests
+const operateLogMiddleware: RequestHandler = (req, res, next) => {
+  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
+    // Listen for response finish event to log operation
+    res.on('finish', async () => {
+      try {
+        // Get user id from req.user (should be set by JWT middleware)
+        const userId = (req as any).user?.id || 0
+        // Clone and filter body (remove file info if present)
+        let filteredBody = req.body
+        // If body contains file or files, remove them
+        if (filteredBody && typeof filteredBody === 'object') {
+          filteredBody = { ...filteredBody }
+          if ('file' in filteredBody) delete filteredBody.file
+          if ('files' in filteredBody) delete filteredBody.files
+        }
+        // Build content string with method, path, query, and filtered body
+        const content = `method: ${req.method}, path: ${req.path}, query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(filteredBody)}`
+        await operateLogService.createOperateLog({
+          code: req.method + ':' + req.path + ':' + req.params['id'],
+          content,
+          type_id: 0, // Adjust type_id as needed
+          user_id: userId
+        })
+      } catch (e) {
+        // Log error but do not affect main flow
+        console.error('OperateLog Error:', e)
+      }
+    })
+  }
+  next()
+}
+
 // Apply authentication middleware
 router.use(authMiddleware)
+
+// Apply operation log middleware before all routes
+router.use(operateLogMiddleware)
 
 // User routes
 router.post('/login', userController.login)

@@ -116,6 +116,12 @@ export const BACKSTAGE_ROUTES: Routes = [
         path: 'pages',
         loadComponent: () => import('./pages/pages/pages.page').then((m) => m.PagesPage),
         data: { keepAlive: true }
+      },
+      {
+        path: 'operate-logs',
+        loadChildren: () =>
+          import('./pages/operate-logs/operate-logs.routes').then((m) => m.OPERATE_LOGS_ROUTES),
+        data: { keepAlive: true }
       }
     ]
   }

@@ -48,14 +48,20 @@ body {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    border-bottom: 1px solid var(--p-border-color);
     gap: 12px;
   }
   .search-controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1 1 300px;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .search-controls input,
+  .search-controls select {
+    flex: unset;
     min-width: 0;
   }
   .search-actions {
@@ -63,6 +69,8 @@ body {
     align-items: center;
     gap: 8px;
     margin-left: auto;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
   }
 }
 // backstage page

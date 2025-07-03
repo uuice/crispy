@@ -270,42 +270,6 @@ interface CategoriesResponse {
   `,
   styles: [
     `
-      .page-container {
-        padding: 1rem;
-      }
-
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .page-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-
-      .search-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .search-controls {
-        display: flex;
-        gap: 1rem;
-        flex: 1;
-      }
-
-      .search-actions {
-        display: flex;
-        gap: 0.5rem;
-      }
-
       .page-title {
         .title-text {
           font-weight: 500;
@@ -328,11 +292,6 @@ interface CategoriesResponse {
         display: flex;
         flex-wrap: wrap;
         gap: 0.25rem;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
       }
     `
   ]

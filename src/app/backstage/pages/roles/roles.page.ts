@@ -179,42 +179,7 @@ interface RolesResponse {
       }
     </div>
   `,
-  styles: [
-    `
-      .page-container {
-        padding: 1rem;
-      }
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .page-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-      .search-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .search-controls {
-        display: flex;
-        gap: 1rem;
-      }
-      .search-actions {
-        display: flex;
-        gap: 0.5rem;
-      }
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-      }
-    `
-  ]
+  styles: [``]
 })
 export class RolesPage implements OnInit {
   roles: WritableSignal<Role[]> = signal([])

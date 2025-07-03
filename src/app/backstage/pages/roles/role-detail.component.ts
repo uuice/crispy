@@ -270,7 +270,7 @@ interface RulesTreeResponse {
       }
 
       .rules-table-container {
-        border: 1px solid var(--p-border-color);
+        border: 1px solid var(--p-content-border-color);
         border-radius: 6px;
         overflow: hidden;
       }
@@ -290,7 +290,7 @@ interface RulesTreeResponse {
 
       .selected-rules-info {
         background-color: var(--p-content-background);
-        border: 1px solid var(--p-border-color);
+        border: 1px solid var(--p-content-border-color);
         border-radius: 6px;
         padding: 0.75rem;
       }

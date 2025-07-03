@@ -193,10 +193,6 @@ interface RecentPost {
             color: var(--p-primary-400, #1976d2);
           }
         }
-        .action-buttons {
-          display: flex;
-          gap: 0.5rem;
-        }
       }
       @media (max-width: 768px) {
         .charts-grid {

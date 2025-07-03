@@ -180,12 +180,6 @@ interface Holiday {
   `,
   styles: [
     `
-      .holiday-dates {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-      }
-
       .date-tag {
         background-color: #e3f2fd;
         color: #1976d2;
@@ -193,39 +187,6 @@ interface Holiday {
         border-radius: 4px;
         font-size: 0.75rem;
         border: 1px solid #bbdefb;
-      }
-
-      .search-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        gap: 1rem;
-      }
-
-      .search-controls {
-        display: flex;
-        gap: 1rem;
-        flex: 1;
-      }
-
-      .search-item {
-        flex: 1;
-        max-width: 200px;
-      }
-
-      .search-input {
-        width: 100%;
-      }
-
-      .search-actions {
-        display: flex;
-        gap: 0.5rem;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.25rem;
       }
     `
   ]
