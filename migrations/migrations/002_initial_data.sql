@@ -34,36 +34,37 @@ INSERT INTO `roles` (
 -- Insert basic rules based on backstage routes
 INSERT INTO `rules` (`title`, `alias`, `des`, `condition`, `icon`, `module_id`, `type_id`, `parent_id`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES
 -- Dashboard
-('仪表盘', 'dashboard', '系统仪表盘管理', 'dashboard', 'pi pi-home', 1, 1, 0, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('仪表盘', 'dashboard', '系统仪表盘管理', '/backstage/dashboard', 'pi pi-home', 1, 1, 0, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- Content Management
-('文章管理', 'posts', '文章内容管理', 'posts', 'pi pi-file', 1, 1, 0, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('分类管理', 'categories', '文章分类管理', 'categories', 'pi pi-folder', 1, 1, 0, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('标签管理', 'tags', '文章标签管理', 'tags', 'pi pi-tags', 1, 1, 0, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('页面管理', 'pages', '静态页面管理', 'pages', 'pi pi-file-edit', 1, 1, 0, 5, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('评论管理', 'comments', '用户评论管理', 'comments', 'pi pi-comments', 1, 1, 0, 6, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('文章管理', 'posts', '文章内容管理', '/backstage/posts', 'pi pi-file', 1, 1, 0, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('分类管理', 'categories', '文章分类管理', '/backstage/categories', 'pi pi-folder', 1, 1, 0, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('标签管理', 'tags', '文章标签管理', '/backstage/tags', 'pi pi-tags', 1, 1, 0, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('页面管理', 'pages', '静态页面管理', '/backstage/pages', 'pi pi-file-edit', 1, 1, 0, 5, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('评论管理', 'comments', '用户评论管理', '/backstage/comments', 'pi pi-comments', 1, 1, 0, 6, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- User Management
-('用户管理', 'users', '用户账户管理', 'users', 'pi pi-users', 1, 1, 0, 7, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('管理员管理', 'admins', '管理员账户管理', 'admins', 'pi pi-user-plus', 1, 1, 0, 8, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('角色管理', 'roles', '用户角色管理', 'roles', 'pi pi-shield', 1, 1, 0, 9, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('权限管理', 'rules', '系统权限管理', 'rules', 'pi pi-key', 1, 1, 0, 10, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('用户管理', 'users', '用户账户管理', '/backstage/users', 'pi pi-users', 1, 1, 0, 7, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('管理员管理', 'admins', '管理员账户管理', '/backstage/admins', 'pi pi-user-plus', 1, 1, 0, 8, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('角色管理', 'roles', '用户角色管理', '/backstage/roles', 'pi pi-shield', 1, 1, 0, 9, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('权限管理', 'rules', '系统权限管理', '/backstage/rules', 'pi pi-key', 1, 1, 0, 10, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- System Management
-('系统设置', 'settings', '系统基础设置', 'settings', 'pi pi-cog', 1, 1, 0, 11, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('配置管理', 'configs', '系统配置管理', 'configs', 'pi pi-wrench', 1, 1, 0, 12, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('系统管理', 'systems', '系统高级管理', 'systems', 'pi pi-server', 1, 1, 0, 13, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('菜单管理', 'menus', '系统菜单管理', 'menus', 'pi pi-bars', 1, 1, 0, 14, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('系统设置', 'settings', '系统基础设置', '/backstage/settings', 'pi pi-cog', 1, 1, 0, 11, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('配置管理', 'configs', '系统配置管理', '/backstage/configs', 'pi pi-wrench', 1, 1, 0, 12, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('系统管理', 'systems', '系统高级管理', '/backstage/systems', 'pi pi-server', 1, 1, 0, 13, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('菜单管理', 'menus', '系统菜单管理', '/backstage/menus', 'pi pi-bars', 1, 1, 0, 14, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- Business Management
-('链接管理', 'links', '友情链接管理', 'links', 'pi pi-link', 1, 1, 0, 15, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('招聘管理', 'jobs', '招聘信息管理', 'jobs', 'pi pi-briefcase', 1, 1, 0, 16, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('广告管理', 'ads', '广告位管理', 'ads', 'pi pi-image', 1, 1, 0, 17, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('节假日管理', 'holidays', '节假日信息管理', 'holidays', 'pi pi-calendar', 1, 1, 0, 18, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('属性管理', 'attrs', '特殊属性管理', 'attrs', 'pi pi-list', 1, 1, 0, 19, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('链接管理', 'links', '友情链接管理', '/backstage/links', 'pi pi-link', 1, 1, 0, 15, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('招聘管理', 'jobs', '招聘信息管理', '/backstage/jobs', 'pi pi-briefcase', 1, 1, 0, 16, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('广告管理', 'ads', '广告位管理', '/backstage/ads', 'pi pi-image', 1, 1, 0, 17, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('广告位详细列表', 'ads-item-list', '广告位详细列表', '/backstage/ads/item-list', 'pi pi-image', 1, 1, 0, 18, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('节假日管理', 'holidays', '节假日信息管理', '/backstage/holidays', 'pi pi-calendar', 1, 1, 0, 19, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('属性管理', 'attrs', '特殊属性管理', '/backstage/attrs', 'pi pi-list', 1, 1, 0, 20, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- Logs
-('操作日志', 'operate-logs', '系统操作日志', 'operate-logs', 'pi pi-history', 1, 1, 0, 20, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+('操作日志', 'operate-logs', '系统操作日志', '/backstage/operate-logs', 'pi pi-history', 1, 1, 0, 21, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- Insert basic categories (including system categories)
 INSERT INTO `categories` (`title`, `alias`, `des`, `parent_id`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES
