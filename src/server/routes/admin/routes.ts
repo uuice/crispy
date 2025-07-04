@@ -24,6 +24,7 @@ import { tagController } from './tags'
 import { userTypeController } from './user-types'
 import { voteController } from './votes'
 import { voteItemController } from './vote-items'
+import { commentController } from './comments'
 import { jwtMiddleware } from '@src/server/middleware'
 import { accessTokenController } from './access-token'
 import { uploadController } from './upload'
@@ -266,6 +267,16 @@ router.get('/vote-items/:id', voteItemController.getVoteItem)
 router.post('/vote-items', voteItemController.createVoteItem)
 router.put('/vote-items/:id', voteItemController.updateVoteItem)
 router.delete('/vote-items/:id', voteItemController.deleteVoteItem)
+
+// Comment routes
+router.get('/comments', commentController.getComments)
+router.get('/comments/:id', commentController.getComment)
+router.post('/comments', commentController.createComment)
+router.put('/comments/:id', commentController.updateComment)
+router.delete('/comments/:id', commentController.deleteComment)
+router.post('/comments/batch-update-status', commentController.batchUpdateStatus)
+router.post('/comments/batch-delete', commentController.batchDeleteComments)
+router.get('/comments/stats', commentController.getCommentStats)
 
 // Register access token routes
 router.get('/access-token', accessTokenController.getAccessTokens)

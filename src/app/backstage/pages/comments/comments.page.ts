@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal, computed, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
@@ -13,25 +13,8 @@ import { TooltipModule } from 'primeng/tooltip'
 import { DialogModule } from 'primeng/dialog'
 import { BadgeModule } from 'primeng/badge'
 import { AvatarModule } from 'primeng/avatar'
-
-interface Comment {
-  id: number
-  content: string
-  author: {
-    name: string
-    avatar: string
-    email: string
-  }
-  post: {
-    id: number
-    title: string
-  }
-  status: 'pending' | 'approved' | 'rejected' | 'spam'
-  createdAt: Date
-  ip: string
-  parentId?: number
-  replyTo?: string
-}
+import { CommentService, type Comment, type CommentFilters } from '../../services/comment.service'
+import { TextareaModule } from 'primeng/textarea'
 
 @Component({
   selector: 'app-comments',
@@ -42,6 +25,7 @@ interface Comment {
     TableModule,
     ButtonModule,
     InputTextModule,
+    TextareaModule,
     DropdownModule,
     TagModule,
     ConfirmDialogModule,
@@ -53,408 +37,593 @@ interface Comment {
   ],
   providers: [ConfirmationService, MessageService],
   template: `
-    <div class="container mx-auto p-4">
+    <div class="page-container">
+      <div class="page-header">
+        <h1>评论管理</h1>
+        <div class="flex gap-2">
+          <p-button
+            label="批量审核"
+            icon="pi pi-check"
+            severity="success"
+            [disabled]="!selectedComments().length"
+            (click)="batchApprove()"
+          ></p-button>
+          <p-button
+            label="批量删除"
+            icon="pi pi-trash"
+            severity="danger"
+            [disabled]="!selectedComments().length"
+            (click)="batchDelete()"
+          ></p-button>
+        </div>
+      </div>
+
       <p-toast></p-toast>
       <p-confirmDialog></p-confirmDialog>
 
-      <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">评论管理</h1>
-        <div class="flex gap-2">
-          <button
-            pButton
-            label="批量审核"
-            icon="pi pi-check"
-            class="p-button-success"
-            [disabled]="!selectedComments.length"
-            (click)="batchApprove()"
-          ></button>
-          <button
-            pButton
-            label="批量删除"
-            icon="pi pi-trash"
-            class="p-button-danger"
-            [disabled]="!selectedComments.length"
-            (click)="batchDelete()"
-          ></button>
-        </div>
-      </div>
+      <p-table
+        [value]="comments()"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="pagination().total || 0"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条评论"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        [loading]="loading()"
+        [lazy]="true"
+        (onLazyLoad)="onLazyLoad($event)"
+        [(selection)]="selectedComments"
+        styleClass="p-datatable-sm"
+        [scrollable]="true"
+      >
+        <ng-template pTemplate="caption">
+          <div class="search-bar">
+            <span class="p-input-icon-left">
+              <input
+                pInputText
+                type="text"
+                [ngModel]="searchText()"
+                (ngModelChange)="searchText.set($event)"
+                placeholder="搜索评论内容..."
+                (keydown.enter)="onSearch()"
+              />
+            </span>
+            <p-dropdown
+              [options]="statusOptions"
+              [ngModel]="selectedStatus()"
+              (ngModelChange)="selectedStatus.set($event)"
+              placeholder="选择状态"
+              styleClass="p-inputtext-sm"
+            ></p-dropdown>
+            <p-dropdown
+              [options]="timeRangeOptions"
+              [ngModel]="selectedTimeRange()"
+              (ngModelChange)="selectedTimeRange.set($event)"
+              placeholder="时间范围"
+              styleClass="p-inputtext-sm"
+            ></p-dropdown>
+            <div class="search-actions">
+              <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
+              <p-button
+                label="搜索"
+                icon="pi pi-search"
+                (click)="onSearch()"
+                [loading]="loading()"
+              ></p-button>
+            </div>
+          </div>
+        </ng-template>
 
-      <div class="card">
-        <!-- 工具栏 -->
-        <div class="flex flex-wrap gap-2 mb-4">
-          <span class="p-input-icon-left">
-            <i class="pi pi-search"></i>
-            <input
-              pInputText
-              type="text"
-              placeholder="搜索评论..."
-              [(ngModel)]="searchText"
-              (input)="onSearch()"
-            />
-          </span>
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width: 3rem;">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th style="min-width: 18rem;">评论内容</th>
+            <th style="min-width: 7rem;">评论者</th>
+            <th style="min-width: 7rem;">评分</th>
+            <th style="min-width: 5rem;">状态</th>
+            <th style="min-width: 6rem;" alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
+          </tr>
+        </ng-template>
 
-          <p-dropdown
-            [options]="statusOptions"
-            [(ngModel)]="selectedStatus"
-            placeholder="选择状态"
-            (onChange)="onStatusChange()"
-            [showClear]="true"
-            styleClass="w-40"
-          ></p-dropdown>
+        <ng-template pTemplate="body" let-comment>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="comment"></p-tableCheckbox>
+            </td>
+            <td>
+              <div class="flex flex-column gap-2 mb-2">
+                <div class="font-medium text-base">{{ comment.title }}</div>
+                <div class="text-gray-600 break-all">{{ comment.content }}</div>
+                <div class="text-sm text-gray-500">
+                  {{
+                    commentService.formatTimestamp(comment.create_time) | date: 'yyyy-MM-dd HH:mm'
+                  }}
+                </div>
+              </div>
 
-          <p-dropdown
-            [options]="timeRangeOptions"
-            [(ngModel)]="selectedTimeRange"
-            placeholder="时间范围"
-            (onChange)="onTimeRangeChange()"
-            [showClear]="true"
-            styleClass="w-40"
-          ></p-dropdown>
-        </div>
-
-        <!-- 评论列表 -->
-        <p-table
-          [value]="comments"
-          [paginator]="true"
-          [rows]="10"
-          [rowsPerPageOptions]="[10, 20, 50]"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="显示 {first} 到 {last} 条，共 {totalRecords} 条"
-          [globalFilterFields]="['content', 'author.name', 'post.title']"
-          [loading]="loading"
-          [(selection)]="selectedComments"
-          styleClass="p-datatable-sm"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th style="width: 3rem">
-                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-              </th>
-              <th style="width: 40%">评论内容</th>
-              <th style="width: 15%">评论者</th>
-              <th style="width: 20%">文章</th>
-              <th style="width: 10%">状态</th>
-              <th style="width: 12%">操作</th>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="body" let-comment>
-            <tr>
-              <td>
-                <p-tableCheckbox [value]="comment"></p-tableCheckbox>
-              </td>
-              <td>
+              @if (comment.parent_id) {
+                <div class="flex flex-column gap-2">
+                  <div class="text-sm text-blue-600 break-all" style="white-space: pre-line;">
+                    回复: {{ comment.parent_content || '原评论' }}
+                  </div>
+                </div>
+              }
+            </td>
+            <td>
+              <div class="flex items-center gap-2">
+                <p-avatar
+                  size="large"
+                  [style]="{ 'background-color': '#ece9fc', color: '#2a1261' }"
+                  shape="circle"
+                  [image]="comment.author_avatar"
+                  [label]="comment.author_name?.[0] || 'U'"
+                  styleClass="mr-2"
+                ></p-avatar>
                 <div class="flex flex-column">
-                  <div class="mb-2">{{ comment.content }}</div>
-                  <div class="flex gap-2 text-sm text-gray-500">
-                    <span>{{ comment.createdAt | date: 'yyyy-MM-dd HH:mm' }}</span>
-                    <span>IP: {{ comment.ip }}</span>
-                    <span *ngIf="comment.parentId">回复: {{ comment.replyTo }}</span>
-                  </div>
+                  <span class="font-medium">{{ comment.author_name || '匿名用户' }}</span>
+                  <span class="text-sm text-gray-500">{{ comment.author_email || '无邮箱' }}</span>
                 </div>
-              </td>
-              <td>
-                <div class="flex items-center gap-2">
-                  <p-avatar
-                    [image]="comment.author.avatar"
-                    [label]="comment.author.name[0]"
-                    styleClass="mr-2"
-                  ></p-avatar>
-                  <div class="flex flex-column">
-                    <span class="font-medium">{{ comment.author.name }}</span>
-                    <span class="text-sm text-gray-500">{{ comment.author.email }}</span>
-                  </div>
+              </div>
+            </td>
+            <td>
+              <div class="flex flex-column gap-1">
+                <div class="flex items-center gap-1">
+                  <span class="text-green-600">👍 {{ comment.good_article }}</span>
                 </div>
-              </td>
-              <td>
-                <a class="text-blue-600 hover:text-blue-800">{{ comment.post.title }}</a>
-              </td>
-              <td>
-                <p-tag
-                  [severity]="getStatusSeverity(comment.status)"
-                  [value]="getStatusLabel(comment.status)"
-                ></p-tag>
-              </td>
-              <td>
-                <div class="flex gap-2">
-                  <button
-                    *ngIf="comment.status === 'pending'"
-                    pButton
+                <div class="flex items-center gap-1">
+                  <span class="text-red-600">👎 {{ comment.bad_article }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-gray-600">😐 {{ comment.not_article }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <p-tag
+                [severity]="commentService.getStatusSeverity(comment.status)"
+                [value]="commentService.getStatusLabel(comment.status)"
+              ></p-tag>
+            </td>
+            <td alignFrozen="right" pFrozenColumn [frozen]="true">
+              <div class="action-buttons">
+                @if (comment.status === 10) {
+                  <p-button
                     icon="pi pi-check"
-                    class="p-button-rounded p-button-success p-button-text p-button-sm"
+                    severity="success"
                     pTooltip="通过"
                     tooltipPosition="top"
                     (click)="approveComment(comment)"
-                  ></button>
-                  <button
-                    *ngIf="comment.status === 'pending'"
-                    pButton
+                  ></p-button>
+                  <p-button
                     icon="pi pi-times"
-                    class="p-button-rounded p-button-danger p-button-text p-button-sm"
+                    severity="danger"
                     pTooltip="拒绝"
                     tooltipPosition="top"
                     (click)="rejectComment(comment)"
-                  ></button>
-                  <button
-                    pButton
-                    icon="pi pi-reply"
-                    class="p-button-rounded p-button-info p-button-text p-button-sm"
-                    pTooltip="回复"
-                    tooltipPosition="top"
-                    (click)="replyComment(comment)"
-                  ></button>
-                  <button
-                    pButton
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger p-button-text p-button-sm"
-                    pTooltip="删除"
-                    tooltipPosition="top"
-                    (click)="confirmDelete(comment)"
-                  ></button>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
+                  ></p-button>
+                }
+                <p-button
+                  icon="pi pi-reply"
+                  severity="info"
+                  pTooltip="回复"
+                  tooltipPosition="top"
+                  (click)="replyComment(comment)"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="删除"
+                  tooltipPosition="top"
+                  (click)="confirmDelete(comment)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
 
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="6" class="text-center p-4">
-                <div class="flex flex-column align-items-center">
-                  <i class="pi pi-comments text-4xl text-gray-400 mb-2"></i>
-                  <span class="text-gray-500">暂无评论</span>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center p-4">
+              <div class="flex flex-column align-items-center">
+                <i class="pi pi-comments text-4xl text-gray-400 mb-2"></i>
+                <span class="text-gray-500">暂无评论</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
 
       <!-- 回复对话框 -->
       <p-dialog
         [(visible)]="replyVisible"
-        [style]="{ width: '50vw' }"
+        [style]="{ width: '500px' }"
         [modal]="true"
         [draggable]="false"
         [resizable]="false"
         header="回复评论"
         [closeOnEscape]="false"
       >
-        <div *ngIf="selectedComment" class="p-4">
-          <div class="mb-4">
-            <h3 class="font-medium mb-2">原评论：</h3>
-            <div class="bg-gray-50 p-3 rounded">
-              <div class="flex items-center gap-2 mb-2">
+        <form>
+          <!-- 原评论展示 -->
+          <div class="field">
+            <label class="block text-900 font-medium mb-2">原评论</label>
+            <div class="p-3 border-1 border-round surface-border surface-card">
+              <div class="flex align-items-center gap-2 mb-2">
                 <p-avatar
-                  [image]="selectedComment.author.avatar"
-                  [label]="selectedComment.author.name[0]"
+                  size="large"
+                  [style]="{ 'background-color': '#ece9fc', color: '#2a1261' }"
+                  shape="circle"
+                  [image]="selectedComment()?.author_avatar"
+                  [label]="selectedComment()?.author_name?.[0] || 'U'"
                   size="normal"
                 ></p-avatar>
-                <span class="font-medium">{{ selectedComment.author.name }}</span>
-                <span class="text-sm text-gray-500">{{
-                  selectedComment.createdAt | date: 'yyyy-MM-dd HH:mm'
+                <span class="font-medium">{{ selectedComment()?.author_name || '匿名用户' }}</span>
+                <span class="text-sm text-500">{{
+                  commentService.formatTimestamp(selectedComment()?.create_time || 0)
+                    | date: 'yyyy-MM-dd HH:mm'
                 }}</span>
               </div>
-              <p>{{ selectedComment.content }}</p>
+              <div *ngIf="selectedComment()?.title" class="mb-1">
+                <span class="font-medium text-900 text-sm">标题：</span>
+                <span>{{ selectedComment()?.title }}</span>
+              </div>
+              <div>
+                <span class="font-medium text-900 text-sm">内容：</span>
+                <span>{{ selectedComment()?.content }}</span>
+              </div>
             </div>
           </div>
 
+          <!-- 回复标题 -->
+          <div class="field">
+            <label for="replyTitle" class="block text-900 font-medium mb-2">回复标题</label>
+            <input
+              id="replyTitle"
+              pInputText
+              [(ngModel)]="replyTitle"
+              class="w-full"
+              placeholder="输入回复标题..."
+              name="replyTitle"
+            />
+          </div>
+
+          <!-- 回复内容 -->
           <div class="field">
             <label for="replyContent" class="block text-900 font-medium mb-2">回复内容</label>
             <textarea
               id="replyContent"
-              pInputTextarea
               [(ngModel)]="replyContent"
-              [rows]="4"
+              [rows]="5"
               class="w-full"
               placeholder="输入回复内容..."
+              name="replyContent"
+              pInputTextarea
             ></textarea>
+            <small class="text-500 mt-1 block">
+              <i class="pi pi-info-circle text-xs"></i>
+              请详细描述您的回复内容
+            </small>
           </div>
-        </div>
+        </form>
 
         <ng-template pTemplate="footer">
-          <button
-            pButton
+          <p-button
             label="取消"
             icon="pi pi-times"
-            class="p-button-text"
-            (click)="replyVisible = false"
-          ></button>
-          <button
-            pButton
+            severity="secondary"
+            (click)="replyVisible.set(false)"
+          ></p-button>
+          <p-button
             label="提交回复"
             icon="pi pi-check"
-            class="p-button-success"
+            severity="success"
             (click)="submitReply()"
-          ></button>
+            [loading]="submittingReply()"
+          ></p-button>
         </ng-template>
       </p-dialog>
     </div>
-  `
+  `,
+  styles: [
+    `
+      .page-container {
+        padding: 1rem;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .page-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+      .search-bar {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .search-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 0.25rem;
+      }
+      .action-buttons p-button {
+        margin-right: 0.25rem;
+      }
+      /* 统一对话框内表单区域间距 */
+      .field {
+        margin-bottom: 1.2rem;
+      }
+      .p-dialog .field:last-child {
+        margin-bottom: 0;
+      }
+      /* 原评论卡片内元素间距 */
+      .comment-card .mb-1 {
+        margin-bottom: 0.5rem;
+      }
+      .comment-card .mb-2 {
+        margin-bottom: 0.75rem;
+      }
+      .comment-card .mb-3 {
+        margin-bottom: 1rem;
+      }
+    `
+  ]
 })
 export class CommentsPage implements OnInit {
-  comments: Comment[] = []
-  selectedComments: Comment[] = []
-  loading = false
-  searchText = ''
-  selectedStatus: string | null = null
-  selectedTimeRange: string | null = null
-  replyVisible = false
-  selectedComment: Comment | null = null
-  replyContent = ''
+  commentService = inject(CommentService)
+  private confirmationService = inject(ConfirmationService)
+  private messageService = inject(MessageService)
 
+  // Signals
+  comments = signal<Comment[]>([])
+  selectedComments = signal<Comment[]>([])
+  loading = signal(false)
+  replyVisible = signal(false)
+  selectedComment = signal<Comment | null>(null)
+  searchText = signal('')
+  selectedStatus = signal<number | null>(null)
+  selectedTimeRange = signal<string | null>(null)
+  replyTitle = signal('')
+  replyContent = signal('')
+  submittingReply = signal(false)
+
+  // Pagination
+  pagination = signal({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0
+  })
+
+  // Options
   statusOptions = [
-    { label: '待审核', value: 'pending' },
-    { label: '已通过', value: 'approved' },
-    { label: '已拒绝', value: 'rejected' },
-    { label: '垃圾评论', value: 'spam' }
+    { label: '全部状态', value: null },
+    { label: '待审核', value: 10 },
+    { label: '已通过', value: 20 },
+    { label: '已拒绝', value: -10 },
+    { label: '垃圾评论', value: -20 }
   ]
 
   timeRangeOptions = [
+    { label: '全部时间', value: null },
     { label: '今天', value: 'today' },
     { label: '昨天', value: 'yesterday' },
     { label: '最近7天', value: 'last7days' },
     { label: '最近30天', value: 'last30days' }
   ]
 
-  constructor(
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService
-  ) {}
-
   ngOnInit() {
     this.loadComments()
   }
 
   loadComments() {
-    this.loading = true
-    // TODO: Implement API call to load comments
-    // Mock data for now
-    setTimeout(() => {
-      this.comments = [
-        {
-          id: 1,
-          content: '这是一条测试评论，文章写得很好！',
-          author: {
-            name: '张三',
-            avatar: '',
-            email: 'zhangsan@example.com'
-          },
-          post: {
-            id: 1,
-            title: 'Angular 最佳实践指南'
-          },
-          status: 'pending',
-          createdAt: new Date('2024-03-21 10:00:00'),
-          ip: '192.168.1.1'
+    this.loading.set(true)
+
+    const filters: CommentFilters = {}
+    if (this.searchText()) {
+      filters.content = this.searchText()
+    }
+    if (this.selectedStatus() !== null) {
+      filters.status = this.selectedStatus()!
+    }
+
+    // Apply time range filter
+    const timeRange = this.selectedTimeRange()
+    if (timeRange) {
+      const now = Date.now()
+      const dayMs = 24 * 60 * 60 * 1000
+
+      switch (timeRange) {
+        case 'today':
+          filters.start_time = new Date().setHours(0, 0, 0, 0)
+          filters.end_time = now
+          break
+        case 'yesterday':
+          filters.start_time = new Date().setHours(0, 0, 0, 0) - dayMs
+          filters.end_time = new Date().setHours(0, 0, 0, 0) - 1
+          break
+        case 'last7days':
+          filters.start_time = now - 7 * dayMs
+          filters.end_time = now
+          break
+        case 'last30days':
+          filters.start_time = now - 30 * dayMs
+          filters.end_time = now
+          break
+      }
+    }
+
+    const currentPagination = this.pagination()
+    this.commentService
+      .getComments({ page: currentPagination.page, pageSize: currentPagination.pageSize }, filters)
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.comments.set(response.data.dataList)
+            this.pagination.set(response.data.pagination)
+            this.loading.set(false)
+          } else {
+            this.comments.set([])
+            this.pagination.set({
+              page: 1,
+              pageSize: 10,
+              total: 0,
+              totalPages: 0
+            })
+            this.loading.set(false)
+          }
         },
-        {
-          id: 2,
-          content: '感谢分享，学到了很多！',
-          author: {
-            name: '李四',
-            avatar: '',
-            email: 'lisi@example.com'
-          },
-          post: {
-            id: 2,
-            title: 'TypeScript 入门教程'
-          },
-          status: 'approved',
-          createdAt: new Date('2024-03-20 15:30:00'),
-          ip: '192.168.1.2',
-          parentId: 1,
-          replyTo: '张三'
+        error: (error) => {
+          console.error('Error loading comments:', error)
+          this.comments.set([])
+          this.pagination.set({
+            page: 1,
+            pageSize: 10,
+            total: 0,
+            totalPages: 0
+          })
+          this.loading.set(false)
         }
-      ]
-      this.loading = false
-    }, 1000)
+      })
+  }
+
+  onLazyLoad(event: any) {
+    const page = event.first / event.rows + 1
+    this.pagination.update((p) => ({
+      ...p,
+      page,
+      pageSize: event.rows
+    }))
+    this.loadComments()
   }
 
   onSearch() {
-    // TODO: Implement search logic
-    console.log('Searching for:', this.searchText)
+    this.pagination.update((p) => ({ ...p, page: 1 }))
+    this.loadComments()
   }
 
   onStatusChange() {
-    // TODO: Implement status filter logic
-    console.log('Status changed to:', this.selectedStatus)
+    this.pagination.update((p) => ({ ...p, page: 1 }))
+    this.loadComments()
   }
 
   onTimeRangeChange() {
-    // TODO: Implement time range filter logic
-    console.log('Time range changed to:', this.selectedTimeRange)
+    this.pagination.update((p) => ({ ...p, page: 1 }))
+    this.loadComments()
   }
 
-  getStatusSeverity(status: string): string {
-    switch (status) {
-      case 'approved':
-        return 'success'
-      case 'pending':
-        return 'warning'
-      case 'rejected':
-        return 'danger'
-      case 'spam':
-        return 'info'
-      default:
-        return 'info'
-    }
-  }
-
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'approved':
-        return '已通过'
-      case 'pending':
-        return '待审核'
-      case 'rejected':
-        return '已拒绝'
-      case 'spam':
-        return '垃圾评论'
-      default:
-        return status
-    }
+  resetFilters() {
+    this.searchText.set('')
+    this.selectedStatus.set(null)
+    this.selectedTimeRange.set(null)
+    this.pagination.update((p) => ({ ...p, page: 1 }))
+    this.loadComments()
   }
 
   approveComment(comment: Comment) {
-    // TODO: Implement approve logic
-    this.messageService.add({
-      severity: 'success',
-      summary: '成功',
-      detail: '评论已通过'
+    this.commentService.updateComment(comment.id, { status: 20 }).subscribe({
+      next: (result) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: '成功',
+          detail: '评论已通过'
+        })
+        this.loadComments()
+      },
+      error: (error) => {
+        console.error('Error approving comment:', error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: '操作失败'
+        })
+      }
     })
   }
 
   rejectComment(comment: Comment) {
-    // TODO: Implement reject logic
-    this.messageService.add({
-      severity: 'info',
-      summary: '已拒绝',
-      detail: '评论已拒绝'
+    this.commentService.updateComment(comment.id, { status: -10 }).subscribe({
+      next: (result) => {
+        this.messageService.add({
+          severity: 'info',
+          summary: '已拒绝',
+          detail: '评论已拒绝'
+        })
+        this.loadComments()
+      },
+      error: (error) => {
+        console.error('Error rejecting comment:', error)
+        this.messageService.add({
+          severity: 'error',
+          summary: '错误',
+          detail: '操作失败'
+        })
+      }
     })
   }
 
   replyComment(comment: Comment) {
-    this.selectedComment = comment
-    this.replyContent = ''
-    this.replyVisible = true
+    this.selectedComment.set(comment)
+    this.replyTitle.set('')
+    this.replyContent.set('')
+    this.replyVisible.set(true)
   }
 
   submitReply() {
-    if (this.replyContent.trim()) {
-      // TODO: Implement reply submission
-      this.messageService.add({
-        severity: 'success',
-        summary: '成功',
-        detail: '回复已提交'
-      })
-      this.replyVisible = false
-    } else {
+    if (!this.replyTitle().trim() || !this.replyContent().trim()) {
       this.messageService.add({
         severity: 'error',
         summary: '错误',
-        detail: '请输入回复内容'
+        detail: '请输入回复标题和内容'
       })
+      return
     }
+
+    const selectedComment = this.selectedComment()
+    if (!selectedComment) return
+
+    this.submittingReply.set(true)
+
+    // Create reply comment
+    this.commentService
+      .createComment({
+        title: this.replyTitle(),
+        content: this.replyContent(),
+        user_id: 1, // TODO: Get current user ID
+        parent_id: selectedComment.id,
+        status: 20 // Auto approve admin replies
+      })
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: '成功',
+            detail: '回复已提交'
+          })
+          this.replyVisible.set(false)
+          this.submittingReply.set(false)
+          this.loadComments()
+        },
+        error: (error) => {
+          console.error('Error submitting reply:', error)
+          this.messageService.add({
+            severity: 'error',
+            summary: '错误',
+            detail: '回复提交失败'
+          })
+          this.submittingReply.set(false)
+        }
+      })
   }
 
   confirmDelete(comment: Comment) {
@@ -463,51 +632,91 @@ export class CommentsPage implements OnInit {
       header: '删除确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // TODO: Implement delete logic
-        this.messageService.add({
-          severity: 'success',
-          summary: '成功',
-          detail: '评论已删除'
+        this.commentService.deleteComment(comment.id).subscribe({
+          next: (result) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: '成功',
+              detail: '评论已删除'
+            })
+            this.loadComments()
+          },
+          error: (error) => {
+            console.error('Error deleting comment:', error)
+            this.messageService.add({
+              severity: 'error',
+              summary: '错误',
+              detail: '删除失败'
+            })
+          }
         })
       }
     })
   }
 
   batchApprove() {
-    if (this.selectedComments.length > 0) {
-      this.confirmationService.confirm({
-        message: `确定要通过选中的 ${this.selectedComments.length} 条评论吗？`,
-        header: '批量审核确认',
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => {
-          // TODO: Implement batch approve logic
-          this.messageService.add({
-            severity: 'success',
-            summary: '成功',
-            detail: '选中的评论已通过'
-          })
-          this.selectedComments = []
-        }
-      })
-    }
+    const selectedComments = this.selectedComments()
+    if (selectedComments.length === 0) return
+
+    this.confirmationService.confirm({
+      message: `确定要通过选中的 ${selectedComments.length} 条评论吗？`,
+      header: '批量审核确认',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const ids = selectedComments.map((c) => c.id)
+        this.commentService.batchUpdateStatus(ids, 20).subscribe({
+          next: (result) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: '成功',
+              detail: `已通过 ${result.data.updatedCount} 条评论`
+            })
+            this.selectedComments.set([])
+            this.loadComments()
+          },
+          error: (error) => {
+            console.error('Error batch approving comments:', error)
+            this.messageService.add({
+              severity: 'error',
+              summary: '错误',
+              detail: '批量操作失败'
+            })
+          }
+        })
+      }
+    })
   }
 
   batchDelete() {
-    if (this.selectedComments.length > 0) {
-      this.confirmationService.confirm({
-        message: `确定要删除选中的 ${this.selectedComments.length} 条评论吗？`,
-        header: '批量删除确认',
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => {
-          // TODO: Implement batch delete logic
-          this.messageService.add({
-            severity: 'success',
-            summary: '成功',
-            detail: '选中的评论已删除'
-          })
-          this.selectedComments = []
-        }
-      })
-    }
+    const selectedComments = this.selectedComments()
+    if (selectedComments.length === 0) return
+
+    this.confirmationService.confirm({
+      message: `确定要删除选中的 ${selectedComments.length} 条评论吗？`,
+      header: '批量删除确认',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        const ids = selectedComments.map((c) => c.id)
+        this.commentService.batchDeleteComments(ids).subscribe({
+          next: (result) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: '成功',
+              detail: `已删除 ${result.data.deletedCount} 条评论`
+            })
+            this.selectedComments.set([])
+            this.loadComments()
+          },
+          error: (error) => {
+            console.error('Error batch deleting comments:', error)
+            this.messageService.add({
+              severity: 'error',
+              summary: '错误',
+              detail: '批量删除失败'
+            })
+          }
+        })
+      }
+    })
   }
 }

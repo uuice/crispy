@@ -9,7 +9,7 @@ export const getDashboardOverview = async (req: Request, res: Response, next: Ne
     // 统计数据
     const totalPosts = await articleService.countArticles()
     const totalUsers = await userService.countUsers()
-    const totalComments = await commentService.countComments()
+    const totalComments = await commentService.countCommentsByStatus()
     const totalViews = await articleService.sumArticleViews()
 
     // 环比变化（演示数据）

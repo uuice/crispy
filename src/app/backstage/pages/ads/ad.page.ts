@@ -16,22 +16,6 @@ import { HttpService } from '../../services/http.service'
 import { AdDetailComponent } from './ad-detail.component'
 import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
 
-interface Ad {
-  id: number
-  name: string
-  position: string
-  type: 'image' | 'text' | 'html'
-  content: string
-  link: string
-  startDate: string
-  endDate: string
-  status: 'active' | 'inactive' | 'expired'
-  clicks: number
-  impressions: number
-  createdAt: string
-  sort: number
-}
-
 @Component({
   selector: 'cs-ads',
   standalone: true,
