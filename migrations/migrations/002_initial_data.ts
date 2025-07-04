@@ -25,16 +25,16 @@ export async function up(db: Kysely<any>): Promise<void> {
         user_name: 'admin',
         real_name: '系统管理员',
         nick_name: '管理员',
-        password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // bcrypt hash for 'admin123'
+        password: '$2b$10$TaB9i6mj0PLmwDOjnLeMJeDSMcw/J9LlFdBWQHG7AvcsUY782B0IW', // bcrypt hash for 'admin123'
         email: 'admin@example.com',
         phone: '13800138000',
         avatar_url: '/assets/images/avatar.png',
         role_id: 1,
         type_id: 1,
         status: 10,
-        is_admin: 10,
-        is_super_admin: 10,
-        is_black: -10,
+        is_admin: 1,
+        is_super_admin: 1,
+        is_black: 0,
         is_delete: 0,
         last_login_time: Date.now(),
         last_login_ip: '127.0.0.1',
@@ -418,8 +418,98 @@ export async function up(db: Kysely<any>): Promise<void> {
     console.log('Some rules may already exist, skipping...')
   }
 
-  // Insert basic categories
+  // Insert basic categories (including system categories)
   const categories = [
+    // System categories
+    {
+      title: '系统管理',
+      alias: 'GOD_SYS_CAT',
+      des: '系统管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '广告管理',
+      alias: 'AD_SYS_CAT',
+      des: '广告管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '文章管理',
+      alias: 'POST_SYS_CAT',
+      des: '文章管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '页面管理',
+      alias: 'PAGE_SYS_CAT',
+      des: '页面管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '链接管理',
+      alias: 'LINK_SYS_CAT',
+      des: '链接管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '评论管理',
+      alias: 'COMMENT_SYS_CAT',
+      des: '评论管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '标签管理',
+      alias: 'TAG_SYS_CAT',
+      des: '标签管理分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    {
+      title: '网站配置',
+      alias: 'SITE_CONFIG_SYS_CAT',
+      des: '网站配置分类',
+      parent_id: 0,
+      sort: 0,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    // Regular categories
     {
       title: '技术',
       alias: 'tech',
@@ -435,7 +525,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '编程',
       alias: 'programming',
       des: '编程技术文章',
-      parent_id: 1,
+      parent_id: 9, // 技术分类现在是第9个
       sort: 1,
       status: 10,
       is_delete: 0,
@@ -446,7 +536,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '前端开发',
       alias: 'frontend',
       des: '前端开发技术',
-      parent_id: 1,
+      parent_id: 9, // 技术分类现在是第9个
       sort: 2,
       status: 10,
       is_delete: 0,
@@ -457,7 +547,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '后端开发',
       alias: 'backend',
       des: '后端开发技术',
-      parent_id: 1,
+      parent_id: 9, // 技术分类现在是第9个
       sort: 3,
       status: 10,
       is_delete: 0,
@@ -468,7 +558,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '移动开发',
       alias: 'mobile',
       des: '移动应用开发',
-      parent_id: 1,
+      parent_id: 9, // 技术分类现在是第9个
       sort: 4,
       status: 10,
       is_delete: 0,
@@ -490,7 +580,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: 'UI设计',
       alias: 'ui-design',
       des: '用户界面设计',
-      parent_id: 6,
+      parent_id: 14, // 设计分类现在是第14个
       sort: 1,
       status: 10,
       is_delete: 0,
@@ -501,7 +591,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: 'UX设计',
       alias: 'ux-design',
       des: '用户体验设计',
-      parent_id: 6,
+      parent_id: 14, // 设计分类现在是第14个
       sort: 2,
       status: 10,
       is_delete: 0,
@@ -523,7 +613,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '随笔',
       alias: 'essay',
       des: '个人随笔',
-      parent_id: 9,
+      parent_id: 17, // 生活分类现在是第17个
       sort: 1,
       status: 10,
       is_delete: 0,
@@ -534,7 +624,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       title: '分享',
       alias: 'share',
       des: '经验分享',
-      parent_id: 9,
+      parent_id: 17, // 生活分类现在是第17个
       sort: 2,
       status: 10,
       is_delete: 0,
@@ -867,8 +957,24 @@ export async function up(db: Kysely<any>): Promise<void> {
     console.log('Some configs may already exist, skipping...')
   }
 
-  // Insert basic menus
+  // Insert basic menus (with frontend navigation category)
   const menus = [
+    // Frontend navigation menu category
+    {
+      title: '前端导航菜单',
+      alias: 'frontend-nav',
+      url: '',
+      icon: 'pi pi-bars',
+      image_url: '',
+      method: '_self',
+      parent_id: 0,
+      sort: 1,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
+    },
+    // Frontend navigation menu items (children of frontend-nav)
     {
       title: '首页',
       alias: 'home',
@@ -876,7 +982,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-home',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 1,
       status: 10,
       is_delete: 0,
@@ -890,7 +996,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-info-circle',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 2,
       status: 10,
       is_delete: 0,
@@ -904,7 +1010,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-calendar',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 3,
       status: 10,
       is_delete: 0,
@@ -918,7 +1024,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-folder',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 4,
       status: 10,
       is_delete: 0,
@@ -932,7 +1038,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-tags',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 5,
       status: 10,
       is_delete: 0,
@@ -946,7 +1052,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-user',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 6,
       status: 10,
       is_delete: 0,
@@ -960,7 +1066,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-link',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 7,
       status: 10,
       is_delete: 0,
@@ -974,7 +1080,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       icon: 'pi pi-exclamation-triangle',
       image_url: '',
       method: '_self',
-      parent_id: 0,
+      parent_id: 1, // 前端导航菜单的子菜单
       sort: 8,
       status: 10,
       is_delete: 0,

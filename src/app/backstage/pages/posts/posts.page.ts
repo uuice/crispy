@@ -476,7 +476,7 @@ export class PostsPage implements OnInit {
     }
 
     if (this.selectedCategory() !== null) {
-      params.category_id = this.selectedCategory()
+      params.type_id = this.selectedCategory()
     }
 
     // Call API to get articles

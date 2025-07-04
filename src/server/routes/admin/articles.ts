@@ -13,7 +13,7 @@ const createArticleSchema = z.object({
   source: z.string().optional(),
   source_url: z.string().optional(),
   tags: z.string().optional(), // Comma-separated tags
-  category_id: z.number().optional(),
+  type_id: z.number().optional(),
   status: z.number().default(10), // 10: draft, 20: published
   sort: z.number().default(0),
   click: z.number().default(0),
@@ -63,9 +63,7 @@ export const getArticles = async (
     // Get filters from query
     const filters = {
       title: req.query['title'] as string | undefined,
-      category_id: req.query['category_id']
-        ? parseInt(req.query['category_id'] as string)
-        : undefined,
+      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
       status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
       tag: req.query['tag'] as string | undefined,
       start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,

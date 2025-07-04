@@ -220,10 +220,10 @@ export const getPoolStatus = () => {
 
 // Log pool status periodically in development
 if (env['NODE_ENV'] === 'development') {
-  setInterval(() => {
-    console.log('Database pool status:', getPoolStatus())
-  }, 30000) // Log every 30 seconds
-  setInterval(() => {
-    console.log('Pool status:', pool)
-  }, 10000)
+  // setInterval(() => {
+  //   console.log('Database pool status:', getPoolStatus())
+  // }, 30000) // Log every 30 seconds
+  // setInterval(() => {
+  //   console.log('Pool status:', pool)
+  // }, 10000)
 }

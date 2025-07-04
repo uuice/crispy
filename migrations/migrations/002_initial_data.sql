@@ -8,9 +8,9 @@ INSERT INTO `users` (
   `last_login_time`, `last_login_ip`, `create_time`, `update_time`
 ) VALUES (
   'admin', '系统管理员', '管理员',
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- bcrypt hash for 'admin123'
+  '$2b$10$TaB9i6mj0PLmwDOjnLeMJeDSMcw/J9LlFdBWQHG7AvcsUY782B0IW', -- bcrypt hash for 'admin123'
   'admin@example.com', '13800138000', '/assets/images/avatar.png',
-  1, 1, 10, 10, 10, -10, 0,
+  1, 1, 10, 1, 1, 0, 0,
   UNIX_TIMESTAMP() * 1000, '127.0.0.1',
   UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000
 ) ON DUPLICATE KEY UPDATE `update_time` = UNIX_TIMESTAMP() * 1000;
@@ -65,19 +65,29 @@ INSERT INTO `rules` (`title`, `alias`, `des`, `condition`, `icon`, `module_id`, 
 -- Logs
 ('操作日志', 'operate-logs', '系统操作日志', 'operate-logs', 'pi pi-history', 1, 1, 0, 20, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
--- Insert basic categories
+-- Insert basic categories (including system categories)
 INSERT INTO `categories` (`title`, `alias`, `des`, `parent_id`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES
+-- System categories
+('系统管理', 'GOD_SYS_CAT', '系统管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('广告管理', 'AD_SYS_CAT', '广告管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('文章管理', 'POST_SYS_CAT', '文章管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('页面管理', 'PAGE_SYS_CAT', '页面管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('链接管理', 'LINK_SYS_CAT', '链接管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('评论管理', 'COMMENT_SYS_CAT', '评论管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('标签管理', 'TAG_SYS_CAT', '标签管理分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('网站配置', 'SITE_CONFIG_SYS_CAT', '网站配置分类', 0, 0, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+-- Regular categories
 ('技术', 'tech', '技术相关文章', 0, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('编程', 'programming', '编程技术文章', 1, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('前端开发', 'frontend', '前端开发技术', 1, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('后端开发', 'backend', '后端开发技术', 1, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('移动开发', 'mobile', '移动应用开发', 1, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('编程', 'programming', '编程技术文章', 9, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('前端开发', 'frontend', '前端开发技术', 9, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('后端开发', 'backend', '后端开发技术', 9, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('移动开发', 'mobile', '移动应用开发', 9, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 ('设计', 'design', '设计相关文章', 0, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('UI设计', 'ui-design', '用户界面设计', 6, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('UX设计', 'ux-design', '用户体验设计', 6, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('UI设计', 'ui-design', '用户界面设计', 14, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('UX设计', 'ux-design', '用户体验设计', 14, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 ('生活', 'life', '生活随笔', 0, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('随笔', 'essay', '个人随笔', 9, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('分享', 'share', '经验分享', 9, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+('随笔', 'essay', '个人随笔', 17, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('分享', 'share', '经验分享', 17, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- Insert basic tags
 INSERT INTO `tags` (`title`, `value`, `des`, `type_id`, `status`, `sort`, `is_delete`, `create_time`, `update_time`) VALUES
@@ -111,16 +121,19 @@ INSERT INTO `configs` (`title`, `alias`, `value`, `type_id`, `type_ids`, `sort`,
 ('备案信息', 'ICP_BEIAN', '京ICP备12345678号', 1, '1', 6, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 ('版权信息', 'COPYRIGHT', '© 2024 Crispy CMS. All rights reserved.', 1, '1', 7, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
--- Insert basic menus based on frontend routes
+-- Insert basic menus (with frontend navigation category)
 INSERT INTO `menus` (`title`, `alias`, `url`, `icon`, `image_url`, `method`, `parent_id`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES
-('首页', 'home', '/', 'pi pi-home', '', '_self', 0, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('关于', 'about', '/about', 'pi pi-info-circle', '', '_self', 0, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('归档', 'archives', '/archives', 'pi pi-calendar', '', '_self', 0, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('分类', 'categories', '/categories', 'pi pi-folder', '', '_self', 0, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('标签', 'tags', '/tags', 'pi pi-tags', '', '_self', 0, 5, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('作者', 'author', '/author', 'pi pi-user', '', '_self', 0, 6, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('链接', 'links', '/links', 'pi pi-link', '', '_self', 0, 7, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
-('免责声明', 'disclaimer', '/disclaimer', 'pi pi-exclamation-triangle', '', '_self', 0, 8, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+-- Frontend navigation menu category
+('前端导航菜单', 'frontend-nav', '', 'pi pi-bars', '', '_self', 0, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+-- Frontend navigation menu items (children of frontend-nav)
+('首页', 'home', '/', 'pi pi-home', '', '_self', 1, 1, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('关于', 'about', '/about', 'pi pi-info-circle', '', '_self', 1, 2, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('归档', 'archives', '/archives', 'pi pi-calendar', '', '_self', 1, 3, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('分类', 'categories', '/categories', 'pi pi-folder', '', '_self', 1, 4, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('标签', 'tags', '/tags', 'pi pi-tags', '', '_self', 1, 5, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('作者', 'author', '/author', 'pi pi-user', '', '_self', 1, 6, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('链接', 'links', '/links', 'pi pi-link', '', '_self', 1, 7, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('免责声明', 'disclaimer', '/disclaimer', 'pi pi-exclamation-triangle', '', '_self', 1, 8, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- Insert sample links
 INSERT INTO `links` (`site_name`, `url`, `logo`, `des`, `type_id`, `method`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES
@@ -333,7 +346,7 @@ INSERT INTO `users` (
 ('editor', '内容编辑', '编辑小王',
   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- bcrypt hash for 'admin123'
   'editor@example.com', '13800138001', '/assets/images/avatar2.png',
-  1, 1, 10, 10, -10, -10, 0,
+  1, 1, 10, 10, -10, 0, 0,
   UNIX_TIMESTAMP() * 1000, '127.0.0.1',
   UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000
 ),

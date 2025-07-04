@@ -62,8 +62,9 @@ const operateLogMiddleware: RequestHandler = (req, res, next) => {
         }
         // Build content string with method, path, query, and filtered body
         const content = `method: ${req.method}, path: ${req.path}, query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(filteredBody)}`
+
         await operateLogService.createOperateLog({
-          code: req.method + ':' + req.path + ':' + req.params['id'],
+          code: req.method + ':' + req.path + ':' + req.params['id'] || '',
           content,
           type_id: 0, // Adjust type_id as needed
           user_id: userId

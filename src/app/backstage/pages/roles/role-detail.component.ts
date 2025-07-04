@@ -425,7 +425,7 @@ export class RoleDetailComponent implements OnInit, OnChanges {
       return
     }
     const ruleIds = ruleIdsString
-      .split('&')
+      .split(',')
       .filter((id) => id)
       .map(Number)
     this.selectedRuleIds.set(ruleIds)
@@ -436,7 +436,7 @@ export class RoleDetailComponent implements OnInit, OnChanges {
       return ''
     }
     const ids = this.selectedRuleIds()
-    return `&${ids.join('&')}&`
+    return ids.join(',')
   }
 
   viewRuleDetail(rule: RuleNode) {

@@ -202,7 +202,7 @@ export class BackstageLayoutComponent implements OnInit, OnDestroy {
   private loadMenuItems() {
     const menuData = this.authService.getMenu<MenuData[]>()
     if (menuData && menuData.length > 0) {
-      this.sidebarItems = this.convertMenuDataToMenuItems(menuData[0].children || [])
+      this.sidebarItems = this.convertMenuDataToMenuItems(menuData || [])
     } else {
       // Fallback to default menu if no menu data available
       this.sidebarItems = this.getDefaultMenuItems()

@@ -344,6 +344,11 @@ export class UserService {
       throw new Error('用户名或密码错误')
     }
 
+    // // test password. create a new password
+    // const salt = await bcrypt.genSalt(10)
+    // const hashedPassword = await bcrypt.hash(password, salt)
+    // console.debug(hashedPassword)
+
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, user.password)
     if (!isValidPassword) {
@@ -386,10 +391,7 @@ export class UserService {
       throw new Error('用户角色不存在')
     }
 
-    const rule_ids = role.rule_ids
-      .slice(1, -1)
-      .split('&')
-      .map((id) => parseInt(id))
+    const rule_ids = role.rule_ids.split(',').map((id) => parseInt(id))
 
     // get user rule
     const rules = await db

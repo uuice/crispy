@@ -12,7 +12,7 @@ export interface CreateArticleData {
   source?: string
   source_url?: string
   tags?: string // Comma-separated tags
-  category_id?: number
+  type_id?: number
   status?: number // 10: draft, 20: published
   sort?: number
   click?: number
@@ -24,7 +24,7 @@ export type UpdateArticleData = Partial<CreateArticleData>
 
 export interface ArticleFilters {
   title?: string
-  category_id?: number
+  type_id?: number
   status?: number
   tag?: string
   start_time?: number
@@ -75,8 +75,8 @@ export class ArticleService {
     if (filters.title) {
       query = query.where(sql.ref('title'), 'like', `%${filters.title}%`)
     }
-    if (filters.category_id !== undefined && !isNaN(filters.category_id)) {
-      query = query.where(sql.ref('category_id'), '=', filters.category_id)
+    if (filters.type_id !== undefined && !isNaN(filters.type_id)) {
+      query = query.where(sql.ref('type_id'), '=', filters.type_id)
     }
     if (filters.status !== undefined && !isNaN(filters.status)) {
       query = query.where(sql.ref('status'), '=', filters.status)
@@ -126,9 +126,9 @@ export class ArticleService {
    * Create a new article
    */
   async createArticle(data: CreateArticleData) {
-    // If category_id is provided, verify that the category exists
-    if (data.category_id) {
-      const category = await this.verifyCategoryExists(data.category_id)
+    // If type_id is provided, verify that the category exists
+    if (data.type_id) {
+      const category = await this.verifyCategoryExists(data.type_id)
       if (!category) {
         throw new Error('Category not found')
       }
@@ -137,7 +137,7 @@ export class ArticleService {
     const now = Date.now()
     const newArticle = {
       ...data,
-      type_id: data.category_id,
+      type_id: data.type_id,
       create_time: now,
       update_time: now,
       is_delete: 0
@@ -155,9 +155,9 @@ export class ArticleService {
    * Update an article
    */
   async updateArticle(id: number, data: UpdateArticleData) {
-    // If category_id is being updated, verify that the new category exists
-    if (data.category_id !== undefined) {
-      const category = await this.verifyCategoryExists(data.category_id)
+    // If type_id is being updated, verify that the new category exists
+    if (data.type_id !== undefined) {
+      const category = await this.verifyCategoryExists(data.type_id)
       if (!category) {
         throw new Error('Category not found')
       }
@@ -165,7 +165,7 @@ export class ArticleService {
 
     const updateData = {
       ...data,
-      type_id: data.category_id,
+      type_id: data.type_id,
       update_time: Date.now()
     }
 
@@ -205,11 +205,11 @@ export class ArticleService {
   /**
    * Get articles by category ID
    */
-  async getArticlesByCategory(categoryId: number, limit = 10) {
+  async getArticlesByCategory(type_id: number, limit = 10) {
     return await db
       .selectFrom('articles')
       .selectAll()
-      .where(sql.ref('category_id'), '=', categoryId)
+      .where(sql.ref('type_id'), '=', type_id)
       .where('is_delete', '=', 0)
       .orderBy('create_time', 'desc')
       .limit(limit)
