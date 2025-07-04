@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router'
-import { HomeLayoutComponent } from './layouts/home-layout/home-layout.component'
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component'
+import { HomeLayoutComponent } from './web-pc/layouts/home-layout/home-layout.component'
+import { MainLayoutComponent } from './web-pc/layouts/main-layout/main-layout.component'
 
 export const routes: Routes = [
   {
@@ -9,7 +9,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage)
+        loadComponent: () => import('./web-pc/pages/home/home.page').then((m) => m.HomePage)
       }
     ]
   },
@@ -19,44 +19,45 @@ export const routes: Routes = [
     children: [
       {
         path: 'about',
-        loadComponent: () => import('./pages/about/about.page').then((m) => m.AboutPage)
+        loadComponent: () => import('./web-pc/pages/about/about.page').then((m) => m.AboutPage)
       },
       {
         path: 'archives',
-        loadComponent: () => import('./pages/archives/archives.page').then((m) => m.ArchivesPage)
+        loadComponent: () =>
+          import('./web-pc/pages/archives/archives.page').then((m) => m.ArchivesPage)
       },
       {
         path: 'links',
-        loadComponent: () => import('./pages/links/links.page').then((m) => m.LinksPage)
+        loadComponent: () => import('./web-pc/pages/links/links.page').then((m) => m.LinksPage)
       },
       {
         path: 'disclaimer',
         loadComponent: () =>
-          import('./pages/disclaimer/disclaimer.page').then((m) => m.DisclaimerPage)
+          import('./web-pc/pages/disclaimer/disclaimer.page').then((m) => m.DisclaimerPage)
       },
       {
         path: 'categories',
         loadComponent: () =>
-          import('./pages/categories/categories.page').then((m) => m.CategoriesPage)
+          import('./web-pc/pages/categories/categories.page').then((m) => m.CategoriesPage)
       },
       {
         path: 'tags',
-        loadComponent: () => import('./pages/tags/tags.page').then((m) => m.TagsPage)
+        loadComponent: () => import('./web-pc/pages/tags/tags.page').then((m) => m.TagsPage)
       },
       {
         path: 'author',
-        loadComponent: () => import('./pages/author/author.page').then((m) => m.AuthorPage)
+        loadComponent: () => import('./web-pc/pages/author/author.page').then((m) => m.AuthorPage)
       }
     ]
   },
   // Feed routes (RSS and Sitemap)
   {
     path: 'rss',
-    loadComponent: () => import('./pages/feed/feed.component').then((m) => m.FeedComponent)
+    loadComponent: () => import('./web-pc/pages/feed/feed.component').then((m) => m.FeedComponent)
   },
   {
     path: 'sitemap.xml',
-    loadComponent: () => import('./pages/feed/feed.component').then((m) => m.FeedComponent)
+    loadComponent: () => import('./web-pc/pages/feed/feed.component').then((m) => m.FeedComponent)
   },
   // Backstage routes (client-side rendering)
   {

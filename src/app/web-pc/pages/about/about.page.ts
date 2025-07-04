@@ -447,7 +447,7 @@ export class AboutPage {
   skills = [
     {
       name: '前端开发',
-      description: '使用 Angular、React 和 Vue.js 构建现代 Web 应用程序',
+      description: '使用 Angular 构建现代 Web 应用程序',
       icon: 'pi pi-desktop',
       level: '专家'
     },
@@ -459,7 +459,7 @@ export class AboutPage {
     },
     {
       name: '数据库设计',
-      description: '关系型和非关系型数据库架构',
+      description: 'MySQL 关系型数据库架构',
       icon: 'pi pi-database',
       level: '高级'
     },
@@ -467,12 +467,6 @@ export class AboutPage {
       name: 'UI/UX 设计',
       description: '以用户为中心的设计和现代界面',
       icon: 'pi pi-palette',
-      level: '中级'
-    },
-    {
-      name: 'DevOps',
-      description: 'CI/CD、容器化和云部署',
-      icon: 'pi pi-cloud',
       level: '中级'
     },
     {

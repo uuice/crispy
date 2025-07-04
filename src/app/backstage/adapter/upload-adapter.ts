@@ -1,5 +1,5 @@
 import { MessageService } from 'primeng/api'
-import { HttpService } from '../backstage/services/http.service'
+import { HttpService } from '../services/http.service'
 
 /**
  * CKEditor 图片上传适配器

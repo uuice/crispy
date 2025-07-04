@@ -26,6 +26,9 @@ export interface AccessToken {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 启用状态 10 启用 -10 未启用
@@ -132,6 +135,9 @@ export interface Ads {
    * 别名
    */
   alias: Generated<string>;
+  /**
+   * 内容
+   */
   content: Generated<string>;
   /**
    * 创建时间
@@ -153,6 +159,9 @@ export interface Ads {
    * 开始时间
    */
   start_time: Generated<number>;
+  /**
+   * 状态
+   */
   status: Generated<number>;
   /**
    * 标题
@@ -185,6 +194,9 @@ export interface ApiLogs {
    * 来源ip
    */
   ip: Generated<string>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 打开方式
@@ -241,6 +253,9 @@ export interface Articles {
    * 文章配图
    */
   image_list: Generated<string>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 是否需要审核 10需要 -10不需要
@@ -317,6 +332,9 @@ export interface Attrs {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 排序
@@ -353,6 +371,9 @@ export interface Caches {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 状态
@@ -381,6 +402,9 @@ export interface Categories {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 父级id
@@ -425,6 +449,9 @@ export interface Comments {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 中立
@@ -465,7 +492,13 @@ export interface Configs {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
+  /**
+   * 排序
+   */
   sort: Generated<number>;
   /**
    * 状态
@@ -479,6 +512,9 @@ export interface Configs {
    * 设置分类
    */
   type_id: Generated<number>;
+  /**
+   * 类型ids
+   */
   type_ids: Generated<string>;
   /**
    * 更新时间
@@ -507,6 +543,9 @@ export interface Enums {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 排序
@@ -531,12 +570,33 @@ export interface Enums {
 }
 
 export interface Holidays {
-  creat_time: Generated<number>;
+  /**
+   * 创建时间
+   */
+  create_time: Generated<number>;
+  /**
+   * 自增id
+   */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
+  /**
+   * 排序
+   */
   sort: Generated<number>;
+  /**
+   * 标题
+   */
   title: string;
+  /**
+   * 更新时间
+   */
   update_time: Generated<number>;
+  /**
+   * 值
+   */
   value: string;
 }
 
@@ -565,6 +625,9 @@ export interface Jobs {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 工作性质
@@ -609,6 +672,9 @@ export interface Keywords {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 状态
@@ -641,11 +707,17 @@ export interface Links {
    * 创建时间
    */
   create_time: Generated<number>;
+  /**
+   * 描述
+   */
   des: Generated<string>;
   /**
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * logo
@@ -682,6 +754,9 @@ export interface Links {
 }
 
 export interface Menus {
+  /**
+   * 别名
+   */
   alias: Generated<string>;
   /**
    * 创建时间
@@ -699,6 +774,9 @@ export interface Menus {
    * 图片列表
    */
   image_url: Generated<string>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 打开方式
@@ -708,6 +786,9 @@ export interface Menus {
    * 父级id
    */
   parent_id: Generated<number>;
+  /**
+   * 排序
+   */
   sort: Generated<number>;
   /**
    * 状态
@@ -744,6 +825,9 @@ export interface Notices {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 发布时间
@@ -784,6 +868,9 @@ export interface OperateLogs {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 分类id
@@ -804,6 +891,9 @@ export interface Pages {
    * 摘要
    */
   abstract: Generated<string>;
+  /**
+   * 别名
+   */
   alias: Generated<string>;
   /**
    * 作者id
@@ -829,6 +919,9 @@ export interface Pages {
    * 页面轮播配图
    */
   image_list: Generated<string>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 备注
@@ -889,6 +982,9 @@ export interface Roles {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 所属模块
@@ -921,6 +1017,9 @@ export interface Roles {
 }
 
 export interface Rules {
+  /**
+   * 别名
+   */
   alias: Generated<string>;
   /**
    * 规则
@@ -934,11 +1033,17 @@ export interface Rules {
    * 规则描述
    */
   des: Generated<string>;
+  /**
+   * 图标
+   */
   icon: Generated<string>;
   /**
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 模块Id
@@ -948,6 +1053,9 @@ export interface Rules {
    * 父级id
    */
   parent_id: Generated<number>;
+  /**
+   * 排序
+   */
   sort: Generated<number>;
   /**
    * 状态
@@ -972,12 +1080,21 @@ export interface Tags {
    * 创建时间
    */
   create_time: Generated<number>;
+  /**
+   * 描述
+   */
   des: Generated<string>;
   /**
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
+  /**
+   * 排序
+   */
   sort: Generated<number>;
   /**
    * 状态
@@ -1002,24 +1119,57 @@ export interface Tags {
 }
 
 export interface Todos {
-  complate: number;
+  /**
+   * 是否完成
+   */
+  complete: number;
+  /**
+   * 内容
+   */
   content: string;
-  creat_time: Generated<number>;
+  /**
+   * 创建时间
+   */
+  create_time: Generated<number>;
+  /**
+   * 结束时间
+   */
   end_time: Generated<number>;
   /**
    * 发布者id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
+  /**
+   * 发布者id
+   */
   publish_id: Generated<number>;
+  /**
+   * 备注
+   */
   remark: Generated<string>;
+  /**
+   * 开始时间
+   */
   start_time: Generated<number>;
+  /**
+   * 状态
+   */
   status: number;
+  /**
+   * 标题
+   */
   title: string;
   /**
    * 分类
    */
   type_id: Generated<number>;
+  /**
+   * 更新时间
+   */
   update_time: Generated<number>;
   /**
    * 用户ids
@@ -1119,6 +1269,9 @@ export interface UserTypes {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 说明
@@ -1147,6 +1300,9 @@ export interface VoteItems {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 状态
@@ -1183,6 +1339,9 @@ export interface Votes {
    * 自增id
    */
   id: Generated<number>;
+  /**
+   * 是否删除
+   */
   is_delete: Generated<number>;
   /**
    * 是否多选 10 多选 -10 单选

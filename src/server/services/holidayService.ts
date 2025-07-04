@@ -63,14 +63,14 @@ export class HolidayService {
       query = query.where('value', 'like', `%${filters.value}%`)
     }
     if (filters.start_time) {
-      query = query.where('creat_time', '>=', filters.start_time)
+      query = query.where('create_time', '>=', filters.start_time)
     }
     if (filters.end_time) {
-      query = query.where('creat_time', '<=', filters.end_time)
+      query = query.where('create_time', '<=', filters.end_time)
     }
 
-    // Order by creat_time desc by default
-    query = query.orderBy('creat_time', 'desc')
+    // Order by create_time desc by default
+    query = query.orderBy('create_time', 'desc')
 
     const [holidays, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
@@ -95,7 +95,7 @@ export class HolidayService {
     const now = Date.now()
     const newHoliday = {
       ...data,
-      creat_time: now,
+      create_time: now,
       update_time: now,
       is_delete: 0
     }
@@ -184,7 +184,7 @@ export class HolidayService {
       .where('title', 'like', `%${title}%`)
       .where('is_delete', '=', 0)
       .orderBy('sort', 'asc')
-      .orderBy('creat_time', 'desc')
+      .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
   }
@@ -198,7 +198,7 @@ export class HolidayService {
       .selectAll()
       .where('is_delete', '=', 0)
       .orderBy('sort', 'asc')
-      .orderBy('creat_time', 'desc')
+      .orderBy('create_time', 'desc')
       .execute()
   }
 

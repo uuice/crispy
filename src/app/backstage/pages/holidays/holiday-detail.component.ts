@@ -22,7 +22,7 @@ interface Holiday {
   title: string
   value: string
   sort: number
-  creat_time: number
+  create_time: number
   update_time: number
   is_delete: number
 }

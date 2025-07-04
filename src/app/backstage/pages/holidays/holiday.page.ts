@@ -19,7 +19,7 @@ interface Holiday {
   title: string
   value: string
   sort: number
-  creat_time: number
+  create_time: number
   update_time: number
   is_delete: number
 }
@@ -140,7 +140,7 @@ interface Holiday {
               </div>
             </td>
             <td>{{ rowData.sort }}</td>
-            <td>{{ rowData.creat_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
             <td alignFrozen="right" pFrozenColumn [frozen]="true">
               <div class="action-buttons">
                 <p-button

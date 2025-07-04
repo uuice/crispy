@@ -62,6 +62,7 @@
         "karma-jasmine": "~5.1.0",
         "karma-jasmine-html-reporter": "~2.1.0",
         "kysely-codegen": "^0.18.5",
+        "kysely-migration-cli": "^0.4.2",
         "less": "^4.2.0",
         "postcss": "^8.5.6",
         "prettier": "^3.5.3",
@@ -280,6 +281,8 @@
     "@ckeditor/ckeditor5-word-count": ["@ckeditor/ckeditor5-word-count@44.3.0", "https://mirrors.cloud.tencent.com/npm/@ckeditor/ckeditor5-word-count/-/ckeditor5-word-count-44.3.0.tgz", { "dependencies": { "@ckeditor/ckeditor5-core": "44.3.0", "@ckeditor/ckeditor5-ui": "44.3.0", "@ckeditor/ckeditor5-utils": "44.3.0", "ckeditor5": "44.3.0", "lodash-es": "4.17.21" } }, "sha512-9iNiF1wq1f9npT/KhBAgDfM6kFbJ0GyUdlXt3V6zyLY2K3SILQ6q5B23jhtABZny8zxA+f528ClxDSTFh9bXDA=="],
 
     "@colors/colors": ["@colors/colors@1.5.0", "https://mirrors.cloud.tencent.com/npm/@colors/colors/-/colors-1.5.0.tgz", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
+
+    "@commander-js/extra-typings": ["@commander-js/extra-typings@11.1.0", "https://mirrors.cloud.tencent.com/npm/@commander-js/extra-typings/-/extra-typings-11.1.0.tgz", { "peerDependencies": { "commander": "11.1.x" } }, "sha512-GuvZ38d23H+7Tz2C9DhzCepivsOsky03s5NI+KCy7ke1FNUvsJ2oO47scQ9YaGGhgjgNW5OYYNSADmbjcSoIhw=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.5", "https://mirrors.cloud.tencent.com/npm/@esbuild/aix-ppc64/-/aix-ppc64-0.25.5.tgz", { "os": "aix", "cpu": "ppc64" }, "sha512-9o3TMmpmftaCMepOdA5k/yDw8SfInyzWWTjYTFCX3kPSDJMROQTb8jg+h9Cnwnmm1vOzvxN7gIfB5V2ewpjtGA=="],
 
@@ -779,7 +782,7 @@
 
     "colorette": ["colorette@2.0.20", "https://mirrors.cloud.tencent.com/npm/colorette/-/colorette-2.0.20.tgz", {}, "sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w=="],
 
-    "commander": ["commander@4.1.1", "https://mirrors.cloud.tencent.com/npm/commander/-/commander-4.1.1.tgz", {}, "sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA=="],
+    "commander": ["commander@11.1.0", "https://mirrors.cloud.tencent.com/npm/commander/-/commander-11.1.0.tgz", {}, "sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ=="],
 
     "concat-map": ["concat-map@0.0.1", "https://mirrors.cloud.tencent.com/npm/concat-map/-/concat-map-0.0.1.tgz", {}, "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="],
 
@@ -1156,6 +1159,8 @@
     "kysely": ["kysely@0.28.2", "https://mirrors.cloud.tencent.com/npm/kysely/-/kysely-0.28.2.tgz", {}, "sha512-4YAVLoF0Sf0UTqlhgQMFU9iQECdah7n+13ANkiuVfRvlK+uI0Etbgd7bVP36dKlG+NXWbhGua8vnGt+sdhvT7A=="],
 
     "kysely-codegen": ["kysely-codegen@0.18.5", "https://mirrors.cloud.tencent.com/npm/kysely-codegen/-/kysely-codegen-0.18.5.tgz", { "dependencies": { "chalk": "4.1.2", "cosmiconfig": "^9.0.0", "dotenv": "^16.5.0", "dotenv-expand": "^12.0.2", "git-diff": "^2.0.6", "micromatch": "^4.0.8", "minimist": "^1.2.8", "pluralize": "^8.0.0", "zod": "^3.24.4" }, "peerDependencies": { "@libsql/kysely-libsql": ">=0.3.0 <0.5.0", "@tediousjs/connection-string": ">=0.5.0 <0.6.0", "better-sqlite3": ">=7.6.2 <8.0.0", "kysely": ">=0.27.0 <1.0.0", "kysely-bun-sqlite": ">=0.3.2 <1.0.0", "kysely-bun-worker": ">=1.2.0 <2.0.0", "mysql2": ">=2.3.3 <4.0.0", "pg": ">=8.8.0 <9.0.0", "tarn": ">=3.0.0 <4.0.0", "tedious": ">=18.0.0 <20.0.0" }, "optionalPeers": ["@libsql/kysely-libsql", "@tediousjs/connection-string", "better-sqlite3", "kysely-bun-sqlite", "kysely-bun-worker", "mysql2", "pg", "tarn", "tedious"], "bin": { "kysely-codegen": "dist/cli/bin.js" } }, "sha512-bj6DMsXcKo0PrrXUk/fdjFgNC6Pwq+HPBCqhNGuD57gwUJZdci2s2OqhNneQeYpAIWGot7/481WdzTyXrClY2Q=="],
+
+    "kysely-migration-cli": ["kysely-migration-cli@0.4.2", "https://mirrors.cloud.tencent.com/npm/kysely-migration-cli/-/kysely-migration-cli-0.4.2.tgz", { "dependencies": { "@commander-js/extra-typings": "^11.1.0", "commander": "^11.1.0" }, "bin": { "kysely-migration-cli": "bin/kysely-migration-cli.js" } }, "sha512-904MSUdzkdxl+k3C67ogvP6ogPOEr0D6ZZDtxAmDeIHEJxZAA+eC+TLAcJt3HQABTPetwsW3pj6y1MPmaveQUg=="],
 
     "less": ["less@4.3.0", "https://mirrors.cloud.tencent.com/npm/less/-/less-4.3.0.tgz", { "dependencies": { "copy-anything": "^2.0.1", "parse-node-version": "^1.0.1", "tslib": "^2.3.0" }, "optionalDependencies": { "errno": "^0.1.1", "graceful-fs": "^4.1.2", "image-size": "~0.5.0", "make-dir": "^2.1.0", "mime": "^1.4.1", "needle": "^3.1.0", "source-map": "~0.6.0" }, "bin": { "lessc": "bin/lessc" } }, "sha512-X9RyH9fvemArzfdP8Pi3irr7lor2Ok4rOttDXBhlwDg+wKQsXOXgHWduAJE1EsF7JJx0w0bcO6BC6tCKKYnXKA=="],
 
@@ -1898,6 +1903,8 @@
     "socket.io-adapter/debug": ["debug@4.3.7", "https://mirrors.cloud.tencent.com/npm/debug/-/debug-4.3.7.tgz", { "dependencies": { "ms": "^2.1.3" } }, "sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ=="],
 
     "socket.io-parser/debug": ["debug@4.3.7", "https://mirrors.cloud.tencent.com/npm/debug/-/debug-4.3.7.tgz", { "dependencies": { "ms": "^2.1.3" } }, "sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ=="],
+
+    "sucrase/commander": ["commander@4.1.1", "https://mirrors.cloud.tencent.com/npm/commander/-/commander-4.1.1.tgz", {}, "sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA=="],
 
     "sucrase/glob": ["glob@10.4.5", "https://mirrors.cloud.tencent.com/npm/glob/-/glob-10.4.5.tgz", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": { "glob": "dist/esm/bin.mjs" } }, "sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg=="],
 
