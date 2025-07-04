@@ -15,6 +15,7 @@ import { BadgeModule } from 'primeng/badge'
 import { AvatarModule } from 'primeng/avatar'
 import { CommentService, type Comment, type CommentFilters } from '../../services/comment.service'
 import { TextareaModule } from 'primeng/textarea'
+import { SelectModule } from 'primeng/select'
 
 @Component({
   selector: 'app-comments',
@@ -25,7 +26,7 @@ import { TextareaModule } from 'primeng/textarea'
     TableModule,
     ButtonModule,
     InputTextModule,
-    TextareaModule,
+    SelectModule,
     DropdownModule,
     TagModule,
     ConfirmDialogModule,
@@ -33,7 +34,8 @@ import { TextareaModule } from 'primeng/textarea'
     TooltipModule,
     DialogModule,
     BadgeModule,
-    AvatarModule
+    AvatarModule,
+    TextareaModule
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -88,20 +90,18 @@ import { TextareaModule } from 'primeng/textarea'
                 (keydown.enter)="onSearch()"
               />
             </span>
-            <p-dropdown
+            <p-select
               [options]="statusOptions"
               [ngModel]="selectedStatus()"
               (ngModelChange)="selectedStatus.set($event)"
               placeholder="选择状态"
-              styleClass="p-inputtext-sm"
-            ></p-dropdown>
-            <p-dropdown
+            ></p-select>
+            <p-select
               [options]="timeRangeOptions"
               [ngModel]="selectedTimeRange()"
               (ngModelChange)="selectedTimeRange.set($event)"
               placeholder="时间范围"
-              styleClass="p-inputtext-sm"
-            ></p-dropdown>
+            ></p-select>
             <div class="search-actions">
               <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
               <p-button
