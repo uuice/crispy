@@ -259,9 +259,7 @@ interface Comment {
           </div>
 
           <div class="field">
-            <label for="replyContent" class="block text-900 font-medium mb-2"
-              >回复内容</label
-            >
+            <label for="replyContent" class="block text-900 font-medium mb-2">回复内容</label>
             <textarea
               id="replyContent"
               pInputTextarea

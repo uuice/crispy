@@ -31,7 +31,7 @@ import { MenuItem } from 'primeng/api'
         border-right: 1px solid var(--p-content-border-color);
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+        overflow: auto;
       }
 
       .sidebar-header {

@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `ads` (
   `is_delete` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '是否删除',
   `content` varchar(255) NOT NULL DEFAULT '',
   `status` tinyint NOT NULL DEFAULT 0,
+  `sort` int unsigned NOT NULL DEFAULT 0 COMMENT '排序',
   PRIMARY KEY (`id`),
   UNIQUE KEY `alias` (`alias`) COMMENT 'alias唯一索引'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='广告位列表';

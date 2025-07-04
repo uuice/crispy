@@ -277,6 +277,13 @@ export async function up(db: Kysely<any>): Promise<void> {
         .defaultTo(0)
         .modifyEnd(sql`COMMENT '状态'`)
     )
+    .addColumn('sort', 'integer', (col) =>
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(0)
+        .modifyEnd(sql`COMMENT '排序'`)
+    )
     .addUniqueConstraint('ads_alias_unique', ['alias'])
     .modifyEnd(
       sql`ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='广告位列表'`

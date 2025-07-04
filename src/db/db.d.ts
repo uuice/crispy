@@ -156,6 +156,10 @@ export interface Ads {
    */
   is_delete: Generated<number>;
   /**
+   * 排序
+   */
+  sort: Generated<number>;
+  /**
    * 开始时间
    */
   start_time: Generated<number>;

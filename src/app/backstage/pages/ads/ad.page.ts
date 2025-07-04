@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { FormsModule } from '@angular/forms'
@@ -16,7 +16,7 @@ import { HttpService } from '../../services/http.service'
 import { AdDetailComponent } from './ad-detail.component'
 import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
 
-interface Advertisement {
+interface Ad {
   id: number
   name: string
   position: string
@@ -29,6 +29,7 @@ interface Advertisement {
   clicks: number
   impressions: number
   createdAt: string
+  sort: number
 }
 
 @Component({
@@ -62,44 +63,45 @@ interface Advertisement {
       <p-confirmDialog></p-confirmDialog>
 
       <p-table
-        [value]="ads"
+        [value]="ads()"
         [paginator]="true"
-        [rows]="pageSize"
-        [totalRecords]="totalRecords"
+        [rows]="pageSize()"
+        [totalRecords]="totalRecords()"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条广告"
         [rowsPerPageOptions]="[10, 20, 50]"
-        [loading]="loading"
+        [loading]="loading()"
         [lazy]="true"
         (onLazyLoad)="onLazyLoad($event)"
         [globalFilterFields]="['title', 'alias', 'position']"
         styleClass="p-datatable-sm"
       >
         <ng-template pTemplate="caption">
-          <div class="search-bar flex justify-content-between align-items-center">
+          <div class="search-bar">
             <span class="p-input-icon-left">
-              <i class="pi pi-search"></i>
               <input
                 pInputText
                 type="text"
-                [(ngModel)]="searchTitle"
+                [ngModel]="searchTitle()"
+                (ngModelChange)="searchTitle.set($event)"
                 placeholder="广告标题/别名/位置"
                 (keydown.enter)="onSearch()"
               />
             </span>
-            <div class="flex gap-2">
-              <p-dropdown
-                [options]="statusOptions"
-                [(ngModel)]="searchStatus"
-                placeholder="状态"
-                styleClass="p-inputtext-sm"
-              ></p-dropdown>
+            <p-dropdown
+              [options]="statusOptions"
+              [ngModel]="searchStatus()"
+              (ngModelChange)="searchStatus.set($event)"
+              placeholder="状态"
+              styleClass="p-inputtext-sm"
+            ></p-dropdown>
+            <div class="search-actions">
               <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
               <p-button
                 label="搜索"
                 icon="pi pi-search"
                 (click)="onSearch()"
-                [loading]="loading"
+                [loading]="loading()"
               ></p-button>
             </div>
           </div>
@@ -177,19 +179,19 @@ interface Advertisement {
         </ng-template>
       </p-table>
 
-      @if (isDetailVisible) {
+      @if (isDetailVisible()) {
         <cs-ad-detail
-          [ad]="selectedAd"
-          [mode]="selectedAd ? 'edit' : 'create'"
+          [ad]="selectedAd()"
+          [mode]="selectedAd() ? 'edit' : 'create'"
           (saved)="onAdSaved()"
           (cancelled)="onAdCancelled()"
         ></cs-ad-detail>
       }
 
-      @if (isAdItemListVisible) {
+      @if (isAdItemListVisible()) {
         <cs-ad-item-list-dialog
-          [adId]="selectedAdId"
-          [visible]="isAdItemListVisible"
+          [adId]="selectedAdId()"
+          [visible]="isAdItemListVisible()"
         ></cs-ad-item-list-dialog>
       }
     </div>
@@ -197,16 +199,16 @@ interface Advertisement {
   styles: [``]
 })
 export class AdvertisementsPage implements OnInit {
-  ads = [] as any[]
-  loading = false
-  pageSize = 10
-  totalRecords = 0
-  searchTitle = ''
-  searchStatus: number | null = null
-  isDetailVisible = false
-  selectedAd: any = null
-  isAdItemListVisible = false
-  selectedAdId: number = 0
+  ads: WritableSignal<any[]> = signal([])
+  loading = signal(false)
+  pageSize = signal(10)
+  totalRecords = signal(0)
+  searchTitle = signal('')
+  searchStatus = signal<number | null>(null)
+  isDetailVisible = signal(false)
+  selectedAd = signal<any>(null)
+  isAdItemListVisible = signal(false)
+  selectedAdId = signal(0)
 
   statusOptions = [
     { label: '全部状态', value: null },
@@ -225,61 +227,61 @@ export class AdvertisementsPage implements OnInit {
   }
 
   loadAds(page: number = 1) {
-    this.loading = true
+    this.loading.set(true)
     const params: any = {
       page,
-      pageSize: this.pageSize
+      pageSize: this.pageSize()
     }
-    if (this.searchTitle) params.title = this.searchTitle
-    if (this.searchStatus !== null) params.status = this.searchStatus
+    if (this.searchTitle()) params.title = this.searchTitle()
+    if (this.searchStatus() !== null) params.status = this.searchStatus()
     this.httpService.get<any>('/api/admin/ads', params).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          this.ads = res.data.dataList
-          this.totalRecords = res.data.pagination.total
+          this.ads.set(res.data.dataList)
+          this.totalRecords.set(res.data.pagination.total)
         } else {
-          this.ads = []
-          this.totalRecords = 0
+          this.ads.set([])
+          this.totalRecords.set(0)
         }
-        this.loading = false
+        this.loading.set(false)
       },
       error: () => {
-        this.ads = []
-        this.totalRecords = 0
-        this.loading = false
+        this.ads.set([])
+        this.totalRecords.set(0)
+        this.loading.set(false)
       }
     })
   }
 
   openCreateDialog() {
-    this.selectedAd = null
-    this.isDetailVisible = true
+    this.selectedAd.set(null)
+    this.isDetailVisible.set(true)
   }
 
   openEditDialog(ad: any) {
-    this.selectedAd = { ...ad }
-    this.isDetailVisible = true
+    this.selectedAd.set({ ...ad })
+    this.isDetailVisible.set(true)
   }
 
   onAdSaved() {
-    this.isDetailVisible = false
-    this.selectedAd = null
+    this.isDetailVisible.set(false)
+    this.selectedAd.set(null)
     this.loadAds()
   }
 
   onAdCancelled() {
-    this.isDetailVisible = false
-    this.selectedAd = null
+    this.isDetailVisible.set(false)
+    this.selectedAd.set(null)
   }
 
   openAdItemListDialog(ad: any) {
-    this.selectedAdId = ad.id
-    this.isAdItemListVisible = true
+    this.selectedAdId.set(ad.id)
+    this.isAdItemListVisible.set(true)
   }
 
   onLazyLoad(event: any) {
     const page = event.first / event.rows + 1
-    this.pageSize = event.rows
+    this.pageSize.set(event.rows)
     this.loadAds(page)
   }
 
@@ -288,8 +290,8 @@ export class AdvertisementsPage implements OnInit {
   }
 
   resetFilters() {
-    this.searchTitle = ''
-    this.searchStatus = null
+    this.searchTitle.set('')
+    this.searchStatus.set(null)
     this.loadAds(1)
   }
 
