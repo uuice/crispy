@@ -1,4 +1,6 @@
-import { Component } from '@angular/core'
+import { Component, OnInit, Inject, PLATFORM_ID, signal, computed } from '@angular/core'
+import { isPlatformServer } from '@angular/common'
+import { TransferState, makeStateKey } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
@@ -11,16 +13,26 @@ import { FormsModule } from '@angular/forms'
 import { AvatarModule } from 'primeng/avatar'
 import { ChipModule } from 'primeng/chip'
 import { TooltipModule } from 'primeng/tooltip'
+import { HttpService } from '@src/app/web-pc/services/http.service'
 
+// TransferState keys
+const LINKS_KEY = makeStateKey<Link[]>('links-data')
+// 定义 Link 接口，避免依赖服务端模块
 interface Link {
-  id: string
-  title: string
+  id: number
+  site_name: string
+  des: string
   url: string
-  description: string
-  category: string
-  icon?: string
+  logo?: string
+  method?: string
+  type_id: number
+  type_name?: string
   color?: string
-  featured?: boolean
+  sort: number
+  status: number
+  create_time: number
+  update_time: number
+  is_delete: number
 }
 
 @Component({
@@ -50,7 +62,7 @@ interface Link {
         </h1>
         <p>发现开发者的精彩资源、工具和网站</p>
         <div class="header-stats">
-          <p-badge [value]="links.length.toString()" severity="info" size="large"> </p-badge>
+          <p-badge [value]="links().length.toString()" severity="info" size="large"> </p-badge>
           <span class="stats-label">总链接数</span>
         </div>
       </div>
@@ -61,32 +73,31 @@ interface Link {
           <div class="controls-content">
             <div class="search-control">
               <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
                 <input
                   type="text"
                   pInputText
                   placeholder="搜索链接..."
-                  [(ngModel)]="searchTerm"
-                  (input)="filterLinks()"
+                  [ngModel]="searchTerm()"
+                  (ngModelChange)="searchTerm.set($event)"
                 />
               </span>
             </div>
             <div class="filter-control">
               <p-dropdown
-                [options]="categoryOptions"
-                [(ngModel)]="selectedCategory"
+                [options]="categoryOptions()"
+                [ngModel]="selectedCategory()"
+                (ngModelChange)="selectedCategory.set($event)"
                 optionLabel="label"
                 optionValue="value"
                 placeholder="按分类筛选"
-                (onChange)="filterLinks()"
               >
               </p-dropdown>
             </div>
             <div class="featured-control">
               <p-button
-                [label]="showFeaturedOnly ? '显示全部' : '仅精选'"
-                [icon]="showFeaturedOnly ? 'pi pi-list' : 'pi pi-star'"
-                [outlined]="!showFeaturedOnly"
+                [label]="showFeaturedOnly() ? '显示全部' : '仅精选'"
+                [icon]="showFeaturedOnly() ? 'pi pi-list' : 'pi pi-star'"
+                [outlined]="!showFeaturedOnly()"
                 (click)="toggleFeatured()"
               >
               </p-button>
@@ -96,7 +107,7 @@ interface Link {
       </div>
 
       <!-- Featured Links -->
-      <section class="featured-section" *ngIf="!showFeaturedOnly">
+      <section class="featured-section" *ngIf="!showFeaturedOnly()">
         <h2>
           <i class="pi pi-star"></i>
           精选链接
@@ -104,16 +115,19 @@ interface Link {
         <div class="featured-grid">
           <p-card *ngFor="let link of getFeaturedLinks()" class="featured-link-card">
             <ng-template pTemplate="header">
-              <div class="featured-header" [style.background-color]="link.color">
-                <i [class]="link.icon" class="featured-icon"></i>
+              <div class="featured-header" style="background-color: #6366f1">
+                <i [class]="link.logo || 'pi pi-link'" class="featured-icon"></i>
                 <p-chip label="精选" icon="pi pi-star" styleClass="featured-chip"> </p-chip>
               </div>
             </ng-template>
 
             <div class="featured-content">
-              <h3>{{ link.title }}</h3>
-              <p class="link-description">{{ link.description }}</p>
-              <p-tag [value]="link.category" [severity]="getCategorySeverity(link.category)">
+              <h3>{{ link.site_name }}</h3>
+              <p class="link-description">{{ link.des }}</p>
+              <p-tag
+                [value]="link.type_name || '未分类'"
+                [severity]="getCategorySeverity(link.type_name || '')"
+              >
               </p-tag>
             </div>
 
@@ -132,47 +146,47 @@ interface Link {
         </div>
       </section>
 
-      <p-divider *ngIf="!showFeaturedOnly"></p-divider>
+      <p-divider *ngIf="!showFeaturedOnly()"></p-divider>
 
       <!-- All Links -->
       <section class="links-section">
         <div class="section-header">
           <h2>
             <i class="pi pi-globe"></i>
-            {{ showFeaturedOnly ? '精选链接' : '所有链接' }}
+            {{ showFeaturedOnly() ? '精选链接' : '所有链接' }}
           </h2>
-          <span class="results-count"> 找到 {{ filteredLinks.length }} 个链接 </span>
+          <span class="results-count"> 找到 {{ filteredLinks().length }} 个链接 </span>
         </div>
 
         <div class="links-grid">
-          <p-card *ngFor="let link of filteredLinks; trackBy: trackByLinkId" class="link-card">
+          <p-card *ngFor="let link of filteredLinks(); trackBy: trackByLinkId" class="link-card">
             <div class="link-content">
               <div class="link-header">
-                <div class="link-icon" [style.background-color]="link.color">
-                  <i [class]="link.icon"></i>
+                <div class="link-icon" style="background-color: #6366f1">
+                  <i [class]="link.logo || 'pi pi-link'"></i>
                 </div>
                 <div class="link-info">
-                  <h3>{{ link.title }}</h3>
+                  <h3>{{ link.site_name }}</h3>
                   <p class="link-url">{{ getDomainFromUrl(link.url) }}</p>
                 </div>
                 <div class="link-badges">
-                  <p-chip
+                  <!-- <p-chip
                     *ngIf="link.featured"
                     label="精选"
                     icon="pi pi-star"
                     styleClass="featured-badge"
                   >
-                  </p-chip>
+                  </p-chip> -->
                   <p-tag
-                    [value]="link.category"
-                    [severity]="getCategorySeverity(link.category)"
+                    [value]="link.type_name || '未分类'"
+                    [severity]="getCategorySeverity(link.type_name || '')"
                     size="small"
                   >
                   </p-tag>
                 </div>
               </div>
 
-              <p class="link-description">{{ link.description }}</p>
+              <p class="link-description">{{ link.des }}</p>
 
               <div class="link-actions">
                 <p-button
@@ -502,150 +516,103 @@ interface Link {
     `
   ]
 })
-export class LinksPage {
-  searchTerm = ''
-  selectedCategory = ''
-  showFeaturedOnly = false
-  filteredLinks: Link[] = []
+export class LinksPage implements OnInit {
+  // 使用 signal 管理状态
+  searchTerm = signal('')
+  selectedCategory = signal('')
+  showFeaturedOnly = signal(false)
+  links = signal<Link[]>([])
 
-  categoryOptions = [
-    { label: '全部分类', value: '' },
-    { label: '开发', value: 'development' },
-    { label: '设计', value: 'design' },
-    { label: '工具', value: 'tools' },
-    { label: '学习', value: 'learning' }
-  ]
+  categoryOptions = signal<
+    {
+      label: string
+      value: string
+    }[]
+  >([])
 
-  // Sample data - In a real application, this would come from a service
-  links: Link[] = [
-    {
-      id: 'angular',
-      title: 'Angular',
-      url: 'https://angular.io',
-      description:
-        "The modern web developer's platform for building mobile and desktop web applications",
-      category: 'development',
-      icon: 'pi pi-code',
-      color: '#DD0031',
-      featured: true
-    },
-    {
-      id: 'typescript',
-      title: 'TypeScript',
-      url: 'https://www.typescriptlang.org',
-      description:
-        'JavaScript with syntax for types. TypeScript is a strongly typed programming language.',
-      category: 'development',
-      icon: 'pi pi-file-edit',
-      color: '#3178C6',
-      featured: true
-    },
-    {
-      id: 'figma',
-      title: 'Figma',
-      url: 'https://www.figma.com',
-      description:
-        'The collaborative interface design tool. Design, prototype, and gather feedback all in one place.',
-      category: 'design',
-      icon: 'pi pi-palette',
-      color: '#F24E1E',
-      featured: true
-    },
-    {
-      id: 'vscode',
-      title: 'VS Code',
-      url: 'https://code.visualstudio.com',
-      description:
-        'Code editor redefined and optimized for building and debugging modern web applications.',
-      category: 'tools',
-      icon: 'pi pi-desktop',
-      color: '#007ACC',
-      featured: false
-    },
-    {
-      id: 'github',
-      title: 'GitHub',
-      url: 'https://github.com',
-      description: 'Where the world builds software. Millions of developers collaborate on GitHub.',
-      category: 'tools',
-      icon: 'pi pi-github',
-      color: '#181717',
-      featured: false
-    },
-    {
-      id: 'mdn',
-      title: 'MDN Web Docs',
-      url: 'https://developer.mozilla.org',
-      description:
-        'The best place to learn web technologies. Comprehensive documentation for web developers.',
-      category: 'learning',
-      icon: 'pi pi-book',
-      color: '#000000',
-      featured: false
-    },
-    {
-      id: 'stackoverflow',
-      title: 'Stack Overflow',
-      url: 'https://stackoverflow.com',
-      description:
-        'The largest online community for programmers to learn and share their knowledge.',
-      category: 'learning',
-      icon: 'pi pi-question-circle',
-      color: '#F58025',
-      featured: false
-    },
-    {
-      id: 'dribbble',
-      title: 'Dribbble',
-      url: 'https://dribbble.com',
-      description: 'Discover and connect with designers worldwide. Showcase your creative work.',
-      category: 'design',
-      icon: 'pi pi-eye',
-      color: '#EA4C89',
-      featured: false
-    }
-  ]
-
-  constructor() {
-    this.filteredLinks = [...this.links]
-  }
-
-  filterLinks(): void {
-    let filtered = [...this.links]
+  // 计算属性：过滤后的链接
+  filteredLinks = computed(() => {
+    let filtered = [...this.links()]
 
     // Filter by search term
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.toLowerCase()
+    if (this.searchTerm().trim()) {
+      const term = this.searchTerm().toLowerCase()
       filtered = filtered.filter(
         (link) =>
-          link.title.toLowerCase().includes(term) || link.description.toLowerCase().includes(term)
+          link.site_name.toLowerCase().includes(term) || link.des.toLowerCase().includes(term)
       )
     }
 
     // Filter by category
-    if (this.selectedCategory) {
-      filtered = filtered.filter((link) => link.category === this.selectedCategory)
+    if (this.selectedCategory()) {
+      filtered = filtered.filter((link) => link.type_name === this.selectedCategory())
     }
 
     // Filter by featured
-    if (this.showFeaturedOnly) {
-      filtered = filtered.filter((link) => link.featured)
+    if (this.showFeaturedOnly()) {
+      filtered = filtered.filter((link) => link.status === 10 && link.sort < 10)
     }
 
-    this.filteredLinks = filtered
+    return filtered
+  })
+
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: object,
+    private transferState: TransferState,
+    private httpService: HttpService
+  ) {}
+
+  ngOnInit() {
+    // 简化的数据获取逻辑
+    this.loadLinks()
+  }
+
+  private loadLinks() {
+    // 尝试从 TransferState 获取数据
+    const cachedLinks = this.transferState.get(LINKS_KEY, null)
+
+    if (cachedLinks && cachedLinks.length > 0) {
+      // 使用缓存数据
+      this.links.set(cachedLinks)
+      this.transferState.remove(LINKS_KEY) // 清除缓存
+      console.log('Using cached links:', cachedLinks.length)
+    } else {
+      // 从 API 获取数据
+      this.httpService
+        .get<any>('/api/content/links', {
+          page: 1,
+          pageSize: 1000
+        })
+        .subscribe({
+          next: (res) => {
+            const linksData = res.data?.dataList || []
+            this.links.set(linksData)
+
+            // 只在服务器端设置 TransferState
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(LINKS_KEY, linksData)
+            }
+
+            console.log('Links loaded:', linksData.length)
+          },
+          error: (error) => {
+            console.error('Error loading links:', error)
+            this.links.set([])
+          }
+        })
+    }
   }
 
   toggleFeatured(): void {
-    this.showFeaturedOnly = !this.showFeaturedOnly
-    this.filterLinks()
+    this.showFeaturedOnly.update((value) => !value)
   }
 
   getFeaturedLinks(): Link[] {
-    return this.links.filter((link) => link.featured)
+    return this.links().filter((link: Link) => link.status === 10 && link.sort < 10)
   }
 
-  trackByLinkId(index: number, link: Link): string {
-    return link.id
+  trackByLinkId(_index: number, link: Link): string {
+    return link.id.toString()
   }
 
   getDomainFromUrl(url: string): string {
@@ -682,30 +649,10 @@ export class LinksPage {
   }
 
   filterByCategory(category: string): void {
-    this.selectedCategory = category
-    this.filterLinks()
+    this.selectedCategory.set(category)
   }
 
-  getLinksByCategory(): any[] {
-    const categories = [
-      {
-        value: 'development',
-        name: '开发',
-        description: '框架、语言和开发工具'
-      },
-      { value: 'design', name: '设计', description: '设计工具、灵感和资源' },
-      { value: 'tools', name: '工具', description: '生产力工具和实用程序' },
-      {
-        value: 'learning',
-        name: '学习',
-        description: '教育资源和技术文档'
-      }
-    ]
-
-    return categories.map((category) => ({
-      ...category,
-      links: this.links.filter((link) => link.category === category.value),
-      count: this.links.filter((link) => link.category === category.value).length
-    }))
+  getPlatform(): string {
+    return isPlatformServer(this.platformId) ? 'server' : 'client'
   }
 }

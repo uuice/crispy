@@ -35,8 +35,10 @@ export interface Link {
   des: string
   url: string
   logo?: string
+  color?: string
   method?: string
   type_id: number
+  type_name?: string
   sort: number
   status: number
   create_time: number
@@ -61,9 +63,11 @@ export class LinkService {
   async getLinkById(id: number): Promise<Link | null> {
     const result = await db
       .selectFrom('links')
-      .selectAll()
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .leftJoin('categories', 'links.type_id', 'categories.id')
+      .selectAll('links')
+      .select('categories.title as type_name')
+      .where('links.id', '=', id)
+      .where('links.is_delete', '=', 0)
       .executeTakeFirst()
 
     return result as Link | null
@@ -79,36 +83,41 @@ export class LinkService {
     const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('links').selectAll().where('is_delete', '=', 0)
+    let query = db
+      .selectFrom('links')
+      .leftJoin('categories', 'links.type_id', 'categories.id')
+      .selectAll('links')
+      .select('categories.title as type_name')
+      .where('links.is_delete', '=', 0)
 
     // Apply filters
     if (filters) {
       if (filters.siteName) {
-        query = query.where('site_name', 'like', `%${filters.siteName}%`)
+        query = query.where('links.site_name', 'like', `%${filters.siteName}%`)
       }
       if (filters.url) {
-        query = query.where('url', 'like', `%${filters.url}%`)
+        query = query.where('links.url', 'like', `%${filters.url}%`)
       }
       if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
+        query = query.where('links.status', '=', filters.status)
       }
       if (filters.typeId !== undefined) {
-        query = query.where('type_id', '=', filters.typeId)
+        query = query.where('links.type_id', '=', filters.typeId)
       }
       if (filters.startTime) {
-        query = query.where('create_time', '>=', filters.startTime)
+        query = query.where('links.create_time', '>=', filters.startTime)
       }
       if (filters.endTime) {
-        query = query.where('create_time', '<=', filters.endTime)
+        query = query.where('links.create_time', '<=', filters.endTime)
       }
     }
 
     // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    query = query.orderBy('links.create_time', 'desc')
 
     const [links, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.select((eb) => [eb.fn.count('links.id').as('count')]).executeTakeFirst()
     ])
 
     return {
@@ -184,11 +193,13 @@ export class LinkService {
   async getLinksByStatus(status: number): Promise<Link[]> {
     const result = await db
       .selectFrom('links')
-      .selectAll()
-      .where('status', '=', status)
-      .where('is_delete', '=', 0)
-      .orderBy('sort', 'asc')
-      .orderBy('create_time', 'desc')
+      .leftJoin('categories', 'links.type_id', 'categories.id')
+      .selectAll('links')
+      .select('categories.title as type_name')
+      .where('links.status', '=', status)
+      .where('links.is_delete', '=', 0)
+      .orderBy('links.sort', 'asc')
+      .orderBy('links.create_time', 'desc')
       .execute()
 
     return result as Link[]
@@ -200,11 +211,13 @@ export class LinkService {
   async getLinksByType(typeId: number): Promise<Link[]> {
     const result = await db
       .selectFrom('links')
-      .selectAll()
-      .where('type_id', '=', typeId)
-      .where('is_delete', '=', 0)
-      .orderBy('sort', 'asc')
-      .orderBy('create_time', 'desc')
+      .leftJoin('categories', 'links.type_id', 'categories.id')
+      .selectAll('links')
+      .select('categories.title as type_name')
+      .where('links.type_id', '=', typeId)
+      .where('links.is_delete', '=', 0)
+      .orderBy('links.sort', 'asc')
+      .orderBy('links.create_time', 'desc')
       .execute()
 
     return result as Link[]
@@ -216,13 +229,18 @@ export class LinkService {
   async searchLinks(searchTerm: string): Promise<Link[]> {
     const result = await db
       .selectFrom('links')
-      .selectAll()
-      .where('is_delete', '=', 0)
+      .leftJoin('categories', 'links.type_id', 'categories.id')
+      .selectAll('links')
+      .select('categories.title as type_name')
+      .where('links.is_delete', '=', 0)
       .where((eb) =>
-        eb.or([eb('site_name', 'like', `%${searchTerm}%`), eb('url', 'like', `%${searchTerm}%`)])
+        eb.or([
+          eb('links.site_name', 'like', `%${searchTerm}%`),
+          eb('links.url', 'like', `%${searchTerm}%`)
+        ])
       )
-      .orderBy('sort', 'asc')
-      .orderBy('create_time', 'desc')
+      .orderBy('links.sort', 'asc')
+      .orderBy('links.create_time', 'desc')
       .execute()
 
     return result as Link[]

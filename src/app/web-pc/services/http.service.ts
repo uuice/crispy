@@ -3,6 +3,30 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 
+// API Response interface
+export interface ApiResponse<T = any> {
+  success: boolean
+  data?: T
+  message?: string
+  error?: any
+}
+
+// Pagination interface
+export interface PaginationParams {
+  page: number
+  pageSize: number
+}
+
+export interface PaginatedResult<T> {
+  dataList: T[]
+  pagination: {
+    total: number
+    page: number
+    pageSize: number
+    totalPages: number
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class HttpService {
   constructor(private http: HttpClient) {}
@@ -11,7 +35,7 @@ export class HttpService {
    * Get access token from localStorage
    */
   private getAccessToken(): string | null {
-    return localStorage.getItem('x-access-token') || '123123'
+    return '123123'
   }
 
   /**
@@ -21,8 +45,8 @@ export class HttpService {
     let headers = new HttpHeaders(extraHeaders || {})
     const token = this.getAccessToken()
     if (token) {
-      headers = headers.set('x-access-token', token)
-      headers = headers.set('x-app-name', 'uuice')
+      headers = headers.set('x-access-token', 'web_token_123456789')
+      headers = headers.set('x-app-name', 'WebApp')
       headers = headers.set('x-channel', 'web')
     }
     return headers
