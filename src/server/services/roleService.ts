@@ -1,4 +1,4 @@
-import { db } from '@src/libs/db'
+import { db } from '@src/server/libs/db'
 import { sql } from 'kysely'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 

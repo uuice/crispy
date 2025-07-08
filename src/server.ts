@@ -6,7 +6,7 @@ import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
-import { testDbConnection } from './libs/db'
+import { testDbConnection } from './server/libs/db'
 
 // test db connection
 testDbConnection()

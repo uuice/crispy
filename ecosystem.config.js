@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'crispy-dev',
+      name: 'web-pc-dev',
       script: 'npm',
       args: 'run start',
       cwd: './',
@@ -17,15 +17,15 @@ module.exports = {
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      log_file: './logs/crispy-dev.log',
-      out_file: './logs/crispy-dev-out.log',
-      error_file: './logs/crispy-dev-error.log',
+      log_file: './logs/web-pc-dev.log',
+      out_file: './logs/web-pc-dev-out.log',
+      error_file: './logs/web-pc-dev-error.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
     },
     {
-      name: 'crispy-ssr',
+      name: 'web-pc-ssr',
       script: 'npm',
-      args: 'run serve:ssr:crispy',
+      args: 'run serve:ssr:web-pc',
       cwd: './',
       env: {
         NODE_ENV: 'production',
@@ -39,26 +39,31 @@ module.exports = {
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      log_file: './logs/crispy-ssr.log',
-      out_file: './logs/crispy-ssr-out.log',
-      error_file: './logs/crispy-ssr-error.log',
+      log_file: './logs/web-pc-ssr.log',
+      out_file: './logs/web-pc-ssr-out.log',
+      error_file: './logs/web-pc-ssr-error.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
     },
     {
-      name: 'crispy-watch',
+      name: 'backstage-dev',
       script: 'npm',
-      args: 'run watch',
+      args: 'run start:backstage',
       cwd: './',
       env: {
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
+        PORT: 4201
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 4201
       },
       instances: 1,
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      log_file: './logs/crispy-watch.log',
-      out_file: './logs/crispy-watch-out.log',
-      error_file: './logs/crispy-watch-error.log',
+      log_file: './logs/backstage-dev.log',
+      out_file: './logs/backstage-dev-out.log',
+      error_file: './logs/backstage-dev-error.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
     }
   ],

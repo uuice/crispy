@@ -1,4 +1,4 @@
-import { db } from '@src/libs/db'
+import { db } from '@src/server/libs/db'
 import { z } from 'zod'
 import { sql } from 'kysely'
 

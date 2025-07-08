@@ -1,4 +1,4 @@
-import { db } from '@src/libs/db'
+import { db } from '@src/server/libs/db'
 import { sql } from 'kysely'
 
 export interface CreateApiLogData {

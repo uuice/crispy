@@ -1,4 +1,4 @@
-import { db, filterUndefined } from '@src/libs/db'
+import { db, filterUndefined } from '@src/server/libs/db'
 import { sql } from 'kysely'
 
 // Data interfaces

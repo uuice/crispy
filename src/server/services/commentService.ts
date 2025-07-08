@@ -1,6 +1,6 @@
-import { db } from '@src/libs/db'
+import { db } from '@src/server/libs/db'
 import { sql } from 'kysely'
-import type { DB } from '@src/db/db.d'
+import type { DB } from '@src/server/db/db'
 
 export interface Comment {
   id: number

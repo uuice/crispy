@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url'
 import type { DB } from '../db/db.d.ts'
 import { sql } from 'kysely'
 
-import { env } from '../server/config/env'
+import { env } from '../config/env.js'
 
 // 工具函数：过滤 undefined 字段
 export const filterUndefined = <T extends Record<string, any>>(obj: T): Partial<T> => {

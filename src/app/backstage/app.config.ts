@@ -17,7 +17,7 @@ import lara from '@primeng/themes/lara'
 import material from '@primeng/themes/material'
 
 import { MessageService } from 'primeng/api'
-import { CustomReuseStrategy } from './backstage/services/route-reuse.strategy'
+import { CustomReuseStrategy } from './services/route-reuse.strategy'
 
 const translation = {
   'zh-CN': {

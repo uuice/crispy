@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "crispy": {
+    "web-pc": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -21,17 +21,20 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/main.ts",
+            "browser": "src/app/web-pc/main.ts",
+            "index": "src/app/web-pc/index.html",
+            "outputPath": "dist/web-pc",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "less",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "output": "/"
               }
             ],
-            "styles": ["src/styles.less"],
-            "scripts": ["node_modules/quill/dist/quill.js"],
+            "styles": ["src/app/web-pc/styles.less"],
+            "scripts": [],
             "allowedCommonJsDependencies": [
               "quill-delta",
               "quill",
@@ -40,12 +43,7 @@
               "multer",
               "helmet",
               "express"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
@@ -75,10 +73,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "crispy:build:production"
+              "buildTarget": "web-pc:build:production"
             },
             "development": {
-              "buildTarget": "crispy:build:development"
+              "buildTarget": "web-pc:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -94,10 +92,106 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "output": "/"
               }
             ],
-            "styles": ["src/styles.less"]
+            "styles": ["src/app/web-pc/styles.less"]
+          }
+        }
+      }
+    },
+    "backstage": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "less"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "cs",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/app/backstage/main.ts",
+            "index": "src/app/backstage/index.html",
+            "baseHref": "/backstage/",
+            "outputPath": "dist/backstage",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "less",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              }
+            ],
+            "styles": ["src/app/backstage/styles.less"],
+            "scripts": ["node_modules/quill/dist/quill.js"],
+            "allowedCommonJsDependencies": [
+              "quill-delta",
+              "quill",
+              "bcryptjs",
+              "jsonwebtoken",
+              "multer",
+              "helmet",
+              "express"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "12kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "backstage:build:production"
+            },
+            "development": {
+              "buildTarget": "backstage:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "less",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              }
+            ],
+            "styles": ["src/app/backstage/styles.less"]
           }
         }
       }

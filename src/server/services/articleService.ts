@@ -1,6 +1,6 @@
-import { db } from '@src/libs/db'
+import { db } from '@src/server/libs/db'
 import { sql, ExpressionBuilder } from 'kysely'
-import type { DB } from '@src/db/db.d'
+import type { DB } from '@src/server/db/db'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 
 export interface CreateArticleData {
