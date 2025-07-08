@@ -7,6 +7,7 @@ import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
+import { adminSpecs, contentSpecs } from './server/config/swagger'
 
 // test db connection
 testDbConnection()
@@ -20,6 +21,59 @@ applyMiddleware(app)
 
 // 2. API routes
 app.use(env['API_PREFIX'], apiRoutes)
+
+app.get('/admin/swagger.json', (req, res) => {
+  res.json(adminSpecs)
+})
+
+// Admin Swagger documentation route
+app.get('/admin/docs', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>API Docs</title>
+      <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    </head>
+    <body>
+      <div id="swagger-ui"></div>
+      <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+      <script>
+        SwaggerUIBundle({
+          url: '/admin/swagger.json',
+          dom_id: '#swagger-ui'
+        });
+      </script>
+    </body>
+    </html>
+  `)
+})
+
+app.get('/content/swagger.json', (req, res) => {
+  res.json(contentSpecs)
+})
+
+app.get('/content/docs', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>API Docs</title>
+      <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    </head>
+    <body>
+      <div id="swagger-ui"></div>
+      <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+      <script>
+        SwaggerUIBundle({
+          url: '/content/swagger.json',
+          dom_id: '#swagger-ui'
+        });
+      </script>
+    </body>
+    </html>
+  `)
+})
 
 // 3. Static file serving
 app.use(
