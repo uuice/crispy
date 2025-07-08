@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { CardModule } from 'primeng/card'
@@ -10,6 +10,7 @@ import { DividerModule } from 'primeng/divider'
 import { InputTextModule } from 'primeng/inputtext'
 import { DropdownModule } from 'primeng/dropdown'
 import { FormsModule } from '@angular/forms'
+import { SeoService } from '../../services/seo.service'
 
 interface Tag {
   id: string
@@ -547,7 +548,20 @@ interface Tag {
     `
   ]
 })
-export class TagsPage {
+export class TagsPage implements OnInit {
+  ngOnInit(): void {
+    // Set SEO data for tags page
+    this.seoService.setSeoData({
+      title: '标签 - Crispy',
+      description: '通过标签和关键词探索 Crispy 博客平台的内容，发现您感兴趣的文章。',
+      keywords: '标签, 关键词, 内容探索, crispy',
+      ogTitle: '标签 - Crispy',
+      ogDescription: '通过标签和关键词探索 Crispy 博客平台的内容，发现您感兴趣的文章。',
+      ogType: 'website',
+      robots: 'index, follow'
+    })
+  }
+
   searchTerm = ''
   selectedCategory = ''
   selectedSort = 'name'
@@ -585,7 +599,7 @@ export class TagsPage {
     { id: 'mongodb', name: 'MongoDB', count: 13, color: '#47A248', category: 'backend' }
   ]
 
-  constructor() {
+  constructor(private seoService: SeoService) {
     this.filteredTags = [...this.tags]
     this.sortTags()
   }

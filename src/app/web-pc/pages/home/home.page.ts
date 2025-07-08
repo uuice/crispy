@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { CardModule } from 'primeng/card'
@@ -8,6 +8,7 @@ import { AvatarModule } from 'primeng/avatar'
 import { DividerModule } from 'primeng/divider'
 import { SkeletonModule } from 'primeng/skeleton'
 import { RippleModule } from 'primeng/ripple'
+import { SeoService } from '../../services/seo.service'
 
 @Component({
   selector: 'cs-home',
@@ -455,7 +456,13 @@ import { RippleModule } from 'primeng/ripple'
     `
   ]
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  constructor(private seoService: SeoService) {}
+
+  ngOnInit(): void {
+    // Set SEO data for home page
+    this.seoService.setHomeSeo()
+  }
   featuredPosts = [
     {
       id: '1',

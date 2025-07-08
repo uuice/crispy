@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
@@ -8,6 +8,7 @@ import { DividerModule } from 'primeng/divider'
 import { PanelModule } from 'primeng/panel'
 import { TimelineModule } from 'primeng/timeline'
 import { ChipModule } from 'primeng/chip'
+import { SeoService } from '../../services/seo.service'
 
 @Component({
   selector: 'cs-about',
@@ -434,7 +435,13 @@ import { ChipModule } from 'primeng/chip'
     `
   ]
 })
-export class AboutPage {
+export class AboutPage implements OnInit {
+  constructor(private seoService: SeoService) {}
+
+  ngOnInit(): void {
+    // Set SEO data for about page
+    this.seoService.setAboutSeo()
+  }
   techStack = [
     { name: 'Angular', icon: 'pi pi-code' },
     { name: 'TypeScript', icon: 'pi pi-file-edit' },

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { CardModule } from 'primeng/card'
@@ -9,6 +9,7 @@ import { DividerModule } from 'primeng/divider'
 import { PanelModule } from 'primeng/panel'
 import { AccordionModule } from 'primeng/accordion'
 import { BadgeModule } from 'primeng/badge'
+import { SeoService } from '../../services/seo.service'
 
 interface ArchivePost {
   id: string
@@ -495,7 +496,13 @@ interface ArchivePost {
     `
   ]
 })
-export class ArchivesPage {
+export class ArchivesPage implements OnInit {
+  constructor(private seoService: SeoService) {}
+
+  ngOnInit(): void {
+    // Set SEO data for archives page
+    this.seoService.setArchivesSeo()
+  }
   // Sample data - In a real application, this would come from a service
   allPosts: ArchivePost[] = [
     {

@@ -14,6 +14,7 @@ import { AvatarModule } from 'primeng/avatar'
 import { ChipModule } from 'primeng/chip'
 import { TooltipModule } from 'primeng/tooltip'
 import { HttpService } from '@src/app/web-pc/services/http.service'
+import { SeoService } from '../../services/seo.service'
 
 // TransferState keys
 const LINKS_KEY = makeStateKey<Link[]>('links-data')
@@ -559,10 +560,14 @@ export class LinksPage implements OnInit {
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
     private transferState: TransferState,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private seoService: SeoService
   ) {}
 
   ngOnInit() {
+    // Set SEO data for links page
+    this.seoService.setLinksSeo()
+
     // 简化的数据获取逻辑
     this.loadLinks()
   }

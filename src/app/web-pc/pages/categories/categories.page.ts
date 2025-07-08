@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { CardModule } from 'primeng/card'
@@ -10,6 +10,7 @@ import { DividerModule } from 'primeng/divider'
 import { DropdownModule } from 'primeng/dropdown'
 import { InputTextModule } from 'primeng/inputtext'
 import { FormsModule } from '@angular/forms'
+import { SeoService } from '../../services/seo.service'
 
 interface Category {
   id: string
@@ -579,7 +580,19 @@ interface Category {
     `
   ]
 })
-export class CategoriesPage {
+export class CategoriesPage implements OnInit {
+  ngOnInit(): void {
+    // Set SEO data for categories page
+    this.seoService.setSeoData({
+      title: '分类 - Crispy',
+      description: '浏览 Crispy 博客平台的所有文章分类，发现您感兴趣的内容。',
+      keywords: '分类, 文章分类, 内容分类, crispy',
+      ogTitle: '分类 - Crispy',
+      ogDescription: '浏览 Crispy 博客平台的所有文章分类，发现您感兴趣的内容。',
+      ogType: 'website',
+      robots: 'index, follow'
+    })
+  }
   searchTerm = ''
   selectedSort = 'name'
   viewMode: 'grid' | 'list' = 'grid'
@@ -669,7 +682,7 @@ export class CategoriesPage {
     }
   ]
 
-  constructor() {
+  constructor(private seoService: SeoService) {
     this.filteredCategories = [...this.categories]
     this.sortCategories()
   }

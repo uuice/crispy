@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
@@ -7,6 +7,7 @@ import { PanelModule } from 'primeng/panel'
 import { AccordionModule } from 'primeng/accordion'
 import { MessageModule } from 'primeng/message'
 import { RouterModule } from '@angular/router'
+import { SeoService } from '../../services/seo.service'
 
 @Component({
   selector: 'cs-disclaimer',
@@ -388,7 +389,14 @@ import { RouterModule } from '@angular/router'
     `
   ]
 })
-export class DisclaimerPage {
+export class DisclaimerPage implements OnInit {
+  constructor(private seoService: SeoService) {}
+
+  ngOnInit(): void {
+    // Set SEO data for disclaimer page
+    this.seoService.setDisclaimerSeo()
+  }
+
   lastUpdated = '2024年3月15日'
   effectiveDate = '2024年1月1日'
 

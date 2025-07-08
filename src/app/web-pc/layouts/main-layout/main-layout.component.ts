@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext'
 import { RippleModule } from 'primeng/ripple'
 import { TooltipModule } from 'primeng/tooltip'
 import { MenuItem } from 'primeng/api'
+import { SeoService } from '../../services/seo.service'
 
 @Component({
   selector: 'cs-main-layout',
@@ -269,10 +270,15 @@ import { MenuItem } from 'primeng/api'
   ]
 })
 export class MainLayoutComponent implements OnInit {
+  constructor(private seoService: SeoService) {}
+
   currentYear = new Date().getFullYear()
   menuItems: MenuItem[] = []
 
   ngOnInit() {
+    // Set default SEO data for the layout
+    this.seoService.setDefaultSeo()
+
     this.menuItems = [
       {
         label: '首页',
