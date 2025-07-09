@@ -278,11 +278,11 @@ const contentRouteConfigs = [
 
 function generateContentSwaggerDoc(config) {
   let docs = `/**\n * ${config.section.toUpperCase()} 模块 Swagger 文档\n * \n * 此文件包含 ${config.section.toLowerCase()} 相关的所有 API 文档\n * 自动生成\n */\n\n`;
-  
+
   config.routes.forEach(route => {
     const fullPath = config.basePath + route.path;
-    
-    docs += `/**\n * @swagger\n * ${fullPath}:\n *   ${route.method}:\n *     tags: [${config.tag}]\n *     summary: ${route.summary}\n *     description: ${route.summary}\n *     security:\n *       - accessTokenAuth: []\n`;
+
+    docs += `/**\n * @swagger\n * ${fullPath}:\n *   ${route.method}:\n *     tags: [${config.tag}]\n *     summary: ${route.summary}\n *     description: ${route.summary}\n *     security:\n *       - accessTokenAuth: []\n *         appNameAuth: []\n *         channelAuth: []\n`;
 
     // Add parameters for routes with path parameters
     if (route.path.includes('{id}')) {
@@ -294,7 +294,7 @@ function generateContentSwaggerDoc(config) {
     // Add query parameters for GET list routes
     if (route.method === 'get' && route.path === '') {
       docs += ` *     parameters:\n *       - in: query\n *         name: page\n *         schema:\n *           type: integer\n *           default: 1\n *         description: 页码\n *       - in: query\n *         name: pageSize\n *         schema:\n *           type: integer\n *           default: 10\n *         description: 每页数量\n`;
-      
+
       if (!config.entityName.includes('日志')) {
         docs += ` *       - in: query\n *         name: search\n *         schema:\n *           type: string\n *         description: 搜索关键词\n`;
       }
@@ -325,25 +325,25 @@ function generateContentSwaggerDoc(config) {
 // 生成所有文档
 function generateAllContentDocs() {
   const docsDir = path.join(__dirname, '../src/server/docs/swagger/content');
-  
+
   // 确保目录存在
   if (!fs.existsSync(docsDir)) {
     fs.mkdirSync(docsDir, { recursive: true });
   }
-  
+
   const moduleMapping = {};
-  
+
   contentRouteConfigs.forEach(config => {
     const moduleName = config.tag.toLowerCase().replace('content', '');
     const moduleContent = generateContentSwaggerDoc(config);
     const filePath = path.join(docsDir, `${moduleName}.ts`);
-    
+
     fs.writeFileSync(filePath, moduleContent, 'utf8');
     console.log(`Generated: ${filePath}`);
-    
+
     moduleMapping[moduleName] = config.tag;
   });
-  
+
   return moduleMapping;
 }
 
@@ -351,11 +351,11 @@ function generateAllContentDocs() {
 function generateContentIndexFile(moduleMapping) {
   const docsDir = path.join(__dirname, '../src/server/docs/swagger/content');
   const indexPath = path.join(docsDir, 'index.ts');
-  
+
   const imports = Object.keys(moduleMapping).map(module => `import './${module}'`).join('\n');
-  
+
   const indexContent = `/**\n * Content API Swagger 文档模块索引\n * \n * 此文件用于导入所有的 Content API Swagger 文档模块\n * Content API 主要提供只读访问，使用 Access Token 认证\n */\n\n${imports}\n\nexport default {};\n\n/**\n * 模块列表：\n${Object.keys(moduleMapping).map(module => ` * - ${module}.ts: ${moduleMapping[module]}`).join('\n')}\n */\n`;
-  
+
   fs.writeFileSync(indexPath, indexContent, 'utf8');
   console.log(`Generated: ${indexPath}`);
 }
@@ -363,14 +363,14 @@ function generateContentIndexFile(moduleMapping) {
 // 主函数
 function main() {
   console.log('开始生成 Content API Swagger 文档...');
-  
+
   const moduleMapping = generateAllContentDocs();
   generateContentIndexFile(moduleMapping);
-  
+
   console.log(`\n✅ 生成完成！`);
   console.log(`📊 总计生成 ${Object.keys(moduleMapping).length} 个模块文件`);
   console.log(`🏷️  标签: ${Object.values(moduleMapping).join(', ')}`);
-  
+
   console.log('\n下一步：');
   console.log('1. 更新 swagger.ts 配置文件，添加 content 文档路径');
   console.log('2. 为 content API 添加 Access Token 认证配置');

@@ -14,6 +14,8 @@
  *     description: 获取链接列表
  *     security:
  *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -50,6 +52,8 @@
  *     description: 获取链接详情
  *     security:
  *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
  *     parameters:
  *       - in: path
  *         name: id

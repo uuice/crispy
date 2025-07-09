@@ -14,6 +14,8 @@
  *     description: 获取API日志列表
  *     security:
  *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -45,6 +47,8 @@
  *     description: 获取API日志详情
  *     security:
  *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
  *     parameters:
  *       - in: path
  *         name: id

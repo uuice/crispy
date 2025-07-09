@@ -118,8 +118,9 @@ export class UserService {
     if (!user) {
       throw new Error('用户不存在')
     }
+    const { password: _, ...userWithoutPassword } = user
 
-    return user
+    return userWithoutPassword
   }
 
   /**
@@ -137,7 +138,9 @@ export class UserService {
       throw new Error('用户不存在')
     }
 
-    return user
+    const { password: _, ...userWithoutPassword } = user
+
+    return userWithoutPassword
   }
 
   /**
@@ -151,25 +154,8 @@ export class UserService {
     let query = db
       .selectFrom('users')
       .leftJoin('roles', 'users.role_id', 'roles.id')
-      .select([
-        'users.id',
-        'users.user_name',
-        'users.nick_name',
-        'users.email',
-        'users.phone',
-        'users.status',
-        'users.is_admin',
-        'users.is_super_admin',
-        'users.is_black',
-        'users.last_login_time',
-        'users.avatar_url',
-        'users.create_time',
-        'users.update_time',
-        'users.role_id',
-        'users.type_id',
-        'roles.id as role_id',
-        'roles.title as role_title'
-      ])
+      .selectAll('users')
+      .select(['roles.id as role_id', 'roles.title as role_title'])
 
     // Apply filters
     if (user_name) {
@@ -225,16 +211,19 @@ export class UserService {
     ])
 
     // Transform users data to include role information
-    const usersWithRoles = users.map((user) => ({
-      ...user,
-      role:
-        user.role_id && user.role_title
-          ? {
-              id: user.role_id,
-              title: user.role_title
-            }
-          : null
-    }))
+    const usersWithRoles = users.map((user) => {
+      const { password: _, ...userWithoutPassword } = user
+      return {
+        ...userWithoutPassword,
+        role:
+          userWithoutPassword.role_id && userWithoutPassword.role_title
+            ? {
+                id: userWithoutPassword.role_id,
+                title: userWithoutPassword.role_title
+              }
+            : null
+      }
+    })
 
     return {
       dataList: usersWithRoles,

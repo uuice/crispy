@@ -1,5 +1,7 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 import { env } from './env'
+import path from 'node:path'
+import fs from 'node:fs'
 
 // 动态构建服务器 URL
 function getServerUrl(): string {
@@ -15,6 +17,58 @@ function getServerUrl(): string {
 
   // 生产环境使用相对路径，让浏览器自动确定域名
   return ''
+}
+
+// 智能检测 Swagger 文档路径
+function findSwaggerDocsPath(): string {
+  const currentDir = process.cwd()
+
+  // 可能的路径列表（按优先级排序）
+  const possiblePaths = [
+    // 服务器部署后的路径（基于您提供的实际路径）
+    '/home/yjj/crispy/dist/crispy/browser/server/docs/swagger',
+    // 如果在应用根目录运行
+    path.join(currentDir, 'dist/crispy/browser/server/docs/swagger'),
+    // 如果在 dist/crispy 目录运行
+    path.join(currentDir, 'browser/server/docs/swagger'),
+    // 开发环境路径
+    path.join(currentDir, 'src/server/docs/swagger')
+  ]
+
+  for (const testPath of possiblePaths) {
+    if (fs.existsSync(testPath)) {
+      console.log(`[Swagger] 找到文档路径: ${testPath}`)
+      return testPath
+    }
+  }
+
+  // 如果都找不到，返回默认路径并记录警告
+  const defaultPath = path.join(currentDir, 'src/server/docs/swagger')
+  console.warn(`[Swagger] 警告：未找到文档路径，使用默认路径: ${defaultPath}`)
+  return defaultPath
+}
+
+// 动态获取 Swagger 文档路径
+function getSwaggerDocsPaths(apiType: 'admin' | 'content'): string[] {
+  const isDev = env.isDevelopment()
+
+  if (isDev) {
+    // 开发环境：使用源文件路径
+    return [
+      `./src/server/docs/swagger/${apiType}/**/*.ts`,
+      `./src/server/docs/swagger/${apiType}/**/*.js`,
+      `./src/server/routes/${apiType}/**/*.ts`,
+      `./src/server/routes/${apiType}/**/*.js`
+    ]
+  } else {
+    // 生产环境：智能检测路径
+    const swaggerBasePath = findSwaggerDocsPath()
+
+    return [
+      path.join(swaggerBasePath, `${apiType}/**/*.ts`),
+      path.join(swaggerBasePath, `${apiType}/**/*.js`)
+    ]
+  }
 }
 
 // Swagger configuration options
@@ -166,12 +220,7 @@ const adminOptions: swaggerJsdoc.Options = {
       }
     ]
   },
-  apis: [
-    './src/server/docs/swagger/admin/**/*.ts',
-    './src/server/docs/swagger/admin/**/*.js',
-    './src/server/routes/admin/**/*.ts',
-    './src/server/routes/admin/**/*.js'
-  ]
+  apis: getSwaggerDocsPaths('admin')
 }
 
 // Generate Swagger specification
@@ -208,19 +257,19 @@ const contentOptions: swaggerJsdoc.Options = {
           type: 'apiKey',
           in: 'header',
           name: 'x-access-token',
-          description: 'Access token for API authentication'
+          description: 'Access Token - 必需'
         },
         appNameAuth: {
           type: 'apiKey',
           in: 'header',
           name: 'x-app-name',
-          description: 'Application name for API authentication'
+          description: 'Application Name - 必需'
         },
         channelAuth: {
           type: 'apiKey',
           in: 'header',
           name: 'x-channel',
-          description: 'Channel name for API authentication'
+          description: 'Channel Name - 必需'
         }
       },
       schemas: {
@@ -317,12 +366,7 @@ const contentOptions: swaggerJsdoc.Options = {
       }
     ]
   },
-  apis: [
-    './src/server/docs/swagger/content/**/*.ts',
-    './src/server/docs/swagger/content/**/*.js',
-    './src/server/routes/content/**/*.ts',
-    './src/server/routes/content/**/*.js'
-  ]
+  apis: getSwaggerDocsPaths('content')
 }
 
 // Generate Swagger specification

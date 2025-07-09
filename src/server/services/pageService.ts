@@ -81,29 +81,8 @@ export class PageService {
     const result = await db
       .selectFrom('pages')
       .leftJoin('categories', 'categories.id', 'pages.type_id')
-      .select([
-        'pages.id',
-        'pages.title',
-        'pages.alias',
-        'pages.content',
-        'pages.abstract',
-        'pages.sub_title',
-        'pages.seo_title',
-        'pages.seo_description',
-        'pages.seo_keywords',
-        'pages.image_list',
-        'pages.tags',
-        'pages.remark',
-        'pages.type_id',
-        'pages.author_id',
-        'pages.user_id',
-        'pages.status',
-        'pages.create_time',
-        'pages.update_time',
-        'pages.is_delete',
-        'categories.id as type_id',
-        'categories.title as type_title'
-      ])
+      .selectAll('pages')
+      .select(['categories.id as type_id', 'categories.title as type_title'])
       .where('pages.id', '=', id)
       .where('pages.is_delete', '=', 0)
       .executeTakeFirst()
@@ -152,29 +131,8 @@ export class PageService {
     let query = db
       .selectFrom('pages')
       .leftJoin('categories', 'categories.id', 'pages.type_id')
-      .select([
-        'pages.id',
-        'pages.title',
-        'pages.alias',
-        'pages.content',
-        'pages.abstract',
-        'pages.sub_title',
-        'pages.seo_title',
-        'pages.seo_description',
-        'pages.seo_keywords',
-        'pages.image_list',
-        'pages.tags',
-        'pages.remark',
-        'pages.type_id',
-        'pages.author_id',
-        'pages.user_id',
-        'pages.status',
-        'pages.create_time',
-        'pages.update_time',
-        'pages.is_delete',
-        'categories.id as type_id',
-        'categories.title as type_title'
-      ])
+      .selectAll('pages')
+      .select(['categories.id as type_id', 'categories.title as type_title'])
       .where('pages.is_delete', '=', 0)
 
     // Apply filters

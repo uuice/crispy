@@ -75,19 +75,8 @@ export class CommentService {
       .selectFrom('comments as c')
       .leftJoin('users as u', 'c.user_id', 'u.id')
       .leftJoin('comments as pc', 'c.parent_id', 'pc.id')
+      .selectAll('c')
       .select([
-        'c.id',
-        'c.title',
-        'c.content',
-        'c.user_id',
-        'c.parent_id',
-        'c.status',
-        'c.good_article',
-        'c.bad_article',
-        'c.not_article',
-        'c.create_time',
-        'c.update_time',
-        'c.is_delete',
         'u.nick_name as author_name',
         'u.email as author_email',
         'u.avatar_url as author_avatar',
@@ -154,19 +143,8 @@ export class CommentService {
       .selectFrom('comments as c')
       .leftJoin('users as u', 'c.user_id', 'u.id')
       .leftJoin('comments as pc', 'c.parent_id', 'pc.id')
+      .selectAll('c')
       .select([
-        'c.id',
-        'c.title',
-        'c.content',
-        'c.user_id',
-        'c.parent_id',
-        'c.status',
-        'c.good_article',
-        'c.bad_article',
-        'c.not_article',
-        'c.create_time',
-        'c.update_time',
-        'c.is_delete',
         'u.nick_name as author_name',
         'u.email as author_email',
         'u.avatar_url as author_avatar',
