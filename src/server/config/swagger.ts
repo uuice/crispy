@@ -150,7 +150,12 @@ const adminOptions: swaggerJsdoc.Options = {
       }
     ]
   },
-  apis: ['./src/server/routes/admin/**/*.ts', './src/server/routes/admin/**/*.js']
+  apis: [
+    './src/server/docs/swagger/admin/**/*.ts',
+    './src/server/docs/swagger/admin/**/*.js',
+    './src/server/routes/admin/**/*.ts',
+    './src/server/routes/admin/**/*.js'
+  ]
 }
 
 // Generate Swagger specification
@@ -296,7 +301,12 @@ const contentOptions: swaggerJsdoc.Options = {
       }
     ]
   },
-  apis: ['./src/server/routes/content/**/*.ts', './src/server/routes/content/**/*.js']
+  apis: [
+    './src/server/docs/swagger/content/**/*.ts',
+    './src/server/docs/swagger/content/**/*.js',
+    './src/server/routes/content/**/*.ts',
+    './src/server/routes/content/**/*.js'
+  ]
 }
 
 // Generate Swagger specification
