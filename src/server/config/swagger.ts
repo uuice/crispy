@@ -1,6 +1,22 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 import { env } from './env'
 
+// 动态构建服务器 URL
+function getServerUrl(): string {
+  const baseUrl = env['BASE_URL'] || env['SWAGGER_BASE_URL']
+  if (baseUrl) {
+    return baseUrl
+  }
+
+  // 开发环境默认使用 localhost
+  if (env.isDevelopment()) {
+    return `http://localhost:${env['PORT']}`
+  }
+
+  // 生产环境使用相对路径，让浏览器自动确定域名
+  return ''
+}
+
 // Swagger configuration options
 const adminOptions: swaggerJsdoc.Options = {
   definition: {
@@ -20,8 +36,8 @@ const adminOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:${env['PORT']}${env['API_PREFIX']}`,
-        description: 'Development server'
+        url: `${getServerUrl()}${env['API_PREFIX']}`,
+        description: env['NODE_ENV'] === 'production' ? 'Production server' : 'Development server'
       }
     ],
     components: {
@@ -182,8 +198,8 @@ const contentOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:${env['PORT']}${env['API_PREFIX']}`,
-        description: 'Development server'
+        url: `${getServerUrl()}${env['API_PREFIX']}`,
+        description: env['NODE_ENV'] === 'production' ? 'Production server' : 'Development server'
       }
     ],
     components: {

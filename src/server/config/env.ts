@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken'
 
 // Environment variables with type definitions
 export const env = {
+  ['BASE_URL']: process.env['BASE_URL'] || '',
+  ['SWAGGER_BASE_URL']: process.env['SWAGGER_BASE_URL'] || '',
   // Server
   ['PORT']: process.env['PORT'] || '4000',
   ['NODE_ENV']: process.env['NODE_ENV'] || 'development',
