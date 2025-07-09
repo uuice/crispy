@@ -33,7 +33,7 @@ function getSwaggerDocsPaths(apiType: 'admin' | 'content'): string[] {
     ]
   } else {
     // 生产环境：使用复制到 server 目录的文件
-    const swaggerBasePath = path.join(import.meta.dirname, '../docs/swagger')
+    const swaggerBasePath = path.join(import.meta.dirname, 'docs/swagger')
     console.log(`[Swagger] 生产环境 - 使用复制的文件路径: ${swaggerBasePath}`)
 
     return [

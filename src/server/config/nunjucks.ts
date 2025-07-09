@@ -10,7 +10,7 @@ export function configureNunjucks(app: Application) {
   const isDevelopment = process.env['NODE_ENV'] === 'development'
   const templatesPath = isDevelopment
     ? join(process.cwd(), 'src/server/templates')
-    : join(import.meta.dirname, '../templates')
+    : join(import.meta.dirname, 'templates')
 
   // Configure Nunjucks environment
   const env = nunjucks.configure(templatesPath, {
@@ -65,7 +65,7 @@ export function renderTemplate(templateName: string, data: any = {}): Promise<st
     const isDevelopment = process.env['NODE_ENV'] === 'development'
     const templatesPath = isDevelopment
       ? join(process.cwd(), 'src/server/templates')
-      : join(import.meta.dirname, '../templates')
+      : join(import.meta.dirname, 'templates')
 
     const env = nunjucks.configure(templatesPath, {
       autoescape: true,
