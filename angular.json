@@ -28,11 +28,6 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*.ts",
-                "input": "src/server/docs/swagger",
-                "output": "server/docs/swagger"
               }
             ],
             "styles": ["src/styles.less"],

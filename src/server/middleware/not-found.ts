@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express'
-import { notFoundTemplate } from '../templates/404'
 
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
   // Check if the request is for an API endpoint
@@ -11,6 +10,10 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
     return
   }
 
-  // For non-API requests, send the HTML template
-  res.status(404).send(notFoundTemplate)
+  // For non-API requests, render the 404 template with Nunjucks
+  res.status(404).render('404.njk', {
+    timestamp: new Date(),
+    path: req.path,
+    userAgent: req.get('User-Agent')
+  })
 }

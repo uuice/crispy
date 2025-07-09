@@ -2,12 +2,14 @@ import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@a
 import express from 'express'
 import { join } from 'node:path'
 import apiRoutes from './server/routes/api'
+import templateDemoRoutes from './server/routes/template-demo'
 import { applyMiddleware } from './server/middleware'
 import { notFoundHandler } from './server/middleware/not-found'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
+import { configureNunjucks } from './server/config/nunjucks'
 
 // test db connection
 testDbConnection()
@@ -19,8 +21,14 @@ const angularApp = new AngularNodeAppEngine()
 // 1. Apply basic middleware
 applyMiddleware(app)
 
+// 2. Configure Nunjucks template engine
+configureNunjucks(app)
+
 // 2. API routes
 app.use(env['API_PREFIX'], apiRoutes)
+
+// Template demo routes (for development/testing)
+app.use(templateDemoRoutes)
 
 app.get('/admin/swagger.json', (req, res) => {
   res.json(adminSpecs)

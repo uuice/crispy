@@ -5,6 +5,16 @@ import { AngularNodeAppEngine, writeResponseToNodeResponse } from '@angular/ssr/
 export const createAngularHandler = (angularApp: AngularNodeAppEngine) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Skip Angular handling for API routes, uploads, and admin/content docs
+      if (
+        req.path.startsWith('/api/') ||
+        req.path.startsWith('/uploads/') ||
+        req.path.startsWith('/admin/') ||
+        req.path.startsWith('/content/')
+      ) {
+        return next()
+      }
+
       const response = await angularApp.handle(req)
       if (response) {
         writeResponseToNodeResponse(response, res)

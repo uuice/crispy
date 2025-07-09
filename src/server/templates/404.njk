@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - 页面未找到</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    html,
+    body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body {
+      color: #000;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      max-width: 600px;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #0070f3, #00a3ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient 8s ease infinite;
+      background-size: 200% 200%;
+    }
+
+    .description {
+      font-size: 1.25rem;
+      line-height: 1.5;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
+      background: #0070f3;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .button:hover {
+      background: #0051a8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .code {
+      font-family: monospace;
+      font-size: 0.875rem;
+      padding: 0.2rem 0.4rem;
+      background: #f1f1f1;
+      border-radius: 0.25rem;
+      color: #666;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #eaeaea;
+      margin: 2rem 0;
+    }
+
+    .footer {
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        color: #fff;
+        background: #000;
+      }
+      .description {
+        color: #999;
+      }
+      .code {
+        background: #1a1a1a;
+        color: #999;
+      }
+      .divider {
+        background: #333;
+      }
+      .footer {
+        color: #999;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">404 - 页面未找到</h1>
+    <p class="description">
+      您访问的页面不存在或已被移动。
+      <br />
+      您可以尝试返回到<span class="code">首页</span>。
+    </p>
+    <a href="/" class="button">
+      返回首页
+    </a>
+    <div class="divider"></div>
+    <p class="footer">
+      Crispy - 基于 Angular SSR 构建
+      {% if timestamp %}
+      <br />
+      <small>错误时间: {{ timestamp | dateFormat('YYYY-MM-DD HH:mm') }}</small>
+      {% endif %}
+    </p>
+  </div>
+</body>
+</html>
