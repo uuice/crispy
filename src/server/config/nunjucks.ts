@@ -1,7 +1,40 @@
 import nunjucks from 'nunjucks'
 import { join } from 'node:path'
 import { Application } from 'express'
-
+import { date } from '../nunjucks/filter/date'
+import { truncate } from '../nunjucks/filter/truncate'
+import { stripHtml } from '../nunjucks/filter/stripHtml'
+import { titleToUrl } from '../nunjucks/filter/titleToUrl'
+import { Console } from '../nunjucks/filter/console'
+import { shorten } from '../nunjucks/filter/shorten'
+import { symbolsCount } from '../nunjucks/filter/symbolsCount'
+import { dateFormat } from '../nunjucks/function/dateFormat'
+import moment from 'moment'
+import { getColor } from '../nunjucks/function/getColor'
+import _ from 'lodash'
+import { Config, ConfigItem } from '../nunjucks/tag/config'
+import { Articles, ArticleItem } from '../nunjucks/tag/article'
+import { Links, LinkItem } from '../nunjucks/tag/link'
+import { Notices, NoticeItem } from '../nunjucks/tag/notice'
+import { Tags, TagItem } from '../nunjucks/tag/tag'
+import { Categories, CategoryItem } from '../nunjucks/tag/category'
+import { Menus, MenuItem } from '../nunjucks/tag/menu'
+import { Enums, EnumItem } from '../nunjucks/tag/enum'
+import { Ads, AdItem } from '../nunjucks/tag/ad'
+import { AdItems, AdItemSingle } from '../nunjucks/tag/adItem'
+import { Attrs, AttrItem } from '../nunjucks/tag/attr'
+import { Additions, AdditionItem } from '../nunjucks/tag/addition'
+import { Pages, PageItem } from '../nunjucks/tag/page'
+import { Comments, CommentItem } from '../nunjucks/tag/comment'
+import { Keywords, KeywordItem } from '../nunjucks/tag/keyword'
+import { Jobs, JobItem } from '../nunjucks/tag/job'
+import { Holidays, HolidayItem } from '../nunjucks/tag/holiday'
+import { Users, UserItem } from '../nunjucks/tag/user'
+import { UserTypes, UserTypeItem } from '../nunjucks/tag/userType'
+import { Votes, VoteItem } from '../nunjucks/tag/vote'
+import { VoteItems, VoteItemSingle } from '../nunjucks/tag/voteItem'
+import { Roles, RoleItem } from '../nunjucks/tag/role'
+import { Rules, RuleItem } from '../nunjucks/tag/rule'
 /**
  * Configure Nunjucks template engine
  */
@@ -24,34 +57,71 @@ export function configureNunjucks(app: Application) {
   app.set('view engine', 'njk')
   app.set('views', templatesPath)
 
+  // Add global functions
+  env.addGlobal('dateFormat', dateFormat)
+  env.addGlobal('moment', moment)
+  env.addGlobal('_', _)
+  env.addGlobal('getColor', getColor)
+
   // Add custom filters
-  env.addFilter('dateFormat', function (date: Date | string, format: string = 'YYYY-MM-DD') {
-    if (!date) return ''
-    const d = new Date(date)
-    if (isNaN(d.getTime())) return ''
+  env.addFilter('shorten', shorten)
+  env.addFilter('console', Console)
+  env.addFilter('date', date)
+  env.addFilter('dateFormat', date)
+  env.addFilter('symbolsCount', symbolsCount)
+  env.addFilter('stripHtml', stripHtml)
+  env.addFilter('titleToUrl', titleToUrl)
+  env.addFilter('truncate', truncate)
 
-    switch (format) {
-      case 'YYYY-MM-DD':
-        return d.toISOString().split('T')[0]
-      case 'YYYY-MM-DD HH:mm':
-        return d.toISOString().replace('T', ' ').substring(0, 16)
-      case 'MM-DD':
-        return d.toISOString().substring(5, 10)
-      default:
-        return d.toLocaleDateString()
-    }
-  })
+  // Add custom tags
+  env.addExtension('Config', new Config())
+  env.addExtension('ConfigItem', new ConfigItem())
 
-  env.addFilter('truncate', function (str: string, length: number = 100) {
-    if (!str) return ''
-    if (str.length <= length) return str
-    return str.substring(0, length) + '...'
-  })
-
-  env.addFilter('stripHtml', function (str: string) {
-    if (!str) return ''
-    return str.replace(/<[^>]*>/g, '')
-  })
+  // Add model tags
+  env.addExtension('Articles', new Articles())
+  env.addExtension('ArticleItem', new ArticleItem())
+  env.addExtension('Links', new Links())
+  env.addExtension('LinkItem', new LinkItem())
+  env.addExtension('Notices', new Notices())
+  env.addExtension('NoticeItem', new NoticeItem())
+  env.addExtension('Tags', new Tags())
+  env.addExtension('TagItem', new TagItem())
+  env.addExtension('Categories', new Categories())
+  env.addExtension('CategoryItem', new CategoryItem())
+  env.addExtension('Menus', new Menus())
+  env.addExtension('MenuItem', new MenuItem())
+  env.addExtension('Enums', new Enums())
+  env.addExtension('EnumItem', new EnumItem())
+  env.addExtension('Ads', new Ads())
+  env.addExtension('AdItem', new AdItem())
+  env.addExtension('AdItems', new AdItems())
+  env.addExtension('AdItemSingle', new AdItemSingle())
+  env.addExtension('Attrs', new Attrs())
+  env.addExtension('AttrItem', new AttrItem())
+  env.addExtension('Additions', new Additions())
+  env.addExtension('AdditionItem', new AdditionItem())
+  env.addExtension('Pages', new Pages())
+  env.addExtension('PageItem', new PageItem())
+  env.addExtension('Comments', new Comments())
+  env.addExtension('CommentItem', new CommentItem())
+  env.addExtension('Keywords', new Keywords())
+  env.addExtension('KeywordItem', new KeywordItem())
+  env.addExtension('Jobs', new Jobs())
+  env.addExtension('JobItem', new JobItem())
+  env.addExtension('Holidays', new Holidays())
+  env.addExtension('HolidayItem', new HolidayItem())
+  env.addExtension('Users', new Users())
+  env.addExtension('UserItem', new UserItem())
+  env.addExtension('UserTypes', new UserTypes())
+  env.addExtension('UserTypeItem', new UserTypeItem())
+  env.addExtension('Votes', new Votes())
+  env.addExtension('VoteItem', new VoteItem())
+  env.addExtension('VoteItems', new VoteItems())
+  env.addExtension('VoteItemSingle', new VoteItemSingle())
+  env.addExtension('Roles', new Roles())
+  env.addExtension('RoleItem', new RoleItem())
+  env.addExtension('Rules', new Rules())
+  env.addExtension('RuleItem', new RuleItem())
 
   return env
 }

@@ -269,7 +269,7 @@ export class HolidayDetailComponent implements OnInit, OnChanges {
         .split(',')
         .map((d) => d.trim())
         .filter((d) => d)
-      let dateRange = null
+      let dateRange: any[] | null = null
 
       if (dateValues.length >= 2) {
         const startDate = new Date(dateValues[0])

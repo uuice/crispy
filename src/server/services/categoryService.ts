@@ -381,7 +381,7 @@ export class CategoryService {
    * Get category path (breadcrumb)
    */
   async getCategoryPath(categoryId: number): Promise<any[]> {
-    const path = []
+    const path: any = []
     let currentId = categoryId
 
     while (currentId) {

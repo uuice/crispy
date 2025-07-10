@@ -52,6 +52,17 @@
     </div>
   </footer>
 
+  {% Config %}
+    {% for item in configs %}
+      {{item.title}}: {{ item.value }}
+    {% endfor %}
+  {% endConfig %}
+
+  {% ConfigItem alias="SITE_NAME" %}
+  {% ConfigItem alias="SITE_DESCRIPTION" %}
+  {% ConfigItem alias="SITE_KEYWORDS" %}
+
+
   {% block scripts %}{% endblock %}
 </body>
 </html>
