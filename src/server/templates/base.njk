@@ -5,139 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Crispy{% endblock %}</title>
   <meta name="description" content="{% block description %}Crispy - 基于 Angular SSR 构建的现代化博客系统{% endblock %}">
-  
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
   {% block head %}{% endblock %}
-  
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* 自定义 Tailwind 配置 */
+    .btn-primary {
+      @apply inline-block px-6 py-3 bg-blue-600 text-white no-underline rounded-lg transition-colors duration-200 hover:bg-blue-700;
     }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    header {
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 1rem 0;
-    }
-    
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #0070f3;
-      text-decoration: none;
-    }
-    
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-    }
-    
-    .nav-links a {
-      text-decoration: none;
-      color: #666;
-      transition: color 0.2s;
-    }
-    
-    .nav-links a:hover {
-      color: #0070f3;
-    }
-    
-    main {
-      min-height: calc(100vh - 200px);
-      padding: 2rem 0;
-    }
-    
-    footer {
-      background: #333;
-      color: #fff;
-      text-align: center;
-      padding: 2rem 0;
-      margin-top: 4rem;
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: #0070f3;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 0.5rem;
-      transition: background 0.2s;
-    }
-    
-    .btn:hover {
-      background: #0051a8;
-    }
-    
+
     .card {
-      background: #fff;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
+      @apply bg-white rounded-lg p-6 shadow-sm mb-6;
     }
-    
-    .text-muted {
-      color: #666;
-      font-size: 0.875rem;
-    }
-    
-    .text-center {
-      text-align: center;
-    }
-    
-    .mb-2 { margin-bottom: 1rem; }
-    .mb-3 { margin-bottom: 1.5rem; }
-    .mt-2 { margin-top: 1rem; }
-    .mt-3 { margin-top: 1.5rem; }
   </style>
 </head>
-<body>
-  <header>
-    <div class="container">
-      <nav>
-        <a href="/" class="logo">Crispy</a>
-        <ul class="nav-links">
-          <li><a href="/">首页</a></li>
-          <li><a href="/blog">博客</a></li>
-          <li><a href="/about">关于</a></li>
-          <li><a href="/contact">联系</a></li>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex justify-between items-center py-4">
+        <a href="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
+          Crispy
+        </a>
+        <ul class="flex space-x-8">
+          <li><a href="/" class="text-gray-600 hover:text-blue-600 transition-colors">首页</a></li>
+          <li><a href="/blog" class="text-gray-600 hover:text-blue-600 transition-colors">博客</a></li>
+          <li><a href="/about" class="text-gray-600 hover:text-blue-600 transition-colors">关于</a></li>
+          <li><a href="/contact" class="text-gray-600 hover:text-blue-600 transition-colors">联系</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main>
-    <div class="container">
+  <main class="flex-1 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {% block content %}{% endblock %}
     </div>
   </main>
 
-  <footer>
-    <div class="container">
+  <footer class="bg-gray-800 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
       <p>&copy; {{ currentYear or 2024 }} Crispy. 保留所有权利。</p>
-      <p class="text-muted mt-2">基于 Angular SSR 和 Nunjucks 构建</p>
+      <p class="text-gray-400 text-sm mt-2">基于 Angular SSR 和 Nunjucks 构建</p>
     </div>
   </footer>
 

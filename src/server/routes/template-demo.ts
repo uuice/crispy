@@ -118,4 +118,13 @@ router.get('/template-filters', (req, res) => {
   res.render('base.njk', testData)
 })
 
+/**
+ * Tailwind CSS 演示页面
+ */
+router.get('/tailwind-demo', (_req, res) => {
+  res.render('tailwind-demo.njk', {
+    currentYear: new Date().getFullYear()
+  })
+})
+
 export default router
