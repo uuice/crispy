@@ -376,6 +376,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         .defaultTo('')
         .modifyEnd(sql`COMMENT '标题'`)
     )
+    .addColumn('url', 'varchar(255)', (col) =>
+      col
+        .notNull()
+        .defaultTo('')
+        .modifyEnd(sql`COMMENT '路由美化'`)
+    )
     .addColumn('sub_title', 'varchar(100)', (col) =>
       col
         .notNull()
@@ -1464,6 +1470,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         .notNull()
         .defaultTo('')
         .modifyEnd(sql`COMMENT '标题'`)
+    )
+    .addColumn('url', 'varchar(255)', (col) =>
+      col
+        .notNull()
+        .defaultTo('')
+        .modifyEnd(sql`COMMENT '路由美化'`)
     )
     .addColumn('alias', 'varchar(255)', (col) =>
       col

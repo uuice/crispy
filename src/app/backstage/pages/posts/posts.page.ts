@@ -21,6 +21,7 @@ import { CheckboxModule } from 'primeng/checkbox'
 interface Article {
   id: number
   title: string
+  url: string
   content: string
   abstract?: string
   sub_title?: string
@@ -183,6 +184,7 @@ interface CategoriesResponse {
           <tr>
             <th style="min-width: 6rem;">ID</th>
             <th style="min-width: 12rem;">标题</th>
+            <th style="min-width: 12rem;">URL</th>
             <th style="min-width: 8rem;">分类</th>
             <th style="min-width: 8rem;">状态</th>
             <th style="min-width: 8rem;">审核状态</th>
@@ -217,6 +219,7 @@ interface CategoriesResponse {
                 }
               </div>
             </td>
+            <td>{{ article.url }}</td>
             <td>
               @if (article.type?.title) {
                 <span>{{ article.type.title }}</span>

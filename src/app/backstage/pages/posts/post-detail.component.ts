@@ -22,10 +22,12 @@ import { ChipsModule } from 'primeng/chips'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
+import { titleToUrl } from '../../../../server/utils/titleToUrl'
 
 interface Article {
   id: number
   title: string
+  url: string
   content: string
   abstract?: string
   sub_title?: string
@@ -133,7 +135,17 @@ interface CategoriesResponse {
             />
           </div>
         </div>
-
+        <div class="field">
+          <label for="url" class="block text-900 font-medium mb-2">URL</label>
+          <input
+            id="url"
+            type="text"
+            pInputText
+            formControlName="url"
+            placeholder="请输入文章URL, 新增的时候不填会自动生成"
+            class="w-full"
+          />
+        </div>
         <div class="field">
           <label for="abstract" class="block text-900 font-medium mb-2">摘要</label>
           <textarea
@@ -505,6 +517,7 @@ export class PostDetailComponent implements OnInit {
   ) {
     this.articleForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      url: [''],
       sub_title: [''],
       abstract: [''],
       content: ['', [Validators.required, Validators.minLength(10)]],
@@ -640,6 +653,7 @@ export class PostDetailComponent implements OnInit {
 
     this.articleForm.patchValue({
       title: article.title,
+      url: article.url,
       sub_title: article.sub_title || '',
       abstract: article.abstract || '',
       content: article.content,
@@ -733,6 +747,10 @@ export class PostDetailComponent implements OnInit {
       const articleData: Partial<Article> = {
         ...sanitizedData,
         id: this.currentArticle()?.id || 0
+      }
+
+      if (!articleData.id && !articleData.url) {
+        articleData.url = titleToUrl(articleData.title!)
       }
 
       console.log('content:', formData.content)

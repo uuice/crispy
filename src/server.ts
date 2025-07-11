@@ -2,9 +2,9 @@ import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@a
 import express from 'express'
 import { join } from 'node:path'
 import apiRoutes from './server/routes/api'
-import templateDemoRoutes from './server/routes/template-demo'
+import blogRoutes from './server/routes/blog'
 import { applyMiddleware } from './server/middleware'
-import { notFoundHandler } from './server/middleware/not-found'
+import { notFoundHandler, globalErrorHandler } from './server/middleware/errorHandler'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
@@ -27,8 +27,14 @@ configureNunjucks(app)
 // 2. API routes
 app.use(env['API_PREFIX'], apiRoutes)
 
-// Template demo routes (for development/testing)
-app.use(templateDemoRoutes)
+// Blog routes
+app.use(blogRoutes)
+
+// Error reporting endpoint
+app.post('/api/error-report', express.json(), (req, res) => {
+  console.error('Client error report:', req.body)
+  res.status(200).json({ received: true })
+})
 
 app.get('/admin/swagger.json', (req, res) => {
   res.json(adminSpecs)
@@ -100,6 +106,9 @@ app.use(createAngularHandler(angularApp))
 
 // 5. 404 handler (must be after all routes)
 app.use(notFoundHandler)
+
+// 6. Global error handler (must be last)
+app.use(globalErrorHandler)
 
 // Start server
 if (isMainModule(import.meta.url)) {

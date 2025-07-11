@@ -5,6 +5,7 @@ import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 
 export interface CreateArticleData {
   title: string
+  url?: string
   content: string
   summary?: string
   cover_image?: string
@@ -16,8 +17,8 @@ export interface CreateArticleData {
   status?: number // 10: draft, 20: published
   sort?: number
   click?: number
-  like_count?: number
-  comment_count?: number
+  // like_count?: number
+  // comment_count?: number
 }
 
 export type UpdateArticleData = Partial<CreateArticleData>

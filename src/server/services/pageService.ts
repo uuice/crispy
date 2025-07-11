@@ -4,6 +4,7 @@ import { sql } from 'kysely'
 // Data interfaces
 export interface CreatePageData {
   title: string
+  url?: string
   alias: string
   content: string
   abstract?: string
@@ -39,6 +40,7 @@ export interface PagePaginationParams {
 export interface Page {
   id: number
   title: string
+  url?: string
   alias: string
   content: string
   des?: string

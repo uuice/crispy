@@ -22,10 +22,12 @@ import { ChipsModule } from 'primeng/chips'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
+import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 interface Page {
   id: number
   title: string
+  url: string
   alias: string
   content: string
   abstract?: string
@@ -134,6 +136,18 @@ interface CategoriesResponse {
               styleClass="mt-1"
             ></p-message>
           </div>
+        </div>
+
+        <div class="field">
+          <label for="url" class="block text-900 font-medium mb-2">URL</label>
+          <input
+            id="url"
+            type="text"
+            pInputText
+            formControlName="url"
+            placeholder="请输入文章URL, 新增的时候不填会自动生成"
+            class="w-full"
+          />
         </div>
 
         <div class="field">
@@ -448,6 +462,7 @@ export class PageDetailComponent implements OnInit {
   ) {
     this.pageForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      url: [''],
       alias: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       sub_title: [''],
       abstract: [''],
@@ -573,6 +588,7 @@ export class PageDetailComponent implements OnInit {
 
     this.pageForm.patchValue({
       title: page.title,
+      url: page.url,
       alias: page.alias,
       sub_title: page.sub_title || '',
       abstract: page.abstract || '',
@@ -661,6 +677,10 @@ export class PageDetailComponent implements OnInit {
       const pageData: Partial<Page> = {
         ...sanitizedData,
         id: this.currentPage()?.id || 0
+      }
+
+      if (!pageData.id && !pageData.url) {
+        pageData.url = titleToUrl(pageData.title!)
       }
 
       console.log('content:', formData.content)

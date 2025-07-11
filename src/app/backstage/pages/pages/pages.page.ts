@@ -20,6 +20,7 @@ import { PageDetailComponent } from './page-detail.component'
 interface Page {
   id: number
   title: string
+  url: string
   alias: string
   content: string
   abstract?: string
@@ -176,6 +177,7 @@ interface CategoriesResponse {
           <tr>
             <th style="min-width: 6rem;">ID</th>
             <th style="min-width: 12rem;">标题</th>
+            <th style="min-width: 12rem;">URL</th>
             <th style="min-width: 8rem;">别名</th>
             <th style="min-width: 8rem;">分类</th>
             <th style="min-width: 8rem;">状态</th>
@@ -199,6 +201,7 @@ interface CategoriesResponse {
                 }
               </div>
             </td>
+            <td>{{ page.url }}</td>
             <td>
               <span class="page-alias">{{ page.alias }}</span>
             </td>

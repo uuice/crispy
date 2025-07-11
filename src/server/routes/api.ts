@@ -11,8 +11,4 @@ router.use('/admin', adminRoutes)
 // Mount content routes
 router.use('/content', contentRoutes)
 
-// TODO: Add more API routes here
-// router.use('/users', userRoutes)
-// router.use('/products', productRoutes)
-
 export default router

@@ -1,0 +1,166 @@
+{% extends "base.njk" %}
+
+{% block title %}{{ article.title }} - {{ siteConfig.site_name or 'Crispy' }}{% endblock %}
+
+{% block description %}{{ article.summary or article.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- 主内容区域 -->
+    <div class="lg:col-span-3">
+      <article class="bg-white rounded-lg shadow-md overflow-hidden">
+        {% if article.cover_image %}
+          <img src="{{ article.cover_image }}" alt="{{ article.title }}" class="w-full h-64 object-cover">
+        {% endif %}
+        
+        <div class="p-8">
+          <!-- 文章标题 -->
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ article.title }}</h1>
+          
+          <!-- 文章元信息 -->
+          <div class="flex flex-wrap items-center text-gray-600 text-sm mb-6 space-x-4">
+            <span>{{ article.create_time | dateFormat('YYYY-MM-DD HH:mm') }}</span>
+            {% if article.author %}
+              <span>作者：{{ article.author }}</span>
+            {% endif %}
+            <span>阅读：{{ article.click or 0 }}</span>
+            {% if article.like_count %}
+              <span>点赞：{{ article.like_count }}</span>
+            {% endif %}
+            {% if category %}
+              <span>分类：<a href="/blog/category/{{ category.id }}" class="text-blue-600 hover:text-blue-800">{{ category.title }}</a></span>
+            {% endif %}
+          </div>
+          
+          <!-- 文章标签 -->
+          {% if article.tags %}
+            <div class="mb-6">
+              <div class="flex flex-wrap gap-2">
+                {% set tagList = article.tags.split(',') %}
+                {% for tag in tagList %}
+                  <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">{{ tag.trim() }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- 文章内容 -->
+          <div class="prose prose-lg max-w-none">
+            {{ article.content | safe }}
+          </div>
+          
+          <!-- 文章来源 -->
+          {% if article.source or article.source_url %}
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-600">
+                {% if article.source_url %}
+                  本文来源：<a href="{{ article.source_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">{{ article.source or article.source_url }}</a>
+                {% else %}
+                  本文来源：{{ article.source }}
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+      
+      <!-- 相关文章 -->
+      {% if relatedArticles and relatedArticles.length > 0 %}
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-xl font-semibold text-gray-900 mb-4">相关文章</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for related in relatedArticles %}
+              <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h4 class="font-medium text-gray-900 mb-2">
+                  <a href="/blog/article/{{ related.id }}" class="hover:text-blue-600 transition-colors">
+                    {{ related.title }}
+                  </a>
+                </h4>
+                <p class="text-gray-600 text-sm">{{ related.create_time | dateFormat('YYYY-MM-DD') }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- 侧边栏 -->
+    <div class="lg:col-span-1">
+      <!-- 返回列表 -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <a href="/blog" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          返回文章列表
+        </a>
+      </div>
+      
+      <!-- 目录 -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">文章目录</h3>
+        <div id="toc" class="text-sm">
+          <!-- 目录将通过 JavaScript 生成 -->
+        </div>
+      </div>
+      
+      <!-- 标签云 -->
+      {% if tags and tags.length > 0 %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">标签云</h3>
+          <div class="flex flex-wrap gap-2">
+            {% for tag in tags %}
+              <a href="/blog/tag/{{ tag.id }}" class="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded hover:bg-blue-100 hover:text-blue-800 transition-colors">
+                {{ tag.title }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 生成文章目录
+document.addEventListener('DOMContentLoaded', function() {
+  const tocContainer = document.getElementById('toc');
+  const headings = document.querySelectorAll('.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6');
+  
+  if (headings.length > 0) {
+    const tocList = document.createElement('ul');
+    tocList.className = 'space-y-1';
+    
+    headings.forEach((heading, index) => {
+      // 为标题添加 ID
+      const id = `heading-${index}`;
+      heading.id = id;
+      
+      // 创建目录项
+      const tocItem = document.createElement('li');
+      const tocLink = document.createElement('a');
+      tocLink.href = `#${id}`;
+      tocLink.textContent = heading.textContent;
+      tocLink.className = 'text-blue-600 hover:text-blue-800 transition-colors block py-1';
+      
+      // 根据标题级别添加缩进
+      const level = parseInt(heading.tagName.charAt(1));
+      if (level > 1) {
+        tocLink.style.paddingLeft = `${(level - 1) * 12}px`;
+        tocLink.className += ' text-sm text-gray-600';
+      }
+      
+      tocItem.appendChild(tocLink);
+      tocList.appendChild(tocItem);
+    });
+    
+    tocContainer.appendChild(tocList);
+  } else {
+    tocContainer.innerHTML = '<p class="text-gray-500 text-sm">暂无目录</p>';
+  }
+});
+</script>
+{% endblock %}

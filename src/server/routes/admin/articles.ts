@@ -6,6 +6,7 @@ import { articleService } from '../../services/articleService'
 // Validation schemas
 const createArticleSchema = z.object({
   title: z.string().min(1),
+  url: z.string().optional(),
   content: z.string().min(1),
   summary: z.string().optional(),
   cover_image: z.string().optional(),
@@ -16,9 +17,9 @@ const createArticleSchema = z.object({
   type_id: z.number().optional(),
   status: z.number().default(10), // 10: draft, 20: published
   sort: z.number().default(0),
-  click: z.number().default(0),
-  like_count: z.number().default(0),
-  comment_count: z.number().default(0)
+  click: z.number().default(0)
+  // like_count: z.number().default(0),
+  // comment_count: z.number().default(0)
 })
 
 const updateArticleSchema = createArticleSchema.partial()
