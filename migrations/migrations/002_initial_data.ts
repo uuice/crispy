@@ -1172,6 +1172,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   const articles = [
     {
       title: '欢迎使用Crispy CMS',
+      url: '/article/welcome-to-crispy-cms',
       sub_title: '开始使用您的新内容管理系统',
       abstract:
         '欢迎使用Crispy CMS，这是一个基于Angular和Node.js构建的现代化内容管理系统。本文将指导您完成基本设置和使用。',
@@ -1194,6 +1195,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     },
     {
       title: 'Angular开发入门指南',
+      url: '/article/angular-development-guide',
       sub_title: '从零开始学习Angular开发',
       abstract: '学习Angular开发的基础知识，从设置第一个项目到构建组件和服务。',
       content:
@@ -1215,6 +1217,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     },
     {
       title: 'TypeScript基础语法',
+      url: '/article/typescript-basic-syntax',
       sub_title: '掌握TypeScript的核心概念',
       abstract:
         'TypeScript是JavaScript的超集，为JavaScript添加了类型系统。本文将介绍TypeScript的基础语法和核心概念。',
@@ -1243,6 +1246,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   const pages = [
     {
       title: '关于我们',
+      url: '/page/about-us',
       alias: 'about',
       sub_title: '了解我们的团队和使命',
       content:
@@ -1263,6 +1267,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     },
     {
       title: '免责声明',
+      url: '/page/disclaimer',
       alias: 'disclaimer',
       sub_title: '网站使用条款和免责声明',
       content:

@@ -145,11 +145,12 @@ INSERT INTO `links` (`site_name`, `url`, `logo`, `des`, `type_id`, `method`, `so
 
 -- Insert sample articles
 INSERT INTO `articles` (
-  `title`, `sub_title`, `abstract`, `content`, `image`, `image_list`, `tags`,
+  `title`, `url`, `sub_title`, `abstract`, `content`, `image`, `image_list`, `tags`,
   `type_id`, `type_ids`, `author_id`, `user_id`, `status`, `is_review`, `is_delete`,
   `click`, `sort`, `create_time`, `update_time`
 ) VALUES (
   '欢迎使用Crispy CMS',
+  '/article/welcome-to-crispy-cms',
   '开始使用您的新内容管理系统',
   '欢迎使用Crispy CMS，这是一个基于Angular和Node.js构建的现代化内容管理系统。本文将指导您完成基本设置和使用。',
   '<h1>欢迎使用Crispy CMS</h1><p>Crispy CMS是一个现代化、快速、灵活的内容管理系统，专为开发者和内容创作者设计。</p><h2>主要特性</h2><ul><li>现代化的Angular前端</li><li>Node.js后端</li><li>MySQL数据库</li><li>TypeScript支持</li><li>响应式设计</li><li>完整的权限管理</li><li>丰富的插件系统</li></ul><h2>快速开始</h2><p>安装完成后，您可以通过以下步骤开始使用：</p><ol><li>访问后台管理界面</li><li>创建您的第一篇文章</li><li>设置网站基本信息</li><li>自定义主题和样式</li></ol>',
@@ -161,6 +162,7 @@ INSERT INTO `articles` (
 ),
 (
   'Angular开发入门指南',
+  '/article/angular-development-guide',
   '从零开始学习Angular开发',
   '学习Angular开发的基础知识，从设置第一个项目到构建组件和服务。',
   '<h1>Angular开发入门指南</h1><p>Angular是一个强大的Web应用开发框架。本指南将帮助您快速入门。</p><h2>前置条件</h2><p>在开始之前，请确保您的系统已安装Node.js。</p><h2>安装Angular CLI</h2><p>首先安装Angular命令行工具：</p><pre><code>npm install -g @angular/cli</code></pre><h2>创建新项目</h2><p>使用以下命令创建新的Angular项目：</p><pre><code>ng new my-app</code></pre><h2>运行项目</h2><p>进入项目目录并启动开发服务器：</p><pre><code>cd my-app\nng serve</code></pre>',
@@ -172,6 +174,7 @@ INSERT INTO `articles` (
 ),
 (
   'TypeScript基础语法',
+  '/article/typescript-basic-syntax',
   '掌握TypeScript的核心概念',
   'TypeScript是JavaScript的超集，为JavaScript添加了类型系统。本文将介绍TypeScript的基础语法和核心概念。',
   '<h1>TypeScript基础语法</h1><p>TypeScript是Microsoft开发的开源编程语言，它是JavaScript的超集。</p><h2>基本类型</h2><p>TypeScript提供了多种基本类型：</p><ul><li>string - 字符串类型</li><li>number - 数字类型</li><li>boolean - 布尔类型</li><li>array - 数组类型</li><li>object - 对象类型</li></ul><h2>接口定义</h2><p>使用接口定义对象的结构：</p><pre><code>interface User {\n  name: string;\n  age: number;\n  email?: string;\n}</code></pre>',
@@ -184,11 +187,12 @@ INSERT INTO `articles` (
 
 -- Insert sample pages
 INSERT INTO `pages` (
-  `title`, `alias`, `sub_title`, `content`, `abstract`, `author_id`, `user_id`,
+  `title`, `url`, `alias`, `sub_title`, `content`, `abstract`, `author_id`, `user_id`,
   `status`, `image_list`, `click`, `tags`, `seo_title`, `seo_keywords`, `seo_description`,
   `create_time`, `update_time`, `is_delete`
 ) VALUES (
   '关于我们',
+  '/page/about-us',
   'about',
   '了解我们的团队和使命',
   '<h1>关于我们</h1><p>我们是一个专注于Web技术开发的团队，致力于为用户提供最好的技术解决方案。</p><h2>我们的使命</h2><p>通过创新的技术和优质的服务，帮助客户实现数字化转型。</p><h2>我们的团队</h2><p>我们拥有经验丰富的开发团队，包括前端开发、后端开发、UI/UX设计等专业人才。</p>',
@@ -201,6 +205,7 @@ INSERT INTO `pages` (
 ),
 (
   '免责声明',
+  '/page/disclaimer',
   'disclaimer',
   '网站使用条款和免责声明',
   '<h1>免责声明</h1><p>本网站提供的信息仅供参考，我们不保证信息的准确性和完整性。</p><h2>版权声明</h2><p>本网站的所有内容均受版权法保护，未经许可不得转载或使用。</p><h2>隐私政策</h2><p>我们重视用户隐私，承诺保护用户的个人信息安全。</p>',
@@ -375,12 +380,13 @@ INSERT INTO `users` (
 
 -- Insert more sample articles
 INSERT INTO `articles` (
-  `title`, `sub_title`, `abstract`, `content`, `image`, `image_list`, `tags`,
+  `title`, `url`, `sub_title`, `abstract`, `content`, `image`, `image_list`, `tags`,
   `type_id`, `type_ids`, `author_id`, `user_id`, `status`, `is_review`, `is_delete`,
   `click`, `sort`, `create_time`, `update_time`
 ) VALUES
 (
   'React Hooks 深度解析',
+  '/article/react-hooks-deep-dive',
   '掌握React Hooks的核心概念和最佳实践',
   'React Hooks是React 16.8引入的新特性，它让函数组件也能使用状态和其他React特性。本文将深入解析Hooks的使用方法和最佳实践。',
   '<h1>React Hooks 深度解析</h1><p>React Hooks是React 16.8版本引入的新特性，它让函数组件也能使用状态和其他React特性。</p><h2>基础Hooks</h2><h3>useState</h3><p>useState是最基础的Hook，用于在函数组件中添加状态：</p><pre><code>const [count, setCount] = useState(0);</code></pre><h3>useEffect</h3><p>useEffect用于处理副作用，相当于类组件的componentDidMount、componentDidUpdate和componentWillUnmount：</p><pre><code>useEffect(() => {\n  document.title = `Count: ${count}`;\n}, [count]);</code></pre><h2>自定义Hooks</h2><p>自定义Hooks是复用状态逻辑的一种方式：</p><pre><code>function useCounter(initialValue) {\n  const [count, setCount] = useState(initialValue);\n  const increment = () => setCount(count + 1);\n  const decrement = () => setCount(count - 1);\n  return { count, increment, decrement };\n}</code></pre>',
@@ -392,6 +398,7 @@ INSERT INTO `articles` (
 ),
 (
   'Vue 3 Composition API 实战',
+  '/article/vue3-composition-api-practice',
   '使用Vue 3 Composition API构建现代化应用',
   'Vue 3的Composition API提供了更灵活的逻辑复用方式。本文将通过实际项目案例来展示Composition API的使用方法。',
   '<h1>Vue 3 Composition API 实战</h1><p>Vue 3的Composition API是Vue 3最重要的新特性之一，它提供了更灵活的逻辑复用方式。</p><h2>setup函数</h2><p>setup函数是Composition API的入口点：</p><pre><code>import { ref, reactive, onMounted } from \'vue\';\n\nexport default {\n  setup() {\n    const count = ref(0);\n    const user = reactive({\n      name: \'John\',\n      age: 30\n    });\n    \n    onMounted(() => {\n      console.log(\'Component mounted\');\n    });\n    \n    return { count, user };\n  }\n}</code></pre><h2>响应式API</h2><p>Vue 3提供了多种响应式API：</p><ul><li>ref - 用于基本类型</li><li>reactive - 用于对象</li><li>computed - 计算属性</li><li>watch - 侦听器</li></ul>',
@@ -403,6 +410,7 @@ INSERT INTO `articles` (
 ),
 (
   'Node.js 性能优化指南',
+  '/article/nodejs-performance-optimization',
   '提升Node.js应用性能的实用技巧',
   'Node.js应用的性能优化是一个重要话题。本文将介绍多种优化技巧，包括内存管理、异步处理、缓存策略等。',
   '<h1>Node.js 性能优化指南</h1><p>Node.js应用的性能优化是每个开发者都需要关注的话题。</p><h2>内存管理</h2><p>合理管理内存是性能优化的基础：</p><pre><code>// 避免内存泄漏\nconst cache = new Map();\n\n// 定期清理缓存\nsetInterval(() => {\n  cache.clear();\n}, 60000);</code></pre><h2>异步处理优化</h2><p>使用Promise.all进行并发处理：</p><pre><code>const results = await Promise.all([\n  fetchUser(1),\n  fetchUser(2),\n  fetchUser(3)\n]);</code></pre><h2>缓存策略</h2><p>合理使用缓存可以显著提升性能：</p><ul><li>Redis缓存</li><li>内存缓存</li><li>CDN缓存</li></ul>',
@@ -414,6 +422,7 @@ INSERT INTO `articles` (
 ),
 (
   'CSS Grid 布局完全指南',
+  '/article/css-grid-complete-guide',
   '掌握现代CSS Grid布局技术',
   'CSS Grid是CSS中最强大的布局系统。本文将详细介绍Grid布局的概念、属性和实际应用案例。',
   '<h1>CSS Grid 布局完全指南</h1><p>CSS Grid是CSS中最强大的布局系统，它提供了二维布局能力。</p><h2>Grid容器</h2><p>设置Grid容器：</p><pre><code>.grid-container {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  grid-template-rows: repeat(2, 100px);\n  gap: 20px;\n}</code></pre><h2>Grid项目</h2><p>控制Grid项目的位置：</p><pre><code>.grid-item {\n  grid-column: 1 / 3;\n  grid-row: 1 / 2;\n}</code></pre><h2>响应式Grid</h2><p>使用媒体查询创建响应式布局：</p><pre><code>@media (max-width: 768px) {\n  .grid-container {\n    grid-template-columns: 1fr;\n  }\n}</code></pre>',
@@ -425,6 +434,7 @@ INSERT INTO `articles` (
 ),
 (
   'Docker 容器化部署实践',
+  '/article/docker-containerization-deployment',
   '使用Docker容器化部署Web应用',
   'Docker是现代应用部署的重要工具。本文将介绍如何使用Docker容器化部署Web应用，包括Dockerfile编写、镜像构建和容器编排。',
   '<h1>Docker 容器化部署实践</h1><p>Docker是现代应用部署的重要工具，它提供了轻量级的容器化解决方案。</p><h2>Dockerfile编写</h2><p>创建Node.js应用的Dockerfile：</p><pre><code>FROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\nEXPOSE 3000\nCMD ["npm", "start"]</code></pre><h2>镜像构建</h2><p>构建Docker镜像：</p><pre><code>docker build -t my-app .</code></pre><h2>容器运行</h2><p>运行容器：</p><pre><code>docker run -p 3000:3000 my-app</code></pre><h2>Docker Compose</h2><p>使用Docker Compose编排多个服务：</p><pre><code>version: \'3\'\nservices:\n  app:\n    build: .\n    ports:\n      - "3000:3000"\n  db:\n    image: mysql:8.0</code></pre>',
