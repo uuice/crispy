@@ -5,13 +5,19 @@ import { DELETE_STATUS, PUBLISH_STATUS, STATUS_PUBLISHED } from '../config/const
 import z from 'zod'
 
 // Types
-export interface PaginationOptions {
-  page: number
-  pageSize: number
+export interface AccessTokenFilters {
   app_name?: string
   channel?: string
   status?: number
   user_id?: number
+  is_delete?: number
+  update_time?: number
+  create_time?: number
+}
+
+export interface PaginationOptions {
+  page: number
+  pageSize: number
 }
 
 export interface PaginatedResult<T> {
@@ -135,8 +141,12 @@ export class AccessTokenService {
    * @param options Pagination and filter options
    * @returns List of access tokens and pagination info
    */
-  async getAccessTokens(options: PaginationOptions): Promise<PaginatedResult<AccessToken>> {
-    const { page, pageSize, app_name, channel, status, user_id } = options
+  async getAccessTokens(
+    filters: AccessTokenFilters,
+    options: PaginationOptions
+  ): Promise<PaginatedResult<AccessToken>> {
+    const { page, pageSize } = options
+    const { app_name, channel, status, user_id } = filters
     const offset = (page - 1) * pageSize
 
     // Build query conditions
@@ -151,7 +161,7 @@ export class AccessTokenService {
       query = query.where('channel', 'like', `%${channel}%`)
     }
 
-    if (status !== undefined) {
+    if (status) {
       query = query.where('status', '=', status)
     }
 
@@ -175,7 +185,7 @@ export class AccessTokenService {
           if (channel) {
             qb = qb.where('channel', 'like', `%${channel}%`)
           }
-          if (status !== undefined) {
+          if (status) {
             qb = qb.where('status', '=', status)
           }
           if (user_id) {

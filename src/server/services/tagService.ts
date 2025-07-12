@@ -1,5 +1,6 @@
 import { db } from '@src/libs/db'
 import { z } from 'zod'
+import { sql } from 'kysely'
 
 // Validation schemas
 const createTagSchema = z.object({
@@ -42,9 +43,15 @@ export interface PaginatedResult<T> {
 
 export interface FilterOptions {
   title?: string
+  alias?: string
+  des?: string
+  value?: string
   type_id?: number
   status?: number
-  value?: string
+  sort_min?: number
+  sort_max?: number
+  start_time?: number
+  end_time?: number
 }
 
 // Tag Service Class
@@ -70,27 +77,42 @@ export class TagService {
   /**
    * Get tags list with pagination and filters
    */
-  async getTags(
-    options: PaginationOptions,
-    filters?: FilterOptions
-  ): Promise<PaginatedResult<any>> {
+  async getTags(options: PaginationOptions, filters: FilterOptions): Promise<PaginatedResult<any>> {
     const { page, pageSize } = options
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('tags').selectAll().where('is_delete', '=', 0)
 
     // Add filters if provided
-    if (filters?.title) {
+    if (filters.title) {
       query = query.where('title', 'like', `%${filters.title}%`)
     }
-    if (filters?.type_id !== undefined) {
+    if (filters.alias) {
+      query = query.where(sql.ref('alias'), 'like', `%${filters.alias}%`)
+    }
+    if (filters.des) {
+      query = query.where(sql.ref('des'), 'like', `%${filters.des}%`)
+    }
+    if (filters.value) {
+      query = query.where('value', 'like', `%${filters.value}%`)
+    }
+    if (filters.type_id) {
       query = query.where('type_id', '=', filters.type_id)
     }
-    if (filters?.status !== undefined) {
+    if (filters.status) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters?.value) {
-      query = query.where('value', 'like', `%${filters.value}%`)
+    if (filters.sort_min && !isNaN(filters.sort_min)) {
+      query = query.where('sort', '>=', filters.sort_min)
+    }
+    if (filters.sort_max && !isNaN(filters.sort_max)) {
+      query = query.where('sort', '<=', filters.sort_max)
+    }
+    if (filters.start_time) {
+      query = query.where('create_time', '>=', filters.start_time)
+    }
+    if (filters.end_time) {
+      query = query.where('create_time', '<=', filters.end_time)
     }
 
     // Order by sort asc, create_time desc by default

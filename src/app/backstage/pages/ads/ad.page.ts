@@ -94,7 +94,7 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
           <tr>
             <th>标题</th>
             <th>别名</th>
-            <th>位置</th>
+            <th>类型ID</th>
             <th>内容</th>
             <th>图片</th>
             <th>链接</th>
@@ -109,7 +109,7 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
           <tr>
             <td>{{ ad.title }}</td>
             <td>{{ ad.alias || '-' }}</td>
-            <td>{{ ad.position || '-' }}</td>
+            <td>{{ ad.type_id || '-' }}</td>
             <td>{{ ad.content || '-' }}</td>
             <td>
               <img
@@ -120,7 +120,7 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
               />
             </td>
             <td>
-              <a *ngIf="ad.link_url" [href]="ad.link_url" target="_blank">{{ ad.link_url }}</a>
+              <a *ngIf="ad.url" [href]="ad.url" target="_blank">{{ ad.url }}</a>
             </td>
             <td>{{ ad.start_time ? (ad.start_time | date: 'yyyy-MM-dd HH:mm') : '-' }}</td>
             <td>{{ ad.end_time ? (ad.end_time | date: 'yyyy-MM-dd HH:mm') : '-' }}</td>

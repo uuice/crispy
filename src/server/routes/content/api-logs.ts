@@ -52,23 +52,25 @@ export const getApiLogs = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-    // Get filters from query
     const filters = {
-      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
+      body: req.query['body'] as string | undefined,
+      query: req.query['query'] as string | undefined,
+      ip: req.query['ip'] as string | undefined,
       method: req.query['method'] as string | undefined,
-      path: req.query['path'] as string | undefined,
-      status_code: req.query['status_code']
-        ? parseInt(req.query['status_code'] as string)
+      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
         : undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined
     }
-
     const result = await apiLogService.getApiLogs(filters, { page, pageSize })
-
     success(res, result)
   } catch (err: unknown) {
-    console.error('Error fetching API logs:', err)
+    console.error('Error fetching api logs:', err)
     error(res, 'Internal server error')
   }
 }

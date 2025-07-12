@@ -19,6 +19,9 @@ export interface Tag {
   id: number
   title: string
   alias?: string
+  des?: string
+  value?: string
+  type_id?: number
   status: number
   sort: number
   create_time: number
@@ -110,6 +113,45 @@ export interface Tag {
               </select>
             </div>
           </div>
+          <div class="col-12">
+            <div class="field">
+              <label for="des" class="block text-900 font-medium mb-2">描述</label>
+              <input
+                id="des"
+                type="text"
+                pInputText
+                formControlName="des"
+                placeholder="请输入标签描述"
+                class="w-full"
+              />
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="field">
+              <label for="value" class="block text-900 font-medium mb-2">值</label>
+              <input
+                id="value"
+                type="text"
+                pInputText
+                formControlName="value"
+                placeholder="请输入标签值"
+                class="w-full"
+              />
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="field">
+              <label for="type_id" class="block text-900 font-medium mb-2">分类ID</label>
+              <input
+                id="type_id"
+                type="number"
+                pInputText
+                formControlName="type_id"
+                placeholder="请输入分类ID"
+                class="w-full"
+              />
+            </div>
+          </div>
         </div>
       </form>
       <ng-template pTemplate="footer">
@@ -157,6 +199,9 @@ export class TagDetailComponent implements OnInit, OnChanges {
     this.tagForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       alias: [''],
+      des: [''],
+      value: [''],
+      type_id: [null],
       sort: [0],
       status: [10]
     })
@@ -167,6 +212,9 @@ export class TagDetailComponent implements OnInit, OnChanges {
       this.tagForm.reset({
         title: '',
         alias: '',
+        des: '',
+        value: '',
+        type_id: null,
         sort: 0,
         status: 10
       })
@@ -189,6 +237,9 @@ export class TagDetailComponent implements OnInit, OnChanges {
       this.tagForm.patchValue({
         title: this.tag.title,
         alias: this.tag.alias || '',
+        des: this.tag.des || '',
+        value: this.tag.value || '',
+        type_id: this.tag.type_id || null,
         sort: this.tag.sort,
         status: this.tag.status
       })

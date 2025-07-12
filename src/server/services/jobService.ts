@@ -19,8 +19,16 @@ export interface JobFilters {
   typeName?: string
   nature?: string
   branch?: string
+  address?: string
+  email?: string
+  num_min?: number
+  num_max?: number
+  sort_min?: number
+  sort_max?: number
   start_time?: number
   end_time?: number
+  has_email?: boolean
+  has_address?: boolean
 }
 
 export interface PaginationParams {
@@ -73,11 +81,41 @@ export class JobService {
     if (filters.branch) {
       query = query.where('branch', 'like', `%${filters.branch}%`)
     }
+    if (filters.address) {
+      query = query.where('address', 'like', `%${filters.address}%`)
+    }
+    if (filters.email) {
+      query = query.where('email', 'like', `%${filters.email}%`)
+    }
+    if (filters.num_min !== undefined && !isNaN(filters.num_min)) {
+      query = query.where('num', '>=', filters.num_min)
+    }
+    if (filters.num_max !== undefined && !isNaN(filters.num_max)) {
+      query = query.where('num', '<=', filters.num_max)
+    }
+    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
+      query = query.where('sort', '>=', filters.sort_min)
+    }
+    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
+      query = query.where('sort', '<=', filters.sort_max)
+    }
     if (filters.start_time) {
       query = query.where('create_time', '>=', filters.start_time)
     }
     if (filters.end_time) {
       query = query.where('create_time', '<=', filters.end_time)
+    }
+    if (filters.has_email === true) {
+      query = query.where('email', 'is not', null)
+    }
+    if (filters.has_email === false) {
+      query = query.where('email', 'is', null)
+    }
+    if (filters.has_address === true) {
+      query = query.where('address', 'is not', null)
+    }
+    if (filters.has_address === false) {
+      query = query.where('address', 'is', null)
     }
 
     // Order by create_time desc by default

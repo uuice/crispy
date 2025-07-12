@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
+import { Component, OnInit, OnDestroy, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import {
   FormsModule,
@@ -93,7 +93,7 @@ import { finalize } from 'rxjs/operators'
             pButton
             type="submit"
             class="login-btn"
-            [loading]="loading"
+            [loading]="loading()"
             [disabled]="loginForm.invalid"
             label="登录"
           ></button>
@@ -253,7 +253,7 @@ import { finalize } from 'rxjs/operators'
 })
 export class LoginPage implements OnInit, OnDestroy {
   loginForm: FormGroup
-  loading = false
+  loading = signal(false)
 
   constructor(
     private fb: FormBuilder,
@@ -299,7 +299,7 @@ export class LoginPage implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      this.loading = true
+      this.loading.set(true)
 
       const loginData = {
         user_name: this.loginForm.value.user_name,
@@ -309,7 +309,7 @@ export class LoginPage implements OnInit, OnDestroy {
       // Call login API
       this.httpService
         .post<any>('/api/admin/login', loginData)
-        .pipe(finalize(() => (this.loading = false)))
+        .pipe(finalize(() => this.loading.set(false)))
         .subscribe({
           next: (response) => {
             // Check if response is successful

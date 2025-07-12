@@ -108,19 +108,21 @@ export const getAccessTokens = async (
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-    const app_name = req.query['app_name'] as string
-    const channel = req.query['channel'] as string
-    const status = req.query['status'] ? parseInt(req.query['status'] as string) : undefined
-    const user_id = req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined
-
-    const result = await accessTokenService.getAccessTokens({
-      page,
-      pageSize,
-      app_name,
-      channel,
-      status,
-      user_id
-    })
+    const filters = {
+      app_name: req.query['app_name'] as string | undefined,
+      channel: req.query['channel'] as string | undefined,
+      token: req.query['token'] as string | undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined
+    }
+    const result = await accessTokenService.getAccessTokens(filters, { page, pageSize })
     success(res, result)
   } catch (err: unknown) {
     handleError(res, err, 'getAccessTokens')

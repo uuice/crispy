@@ -121,7 +121,8 @@ export class SeoService {
   setHomeSeo(): void {
     this.setSeoData({
       title: 'Crispy - 现代化博客平台',
-      description: '基于 Angular 和 PrimeNG 构建的现代化、优雅的博客平台。发现精彩内容，分享你的想法。',
+      description:
+        '基于 Angular 和 PrimeNG 构建的现代化、优雅的博客平台。发现精彩内容，分享你的想法。',
       keywords: 'crispy, 博客, angular, primeng, 现代化, 优雅',
       author: 'Crispy Team',
       ogTitle: 'Crispy - 现代化博客平台',
@@ -168,11 +169,7 @@ export class SeoService {
   /**
    * Set SEO data for category page
    */
-  setCategorySeo(category: {
-    name: string
-    description?: string
-    count: number
-  }): void {
+  setCategorySeo(category: { name: string; description?: string; count: number }): void {
     this.setSeoData({
       title: `${category.name} - 分类 - Crispy`,
       description: category.description || `${category.name} 分类下的 ${category.count} 篇文章`,
@@ -187,10 +184,7 @@ export class SeoService {
   /**
    * Set SEO data for tag page
    */
-  setTagSeo(tag: {
-    name: string
-    count: number
-  }): void {
+  setTagSeo(tag: { name: string; count: number }): void {
     this.setSeoData({
       title: `${tag.name} - 标签 - Crispy`,
       description: `${tag.name} 标签下的 ${tag.count} 篇文章`,
@@ -314,7 +308,7 @@ export class SeoService {
     // Note: This is a simplified version. In production, you might want to be more specific
     // about which tags to remove
     const metaTags = document.querySelectorAll('meta[name], meta[property]')
-    metaTags.forEach(tag => {
+    metaTags.forEach((tag) => {
       const name = tag.getAttribute('name') || tag.getAttribute('property')
       if (name && !['viewport', 'charset', 'theme-color'].includes(name)) {
         tag.remove()

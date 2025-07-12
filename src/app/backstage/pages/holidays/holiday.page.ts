@@ -211,11 +211,7 @@ export class HolidayPage implements OnInit {
     private httpService: HttpService
   ) {}
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.loadHolidays()
-    })
-  }
+  ngOnInit() {}
 
   loadHolidays(page = 1, pageSize = 10) {
     this.loading.set(true)
@@ -252,6 +248,7 @@ export class HolidayPage implements OnInit {
           summary: '错误',
           detail: '加载假期列表失败'
         })
+        this.loading.set(false)
       },
       complete: () => {
         this.loading.set(false)

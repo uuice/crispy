@@ -74,22 +74,40 @@ interface OperateLogsResponse {
           <div class="search-bar">
             <div class="search-controls">
               <label for="search-code" class="sr-only">操作类型</label>
-              <input pInputText [(ngModel)]="searchCode" placeholder="操作类型" />
+              <input
+                pInputText
+                [ngModel]="searchCode()"
+                (ngModelChange)="searchCode.set($event)"
+                placeholder="操作类型"
+              />
               <label for="search-user-id" class="sr-only">用户ID</label>
-              <input pInputText [(ngModel)]="searchUserId" placeholder="用户ID" type="number" />
+              <input
+                pInputText
+                [ngModel]="searchUserId()"
+                (ngModelChange)="searchUserId.set($event)"
+                placeholder="用户ID"
+                type="number"
+              />
               <label for="search-keyword" class="sr-only">关键字</label>
-              <input pInputText [(ngModel)]="searchKeyword" placeholder="关键字" />
+              <input
+                pInputText
+                [ngModel]="searchKeyword()"
+                (ngModelChange)="searchKeyword.set($event)"
+                placeholder="关键字"
+              />
               <label for="search-start-time" class="sr-only">开始时间</label>
               <input
                 pInputText
-                [(ngModel)]="searchStartTime"
+                [ngModel]="searchStartTime()"
+                (ngModelChange)="searchStartTime.set($event)"
                 placeholder="开始时间(时间戳)"
                 type="number"
               />
               <label for="search-end-time" class="sr-only">结束时间</label>
               <input
                 pInputText
-                [(ngModel)]="searchEndTime"
+                [ngModel]="searchEndTime()"
+                (ngModelChange)="searchEndTime.set($event)"
                 placeholder="结束时间(时间戳)"
                 type="number"
               />
@@ -153,11 +171,11 @@ export class OperateLogsPage implements OnInit {
   totalRecords = signal(0)
   currentPage = signal(1)
   pageSize = signal(20)
-  searchCode = ''
-  searchUserId = ''
-  searchKeyword = ''
-  searchStartTime = ''
-  searchEndTime = ''
+  searchCode = signal('')
+  searchUserId = signal('')
+  searchKeyword = signal('')
+  searchStartTime = signal('')
+  searchEndTime = signal('')
   selectedLog = signal<OperateLog | null>(null)
   detailVisible = signal(false)
 
@@ -174,11 +192,11 @@ export class OperateLogsPage implements OnInit {
   }
 
   onReset() {
-    this.searchCode = ''
-    this.searchUserId = ''
-    this.searchKeyword = ''
-    this.searchStartTime = ''
-    this.searchEndTime = ''
+    this.searchCode.set('')
+    this.searchUserId.set('')
+    this.searchKeyword.set('')
+    this.searchStartTime.set('')
+    this.searchEndTime.set('')
     this.currentPage.set(1)
     this.loadLogs()
   }
@@ -201,11 +219,11 @@ export class OperateLogsPage implements OnInit {
       page: this.currentPage(),
       pageSize: this.pageSize()
     }
-    if (this.searchCode) params.code = this.searchCode
-    if (this.searchUserId) params.userId = Number(this.searchUserId)
-    if (this.searchKeyword) params.searchTerm = this.searchKeyword
-    if (this.searchStartTime) params.startTime = Number(this.searchStartTime)
-    if (this.searchEndTime) params.endTime = Number(this.searchEndTime)
+    if (this.searchCode()) params.code = this.searchCode()
+    if (this.searchUserId()) params.user_id = Number(this.searchUserId())
+    if (this.searchKeyword()) params.content = this.searchKeyword()
+    if (this.searchStartTime()) params.start_time = Number(this.searchStartTime())
+    if (this.searchEndTime()) params.end_time = Number(this.searchEndTime())
     this.httpService.get<OperateLogsResponse>('/api/admin/operate-logs', params).subscribe({
       next: (res) => {
         if (res.success && res.data) {

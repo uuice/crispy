@@ -16,10 +16,15 @@ export interface CreateLinkData {
 export type UpdateLinkData = Partial<CreateLinkData>
 
 export interface LinkFilters {
-  siteName?: string
+  site_name?: string
   url?: string
+  des?: string
+  logo?: string
+  method?: string
   status?: number
-  typeId?: number
+  type_id?: number
+  sort_min?: number
+  sort_max?: number
   startTime?: number
   endTime?: number
 }
@@ -92,17 +97,32 @@ export class LinkService {
 
     // Apply filters
     if (filters) {
-      if (filters.siteName) {
-        query = query.where('links.site_name', 'like', `%${filters.siteName}%`)
+      if (filters.site_name) {
+        query = query.where('links.site_name', 'like', `%${filters.site_name}%`)
       }
       if (filters.url) {
         query = query.where('links.url', 'like', `%${filters.url}%`)
       }
-      if (filters.status !== undefined) {
+      if (filters.des) {
+        query = query.where('links.des', 'like', `%${filters.des}%`)
+      }
+      if (filters.logo) {
+        query = query.where('links.logo', 'like', `%${filters.logo}%`)
+      }
+      if (filters.method) {
+        query = query.where('links.method', '=', filters.method)
+      }
+      if (filters.status) {
         query = query.where('links.status', '=', filters.status)
       }
-      if (filters.typeId !== undefined) {
-        query = query.where('links.type_id', '=', filters.typeId)
+      if (filters.type_id) {
+        query = query.where('links.type_id', '=', filters.type_id)
+      }
+      if (filters.sort_min && !isNaN(filters.sort_min)) {
+        query = query.where('links.sort', '>=', filters.sort_min)
+      }
+      if (filters.sort_max && !isNaN(filters.sort_max)) {
+        query = query.where('links.sort', '<=', filters.sort_max)
       }
       if (filters.startTime) {
         query = query.where('links.create_time', '>=', filters.startTime)

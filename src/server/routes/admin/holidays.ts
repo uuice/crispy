@@ -49,12 +49,18 @@ export const getHolidays = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-    // Get filters from query
+
     const filters = {
       title: req.query['title'] as string | undefined,
       value: req.query['value'] as string | undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      sort: req.query['sort'] ? parseInt(req.query['sort'] as string) : undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined
     }
 
     const result = await holidayService.getHolidays(filters, { page, pageSize })

@@ -45,24 +45,19 @@ export const getOperateLogs = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-    // Build filters from query
-    const filters: OperateLogFilters = {}
-    if (req.query['code']) {
-      filters.code = req.query['code'] as string
+    const filters = {
+      code: req.query['code'] as string | undefined,
+      content: req.query['content'] as string | undefined,
+      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
+      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined
     }
-    if (req.query['type_id']) {
-      filters.typeId = parseInt(req.query['type_id'] as string)
-    }
-    if (req.query['user_id']) {
-      filters.userId = parseInt(req.query['user_id'] as string)
-    }
-    if (req.query['start_time']) {
-      filters.startTime = parseInt(req.query['start_time'] as string)
-    }
-    if (req.query['end_time']) {
-      filters.endTime = parseInt(req.query['end_time'] as string)
-    }
-
     const result = await operateLogService.getOperateLogs({ page, pageSize }, filters)
     success(res, result)
   } catch (err: unknown) {

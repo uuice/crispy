@@ -318,6 +318,10 @@ export interface Articles {
    */
   update_time: Generated<number>;
   /**
+   * 路由美化
+   */
+  url: Generated<string>;
+  /**
    * 操作用户id
    */
   user_id: Generated<number>;
@@ -967,6 +971,10 @@ export interface Pages {
    * 更新时间
    */
   update_time: Generated<number>;
+  /**
+   * 路由美化
+   */
+  url: Generated<string>;
   /**
    * 操作用户id
    */

@@ -17,9 +17,15 @@ export type UpdateRoleData = Partial<CreateRoleData>
 
 export interface RoleFilters {
   title?: string
+  des?: string
   module_id?: number
   type_id?: number
   status?: number
+  sort_min?: number
+  sort_max?: number
+  start_time?: number
+  end_time?: number
+  has_rules?: boolean
 }
 
 export interface RolePaginationParams {
@@ -83,14 +89,35 @@ export class RoleService {
       if (filters.title) {
         query = query.where('title', 'like', `%${filters.title}%`)
       }
-      if (filters.module_id !== undefined) {
+      if (filters.des) {
+        query = query.where('des', 'like', `%${filters.des}%`)
+      }
+      if (filters.module_id) {
         query = query.where('module_id', '=', filters.module_id)
       }
-      if (filters.type_id !== undefined) {
+      if (filters.type_id) {
         query = query.where('type_id', '=', filters.type_id)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
+      }
+      if (filters.sort_min && !isNaN(filters.sort_min)) {
+        query = query.where('sort', '>=', filters.sort_min)
+      }
+      if (filters.sort_max && !isNaN(filters.sort_max)) {
+        query = query.where('sort', '<=', filters.sort_max)
+      }
+      if (filters.start_time) {
+        query = query.where('create_time', '>=', filters.start_time)
+      }
+      if (filters.end_time) {
+        query = query.where('create_time', '<=', filters.end_time)
+      }
+      if (filters.has_rules === true) {
+        query = query.where('rule_ids', '!=', '')
+      }
+      if (filters.has_rules === false) {
+        query = query.where('rule_ids', '=', '')
       }
     }
 

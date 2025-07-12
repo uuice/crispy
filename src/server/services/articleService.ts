@@ -25,11 +25,27 @@ export type UpdateArticleData = Partial<CreateArticleData>
 
 export interface ArticleFilters {
   title?: string
+  sub_title?: string
+  abstract?: string
+  url?: string
   type_id?: number
+  type_ids?: string
   status?: number
   tag?: string
+  tags?: string
+  author_id?: number
+  user_id?: number
+  is_review?: number
+  click_min?: number
+  click_max?: number
+  sort_min?: number
+  sort_max?: number
   start_time?: number
   end_time?: number
+  publish_start?: number
+  publish_end?: number
+  has_image?: boolean
+  has_redirect_url?: boolean
 }
 
 export interface PaginationParams {
@@ -70,34 +86,93 @@ export class ArticleService {
     const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('articles').selectAll().where('is_delete', '=', 0)
+    let query = db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .where('articles.is_delete', '=', 0)
 
     // Add filters if provided
     if (filters.title) {
-      query = query.where(sql.ref('title'), 'like', `%${filters.title}%`)
+      query = query.where(sql.ref('articles.title'), 'like', `%${filters.title}%`)
+    }
+    if (filters.sub_title) {
+      query = query.where(sql.ref('articles.sub_title'), 'like', `%${filters.sub_title}%`)
+    }
+    if (filters.abstract) {
+      query = query.where(sql.ref('articles.abstract'), 'like', `%${filters.abstract}%`)
+    }
+    if (filters.url) {
+      query = query.where(sql.ref('articles.url'), 'like', `%${filters.url}%`)
     }
     if (filters.type_id !== undefined && !isNaN(filters.type_id)) {
-      query = query.where(sql.ref('type_id'), '=', filters.type_id)
+      query = query.where(sql.ref('articles.type_id'), '=', filters.type_id)
+    }
+    if (filters.type_ids) {
+      query = query.where(sql.ref('articles.type_ids'), 'like', `%${filters.type_ids}%`)
     }
     if (filters.status !== undefined && !isNaN(filters.status)) {
-      query = query.where(sql.ref('status'), '=', filters.status)
+      query = query.where(sql.ref('articles.status'), '=', filters.status)
     }
     if (filters.tag) {
-      query = query.where(sql.ref('tags'), 'like', `%${filters.tag}%`)
+      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tag}%`)
+    }
+    if (filters.tags) {
+      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+    }
+    if (filters.author_id !== undefined && !isNaN(filters.author_id)) {
+      query = query.where(sql.ref('articles.author_id'), '=', filters.author_id)
+    }
+    if (filters.user_id !== undefined && !isNaN(filters.user_id)) {
+      query = query.where(sql.ref('articles.user_id'), '=', filters.user_id)
+    }
+    if (filters.is_review !== undefined && !isNaN(filters.is_review)) {
+      query = query.where(sql.ref('articles.is_review'), '=', filters.is_review)
+    }
+    if (filters.click_min !== undefined && !isNaN(filters.click_min)) {
+      query = query.where(sql.ref('articles.click'), '>=', filters.click_min)
+    }
+    if (filters.click_max !== undefined && !isNaN(filters.click_max)) {
+      query = query.where(sql.ref('articles.click'), '<=', filters.click_max)
+    }
+    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
+      query = query.where(sql.ref('articles.sort'), '>=', filters.sort_min)
+    }
+    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
+      query = query.where(sql.ref('articles.sort'), '<=', filters.sort_max)
     }
     if (filters.start_time) {
-      query = query.where(sql.ref('create_time'), '>=', filters.start_time)
+      query = query.where(sql.ref('articles.create_time'), '>=', filters.start_time)
     }
     if (filters.end_time) {
-      query = query.where(sql.ref('create_time'), '<=', filters.end_time)
+      query = query.where(sql.ref('articles.create_time'), '<=', filters.end_time)
+    }
+    if (filters.publish_start) {
+      query = query.where(sql.ref('articles.update_time'), '>=', filters.publish_start)
+    }
+    if (filters.publish_end) {
+      query = query.where(sql.ref('articles.update_time'), '<=', filters.publish_end)
+    }
+    if (filters.has_image === true) {
+      query = query.where(sql.ref('articles.image'), 'is not', null)
+    }
+    if (filters.has_image === false) {
+      query = query.where(sql.ref('articles.image'), 'is', null)
+    }
+    if (filters.has_redirect_url === true) {
+      query = query.where(sql.ref('articles.redirect_url'), 'is not', null)
+    }
+    if (filters.has_redirect_url === false) {
+      query = query.where(sql.ref('articles.redirect_url'), 'is', null)
     }
 
     // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    query = query.orderBy('articles.create_time', 'desc')
 
     const [articles, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.select((eb) => [eb.fn.count('articles.id').as('count')]).executeTakeFirst()
     ])
 
     return {
@@ -157,7 +232,7 @@ export class ArticleService {
    */
   async updateArticle(id: number, data: UpdateArticleData) {
     // If type_id is being updated, verify that the new category exists
-    if (data.type_id !== undefined) {
+    if (data.type_id) {
       const category = await this.verifyCategoryExists(data.type_id)
       if (!category) {
         throw new Error('Category not found')

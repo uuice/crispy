@@ -41,8 +41,12 @@ export interface PaginatedResult<T> {
   }
 }
 
-export interface FilterOptions {
+export interface AdditionFilters {
   type?: number
+  status?: number
+  is_delete?: number
+  update_time?: number
+  create_time?: number
 }
 
 // Addition Service Class
@@ -70,7 +74,7 @@ export class AdditionService {
    */
   async getAdditions(
     options: PaginationOptions,
-    filters?: FilterOptions
+    filters?: AdditionFilters
   ): Promise<PaginatedResult<any>> {
     const { page, pageSize } = options
     const offset = (page - 1) * pageSize
@@ -78,7 +82,7 @@ export class AdditionService {
     let query = db.selectFrom('additions').selectAll().where('is_delete', '=', 0)
 
     // Add type filter if provided
-    if (filters?.type !== undefined) {
+    if (filters?.type) {
       query = query.where(sql.ref('type'), '=', filters.type)
     }
 

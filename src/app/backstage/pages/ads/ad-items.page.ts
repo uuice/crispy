@@ -79,16 +79,24 @@ interface AdsOption {
             <div class="search-controls">
               <p-dropdown
                 [options]="adsOptions()"
-                [(ngModel)]="selectedAdId"
+                [ngModel]="selectedAdId()"
+                (ngModelChange)="selectedAdId.set($event)"
                 optionLabel="title"
                 optionValue="id"
                 placeholder="选择广告"
                 [showClear]="true"
               ></p-dropdown>
-              <input pInputText type="text" [(ngModel)]="searchTitle" placeholder="广告项标题" />
+              <input
+                pInputText
+                type="text"
+                [ngModel]="searchTitle()"
+                (ngModelChange)="searchTitle.set($event)"
+                placeholder="广告项标题"
+              />
               <p-dropdown
                 [options]="statusOptions"
-                [(ngModel)]="searchStatus"
+                [ngModel]="searchStatus()"
+                (ngModelChange)="searchStatus.set($event)"
                 optionLabel="label"
                 optionValue="value"
                 placeholder="状态"
@@ -190,9 +198,9 @@ export class AdItemsPage implements OnInit {
   adsOptions: WritableSignal<AdsOption[]> = signal([])
   loading = signal(false)
   totalRecords = signal(0)
-  selectedAdId: number | null = null
-  searchTitle = ''
-  searchStatus: number | null = null
+  selectedAdId = signal<number | null>(null)
+  searchTitle = signal('')
+  searchStatus = signal<number | null>(null)
   selectedAdItem = signal<AdItem | null>(null)
   isDetailVisible = signal(false)
   currentPage = signal(1)
@@ -242,9 +250,9 @@ export class AdItemsPage implements OnInit {
       page: this.currentPage(),
       pageSize: this.pageSize()
     }
-    if (this.selectedAdId) params.ad_id = this.selectedAdId
-    if (this.searchTitle) params.title = this.searchTitle
-    if (this.searchStatus !== null) params.status = this.searchStatus
+    if (this.selectedAdId()) params.ad_id = this.selectedAdId()
+    if (this.searchTitle()) params.title = this.searchTitle()
+    if (this.searchStatus() !== null) params.status = this.searchStatus()
     this.httpService.get<any>('/api/admin/ad-items', params).subscribe({
       next: (res) => {
         if (res.success && res.data && res.data.dataList) {
@@ -368,9 +376,9 @@ export class AdItemsPage implements OnInit {
   }
 
   resetFilters() {
-    this.selectedAdId = null
-    this.searchTitle = ''
-    this.searchStatus = null
+    this.selectedAdId.set(null)
+    this.searchTitle.set('')
+    this.searchStatus.set(null)
     this.currentPage.set(1)
     this.loadAdItems()
   }

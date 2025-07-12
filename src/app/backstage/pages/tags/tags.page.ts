@@ -74,7 +74,8 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
                   id="title-search"
                   type="text"
                   pInputText
-                  [(ngModel)]="searchFilters.title"
+                  [ngModel]="searchTitle()"
+                  (ngModelChange)="searchTitle.set($event)"
                   placeholder="搜索标签名称"
                   class="search-input"
                 />
@@ -84,7 +85,8 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
                 <p-dropdown
                   id="status-filter"
                   [options]="statusOptions"
-                  [(ngModel)]="searchFilters.status"
+                  [ngModel]="searchStatus()"
+                  (ngModelChange)="searchStatus.set($event)"
                   placeholder="选择状态"
                   [showClear]="true"
                   optionLabel="label"
@@ -113,6 +115,9 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
           <tr>
             <th>名称</th>
             <th>别名</th>
+            <th>描述</th>
+            <th>值</th>
+            <th>分类ID</th>
             <th>状态</th>
             <th>排序</th>
             <th>创建时间</th>
@@ -123,6 +128,9 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
           <tr>
             <td>{{ rowData.title }}</td>
             <td>{{ rowData.alias }}</td>
+            <td>{{ rowData.des || '-' }}</td>
+            <td>{{ rowData.value || '-' }}</td>
+            <td>{{ rowData.type_id || '-' }}</td>
             <td>
               <p-tag
                 [severity]="getStatusSeverity(rowData.status)"
@@ -152,7 +160,7 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="6" class="text-center">暂无标签数据</td>
+            <td colspan="9" class="text-center">暂无标签数据</td>
           </tr>
         </ng-template>
       </p-table>
@@ -173,13 +181,10 @@ export class TagsPage implements OnInit {
   total = signal(0)
   selectedTag = signal<Tag | null>(null)
   isDetailVisible = signal(false)
-  page = 1
-  pageSize = 10
-
-  searchFilters = {
-    title: '',
-    status: null as number | null
-  }
+  page = signal(1)
+  pageSize = signal(10)
+  searchTitle = signal('')
+  searchStatus = signal<number | null>(null)
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -203,11 +208,11 @@ export class TagsPage implements OnInit {
     const params = new URLSearchParams()
     params.append('page', page.toString())
     params.append('pageSize', pageSize.toString())
-    if (this.searchFilters.title) {
-      params.append('title', this.searchFilters.title)
+    if (this.searchTitle()) {
+      params.append('title', this.searchTitle())
     }
-    if (this.searchFilters.status !== null) {
-      params.append('status', this.searchFilters.status.toString())
+    if (this.searchStatus() !== null) {
+      params.append('status', this.searchStatus()!.toString())
     }
     this.httpService.get<any>(`/api/admin/tags?${params.toString()}`).subscribe({
       next: (response) => {
@@ -236,24 +241,22 @@ export class TagsPage implements OnInit {
   }
 
   searchTags() {
-    this.page = 1
-    this.loadTags(this.page, this.pageSize)
+    this.page.set(1)
+    this.loadTags(this.page(), this.pageSize())
   }
 
   resetSearch() {
-    this.searchFilters = {
-      title: '',
-      status: null
-    }
-    this.page = 1
-    this.loadTags(this.page, this.pageSize)
+    this.searchTitle.set('')
+    this.searchStatus.set(null)
+    this.page.set(1)
+    this.loadTags(this.page(), this.pageSize())
   }
 
   onLazyLoad(event: any) {
     const page = Math.floor(event.first / event.rows) + 1
     const pageSize = event.rows
-    this.page = page
-    this.pageSize = pageSize
+    this.page.set(page)
+    this.pageSize.set(pageSize)
     this.loadTags(page, pageSize)
   }
 
@@ -276,7 +279,7 @@ export class TagsPage implements OnInit {
   }
 
   onTagSaved() {
-    this.loadTags(this.page, this.pageSize)
+    this.loadTags(this.page(), this.pageSize())
     this.selectedTag.set(null)
     this.isDetailVisible.set(false)
   }
@@ -306,7 +309,7 @@ export class TagsPage implements OnInit {
             summary: '成功',
             detail: '标签删除成功'
           })
-          this.loadTags(this.page, this.pageSize)
+          this.loadTags(this.page(), this.pageSize())
         } else {
           this.messageService.add({
             severity: 'error',
@@ -326,8 +329,8 @@ export class TagsPage implements OnInit {
   }
 
   onPageChange(event: any) {
-    this.page = event.page + 1
-    this.pageSize = event.rows
-    this.loadTags(this.page, this.pageSize)
+    this.page.set(event.page + 1)
+    this.pageSize.set(event.rows)
+    this.loadTags(this.page(), this.pageSize())
   }
 }

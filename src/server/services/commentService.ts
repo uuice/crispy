@@ -28,8 +28,15 @@ export interface CommentFilters {
   user_id?: number
   parent_id?: number
   status?: number
+  good_article_min?: number
+  good_article_max?: number
+  bad_article_min?: number
+  bad_article_max?: number
+  not_article_min?: number
+  not_article_max?: number
   start_time?: number
   end_time?: number
+  has_parent?: boolean
 }
 
 export interface CreateCommentData {
@@ -66,7 +73,7 @@ export class CommentService {
   // Get comments with pagination and filters
   async getComments(
     pagination: { page: number; pageSize: number },
-    filters?: CommentFilters
+    filters: CommentFilters
   ): Promise<PaginatedCommentsResult> {
     const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
@@ -85,30 +92,54 @@ export class CommentService {
       .where('c.is_delete', '=', 0)
 
     // Apply filters
-    if (filters?.content) {
+    if (filters.content) {
       query = query.where('c.content', 'like', `%${filters.content}%`)
     }
-    if (filters?.title) {
+    if (filters.title) {
       query = query.where('c.title', 'like', `%${filters.title}%`)
     }
-    if (filters?.user_id) {
+    if (filters.user_id) {
       query = query.where('c.user_id', '=', filters.user_id)
     }
-    if (filters?.parent_id !== undefined) {
+    if (filters.parent_id) {
       if (filters.parent_id === null) {
         query = query.where('c.parent_id', 'is', null)
       } else {
         query = query.where('c.parent_id', '=', filters.parent_id)
       }
     }
-    if (filters?.status !== undefined) {
+    if (filters.status) {
       query = query.where('c.status', '=', filters.status)
     }
-    if (filters?.start_time) {
+    if (filters.start_time) {
       query = query.where('c.create_time', '>=', filters.start_time)
     }
-    if (filters?.end_time) {
+    if (filters.end_time) {
       query = query.where('c.create_time', '<=', filters.end_time)
+    }
+    if (filters.good_article_min && !isNaN(filters.good_article_min)) {
+      query = query.where('c.good_article', '>=', filters.good_article_min)
+    }
+    if (filters.good_article_max && !isNaN(filters.good_article_max)) {
+      query = query.where('c.good_article', '<=', filters.good_article_max)
+    }
+    if (filters.bad_article_min && !isNaN(filters.bad_article_min)) {
+      query = query.where('c.bad_article', '>=', filters.bad_article_min)
+    }
+    if (filters.bad_article_max && !isNaN(filters.bad_article_max)) {
+      query = query.where('c.bad_article', '<=', filters.bad_article_max)
+    }
+    if (filters.not_article_min && !isNaN(filters.not_article_min)) {
+      query = query.where('c.not_article', '>=', filters.not_article_min)
+    }
+    if (filters.not_article_max && !isNaN(filters.not_article_max)) {
+      query = query.where('c.not_article', '<=', filters.not_article_max)
+    }
+    if (filters.has_parent === true) {
+      query = query.where('c.parent_id', 'is not', null)
+    }
+    if (filters.has_parent === false) {
+      query = query.where('c.parent_id', 'is', null)
     }
 
     // Get total count
@@ -260,7 +291,7 @@ export class CommentService {
       .select((eb: any) => [eb.fn.count('id').as('count')])
       .where('is_delete', '=', 0)
 
-    if (status !== undefined) {
+    if (status) {
       query = query.where('status', '=', status)
     }
 

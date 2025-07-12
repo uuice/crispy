@@ -51,27 +51,22 @@ export const getLinks = async (req: Request, res: Response, next: NextFunction):
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-    // Build filters from query
-    const filters: LinkFilters = {}
-    if (req.query['site_name']) {
-      filters.siteName = req.query['site_name'] as string
+    const filters = {
+      site_name: req.query['site_name'] as string | undefined,
+      des: req.query['des'] as string | undefined,
+      logo: req.query['logo'] as string | undefined,
+      method: req.query['method'] as string | undefined,
+      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
+      sort: req.query['sort'] ? parseInt(req.query['sort'] as string) : undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      url: req.query['url'] as string | undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
-    if (req.query['url']) {
-      filters.url = req.query['url'] as string
-    }
-    if (req.query['status']) {
-      filters.status = parseInt(req.query['status'] as string)
-    }
-    if (req.query['type_id']) {
-      filters.typeId = parseInt(req.query['type_id'] as string)
-    }
-    if (req.query['start_time']) {
-      filters.startTime = parseInt(req.query['start_time'] as string)
-    }
-    if (req.query['end_time']) {
-      filters.endTime = parseInt(req.query['end_time'] as string)
-    }
-
     const result = await linkService.getLinks({ page, pageSize }, filters)
     success(res, result)
   } catch (err: unknown) {

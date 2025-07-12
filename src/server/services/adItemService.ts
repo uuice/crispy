@@ -44,6 +44,13 @@ export interface PaginatedResult<T> {
 
 export interface FilterOptions {
   ad_id?: number
+  title?: string
+  content?: string
+  image_url?: string
+  url?: string
+  method?: string
+  sort?: number
+  status?: number
 }
 
 // Ad Item Service Class
@@ -79,8 +86,32 @@ export class AdItemService {
     let query = db.selectFrom('ad_items').selectAll().where('is_delete', '=', 0)
 
     // Add ad_id filter if provided
-    if (filters?.ad_id !== undefined) {
+    if (filters?.ad_id) {
       query = query.where('ad_id', '=', filters.ad_id)
+    }
+
+    if (filters?.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
+    }
+
+    if (filters?.content) {
+      query = query.where('content', 'like', `%${filters.content}%`)
+    }
+
+    if (filters?.image_url) {
+      query = query.where('image_url', 'like', `%${filters.image_url}%`)
+    }
+
+    if (filters?.url) {
+      query = query.where('url', 'like', `%${filters.url}%`)
+    }
+
+    if (filters?.method) {
+      query = query.where('method', '=', filters.method)
+    }
+
+    if (filters?.status) {
+      query = query.where('status', '=', filters.status)
     }
 
     const [adItems, total] = await Promise.all([
@@ -142,7 +173,7 @@ export class AdItemService {
     const validatedData = updateAdItemSchema.parse(adItemData)
 
     // If ad_id is being updated, verify that the new ad exists
-    if (validatedData.ad_id !== undefined) {
+    if (validatedData.ad_id) {
       const ad = await db
         .selectFrom('ads')
         .select('id')

@@ -124,11 +124,11 @@ interface Category {
           </div>
 
           <div class="field col-12">
-            <label for="description" class="block text-900 font-medium mb-2">描述</label>
+            <label for="des" class="block text-900 font-medium mb-2">描述</label>
             <textarea
-              id="description"
+              id="des"
               pInputTextarea
-              formControlName="description"
+              formControlName="des"
               placeholder="请输入链接描述"
               [rows]="3"
               class="w-full"
@@ -236,7 +236,7 @@ export class LinkDetailComponent implements OnInit, OnChanges {
     this.friendLinkForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       url: ['', [Validators.required, Validators.pattern('https?://.+')]],
-      description: [''],
+      des: [''],
       logo: [''],
       type_id: [undefined],
       sort: [0],

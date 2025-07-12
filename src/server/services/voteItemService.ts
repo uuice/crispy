@@ -75,10 +75,10 @@ export class VoteItemService {
       if (filters.title) {
         query = query.where('title', 'like', `%${filters.title}%`)
       }
-      if (filters.vote_id !== undefined) {
+      if (filters.vote_id) {
         query = query.where('vote_id', '=', filters.vote_id)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
       }
       if (filters.startTime) {

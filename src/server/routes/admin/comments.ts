@@ -58,32 +58,31 @@ export const getComments = async (
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-
-    // Build filters from query
-    const filters: CommentFilters = {}
-    if (req.query['content']) {
-      filters.content = req.query['content'] as string
+    const filters = {
+      title: req.query['title'] as string | undefined,
+      content: req.query['content'] as string | undefined,
+      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
+      parent_id: req.query['parent_id'] ? parseInt(req.query['parent_id'] as string) : undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      good_article: req.query['good_article']
+        ? parseInt(req.query['good_article'] as string)
+        : undefined,
+      bad_article: req.query['bad_article']
+        ? parseInt(req.query['bad_article'] as string)
+        : undefined,
+      not_article: req.query['not_article']
+        ? parseInt(req.query['not_article'] as string)
+        : undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined,
+      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
+      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
     }
-    if (req.query['title']) {
-      filters.title = req.query['title'] as string
-    }
-    if (req.query['user_id']) {
-      filters.user_id = parseInt(req.query['user_id'] as string)
-    }
-    if (req.query['parent_id']) {
-      const parentId = req.query['parent_id'] as string
-      filters.parent_id = parentId === 'null' ? undefined : parseInt(parentId)
-    }
-    if (req.query['status']) {
-      filters.status = parseInt(req.query['status'] as string)
-    }
-    if (req.query['start_time']) {
-      filters.start_time = parseInt(req.query['start_time'] as string)
-    }
-    if (req.query['end_time']) {
-      filters.end_time = parseInt(req.query['end_time'] as string)
-    }
-
     const result = await commentService.getComments({ page, pageSize }, filters)
     success(res, result)
   } catch (err: unknown) {

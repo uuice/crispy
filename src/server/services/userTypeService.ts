@@ -69,7 +69,7 @@ export class UserTypeService {
    */
   async getUserTypes(
     options: PaginationOptions,
-    filters?: FilterOptions
+    filters: FilterOptions
   ): Promise<PaginatedResult<any>> {
     const { page, pageSize } = options
     const offset = (page - 1) * pageSize
@@ -77,19 +77,19 @@ export class UserTypeService {
     let query = db.selectFrom('user_types').selectAll().where('is_delete', '=', 0)
 
     // Add filters if provided
-    if (filters?.type_name) {
+    if (filters.type_name) {
       query = query.where('type_name', 'like', `%${filters.type_name}%`)
     }
-    if (filters?.alias) {
+    if (filters.alias) {
       query = query.where('alias', 'like', `%${filters.alias}%`)
     }
-    if (filters?.status !== undefined) {
+    if (filters.status) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters?.start_time) {
+    if (filters.start_time) {
       query = query.where('create_time', '>=', filters.start_time)
     }
-    if (filters?.end_time) {
+    if (filters.end_time) {
       query = query.where('create_time', '<=', filters.end_time)
     }
 

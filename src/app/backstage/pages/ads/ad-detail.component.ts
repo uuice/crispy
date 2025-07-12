@@ -22,9 +22,9 @@ interface Advertisement {
   title: string
   alias?: string
   content?: string
-  image_url?: string
-  link_url?: string
-  position?: string
+  // image_url?: string
+  // link_url?: string
+  // position?: string
   start_time?: number
   end_time?: number
   status: number
@@ -113,7 +113,7 @@ interface Advertisement {
             </div>
           </div>
 
-          <div class="col-6">
+          <!-- <div class="col-6">
             <div class="field">
               <label for="image_url" class="block text-900 font-medium mb-2">图片URL</label>
               <input
@@ -125,9 +125,9 @@ interface Advertisement {
                 class="w-full"
               />
             </div>
-          </div>
+          </div> -->
 
-          <div class="col-6">
+          <!-- <div class="col-6">
             <div class="field">
               <label for="link_url" class="block text-900 font-medium mb-2">跳转链接</label>
               <input
@@ -139,9 +139,9 @@ interface Advertisement {
                 class="w-full"
               />
             </div>
-          </div>
+          </div> -->
 
-          <div class="col-6">
+          <!-- <div class="col-6">
             <div class="field">
               <label for="position" class="block text-900 font-medium mb-2">广告位置</label>
               <input
@@ -153,7 +153,7 @@ interface Advertisement {
                 class="w-full"
               />
             </div>
-          </div>
+          </div> -->
 
           <div class="col-6">
             <div class="field">
@@ -266,9 +266,9 @@ export class AdDetailComponent implements OnInit, OnChanges {
       title: ['', [Validators.required, Validators.minLength(2)]],
       alias: [''],
       content: [''],
-      image_url: [''],
-      link_url: [''],
-      position: [''],
+      // image_url: [''],
+      // link_url: [''],
+      // position: [''],
       start_time: [null],
       end_time: [null],
       status: [10],
@@ -299,9 +299,9 @@ export class AdDetailComponent implements OnInit, OnChanges {
         title: this.ad.title,
         alias: this.ad.alias || '',
         content: this.ad.content || '',
-        image_url: this.ad.image_url || '',
-        link_url: this.ad.link_url || '',
-        position: this.ad.position || '',
+        // image_url: this.ad.image_url || '',
+        // link_url: this.ad.link_url || '',
+        // position: this.ad.position || '',
         start_time: this.ad.start_time ? new Date(this.ad.start_time) : null,
         end_time: this.ad.end_time ? new Date(this.ad.end_time) : null,
         status: this.ad.status,
@@ -318,9 +318,9 @@ export class AdDetailComponent implements OnInit, OnChanges {
       title: '',
       alias: '',
       content: '',
-      image_url: '',
-      link_url: '',
-      position: '',
+      // image_url: '',
+      // link_url: '',
+      // position: '',
       start_time: null,
       end_time: null,
       status: 10,

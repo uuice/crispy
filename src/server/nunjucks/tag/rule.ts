@@ -29,11 +29,11 @@ export function Rules(): void {
       rules = await ruleService.getRuleTree()
     } else if (moduleId) {
       rules = await ruleService.getRulesByModuleId(moduleId)
-    } else if (parentId !== undefined) {
+    } else if (parentId) {
       rules = await ruleService.getChildRules(parentId)
     } else {
       const filters: any = {}
-      if (status !== undefined) filters.status = status
+      if (status) filters.status = status
       if (typeId) filters.type_id = typeId
 
       const result = await ruleService.getRules({ page: 1, pageSize: limit }, filters)

@@ -18,13 +18,15 @@ interface FriendLink {
   id: number
   title: string
   url: string
-  description?: string
+  des?: string
   logo?: string
+  method?: string
   sort: number
   status: number
   type_id?: number
   create_time: number
   update_time: number
+  is_delete: number
 }
 
 interface Category {
@@ -161,7 +163,7 @@ interface FriendLinksResponse {
             <td>
               <a [href]="link.url" target="_blank" class="link-url">{{ link.url }}</a>
             </td>
-            <td>{{ link.description || '-' }}</td>
+            <td>{{ link.des || '-' }}</td>
             <td>
               <p-tag [value]="getCategoryName(link.type_id)" severity="info" size="small"></p-tag>
             </td>
@@ -231,9 +233,9 @@ export class LinksPage implements OnInit {
   friendLinks: WritableSignal<FriendLink[]> = signal([])
   categories: WritableSignal<Category[]> = signal([])
   loading = signal(false)
-  title = signal('')
-  selectedCategory = signal<number | null>(null)
-  selectedStatus = signal<number | null>(null)
+  titleValue = signal('')
+  categoryValue = signal<number | null>(null)
+  statusValue = signal<number | null>(null)
   selectedFriendLink = signal<FriendLink | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
@@ -247,27 +249,6 @@ export class LinksPage implements OnInit {
   ])
 
   categoryOptions = signal<Category[]>([])
-
-  get titleValue() {
-    return this.title()
-  }
-  set titleValue(val: string) {
-    this.title.set(val)
-  }
-
-  get categoryValue() {
-    return this.selectedCategory()
-  }
-  set categoryValue(val: number | null) {
-    this.selectedCategory.set(val)
-  }
-
-  get statusValue() {
-    return this.selectedStatus()
-  }
-  set statusValue(val: number | null) {
-    this.selectedStatus.set(val)
-  }
 
   private confirmationService = inject(ConfirmationService)
   private messageService = inject(MessageService)
@@ -329,14 +310,14 @@ export class LinksPage implements OnInit {
       pageSize: this.pageSize()
     }
 
-    if (this.title()) {
-      params.site_name = this.title()
+    if (this.titleValue()) {
+      params.site_name = this.titleValue()
     }
-    if (this.selectedCategory() !== null) {
-      params.type_id = this.selectedCategory()
+    if (this.categoryValue() !== null) {
+      params.type_id = this.categoryValue()
     }
-    if (this.selectedStatus() !== null) {
-      params.status = this.selectedStatus()
+    if (this.statusValue() !== null) {
+      params.status = this.statusValue()
     }
 
     this.httpService.get<FriendLinksResponse>('/api/admin/links', params).subscribe({
@@ -347,13 +328,15 @@ export class LinksPage implements OnInit {
             id: link.id,
             title: link.site_name,
             url: link.url,
-            description: link.des,
+            des: link.des,
             logo: link.logo,
+            method: link.method,
             sort: link.sort,
             status: link.status,
             type_id: link.type_id,
             create_time: link.create_time,
-            update_time: link.update_time
+            update_time: link.update_time,
+            is_delete: link.is_delete || 0
           }))
           this.friendLinks.set(transformedLinks)
           this.totalRecords.set(response.data.pagination.total)
@@ -407,7 +390,7 @@ export class LinksPage implements OnInit {
     const transformedData = {
       site_name: linkData.title,
       url: linkData.url,
-      des: linkData.description || '',
+      des: linkData.des || '',
       logo: linkData.logo || '',
       type_id: linkData.type_id || 0,
       sort: linkData.sort || 0,
@@ -494,9 +477,9 @@ export class LinksPage implements OnInit {
   }
 
   resetFilters() {
-    this.title.set('')
-    this.selectedCategory.set(null)
-    this.selectedStatus.set(null)
+    this.titleValue.set('')
+    this.categoryValue.set(null)
+    this.statusValue.set(null)
     this.currentPage.set(1)
     this.loadFriendLinks()
   }

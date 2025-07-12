@@ -92,10 +92,10 @@ export class MenuService {
       if (filters.alias) {
         query = query.where('alias', 'like', `%${filters.alias}%`)
       }
-      if (filters.parentId !== undefined) {
+      if (filters.parentId) {
         query = query.where('parent_id', '=', filters.parentId)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
       }
       if (filters.startTime) {

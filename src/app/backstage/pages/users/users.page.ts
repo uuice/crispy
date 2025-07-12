@@ -220,7 +220,7 @@ export class UsersPage implements OnInit {
   users: WritableSignal<User[]> = signal<User[]>([])
   loading = signal(false)
   user_name = signal('')
-  selectedStatus = signal<number | null>(null)
+  statusValue = signal<number | null>(null)
   statusOptions = signal([
     { label: '全部状态', value: null },
     { label: '正常', value: 10 },
@@ -231,13 +231,6 @@ export class UsersPage implements OnInit {
   totalRecords = signal(0)
   selectedUser = signal<User | null>(null)
   isDetailVisible = signal(false)
-
-  get statusValue() {
-    return this.selectedStatus()
-  }
-  set statusValue(val: number | null) {
-    this.selectedStatus.set(val)
-  }
 
   constructor(
     private confirmationService: ConfirmationService,
@@ -273,8 +266,8 @@ export class UsersPage implements OnInit {
       params.user_name = this.user_name()
     }
 
-    if (this.selectedStatus() !== null) {
-      params.status = this.selectedStatus()
+    if (this.statusValue() !== null) {
+      params.status = this.statusValue()
     }
 
     // Call API to get users
@@ -348,7 +341,7 @@ export class UsersPage implements OnInit {
 
   resetFilters() {
     this.user_name.set('')
-    this.selectedStatus.set(null)
+    this.statusValue.set(null)
     this.currentPage.set(1)
     this.loadUsers()
   }

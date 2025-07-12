@@ -57,22 +57,22 @@ export const getKeywords = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-    // Build filters from query
-    const filters: KeywordFilters = {}
-    if (req.query['title']) {
-      filters.title = req.query['title'] as string
-    }
-    if (req.query['alias']) {
-      filters.alias = req.query['alias'] as string
-    }
-    if (req.query['status']) {
-      filters.status = parseInt(req.query['status'] as string)
-    }
-    if (req.query['start_time']) {
-      filters.startTime = parseInt(req.query['start_time'] as string)
-    }
-    if (req.query['end_time']) {
-      filters.endTime = parseInt(req.query['end_time'] as string)
+
+    const filters = {
+      title: req.query['title'] as string | undefined,
+      alias: req.query['alias'] as string | undefined,
+      count: req.query['count'] ? parseInt(req.query['count'] as string) : undefined,
+      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
+      url: req.query['url'] as string | undefined,
+      value: req.query['value'] as string | undefined,
+      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      update_time: req.query['update_time']
+        ? parseInt(req.query['update_time'] as string)
+        : undefined,
+      create_time: req.query['create_time']
+        ? parseInt(req.query['create_time'] as string)
+        : undefined
     }
 
     const result = await keywordService.getKeywords({ page, pageSize }, filters)

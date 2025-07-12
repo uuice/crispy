@@ -36,6 +36,7 @@ interface Article {
   type_ids?: string
   author_id?: number
   user_id?: number
+  type_name?: string
   status: number // 10=已发布, -10=待发布, -20=草稿箱, -100=已删除
   click?: number
   is_review?: number
@@ -44,10 +45,6 @@ interface Article {
   create_time: number
   update_time: number
   is_delete: number
-  type?: {
-    id: number
-    title: string
-  }
 }
 
 interface Category {
@@ -221,8 +218,8 @@ interface CategoriesResponse {
             </td>
             <td>{{ article.url }}</td>
             <td>
-              @if (article.type?.title) {
-                <span>{{ article.type.title }}</span>
+              @if (article.type_name) {
+                <span>{{ article.type_name }}</span>
               } @else {
                 <span class="text-gray-500">-</span>
               }
@@ -332,8 +329,8 @@ interface CategoriesResponse {
             <div class="p-4">
               <h2 class="text-2xl font-bold mb-4">{{ previewArticleData()?.title }}</h2>
               <div class="flex gap-4 mb-4">
-                @if (previewArticleData()?.type?.title) {
-                  <p-tag [value]="previewArticleData()?.type?.title" icon="pi pi-folder"></p-tag>
+                @if (previewArticleData()?.type_name) {
+                  <p-tag [value]="previewArticleData()?.type_name" icon="pi pi-folder"></p-tag>
                 }
                 <p-tag
                   [severity]="getStatusSeverity(previewArticleData()?.status || 0)"
@@ -391,8 +388,8 @@ export class PostsPage implements OnInit {
   loading = signal(false)
   title = signal('')
   abstract = signal('')
-  selectedStatus = signal<number | null>(null)
-  selectedCategory = signal<number | null>(null)
+  statusValue = signal<number | null>(null)
+  categoryValue = signal<number | null>(null)
   selectedArticle = signal<Article | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
@@ -415,20 +412,6 @@ export class PostsPage implements OnInit {
   categoryOptions = signal<{ label: string; value: number | null }[]>([
     { label: '全部分类', value: null }
   ])
-
-  get statusValue() {
-    return this.selectedStatus()
-  }
-  set statusValue(val: number | null) {
-    this.selectedStatus.set(val)
-  }
-
-  get categoryValue() {
-    return this.selectedCategory()
-  }
-  set categoryValue(val: number | null) {
-    this.selectedCategory.set(val)
-  }
 
   private authService = inject(AuthService)
 
@@ -474,12 +457,12 @@ export class PostsPage implements OnInit {
       params.abstract = this.abstract()
     }
 
-    if (this.selectedStatus() !== null) {
-      params.status = this.selectedStatus()
+    if (this.statusValue() !== null) {
+      params.status = this.statusValue()
     }
 
-    if (this.selectedCategory() !== null) {
-      params.type_id = this.selectedCategory()
+    if (this.categoryValue() !== null) {
+      params.type_id = this.categoryValue()
     }
 
     // Call API to get articles
@@ -737,8 +720,8 @@ export class PostsPage implements OnInit {
   resetFilters() {
     this.title.set('')
     this.abstract.set('')
-    this.selectedStatus.set(null)
-    this.selectedCategory.set(null)
+    this.statusValue.set(null)
+    this.categoryValue.set(null)
     this.currentPage.set(1)
     this.loadArticles()
   }

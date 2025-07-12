@@ -80,22 +80,22 @@ export class CommentService {
   // Get comments with pagination and filters
   getComments(
     pagination: { page: number; pageSize: number },
-    filters?: CommentFilters
+    filters: CommentFilters
   ): Observable<PaginatedCommentsResult> {
     const params: any = {
       page: pagination.page.toString(),
       pageSize: pagination.pageSize.toString()
     }
 
-    if (filters?.content) params.content = filters.content
-    if (filters?.title) params.title = filters.title
-    if (filters?.user_id) params.user_id = filters.user_id.toString()
-    if (filters?.parent_id !== undefined) {
+    if (filters.content) params.content = filters.content
+    if (filters.title) params.title = filters.title
+    if (filters.user_id) params.user_id = filters.user_id.toString()
+    if (filters.parent_id) {
       params.parent_id = filters.parent_id === null ? 'null' : filters.parent_id.toString()
     }
-    if (filters?.status !== undefined) params.status = filters.status.toString()
-    if (filters?.start_time) params.start_time = filters.start_time.toString()
-    if (filters?.end_time) params.end_time = filters.end_time.toString()
+    if (filters.status) params.status = filters.status.toString()
+    if (filters.start_time) params.start_time = filters.start_time.toString()
+    if (filters.end_time) params.end_time = filters.end_time.toString()
 
     return this.http.get<PaginatedCommentsResult>('/api/admin/comments', params)
   }

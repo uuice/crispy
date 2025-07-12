@@ -184,8 +184,8 @@ interface RolesResponse {
 export class RolesPage implements OnInit {
   roles: WritableSignal<Role[]> = signal([])
   loading = signal(false)
-  title = signal('')
-  selectedStatus = signal<number | null>(null)
+  titleValue = signal('')
+  statusValue = signal<number | null>(null)
   selectedRole = signal<Role | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
@@ -197,20 +197,6 @@ export class RolesPage implements OnInit {
     { label: '启用', value: 10 },
     { label: '禁用', value: 0 }
   ])
-
-  get titleValue() {
-    return this.title()
-  }
-  set titleValue(val: string) {
-    this.title.set(val)
-  }
-
-  get statusValue() {
-    return this.selectedStatus()
-  }
-  set statusValue(val: number | null) {
-    this.selectedStatus.set(val)
-  }
 
   private confirmationService = inject(ConfirmationService)
   private messageService = inject(MessageService)
@@ -240,11 +226,11 @@ export class RolesPage implements OnInit {
       pageSize: this.pageSize()
     }
 
-    if (this.title()) {
-      params.title = this.title()
+    if (this.titleValue()) {
+      params.title = this.titleValue()
     }
-    if (this.selectedStatus() !== null) {
-      params.status = this.selectedStatus()
+    if (this.statusValue() !== null) {
+      params.status = this.statusValue()
     }
 
     this.httpService.get<RolesResponse>('/api/admin/roles', params).subscribe({
@@ -372,8 +358,8 @@ export class RolesPage implements OnInit {
   }
 
   resetFilters() {
-    this.title.set('')
-    this.selectedStatus.set(null)
+    this.titleValue.set('')
+    this.statusValue.set(null)
     this.currentPage.set(1)
     this.loadRoles()
   }

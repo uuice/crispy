@@ -18,12 +18,12 @@ export function Pages(): void {
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
     const status = args.status || 10 // 默认获取已发布的页面
-    const typeId = args.type_id
+    const type_id = args.type_id
     const limit = args.limit || 10
 
     let pages
-    if (typeId || status) {
-      const result = await pageService.getPages({ page: 1, pageSize: limit }, { status, typeId })
+    if (type_id || status) {
+      const result = await pageService.getPages({ page: 1, pageSize: limit }, { status, type_id })
       pages = result.dataList
     } else {
       const result = await pageService.getPages({ page: 1, pageSize: limit })

@@ -48,10 +48,17 @@ export interface PaginatedResult<T> {
 }
 
 export interface FilterOptions {
-  position?: string
+  title?: string
+  alias?: string
+  content?: string
+  type_id?: number
   status?: number
+  sort_min?: number
+  sort_max?: number
   start_time?: number
   end_time?: number
+  has_image?: boolean
+  has_url?: boolean
 }
 
 // Ad Service Class
@@ -84,17 +91,44 @@ export class AdService {
     let query = db.selectFrom('ads').selectAll().where('is_delete', '=', 0)
 
     // Add filters if provided
-    if (filters?.position) {
-      query = query.where(sql.ref('position'), '=', filters.position)
+    if (filters?.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
     }
-    if (filters?.status !== undefined) {
+    if (filters?.alias) {
+      query = query.where('alias', 'like', `%${filters.alias}%`)
+    }
+    if (filters?.content) {
+      query = query.where('content', 'like', `%${filters.content}%`)
+    }
+    if (filters?.type_id && !isNaN(filters.type_id)) {
+      query = query.where('type_id', '=', filters.type_id)
+    }
+    if (filters?.status) {
       query = query.where('status', '=', filters.status)
     }
+    if (filters?.sort_min && !isNaN(filters.sort_min)) {
+      query = query.where('sort', '>=', filters.sort_min)
+    }
+    if (filters?.sort_max && !isNaN(filters.sort_max)) {
+      query = query.where('sort', '<=', filters.sort_max)
+    }
     if (filters?.start_time) {
-      query = query.where(sql.ref('start_time'), '>=', filters.start_time)
+      query = query.where('start_time', '>=', filters.start_time)
     }
     if (filters?.end_time) {
-      query = query.where(sql.ref('end_time'), '<=', filters.end_time)
+      query = query.where('end_time', '<=', filters.end_time)
+    }
+    if (filters?.has_image === true) {
+      query = query.where(sql.ref('image_url'), 'is not', null)
+    }
+    if (filters?.has_image === false) {
+      query = query.where(sql.ref('image_url'), 'is', null)
+    }
+    if (filters?.has_url === true) {
+      query = query.where(sql.ref('url'), 'is not', null)
+    }
+    if (filters?.has_url === false) {
+      query = query.where(sql.ref('url'), 'is', null)
     }
 
     // Order by sort asc, create_time desc by default

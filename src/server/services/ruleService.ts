@@ -99,7 +99,7 @@ export class RuleService {
    */
   async getRules(
     options: PaginationOptions,
-    filters?: FilterOptions
+    filters: FilterOptions
   ): Promise<PaginatedResult<any>> {
     const { page, pageSize } = options
     const offset = (page - 1) * pageSize
@@ -107,22 +107,22 @@ export class RuleService {
     let query = db.selectFrom('rules').selectAll().where('is_delete', '=', 0)
 
     // Add filters if provided
-    if (filters?.title) {
+    if (filters.title) {
       query = query.where('title', 'like', `%${filters.title}%`)
     }
-    if (filters?.alias) {
+    if (filters.alias) {
       query = query.where('alias', 'like', `%${filters.alias}%`)
     }
-    if (filters?.module_id !== undefined) {
+    if (filters.module_id) {
       query = query.where('module_id', '=', filters.module_id)
     }
-    if (filters?.parent_id !== undefined) {
+    if (filters.parent_id) {
       query = query.where('parent_id', '=', filters.parent_id)
     }
-    if (filters?.type_id !== undefined) {
+    if (filters.type_id) {
       query = query.where('type_id', '=', filters.type_id)
     }
-    if (filters?.status !== undefined) {
+    if (filters.status) {
       query = query.where('status', '=', filters.status)
     }
 

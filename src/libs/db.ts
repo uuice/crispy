@@ -18,7 +18,7 @@ import { env } from '../server/config/env'
 export const filterUndefined = <T extends Record<string, any>>(obj: T): Partial<T> => {
   const filtered: Partial<T> = {}
   for (const [key, value] of Object.entries(obj)) {
-    if (value !== undefined) {
+    if (value) {
       filtered[key as keyof T] = value
     }
   }

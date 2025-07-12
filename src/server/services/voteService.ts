@@ -110,10 +110,10 @@ export class VoteService {
       if (filters.title) {
         query = query.where('title', 'like', `%${filters.title}%`)
       }
-      if (filters.is_multiple !== undefined) {
+      if (filters.is_multiple) {
         query = query.where('is_multiple', '=', filters.is_multiple)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
       }
       if (filters.startTime) {
@@ -211,7 +211,7 @@ export class VoteService {
    */
   async updateVote(id: number, data: UpdateVoteData): Promise<boolean> {
     // Validate time range if both times are provided
-    if (data.start_time !== undefined && data.end_time !== undefined) {
+    if (data.start_time && data.end_time) {
       if (data.start_time >= data.end_time) {
         throw new Error('Start time must be before end time')
       }
@@ -240,7 +240,7 @@ export class VoteService {
       }
 
       // Update vote items if provided
-      if (vote_items !== undefined) {
+      if (vote_items) {
         // Delete existing vote items
         await trx
           .updateTable('vote_items')

@@ -80,7 +80,7 @@ export class NoticeService {
       if (filters.title) {
         query = query.where('title', 'like', `%${filters.title}%`)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
       }
       if (filters.startTime) {

@@ -84,7 +84,7 @@ export class KeywordService {
       if (filters.alias) {
         query = query.where('alias', 'like', `%${filters.alias}%`)
       }
-      if (filters.status !== undefined) {
+      if (filters.status) {
         query = query.where('status', '=', filters.status)
       }
       if (filters.startTime) {

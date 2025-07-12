@@ -84,11 +84,7 @@ export const getAccessTokens = async (
     const validatedQuery = listQuerySchema.parse(req.query)
     const { page, pageSize, ...filters } = validatedQuery
 
-    const result = await accessTokenService.getAccessTokens({
-      page,
-      pageSize,
-      ...filters
-    })
+    const result = await accessTokenService.getAccessTokens(filters, { page, pageSize })
     success(res, result)
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {

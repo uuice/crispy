@@ -26,10 +26,21 @@ export type UpdatePageData = Partial<CreatePageData>
 export interface PageFilters {
   title?: string
   alias?: string
+  sub_title?: string
+  abstract?: string
+  url?: string
   status?: number
-  typeId?: number
+  type_id?: number
+  author_id?: number
+  user_id?: number
+  sort_min?: number
+  sort_max?: number
+  click_min?: number
+  click_max?: number
   startTime?: number
   endTime?: number
+  has_image?: boolean
+  has_tags?: boolean
 }
 
 export interface PagePaginationParams {
@@ -145,17 +156,56 @@ export class PageService {
       if (filters.alias) {
         query = query.where('pages.alias', 'like', `%${filters.alias}%`)
       }
-      if (filters.status !== undefined) {
+      if (filters.sub_title) {
+        query = query.where('pages.sub_title', 'like', `%${filters.sub_title}%`)
+      }
+      if (filters.abstract) {
+        query = query.where('pages.abstract', 'like', `%${filters.abstract}%`)
+      }
+      if (filters.url) {
+        query = query.where('pages.url', 'like', `%${filters.url}%`)
+      }
+      if (filters.status) {
         query = query.where('pages.status', '=', filters.status)
       }
-      if (filters.typeId !== undefined) {
-        query = query.where('pages.type_id', '=', filters.typeId)
+      if (filters.type_id) {
+        query = query.where('pages.type_id', '=', filters.type_id)
+      }
+      if (filters.author_id && !isNaN(filters.author_id)) {
+        query = query.where('pages.author_id', '=', filters.author_id)
+      }
+      if (filters.user_id && !isNaN(filters.user_id)) {
+        query = query.where('pages.user_id', '=', filters.user_id)
+      }
+      if (filters.sort_min && !isNaN(filters.sort_min)) {
+        query = query.where(sql.ref('pages.sort'), '>=', filters.sort_min)
+      }
+      if (filters.sort_max && !isNaN(filters.sort_max)) {
+        query = query.where(sql.ref('pages.sort'), '<=', filters.sort_max)
+      }
+      if (filters.click_min && !isNaN(filters.click_min)) {
+        query = query.where('pages.click', '>=', filters.click_min)
+      }
+      if (filters.click_max && !isNaN(filters.click_max)) {
+        query = query.where('pages.click', '<=', filters.click_max)
       }
       if (filters.startTime) {
         query = query.where('pages.create_time', '>=', filters.startTime)
       }
       if (filters.endTime) {
         query = query.where('pages.create_time', '<=', filters.endTime)
+      }
+      if (filters.has_image === true) {
+        query = query.where('pages.image_list', 'is not', null)
+      }
+      if (filters.has_image === false) {
+        query = query.where('pages.image_list', 'is', null)
+      }
+      if (filters.has_tags === true) {
+        query = query.where('pages.tags', 'is not', null)
+      }
+      if (filters.has_tags === false) {
+        query = query.where('pages.tags', 'is', null)
       }
     }
 

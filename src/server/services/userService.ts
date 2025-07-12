@@ -80,10 +80,21 @@ export interface PaginationOptions {
   page: number
   pageSize: number
   user_name?: string
+  nick_name?: string
+  real_name?: string
+  email?: string
+  phone?: string
   status?: number
   isDelete?: number
   isAdmin?: number
+  is_super_admin?: number
+  is_black?: number
   role_id?: number
+  type_id?: number
+  start_time?: number
+  end_time?: number
+  last_login_start?: number
+  last_login_end?: number
 }
 
 export interface PaginatedResult<T> {
@@ -100,6 +111,32 @@ export interface LoginResult {
   user: any
   token: string
   menus: any[]
+}
+
+export interface UserFilters {
+  user_name?: string
+  nick_name?: string
+  real_name?: string
+  email?: string
+  phone?: string
+  status?: number
+  isDelete?: number
+  isAdmin?: number
+  is_super_admin?: number
+  is_black?: number
+  role_id?: number
+  type_id?: number
+  start_time?: number
+  end_time?: number
+  last_login_start?: number
+  last_login_end?: number
+  avatar_url?: string
+  password?: string
+  last_login_ip?: string
+  last_login_time?: number
+  update_time?: number
+  create_time?: number
+  id?: number
 }
 
 // User Service Class
@@ -146,70 +183,174 @@ export class UserService {
   /**
    * Get users list with pagination
    */
-  async getUsers(options: PaginationOptions): Promise<PaginatedResult<any>> {
-    const { page, pageSize, user_name, status, isDelete, isAdmin, role_id } = options
+  async getUsers(
+    pagination: { page: number; pageSize: number },
+    filters?: UserFilters
+  ): Promise<PaginatedResult<any>> {
+    const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
-
     // Build query conditions with LEFT JOIN to get role information
     let query = db
       .selectFrom('users')
       .leftJoin('roles', 'users.role_id', 'roles.id')
       .selectAll('users')
       .select(['roles.id as role_id', 'roles.title as role_title'])
-
     // Apply filters
-    if (user_name) {
-      query = query.where('users.user_name', 'like', `%${user_name}%`)
-    }
-
-    if (status !== undefined) {
-      query = query.where('users.status', '=', status)
-    }
-
-    if (isDelete !== undefined) {
-      query = query.where('users.is_delete', '=', isDelete)
+    if (filters) {
+      const {
+        user_name,
+        nick_name,
+        real_name,
+        email,
+        phone,
+        status,
+        isDelete,
+        isAdmin,
+        is_super_admin,
+        is_black,
+        role_id,
+        type_id,
+        start_time,
+        end_time,
+        last_login_start,
+        last_login_end
+      } = filters
+      if (user_name) {
+        query = query.where('users.user_name', 'like', `%${user_name}%`)
+      }
+      if (nick_name) {
+        query = query.where('users.nick_name', 'like', `%${nick_name}%`)
+      }
+      if (real_name) {
+        query = query.where('users.real_name', 'like', `%${real_name}%`)
+      }
+      if (email) {
+        query = query.where('users.email', 'like', `%${email}%`)
+      }
+      if (phone) {
+        query = query.where('users.phone', 'like', `%${phone}%`)
+      }
+      if (status) {
+        query = query.where('users.status', '=', status)
+      }
+      if (isDelete) {
+        query = query.where('users.is_delete', '=', isDelete)
+      } else {
+        query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
+      }
+      if (isAdmin) {
+        query = query.where('users.is_admin', '=', isAdmin)
+      }
+      if (is_super_admin) {
+        query = query.where('users.is_super_admin', '=', is_super_admin)
+      }
+      if (is_black) {
+        query = query.where('users.is_black', '=', is_black)
+      }
+      if (role_id) {
+        query = query.where('users.role_id', '=', role_id)
+      }
+      if (type_id) {
+        query = query.where('users.type_id', '=', type_id)
+      }
+      if (start_time) {
+        query = query.where('users.create_time', '>=', start_time)
+      }
+      if (end_time) {
+        query = query.where('users.create_time', '<=', end_time)
+      }
+      if (last_login_start) {
+        query = query.where('users.last_login_time', '>=', last_login_start)
+      }
+      if (last_login_end) {
+        query = query.where('users.last_login_time', '<=', last_login_end)
+      }
     } else {
       // Default to only non-deleted users
       query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
     }
-
-    if (isAdmin !== undefined) {
-      query = query.where('users.is_admin', '=', isAdmin)
-    }
-
-    if (role_id !== undefined) {
-      query = query.where('users.role_id', '=', role_id)
-    }
-
     const [users, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
       db
         .selectFrom('users')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
-          // Apply same filters to count query
-          if (user_name) {
-            qb = qb.where('user_name', 'like', `%${user_name}%`)
-          }
-          if (status !== undefined) {
-            qb = qb.where('status', '=', status)
-          }
-          if (isDelete !== undefined) {
-            qb = qb.where('is_delete', '=', isDelete)
+          if (filters) {
+            const {
+              user_name,
+              nick_name,
+              real_name,
+              email,
+              phone,
+              status,
+              isDelete,
+              isAdmin,
+              is_super_admin,
+              is_black,
+              role_id,
+              type_id,
+              start_time,
+              end_time,
+              last_login_start,
+              last_login_end
+            } = filters
+            if (user_name) {
+              qb = qb.where('user_name', 'like', `%${user_name}%`)
+            }
+            if (nick_name) {
+              qb = qb.where('nick_name', 'like', `%${nick_name}%`)
+            }
+            if (real_name) {
+              qb = qb.where('real_name', 'like', `%${real_name}%`)
+            }
+            if (email) {
+              qb = qb.where('email', 'like', `%${email}%`)
+            }
+            if (phone) {
+              qb = qb.where('phone', 'like', `%${phone}%`)
+            }
+            if (status) {
+              qb = qb.where('status', '=', status)
+            }
+            if (isDelete) {
+              qb = qb.where('is_delete', '=', isDelete)
+            } else {
+              qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+            }
+            if (isAdmin) {
+              qb = qb.where('is_admin', '=', isAdmin)
+            }
+            if (is_super_admin) {
+              qb = qb.where('is_super_admin', '=', is_super_admin)
+            }
+            if (is_black) {
+              qb = qb.where('is_black', '=', is_black)
+            }
+            if (role_id) {
+              qb = qb.where('role_id', '=', role_id)
+            }
+            if (type_id) {
+              qb = qb.where('type_id', '=', type_id)
+            }
+            if (start_time) {
+              qb = qb.where('create_time', '>=', start_time)
+            }
+            if (end_time) {
+              qb = qb.where('create_time', '<=', end_time)
+            }
+            if (last_login_start) {
+              qb = qb.where('last_login_time', '>=', last_login_start)
+            }
+            if (last_login_end) {
+              qb = qb.where('last_login_time', '<=', last_login_end)
+            }
           } else {
             qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
-          }
-          if (isAdmin !== undefined) {
-            qb = qb.where('is_admin', '=', isAdmin)
-          }
-          if (role_id !== undefined) {
-            qb = qb.where('role_id', '=', role_id)
           }
           return qb
         })
         .executeTakeFirst()
     ])
-
     // Transform users data to include role information
     const usersWithRoles = users.map((user) => {
       const { password: _, ...userWithoutPassword } = user
@@ -224,7 +365,6 @@ export class UserService {
             : null
       }
     })
-
     return {
       dataList: usersWithRoles,
       pagination: {

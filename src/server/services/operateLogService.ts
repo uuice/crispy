@@ -13,10 +13,11 @@ export type UpdateOperateLogData = Partial<CreateOperateLogData>
 
 export interface OperateLogFilters {
   code?: string
-  typeId?: number
-  userId?: number
-  startTime?: number
-  endTime?: number
+  content?: string
+  type_id?: number
+  user_id?: number
+  start_time?: number
+  end_time?: number
 }
 
 export interface OperateLogPaginationParams {
@@ -77,17 +78,20 @@ export class OperateLogService {
       if (filters.code) {
         query = query.where('code', 'like', `%${filters.code}%`)
       }
-      if (filters.typeId !== undefined) {
-        query = query.where('type_id', '=', filters.typeId)
+      if (filters.content) {
+        query = query.where('content', 'like', `%${filters.content}%`)
       }
-      if (filters.userId !== undefined) {
-        query = query.where('user_id', '=', filters.userId)
+      if (filters.type_id) {
+        query = query.where('type_id', '=', filters.type_id)
       }
-      if (filters.startTime) {
-        query = query.where('create_time', '>=', filters.startTime)
+      if (filters.user_id) {
+        query = query.where('user_id', '=', filters.user_id)
       }
-      if (filters.endTime) {
-        query = query.where('create_time', '<=', filters.endTime)
+      if (filters.start_time) {
+        query = query.where('create_time', '>=', filters.start_time)
+      }
+      if (filters.end_time) {
+        query = query.where('create_time', '<=', filters.end_time)
       }
     }
 

@@ -115,7 +115,7 @@ import { AttrDetailComponent, SpecialTag } from './attr-detail.component'
             <th>别名</th>
             <th>状态</th>
             <th>排序</th>
-            <th>备注</th>
+            <th>创建时间</th>
             <th alignFrozen="right" pFrozenColumn [frozen]="true">操作</th>
           </tr>
         </ng-template>
@@ -130,7 +130,7 @@ import { AttrDetailComponent, SpecialTag } from './attr-detail.component'
               ></p-tag>
             </td>
             <td>{{ rowData.sort }}</td>
-            <td>{{ rowData.remark }}</td>
+            <td>{{ rowData.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
             <td alignFrozen="right" pFrozenColumn [frozen]="true">
               <div class="action-buttons">
                 <p-button
@@ -152,7 +152,7 @@ import { AttrDetailComponent, SpecialTag } from './attr-detail.component'
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="text-center">暂无特殊标签数据</td>
+            <td colspan="6" class="text-center">暂无特殊标签数据</td>
           </tr>
         </ng-template>
       </p-table>

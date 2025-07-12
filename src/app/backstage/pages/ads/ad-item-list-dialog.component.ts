@@ -1,4 +1,12 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core'
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  signal,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { DialogModule } from 'primeng/dialog'
 import { TableModule } from 'primeng/table'
@@ -41,13 +49,13 @@ interface AdItem {
     >
       <div class="dialog-content">
         <p-table
-          [value]="adItems"
+          [value]="adItems()"
           [paginator]="true"
           [rows]="10"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 条广告项"
           [rowsPerPageOptions]="[10, 20, 50]"
-          [loading]="loading"
+          [loading]="loading()"
           styleClass="p-datatable-sm"
         >
           <ng-template pTemplate="header">
@@ -136,21 +144,22 @@ interface AdItem {
     <!-- Image preview dialog -->
     <p-dialog
       header="图片预览"
-      [(visible)]="imagePreviewVisible"
+      [visible]="imagePreviewVisible()"
+      (visibleChange)="imagePreviewVisible.set($event)"
       [modal]="true"
       [style]="{ width: 'auto', maxWidth: '80vw' }"
       [draggable]="false"
       [resizable]="false"
     >
       <div class="image-preview-container">
-        <img [src]="previewImageUrl" alt="预览图片" class="preview-image" />
+        <img [src]="previewImageUrl()" alt="预览图片" class="preview-image" />
       </div>
       <ng-template pTemplate="footer">
         <div class="flex justify-content-end">
           <p-button
             label="关闭"
             icon="pi pi-times"
-            (click)="imagePreviewVisible = false"
+            (click)="imagePreviewVisible.set(false)"
             styleClass="p-button-text"
           ></p-button>
         </div>
@@ -220,10 +229,10 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
   @Input() adId: number = 0
   @Input() visible: boolean = false
 
-  adItems: AdItem[] = []
-  loading = false
-  imagePreviewVisible = false
-  previewImageUrl = ''
+  adItems: WritableSignal<AdItem[]> = signal<AdItem[]>([])
+  loading = signal(false)
+  imagePreviewVisible = signal(false)
+  previewImageUrl = signal('')
 
   constructor(
     private httpService: HttpService,
@@ -243,24 +252,24 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
   }
 
   loadAdItems() {
-    this.loading = true
+    this.loading.set(true)
     this.httpService.get<any>('/api/admin/ad-items', { ad_id: this.adId }).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          this.adItems = res.data.dataList || []
+          this.adItems.set(res.data.dataList || [])
         } else {
-          this.adItems = []
+          this.adItems.set([])
           this.messageService.add({
             severity: 'warn',
             summary: '提示',
             detail: res.message || '暂无广告项数据'
           })
         }
-        this.loading = false
+        this.loading.set(false)
       },
       error: (error) => {
-        this.adItems = []
-        this.loading = false
+        this.adItems.set([])
+        this.loading.set(false)
         this.messageService.add({
           severity: 'error',
           summary: '错误',
@@ -273,7 +282,7 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
 
   onClose() {
     this.visible = false
-    this.adItems = []
+    this.adItems.set([])
   }
 
   getImageList(imageUrl: string): string[] {
@@ -285,8 +294,8 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
   }
 
   previewImage(imageUrl: string) {
-    this.previewImageUrl = imageUrl
-    this.imagePreviewVisible = true
+    this.previewImageUrl.set(imageUrl)
+    this.imagePreviewVisible.set(true)
   }
 
   getMethodSeverity(method: string): string {
