@@ -113,7 +113,7 @@ interface Dependency {
   ]
 })
 export class SystemPage implements OnInit {
-  systemInfo = signal<SystemInfo[]>([])
+  systemInfo = signal<[]>([])
   prodDependencies = signal<Dependency[]>([])
   devDependencies = signal<Dependency[]>([])
   loading = signal(false)

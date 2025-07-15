@@ -27,6 +27,7 @@ import { voteItemController } from './vote-items'
 import { AccessTokenService } from '../../services/accessToken.Service'
 import { accessTokenController } from './access-token'
 import { error } from '../../utils/response'
+import { systemRouterController } from './system'
 
 // Define token info interface
 interface TokenInfo {
@@ -204,5 +205,7 @@ router.get('/vote-items/:id', voteItemController.getVoteItem)
 router.get('/access-token', accessTokenController.getAccessTokens)
 router.get('/access-token/:id', accessTokenController.getAccessToken)
 router.post('/access-token/check', accessTokenController.checkAccessToken)
+
+router.get('/system/getSystemInfo', systemRouterController.getSystemInfo)
 
 export default router
