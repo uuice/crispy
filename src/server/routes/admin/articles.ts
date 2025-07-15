@@ -6,20 +6,25 @@ import { articleService } from '../../services/articleService'
 // Validation schemas
 const createArticleSchema = z.object({
   title: z.string().min(1),
+  sub_title: z.string().optional(),
   url: z.string().optional(),
   content: z.string().min(1),
-  summary: z.string().optional(),
-  cover_image: z.string().optional(),
-  author: z.string().optional(),
-  source: z.string().optional(),
-  source_url: z.string().optional(),
-  tags: z.string().optional(), // Comma-separated tags
+  abstract: z.string().optional(),
+  image: z.string().optional(),
+  image_list: z.string().optional(),
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  seo_keywords: z.string().optional(),
+  remark: z.string().optional(),
+  user_id: z.number().optional(),
+  tags: z.string().optional(),
   type_id: z.number().optional(),
+  type_ids: z.string().optional(),
   status: z.number().default(10), // 10: draft, 20: published
   sort: z.number().default(0),
-  click: z.number().default(0)
-  // like_count: z.number().default(0),
-  // comment_count: z.number().default(0)
+  click: z.number().default(0),
+  attrs: z.string().optional(),
+  is_review: z.number().default(-10)
 })
 
 const updateArticleSchema = createArticleSchema.partial()

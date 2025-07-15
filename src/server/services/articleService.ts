@@ -6,19 +6,24 @@ import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 export interface CreateArticleData {
   title: string
   url?: string
+  sub_title?: string
+  abstract?: string
   content: string
-  summary?: string
-  cover_image?: string
-  author?: string
-  source?: string
-  source_url?: string
-  tags?: string // Comma-separated tags
+  image?: string
+  image_list?: string
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string
+  remark?: string
+  user_id?: number
+  tags?: string
   type_id?: number
+  type_ids?: string
   status?: number // 10: draft, 20: published
   sort?: number
   click?: number
-  // like_count?: number
-  // comment_count?: number
+  attrs?: string
+  is_review?: number
 }
 
 export type UpdateArticleData = Partial<CreateArticleData>
