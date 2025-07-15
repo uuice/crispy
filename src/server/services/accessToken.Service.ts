@@ -161,11 +161,11 @@ export class AccessTokenService {
       query = query.where('channel', 'like', `%${channel}%`)
     }
 
-    if (status) {
+    if (status !== undefined) {
       query = query.where('status', '=', status)
     }
 
-    if (user_id) {
+    if (user_id !== undefined) {
       query = query.where('user_id', '=', user_id)
     }
 
@@ -185,10 +185,10 @@ export class AccessTokenService {
           if (channel) {
             qb = qb.where('channel', 'like', `%${channel}%`)
           }
-          if (status) {
+          if (status !== undefined) {
             qb = qb.where('status', '=', status)
           }
-          if (user_id) {
+          if (user_id !== undefined) {
             qb = qb.where('user_id', '=', user_id)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)

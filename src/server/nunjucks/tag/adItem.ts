@@ -17,20 +17,30 @@ export function AdItems(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const adId = args.ad_id
     const limit = args.limit || 10
+    const page = args.page || 1
+    const pageSize = args.page_size || limit
 
-    let adItems
-    if (adId) {
-      adItems = await adItemService.getAdItemsByAdId(adId)
-    } else {
-      const result = await adItemService.getAdItems({ page: 1, pageSize: limit })
-      adItems = result.dataList
-    }
+    // Build filters object from args
+    const filters: any = {}
 
-    context.ctx.adItems = adItems
-    const result = new nunjucks.runtime.SafeString(body())
-    return callback(null, result)
+    // Basic filters
+    if (args.ad_id !== undefined) filters.ad_id = args.ad_id
+    if (args.title) filters.title = args.title
+    if (args.content) filters.content = args.content
+    if (args.image_url) filters.image_url = args.image_url
+    if (args.url) filters.url = args.url
+    if (args.method) filters.method = args.method
+    if (args.status !== undefined) filters.status = args.status
+
+    // Use the enhanced getAdItems method with filters
+    const result = await adItemService.getAdItems({ page, pageSize }, filters)
+
+    context.ctx.adItems = result.dataList
+    context.ctx.adItems_pagination = result.pagination
+
+    const resultHtml = new nunjucks.runtime.SafeString(body())
+    return callback(null, resultHtml)
   }
 }
 
@@ -48,11 +58,24 @@ export function AdItemSingle(): void {
   }
   this.run = async function (context: any, args: any, callback: any) {
     const id = args.id
-    if (!id) {
+    const title = args.title
+    const ad_id = args.ad_id
+
+    if (!id && !title) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const adItem = await adItemService.getAdItemById(id)
+    let adItem
+    if (id) {
+      adItem = await adItemService.getAdItemById(id)
+    } else if (title) {
+      // Note: adItemService doesn't have getAdItemByTitle method, so we'll use getAdItems with title filter
+      const filters: any = { title }
+      if (ad_id !== undefined) filters.ad_id = ad_id
+      const result = await adItemService.getAdItems({ page: 1, pageSize: 1 }, filters)
+      adItem = result.dataList[0] || null
+    }
+
     const result = new nunjucks.runtime.SafeString(adItem ? JSON.stringify(adItem) : '')
     return callback(null, result)
   }

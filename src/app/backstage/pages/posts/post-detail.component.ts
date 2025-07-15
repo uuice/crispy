@@ -499,7 +499,8 @@ export class PostDetailComponent implements OnInit {
         [{ font: [] }],
         [{ align: [] }],
         ['clean'],
-        ['link', 'image', 'video']
+        ['link', 'image', 'video'],
+        ['table']
       ],
       handlers: {
         image: () => {

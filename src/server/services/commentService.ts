@@ -98,41 +98,41 @@ export class CommentService {
     if (filters.title) {
       query = query.where('c.title', 'like', `%${filters.title}%`)
     }
-    if (filters.user_id) {
+    if (filters.user_id !== undefined) {
       query = query.where('c.user_id', '=', filters.user_id)
     }
-    if (filters.parent_id) {
+    if (filters.parent_id !== undefined) {
       if (filters.parent_id === null) {
         query = query.where('c.parent_id', 'is', null)
       } else {
         query = query.where('c.parent_id', '=', filters.parent_id)
       }
     }
-    if (filters.status) {
+    if (filters.status !== undefined) {
       query = query.where('c.status', '=', filters.status)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where('c.create_time', '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where('c.create_time', '<=', filters.end_time)
     }
-    if (filters.good_article_min && !isNaN(filters.good_article_min)) {
+    if (filters.good_article_min !== undefined && !isNaN(filters.good_article_min)) {
       query = query.where('c.good_article', '>=', filters.good_article_min)
     }
-    if (filters.good_article_max && !isNaN(filters.good_article_max)) {
+    if (filters.good_article_max !== undefined && !isNaN(filters.good_article_max)) {
       query = query.where('c.good_article', '<=', filters.good_article_max)
     }
-    if (filters.bad_article_min && !isNaN(filters.bad_article_min)) {
+    if (filters.bad_article_min !== undefined && !isNaN(filters.bad_article_min)) {
       query = query.where('c.bad_article', '>=', filters.bad_article_min)
     }
-    if (filters.bad_article_max && !isNaN(filters.bad_article_max)) {
+    if (filters.bad_article_max !== undefined && !isNaN(filters.bad_article_max)) {
       query = query.where('c.bad_article', '<=', filters.bad_article_max)
     }
-    if (filters.not_article_min && !isNaN(filters.not_article_min)) {
+    if (filters.not_article_min !== undefined && !isNaN(filters.not_article_min)) {
       query = query.where('c.not_article', '>=', filters.not_article_min)
     }
-    if (filters.not_article_max && !isNaN(filters.not_article_max)) {
+    if (filters.not_article_max !== undefined && !isNaN(filters.not_article_max)) {
       query = query.where('c.not_article', '<=', filters.not_article_max)
     }
     if (filters.has_parent === true) {

@@ -1,6 +1,6 @@
 /**
  * JOBS 模块 Swagger 文档
- * 
+ *
  * 此文件包含 jobs 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -27,6 +27,96 @@
  *           type: integer
  *           default: 10
  *         description: 每页数量
+ *       - in: query
+ *         name: title
+ *         schema:
+ *           type: string
+ *         description: 职位名称（模糊搜索）
+ *       - in: query
+ *         name: typeName
+ *         schema:
+ *           type: string
+ *         description: 职位类别（模糊搜索）
+ *       - in: query
+ *         name: nature
+ *         schema:
+ *           type: string
+ *         description: 工作性质（模糊搜索）
+ *       - in: query
+ *         name: branch
+ *         schema:
+ *           type: string
+ *         description: 所在部门（模糊搜索）
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *         description: 工作地址（模糊搜索）
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: 简历发送邮箱（模糊搜索）
+ *       - in: query
+ *         name: content
+ *         schema:
+ *           type: string
+ *         description: 招聘信息（模糊搜索）
+ *       - in: query
+ *         name: num
+ *         schema:
+ *           type: integer
+ *         description: 招聘人数
+ *       - in: query
+ *         name: num_min
+ *         schema:
+ *           type: integer
+ *         description: 最小招聘人数
+ *       - in: query
+ *         name: num_max
+ *         schema:
+ *           type: integer
+ *         description: 最大招聘人数
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: integer
+ *         description: 排序值
+ *       - in: query
+ *         name: sort_min
+ *         schema:
+ *           type: integer
+ *         description: 最小排序值
+ *       - in: query
+ *         name: sort_max
+ *         schema:
+ *           type: integer
+ *         description: 最大排序值
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
+ *       - in: query
+ *         name: start_time
+ *         schema:
+ *           type: integer
+ *         description: 开始时间戳
+ *       - in: query
+ *         name: end_time
+ *         schema:
+ *           type: integer
+ *         description: 结束时间戳
  *     responses:
  *       200:
  *         description: 获取成功

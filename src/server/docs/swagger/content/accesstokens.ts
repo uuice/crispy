@@ -1,6 +1,6 @@
 /**
  * ACCESS TOKEN ROUTES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 access token routes 相关的所有 API 文档
  * 自动生成
  */
@@ -30,10 +30,30 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: app_name
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: 应用名称（模糊搜索）
+ *       - in: query
+ *         name: channel
+ *         schema:
+ *           type: string
+ *         description: 渠道名称（模糊搜索）
+ *       - in: query
+ *         name: token
+ *         schema:
+ *           type: string
+ *         description: Token值（模糊搜索）
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 状态
+ *       - in: query
+ *         name: user_id
+ *         schema:
+ *           type: integer
+ *         description: 用户ID
  *     responses:
  *       200:
  *         description: 操作成功

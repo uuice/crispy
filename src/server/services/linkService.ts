@@ -112,22 +112,22 @@ export class LinkService {
       if (filters.method) {
         query = query.where('links.method', '=', filters.method)
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         query = query.where('links.status', '=', filters.status)
       }
-      if (filters.type_id) {
+      if (filters.type_id !== undefined) {
         query = query.where('links.type_id', '=', filters.type_id)
       }
-      if (filters.sort_min && !isNaN(filters.sort_min)) {
+      if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
         query = query.where('links.sort', '>=', filters.sort_min)
       }
-      if (filters.sort_max && !isNaN(filters.sort_max)) {
+      if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
         query = query.where('links.sort', '<=', filters.sort_max)
       }
-      if (filters.startTime) {
+      if (filters.startTime !== undefined) {
         query = query.where('links.create_time', '>=', filters.startTime)
       }
-      if (filters.endTime) {
+      if (filters.endTime !== undefined) {
         query = query.where('links.create_time', '<=', filters.endTime)
       }
     }

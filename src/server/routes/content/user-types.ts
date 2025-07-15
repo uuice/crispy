@@ -42,14 +42,20 @@ export const getUserTypes = async (
       type_name: req.query['type_name'] as string | undefined,
       alias: req.query['alias'] as string | undefined,
       remark: req.query['remark'] as string | undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined
     }
     const result = await userTypeService.getUserTypes({ page, pageSize }, filters)
     success(res, result)

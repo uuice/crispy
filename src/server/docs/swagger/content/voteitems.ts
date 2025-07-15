@@ -1,6 +1,6 @@
 /**
  * VOTE ITEM ROUTES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 vote item routes 相关的所有 API 文档
  * 自动生成
  */
@@ -30,10 +30,35 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: title
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: Vote item title (fuzzy search)
+ *       - in: query
+ *         name: vote_id
+ *         schema:
+ *           type: integer
+ *         description: Vote ID filter
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: Status filter
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: Deletion status
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: Update timestamp
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: Creation timestamp
  *     responses:
  *       200:
  *         description: 操作成功

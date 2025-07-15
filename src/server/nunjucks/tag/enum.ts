@@ -17,23 +17,32 @@ export function Enums(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const code = args.code
-    const status = args.status || 10 // 默认获取激活状态的枚举
     const limit = args.limit || 10
+    const page = args.page || 1
+    const pageSize = args.page_size || limit
 
-    let enums
-    if (code) {
-      enums = await enumService.getEnumsByCode(code, limit)
-    } else if (status) {
-      enums = await enumService.getEnumsByStatus(status, limit)
-    } else {
-      enums = await enumService.getAllActiveEnums()
-      enums = enums.slice(0, limit)
-    }
+    // Build filters object from args
+    const filters: any = {}
 
-    context.ctx.enums = enums
-    const result = new nunjucks.runtime.SafeString(body())
-    return callback(null, result)
+    // Search filters - 字符串，空字符串通常不是有效值
+    if (args.title) filters.title = args.title
+    if (args.alias) filters.alias = args.alias
+    if (args.code) filters.code = args.code
+    // 需要 !== undefined 因为可能包含 0 等 falsy 值
+    if (args.status !== undefined) filters.status = args.status
+
+    // Date filters - 时间戳，0 是有效值
+    if (args.start_time !== undefined) filters.start_time = args.start_time
+    if (args.end_time !== undefined) filters.end_time = args.end_time
+
+    // Use the enhanced getEnums method with filters
+    const result = await enumService.getEnums(filters, { page, pageSize })
+
+    context.ctx.enums = result.dataList
+    context.ctx.enums_pagination = result.pagination
+
+    const resultHtml = new nunjucks.runtime.SafeString(body())
+    return callback(null, resultHtml)
   }
 }
 
@@ -49,17 +58,13 @@ export function EnumItem(): void {
     parser.advanceAfterBlockEnd(tok.value)
     return new nodes.CallExtensionAsync(this, 'run', args)
   }
-  this.run = async function (context: any, args: any, callback: any) {
+  this.run = async function (_context: any, args: any, callback: any) {
     const id = args.id
-    const alias = args.alias
-
-    let enumItem
-    if (id) {
-      enumItem = await enumService.getEnumById(id)
-    } else if (alias) {
-      enumItem = await enumService.getEnumByAlias(alias)
+    if (!id) {
+      return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
+    const enumItem = await enumService.getEnumById(id)
     const result = new nunjucks.runtime.SafeString(enumItem ? JSON.stringify(enumItem) : '')
     return callback(null, result)
   }

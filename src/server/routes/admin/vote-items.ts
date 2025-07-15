@@ -54,12 +54,16 @@ export const getVoteItems = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-
     const filters = {
       title: req.query['title'] as string | undefined,
-      vote_id: req.query['vote_id'] ? parseInt(req.query['vote_id'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      vote_id:
+        req.query['vote_id'] !== undefined ? parseInt(req.query['vote_id'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
       update_time: req.query['update_time']
         ? parseInt(req.query['update_time'] as string)
         : undefined,

@@ -44,21 +44,29 @@ export const getNotices = async (
     const filters = {
       title: req.query['title'] as string | undefined,
       content: req.query['content'] as string | undefined,
-      from_user_id: req.query['from_user_id']
-        ? parseInt(req.query['from_user_id'] as string)
-        : undefined,
+      from_user_id:
+        req.query['from_user_id'] !== undefined
+          ? parseInt(req.query['from_user_id'] as string)
+          : undefined,
       tolds: req.query['tolds'] as string | undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      publish_time: req.query['publish_time']
-        ? parseInt(req.query['publish_time'] as string)
-        : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      publish_time:
+        req.query['publish_time'] !== undefined
+          ? parseInt(req.query['publish_time'] as string)
+          : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined
     }
     const result = await noticeService.getNotices({ page, pageSize }, filters)
     success(res, result)

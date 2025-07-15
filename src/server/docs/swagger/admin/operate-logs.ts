@@ -1,6 +1,6 @@
 /**
  * OPERATE-LOGS 模块 Swagger 文档
- * 
+ *
  * 此文件包含 operate-logs 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -28,15 +28,40 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: user_id
+ *         name: code
  *         schema:
- *           type: integer
- *         description: 用户ID
+ *           type: string
+ *         description: 操作代码（模糊搜索）
+ *       - in: query
+ *         name: content
+ *         schema:
+ *           type: string
+ *         description: 操作内容（模糊搜索）
  *       - in: query
  *         name: type_id
  *         schema:
  *           type: integer
  *         description: 操作类型ID
+ *       - in: query
+ *         name: user_id
+ *         schema:
+ *           type: integer
+ *         description: 用户ID
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
  *     responses:
  *       200:
  *         description: 获取成功

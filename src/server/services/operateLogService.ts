@@ -81,16 +81,16 @@ export class OperateLogService {
       if (filters.content) {
         query = query.where('content', 'like', `%${filters.content}%`)
       }
-      if (filters.type_id) {
+      if (filters.type_id !== undefined) {
         query = query.where('type_id', '=', filters.type_id)
       }
-      if (filters.user_id) {
+      if (filters.user_id !== undefined) {
         query = query.where('user_id', '=', filters.user_id)
       }
-      if (filters.start_time) {
+      if (filters.start_time !== undefined) {
         query = query.where('create_time', '>=', filters.start_time)
       }
-      if (filters.end_time) {
+      if (filters.end_time !== undefined) {
         query = query.where('create_time', '<=', filters.end_time)
       }
     }

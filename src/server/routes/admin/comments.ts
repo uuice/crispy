@@ -61,9 +61,14 @@ export const getComments = async (
     const filters = {
       title: req.query['title'] as string | undefined,
       content: req.query['content'] as string | undefined,
-      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
-      parent_id: req.query['parent_id'] ? parseInt(req.query['parent_id'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      user_id:
+        req.query['user_id'] !== undefined ? parseInt(req.query['user_id'] as string) : undefined,
+      parent_id:
+        req.query['parent_id'] !== undefined
+          ? parseInt(req.query['parent_id'] as string)
+          : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
       good_article: req.query['good_article']
         ? parseInt(req.query['good_article'] as string)
         : undefined,
@@ -73,15 +78,22 @@ export const getComments = async (
       not_article: req.query['not_article']
         ? parseInt(req.query['not_article'] as string)
         : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
       update_time: req.query['update_time']
         ? parseInt(req.query['update_time'] as string)
         : undefined,
       create_time: req.query['create_time']
         ? parseInt(req.query['create_time'] as string)
         : undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      start_time:
+        req.query['start_time'] !== undefined
+          ? parseInt(req.query['start_time'] as string)
+          : undefined,
+      end_time:
+        req.query['end_time'] !== undefined ? parseInt(req.query['end_time'] as string) : undefined
     }
     const result = await commentService.getComments({ page, pageSize }, filters)
     success(res, result)

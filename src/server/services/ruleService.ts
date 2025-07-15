@@ -113,16 +113,16 @@ export class RuleService {
     if (filters.alias) {
       query = query.where('alias', 'like', `%${filters.alias}%`)
     }
-    if (filters.module_id) {
+    if (filters.module_id !== undefined) {
       query = query.where('module_id', '=', filters.module_id)
     }
-    if (filters.parent_id) {
+    if (filters.parent_id !== undefined) {
       query = query.where('parent_id', '=', filters.parent_id)
     }
-    if (filters.type_id) {
+    if (filters.type_id !== undefined) {
       query = query.where('type_id', '=', filters.type_id)
     }
-    if (filters.status) {
+    if (filters.status !== undefined) {
       query = query.where('status', '=', filters.status)
     }
 

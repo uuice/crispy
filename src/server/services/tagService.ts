@@ -74,6 +74,24 @@ export class TagService {
     return tag
   }
 
+  // /**
+  //  * Get a single tag by alias
+  //  */
+  // async getTagByAlias(alias: string): Promise<any> {
+  //   const tag = await db
+  //     .selectFrom('tags')
+  //     .selectAll()
+  //     .where('alias', '=', alias)
+  //     .where('is_delete', '=', 0)
+  //     .executeTakeFirst()
+
+  //   if (!tag) {
+  //     throw new Error('Tag not found')
+  //   }
+
+  //   return tag
+  // }
+
   /**
    * Get tags list with pagination and filters
    */
@@ -96,22 +114,22 @@ export class TagService {
     if (filters.value) {
       query = query.where('value', 'like', `%${filters.value}%`)
     }
-    if (filters.type_id) {
+    if (filters.type_id !== undefined) {
       query = query.where('type_id', '=', filters.type_id)
     }
-    if (filters.status) {
+    if (filters.status !== undefined) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters.sort_min && !isNaN(filters.sort_min)) {
+    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
       query = query.where('sort', '>=', filters.sort_min)
     }
-    if (filters.sort_max && !isNaN(filters.sort_max)) {
+    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
       query = query.where('sort', '<=', filters.sort_max)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where('create_time', '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where('create_time', '<=', filters.end_time)
     }
 

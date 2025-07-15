@@ -1,6 +1,6 @@
 /**
  * ADDITION ROUTES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 addition routes 相关的所有 API 文档
  * 自动生成
  */
@@ -30,10 +30,35 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: fields_json
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: JSON字段内容（模糊搜索）
+ *       - in: query
+ *         name: primary_id
+ *         schema:
+ *           type: integer
+ *         description: 主表ID
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 状态
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
  *     responses:
  *       200:
  *         description: 操作成功

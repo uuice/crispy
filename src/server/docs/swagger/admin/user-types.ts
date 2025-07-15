@@ -1,6 +1,6 @@
 /**
  * USER-TYPES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 user-types 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -28,10 +28,40 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: type_name
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: User type name (fuzzy search)
+ *       - in: query
+ *         name: alias
+ *         schema:
+ *           type: string
+ *         description: User type alias (fuzzy search)
+ *       - in: query
+ *         name: remark
+ *         schema:
+ *           type: string
+ *         description: User type remark (fuzzy search)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: User type status
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: Deletion status
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: Update timestamp
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: Creation timestamp
  *     responses:
  *       200:
  *         description: 获取成功

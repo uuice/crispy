@@ -86,7 +86,7 @@ export class AdItemService {
     let query = db.selectFrom('ad_items').selectAll().where('is_delete', '=', 0)
 
     // Add ad_id filter if provided
-    if (filters?.ad_id) {
+    if (filters?.ad_id !== undefined) {
       query = query.where('ad_id', '=', filters.ad_id)
     }
 
@@ -110,7 +110,7 @@ export class AdItemService {
       query = query.where('method', '=', filters.method)
     }
 
-    if (filters?.status) {
+    if (filters?.status !== undefined) {
       query = query.where('status', '=', filters.status)
     }
 

@@ -40,17 +40,26 @@ export const getJobs = async (req: Request, res: Response, next: NextFunction): 
       address: req.query['address'] as string | undefined,
       email: req.query['email'] as string | undefined,
       content: req.query['content'] as string | undefined,
-      num: req.query['num'] ? parseInt(req.query['num'] as string) : undefined,
-      sort: req.query['sort'] ? parseInt(req.query['sort'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      num: req.query['num'] !== undefined ? parseInt(req.query['num'] as string) : undefined,
+      sort: req.query['sort'] !== undefined ? parseInt(req.query['sort'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined,
+      start_time:
+        req.query['start_time'] !== undefined
+          ? parseInt(req.query['start_time'] as string)
+          : undefined,
+      end_time:
+        req.query['end_time'] !== undefined ? parseInt(req.query['end_time'] as string) : undefined
     }
     const result = await jobService.getJobs(filters, { page, pageSize })
     success(res, result)

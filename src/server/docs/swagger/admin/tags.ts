@@ -1,6 +1,6 @@
 /**
  * TAGS 模块 Swagger 文档
- * 
+ *
  * 此文件包含 tags 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -28,10 +28,65 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: title
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: 标签标题（模糊搜索）
+ *       - in: query
+ *         name: alias
+ *         schema:
+ *           type: string
+ *         description: 标签别名（模糊搜索）
+ *       - in: query
+ *         name: des
+ *         schema:
+ *           type: string
+ *         description: 标签描述（模糊搜索）
+ *       - in: query
+ *         name: value
+ *         schema:
+ *           type: string
+ *         description: 标签值（模糊搜索）
+ *       - in: query
+ *         name: type_id
+ *         schema:
+ *           type: integer
+ *         description: 标签类型ID
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 标签状态
+ *       - in: query
+ *         name: sort_min
+ *         schema:
+ *           type: integer
+ *         description: 排序最小值
+ *       - in: query
+ *         name: sort_max
+ *         schema:
+ *           type: integer
+ *         description: 排序最大值
+ *       - in: query
+ *         name: start_time
+ *         schema:
+ *           type: integer
+ *         description: 开始时间戳
+ *       - in: query
+ *         name: end_time
+ *         schema:
+ *           type: integer
+ *         description: 结束时间戳
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
  *     responses:
  *       200:
  *         description: 获取成功

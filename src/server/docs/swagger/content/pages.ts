@@ -1,6 +1,6 @@
 /**
  * PAGE ROUTES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 page routes 相关的所有 API 文档
  * 自动生成
  */
@@ -30,10 +30,105 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: title
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: 页面标题（模糊搜索）
+ *       - in: query
+ *         name: alias
+ *         schema:
+ *           type: string
+ *         description: 页面别名（模糊搜索）
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 状态 (0-草稿, 1-已发布, 2-已下架)
+ *       - in: query
+ *         name: type_id
+ *         schema:
+ *           type: integer
+ *         description: 分类ID
+ *       - in: query
+ *         name: author_id
+ *         schema:
+ *           type: integer
+ *         description: 作者ID
+ *       - in: query
+ *         name: user_id
+ *         schema:
+ *           type: integer
+ *         description: 用户ID
+ *       - in: query
+ *         name: url
+ *         schema:
+ *           type: string
+ *         description: URL（模糊搜索）
+ *       - in: query
+ *         name: remark
+ *         schema:
+ *           type: string
+ *         description: 备注（模糊搜索）
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         description: 标签（模糊搜索）
+ *       - in: query
+ *         name: seo_title
+ *         schema:
+ *           type: string
+ *         description: SEO标题（模糊搜索）
+ *       - in: query
+ *         name: seo_description
+ *         schema:
+ *           type: string
+ *         description: SEO描述（模糊搜索）
+ *       - in: query
+ *         name: seo_keywords
+ *         schema:
+ *           type: string
+ *         description: SEO关键词（模糊搜索）
+ *       - in: query
+ *         name: sub_title
+ *         schema:
+ *           type: string
+ *         description: 副标题（模糊搜索）
+ *       - in: query
+ *         name: abstract
+ *         schema:
+ *           type: string
+ *         description: 摘要（模糊搜索）
+ *       - in: query
+ *         name: image_list
+ *         schema:
+ *           type: string
+ *         description: 图片列表（模糊搜索）
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 是否删除 (0-未删除, 1-已删除)
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间（时间戳）
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间（时间戳）
+ *       - in: query
+ *         name: start_time
+ *         schema:
+ *           type: integer
+ *         description: 开始时间（时间戳）
+ *       - in: query
+ *         name: end_time
+ *         schema:
+ *           type: integer
+ *         description: 结束时间（时间戳）
  *     responses:
  *       200:
  *         description: 操作成功

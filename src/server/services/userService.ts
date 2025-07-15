@@ -230,39 +230,39 @@ export class UserService {
       if (phone) {
         query = query.where('users.phone', 'like', `%${phone}%`)
       }
-      if (status) {
+      if (status !== undefined) {
         query = query.where('users.status', '=', status)
       }
-      if (isDelete) {
+      if (isDelete !== undefined) {
         query = query.where('users.is_delete', '=', isDelete)
       } else {
         query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
       }
-      if (isAdmin) {
+      if (isAdmin !== undefined) {
         query = query.where('users.is_admin', '=', isAdmin)
       }
-      if (is_super_admin) {
+      if (is_super_admin !== undefined) {
         query = query.where('users.is_super_admin', '=', is_super_admin)
       }
-      if (is_black) {
+      if (is_black !== undefined) {
         query = query.where('users.is_black', '=', is_black)
       }
-      if (role_id) {
+      if (role_id !== undefined) {
         query = query.where('users.role_id', '=', role_id)
       }
-      if (type_id) {
+      if (type_id !== undefined) {
         query = query.where('users.type_id', '=', type_id)
       }
-      if (start_time) {
+      if (start_time !== undefined) {
         query = query.where('users.create_time', '>=', start_time)
       }
-      if (end_time) {
+      if (end_time !== undefined) {
         query = query.where('users.create_time', '<=', end_time)
       }
-      if (last_login_start) {
+      if (last_login_start !== undefined) {
         query = query.where('users.last_login_time', '>=', last_login_start)
       }
-      if (last_login_end) {
+      if (last_login_end !== undefined) {
         query = query.where('users.last_login_time', '<=', last_login_end)
       }
     } else {
@@ -309,39 +309,39 @@ export class UserService {
             if (phone) {
               qb = qb.where('phone', 'like', `%${phone}%`)
             }
-            if (status) {
+            if (status !== undefined) {
               qb = qb.where('status', '=', status)
             }
-            if (isDelete) {
+            if (isDelete !== undefined) {
               qb = qb.where('is_delete', '=', isDelete)
             } else {
               qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
             }
-            if (isAdmin) {
+            if (isAdmin !== undefined) {
               qb = qb.where('is_admin', '=', isAdmin)
             }
-            if (is_super_admin) {
+            if (is_super_admin !== undefined) {
               qb = qb.where('is_super_admin', '=', is_super_admin)
             }
-            if (is_black) {
+            if (is_black !== undefined) {
               qb = qb.where('is_black', '=', is_black)
             }
-            if (role_id) {
+            if (role_id !== undefined) {
               qb = qb.where('role_id', '=', role_id)
             }
-            if (type_id) {
+            if (type_id !== undefined) {
               qb = qb.where('type_id', '=', type_id)
             }
-            if (start_time) {
+            if (start_time !== undefined) {
               qb = qb.where('create_time', '>=', start_time)
             }
-            if (end_time) {
+            if (end_time !== undefined) {
               qb = qb.where('create_time', '<=', end_time)
             }
-            if (last_login_start) {
+            if (last_login_start !== undefined) {
               qb = qb.where('last_login_time', '>=', last_login_start)
             }
-            if (last_login_end) {
+            if (last_login_end !== undefined) {
               qb = qb.where('last_login_time', '<=', last_login_end)
             }
           } else {

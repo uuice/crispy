@@ -17,22 +17,49 @@ export function Pages(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const status = args.status || 10 // 默认获取已发布的页面
-    const type_id = args.type_id
     const limit = args.limit || 10
+    const page = args.page || 1
+    const pageSize = args.page_size || limit
 
-    let pages
-    if (type_id || status) {
-      const result = await pageService.getPages({ page: 1, pageSize: limit }, { status, type_id })
-      pages = result.dataList
-    } else {
-      const result = await pageService.getPages({ page: 1, pageSize: limit })
-      pages = result.dataList
-    }
+    // Build filters object from args
+    const filters: any = {}
 
-    context.ctx.pages = pages
-    const result = new nunjucks.runtime.SafeString(body())
-    return callback(null, result)
+    // Search filters - 字符串，空字符串通常不是有效值
+    if (args.title) filters.title = args.title
+    if (args.alias) filters.alias = args.alias
+    if (args.sub_title) filters.sub_title = args.sub_title
+    if (args.abstract) filters.abstract = args.abstract
+    if (args.url) filters.url = args.url
+    // 需要 !== undefined 因为可能包含 0 等 falsy 值
+    if (args.status !== undefined) filters.status = args.status
+    if (args.type_id !== undefined) filters.type_id = args.type_id
+    if (args.author_id !== undefined) filters.author_id = args.author_id
+    if (args.user_id !== undefined) filters.user_id = args.user_id
+
+    // Range filters - 需要 !== undefined 因为可能包含 0
+    if (args.sort_min !== undefined) filters.sort_min = args.sort_min
+    if (args.sort_max !== undefined) filters.sort_max = args.sort_max
+    if (args.click_min !== undefined) filters.click_min = args.click_min
+    if (args.click_max !== undefined) filters.click_max = args.click_max
+
+    // Date filters - 时间戳，0 是有效值
+    if (args.start_time !== undefined) filters.startTime = args.start_time
+    if (args.end_time !== undefined) filters.endTime = args.end_time
+
+    // Boolean filters - 需要 !== undefined 因为 false 是有效值
+    if (args.has_image !== undefined)
+      filters.has_image = args.has_image === 'true' || args.has_image === true
+    if (args.has_tags !== undefined)
+      filters.has_tags = args.has_tags === 'true' || args.has_tags === true
+
+    // Use the enhanced getPages method with filters
+    const result = await pageService.getPages({ page, pageSize }, filters)
+
+    context.ctx.pages = result.dataList
+    context.ctx.pages_pagination = result.pagination
+
+    const resultHtml = new nunjucks.runtime.SafeString(body())
+    return callback(null, resultHtml)
   }
 }
 
@@ -51,6 +78,10 @@ export function PageItem(): void {
   this.run = async function (_context: any, args: any, callback: any) {
     const id = args.id
     const alias = args.alias
+
+    if (!id && !alias) {
+      return callback(null, new nunjucks.runtime.SafeString(''))
+    }
 
     let page
     if (id) {

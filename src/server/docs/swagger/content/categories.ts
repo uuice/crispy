@@ -1,6 +1,6 @@
 /**
  * CATEGORY ROUTES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 category routes 相关的所有 API 文档
  * 自动生成
  */
@@ -30,10 +30,50 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: title
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: 分类标题（模糊搜索）
+ *       - in: query
+ *         name: alias
+ *         schema:
+ *           type: string
+ *         description: 分类别名（模糊搜索）
+ *       - in: query
+ *         name: des
+ *         schema:
+ *           type: string
+ *         description: 分类描述（模糊搜索）
+ *       - in: query
+ *         name: parent_id
+ *         schema:
+ *           type: integer
+ *         description: 父分类ID
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 状态 (0-禁用, 1-启用)
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: integer
+ *         description: 排序
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 是否删除 (0-未删除, 1-已删除)
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间（时间戳）
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间（时间戳）
  *     responses:
  *       200:
  *         description: 操作成功

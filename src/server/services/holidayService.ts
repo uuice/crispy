@@ -62,10 +62,10 @@ export class HolidayService {
     if (filters.value) {
       query = query.where('value', 'like', `%${filters.value}%`)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where('create_time', '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where('create_time', '<=', filters.end_time)
     }
 

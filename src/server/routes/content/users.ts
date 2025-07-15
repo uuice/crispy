@@ -33,27 +33,43 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
       phone: req.query['phone'] as string | undefined,
       avatar_url: req.query['avatar_url'] as string | undefined,
       password: req.query['password'] as string | undefined,
-      role_id: req.query['role_id'] ? parseInt(req.query['role_id'] as string) : undefined,
-      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      isAdmin: req.query['is_admin'] ? parseInt(req.query['is_admin'] as string) : undefined,
-      is_super_admin: req.query['is_super_admin']
-        ? parseInt(req.query['is_super_admin'] as string)
-        : undefined,
-      is_black: req.query['is_black'] ? parseInt(req.query['is_black'] as string) : undefined,
-      isDelete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      role_id:
+        req.query['role_id'] !== undefined ? parseInt(req.query['role_id'] as string) : undefined,
+      type_id:
+        req.query['type_id'] !== undefined ? parseInt(req.query['type_id'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      isAdmin:
+        req.query['is_admin'] !== undefined ? parseInt(req.query['is_admin'] as string) : undefined,
+      is_super_admin:
+        req.query['is_super_admin'] !== undefined
+          ? parseInt(req.query['is_super_admin'] as string)
+          : undefined,
+      is_black:
+        req.query['is_black'] !== undefined ? parseInt(req.query['is_black'] as string) : undefined,
+      isDelete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
       last_login_ip: req.query['last_login_ip'] as string | undefined,
-      last_login_time: req.query['last_login_time']
-        ? parseInt(req.query['last_login_time'] as string)
-        : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      last_login_time:
+        req.query['last_login_time'] !== undefined
+          ? parseInt(req.query['last_login_time'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined,
+      start_time:
+        req.query['start_time'] !== undefined
+          ? parseInt(req.query['start_time'] as string)
+          : undefined,
+      end_time:
+        req.query['end_time'] !== undefined ? parseInt(req.query['end_time'] as string) : undefined
     }
     const result = await userService.getUsers({ page, pageSize }, filters)
     success(res, result)

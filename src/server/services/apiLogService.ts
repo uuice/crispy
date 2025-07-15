@@ -78,10 +78,10 @@ export class ApiLogService {
     if (filters.status_code !== undefined && !isNaN(filters.status_code)) {
       query = query.where(sql.ref('status_code'), '=', filters.status_code)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where(sql.ref('create_time'), '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where(sql.ref('create_time'), '<=', filters.end_time)
     }
 

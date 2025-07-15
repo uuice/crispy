@@ -1,6 +1,6 @@
 /**
  * ROLES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 roles 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -28,10 +28,75 @@
  *           default: 10
  *         description: 每页数量
  *       - in: query
- *         name: search
+ *         name: title
  *         schema:
  *           type: string
- *         description: 搜索关键词
+ *         description: 角色标题（模糊搜索）
+ *       - in: query
+ *         name: des
+ *         schema:
+ *           type: string
+ *         description: 角色描述（模糊搜索）
+ *       - in: query
+ *         name: module_id
+ *         schema:
+ *           type: integer
+ *         description: 模块ID
+ *       - in: query
+ *         name: rule_ids
+ *         schema:
+ *           type: string
+ *         description: 规则ID列表（模糊搜索）
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: integer
+ *         description: 排序值
+ *       - in: query
+ *         name: sort_min
+ *         schema:
+ *           type: integer
+ *         description: 最小排序值
+ *       - in: query
+ *         name: sort_max
+ *         schema:
+ *           type: integer
+ *         description: 最大排序值
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 角色状态
+ *       - in: query
+ *         name: type_id
+ *         schema:
+ *           type: integer
+ *         description: 角色类型ID
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
+ *       - in: query
+ *         name: start_time
+ *         schema:
+ *           type: integer
+ *         description: 开始时间戳
+ *       - in: query
+ *         name: end_time
+ *         schema:
+ *           type: integer
+ *         description: 结束时间戳
  *     responses:
  *       200:
  *         description: 获取成功

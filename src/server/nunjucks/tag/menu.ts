@@ -17,20 +17,32 @@ export function Menus(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const tree = args.tree === 'true' || args.tree === true
-    const limit = args.limit || 100
+    const limit = args.limit || 10
+    const page = args.page || 1
+    const pageSize = args.page_size || limit
 
-    let menus
-    if (tree) {
-      menus = await menuService.getMenuTree()
-    } else {
-      const result = await menuService.getMenus({ page: 1, pageSize: limit }, {})
-      menus = result.dataList
-    }
+    // Build filters object from args
+    const filters: any = {}
 
-    context.ctx.menus = menus
-    const result = new nunjucks.runtime.SafeString(body())
-    return callback(null, result)
+    // Search filters - 字符串，空字符串通常不是有效值
+    if (args.title) filters.title = args.title
+    if (args.alias) filters.alias = args.alias
+    // 需要 !== undefined 因为可能包含 0 等 falsy 值
+    if (args.parent_id !== undefined) filters.parentId = args.parent_id
+    if (args.status !== undefined) filters.status = args.status
+
+    // Date filters - 时间戳，0 是有效值
+    if (args.start_time !== undefined) filters.startTime = args.start_time
+    if (args.end_time !== undefined) filters.endTime = args.end_time
+
+    // Use the enhanced getMenus method with filters
+    const result = await menuService.getMenus({ page, pageSize }, filters)
+
+    context.ctx.menus = result.dataList
+    context.ctx.menus_pagination = result.pagination
+
+    const resultHtml = new nunjucks.runtime.SafeString(body())
+    return callback(null, resultHtml)
   }
 }
 

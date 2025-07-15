@@ -1,6 +1,6 @@
 /**
  * CACHES 模块 Swagger 文档
- * 
+ *
  * 此文件包含 caches 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -27,6 +27,36 @@
  *           type: integer
  *           default: 10
  *         description: 每页数量
+ *       - in: query
+ *         name: hash
+ *         schema:
+ *           type: string
+ *         description: 缓存哈希（模糊搜索）
+ *       - in: query
+ *         name: cache_data
+ *         schema:
+ *           type: string
+ *         description: 缓存内容（模糊搜索）
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 缓存状态
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
  *     responses:
  *       200:
  *         description: 获取成功

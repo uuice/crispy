@@ -13,12 +13,14 @@ export const getTag = async (req: Request, res: Response, next: NextFunction): P
     }
 
     const tag = await tagService.getTagById(id)
-    success(res, tag)
-  } catch (err: unknown) {
-    if (err instanceof Error && err.message === 'Tag not found') {
+
+    if (!tag) {
       notFound(res, 'Tag not found')
       return
     }
+
+    success(res, tag)
+  } catch (err: unknown) {
     console.error('Error fetching tag:', err)
     error(res, 'Internal server error')
   }
@@ -29,18 +31,29 @@ export const getTags = async (req: Request, res: Response, next: NextFunction): 
   try {
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
-
     const filters = {
-      site_name: req.query['site_name'] as string | undefined,
+      title: req.query['title'] as string | undefined,
+      alias: req.query['alias'] as string | undefined,
       des: req.query['des'] as string | undefined,
-      sort: req.query['sort'] ? parseInt(req.query['sort'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
-      value: req.query['value'] as string | undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined
+      type_id:
+        req.query['type_id'] !== undefined ? parseInt(req.query['type_id'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      sort: req.query['sort'] !== undefined ? parseInt(req.query['sort'] as string) : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined,
+      start_time:
+        req.query['start_time'] !== undefined
+          ? parseInt(req.query['start_time'] as string)
+          : undefined,
+      end_time:
+        req.query['end_time'] !== undefined ? parseInt(req.query['end_time'] as string) : undefined
     }
     const result = await tagService.getTags({ page, pageSize }, filters)
     success(res, result)

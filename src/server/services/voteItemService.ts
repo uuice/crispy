@@ -75,16 +75,16 @@ export class VoteItemService {
       if (filters.title) {
         query = query.where('title', 'like', `%${filters.title}%`)
       }
-      if (filters.vote_id) {
+      if (filters.vote_id !== undefined) {
         query = query.where('vote_id', '=', filters.vote_id)
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         query = query.where('status', '=', filters.status)
       }
-      if (filters.startTime) {
+      if (filters.startTime !== undefined) {
         query = query.where('create_time', '>=', filters.startTime)
       }
-      if (filters.endTime) {
+      if (filters.endTime !== undefined) {
         query = query.where('create_time', '<=', filters.endTime)
       }
     }

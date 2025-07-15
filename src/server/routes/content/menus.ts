@@ -40,22 +40,35 @@ export const getMenus = async (req: Request, res: Response, next: NextFunction):
     const filters = {
       title: req.query['title'] as string | undefined,
       alias: req.query['alias'] as string | undefined,
-      parent_id: req.query['parent_id'] ? parseInt(req.query['parent_id'] as string) : undefined,
+      parent_id:
+        req.query['parent_id'] !== undefined
+          ? parseInt(req.query['parent_id'] as string)
+          : undefined,
       icon: req.query['icon'] as string | undefined,
       url: req.query['url'] as string | undefined,
       image_url: req.query['image_url'] as string | undefined,
       method: req.query['method'] as string | undefined,
-      sort: req.query['sort'] ? parseInt(req.query['sort'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined,
-      start_time: req.query['start_time'] ? parseInt(req.query['start_time'] as string) : undefined,
-      end_time: req.query['end_time'] ? parseInt(req.query['end_time'] as string) : undefined
+      sort: req.query['sort'] !== undefined ? parseInt(req.query['sort'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined,
+      start_time:
+        req.query['start_time'] !== undefined
+          ? parseInt(req.query['start_time'] as string)
+          : undefined,
+      end_time:
+        req.query['end_time'] !== undefined ? parseInt(req.query['end_time'] as string) : undefined
     }
     const result = await menuService.getMenus({ page, pageSize }, filters)
     success(res, result)

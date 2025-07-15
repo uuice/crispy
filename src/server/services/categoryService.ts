@@ -101,10 +101,10 @@ export class CategoryService {
     if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
       query = query.where(sql.ref('sort'), '<=', filters.sort_max)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where(sql.ref('create_time'), '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where(sql.ref('create_time'), '<=', filters.end_time)
     }
     if (filters.has_children === true) {

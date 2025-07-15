@@ -35,14 +35,20 @@ export const getCaches = async (req: Request, res: Response, next: NextFunction)
     const filters = {
       cache_data: req.query['cache_data'] as string | undefined,
       hash: req.query['hash'] as string | undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined
     }
     const result = await cacheService.getCaches(filters, { page, pageSize })
     success(res, result)

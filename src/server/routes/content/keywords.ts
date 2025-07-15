@@ -48,18 +48,25 @@ export const getKeywords = async (
     const filters = {
       title: req.query['title'] as string | undefined,
       alias: req.query['alias'] as string | undefined,
-      count: req.query['count'] ? parseInt(req.query['count'] as string) : undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      type_id: req.query['type_id'] ? parseInt(req.query['type_id'] as string) : undefined,
+      count: req.query['count'] !== undefined ? parseInt(req.query['count'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      type_id:
+        req.query['type_id'] !== undefined ? parseInt(req.query['type_id'] as string) : undefined,
       url: req.query['url'] as string | undefined,
       value: req.query['value'] as string | undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined
     }
     const result = await keywordService.getKeywords({ page, pageSize }, filters)
     success(res, result)

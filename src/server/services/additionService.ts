@@ -82,7 +82,7 @@ export class AdditionService {
     let query = db.selectFrom('additions').selectAll().where('is_delete', '=', 0)
 
     // Add type filter if provided
-    if (filters?.type) {
+    if (filters?.type !== undefined) {
       query = query.where(sql.ref('type'), '=', filters.type)
     }
 

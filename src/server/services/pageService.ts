@@ -165,34 +165,34 @@ export class PageService {
       if (filters.url) {
         query = query.where('pages.url', 'like', `%${filters.url}%`)
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         query = query.where('pages.status', '=', filters.status)
       }
-      if (filters.type_id) {
+      if (filters.type_id !== undefined) {
         query = query.where('pages.type_id', '=', filters.type_id)
       }
-      if (filters.author_id && !isNaN(filters.author_id)) {
+      if (filters.author_id !== undefined && !isNaN(filters.author_id)) {
         query = query.where('pages.author_id', '=', filters.author_id)
       }
-      if (filters.user_id && !isNaN(filters.user_id)) {
+      if (filters.user_id !== undefined && !isNaN(filters.user_id)) {
         query = query.where('pages.user_id', '=', filters.user_id)
       }
-      if (filters.sort_min && !isNaN(filters.sort_min)) {
+      if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
         query = query.where(sql.ref('pages.sort'), '>=', filters.sort_min)
       }
-      if (filters.sort_max && !isNaN(filters.sort_max)) {
+      if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
         query = query.where(sql.ref('pages.sort'), '<=', filters.sort_max)
       }
-      if (filters.click_min && !isNaN(filters.click_min)) {
+      if (filters.click_min !== undefined && !isNaN(filters.click_min)) {
         query = query.where('pages.click', '>=', filters.click_min)
       }
-      if (filters.click_max && !isNaN(filters.click_max)) {
+      if (filters.click_max !== undefined && !isNaN(filters.click_max)) {
         query = query.where('pages.click', '<=', filters.click_max)
       }
-      if (filters.startTime) {
+      if (filters.startTime !== undefined) {
         query = query.where('pages.create_time', '>=', filters.startTime)
       }
-      if (filters.endTime) {
+      if (filters.endTime !== undefined) {
         query = query.where('pages.create_time', '<=', filters.endTime)
       }
       if (filters.has_image === true) {

@@ -53,7 +53,6 @@ export const getNotices = async (
     const page = parseInt(req.query['page'] as string) || 1
     const pageSize = parseInt(req.query['pageSize'] as string) || 10
 
-
     const filters = {
       title: req.query['title'] as string | undefined,
       content: req.query['content'] as string | undefined,
@@ -61,11 +60,15 @@ export const getNotices = async (
         ? parseInt(req.query['from_user_id'] as string)
         : undefined,
       tolds: req.query['tolds'] as string | undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
       publish_time: req.query['publish_time']
         ? parseInt(req.query['publish_time'] as string)
         : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
       update_time: req.query['update_time']
         ? parseInt(req.query['update_time'] as string)
         : undefined,

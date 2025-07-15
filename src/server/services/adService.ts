@@ -100,22 +100,22 @@ export class AdService {
     if (filters?.content) {
       query = query.where('content', 'like', `%${filters.content}%`)
     }
-    if (filters?.type_id && !isNaN(filters.type_id)) {
+    if (filters?.type_id !== undefined && !isNaN(filters.type_id)) {
       query = query.where('type_id', '=', filters.type_id)
     }
-    if (filters?.status) {
+    if (filters?.status !== undefined) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters?.sort_min && !isNaN(filters.sort_min)) {
+    if (filters?.sort_min !== undefined && !isNaN(filters.sort_min)) {
       query = query.where('sort', '>=', filters.sort_min)
     }
-    if (filters?.sort_max && !isNaN(filters.sort_max)) {
+    if (filters?.sort_max !== undefined && !isNaN(filters.sort_max)) {
       query = query.where('sort', '<=', filters.sort_max)
     }
-    if (filters?.start_time) {
+    if (filters?.start_time !== undefined) {
       query = query.where('start_time', '>=', filters.start_time)
     }
-    if (filters?.end_time) {
+    if (filters?.end_time !== undefined) {
       query = query.where('end_time', '<=', filters.end_time)
     }
     if (filters?.has_image === true) {

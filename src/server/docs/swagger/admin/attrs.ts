@@ -1,6 +1,6 @@
 /**
  * ATTRS 模块 Swagger 文档
- * 
+ *
  * 此文件包含 attrs 相关的所有 API 文档
  * 自动从 routes.ts 文件提取生成
  */
@@ -27,6 +27,51 @@
  *           type: integer
  *           default: 10
  *         description: 每页数量
+ *       - in: query
+ *         name: title
+ *         schema:
+ *           type: string
+ *         description: 属性标题（模糊搜索）
+ *       - in: query
+ *         name: alias
+ *         schema:
+ *           type: string
+ *         description: 属性别名（模糊搜索）
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: integer
+ *         description: 排序值
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: integer
+ *         description: 属性状态
+ *       - in: query
+ *         name: is_delete
+ *         schema:
+ *           type: integer
+ *         description: 删除状态
+ *       - in: query
+ *         name: update_time
+ *         schema:
+ *           type: integer
+ *         description: 更新时间戳
+ *       - in: query
+ *         name: create_time
+ *         schema:
+ *           type: integer
+ *         description: 创建时间戳
+ *       - in: query
+ *         name: start_time
+ *         schema:
+ *           type: integer
+ *         description: 开始时间戳
+ *       - in: query
+ *         name: end_time
+ *         schema:
+ *           type: integer
+ *         description: 结束时间戳
  *     responses:
  *       200:
  *         description: 获取成功

@@ -112,15 +112,22 @@ export const getAccessTokens = async (
       app_name: req.query['app_name'] as string | undefined,
       channel: req.query['channel'] as string | undefined,
       token: req.query['token'] as string | undefined,
-      status: req.query['status'] ? parseInt(req.query['status'] as string) : undefined,
-      user_id: req.query['user_id'] ? parseInt(req.query['user_id'] as string) : undefined,
-      is_delete: req.query['is_delete'] ? parseInt(req.query['is_delete'] as string) : undefined,
-      update_time: req.query['update_time']
-        ? parseInt(req.query['update_time'] as string)
-        : undefined,
-      create_time: req.query['create_time']
-        ? parseInt(req.query['create_time'] as string)
-        : undefined
+      status:
+        req.query['status'] !== undefined ? parseInt(req.query['status'] as string) : undefined,
+      user_id:
+        req.query['user_id'] !== undefined ? parseInt(req.query['user_id'] as string) : undefined,
+      is_delete:
+        req.query['is_delete'] !== undefined
+          ? parseInt(req.query['is_delete'] as string)
+          : undefined,
+      update_time:
+        req.query['update_time'] !== undefined
+          ? parseInt(req.query['update_time'] as string)
+          : undefined,
+      create_time:
+        req.query['create_time'] !== undefined
+          ? parseInt(req.query['create_time'] as string)
+          : undefined
     }
     const result = await accessTokenService.getAccessTokens(filters, { page, pageSize })
     success(res, result)

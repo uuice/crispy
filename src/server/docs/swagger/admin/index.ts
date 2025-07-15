@@ -1,11 +1,12 @@
 /**
  * Swagger 文档模块索引
- * 
+ *
  * 此文件自动生成，用于导入所有的 Swagger 文档模块
  */
 
 import './users'
 import './ads'
+import './ad-items'
 import './additions'
 import './api-logs'
 import './articles'
@@ -27,6 +28,7 @@ import './tags'
 import './pages'
 import './user-types'
 import './votes'
+import './vote-items'
 import './comments'
 import './access-tokens'
 import './upload'
@@ -39,6 +41,7 @@ export default {};
  * 模块列表：
  * - users.ts
  * - ads.ts
+ * - ad-items.ts
  * - additions.ts
  * - api-logs.ts
  * - articles.ts
@@ -60,6 +63,7 @@ export default {};
  * - pages.ts
  * - user-types.ts
  * - votes.ts
+ * - vote-items.ts
  * - comments.ts
  * - access-tokens.ts
  * - upload.ts

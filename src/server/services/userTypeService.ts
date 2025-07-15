@@ -83,13 +83,13 @@ export class UserTypeService {
     if (filters.alias) {
       query = query.where('alias', 'like', `%${filters.alias}%`)
     }
-    if (filters.status) {
+    if (filters.status !== undefined) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where('create_time', '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where('create_time', '<=', filters.end_time)
     }
 

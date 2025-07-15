@@ -62,10 +62,10 @@ export class CacheService {
     if (filters.status !== undefined && !isNaN(filters.status)) {
       query = query.where('status', '=', filters.status)
     }
-    if (filters.start_time) {
+    if (filters.start_time !== undefined) {
       query = query.where('create_time', '>=', filters.start_time)
     }
-    if (filters.end_time) {
+    if (filters.end_time !== undefined) {
       query = query.where('create_time', '<=', filters.end_time)
     }
 

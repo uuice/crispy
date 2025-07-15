@@ -92,16 +92,16 @@ export class MenuService {
       if (filters.alias) {
         query = query.where('alias', 'like', `%${filters.alias}%`)
       }
-      if (filters.parentId) {
+      if (filters.parentId !== undefined) {
         query = query.where('parent_id', '=', filters.parentId)
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         query = query.where('status', '=', filters.status)
       }
-      if (filters.startTime) {
+      if (filters.startTime !== undefined) {
         query = query.where('create_time', '>=', filters.startTime)
       }
-      if (filters.endTime) {
+      if (filters.endTime !== undefined) {
         query = query.where('create_time', '<=', filters.endTime)
       }
     }

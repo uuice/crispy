@@ -17,22 +17,45 @@ export function Comments(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const status = args.status || 10 // 默认获取已审核的评论
-    const userId = args.user_id
-    const parentId = args.parent_id
     const limit = args.limit || 10
+    const page = args.page || 1
+    const pageSize = args.page_size || limit
 
+    // Build filters object from args
     const filters: any = {}
-    if (status) filters.status = status
-    if (userId) filters.user_id = userId
-    if (parentId) filters.parent_id = parentId
 
-    const result = await commentService.getComments({ page: 1, pageSize: limit }, filters)
-    const comments = result.dataList
+    // Search filters - 字符串，空字符串通常不是有效值
+    if (args.content) filters.content = args.content
+    if (args.title) filters.title = args.title
+    // 需要 !== undefined 因为可能包含 0 等 falsy 值
+    if (args.user_id !== undefined) filters.user_id = args.user_id
+    if (args.parent_id !== undefined) filters.parent_id = args.parent_id
+    if (args.status !== undefined) filters.status = args.status
 
-    context.ctx.comments = comments
-    const result2 = new nunjucks.runtime.SafeString(body())
-    return callback(null, result2)
+    // Range filters - 需要 !== undefined 因为可能包含 0
+    if (args.good_article_min !== undefined) filters.good_article_min = args.good_article_min
+    if (args.good_article_max !== undefined) filters.good_article_max = args.good_article_max
+    if (args.bad_article_min !== undefined) filters.bad_article_min = args.bad_article_min
+    if (args.bad_article_max !== undefined) filters.bad_article_max = args.bad_article_max
+    if (args.not_article_min !== undefined) filters.not_article_min = args.not_article_min
+    if (args.not_article_max !== undefined) filters.not_article_max = args.not_article_max
+
+    // Date filters - 时间戳，0 是有效值
+    if (args.start_time !== undefined) filters.start_time = args.start_time
+    if (args.end_time !== undefined) filters.end_time = args.end_time
+
+    // Boolean filters - 需要 !== undefined 因为 false 是有效值
+    if (args.has_parent !== undefined)
+      filters.has_parent = args.has_parent === 'true' || args.has_parent === true
+
+    // Use the enhanced getComments method with filters
+    const result = await commentService.getComments({ page, pageSize }, filters)
+
+    context.ctx.comments = result.dataList
+    context.ctx.comments_pagination = result.pagination
+
+    const resultHtml = new nunjucks.runtime.SafeString(body())
+    return callback(null, resultHtml)
   }
 }
 
@@ -48,7 +71,7 @@ export function CommentItem(): void {
     parser.advanceAfterBlockEnd(tok.value)
     return new nodes.CallExtensionAsync(this, 'run', args)
   }
-  this.run = async function (context: any, args: any, callback: any) {
+  this.run = async function (_context: any, args: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
