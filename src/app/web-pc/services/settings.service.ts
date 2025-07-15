@@ -289,9 +289,23 @@ export class SettingsService {
    * Load preset theme
    */
   private async loadPresetTheme(themeName: string): Promise<any> {
-    // You can implement dynamic import for theme files if needed
-    // For now, just return null
-    return null
+    try {
+      switch (themeName) {
+        case 'lara':
+          return (await import('@primeng/themes/lara')).default
+        case 'aura':
+          return (await import('@primeng/themes/aura')).default
+        case 'nora':
+          return (await import('@primeng/themes/nora')).default
+        case 'material':
+          return (await import('@primeng/themes/material')).default
+        default:
+          return null
+      }
+    } catch (error) {
+      console.warn(`Failed to load preset theme ${themeName}:`, error)
+      return null
+    }
   }
 
   /**
