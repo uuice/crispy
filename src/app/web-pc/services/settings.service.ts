@@ -208,6 +208,24 @@ export class SettingsService {
     if (isPlatformBrowser(this.platformId)) {
       const config = this.getSurfaceConfig()
       document.body.setAttribute('data-surface', config.color)
+      const surfaceConfig = this.getSurfaceConfig()
+      if (surfaceConfig && surfaceConfig.color && surfaceConfig.color !== 'zinc') {
+        try {
+          import('@primeng/themes').then((mod) => {
+            if (mod.updateSurfacePalette) {
+              const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+              const palette: Record<number, string> = {}
+              for (const step of steps) {
+                palette[step] = `{${surfaceConfig.color}.${step}}`
+              }
+              mod.updateSurfacePalette(palette)
+            }
+          })
+        } catch (e) {
+          // Ignore in SSR environment
+          console.warn('Failed to apply surface configuration:', e)
+        }
+      }
     }
   }
 
