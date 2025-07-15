@@ -24,6 +24,9 @@ export interface CreateArticleData {
   click?: number
   attrs?: string
   is_review?: number
+  // Added fields
+  author_id?: number // Article author id
+  redirect_url?: string // Redirect url
 }
 
 export type UpdateArticleData = Partial<CreateArticleData>

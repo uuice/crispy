@@ -12,6 +12,9 @@ export interface CreateApiLogData {
   user_agent?: string
   duration?: number
   status?: number
+  // Added fields
+  body?: string // POST request body
+  query?: string // Query string
 }
 
 export type UpdateApiLogData = Partial<CreateApiLogData>
