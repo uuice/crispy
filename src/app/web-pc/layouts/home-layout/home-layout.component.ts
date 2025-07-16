@@ -48,8 +48,6 @@ import { FormsModule } from '@angular/forms'
                 [rounded]="true"
                 severity="secondary"
                 size="small"
-                pTooltip="Toggle Dark Mode"
-                tooltipPosition="bottom"
                 (click)="toggleDarkMode()"
               ></p-button>
               <p-button
@@ -58,8 +56,6 @@ import { FormsModule } from '@angular/forms'
                 [rounded]="true"
                 severity="secondary"
                 size="small"
-                pTooltip="Theme Settings"
-                tooltipPosition="bottom"
                 (click)="drawerVisible = true"
               ></p-button>
             </div>
@@ -155,7 +151,9 @@ import { FormsModule } from '@angular/forms'
       </p-drawer>
       <main class="main-content">
         <div class="content-container">
-          <router-outlet></router-outlet>
+          <div class="flex flex-col gap-8 min-h-[80vh] w-full">
+            <router-outlet></router-outlet>
+          </div>
         </div>
       </main>
       <footer class="footer">
@@ -207,6 +205,9 @@ import { FormsModule } from '@angular/forms'
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
+        display: flex;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
       .footer {
         background: var(--p-surface-section);
@@ -566,6 +567,11 @@ export class HomeLayoutComponent implements OnInit {
         label: '模版',
         icon: 'pi pi-code',
         routerLink: '/templates'
+      },
+      {
+        label: '数据模型',
+        icon: 'pi pi-database',
+        routerLink: '/data-models'
       }
     ]
     // Initialize theme settings

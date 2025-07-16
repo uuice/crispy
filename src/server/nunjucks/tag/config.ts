@@ -61,9 +61,11 @@ export function ConfigItem(): void {
     parser.advanceAfterBlockEnd(tok.value)
     // const body = parser.parseUntilBlocks('endSysConfigItem') // eng tag
     // parser.advanceAfterBlockEnd()
-    return new nodes.CallExtensionAsync(this, 'run', args) // async
+    const body = parser.parseUntilBlocks('endSysConfigItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body]) // async
   }
-  this.run = async function (_context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     const alias = args.alias
 
@@ -78,7 +80,8 @@ export function ConfigItem(): void {
       config = await configService.getConfigByAlias(alias)
     }
 
-    const result = new nunjucks.runtime.SafeString(config?.value || '')
+    context.ctx.config = config
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

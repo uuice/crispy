@@ -69,16 +69,19 @@ export function CommentItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endCommentItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (_context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
     const comment = await commentService.getCommentById(id)
-    const result = new nunjucks.runtime.SafeString(comment ? JSON.stringify(comment) : '')
+    context.ctx.comment = comment
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

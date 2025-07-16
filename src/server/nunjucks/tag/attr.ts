@@ -56,16 +56,19 @@ export function AttrItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endAttrItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (_context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
     const attr = await attrService.getAttrById(id)
-    const result = new nunjucks.runtime.SafeString(attr ? JSON.stringify(attr) : '')
+    context.ctx.attr = attr
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

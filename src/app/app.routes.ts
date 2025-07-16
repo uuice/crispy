@@ -31,6 +31,10 @@ export const routes: Routes = [
       {
         path: 'templates',
         loadComponent: () => import('./web-pc/pages/templates.page').then((m) => m.TemplatesPage)
+      },
+      {
+        path: 'data-models',
+        loadComponent: () => import('./web-pc/pages/data-models.page').then((m) => m.DataModelsPage)
       }
     ]
   },

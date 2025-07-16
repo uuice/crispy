@@ -55,16 +55,19 @@ export function VoteItemSingle(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endVoteItemSingle')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
     const voteItem = await voteItemService.getVoteItemById(id)
-    const result = new nunjucks.runtime.SafeString(voteItem ? JSON.stringify(voteItem) : '')
+    context.ctx.voteItem = voteItem
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

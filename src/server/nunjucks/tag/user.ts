@@ -72,16 +72,19 @@ export function UserItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endUserItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (_context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
     const user = await userService.getUserById(id)
-    const result = new nunjucks.runtime.SafeString(user ? JSON.stringify(user) : '')
+    context.ctx.user = user
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

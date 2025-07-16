@@ -55,16 +55,19 @@ export function KeywordItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endKeywordItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (_context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     if (!id) {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
     const keyword = await keywordService.getKeywordById(id)
-    const result = new nunjucks.runtime.SafeString(keyword ? JSON.stringify(keyword) : '')
+    context.ctx.keyword = keyword
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

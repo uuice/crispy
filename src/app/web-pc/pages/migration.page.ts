@@ -7,40 +7,37 @@ import { AccordionModule } from 'primeng/accordion'
   standalone: true,
   imports: [CardModule, AccordionModule],
   template: `
-    <div
-      class="grid gap-8 bg-gradient-to-br from-[var(--p-surface-ground)] to-[var(--p-surface-section)] min-h-[80vh]"
-    >
-      <p-card header="数据库迁移工具" styleClass="system-card">
-        <div class="text-base leading-relaxed" style="color: var(--p-content-color)">
-          <p>
-            本项目使用 <b>Kysely</b> 进行数据库 schema 管理，迁移脚本位于
-            <code>/migrations</code> 目录。
-          </p>
-        </div>
-      </p-card>
-      <p-card header="常用迁移命令" styleClass="system-card">
-        <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
-          <li><code>bun run migrate</code> —— 执行所有迁移</li>
-          <li><code>bun run scripts/migrate.ts</code> —— 使用 bun 执行迁移脚本</li>
-        </ul>
-      </p-card>
-      <p-card header="迁移文件示例" styleClass="system-card">
-        <pre
-          class=" p-4 rounded-xl shadow-inner border border-[var(--p-content-border-color)] overflow-x-auto text-sm"
-          [innerHTML]="migrationExampleCode"
-        ></pre>
-      </p-card>
-      <p-card header="注意事项" styleClass="system-card">
-        <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
-          <li>迁移脚本应可逆（实现 up/down）</li>
-          <li>生产环境迁移前请备份数据</li>
-        </ul>
-      </p-card>
-    </div>
+    <p-card header="数据库迁移工具" styleClass="system-card">
+      <div class="text-base leading-relaxed" style="color: var(--p-content-color)">
+        <p>
+          本项目使用 <b>Kysely</b> 进行数据库 schema 管理，迁移脚本位于
+          <code>/migrations</code> 目录。
+        </p>
+      </div>
+    </p-card>
+    <p-card header="常用迁移命令" styleClass="system-card">
+      <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
+        <li><code>bun run migrate</code> —— 执行所有迁移</li>
+        <li><code>bun run scripts/migrate.ts</code> —— 使用 bun 执行迁移脚本</li>
+      </ul>
+    </p-card>
+    <p-card header="迁移文件示例" styleClass="system-card">
+      <pre
+        class=" p-4 rounded-xl shadow-inner border border-[var(--p-content-border-color)] overflow-x-auto text-sm"
+        [innerHTML]="migrationExampleCode"
+      ></pre>
+    </p-card>
+    <p-card header="注意事项" styleClass="system-card">
+      <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
+        <li>迁移脚本应可逆（实现 up/down）</li>
+        <li>生产环境迁移前请备份数据</li>
+      </ul>
+    </p-card>
   `,
   styles: [
     `
       .system-card {
+        flex: 1;
         background: var(--p-content-background) !important;
         color: var(--p-content-color) !important;
         border: 1px solid var(--p-content-border-color) !important;

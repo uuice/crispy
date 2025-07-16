@@ -63,9 +63,11 @@ export function AdItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    return new nodes.CallExtensionAsync(this, 'run', args)
+    const body = parser.parseUntilBlocks('endAdItem')
+    parser.advanceAfterBlockEnd()
+    return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
-  this.run = async function (context: any, args: any, callback: any) {
+  this.run = async function (context: any, args: any, body: any, callback: any) {
     const id = args.id
     const withItems = args.with_items === 'true' || args.with_items === true
 
@@ -80,7 +82,8 @@ export function AdItem(): void {
       ad = await adService.getAdById(id)
     }
 
-    const result = new nunjucks.runtime.SafeString(ad ? JSON.stringify(ad) : '')
+    context.ctx.ad = ad
+    const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
   }
 }

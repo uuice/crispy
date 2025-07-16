@@ -9,28 +9,25 @@ import { MessageModule } from 'primeng/message'
   standalone: true,
   imports: [CardModule, TabViewModule, ButtonModule, MessageModule],
   template: `
-    <div
-      class="grid gap-8 bg-gradient-to-br from-[var(--p-surface-ground)] to-[var(--p-surface-section)] min-h-[80vh]"
-    >
-      <p-card header="Crispy 项目介绍" styleClass="system-card">
-        <div class="flex flex-col gap-4 mb-4">
-          <p-message icon="pi pi-exclamation-triangle" severity="error" variant="outlined">
-            大部分代码是AI生成的(Cursor)，请谨慎使用。
-          </p-message>
+    <p-card header="Crispy 项目介绍" styleClass="system-card">
+      <div class="flex flex-col gap-4 mb-4">
+        <p-message icon="pi pi-exclamation-triangle" severity="error" variant="outlined">
+          大部分代码是AI生成的(Cursor)，请谨慎使用。
+        </p-message>
 
-          <div class="text-base leading-relaxed" style="color: var(--p-content-color)">
-            <p>
-              <b>Crispy</b> 是一套现代全栈内容管理系统，前端采用 Angular + PrimeNG +
-              Tailwind，后端基于 Node.js/Express，数据库层用 Kysely，支持 SSR、权限、内容建模、API
-              自动文档等。
-            </p>
-          </div>
+        <div class="text-base leading-relaxed" style="color: var(--p-content-color)">
+          <p>
+            <b>Crispy</b> 是一套现代全栈内容管理系统，前端采用 Angular + PrimeNG +
+            Tailwind，后端基于 Node.js/Express，数据库层用 Kysely，支持 SSR、权限、内容建模、API
+            自动文档等。
+          </p>
         </div>
-      </p-card>
-      <p-card header="架构图" styleClass="system-card">
-        <pre
-          class="p-4 rounded-xl shadow-inner border border-[var(--p-content-border-color)] overflow-x-auto text-sm"
-        >
+      </div>
+    </p-card>
+    <p-card header="架构图" styleClass="system-card">
+      <pre
+        class="p-4 rounded-xl shadow-inner border border-[var(--p-content-border-color)] overflow-x-auto text-sm"
+      >
 crispy/
 ├── src/
 │   ├── app/                  # 前端主应用目录
@@ -54,72 +51,72 @@ crispy/
 ├── angular.json              # Angular 配置
 └── ...
         </pre
-        >
-      </p-card>
-      <p-card header="技术栈" styleClass="system-card">
-        <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
-          <li>前端：Angular 20、PrimeNG、TailwindCSS</li>
-          <li>后端：<b>Node.js + Express</b>、Kysely、PM2</li>
-          <li>模板：Nunjucks</li>
-          <li>数据库：MariaDB</li>
-          <li>API文档：Swagger</li>
-        </ul>
-      </p-card>
-      <p-card header="测试入口 & 相关链接" styleClass="system-card">
-        <div class="flex flex-wrap gap-4 mb-4">
-          <a
-            pButton
-            label="管理后台"
-            href="/backstage"
-            target="_blank"
-            class="p-button-outlined home-link-btn"
-            style="color: var(--p-content-color)"
-          ></a>
-          <a
-            pButton
-            label="内容前台"
-            href="/"
-            target="_blank"
-            class="p-button-outlined home-link-btn"
-            style="color: var(--p-content-color)"
-          ></a>
-          <a
-            pButton
-            label="Swagger Admin"
-            href="/admin/docs"
-            target="_blank"
-            class="p-button-outlined home-link-btn"
-            style="color: var(--p-content-color)"
-          ></a>
-          <a
-            pButton
-            label="Swagger Content"
-            href="/content/docs"
-            target="_blank"
-            class="p-button-outlined home-link-btn"
-            style="color: var(--p-content-color)"
-          ></a>
-          <a
-            pButton
-            label="GitHub"
-            href="https://github.com/uuice/crispy"
-            target="_blank"
-            class="p-button-outlined home-link-btn"
-            style="color: var(--p-content-color)"
-          ></a>
-        </div>
-        <div
-          class="text-sm mt-4 px-2 py-1 rounded bg-[var(--p-surface-section)] border border-[var(--p-content-border-color)] inline-block"
-          style="color: var(--p-text-muted-color)"
-        >
-          后台测试账号：<b>admin</b> / <b>111111</b>
-        </div>
-      </p-card>
-    </div>
+      >
+    </p-card>
+    <p-card header="技术栈" styleClass="system-card">
+      <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
+        <li>前端：Angular 20、PrimeNG、TailwindCSS</li>
+        <li>后端：<b>Node.js + Express</b>、Kysely、PM2</li>
+        <li>模板：Nunjucks</li>
+        <li>数据库：MariaDB</li>
+        <li>API文档：Swagger</li>
+      </ul>
+    </p-card>
+    <p-card header="测试入口 & 相关链接" styleClass="system-card">
+      <div class="flex flex-wrap gap-4 mb-4">
+        <a
+          pButton
+          label="管理后台"
+          href="/backstage"
+          target="_blank"
+          class="p-button-outlined home-link-btn"
+          style="color: var(--p-content-color)"
+        ></a>
+        <a
+          pButton
+          label="内容前台"
+          href="/"
+          target="_blank"
+          class="p-button-outlined home-link-btn"
+          style="color: var(--p-content-color)"
+        ></a>
+        <a
+          pButton
+          label="Swagger Admin"
+          href="/admin/docs"
+          target="_blank"
+          class="p-button-outlined home-link-btn"
+          style="color: var(--p-content-color)"
+        ></a>
+        <a
+          pButton
+          label="Swagger Content"
+          href="/content/docs"
+          target="_blank"
+          class="p-button-outlined home-link-btn"
+          style="color: var(--p-content-color)"
+        ></a>
+        <a
+          pButton
+          label="GitHub"
+          href="https://github.com/uuice/crispy"
+          target="_blank"
+          class="p-button-outlined home-link-btn"
+          style="color: var(--p-content-color)"
+        ></a>
+      </div>
+      <div
+        class="text-sm mt-4 px-2 py-1 rounded bg-[var(--p-surface-section)] border border-[var(--p-content-border-color)] inline-block"
+        style="color: var(--p-text-muted-color)"
+      >
+        后台测试账号：<b>admin</b> / <b>111111</b>
+      </div>
+    </p-card>
   `,
   styles: [
     `
       .system-card {
+        flex: 1;
         background: var(--p-content-background) !important;
         color: var(--p-content-color) !important;
         border: 1px solid var(--p-content-border-color) !important;

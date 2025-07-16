@@ -68,8 +68,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% ArticleItem id=1 %}
-{% ArticleItem title="article-title" %}
+  <h1>{{ article.title }}</h1>
+  <div>{{ article.content }}</div>
+{% endArticleItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`article`
 
 **Parameters:**
 
@@ -111,8 +117,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% CategoryItem id=1 %}
-{% CategoryItem title="category-title" %}
+  <h2>{{ category.title }}</h2>
+  <p>{{ category.description }}</p>
+{% endCategoryItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`category`
 
 **Parameters:**
 
@@ -153,8 +165,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% TagItem id=1 %}
-{% TagItem title="tag-title" %}
+  <span class="tag">{{ tag.title }}</span>
+  <p>{{ tag.description }}</p>
+{% endTagItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`tag`
 
 **Parameters:**
 
@@ -200,7 +218,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% CommentItem id=1 %}
+  <div class="comment">
+    <p>{{ comment.content }}</p>
+    <small>By: {{ comment.user_name }}</small>
+  </div>
+{% endCommentItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`comment`
 
 **Parameters:**
 
@@ -245,9 +272,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% UserItem id=1 %}
-{% UserItem username="admin" %}
-{% UserItem email="admin@example.com" %}
+  <div class="user">
+    <h4>{{ user.username }}</h4>
+    <p>{{ user.email }}</p>
+  </div>
+{% endUserItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`user`
 
 **Parameters:**
 
@@ -290,9 +324,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% LinkItem id=1 %}
-{% LinkItem title="link-title" %}
-{% LinkItem url="https://example.com" %}
+  <a href="{{ link.url }}">{{ link.title }}</a>
+  <p>{{ link.description }}</p>
+{% endLinkItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`link`
 
 **Parameters:**
 
@@ -335,8 +374,13 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% MenuItem id=1 %}
-{% MenuItem title="menu-title" %}
+  <li><a href="{{ menu.url }}">{{ menu.title }}</a></li>
+{% endMenuItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`menu`
 
 **Parameters:**
 
@@ -381,8 +425,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% NoticeItem id=1 %}
-{% NoticeItem title="notice-title" %}
+  <div class="notice">
+    <h3>{{ notice.title }}</h3>
+    <p>{{ notice.content }}</p>
+  </div>
+{% endNoticeItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`notice`
 
 **Parameters:**
 
@@ -427,9 +479,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% PageItem id=1 %}
-{% PageItem title="page-title" %}
-{% PageItem alias="about" %}
+  <div class="page">
+    <h2>{{ page.title }}</h2>
+    <div>{{ page.content }}</div>
+  </div>
+{% endPageItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`page`
 
 **Parameters:**
 
@@ -474,8 +533,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% RoleItem id=1 %}
-{% RoleItem title="role-title" %}
+  <div class="role">
+    <h3>{{ role.title }}</h3>
+    <p>{{ role.description }}</p>
+  </div>
+{% endRoleItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`role`
 
 **Parameters:**
 
@@ -520,8 +587,15 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% ConfigItem id=1 %}
-{% ConfigItem alias="site_name" %}
+  <div class="config">
+    <strong>{{ config.title }}:</strong> {{ config.value }}
+  </div>
+{% endConfigItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`config`
 
 **Parameters:**
 
@@ -564,10 +638,13 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% EnumItem id=1 %}
-{% EnumItem alias="enum-alias" %}
-{% EnumItem code="user_status" %}
-{% EnumItem value="active" %}
+  <option value="{{ enum.value }}">{{ enum.title }}</option>
+{% endEnumItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`enum`
 
 **Parameters:**
 
@@ -611,9 +688,13 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% KeywordItem id=1 %}
-{% KeywordItem alias="keyword-alias" %}
-{% KeywordItem title="keyword-title" %}
+  <span class="keyword">{{ keyword.title }}</span>
+{% endKeywordItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`keyword`
 
 **Parameters:**
 
@@ -667,8 +748,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% AdItem id=1 %}
-{% AdItem title="ad-title" %}
+  <div class="ad">
+    <h3>{{ ad.title }}</h3>
+    {% if ad.image_url %}
+      <img src="{{ ad.image_url }}" alt="{{ ad.title }}">
+    {% endif %}
+  </div>
+{% endAdItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`ad`
 
 **Parameters:**
 
@@ -717,8 +808,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% AdItemSingle id=1 %}
-{% AdItemSingle title="ad-item-title" ad_id=1 %}
+  <div class="ad-item">
+    <h4>{{ adItem.title }}</h4>
+    {% if adItem.image_url %}
+      <img src="{{ adItem.image_url }}" alt="{{ adItem.title }}">
+    {% endif %}
+  </div>
+{% endAdItemSingle %}
 ```
+
+**Context:**
+
+- 返回单个对象：`adItem`
 
 **Parameters:**
 
@@ -764,8 +865,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% VoteItem id=1 %}
-{% VoteItem title="vote-title" %}
+  <div class="vote">
+    <h3>{{ vote.title }}</h3>
+    <p>Multiple choice: {{ vote.is_multiple ? 'Yes' : 'No' }}</p>
+  </div>
+{% endVoteItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`vote`
 
 **Parameters:**
 
@@ -812,8 +921,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% VoteItemSingle id=1 %}
-{% VoteItemSingle title="vote-item-title" vote_id=1 %}
+  <div class="vote-item">
+    <label>
+      <input type="radio" name="vote" value="{{ voteItem.id }}">
+      {{ voteItem.title }}
+    </label>
+  </div>
+{% endVoteItemSingle %}
 ```
+
+**Context:**
+
+- 返回单个对象：`voteItem`
 
 **Parameters:**
 
@@ -857,9 +976,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% AttrItem id=1 %}
-{% AttrItem alias="attr-alias" %}
-{% AttrItem title="attr-title" %}
+  <div class="attr">
+    <strong>{{ attr.title }}</strong>
+    <span>{{ attr.value }}</span>
+  </div>
+{% endAttrItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`attr`
 
 **Parameters:**
 
@@ -903,8 +1029,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% AdditionItem id=1 %}
-{% AdditionItem name="addition-name" %}
+  <div class="addition">
+    <h4>{{ addition.name }}</h4>
+    <p>{{ addition.description }}</p>
+    <span>Price: ${{ addition.price }}</span>
+  </div>
+{% endAdditionItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`addition`
 
 **Parameters:**
 
@@ -960,8 +1095,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% JobItem id=1 %}
-{% JobItem title="job-title" %}
+  <div class="job">
+    <h3>{{ job.title }}</h3>
+    <p>{{ job.content }}</p>
+    <p>Location: {{ job.address }}</p>
+    <p>Openings: {{ job.num }}</p>
+  </div>
+{% endJobItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`job`
 
 **Parameters:**
 
@@ -1005,9 +1150,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% HolidayItem id=1 %}
-{% HolidayItem name="holiday-name" %}
-{% HolidayItem value="2024-01-01" %}
+  <div class="holiday">
+    <span>{{ holiday.title }}</span>
+    <span>{{ holiday.value }}</span>
+  </div>
+{% endHolidayItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`holiday`
 
 **Parameters:**
 
@@ -1053,9 +1205,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% UserTypeItem id=1 %}
-{% UserTypeItem type_name="admin" %}
-{% UserTypeItem alias="administrator" %}
+  <div class="user-type">
+    <h4>{{ userType.type_name }}</h4>
+    <p>{{ userType.remark }}</p>
+  </div>
+{% endUserTypeItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`userType`
 
 **Parameters:**
 
@@ -1120,9 +1279,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 
 ```njk
 {% RuleItem id=1 %}
-{% RuleItem title="rule-title" %}
-{% RuleItem alias="rule-alias" %}
+  <div class="rule">
+    <h4>{{ rule.title }}</h4>
+    <p>{{ rule.des }}</p>
+  </div>
+{% endRuleItem %}
 ```
+
+**Context:**
+
+- 返回单个对象：`rule`
 
 **Parameters:**
 
