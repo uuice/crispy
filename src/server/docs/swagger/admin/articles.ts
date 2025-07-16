@@ -71,7 +71,7 @@
  *         name: status
  *         schema:
  *           type: integer
- *         description: 状态 (0-草稿, 1-已发布, 2-已下架)
+ *         description: 状态 (10已发布 -10待发布 -100已删除 -20草稿)
  *       - in: query
  *         name: is_review
  *         schema:
