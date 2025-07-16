@@ -29,7 +29,7 @@
  *           description: 投票数量
  *         status:
  *           type: integer
- *           description: 状态 (0-禁用, 1-启用)
+ *           description: 状态 (-10-禁用, 10-启用)
  *         created_at:
  *           type: string
  *           format: date-time
@@ -174,7 +174,7 @@
  *               status:
  *                 type: integer
  *                 default: 1
- *                 description: 状态 (0-禁用, 1-启用)
+ *                 description: 状态 (-10-禁用, 10-启用)
  *     responses:
  *       200:
  *         description: 创建成功
@@ -230,7 +230,7 @@
  *                 description: 所属投票ID
  *               status:
  *                 type: integer
- *                 description: 状态 (0-禁用, 1-启用)
+ *                 description: 状态 (-10-禁用, 10-启用)
  *     responses:
  *       200:
  *         description: 更新成功

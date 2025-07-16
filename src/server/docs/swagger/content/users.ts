@@ -78,7 +78,7 @@
  *         name: status
  *         schema:
  *           type: integer
- *         description: 状态 (0-禁用, 1-启用)
+ *         description: 状态 (-10-禁用, 10-启用)
  *       - in: query
  *         name: is_admin
  *         schema:
