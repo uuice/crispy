@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Crispy{% endblock %}</title>
+  <meta name="description" content="{% block description %}Crispy - 基于 Angular SSR 构建的现代化博客系统{% endblock %}">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  {% block head %}{% endblock %}
+
+  <style>
+    /* 自定义 Tailwind 配置 */
+    .btn-primary {
+      @apply inline-block px-6 py-3 bg-blue-600 text-white no-underline rounded-lg transition-colors duration-200 hover:bg-blue-700;
+    }
+
+    .card {
+      @apply bg-white rounded-lg p-6 shadow-sm mb-6;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex justify-between items-center py-4">
+        <a href="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
+          Crispy
+        </a>
+        <ul class="flex space-x-8">
+          <li><a href="/" class="text-gray-600 hover:text-blue-600 transition-colors">首页</a></li>
+          <li><a href="/blog" class="text-gray-600 hover:text-blue-600 transition-colors">博客</a></li>
+          <li><a href="/about" class="text-gray-600 hover:text-blue-600 transition-colors">关于</a></li>
+          <li><a href="/contact" class="text-gray-600 hover:text-blue-600 transition-colors">联系</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+      <p>&copy; {{ currentYear or 2024 }} Crispy. 保留所有权利。</p>
+      <p class="text-gray-400 text-sm mt-2">基于 Angular SSR 和 Nunjucks 构建</p>
+    </div>
+  </footer>
+
+  {% Config %}
+    {% for item in configs %}
+      {{item.title}}: {{ item.value }}
+    {% endfor %}
+  {% endConfig %}
+
+  {% ConfigItem alias="SITE_NAME" %}
+  {% ConfigItem alias="SITE_DESCRIPTION" %}
+  {% ConfigItem alias="SITE_KEYWORDS" %}
+
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
