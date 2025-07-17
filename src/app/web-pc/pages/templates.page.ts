@@ -701,37 +701,37 @@ export class TemplatesPage {
     <h3>{{ category.title }}</h3>
   {% endfor %}
 {% endCategories %}`,
-          description: '获取前20个页面的全部内容。'
+          description: '获取前20个分类的全部内容。'
         },
         {
-          title: '按别名筛选页面',
+          title: '按别名筛选分类',
           code: `{% Categories alias="about" %}
-  {% for page in pages %}
-    <div class="page">
-      <h2>{{ page.title }}</h2>
+  {% for category in categories %}
+    <div class="category">
+      <h2>{{ category.title }}</h2>
     </div>
   {% endfor %}
 {% endCategories %}`,
-          description: '只获取别名为 about 的页面。'
+          description: '只获取别名为 about 的分类。'
         },
         {
-          title: '分页获取页面',
+          title: '分页获取分类',
           code: `{% Categories page=2 page_size=5 %}
-  {% for page in pages %}
-    <div class="page">
-      <h2>{{ page.title }}</h2>
+  {% for category in categories %}
+    <div class="category">
+      <h2>{{ category.title }}</h2>
     </div>
   {% endfor %}
-  <p>当前页: {{ pages_pagination.page }}</p>
+  <p>当前页: {{ categories_pagination.page }}</p>
 {% endCategories %}`,
           description: '获取第2页，每页5条，并显示分页信息。'
         },
         {
-          title: '按标题模糊搜索页面',
+          title: '按标题模糊搜索分类',
           code: `{% Categories title="帮助" %}
-  {% for page in pages %}
-    <div class="page">
-      <h2>{{ page.title }}</h2>
+  {% for category in categories %}
+    <div class="category">
+      <h2>{{ category.title }}</h2>
     </div>
   {% endfor %}
 {% endCategories %}`,
@@ -740,13 +740,141 @@ export class TemplatesPage {
         {
           title: '多条件组合筛选页面',
           code: `{% Categories title="服务" alias="service" status=10 %}
+  {% for category in categories %}
+    <div class="category">
+      <h2>{{ category.title }}</h2>
+    </div>
+  {% endfor %}
+{% endCategories %}`,
+          description: '按标题、别名和状态组合筛选页面。'
+        }
+      ]
+    },
+    {
+      name: 'CategoryItem',
+      desc: '获取单个分类',
+      usage: '{% CategoryItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '分类ID' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '分类标题' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取分类',
+          code: `{% CategoryItem id=1 %}
+  <h2>{{ category.title }}</h2>
+  <p>{{ category.description }}</p>
+{% endCategoryItem %}`,
+          description: '通过分类ID获取分类详细信息'
+        },
+        {
+          title: '通过标题获取分类',
+          code: `{% CategoryItem title="技术" %}
+  <h2>{{ category.title }}</h2>
+  <p>{{ category.description }}</p>
+{% endCategoryItem %}`,
+          description: '通过标题模糊搜索获取分类'
+        }
+      ]
+    },
+    {
+      name: 'Pages',
+      desc: '获取页面列表，支持多种查询条件',
+      usage:
+        '{% Pages limit=20 page=1 page_size=10 title="search" alias=search status=10 start_time=16499520 end_time=16499520 %}...{% endPages %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '限制返回数量，默认20'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标题搜索'
+        },
+        {
+          name: 'alias',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按别名搜索'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部页面',
+          code: `{% Pages limit=20 %}
+  {% for page in pages %}
+    <div class="page">
+      <h2>{{ page.title }}</h2>
+      <p>{{ page.content }}</p>
+    </div>
+  {% endfor %}
+{% endPages %}`,
+          description: '获取前20个页面的全部内容'
+        },
+        {
+          title: '按别名筛选页面',
+          code: `{% Pages alias="about" %}
   {% for page in pages %}
     <div class="page">
       <h2>{{ page.title }}</h2>
     </div>
   {% endfor %}
-{% endCategories %}`,
-          description: '按标题、别名和状态组合筛选页面。'
+{% endPages %}`,
+          description: '只获取别名为 about 的页面'
+        },
+        {
+          title: '分页获取页面',
+          code: `{% Pages page=2 page_size=5 %}
+  {% for page in pages %}
+    <div class="page">
+      <h2>{{ page.title }}</h2>
+    </div>
+  {% endfor %}
+  <p>当前页: {{ pages_pagination.page }}</p>
+{% endPages %}`,
+          description: '获取第2页，每页5条，并显示分页信息'
         }
       ]
     },
@@ -2552,6 +2680,774 @@ export class TemplatesPage {
   </div>
 {% endRuleItem %}`,
           description: '通过别名获取规则信息。'
+        }
+      ]
+    },
+    {
+      name: 'Users',
+      desc: '获取用户列表，支持多种查询条件',
+      usage:
+        '{% Users limit=20 page=1 page_size=10 username="search" email=search type_id=1 status=10 start_time=1640995200 end_time=164995200000}...{% endUsers %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '限制返回数量，默认20'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'username',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按用户名搜索'
+        },
+        {
+          name: 'email',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按邮箱搜索'
+        },
+        {
+          name: 'type_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按用户类型过滤'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部用户',
+          code: `{% Users limit=20 %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+      <p>{{ user.email }}</p>
+    </div>
+  {% endfor %}
+{% endUsers %}`,
+          description: '获取前20个用户。'
+        },
+        {
+          title: '按用户名搜索',
+          code: `{% Users username="admin" %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+      <p>{{ user.email }}</p>
+    </div>
+  {% endfor %}
+{% endUsers %}`,
+          description: '按用户名模糊搜索用户'
+        },
+        {
+          title: '按邮箱搜索',
+          code: `{% Users email=example.com %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+      <p>{{ user.email }}</p>
+    </div>
+  {% endfor %}
+{% endUsers %}`,
+          description: '按邮箱模糊搜索用户'
+        },
+        {
+          title: '按用户类型筛选',
+          code: `{% Users type_id=1 limit=10 %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+      <p>Type: {{ user.type_name }}</p>
+    </div>
+  {% endfor %}
+{% endUsers %}`,
+          description: '获取指定类型的用户'
+        },
+        {
+          title: '分页获取用户',
+          code: `{% Users page=2 page_size=5 %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+    </div>
+  {% endfor %}
+  <p>当前页: {{ users_pagination.page }}</p>
+{% endUsers %}`,
+          description: '获取第2页，每页5条，并显示分页信息'
+        },
+        {
+          title: '按时间范围筛选',
+          code: `{% Users start_time=1704067200 end_time=1706745600000 %}
+  {% for user in users %}
+    <div class="user">
+      <h4>{{ user.username }}</h4>
+      <p>注册时间: {{ user.create_time | date('YYYY-MM-DD') }}</p>
+    </div>
+  {% endfor %}
+{% endUsers %}`,
+          description: '获取指定时间段内注册的用户'
+        }
+      ]
+    },
+    {
+      name: 'UserItem',
+      desc: '获取单个用户',
+      usage: '{% UserItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '用户ID' },
+        { name: 'username', type: 'string', required: false, default: '-', description: '用户名' },
+        { name: 'email', type: 'string', required: false, default: '-', description: '邮箱' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取用户',
+          code: `{% UserItem id=1 %}
+  <div class="user">
+    <h4>{{ user.username }}</h4>
+    <p>{{ user.email }}</p>
+  </div>
+{% endUserItem %}`,
+          description: '通过用户ID获取用户详细信息'
+        },
+        {
+          title: '通过用户名获取用户',
+          code: `{% UserItem username="admin" %}
+  <div class="user">
+    <h4>{{ user.username }}</h4>
+    <p>{{ user.email }}</p>
+  </div>
+{% endUserItem %}`,
+          description: '通过用户名获取用户信息'
+        },
+        {
+          title: '通过邮箱获取用户',
+          code: `{% UserItem email=admin@example.com %}
+  <div class="user">
+    <h4>{{ user.username }}</h4>
+    <p>{{ user.email }}</p>
+  </div>
+{% endUserItem %}`,
+          description: '通过邮箱获取用户信息'
+        }
+      ]
+    },
+    {
+      name: 'Tags',
+      desc: '获取标签列表，支持多种查询条件',
+      usage:
+        '{% Tags limit=50 page=1 page_size=20 title="search" status=10 start_time=1640995200 end_time=1649952000 %}...{% endTags %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '50',
+          description: '限制返回数量，默认50'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标题搜索'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部标签',
+          code: `{% Tags limit=50 %}
+  {% for tag in tags %}
+    <span class="tag">{{ tag.title }}</span>
+  {% endfor %}
+{% endTags %}`,
+          description: '获取前50个标签。'
+        },
+        {
+          title: '按标题搜索标签',
+          code: `{% Tags title="技术" %}
+  {% for tag in tags %}
+    <span class="tag">{{ tag.title }}</span>
+  {% endfor %}
+{% endTags %}`,
+          description: '按标题模糊搜索标签'
+        },
+        {
+          title: '分页获取标签',
+          code: `{% Tags page=2 page_size=10 %}
+  {% for tag in tags %}
+    <span class="tag">{{ tag.title }}</span>
+  {% endfor %}
+  <p>当前页: {{ tags_pagination.page }}</p>
+{% endTags %}`,
+          description: '获取第2页，每页10条，并显示分页信息。'
+        }
+      ]
+    },
+    {
+      name: 'TagItem',
+      desc: '获取单个标签',
+      usage: '{% TagItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '标签ID' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '标签标题' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取标签',
+          code: `{% TagItem id=1 %}
+  <span class="tag">{{ tag.title }}</span>
+  <p>{{ tag.description }}</p>
+{% endTagItem %}`,
+          description: '通过标签ID获取标签详细信息'
+        },
+        {
+          title: '通过标题获取标签',
+          code: `{% TagItem title="技术" %}
+  <span class="tag">{{ tag.title }}</span>
+{% endTagItem %}`,
+          description: '通过标题获取标签信息'
+        }
+      ]
+    },
+    {
+      name: 'Comments',
+      desc: '获取评论列表，支持多种查询条件',
+      usage:
+        '{% Comments limit=20 page=1 page_size=10 t="search" article_id=1 user_id=1 status=10 start_time=1640995200 end_time=164995200000 %}...{% endComments %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '限制返回数量，默认20'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'content',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按内容搜索'
+        },
+        {
+          name: 'article_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按文章ID过滤'
+        },
+        {
+          name: 'user_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按用户ID过滤'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部评论',
+          code: `{% Comments limit=20 %}
+  {% for comment in comments %}
+    <div class="comment">
+      <p>{{ comment.content }}</p>
+      <small>By: {{ comment.user_name }}</small>
+    </div>
+  {% endfor %}
+{% endComments %}`,
+          description: '获取前20条评论'
+        },
+        {
+          title: '按文章获取评论',
+          code: `{% Comments article_id=1 limit=10 %}
+  {% for comment in comments %}
+    <div class="comment">
+      <p>{{ comment.content }}</p>
+      <small>By: {{ comment.user_name }}</small>
+    </div>
+  {% endfor %}
+{% endComments %}`,
+          description: '获取指定文章的评论'
+        },
+        {
+          title: '按用户获取评论',
+          code: `{% Comments user_id=1 limit=10 %}
+  {% for comment in comments %}
+    <div class="comment">
+      <p>{{ comment.content }}</p>
+      <small>On: {{ comment.article_title }}</small>
+    </div>
+  {% endfor %}
+{% endComments %}`,
+          description: '获取指定用户的评论'
+        }
+      ]
+    },
+    {
+      name: 'CommentItem',
+      desc: '获取单个评论',
+      usage: '{% CommentItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '评论ID' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取评论',
+          code: `{% CommentItem id=1 %}
+  <div class="comment">
+    <p>{{ comment.content }}</p>
+    <small>By: {{ comment.user_name }}</small>
+  </div>
+{% endCommentItem %}`,
+          description: '通过评论ID获取评论详细信息'
+        }
+      ]
+    },
+    {
+      name: 'Links',
+      desc: '获取链接列表，支持多种查询条件',
+      usage:
+        '{% Links limit=20 page=1 page_size=10 title="search" url=search status=10 start_time=1640995200 end_time=1649952000 %}...{% endLinks %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '限制返回数量，默认20'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标题搜索'
+        },
+        {
+          name: 'url',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按URL搜索'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部链接',
+          code: `{% Links limit=20 %}
+  {% for link in links %}
+    <a href="{{ link.url }}">{{ link.title }}</a>
+  {% endfor %}
+{% endLinks %}`,
+          description: '获取前20个链接'
+        },
+        {
+          title: '按标题搜索链接',
+          code: `{% Links title="友情链接" %}
+  {% for link in links %}
+    <a href="{{ link.url }}">{{ link.title }}</a>
+  {% endfor %}
+{% endLinks %}`,
+          description: '按标题模糊搜索链接'
+        }
+      ]
+    },
+    {
+      name: 'LinkItem',
+      desc: '获取单个链接',
+      usage: '{% LinkItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '链接ID' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '链接标题' },
+        { name: 'url', type: 'string', required: false, default: '-', description: '链接URL' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取链接',
+          code: `{% LinkItem id=1 %}
+  <a href="{{ link.url }}">{{ link.title }}</a>
+  <p>{{ link.description }}</p>
+{% endLinkItem %}`,
+          description: '通过链接ID获取链接详细信息'
+        },
+        {
+          title: '通过标题获取链接',
+          code: `{% LinkItem title="首页" %}
+  <a href="{{ link.url }}">{{ link.title }}</a>
+{% endLinkItem %}`,
+          description: '通过标题获取链接信息'
+        }
+      ]
+    },
+    {
+      name: 'Menus',
+      desc: '获取菜单列表，支持多种查询条件',
+      usage:
+        '{% Menus limit=20 page=1 page_size=10 title="search" parent_id=0 status=10 start_time=1640995200 end_time=1649952000 %}...{% endMenus %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '20',
+          description: '限制返回数量，默认20'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标题搜索'
+        },
+        {
+          name: 'parent_id',
+          type: 'number',
+          required: false,
+          default: '0',
+          description: '父菜单ID，0表示顶级菜单'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部菜单',
+          code: `{% Menus limit=20 %}
+  {% for menu in menus %}
+    <li><a href="{{ menu.url }}">{{ menu.title }}</a></li>
+  {% endfor %}
+{% endMenus %}`,
+          description: '获取前20个菜单项'
+        },
+        {
+          title: '获取顶级菜单',
+          code: `{% Menus parent_id=0 %}
+  {% for menu in menus %}
+    <li><a href="{{ menu.url }}">{{ menu.title }}</a></li>
+  {% endfor %}
+{% endMenus %}`,
+          description: '获取顶级菜单项'
+        }
+      ]
+    },
+    {
+      name: 'MenuItem',
+      desc: '获取单个菜单',
+      usage: '{% MenuItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '菜单ID' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '菜单标题' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取菜单',
+          code: `{% MenuItem id=1 %}
+  <li><a href="{{ menu.url }}">{{ menu.title }}</a></li>
+{% endMenuItem %}`,
+          description: '通过菜单ID获取菜单详细信息'
+        },
+        {
+          title: '通过标题获取菜单',
+          code: `{% MenuItem title="首页" %}
+  <li><a href="{{ menu.url }}">{{ menu.title }}</a></li>
+{% endMenuItem %}`,
+          description: '通过标题获取菜单信息'
+        }
+      ]
+    },
+    {
+      name: 'Notices',
+      desc: '获取公告列表，支持多种查询条件',
+      usage:
+        '{% Notices limit=10 page=1 page_size=5 title="search" content=search status=10 start_time=1640995200 end_time=1649952000 %}...{% endNotices %}',
+      parameters: [
+        {
+          name: 'limit',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '限制返回数量，默认10'
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: false,
+          default: '1',
+          description: '页码，默认1'
+        },
+        {
+          name: 'page_size',
+          type: 'number',
+          required: false,
+          default: '5',
+          description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标题搜索'
+        },
+        {
+          name: 'content',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按内容搜索'
+        },
+        {
+          name: 'status',
+          type: 'number',
+          required: false,
+          default: '10',
+          description: '按状态过滤'
+        },
+        {
+          name: 'start_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '开始时间戳'
+        },
+        {
+          name: 'end_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '结束时间戳'
+        }
+      ],
+      examples: [
+        {
+          title: '获取全部公告',
+          code: `{% Notices limit=10 %}
+  {% for notice in notices %}
+    <div class="notice">
+      <h3>{{ notice.title }}</h3>
+      <p>{{ notice.content }}</p>
+    </div>
+  {% endfor %}
+{% endNotices %}`,
+          description: '获取前10个公告'
+        },
+        {
+          title: '按标题搜索公告',
+          code: `{% Notices title="重要" %}
+  {% for notice in notices %}
+    <div class="notice">
+      <h3>{{ notice.title }}</h3>
+    </div>
+  {% endfor %}
+{% endNotices %}`,
+          description: '按标题模糊搜索公告'
+        }
+      ]
+    },
+    {
+      name: 'NoticeItem',
+      desc: '获取单个公告',
+      usage: '{% NoticeItem id=1 %}',
+      parameters: [
+        { name: 'id', type: 'number', required: true, default: '-', description: '公告ID' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '公告标题' }
+      ],
+      examples: [
+        {
+          title: '通过ID获取公告',
+          code: `{% NoticeItem id=1 %}
+  <div class="notice">
+    <h3>{{ notice.title }}</h3>
+    <p>{{ notice.content }}</p>
+  </div>
+{% endNoticeItem %}`,
+          description: '通过公告ID获取公告详细信息'
+        },
+        {
+          title: '通过标题获取公告',
+          code: `{% NoticeItem title="系统维护" %}
+  <div class="notice">
+    <h3>{{ notice.title }}</h3>
+  </div>
+{% endNoticeItem %}`,
+          description: '通过标题获取公告信息'
         }
       ]
     }
