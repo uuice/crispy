@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button'
 import { MessageModule } from 'primeng/message'
 
 @Component({
-  selector: 'app-home',
+  selector: 'cs-home',
   standalone: true,
   imports: [CardModule, TabViewModule, ButtonModule, MessageModule],
   template: `

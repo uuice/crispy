@@ -13,7 +13,7 @@ import { Component, OnInit } from '@angular/core'
 import { SeoService } from '../../services/seo.service'
 
 @Component({
-  selector: 'app-my-page',
+  selector: 'cs-my-page',
   template: `<div>页面内容</div>`
 })
 export class MyPageComponent implements OnInit {
@@ -43,7 +43,7 @@ import { Component } from '@angular/core'
 import { SeoDirective } from '../../directives/seo.directive'
 
 @Component({
-  selector: 'app-home',
+  selector: 'cs-home',
   template: `
     <div csSeo="home">
       <!-- 页面内容 -->
@@ -59,7 +59,7 @@ export class HomeComponent {}
 
 ```typescript
 @Component({
-  selector: 'app-article',
+  selector: 'cs-article',
   template: `
     <div [csSeo]="articleSeo">
       <!-- 页面内容 -->
@@ -184,7 +184,7 @@ ngOnDestroy(): void {
 
 ```typescript
 @Component({
-  selector: 'app-article-detail',
+  selector: 'cs-article-detail',
   template: `<div>文章内容</div>`
 })
 export class ArticleDetailComponent implements OnInit {
@@ -216,7 +216,7 @@ export class ArticleDetailComponent implements OnInit {
 
 ```typescript
 @Component({
-  selector: 'app-category',
+  selector: 'cs-category',
   template: `<div>分类内容</div>`
 })
 export class CategoryComponent implements OnInit {

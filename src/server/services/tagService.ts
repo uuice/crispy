@@ -262,6 +262,43 @@ export class TagService {
       .orderBy('create_time', 'desc')
       .execute()
   }
+
+  /**
+   * Upsert tags by name array. Insert if not exists. type_id=7, title/value/des all use name.
+   */
+  async upsertTags(names: string[]): Promise<void> {
+    const uniqueNames = Array.from(new Set(names.map((t) => t.trim()).filter(Boolean)))
+    if (uniqueNames.length === 0) return
+
+    // 查询已存在的 name
+    const existRows = await db
+      .selectFrom('tags')
+      .select('value')
+      .where('value', 'in', uniqueNames)
+      .where('is_delete', '=', 0)
+      .execute()
+    const existNames = new Set(existRows.map((row) => row.value))
+
+    // 过滤出不存在的
+    const toInsert = uniqueNames.filter((name) => !existNames.has(name))
+    if (toInsert.length === 0) return
+
+    await db
+      .insertInto('tags')
+      .values(
+        toInsert.map((name) => ({
+          title: name,
+          value: name,
+          des: name,
+          type_id: 7,
+          status: 10,
+          create_time: Date.now(),
+          update_time: Date.now(),
+          is_delete: 0
+        }))
+      )
+      .execute()
+  }
 }
 
 // Export service instance

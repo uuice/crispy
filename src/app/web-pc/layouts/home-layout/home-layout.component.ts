@@ -13,6 +13,7 @@ import { SettingsService } from '../../services/settings.service'
 import { DrawerModule } from 'primeng/drawer'
 import { SelectButtonModule } from 'primeng/selectbutton'
 import { FormsModule } from '@angular/forms'
+import { ScrollTopModule } from 'primeng/scrolltop'
 
 @Component({
   selector: 'cs-home-layout',
@@ -29,7 +30,8 @@ import { FormsModule } from '@angular/forms'
     TooltipModule,
     DrawerModule,
     SelectButtonModule,
-    FormsModule
+    FormsModule,
+    ScrollTopModule
   ],
   template: `
     <div class="home-layout">
@@ -166,6 +168,7 @@ import { FormsModule } from '@angular/forms'
           </div>
         </div>
       </footer>
+      <p-scrollTop [threshold]="200" icon="pi pi-arrow-up" styleClass="global-scrolltop" />
     </div>
   `,
   styles: [
@@ -206,8 +209,8 @@ import { FormsModule } from '@angular/forms'
         margin: 0 auto;
         padding: 0 1rem;
         display: flex;
-        overflow-x: hidden;
-        overflow-y: auto;
+        // overflow-x: hidden;
+        // overflow-y: auto;
       }
       .footer {
         background: var(--p-surface-section);
@@ -350,6 +353,14 @@ import { FormsModule } from '@angular/forms'
       .p-selectbutton .p-button {
         font-size: 0.95rem;
         padding: 0.3rem 1.2rem;
+      }
+    `,
+    // New styles for ScrollTopModule
+    `
+      :host ::ng-deep .global-scrolltop {
+        z-index: 9999;
+        right: 32px;
+        bottom: 48px;
       }
     `
   ]

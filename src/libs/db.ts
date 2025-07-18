@@ -49,8 +49,15 @@ export const createDbWithHelpers = (kyselyInstance: Kysely<DB>) => {
   enhanced.safeInsertInto = <T extends keyof DB>(table: T) => {
     return {
       values: (data: any) => {
-        const filteredData = filterUndefined(data) as any
-        return kyselyInstance.insertInto(table).values(filteredData)
+        if (Array.isArray(data)) {
+          // If data is an array, filter each object and cast to correct type
+          return kyselyInstance
+            .insertInto(table)
+            .values(data.map((item: any) => filterUndefined(item)) as any)
+        } else {
+          // Single object
+          return kyselyInstance.insertInto(table).values(filterUndefined(data) as any)
+        }
       }
     }
   }

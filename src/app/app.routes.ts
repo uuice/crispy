@@ -35,6 +35,15 @@ export const routes: Routes = [
       {
         path: 'data-models',
         loadComponent: () => import('./web-pc/pages/data-models.page').then((m) => m.DataModelsPage)
+      },
+      {
+        path: 'daily-lib',
+        loadComponent: () => import('./web-pc/pages/daily-lib.page').then((m) => m.DailyLibPage)
+      },
+      {
+        path: 'daily-lib/:url',
+        loadComponent: () =>
+          import('./web-pc/pages/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
       }
     ]
   },

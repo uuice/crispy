@@ -67,7 +67,7 @@ interface ThemeOption {
 }
 
 @Component({
-  selector: 'app-settings',
+  selector: 'cs-settings',
   standalone: true,
   imports: [
     CommonModule,

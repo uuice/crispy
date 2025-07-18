@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button'
 import { CommonModule } from '@angular/common'
 
 @Component({
-  selector: 'app-templates',
+  selector: 'cs-templates',
   standalone: true,
   imports: [CardModule, TabViewModule, TableModule, ButtonModule, CommonModule],
   template: `

@@ -2,6 +2,7 @@ import { db } from '@src/libs/db'
 import { sql, ExpressionBuilder } from 'kysely'
 import type { DB } from '@src/db/db.d'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
+import { tagService } from './tagService'
 
 export interface CreateArticleData {
   title: string
@@ -218,6 +219,15 @@ export class ArticleService {
       }
     }
 
+    // 新增：处理 tags
+    if (data.tags) {
+      const tagsArr = data.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      await tagService.upsertTags(tagsArr)
+    }
+
     const now = Date.now()
     const newArticle = {
       ...data,
@@ -251,6 +261,14 @@ export class ArticleService {
       ...data,
       type_id: data.type_id,
       update_time: Date.now()
+    }
+
+    if (updateData.tags) {
+      const tagsArr = updateData.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      await tagService.upsertTags(tagsArr)
     }
 
     const result = await db

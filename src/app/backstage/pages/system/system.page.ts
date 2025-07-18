@@ -18,7 +18,7 @@ interface Dependency {
 }
 
 @Component({
-  selector: 'app-system',
+  selector: 'cs-system',
   standalone: true,
   imports: [CommonModule, CardModule, TableModule, AccordionModule, ToastModule],
   providers: [MessageService],

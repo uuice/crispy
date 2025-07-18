@@ -1,5 +1,6 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
+import { tagService } from './tagService'
 
 // Data interfaces
 export interface CreatePageData {
@@ -243,6 +244,14 @@ export class PageService {
    * Create new page
    */
   async createPage(data: CreatePageData): Promise<Page> {
+    // 新增：处理 tags
+    if (data.tags) {
+      const tagsArr = data.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      await tagService.upsertTags(tagsArr)
+    }
     const now = Date.now()
     const newPage = {
       ...data,
@@ -266,6 +275,14 @@ export class PageService {
     const updateData = {
       ...data,
       update_time: Date.now()
+    }
+
+    if (updateData.tags) {
+      const tagsArr = updateData.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      await tagService.upsertTags(tagsArr)
     }
 
     const result = await db

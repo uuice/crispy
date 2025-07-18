@@ -18,7 +18,7 @@ import { HttpService } from '../../services/http.service'
 import { finalize } from 'rxjs/operators'
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'cs-login-page',
   standalone: true,
   imports: [
     CommonModule,

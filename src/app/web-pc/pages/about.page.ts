@@ -5,7 +5,7 @@ import { TabViewModule } from 'primeng/tabview'
 import { HttpService } from '../services/http.service'
 
 @Component({
-  selector: 'app-about',
+  selector: 'cs-about',
   standalone: true,
   imports: [CardModule, TableModule, TabViewModule],
   template: `

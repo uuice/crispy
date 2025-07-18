@@ -3,7 +3,7 @@ import { CardModule } from 'primeng/card'
 import { AccordionModule } from 'primeng/accordion'
 
 @Component({
-  selector: 'app-migration',
+  selector: 'cs-migration',
   standalone: true,
   imports: [CardModule, AccordionModule],
   template: `

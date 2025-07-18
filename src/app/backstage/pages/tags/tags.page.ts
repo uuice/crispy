@@ -14,7 +14,7 @@ import { HttpService } from '../../services/http.service'
 import { TagDetailComponent, Tag } from './tag-detail.component'
 
 @Component({
-  selector: 'app-tags',
+  selector: 'cs-tags',
   standalone: true,
   imports: [
     CommonModule,

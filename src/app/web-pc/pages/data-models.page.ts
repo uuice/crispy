@@ -1745,7 +1745,7 @@ const TABLES = [
 ]
 
 @Component({
-  selector: 'app-data-models',
+  selector: 'cs-data-models',
   standalone: true,
   imports: [CardModule, TableModule, ButtonModule, CommonModule],
   template: `

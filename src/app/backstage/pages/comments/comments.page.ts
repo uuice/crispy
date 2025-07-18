@@ -18,7 +18,7 @@ import { TextareaModule } from 'primeng/textarea'
 import { SelectModule } from 'primeng/select'
 
 @Component({
-  selector: 'app-comments',
+  selector: 'cs-comments',
   standalone: true,
   imports: [
     CommonModule,

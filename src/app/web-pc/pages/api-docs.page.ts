@@ -4,7 +4,7 @@ import { TabViewModule } from 'primeng/tabview'
 import { ButtonModule } from 'primeng/button'
 
 @Component({
-  selector: 'app-api-docs',
+  selector: 'cs-api-docs',
   standalone: true,
   imports: [CardModule, TabViewModule, ButtonModule],
   template: `
