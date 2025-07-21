@@ -262,9 +262,17 @@ export interface Articles {
    */
   is_delete: Generated<number>;
   /**
+   * 是否是markdown 内容
+   */
+  is_markdown: Generated<number>;
+  /**
    * 是否需要审核 10需要 -10不需要
    */
   is_review: Generated<number>;
+  /**
+   * markdown 内容
+   */
+  markdown_content: Generated<string>;
   /**
    * 跳转链接
    */
@@ -931,6 +939,14 @@ export interface Pages {
    * 是否删除
    */
   is_delete: Generated<number>;
+  /**
+   * 是否是markdown 内容
+   */
+  is_markdown: Generated<number>;
+  /**
+   * markdown 内容
+   */
+  markdown_content: Generated<string>;
   /**
    * 备注
    */

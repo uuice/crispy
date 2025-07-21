@@ -9,6 +9,8 @@ const createArticleSchema = z.object({
   sub_title: z.string().optional(),
   url: z.string().optional(),
   content: z.string().min(1),
+  markdown_content: z.string().optional(),
+  is_markdown: z.number().default(0),
   abstract: z.string().optional(),
   image: z.string().optional(),
   image_list: z.string().optional(),

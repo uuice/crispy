@@ -10,6 +10,8 @@ export interface CreateArticleData {
   sub_title?: string
   abstract?: string
   content: string
+  markdown_content?: string
+  is_markdown?: number
   image?: string
   image_list?: string
   seo_title?: string

@@ -14,6 +14,8 @@ const createPageSchema = z.object({
   url: z.string().optional(),
   alias: z.string().min(1, '别名不能为空'),
   content: z.string().min(1, '内容不能为空'),
+  markdown_content: z.string().optional(),
+  is_markdown: z.number().default(0),
   abstract: z
     .string()
     .optional()

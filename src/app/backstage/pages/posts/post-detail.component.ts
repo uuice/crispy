@@ -23,12 +23,16 @@ import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import { titleToUrl } from '../../../../server/utils/titleToUrl'
+import { VditorEditorComponent } from '../../components/vditor-editor.component'
+import Vditor from 'vditor'
 
 interface Article {
   id: number
   title: string
   url: string
   content: string
+  markdown_content?: string
+  is_markdown?: number
   abstract?: string
   sub_title?: string
   seo_title?: string
@@ -85,7 +89,8 @@ interface CategoriesResponse {
     ToastModule,
     MessageModule,
     ChipsModule,
-    EditorModule
+    EditorModule,
+    VditorEditorComponent
   ],
   providers: [MessageService],
   template: `
@@ -159,23 +164,47 @@ interface CategoriesResponse {
         </div>
 
         <div class="field">
-          <label for="content" class="block text-900 font-medium mb-2">内容 *</label>
-          <p-editor
-            id="content"
-            formControlName="content"
-            [style]="{ height: '400px' }"
-            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
-            [modules]="editorModules"
-            #editorRef
-          ></p-editor>
-          <p-message
-            *ngIf="isFieldInvalid('content')"
-            severity="error"
-            [text]="getErrorMessage('content')"
-            styleClass="mt-1"
-          ></p-message>
+          <label for="is_markdown" class="block text-900 font-medium mb-2">是否是markdown</label>
+          <p-select
+            id="is_markdown"
+            [options]="markdownOptions()"
+            formControlName="is_markdown"
+            placeholder="请选择是否是markdown"
+            class="w-full"
+            appendTo="body"
+          ></p-select>
         </div>
 
+        @if (articleForm.get('is_markdown')?.value === 1) {
+          <div class="field">
+            <label for="markdown_content" class="block text-900 font-medium mb-2"
+              >markdown内容</label
+            >
+            <vditor-editor
+              #vditorEditor
+              [value]="articleForm.get('markdown_content')?.value"
+              (valueChange)="articleForm.get('markdown_content')?.setValue($event)"
+            ></vditor-editor>
+          </div>
+        } @else {
+          <div class="field">
+            <label for="content" class="block text-900 font-medium mb-2">内容 *</label>
+            <p-editor
+              id="content"
+              formControlName="content"
+              [style]="{ height: '400px' }"
+              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
+              [modules]="editorModules"
+              #editorRef
+            ></p-editor>
+            <p-message
+              *ngIf="isFieldInvalid('content')"
+              severity="error"
+              [text]="getErrorMessage('content')"
+              styleClass="mt-1"
+            ></p-message>
+          </div>
+        }
         <div class="grid grid-cols-3 gap-4">
           <div class="field">
             <label for="type_id" class="block text-900 font-medium mb-2">分类</label>
@@ -483,6 +512,8 @@ export class PostDetailComponent implements OnInit {
 
   @ViewChild('editorRef') editorComponent!: Editor
 
+  @ViewChild('vditorEditor') vditorEditor!: VditorEditorComponent
+
   public editorModules = {
     toolbar: {
       container: [
@@ -521,7 +552,9 @@ export class PostDetailComponent implements OnInit {
       url: [''],
       sub_title: [''],
       abstract: [''],
-      content: ['', [Validators.required, Validators.minLength(10)]],
+      content: [''],
+      markdown_content: [''],
+      is_markdown: [0],
       type_id: [undefined],
       status: [10], // Default published
       is_review: [-10], // Default no review needed
@@ -573,6 +606,11 @@ export class PostDetailComponent implements OnInit {
     } else {
       this.resetForm()
     }
+
+    // // check is_markdown
+    // if (this.articleForm.get('is_markdown')?.value === 1) {
+    //   debugger
+    // }
 
     // Log form status changes for debugging
     this.articleForm.statusChanges.subscribe(() => {
@@ -635,6 +673,13 @@ export class PostDetailComponent implements OnInit {
     ]
   }
 
+  markdownOptions() {
+    return [
+      { label: '否', value: 0 },
+      { label: '是', value: 1 }
+    ]
+  }
+
   loadFormData(article: Article) {
     // Convert tags string to array for chips component
     const tags = article.tags
@@ -658,6 +703,8 @@ export class PostDetailComponent implements OnInit {
       sub_title: article.sub_title || '',
       abstract: article.abstract || '',
       content: article.content,
+      markdown_content: article.markdown_content || '',
+      is_markdown: article.is_markdown || 0,
       type_id: article.type_id || null,
       status: article.status,
       is_review: article.is_review || -10,
@@ -681,6 +728,7 @@ export class PostDetailComponent implements OnInit {
       status: 10,
       is_review: -10,
       tags: [],
+      is_markdown: 1,
       image_list: []
     })
     this.articleForm.enable()
@@ -712,7 +760,7 @@ export class PostDetailComponent implements OnInit {
     this.cancelled.emit()
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.articleForm.valid) {
       this.submitting.set(true)
       const formData = this.articleForm.value
@@ -743,6 +791,13 @@ export class PostDetailComponent implements OnInit {
         type_id: formData.type_id || 0,
         author_id: formData.author_id || 0,
         user_id: formData.user_id || 0
+      }
+
+      if (this.articleForm.get('is_markdown')?.value === 1) {
+        sanitizedData.content = await Vditor.md2html(sanitizedData.markdown_content, {
+          cdn: '',
+          mode: 'light'
+        })
       }
 
       const articleData: Partial<Article> = {

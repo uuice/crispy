@@ -23,6 +23,8 @@ interface Article {
   title: string
   url: string
   content: string
+  markdown_content?: string
+  is_markdown?: number
   abstract?: string
   sub_title?: string
   seo_title?: string

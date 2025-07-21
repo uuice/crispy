@@ -30,6 +30,8 @@ interface Page {
   url: string
   alias: string
   content: string
+  markdown_content?: string
+  is_markdown?: number
   abstract?: string
   sub_title?: string
   seo_title?: string
@@ -467,6 +469,8 @@ export class PageDetailComponent implements OnInit {
       sub_title: [''],
       abstract: [''],
       content: ['', [Validators.required, Validators.minLength(10)]],
+      markdown_content: [''],
+      is_markdown: [0],
       type_id: [undefined],
       status: [10],
       tags: [[]],
@@ -593,6 +597,8 @@ export class PageDetailComponent implements OnInit {
       sub_title: page.sub_title || '',
       abstract: page.abstract || '',
       content: page.content,
+      markdown_content: page.markdown_content || '',
+      is_markdown: page.is_markdown || 0,
       type_id: page.type_id || null,
       status: page.status,
       tags: tags,
