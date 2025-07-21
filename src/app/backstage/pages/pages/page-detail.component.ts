@@ -23,6 +23,8 @@ import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import { titleToUrl } from '@src/server/utils/titleToUrl'
+import Vditor from 'vditor'
+import { VditorEditorComponent } from '../../components/vditor-editor.component'
 
 interface Page {
   id: number
@@ -82,7 +84,8 @@ interface CategoriesResponse {
     ToastModule,
     MessageModule,
     ChipsModule,
-    EditorModule
+    EditorModule,
+    VditorEditorComponent
   ],
   providers: [MessageService],
   template: `
@@ -177,22 +180,47 @@ interface CategoriesResponse {
         </div>
 
         <div class="field">
-          <label for="content" class="block text-900 font-medium mb-2">内容 *</label>
-          <p-editor
-            id="content"
-            formControlName="content"
-            [style]="{ height: '300px' }"
-            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
-            [modules]="editorModules"
-            #editorRef
-          ></p-editor>
-          <p-message
-            *ngIf="isFieldInvalid('content')"
-            severity="error"
-            [text]="getErrorMessage('content')"
-            styleClass="mt-1"
-          ></p-message>
+          <label for="is_markdown" class="block text-900 font-medium mb-2">是否使用markdown</label>
+          <p-select
+            id="is_markdown"
+            [options]="markdownOptions()"
+            formControlName="is_markdown"
+            placeholder="请选择是否使用markdown"
+            class="w-full"
+            appendTo="body"
+          ></p-select>
         </div>
+
+        @if (pageForm.get('is_markdown')?.value === 1) {
+          <div class="field">
+            <label for="markdown_content" class="block text-900 font-medium mb-2"
+              >markdown内容</label
+            >
+            <vditor-editor
+              #vditorEditor
+              [value]="pageForm.get('markdown_content')?.value"
+              (valueChange)="pageForm.get('markdown_content')?.setValue($event)"
+            ></vditor-editor>
+          </div>
+        } @else {
+          <div class="field">
+            <label for="content" class="block text-900 font-medium mb-2">内容 *</label>
+            <p-editor
+              id="content"
+              formControlName="content"
+              [style]="{ height: '300px' }"
+              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('content') }"
+              [modules]="editorModules"
+              #editorRef
+            ></p-editor>
+            <p-message
+              *ngIf="isFieldInvalid('content')"
+              severity="error"
+              [text]="getErrorMessage('content')"
+              styleClass="mt-1"
+            ></p-message>
+          </div>
+        }
 
         <div class="grid grid-cols-2 gap-4">
           <div class="field">
@@ -430,6 +458,8 @@ export class PageDetailComponent implements OnInit {
 
   @ViewChild('editorRef') editorComponent!: Editor
 
+  @ViewChild('vditorEditor') vditorEditor!: VditorEditorComponent
+
   public editorModules = {
     toolbar: {
       container: [
@@ -468,7 +498,7 @@ export class PageDetailComponent implements OnInit {
       alias: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       sub_title: [''],
       abstract: [''],
-      content: ['', [Validators.required, Validators.minLength(10)]],
+      content: [''],
       markdown_content: [''],
       is_markdown: [0],
       type_id: [undefined],
@@ -573,6 +603,13 @@ export class PageDetailComponent implements OnInit {
     ]
   }
 
+  markdownOptions() {
+    return [
+      { label: '是', value: 1 },
+      { label: '否', value: 0 }
+    ]
+  }
+
   loadFormData(page: Page) {
     // Convert tags string to array for chips component
     const tags = page.tags
@@ -618,6 +655,7 @@ export class PageDetailComponent implements OnInit {
     this.pageForm.reset({
       status: 10,
       tags: [],
+      is_markdown: 1,
       image_list: []
     })
     this.pageForm.enable()
@@ -649,7 +687,7 @@ export class PageDetailComponent implements OnInit {
     this.cancelled.emit()
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.pageForm.valid) {
       this.submitting.set(true)
       const formData = this.pageForm.value
@@ -678,6 +716,13 @@ export class PageDetailComponent implements OnInit {
         type_id: formData.type_id || 0,
         author_id: formData.author_id || 0,
         user_id: formData.user_id || 0
+      }
+
+      if (this.pageForm.get('is_markdown')?.value === 1) {
+        sanitizedData.content = await Vditor.md2html(sanitizedData.markdown_content, {
+          cdn: '',
+          mode: 'light'
+        })
       }
 
       const pageData: Partial<Page> = {
