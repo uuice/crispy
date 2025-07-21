@@ -1745,7 +1745,7 @@ const TABLES = [
 ]
 
 @Component({
-  selector: 'cs-data-models',
+  selector: 'cs-doc-data-models',
   standalone: true,
   imports: [CardModule, TableModule, ButtonModule, CommonModule],
   template: `
@@ -1985,7 +1985,7 @@ const TABLES = [
     `
   ]
 })
-export class DataModelsPage {
+export class DocDataModelsPage {
   tables = TABLES
   expandedRows: any = Object.fromEntries(TABLES.map((t) => [t.name, true]))
 

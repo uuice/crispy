@@ -3,7 +3,7 @@ import { CardModule } from 'primeng/card'
 import { AccordionModule } from 'primeng/accordion'
 
 @Component({
-  selector: 'cs-migration',
+  selector: 'cs-doc-migration',
   standalone: true,
   imports: [CardModule, AccordionModule],
   template: `
@@ -62,6 +62,6 @@ import { AccordionModule } from 'primeng/accordion'
     `
   ]
 })
-export class MigrationPage {
+export class DocMigrationPage {
   readonly migrationExampleCode = `// migrations/001_initial_schema.ts<br>import { Kysely, Migration } from 'kysely';<br>export async function up(db: Kysely<any>): Promise<void> {<br>&nbsp;&nbsp;await db.schema.createTable('users')<br>&nbsp;&nbsp;&nbsp;&nbsp;.addColumn('id', 'integer', col => col.primaryKey().autoIncrement())<br>&nbsp;&nbsp;&nbsp;&nbsp;.addColumn('user_name', 'varchar', col => col.notNull())<br>&nbsp;&nbsp;&nbsp;&nbsp;.addColumn('password', 'varchar', col => col.notNull())<br>&nbsp;&nbsp;&nbsp;&nbsp;.execute();<br>}<br>export async function down(db: Kysely<any>): Promise<void> {<br>&nbsp;&nbsp;await db.schema.dropTable('users').execute();<br>}`
 }

@@ -3,27 +3,19 @@ import { RenderMode, ServerRoute } from '@angular/ssr'
 export const serverRoutes: ServerRoute[] = [
   {
     path: '',
-    renderMode: RenderMode.Prerender
+    renderMode: RenderMode.Server
   },
   {
-    path: 'about',
-    renderMode: RenderMode.Prerender
+    path: 'archives',
+    renderMode: RenderMode.Server
   },
   {
-    path: 'migration',
-    renderMode: RenderMode.Prerender
+    path: 'archives/:url',
+    renderMode: RenderMode.Server
   },
   {
-    path: 'api-docs',
-    renderMode: RenderMode.Prerender
-  },
-  {
-    path: 'templates',
-    renderMode: RenderMode.Prerender
-  },
-  {
-    path: 'data-models',
-    renderMode: RenderMode.Prerender
+    path: 'links',
+    renderMode: RenderMode.Server
   },
   {
     path: 'daily-lib',
@@ -33,6 +25,48 @@ export const serverRoutes: ServerRoute[] = [
     path: 'daily-lib/:url',
     renderMode: RenderMode.Server
   },
+  {
+    path: 'categories/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'tags/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'pages/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'about',
+    renderMode: RenderMode.Server
+  },
+
+  {
+    path: 'doc',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'doc/about',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'doc/migration',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'doc/api-docs',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'doc/templates',
+    renderMode: RenderMode.Prerender
+  },
+  {
+    path: 'doc/data-models',
+    renderMode: RenderMode.Prerender
+  },
+
   {
     path: '**',
     renderMode: RenderMode.Client

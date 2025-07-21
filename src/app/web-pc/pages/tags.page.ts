@@ -1,10 +1,10 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-about',
+  selector: 'cs-tags',
   standalone: true,
-  template: ` <h1>关于</h1> `
+  template: ` <h1>标签</h1> `
 })
-export class AboutPage {
+export class TagsPage {
   // Add properties and methods for login here
 }

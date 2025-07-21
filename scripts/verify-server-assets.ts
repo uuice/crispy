@@ -72,7 +72,7 @@ function getFilesRecursive(dir: string, extensions?: string[]): FileInfo[] {
       const subFiles = getFilesRecursive(itemPath, extensions)
       files.push(...subFiles)
     } else if (stat.isFile()) {
-      if (!extensions || extensions.some(ext => item.endsWith(ext))) {
+      if (!extensions || extensions.some((ext) => item.endsWith(ext))) {
         files.push({
           name: item,
           path: itemPath,
@@ -139,7 +139,7 @@ function verifyAsset(asset: AssetConfig): VerifyResult {
   let differentCount = 0
 
   for (const sourceFile of sourceFiles) {
-    const targetFile = targetFiles.find(f => f.relativePath === sourceFile.relativePath)
+    const targetFile = targetFiles.find((f) => f.relativePath === sourceFile.relativePath)
 
     if (!targetFile) {
       console.log(`   ❌ 缺失: ${sourceFile.relativePath}`)
@@ -157,18 +157,20 @@ function verifyAsset(asset: AssetConfig): VerifyResult {
   }
 
   // 检查额外文件
-  const extraFiles = targetFiles.filter(tf => 
-    !sourceFiles.find(sf => sf.relativePath === tf.relativePath)
+  const extraFiles = targetFiles.filter(
+    (tf) => !sourceFiles.find((sf) => sf.relativePath === tf.relativePath)
   )
 
   if (extraFiles.length > 0) {
     console.log(`   📎 额外文件: ${extraFiles.length}`)
-    extraFiles.forEach(file => {
+    extraFiles.forEach((file) => {
       console.log(`      • ${file.relativePath}`)
     })
   }
 
-  console.log(`   📈 结果: ✅${matchCount} ❌${missingCount} ⚠️${differentCount} 📎${extraFiles.length}`)
+  console.log(
+    `   📈 结果: ✅${matchCount} ❌${missingCount} ⚠️${differentCount} 📎${extraFiles.length}`
+  )
 
   const success = missingCount === 0 && differentCount === 0
   return {
@@ -186,16 +188,16 @@ function showDirectoryTree(dir: string, prefix = '', maxDepth = 3, currentDepth 
 
   try {
     const items = readdirSync(dir).sort()
-    
+
     for (let i = 0; i < items.length; i++) {
       const item = items[i]
       const itemPath = join(dir, item)
       const isLast = i === items.length - 1
       const currentPrefix = isLast ? '└── ' : '├── '
       const nextPrefix = isLast ? '    ' : '│   '
-      
+
       console.log(`${prefix}${currentPrefix}${item}`)
-      
+
       const stat = statSync(itemPath)
       if (stat.isDirectory()) {
         showDirectoryTree(itemPath, prefix + nextPrefix, maxDepth, currentDepth + 1)
@@ -231,7 +233,7 @@ function main(): void {
   for (const asset of assetsToCheck) {
     const result = verifyAsset(asset)
     results.push({ asset: asset.name, ...result })
-    
+
     if (!result.success) {
       allSuccess = false
     }
@@ -242,20 +244,22 @@ function main(): void {
   for (const result of results) {
     const status = result.success ? '✅' : '❌'
     console.log(`${status} ${result.asset}: ${result.reason}`)
-    
+
     if (result.stats) {
       const { matchCount, missingCount, differentCount, extraCount } = result.stats
-      console.log(`   统计: 匹配${matchCount} 缺失${missingCount} 不同${differentCount} 额外${extraCount}`)
+      console.log(
+        `   统计: 匹配${matchCount} 缺失${missingCount} 不同${differentCount} 额外${extraCount}`
+      )
     }
   }
 
   if (allSuccess) {
     console.log(`\n🎉 所有服务端资源验证通过！文件已正确移动到 server 目录。`)
-    
+
     // 显示构建后的目录结构
     console.log(`\n📁 server 目录结构:`)
     showDirectoryTree(serverDir, '', 3)
-    
+
     process.exit(0)
   } else {
     console.log(`\n⚠️  部分资源验证失败！`)

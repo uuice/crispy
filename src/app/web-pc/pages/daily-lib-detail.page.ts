@@ -7,7 +7,7 @@ import { ButtonModule } from 'primeng/button'
 import { url } from 'inspector'
 
 @Component({
-  selector: 'app-daily-lib-detail',
+  selector: 'cs-daily-lib-detail',
   standalone: true,
   imports: [CommonModule, TagModule, ButtonModule],
   template: `

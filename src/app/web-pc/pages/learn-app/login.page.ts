@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-learn-login',
+  selector: 'cs-learn-app-login',
   standalone: true,
   template: `
     <!-- Login Page -->
@@ -9,6 +9,6 @@ import { Component } from '@angular/core'
     <!-- Add login form and logic here -->
   `
 })
-export class LearnLoginPage {
+export class LearnAppLoginPage {
   // Add properties and methods for login here
 }

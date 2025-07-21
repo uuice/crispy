@@ -59,9 +59,7 @@ export function ConfigItem(): void {
       args.addChild(new nodes.Literal(0, 0, ''))
     }
     parser.advanceAfterBlockEnd(tok.value)
-    // const body = parser.parseUntilBlocks('endSysConfigItem') // eng tag
-    // parser.advanceAfterBlockEnd()
-    const body = parser.parseUntilBlocks('endSysConfigItem')
+    const body = parser.parseUntilBlocks('endConfigItem')
     parser.advanceAfterBlockEnd()
     return new nodes.CallExtensionAsync(this, 'run', args, [body]) // async
   }

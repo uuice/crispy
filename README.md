@@ -36,10 +36,11 @@ For more information on using the Angular CLI, including detailed command refere
 ## Links
 
 - **Demo/Test**: [https://crispy.uuice.com](https://crispy.uuice.com)
+- **Document**: [https://crispy.uuice.com/doc](https://crispy.uuice.com/doc)
 - **Documentation**:
-  - Template: [https://crispy.uuice.com/templates](https://crispy.uuice.com/templates)
-  - API: [https://crispy.uuice.com/api-docs](https://crispy.uuice.com/api-docs)
-  - Data Models:[https://crispy.uuice.com/data-models](https://crispy.uuice.com/data-models)
+  - Template: [https://crispy.uuice.com/templates](https://crispy.uuice.com/doc/templates)
+  - API: [https://crispy.uuice.com/api-docs](https://crispy.uuice.com/doc/api-docs)
+  - Data Models:[https://crispy.uuice.com/data-models](https://crispy.uuice.com/doc/data-models)
 
 ## Deploy
 

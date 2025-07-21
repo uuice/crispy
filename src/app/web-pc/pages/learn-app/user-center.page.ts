@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-user-center',
+  selector: 'cs-learn-user-center',
   standalone: true,
   template: `
     <!-- User Center Page -->
@@ -9,6 +9,6 @@ import { Component } from '@angular/core'
     <!-- Add user center content here -->
   `
 })
-export class UserCenterPage {
+export class LearnUserCenterPage {
   // Add properties and methods for user center here
 }

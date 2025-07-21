@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms'
 import { ScrollTopModule } from 'primeng/scrolltop'
 
 @Component({
-  selector: 'cs-home-layout',
+  selector: 'cs-doc-layout',
   standalone: true,
   imports: [
     CommonModule,
@@ -365,7 +365,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
     `
   ]
 })
-export class HomeLayoutComponent implements OnInit {
+export class DocLayoutComponent implements OnInit {
   currentYear = new Date().getFullYear()
   menuItems: MenuItem[] = []
 
@@ -556,43 +556,33 @@ export class HomeLayoutComponent implements OnInit {
       {
         label: '首页',
         icon: 'pi pi-home',
-        routerLink: '/',
+        routerLink: '/doc',
         routerLinkActiveOptions: { exact: true }
       },
       {
-        label: '归档',
-        icon: 'pi pi-archive',
-        routerLink: '/archives'
-      },
-      {
-        label: '友情链接',
-        icon: 'pi pi-link',
-        routerLink: '/links'
-      },
-      {
-        label: '分类',
-        icon: 'pi pi-folder',
-        routerLink: '/categories'
-      },
-      {
-        label: '标签',
-        icon: 'pi pi-tag',
-        routerLink: '/tags'
-      },
-      {
-        label: '页面',
-        icon: 'pi pi-file',
-        routerLink: '/pages'
-      },
-      {
-        label: '每日一库',
-        icon: 'pi pi-book',
-        routerLink: '/daily-lib'
-      },
-      {
         label: '关于',
-        icon: 'pi pi-info-circle',
-        routerLink: '/about'
+        icon: 'pi pi-user',
+        routerLink: '/doc/about'
+      },
+      {
+        label: '迁移',
+        icon: 'pi pi-refresh',
+        routerLink: '/doc/migration'
+      },
+      {
+        label: 'API 文档',
+        icon: 'pi pi-book',
+        routerLink: '/doc/api-docs'
+      },
+      {
+        label: '模版',
+        icon: 'pi pi-code',
+        routerLink: '/doc/templates'
+      },
+      {
+        label: '数据模型',
+        icon: 'pi pi-database',
+        routerLink: '/doc/data-models'
       }
     ]
     // Initialize theme settings

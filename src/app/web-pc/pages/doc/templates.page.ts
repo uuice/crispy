@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button'
 import { CommonModule } from '@angular/common'
 
 @Component({
-  selector: 'cs-templates',
+  selector: 'cs-doc-templates',
   standalone: true,
   imports: [CardModule, TabViewModule, TableModule, ButtonModule, CommonModule],
   template: `
@@ -434,7 +434,7 @@ import { CommonModule } from '@angular/common'
     `
   ]
 })
-export class TemplatesPage {
+export class DocTemplatesPage {
   expandedRows: any = {}
 
   onRowExpand(event: any) {

@@ -59,8 +59,16 @@
   {% endConfig %}
 
   {% ConfigItem alias="SITE_NAME" %}
+    {{ config.value }}
+  {% endConfigItem %}
+
   {% ConfigItem alias="SITE_DESCRIPTION" %}
+    {{ config.value }}
+  {% endConfigItem %}
+  
   {% ConfigItem alias="SITE_KEYWORDS" %}
+    {{ config.value }}
+  {% endConfigItem %}
 
 
   {% block scripts %}{% endblock %}

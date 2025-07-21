@@ -36,12 +36,12 @@ app.post('/api/error-report', express.json(), (req, res) => {
   res.status(200).json({ received: true })
 })
 
-app.get('/admin/swagger.json', (req, res) => {
+app.get('/doc/admin/swagger.json', (req, res) => {
   res.json(adminSpecs)
 })
 
 // Admin Swagger documentation route
-app.get('/admin/docs', (req, res) => {
+app.get('/doc/admin/docs', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -54,7 +54,7 @@ app.get('/admin/docs', (req, res) => {
       <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
       <script>
         SwaggerUIBundle({
-          url: '/admin/swagger.json',
+          url: '/doc/admin/swagger.json',
           dom_id: '#swagger-ui'
         });
       </script>
@@ -63,11 +63,11 @@ app.get('/admin/docs', (req, res) => {
   `)
 })
 
-app.get('/content/swagger.json', (req, res) => {
+app.get('/doc/content/swagger.json', (req, res) => {
   res.json(contentSpecs)
 })
 
-app.get('/content/docs', (req, res) => {
+app.get('/doc/content/docs', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -80,7 +80,7 @@ app.get('/content/docs', (req, res) => {
       <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
       <script>
         SwaggerUIBundle({
-          url: '/content/swagger.json',
+          url: '/doc/content/swagger.json',
           dom_id: '#swagger-ui'
         });
       </script>

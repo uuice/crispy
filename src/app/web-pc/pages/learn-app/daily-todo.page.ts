@@ -10,7 +10,7 @@ interface TodoItem {
 }
 
 @Component({
-  selector: 'cs-daily-todo',
+  selector: 'cs-learn-daily-todo',
   standalone: true,
   imports: [FormsModule, CommonModule],
   template: `
@@ -77,7 +77,7 @@ interface TodoItem {
     <button (click)="printTodos()">Print/Download</button>
   `
 })
-export class DailyTodoPage {
+export class LearnDailyTodoPage {
   // Mock data for todo list
   todoList: TodoItem[] = [
     { id: 1, title: 'Math homework', subject: 'Math', done: false },

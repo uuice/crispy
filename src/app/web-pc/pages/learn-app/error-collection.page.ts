@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-error-collection',
+  selector: 'cs-learn-error-collection',
   standalone: true,
   template: `
     <!-- Error Collection Page -->
@@ -9,6 +9,6 @@ import { Component } from '@angular/core'
     <!-- Add error collection content here -->
   `
 })
-export class ErrorCollectionPage {
+export class LearnErrorCollectionPage {
   // Add properties and methods for error collection here
 }

@@ -1,10 +1,10 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-about',
+  selector: 'cs-archives',
   standalone: true,
-  template: ` <h1>关于</h1> `
+  template: ` <h1>归档</h1> `
 })
-export class AboutPage {
+export class ArchivesPage {
   // Add properties and methods for login here
 }

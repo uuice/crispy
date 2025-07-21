@@ -8,7 +8,7 @@ interface ArchiveItem {
 }
 
 @Component({
-  selector: 'cs-archive-list',
+  selector: 'cs-learn-archive-list',
   standalone: true,
   imports: [FormsModule],
   template: `
@@ -46,7 +46,7 @@ interface ArchiveItem {
     </div>
   `
 })
-export class ArchiveListPage {
+export class LearnArchiveListPage {
   // Mock data for archive list
   archiveList: ArchiveItem[] = [
     { id: 1, title: 'Angular Basics', date: '2024-01-01' },

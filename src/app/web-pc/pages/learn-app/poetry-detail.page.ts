@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 
 @Component({
-  selector: 'cs-poetry-detail',
+  selector: 'cs-learn-poetry-detail',
   standalone: true,
   template: `
     <!-- Poetry Detail Page -->
@@ -9,6 +9,6 @@ import { Component } from '@angular/core'
     <!-- Add poetry detail content here -->
   `
 })
-export class PoetryDetailPage {
+export class LearnPoetryDetailPage {
   // Add properties and methods for poetry detail here
 }

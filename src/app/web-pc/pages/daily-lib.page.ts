@@ -123,7 +123,7 @@ export const DAILY_LIBS: Article[] = [
 ]
 
 @Component({
-  selector: 'app-daily-lib',
+  selector: 'cs-daily-lib',
   standalone: true,
   imports: [
     CommonModule,

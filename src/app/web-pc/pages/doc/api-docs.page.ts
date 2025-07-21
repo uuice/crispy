@@ -4,7 +4,7 @@ import { TabViewModule } from 'primeng/tabview'
 import { ButtonModule } from 'primeng/button'
 
 @Component({
-  selector: 'cs-api-docs',
+  selector: 'cs-doc-api-docs',
   standalone: true,
   imports: [CardModule, TabViewModule, ButtonModule],
   template: `
@@ -13,7 +13,7 @@ import { ButtonModule } from 'primeng/button'
         <a
           pButton
           label="Admin API"
-          href="/admin/docs"
+          href="/doc/admin/docs"
           target="_blank"
           class="p-button-outlined api-link-btn"
           style="color: var(--p-content-color)"
@@ -21,7 +21,7 @@ import { ButtonModule } from 'primeng/button'
         <a
           pButton
           label="Content API"
-          href="/content/docs"
+          href="/doc/content/docs"
           target="_blank"
           class="p-button-outlined api-link-btn"
           style="color: var(--p-content-color)"
@@ -78,4 +78,4 @@ import { ButtonModule } from 'primeng/button'
     `
   ]
 })
-export class ApiDocsPage {}
+export class DocApiDocsPage {}
