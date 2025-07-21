@@ -11,7 +11,7 @@ import {
 } from '@angular/core'
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms'
 import Vditor from 'vditor'
-import 'vditor/dist/index.css'
+
 import { MessageService } from 'primeng/api'
 import { MessageModule } from 'primeng/message'
 import { ToastModule } from 'primeng/toast'
