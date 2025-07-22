@@ -10,6 +10,7 @@ import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
 import { configureNunjucks } from './server/config/nunjucks'
+import { pageCacheMiddleware } from './server/middleware'
 
 // test db connection
 testDbConnection()
@@ -102,6 +103,7 @@ app.use(
 app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
 
 // 4. Angular application routes
+app.use(pageCacheMiddleware)
 app.use(createAngularHandler(angularApp))
 
 // 5. 404 handler (must be after all routes)

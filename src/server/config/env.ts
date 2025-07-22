@@ -7,6 +7,7 @@ export const env = {
   // Server
   ['PORT']: process.env['PORT'] || '4000',
   ['NODE_ENV']: process.env['NODE_ENV'] || 'development',
+  ['PAGE_CACHE_TTL']: process.env['PAGE_CACHE_TTL'] || '60',
 
   // JWT
   ['JWT_SECRET']: process.env['JWT_SECRET'] || 'your-super-secret-key-change-in-production',
