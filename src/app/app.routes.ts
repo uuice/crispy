@@ -9,45 +9,48 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./web-pc/pages/home.page').then((m) => m.HomePage)
+        loadComponent: () => import('./web-pc/pages/blog/home.page').then((m) => m.HomePage)
       },
       {
         path: 'archives',
-        loadComponent: () => import('./web-pc/pages/archives.page').then((m) => m.ArchivesPage)
+        loadComponent: () => import('./web-pc/pages/blog/archives.page').then((m) => m.ArchivesPage)
       },
       {
         path: 'archives/:url',
-        loadComponent: () => import('./web-pc/pages/archives.page').then((m) => m.ArchivesPage)
+        loadComponent: () =>
+          import('./web-pc/pages/blog/archives-detail.page').then((m) => m.ArchivesDetailPage)
       },
       {
         path: 'links',
-        loadComponent: () => import('./web-pc/pages/links.page').then((m) => m.LinksPage)
+        loadComponent: () => import('./web-pc/pages/blog/links.page').then((m) => m.LinksPage)
       },
       {
         path: 'daily-lib',
-        loadComponent: () => import('./web-pc/pages/daily-lib.page').then((m) => m.DailyLibPage)
+        loadComponent: () =>
+          import('./web-pc/pages/blog/daily-lib.page').then((m) => m.DailyLibPage)
       },
       {
         path: 'daily-lib/:url',
         loadComponent: () =>
-          import('./web-pc/pages/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
+          import('./web-pc/pages/blog/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
       },
 
       {
         path: 'categories/:url',
-        loadComponent: () => import('./web-pc/pages/categories.page').then((m) => m.CategoriesPage)
+        loadComponent: () =>
+          import('./web-pc/pages/blog/categories.page').then((m) => m.CategoriesPage)
       },
       {
         path: 'tags/:url',
-        loadComponent: () => import('./web-pc/pages/tags.page').then((m) => m.TagsPage)
+        loadComponent: () => import('./web-pc/pages/blog/tags.page').then((m) => m.TagsPage)
       },
       {
         path: 'pages/:url',
-        loadComponent: () => import('./web-pc/pages/pages.page').then((m) => m.PagesPage)
+        loadComponent: () => import('./web-pc/pages/blog/pages.page').then((m) => m.PagesPage)
       },
       {
         path: 'about',
-        loadComponent: () => import('./web-pc/pages/about.page').then((m) => m.AboutPage)
+        loadComponent: () => import('./web-pc/pages/blog/about.page').then((m) => m.AboutPage)
       }
     ]
   },

@@ -1,0 +1,131 @@
+// Blog common styles using Tailwind @apply and main.less variables
+
+.blog-banner {
+  @apply w-full relative flex flex-col items-center justify-center min-h-[180px] md:min-h-[220px] rounded-xl overflow-hidden mb-10;
+  background: var(--p-content-hover-background);
+}
+.blog-banner-img {
+  @apply absolute inset-0 w-full h-full object-cover pointer-events-none select-none;
+  opacity: 0.6;
+  background: var(--p-content-background);
+}
+.app-dark .blog-banner-img {
+  opacity: 0.4;
+}
+.blog-banner-content {
+  @apply relative z-10 flex flex-col items-center justify-center py-8 md:py-10;
+}
+.blog-title {
+  @apply font-bold mb-2 drop-shadow;
+  font-size: 2.25rem;
+  color: var(--p-text-color);
+}
+@media (min-width: 768px) {
+  .blog-title {
+    font-size: 3rem;
+  }
+}
+.blog-section {
+  @apply mx-auto mb-16 px-4;
+  max-width: 48rem;
+}
+.blog-prose {
+  @apply prose;
+  color: var(--p-content-color);
+}
+.app-dark .blog-prose {
+  @apply dark:prose-invert;
+  color: var(--p-content-color);
+}
+.blog-tags {
+  @apply flex flex-wrap gap-2 mt-8;
+}
+.blog-tag {
+  @apply px-3 py-1 rounded-full text-xs font-medium;
+  background: var(--p-content-hover-background);
+  color: var(--p-primary-color);
+}
+.blog-card {
+  @apply rounded-xl shadow p-6 transition-shadow flex flex-col gap-4;
+  background: var(--p-content-background);
+  color: var(--p-content-color);
+  border: 1px solid var(--p-content-border-color);
+  box-shadow: 0 2px 8px var(--p-shadow-color, rgba(0,0,0,0.06));
+}
+.app-dark .blog-card {
+  background: var(--p-content-background);
+  color: var(--p-content-color);
+  border-color: var(--p-content-border-color);
+}
+
+// Tag color variants (all use main.less variables or custom CSS vars)
+.blog-tag-blue {
+  background: var(--p-blue-100, #e0f2fe);
+  color: var(--p-blue-700, #0369a1);
+}
+.app-dark .blog-tag-blue {
+  background: var(--p-blue-900, #0c4a6e);
+  color: var(--p-blue-200, #bae6fd);
+}
+.blog-tag-gray {
+  background: var(--p-surface-100, #f3f4f6);
+  color: var(--p-surface-700, #374151);
+}
+.app-dark .blog-tag-gray {
+  background: var(--p-surface-800, #1f2937);
+  color: var(--p-surface-200, #e5e7eb);
+}
+.blog-tag-purple {
+  background: var(--p-purple-100, #ede9fe);
+  color: var(--p-purple-700, #7c3aed);
+}
+.app-dark .blog-tag-purple {
+  background: var(--p-purple-900, #4c1d95);
+  color: var(--p-purple-200, #ddd6fe);
+}
+.blog-tag-pink {
+  background: var(--p-pink-100, #fce7f3);
+  color: var(--p-pink-700, #be185d);
+}
+.app-dark .blog-tag-pink {
+  background: var(--p-pink-900, #831843);
+  color: var(--p-pink-200, #fbcfe8);
+}
+.blog-tag-green {
+  background: var(--p-green-100, #dcfce7);
+  color: var(--p-green-700, #15803d);
+}
+.app-dark .blog-tag-green {
+  background: var(--p-green-900, #052e16);
+  color: var(--p-green-200, #bbf7d0);
+}
+.blog-tag-yellow {
+  background: var(--p-yellow-100, #fef9c3);
+  color: var(--p-yellow-700, #a16207);
+}
+.app-dark .blog-tag-yellow {
+  background: var(--p-yellow-900, #713f12);
+  color: var(--p-yellow-200, #fef08a);
+}
+.blog-tag-indigo {
+  background: var(--p-indigo-100, #e0e7ff);
+  color: var(--p-indigo-700, #4338ca);
+}
+.app-dark .blog-tag-indigo {
+  background: var(--p-indigo-900, #1e1b4b);
+  color: var(--p-indigo-200, #c7d2fe);
+}
+
+// Icon color utility
+.blog-icon-blue { color: var(--p-blue-500, #3b82f6); }
+.blog-icon-green { color: var(--p-green-500, #22c55e); }
+.blog-icon-gray { color: var(--p-surface-500, #6b7280); }
+.blog-icon-pink { color: var(--p-pink-500, #ec4899); }
+.blog-icon-yellow { color: var(--p-yellow-500, #eab308); }
+.blog-icon-indigo { color: var(--p-indigo-500, #6366f1); }
+.blog-icon-purple { color: var(--p-purple-500, #a855f7); }
+
+// Text color utilities
+.blog-text-primary { color: var(--p-text-color); }
+.blog-text-secondary { color: var(--p-text-color-secondary); }
+.blog-text-muted { color: var(--p-text-color-secondary); }

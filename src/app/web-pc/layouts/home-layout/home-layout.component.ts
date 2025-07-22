@@ -34,36 +34,157 @@ import { ScrollTopModule } from 'primeng/scrolltop'
     ScrollTopModule
   ],
   template: `
-    <div class="home-layout">
-      <header class="header">
-        <p-menubar [model]="menuItems" class="custom-menubar">
-          <ng-template pTemplate="start">
-            <a routerLink="/" class="logo-link">
-              <span class="logo">Crispy</span>
-            </a>
-          </ng-template>
-          <ng-template pTemplate="end">
-            <div class="header-actions">
-              <p-button
-                [icon]="settingsService.settings().darkMode ? 'pi pi-sun' : 'pi pi-moon'"
-                [text]="true"
-                [rounded]="true"
-                severity="secondary"
-                size="small"
-                (click)="toggleDarkMode()"
-              ></p-button>
-              <p-button
-                icon="pi pi-palette"
-                [text]="true"
-                [rounded]="true"
-                severity="secondary"
-                size="small"
-                (click)="drawerVisible = true"
-              ></p-button>
-            </div>
-          </ng-template>
-        </p-menubar>
+    <div class="home-layout min-h-screen flex flex-col bg-[var(--p-content-background)]">
+      <!-- Top Navigation Bar -->
+      <header
+        class="header w-full sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-gray-200 dark:border-slate-800"
+      >
+        <nav class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4">
+          <div class="flex items-center gap-8">
+            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">Fuwari</a>
+            <!-- Desktop Menu -->
+            <ul class="hidden md:flex gap-6 text-base font-medium">
+              <li *ngFor="let item of menuItems">
+                <a
+                  *ngIf="!item.url"
+                  [routerLink]="item.routerLink"
+                  routerLinkActive="active"
+                  class="hover:opacity-80 transition"
+                  [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
+                >
+                  {{ item.label }}
+                </a>
+                <a
+                  *ngIf="item.url"
+                  [href]="item.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:opacity-80 transition"
+                >
+                  {{ item.label }}
+                </a>
+              </li>
+            </ul>
+            <!-- Mobile Menu Button -->
+            <button
+              class="md:hidden ml-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800"
+              (click)="mobileMenuVisible = true"
+              aria-label="Open menu"
+            >
+              <i class="pi pi-bars text-xl"></i>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-button
+              [icon]="settingsService.settings().darkMode ? 'pi pi-sun' : 'pi pi-moon'"
+              [text]="true"
+              [rounded]="true"
+              severity="secondary"
+              size="small"
+              (click)="toggleDarkMode()"
+              class="mr-1"
+            ></p-button>
+            <p-button
+              icon="pi pi-palette"
+              [text]="true"
+              [rounded]="true"
+              severity="secondary"
+              size="small"
+              (click)="drawerVisible = true"
+            ></p-button>
+          </div>
+        </nav>
       </header>
+      <!-- Mobile Menu Drawer -->
+      <p-drawer
+        [(visible)]="mobileMenuVisible"
+        position="left"
+        [modal]="true"
+        [dismissible]="true"
+        header="Menu"
+        [style]="{ width: '80vw', maxWidth: '320px' }"
+      >
+        <ul class="flex flex-col gap-4 mt-4">
+          <li *ngFor="let item of menuItems">
+            <a
+              *ngIf="!item.url"
+              [routerLink]="item.routerLink"
+              (click)="mobileMenuVisible = false"
+              class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
+              [routerLinkActive]="'active'"
+              [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
+            >
+              {{ item.label }}
+            </a>
+            <a
+              *ngIf="item.url"
+              [href]="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
+              (click)="mobileMenuVisible = false"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        </ul>
+      </p-drawer>
+      <!-- Main Content: Sidebar + Content -->
+      <div
+        class="flex-1 w-full max-w-6xl mx-auto flex flex-col-reverse lg:flex-row gap-8 px-4 py-8"
+      >
+        <!-- Sidebar (Desktop) -->
+        <aside class="lg:block w-full lg:w-80 flex-shrink-0">
+          <!-- Author Card -->
+          <div
+            class="bg-white dark:bg-slate-900 rounded-xl shadow p-6 mb-8 flex flex-col items-center"
+          >
+            <img
+              src="https://randomuser.me/api/portraits/men/32.jpg"
+              alt="Author"
+              class="w-20 h-20 rounded-full mb-3 border-4 border-blue-200 dark:border-blue-900 shadow"
+            />
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Lorem Ipsum</h2>
+            <p class="text-gray-600 dark:text-gray-300 text-center text-sm mb-2">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            </p>
+            <div class="flex gap-3 mt-2">
+              <a href="#" class="blog-icon-blue hover:opacity-80" title="GitHub"
+                ><i class="pi pi-github text-xl"></i
+              ></a>
+              <a href="#" class="blog-icon-pink hover:opacity-80" title="Twitter"
+                ><i class="pi pi-twitter text-xl"></i
+              ></a>
+            </div>
+          </div>
+          <!-- Categories Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-6 mb-8">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Categories</h3>
+            <div class="flex flex-wrap gap-3">
+              <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
+              <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
+            </div>
+          </div>
+          <!-- Tags Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-6">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="blog-tag blog-tag-gray text-xs">Blogging</span>
+              <span class="blog-tag blog-tag-purple text-xs">Customization</span>
+              <span class="blog-tag blog-tag-pink text-xs">Demo</span>
+              <span class="blog-tag blog-tag-blue text-xs">Example</span>
+              <span class="blog-tag blog-tag-green text-xs">Fuwari</span>
+              <span class="blog-tag blog-tag-yellow text-xs">Markdown</span>
+              <span class="blog-tag blog-tag-indigo text-xs">Video</span>
+            </div>
+          </div>
+        </aside>
+        <!-- Main Content Area: always visible on all screens -->
+        <main class="flex-1 min-w-0">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+      <!-- Theme Settings Drawer -->
       <p-drawer
         [(visible)]="drawerVisible"
         position="right"
@@ -151,20 +272,22 @@ import { ScrollTopModule } from 'primeng/scrolltop'
           }
         </div>
       </p-drawer>
-      <main class="main-content">
-        <div class="content-container">
-          <div class="flex flex-col gap-8 min-h-[80vh] w-full">
-            <router-outlet></router-outlet>
+      <!-- Footer -->
+      <footer
+        class="footer w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-8 mt-auto"
+      >
+        <div
+          class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4"
+        >
+          <div class="text-gray-500 dark:text-gray-400 text-sm text-center md:text-left">
+            © 2025 Lorem Ipsum. All Rights Reserved. <span class="mx-2">/</span>
+            <a href="#" class="hover:underline">RSS</a>
+            <span class="mx-2">/</span>
+            <a href="#" class="hover:underline">Sitemap</a>
           </div>
-        </div>
-      </main>
-      <footer class="footer">
-        <div class="footer-content">
-          <div class="footer-bottom">
-            <div class="copyright">
-              <i class="pi pi-copyright"></i>
-              {{ currentYear }} Crispy. 保留所有权利。
-            </div>
+          <div class="text-gray-400 text-xs text-center md:text-right">
+            Powered by <span class="font-semibold">Astro</span> &
+            <span class="font-semibold">Fuwari</span>
           </div>
         </div>
       </footer>
@@ -371,6 +494,7 @@ export class HomeLayoutComponent implements OnInit {
 
   // Theme drawer state
   drawerVisible = false
+  mobileMenuVisible = false
 
   // Inject SettingsService
   settingsService = inject(SettingsService)

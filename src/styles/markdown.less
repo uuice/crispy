@@ -1,0 +1,164 @@
+// Markdown styles for blog/article content
+// Use variables from main.less for colors, spacing, etc.
+
+.markdown, .prose, .markdown-body {
+  color: var(--p-content-color);
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.markdown h1, .prose h1 {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin: 2.5rem 0 1.5rem 0;
+  color: var(--p-text-color);
+}
+.markdown h2, .prose h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 2rem 0 1.2rem 0;
+  color: var(--p-text-color);
+}
+.markdown h3, .prose h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 1.5rem 0 1rem 0;
+  color: var(--p-text-color);
+}
+.markdown h4, .prose h4 {
+  font-size: 1.05rem;
+  font-weight: bold;
+  margin: 1.2rem 0 0.8rem 0;
+  color: var(--p-text-color);
+}
+
+.markdown p, .prose p {
+  margin: 1rem 0;
+  color: var(--p-content-color);
+}
+
+.markdown ul, .prose ul, .markdown ol, .prose ol {
+  margin: 1rem 0 1rem 1.5rem;
+  padding: 0;
+}
+.markdown ul li, .prose ul li, .markdown ol li, .prose ol li {
+  margin: 0.3rem 0;
+  line-height: 1.7;
+}
+
+.markdown blockquote, .prose blockquote {
+  border-left: 4px solid var(--p-primary-300);
+  background: var(--p-content-hover-background);
+  color: var(--p-text-muted-color);
+  padding: 0.7em 1em;
+  margin: 1.5em 0;
+  border-radius: 0 0.5em 0.5em 0;
+  font-style: italic;
+}
+
+.markdown code, .prose code {
+  background: var(--p-surface-100);
+  color: var(--p-primary-700);
+  padding: 0.15em 0.4em;
+  border-radius: 0.3em;
+  font-size: 0.95em;
+  font-family: 'Fira Mono', 'Menlo', 'Consolas', monospace;
+}
+
+.markdown pre, .prose pre {
+  background: var(--p-surface-100);
+  color: var(--p-content-color);
+  border-radius: 0.5em;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  font-size: 0.98em;
+  font-family: 'Fira Mono', 'Menlo', 'Consolas', monospace;
+}
+
+.markdown pre code, .prose pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.markdown a, .prose a {
+  color: var(--p-primary-color);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.markdown a:hover, .prose a:hover {
+  color: var(--p-primary-hover-color);
+}
+
+.markdown table, .prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.98em;
+}
+.markdown th, .prose th {
+  background: var(--p-surface-100);
+  color: var(--p-text-color);
+  font-weight: bold;
+  padding: 0.6em 1em;
+  border: 1px solid var(--p-content-border-color);
+}
+.markdown td, .prose td {
+  background: var(--p-content-background);
+  color: var(--p-content-color);
+  padding: 0.6em 1em;
+  border: 1px solid var(--p-content-border-color);
+}
+
+.markdown img, .prose img {
+  max-width: 100%;
+  border-radius: 0.5em;
+  margin: 1.5em 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.markdown hr, .prose hr {
+  border: none;
+  border-top: 1px solid var(--p-content-border-color);
+  margin: 2em 0;
+}
+
+// Inline math/LaTeX
+.markdown .katex, .prose .katex {
+  font-size: 1.05em;
+  background: var(--p-surface-50);
+  padding: 0.1em 0.3em;
+  border-radius: 0.3em;
+}
+
+// Dark mode overrides
+.app-dark .markdown, .app-dark .prose, .app-dark .markdown-body {
+  color: var(--p-content-color);
+  background: transparent;
+}
+.app-dark .markdown pre, .app-dark .prose pre {
+  background: var(--p-surface-900);
+  color: var(--p-content-color);
+}
+.app-dark .markdown code, .app-dark .prose code {
+  background: var(--p-surface-800);
+  color: var(--p-primary-200);
+}
+.app-dark .markdown th, .app-dark .prose th {
+  background: var(--p-surface-800);
+  color: var(--p-text-color);
+}
+.app-dark .markdown td, .app-dark .prose td {
+  background: var(--p-surface-900);
+  color: var(--p-content-color);
+}
+.app-dark .markdown blockquote, .app-dark .prose blockquote {
+  background: var(--p-surface-900);
+  color: var(--p-text-muted-color);
+  border-left: 4px solid var(--p-primary-700);
+}

@@ -1,6 +1,7 @@
 import { db } from '@src/libs/db'
 import { z } from 'zod'
 import { sql } from 'kysely'
+import { titleToUrl } from '../utils/titleToUrl'
 
 // Validation schemas
 const createTagSchema = z.object({
@@ -270,14 +271,17 @@ export class TagService {
     const uniqueNames = Array.from(new Set(names.map((t) => t.trim()).filter(Boolean)))
     if (uniqueNames.length === 0) return
 
+    // change name to value  titleToUrl
+    const uniqueValues = uniqueNames.map((name) => titleToUrl(name))
+
     // 查询已存在的 name
     const existRows = await db
       .selectFrom('tags')
-      .select('value')
-      .where('value', 'in', uniqueNames)
+      .select('title')
+      .where('value', 'in', uniqueValues)
       .where('is_delete', '=', 0)
       .execute()
-    const existNames = new Set(existRows.map((row) => row.value))
+    const existNames = new Set(existRows.map((row) => row.title))
 
     // 过滤出不存在的
     const toInsert = uniqueNames.filter((name) => !existNames.has(name))
@@ -288,7 +292,7 @@ export class TagService {
       .values(
         toInsert.map((name) => ({
           title: name,
-          value: name,
+          value: titleToUrl(name),
           des: name,
           type_id: 7,
           status: 10,
