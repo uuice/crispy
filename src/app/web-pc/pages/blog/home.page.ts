@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { AvatarModule } from 'primeng/avatar';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
+import { Component } from '@angular/core'
+import { AvatarModule } from 'primeng/avatar'
+import { CardModule } from 'primeng/card'
+import { ButtonModule } from 'primeng/button'
 
 @Component({
   selector: 'cs-home',
@@ -15,7 +15,11 @@ import { ButtonModule } from 'primeng/button';
         <!-- Article Card 1 -->
         <p-card class="blog-card overflow-hidden">
           <ng-template pTemplate="header">
-            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80" alt="Markdown Extended Features" class="w-full h-40 object-cover" />
+            <img
+              src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80"
+              alt="Markdown Extended Features"
+              class="w-full h-40 object-cover"
+            />
           </ng-template>
           <div class="p-4">
             <h3 class="text-lg font-semibold mb-2">Markdown Extended Features</h3>
@@ -31,7 +35,11 @@ import { ButtonModule } from 'primeng/button';
         <!-- Article Card 2 -->
         <p-card class="blog-card overflow-hidden">
           <ng-template pTemplate="header">
-            <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80" alt="Expressive Code Example" class="w-full h-40 object-cover" />
+            <img
+              src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80"
+              alt="Expressive Code Example"
+              class="w-full h-40 object-cover"
+            />
           </ng-template>
           <div class="p-4">
             <h3 class="text-lg font-semibold mb-2">Expressive Code Example</h3>
@@ -47,7 +55,11 @@ import { ButtonModule } from 'primeng/button';
         <!-- Article Card 3 -->
         <p-card class="blog-card overflow-hidden">
           <ng-template pTemplate="header">
-            <img src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80" alt="Simple Guides for Fuwari" class="w-full h-40 object-cover" />
+            <img
+              src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
+              alt="Simple Guides for Fuwari"
+              class="w-full h-40 object-cover"
+            />
           </ng-template>
           <div class="p-4">
             <h3 class="text-lg font-semibold mb-2">Simple Guides for Fuwari</h3>
@@ -63,7 +75,11 @@ import { ButtonModule } from 'primeng/button';
         <!-- Article Card 4 -->
         <p-card class="blog-card overflow-hidden">
           <ng-template pTemplate="header">
-            <img src="https://images.unsplash.com/photo-1465101178521-c1a9136a3fdc?auto=format&fit=crop&w=600&q=80" alt="Markdown Example" class="w-full h-40 object-cover" />
+            <img
+              src="https://images.unsplash.com/photo-1465101178521-c1a9136a3fdc?auto=format&fit=crop&w=600&q=80"
+              alt="Markdown Example"
+              class="w-full h-40 object-cover"
+            />
           </ng-template>
           <div class="p-4">
             <h3 class="text-lg font-semibold mb-2">Markdown Example</h3>
@@ -81,22 +97,57 @@ import { ButtonModule } from 'primeng/button';
   `,
   styles: [
     `
-      .bg-content { background: var(--p-content-background) !important; }
-      .text-main { color: var(--p-text-color) !important; }
-      .text-muted { color: var(--p-text-muted-color) !important; }
-      .border-content { border-color: var(--p-content-border-color) !important; }
-      .rounded-xl { border-radius: 1rem !important; }
-      .shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
-      .blog-card, .p-card { background: var(--p-content-background) !important; color: var(--p-text-color) !important; border: 1px solid var(--p-content-border-color) !important; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-      .blog-banner-content { color: var(--p-text-color) !important; }
-      .blog-title { color: var(--p-text-color) !important; }
-      .blog-prose { color: var(--p-text-color) !important; }
-      .text-xs { font-size: 0.85rem !important; }
-      .text-lg { font-size: 1.25rem !important; }
-      .text-2xl { font-size: 2rem !important; }
-      .font-semibold { font-weight: 600 !important; }
-      .font-bold { font-weight: 700 !important; }
+      .bg-content {
+        background: var(--p-content-background) !important;
+      }
+      .text-main {
+        color: var(--p-text-color) !important;
+      }
+      .text-muted {
+        color: var(--p-text-muted-color) !important;
+      }
+      .border-content {
+        border-color: var(--p-content-border-color) !important;
+      }
+      .rounded-xl {
+        border-radius: 1rem !important;
+      }
+      .shadow {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+      }
+      .blog-card,
+      .p-card {
+        background: var(--p-content-background) !important;
+        color: var(--p-text-color) !important;
+        border: 1px solid var(--p-content-border-color) !important;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .blog-banner-content {
+        color: var(--p-text-color) !important;
+      }
+      .blog-title {
+        color: var(--p-text-color) !important;
+      }
+      .blog-prose {
+        color: var(--p-text-color) !important;
+      }
+      .text-xs {
+        font-size: 0.85rem !important;
+      }
+      .text-lg {
+        font-size: 1.25rem !important;
+      }
+      .text-2xl {
+        font-size: 2rem !important;
+      }
+      .font-semibold {
+        font-weight: 600 !important;
+      }
+      .font-bold {
+        font-weight: 700 !important;
+      }
     `
-   ]
+  ]
 })
 export class HomePage {}

@@ -288,14 +288,16 @@ import { ScrollTopModule } from 'primeng/scrolltop'
           class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4"
         >
           <div class="text-sm text-center md:text-left">
-            © 2025 Lorem Ipsum. All Rights Reserved. <span class="mx-2">/</span>
+            © {{ currentYear }} UUICE. All Rights Reserved. <span class="mx-2">/</span>
             <a href="#" class="hover:underline">RSS</a>
             <span class="mx-2">/</span>
             <a href="#" class="hover:underline">Sitemap</a>
           </div>
           <div class="text-xs text-center md:text-right">
-            Powered by <span class="font-semibold">Astro</span> &
-            <span class="font-semibold">Fuwari</span>
+            Powered by <span class="font-semibold">UUICE</span> &
+            <span class="font-semibold">Crispy</span>
+            <span class="mx-2">|</span>
+            <a href="https://github.com/uuice/crispy" class="hover:underline">GitHub</a>
           </div>
         </div>
       </footer>
@@ -883,6 +885,19 @@ export class HomeLayoutComponent implements OnInit {
         { name: 'Diamond', palette: { 500: '#ffffff' } }
       ]
     }
+  ]
+
+  // Tag color class list for blog tags
+  tagClassList = [
+    'blog-tag-blue',
+    'blog-tag-green',
+    'blog-tag-red',
+    'blog-tag-yellow',
+    'blog-tag-purple',
+    'blog-tag-orange',
+    'blog-tag-pink',
+    'blog-tag-gray',
+    'blog-tag-indigo'
   ]
 
   // Flatten all colors for backward compatibility
