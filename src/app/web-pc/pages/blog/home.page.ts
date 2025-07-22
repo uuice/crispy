@@ -8,14 +8,6 @@ import { ButtonModule } from 'primeng/button';
   standalone: true,
   imports: [AvatarModule, CardModule, ButtonModule],
   template: `
-    <!-- Banner Section -->
-    <section class="blog-banner">
-      <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" alt="Banner" class="blog-banner-img" />
-      <div class="blog-banner-content">
-        <h1 class="blog-title">空色天絵 / NEO TOKYO NOIR 01</h1>
-        <p class="text-lg md:text-xl text-gray-700 dark:text-gray-200 mb-2">A modern, minimal blog starter powered by Astro & Fuwari</p>
-      </div>
-    </section>
     <!-- Profile & Categories Section -->
     <section class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
       <!-- Profile Card -->
@@ -32,10 +24,10 @@ import { ButtonModule } from 'primeng/button';
       <div class="md:col-span-2 flex flex-col gap-6">
         <div class="blog-card">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Categories</h3>
-                                <div class="flex flex-wrap gap-3">
-                        <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
-                        <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
-                      </div>
+          <div class="flex flex-wrap gap-3">
+            <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
+            <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
+          </div>
         </div>
         <!-- Tags Card -->
         <div class="blog-card">

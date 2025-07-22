@@ -130,6 +130,12 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         </ul>
       </p-drawer>
       <!-- Main Content: Sidebar + Content -->
+
+      <!-- banner -->
+      <div class="w-full max-w-6xl mx-auto">
+        <router-outlet name="banner"></router-outlet>
+      </div>
+
       <div
         class="flex-1 w-full max-w-6xl mx-auto flex flex-col-reverse lg:flex-row gap-8 px-4 py-8"
       >

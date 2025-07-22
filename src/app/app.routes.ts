@@ -12,6 +12,12 @@ export const routes: Routes = [
         loadComponent: () => import('./web-pc/pages/blog/home.page').then((m) => m.HomePage)
       },
       {
+        path: '',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/home-banner.component').then((m) => m.HomeBannerComponent),
+        outlet: 'banner'
+      },
+      {
         path: 'archives',
         loadComponent: () => import('./web-pc/pages/blog/archives.page').then((m) => m.ArchivesPage)
       },
