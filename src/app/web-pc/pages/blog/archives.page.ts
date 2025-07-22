@@ -9,35 +9,35 @@ import { TagModule } from 'primeng/tag';
   template: `
     <!-- Archive Page Tabs -->
     <section class="max-w-4xl mx-auto mb-16">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Archive</h1>
+      <h1 class="text-3xl font-bold text-main mb-8">Archive</h1>
       <p-tabView>
         <!-- Category Archive Tab -->
         <p-tabPanel header="By Category">
           <div class="space-y-8">
             <!-- Example Category Block -->
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Examples</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">Examples</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-05-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Extended Features</span>
+                  <span class="blog-icon">2024-05-01</span>
+                  <span class="font-medium text-main">Markdown Extended Features</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-04-10</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Expressive Code Example</span>
+                  <span class="blog-icon">2024-04-10</span>
+                  <span class="font-medium text-main">Expressive Code Example</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2023-10-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Example</span>
+                  <span class="blog-icon">2023-10-01</span>
+                  <span class="font-medium text-main">Markdown Example</span>
                 </li>
               </ul>
             </div>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Guides</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-green">2024-04-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Simple Guides for Fuwari</span>
+                  <span class="blog-icon">2024-04-01</span>
+                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
                 </li>
               </ul>
             </div>
@@ -47,34 +47,34 @@ import { TagModule } from 'primeng/tag';
         <p-tabPanel header="By Tag">
           <div class="space-y-8">
             <!-- Example Tag Block -->
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Blogging</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">Blogging</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2023-10-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Example</span>
+                  <span class="blog-icon">2023-10-01</span>
+                  <span class="font-medium text-main">Markdown Example</span>
                 </li>
               </ul>
             </div>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Demo</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">Demo</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-05-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Extended Features</span>
+                  <span class="blog-icon">2024-05-01</span>
+                  <span class="font-medium text-main">Markdown Extended Features</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-04-10</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Expressive Code Example</span>
+                  <span class="blog-icon">2024-04-10</span>
+                  <span class="font-medium text-main">Expressive Code Example</span>
                 </li>
               </ul>
             </div>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Guides</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-green">2024-04-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Simple Guides for Fuwari</span>
+                  <span class="blog-icon">2024-04-01</span>
+                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
                 </li>
               </ul>
             </div>
@@ -84,29 +84,29 @@ import { TagModule } from 'primeng/tag';
         <p-tabPanel header="By Date">
           <div class="space-y-8">
             <!-- Example Year Block -->
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">2024</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">2024</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-05-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Extended Features</span>
+                  <span class="blog-icon">2024-05-01</span>
+                  <span class="font-medium text-main">Markdown Extended Features</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2024-04-10</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Expressive Code Example</span>
+                  <span class="blog-icon">2024-04-10</span>
+                  <span class="font-medium text-main">Expressive Code Example</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-green">2024-04-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Simple Guides for Fuwari</span>
+                  <span class="blog-icon">2024-04-01</span>
+                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
                 </li>
               </ul>
             </div>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">2023</h2>
+            <div class="blog-card p-card">
+              <h2 class="text-xl font-semibold text-main mb-2">2023</h2>
               <ul class="space-y-2">
                 <li class="flex items-center gap-2">
-                  <span class="blog-icon-blue">2023-10-01</span>
-                  <span class="font-medium text-gray-900 dark:text-white">Markdown Example</span>
+                  <span class="blog-icon">2023-10-01</span>
+                  <span class="font-medium text-main">Markdown Example</span>
                 </li>
               </ul>
             </div>
@@ -114,6 +114,25 @@ import { TagModule } from 'primeng/tag';
         </p-tabPanel>
       </p-tabView>
     </section>
-  `
+  `,
+  styles: [
+    `
+      .blog-card, .p-card { background: var(--p-content-background) !important; color: var(--p-text-color) !important; border: 1px solid var(--p-content-border-color) !important; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+      .blog-section { background: var(--p-content-background) !important; color: var(--p-text-color) !important; border: 1px solid var(--p-content-border-color) !important; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+      .blog-banner-content { color: var(--p-text-color) !important; }
+      .blog-title { color: var(--p-text-color) !important; }
+      .text-main { color: var(--p-text-color) !important; }
+      .text-muted { color: var(--p-text-muted-color) !important; }
+      .blog-icon { color: var(--p-primary-color) !important; }
+      .border-content { border-color: var(--p-content-border-color) !important; }
+      .rounded-xl { border-radius: 1rem !important; }
+      .shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
+      .text-xs { font-size: 0.85rem !important; }
+      .text-lg { font-size: 1.25rem !important; }
+      .text-2xl { font-size: 2rem !important; }
+      .font-semibold { font-weight: 600 !important; }
+      .font-bold { font-weight: 700 !important; }
+    `
+  ]
 })
 export class ArchivesPage {}

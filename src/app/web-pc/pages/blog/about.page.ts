@@ -12,22 +12,23 @@ import { Component } from '@angular/core'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title">About</h1>
+        <h1 class="blog-title text-main">About</h1>
       </div>
     </section>
     <!-- About Content -->
     <section class="blog-section">
-      <div class="blog-prose">
+      <div class="blog-prose prose text-main">
         <h2>This is the demo site for Fuwari.</h2>
         <p>saicaca/fuwari</p>
         <h3>Sources of images used in this site</h3>
-        <ul>
+        <ul class="list-disc pl-6">
           <li>Unsplash</li>
           <li>星と少女 by Stella</li>
           <li>Rabbit - v1.4 Showcase by Rabbit_YourMajesty</li>
         </ul>
       </div>
     </section>
-  `
+  `,
+  styles: [``]
 })
 export class AboutPage {}

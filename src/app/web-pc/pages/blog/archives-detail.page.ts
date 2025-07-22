@@ -7,13 +7,11 @@ import { Component } from '@angular/core'
     <!-- Article Banner -->
     <section class="blog-banner">
       <div class="blog-banner-content">
-        <h1 class="blog-title">Markdown Extended Features</h1>
-        <div
-          class="flex flex-wrap gap-3 items-center text-sm text-gray-500 dark:text-gray-400 mb-2"
-        >
+        <h1 class="blog-title text-main">Markdown Extended Features</h1>
+        <div class="flex flex-wrap gap-3 items-center text-sm text-muted mb-2">
           <span>2024-05-01</span>
           <span>·</span>
-          <span>by <span class="font-semibold blog-icon-blue">Lorem Ipsum</span></span>
+          <span>by <span class="font-semibold blog-icon">Lorem Ipsum</span></span>
           <span>·</span>
           <span class="blog-tag blog-tag-blue text-xs">Examples</span>
         </div>
@@ -21,7 +19,7 @@ import { Component } from '@angular/core'
     </section>
     <!-- Article Content -->
     <section class="blog-section">
-      <div class="blog-prose">
+      <div class="blog-prose text-main">
         <h2>Introduction</h2>
         <p>
           This article demonstrates extended Markdown features in Fuwari, including code blocks,
@@ -65,12 +63,13 @@ console.log(greet('Fuwari'));
           Fuwari provides a beautiful and modern blogging experience with extended Markdown support.
         </p>
       </div>
-      <div class="blog-tags">
+      <div class="blog-tags mt-4 text-muted">
         <span class="blog-tag blog-tag-gray">Blogging</span>
         <span class="blog-tag blog-tag-purple">Demo</span>
         <span class="blog-tag blog-tag-blue">Example</span>
       </div>
     </section>
-  `
+  `,
+  styles: [``]
 })
 export class ArchivesDetailPage {}

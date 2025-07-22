@@ -34,11 +34,9 @@ import { ScrollTopModule } from 'primeng/scrolltop'
     ScrollTopModule
   ],
   template: `
-    <div class="home-layout min-h-screen flex flex-col bg-[var(--p-content-background)]">
+    <div class="home-layout min-h-screen flex flex-col">
       <!-- Top Navigation Bar -->
-      <header
-        class="header w-full sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-gray-200 dark:border-slate-800"
-      >
+      <header class="header w-full sticky top-0 z-50">
         <nav class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4">
           <div class="flex items-center gap-8">
             <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">Fuwari</a>
@@ -102,7 +100,12 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         [modal]="true"
         [dismissible]="true"
         header="Menu"
-        [style]="{ width: '80vw', maxWidth: '320px' }"
+        [style]="{
+          width: '80vw',
+          maxWidth: '320px',
+          background: 'var(--p-content-background)',
+          color: 'var(--p-text-color)'
+        }"
       >
         <ul class="flex flex-col gap-4 mt-4">
           <li *ngFor="let item of menuItems">
@@ -130,28 +133,24 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         </ul>
       </p-drawer>
       <!-- Main Content: Sidebar + Content -->
-
       <!-- banner -->
       <div class="w-full max-w-6xl mx-auto">
         <router-outlet name="banner"></router-outlet>
       </div>
-
       <div
         class="flex-1 w-full max-w-6xl mx-auto flex flex-col-reverse lg:flex-row gap-8 px-4 py-8"
       >
         <!-- Sidebar (Desktop) -->
         <aside class="lg:block w-full lg:w-80 flex-shrink-0">
           <!-- Author Card -->
-          <div
-            class="bg-white dark:bg-slate-900 rounded-xl shadow p-6 mb-8 flex flex-col items-center"
-          >
+          <div class="bg-content rounded-xl shadow p-6 mb-8 flex flex-col items-center">
             <img
               src="https://randomuser.me/api/portraits/men/32.jpg"
               alt="Author"
               class="w-20 h-20 rounded-full mb-3 border-4 border-blue-200 dark:border-blue-900 shadow"
             />
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Lorem Ipsum</h2>
-            <p class="text-gray-600 dark:text-gray-300 text-center text-sm mb-2">
+            <h2 class="text-lg font-semibold mb-1">Lorem Ipsum</h2>
+            <p class="text-center text-sm mb-2">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             </p>
             <div class="flex gap-3 mt-2">
@@ -164,16 +163,16 @@ import { ScrollTopModule } from 'primeng/scrolltop'
             </div>
           </div>
           <!-- Categories Card -->
-          <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-6 mb-8">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Categories</h3>
+          <div class="rounded-xl shadow p-6 mb-8">
+            <h3 class="text-base font-semibold mb-3">Categories</h3>
             <div class="flex flex-wrap gap-3">
               <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
               <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
             </div>
           </div>
           <!-- Tags Card -->
-          <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-6">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
+          <div class="rounded-xl shadow p-6">
+            <h3 class="text-base font-semibold mb-3">Tags</h3>
             <div class="flex flex-wrap gap-2">
               <span class="blog-tag blog-tag-gray text-xs">Blogging</span>
               <span class="blog-tag blog-tag-purple text-xs">Customization</span>
@@ -197,7 +196,12 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         [modal]="true"
         [dismissible]="true"
         header="Theme Settings"
-        [style]="{ width: '700px', 'max-width': '50%' }"
+        [style]="{
+          width: '700px',
+          'max-width': '80%',
+          background: 'var(--p-content-background)',
+          color: 'var(--p-text-color)'
+        }"
       >
         <div class="theme-settings">
           <!-- Dark Mode Section -->
@@ -279,19 +283,17 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         </div>
       </p-drawer>
       <!-- Footer -->
-      <footer
-        class="footer w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-8 mt-auto"
-      >
+      <footer class="footer w-full py-8 mt-auto">
         <div
           class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4"
         >
-          <div class="text-gray-500 dark:text-gray-400 text-sm text-center md:text-left">
+          <div class="text-sm text-center md:text-left">
             © 2025 Lorem Ipsum. All Rights Reserved. <span class="mx-2">/</span>
             <a href="#" class="hover:underline">RSS</a>
             <span class="mx-2">/</span>
             <a href="#" class="hover:underline">Sitemap</a>
           </div>
-          <div class="text-gray-400 text-xs text-center md:text-right">
+          <div class="text-xs text-center md:text-right">
             Powered by <span class="font-semibold">Astro</span> &
             <span class="font-semibold">Fuwari</span>
           </div>
@@ -301,6 +303,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
     </div>
   `,
   styles: [
+    // PrimeNG style: unify background, card, section, spacing, and tag styles
     `
       .home-layout {
         display: flex;
@@ -312,21 +315,9 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         position: sticky;
         top: 0;
         z-index: 1000;
-        box-shadow: none;
-        background: var(--p-surface-card);
-        border-bottom: 1px solid var(--p-content-border-color);
-      }
-      .custom-menubar {
-        border: none;
-        border-radius: 0;
-        background: transparent;
-        padding: 0.5rem 1rem;
-      }
-      .logo-link .logo {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--p-primary-color);
-        text-shadow: none;
+        background: var(--p-content-background, #fff);
+        border-bottom: 1px solid var(--p-content-border-color, #e5e7eb);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
       }
       .main-content {
         flex: 1;
@@ -338,14 +329,12 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         margin: 0 auto;
         padding: 0 1rem;
         display: flex;
-        // overflow-x: hidden;
-        // overflow-y: auto;
       }
       .footer {
-        background: var(--p-surface-section);
+        background: var(--p-content-background, #f4f4f5);
         padding: 2rem 1rem 1rem;
         margin-top: auto;
-        border-top: 1px solid var(--p-content-border-color);
+        border-top: 1px solid var(--p-content-border-color, #e5e7eb);
       }
       .footer-content {
         max-width: 1200px;
@@ -354,20 +343,165 @@ import { ScrollTopModule } from 'primeng/scrolltop'
       .footer-bottom {
         text-align: center;
         padding-top: 1.5rem;
-        border-top: 1px solid var(--p-content-border-color);
+        border-top: 1px solid var(--p-content-border-color, #e5e7eb);
       }
       .copyright {
-        color: var(--p-text-color-secondary);
+        color: var(--text-color-secondary, #6b7280);
         font-size: 1.05rem;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        text-shadow: none;
+      }
+      .blog-card,
+      .p-card {
+        background: var(--p-content-background, #fff);
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: none;
+      }
+      .blog-banner {
+        position: relative;
+        width: 100%;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+        background: var(--p-content-background, #fff);
+      }
+      .blog-banner-img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 1.25rem 1.25rem 0 0;
+      }
+      .blog-banner-content {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        padding: 2rem 2.5rem 1.5rem 2.5rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(0, 0, 0, 0.18) 100%);
+        color: #fff;
+      }
+      .blog-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color, #2196f3);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .blog-section {
+        background: var(--p-content-background, #fff);
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+      }
+      .blog-prose {
+        color: var(--text-color, #374151);
+        font-size: 1.1rem;
+        line-height: 1.8;
+      }
+      .blog-tag {
+        display: inline-block;
+        padding: 0.18em 0.8em;
+        border-radius: 999px;
+        font-size: 0.95em;
+        font-weight: 500;
+        background: var(--p-content-background, #f4f4f5);
+        color: var(--primary-color, #2196f3);
+        margin-right: 0.5em;
+        margin-bottom: 0.3em;
+      }
+      .blog-tag-blue {
+        color: #2196f3;
+        background: #e3f2fd;
+      }
+      .blog-tag-green {
+        color: #43d572;
+        background: #e6f9ed;
+      }
+      .blog-tag-yellow {
+        color: #fbc02d;
+        background: #fff9e1;
+      }
+      .blog-tag-pink {
+        color: #ec4899;
+        background: #fce7f3;
+      }
+      .blog-tag-purple {
+        color: #a855f7;
+        background: #ede9fe;
+      }
+      .blog-tag-gray {
+        color: #6b7280;
+        background: #f3f4f6;
+      }
+      .blog-tag-indigo {
+        color: #6366f1;
+        background: #e0e7ff;
+      }
+      .blog-icon-blue {
+        color: #2196f3;
+      }
+      .blog-icon-green {
+        color: #43d572;
+      }
+      .blog-icon-yellow {
+        color: #fbc02d;
+      }
+      .blog-icon-pink {
+        color: #ec4899;
+      }
+      .blog-icon-purple {
+        color: #a855f7;
+      }
+      .blog-icon-gray {
+        color: #6b7280;
+      }
+      .blog-icon-indigo {
+        color: #6366f1;
+      }
+      .p-button {
+        border-radius: 999px;
+        font-weight: 500;
+      }
+      .p-avatar {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .p-tabview .p-tabview-nav {
+        border-radius: 1rem 1rem 0 0;
+        background: var(--p-content-background, #fff);
+      }
+      .p-tabview .p-tabview-panels {
+        border-radius: 0 0 1rem 1rem;
+        background: var(--p-content-background, #fff);
+      }
+      .p-card {
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: none;
+      }
+      .p-card .p-card-body {
+        padding: 1.5rem;
+      }
+      .p-card .p-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      .p-card .p-card-content {
+        font-size: 1.05rem;
       }
       @media (max-width: 768px) {
-        .main-content {
-          padding: 1rem 0;
+        .main-content,
+        .blog-section {
+          padding: 1rem 0.5rem;
+        }
+        .blog-banner-content {
+          padding: 1.2rem 1rem 1rem 1rem;
         }
       }
     `,
@@ -490,6 +624,87 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         z-index: 9999;
         right: 32px;
         bottom: 48px;
+      }
+    `,
+    // Custom styles for inline styles
+    `
+      .bg-content {
+        background: var(--p-content-background) !important;
+      }
+      .text-main {
+        color: var(--p-text-color) !important;
+      }
+      .text-muted {
+        color: var(--p-text-muted-color) !important;
+      }
+      .border-content {
+        border-color: var(--p-content-border-color) !important;
+      }
+      .bg-hover {
+        background: var(--p-content-hover-background) !important;
+      }
+      .border-b-content {
+        border-bottom: 1px solid var(--p-content-border-color) !important;
+      }
+      .border-t-content {
+        border-top: 1px solid var(--p-content-border-color) !important;
+      }
+      .rounded-xl {
+        border-radius: 1rem !important;
+      }
+      .shadow {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+      }
+      .font-semibold {
+        font-weight: 600 !important;
+      }
+      .font-bold {
+        font-weight: 700 !important;
+      }
+      .text-xs {
+        font-size: 0.85rem !important;
+      }
+      .text-base {
+        font-size: 1rem !important;
+      }
+      .text-lg {
+        font-size: 1.25rem !important;
+      }
+      .text-2xl {
+        font-size: 2rem !important;
+      }
+      .text-3xl {
+        font-size: 2.5rem !important;
+      }
+      .p-card {
+        background: var(--p-content-background) !important;
+        color: var(--p-text-color) !important;
+        border: 1px solid var(--p-content-border-color) !important;
+      }
+      .blog-card {
+        background: var(--p-content-background) !important;
+        color: var(--p-text-color) !important;
+        border: 1px solid var(--p-content-border-color) !important;
+      }
+      .blog-banner-content {
+        color: var(--p-text-color) !important;
+      }
+      .footer {
+        background: var(--p-content-background) !important;
+        color: var(--p-text-muted-color) !important;
+        border-top: 1px solid var(--p-content-border-color) !important;
+      }
+      .footer a {
+        color: var(--p-text-color) !important;
+      }
+      .label {
+        color: var(--p-text-color) !important;
+      }
+      .surface-color-option {
+        color: var(--p-text-color) !important;
+      }
+      .color-dot {
+        border-color: var(--p-content-border-color) !important;
       }
     `
   ]

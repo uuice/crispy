@@ -8,12 +8,12 @@ import { Component } from '@angular/core';
     <section class="blog-banner">
       <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" alt="Banner" class="blog-banner-img" />
       <div class="blog-banner-content">
-        <h1 class="blog-title">Pages</h1>
+        <h1 class="blog-title text-main">Pages</h1>
       </div>
     </section>
     <!-- Pages Content -->
     <section class="blog-section">
-      <div class="blog-prose">
+      <div class="blog-prose text-main">
         <h2>This is the demo site for Fuwari.</h2>
         <p>saicaca/fuwari</p>
         <h3>Sources of images used in this site</h3>
@@ -24,6 +24,9 @@ import { Component } from '@angular/core';
         </ul>
       </div>
     </section>
-  `
+  `,
+  styles: [
+    ``
+  ]
 })
 export class PagesPage {}
