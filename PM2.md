@@ -42,6 +42,8 @@ pm2 start npm --name "crispy-dev" -- run start
 # 启动 SSR 服务器
 pm2 start npm --name "crispy-ssr" -- run serve:ssr:crispy
 
+pm2 start bun --name "crispy-ssr" -- run serve:ssr:crispy
+
 # 启动构建监听
 pm2 start npm --name "crispy-watch" -- run watch
 ```
