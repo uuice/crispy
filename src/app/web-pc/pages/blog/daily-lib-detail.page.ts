@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router'
 import { DAILY_LIBS, Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
 import { ButtonModule } from 'primeng/button'
-import { url } from 'inspector'
 
 @Component({
   selector: 'cs-daily-lib-detail',

@@ -39,7 +39,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
       <header class="header w-full sticky top-0 z-50">
         <nav class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4">
           <div class="flex items-center gap-8">
-            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">Fuwari</a>
+            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">UUICE</a>
             <!-- Desktop Menu -->
             <ul class="hidden md:flex gap-6 text-base font-medium">
               <li *ngFor="let item of menuItems">
@@ -99,7 +99,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         position="left"
         [modal]="true"
         [dismissible]="true"
-        header="Menu"
+        header="导航菜单"
         [style]="{
           width: '80vw',
           maxWidth: '320px',
@@ -195,7 +195,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         position="right"
         [modal]="true"
         [dismissible]="true"
-        header="Theme Settings"
+        header="主题设置"
         [style]="{
           width: '700px',
           'max-width': '80%',
@@ -218,7 +218,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
           </div>
           <!-- Preset Themes Section -->
           <div class="setting-section">
-            <div class="label">Preset Theme</div>
+            <div class="label">预设主题</div>
             <p-selectButton
               [options]="presetOptions"
               [(ngModel)]="selectedPreset"
@@ -249,7 +249,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
           </div>
           <!-- Font Size Section -->
           <div class="setting-section">
-            <div class="label">Font Size</div>
+            <div class="label">字体大小</div>
             <p-selectButton
               [options]="fontSizes"
               [(ngModel)]="selectedFontSize"
@@ -289,9 +289,9 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         >
           <div class="text-sm text-center md:text-left">
             © {{ currentYear }} UUICE. All Rights Reserved. <span class="mx-2">/</span>
-            <a href="#" class="hover:underline">RSS</a>
+            <a href="/rss.xml" class="hover:underline">RSS</a>
             <span class="mx-2">/</span>
-            <a href="#" class="hover:underline">Sitemap</a>
+            <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
           </div>
           <div class="text-xs text-center md:text-right">
             Powered by <span class="font-semibold">UUICE</span> &

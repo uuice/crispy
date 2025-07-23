@@ -16,7 +16,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">Pages</h1>
+        <h1 class="blog-title text-main">页面Title</h1>
       </div>
     </section>
     <!-- Pages Content -->

@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button'
   template: `
     <!-- Article List Section -->
     <section class="max-w-4xl mx-auto mb-16">
-      <h2 class="text-2xl font-bold mb-6">Latest Posts</h2>
+      <h2 class="text-2xl font-bold mb-6">最新文章</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Article Card 1 -->
         <p-card class="blog-card overflow-hidden">

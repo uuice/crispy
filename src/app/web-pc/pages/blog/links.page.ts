@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button'
     <!-- Links Banner -->
     <section class="blog-banner">
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">Links</h1>
+        <h1 class="blog-title text-main">链接</h1>
       </div>
     </section>
     <!-- Links Content (Grouped & Optimized) -->
@@ -18,7 +18,7 @@ import { ButtonModule } from 'primeng/button'
       <div class="blog-card">
         <div class="flex items-center gap-2 mb-2">
           <i class="pi pi-user blog-icon"></i>
-          <h2 class="text-lg font-semibold text-main">Personal Blogs</h2>
+          <h2 class="text-lg font-semibold text-main">个人博客</h2>
         </div>
         <ul class="flex flex-col gap-3">
           <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -51,7 +51,7 @@ import { ButtonModule } from 'primeng/button'
       <div class="blog-card">
         <div class="flex items-center gap-2 mb-2">
           <i class="pi pi-globe blog-icon"></i>
-          <h2 class="text-lg font-semibold text-main">Resource Sites</h2>
+          <h2 class="text-lg font-semibold text-main">资源站点</h2>
         </div>
         <ul class="flex flex-col gap-3">
           <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -84,7 +84,7 @@ import { ButtonModule } from 'primeng/button'
       <div class="blog-card">
         <div class="flex items-center gap-2 mb-2">
           <i class="pi pi-github blog-icon"></i>
-          <h2 class="text-lg font-semibold text-main">Projects / Source Code</h2>
+          <h2 class="text-lg font-semibold text-main">项目 / 源码</h2>
         </div>
         <ul class="flex flex-col gap-3">
           <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">

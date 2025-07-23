@@ -9,7 +9,7 @@ import { TagModule } from 'primeng/tag'
   template: `
     <!-- Archive Page Tabs -->
     <section class="max-w-4xl mx-auto mb-16">
-      <h1 class="text-3xl font-bold text-main mb-8">Archive</h1>
+      <h1 class="text-3xl font-bold text-main mb-8">归档</h1>
       <p-tabView>
         <!-- Category Archive Tab -->
         <p-tabPanel header="By Category">

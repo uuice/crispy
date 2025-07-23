@@ -11,9 +11,9 @@ import { Component } from '@angular/core'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">空色天絵 / NEO TOKYO NOIR 01</h1>
+        <h1 class="blog-title text-main">UUICE(一句话)</h1>
         <p class="text-lg md:text-xl text-muted mb-2">
-          A modern, minimal blog starter powered by Astro & Fuwari
+          一个现代、简约的博客启动器，由Crisp和UUICE驱动
         </p>
       </div>
     </section>
