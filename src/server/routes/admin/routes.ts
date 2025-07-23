@@ -152,6 +152,16 @@ router.post('/caches', cacheController.createCache)
 router.put('/caches/:id', cacheController.updateCache)
 router.delete('/caches/:id', cacheController.deleteCache)
 
+// Page cache management routes
+router.get('/page-cache/stats', cacheController.getPageCacheStats)
+router.get('/page-cache/memory/keys', cacheController.getMemoryCacheKeys)
+router.delete('/page-cache/memory', cacheController.clearMemoryCache)
+router.post('/page-cache/memory/cleanup', cacheController.cleanupMemoryCache)
+router.post('/page-cache/database/cleanup', cacheController.clearExpiredDatabaseCache)
+router.delete('/page-cache/:hash', cacheController.deletePageCache)
+router.get('/page-cache/info/:hash', cacheController.getPageCacheInfo)
+router.get('/page-cache/memory/list', cacheController.getMemoryCacheList)
+
 // Configs routes
 router.get('/configs', configController.getConfigs)
 router.get('/configs/alias/:alias', configController.getConfigByAlias)

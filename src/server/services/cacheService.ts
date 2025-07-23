@@ -4,6 +4,7 @@ export interface CreateCacheData {
   hash: string
   cache_data: string
   status?: number
+  url: string // 新增
 }
 
 export type UpdateCacheData = Partial<CreateCacheData>
@@ -137,7 +138,7 @@ export class CacheService {
     const result = await db
       .safeUpdateTable('caches')
       .set({
-        is_delete: 10,
+        is_delete: 1,
         update_time: Date.now()
       })
       .where('id', '=', id)
@@ -183,7 +184,7 @@ export class CacheService {
     const result = await db
       .safeUpdateTable('caches')
       .set({
-        is_delete: 10,
+        is_delete: 1,
         update_time: Date.now()
       })
       .where('create_time', '<', expireTime)
@@ -192,7 +193,7 @@ export class CacheService {
 
     return {
       success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
+      numUpdatedRows: Number(result.numUpdatedRows)
     }
   }
 
@@ -232,7 +233,7 @@ export class CacheService {
       db
         .selectFrom('caches')
         .select((eb) => [eb.fn.count('id').as('count')])
-        .where('status', '=', 20)
+        .where('status', '=', -10)
         .where('is_delete', '=', 0)
         .executeTakeFirst()
     ])

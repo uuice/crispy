@@ -374,7 +374,7 @@ export interface Caches {
   /**
    * 缓存数据
    */
-  cache_data: string;
+  cache_data: Generated<string>;
   /**
    * 创建时间
    */
@@ -399,6 +399,10 @@ export interface Caches {
    * 更新时间
    */
   update_time: Generated<number>;
+  /**
+   * 原始url
+   */
+  url: Generated<string>;
 }
 
 export interface Categories {
