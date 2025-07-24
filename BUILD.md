@@ -4,26 +4,26 @@ This guide explains how to build and package the Crispy project using the provid
 
 ## Quick Start
 
-### Using npm scripts (package.json)
+### Using bun scripts (package.json)
 
 ```bash
 # Build only
-npm run build
+bun run build
 
 # Build and create tar.gz with dist/ only
-npm run build:tar
+bun run build:tar
 
 # Build and create production tar.gz
-npm run build:tar:prod
+bun run build:tar:prod
 
 # Clean dist/, build and create tar.gz
-npm run build:tar:clean
+bun run build:tar:clean
 
 # Build and create tar.gz with .env file
-npm run build:tar:with-env
+bun run build:tar:with-env
 
 # Build and create tar.gz with all necessary files
-npm run build:tar:full
+bun run build:tar:full
 ```
 
 ### Using the build script (build.sh)
@@ -56,7 +56,7 @@ npm run build:tar:full
 
 ## Script Options
 
-### npm scripts
+### bun scripts
 
 | Script               | Description                                      |
 | -------------------- | ------------------------------------------------ |
@@ -124,7 +124,7 @@ Where:
 
 ```bash
 # Quick build and package
-npm run build:tar
+bun run build:tar
 
 # Or using the script
 ./build.sh tar
@@ -134,7 +134,7 @@ npm run build:tar
 
 ```bash
 # Build with environment file
-npm run build:tar:with-env
+bun run build:tar:with-env
 
 # Or using the script
 ./build.sh tar:with-env
@@ -144,7 +144,7 @@ npm run build:tar:with-env
 
 ```bash
 # Full package with all necessary files
-npm run build:tar:full
+bun run build:tar:full
 
 # Or using the script
 ./build.sh tar:full
@@ -172,7 +172,7 @@ chmod +x build.sh
 
 If the build fails, check:
 
-1. All dependencies are installed: `npm install`
+1. All dependencies are installed: `bun install`
 2. Environment file exists: `.env`
 3. Database connection is available
 4. Node.js version is compatible

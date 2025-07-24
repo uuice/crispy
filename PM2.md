@@ -14,38 +14,36 @@ bun add -g pm2
 
 ## 快速开始
 
-### 1. 使用 npm 脚本（推荐）
+### 1. 使用 bun 脚本（推荐）
 
 ```bash
 # 启动所有应用
-npm run pm2:start
+bun run pm2:start
 
 # 启动开发服务器
-npm run pm2:start:dev
+bun run pm2:start:dev
 
 # 启动 SSR 服务器
-npm run pm2:start:ssr
+bun run pm2:start:ssr
 
 # 启动构建监听
-npm run pm2:start:watch
+bun run pm2:start:watch
 
 # 启动生产环境
-npm run pm2:start:prod
+bun run pm2:start:prod
 ```
 
 ### 2. 直接使用 PM2 命令
 
 ```bash
 # 启动开发服务器
-pm2 start npm --name "crispy-dev" -- run start
+pm2 start bun --name "crispy-dev" -- run start
 
 # 启动 SSR 服务器
-pm2 start npm --name "crispy-ssr" -- run serve:ssr:crispy
-
 pm2 start bun --name "crispy-ssr" -- run serve:ssr:crispy
 
 # 启动构建监听
-pm2 start npm --name "crispy-watch" -- run watch
+pm2 start bun --name "crispy-watch" -- run watch
 ```
 
 ### 3. 使用配置文件
@@ -67,7 +65,7 @@ pm2 start ecosystem.config.js --env production
 
 ```bash
 # 查看所有进程状态
-npm run pm2:status
+bun run pm2:status
 # 或
 pm2 status
 pm2 list
@@ -77,7 +75,7 @@ pm2 list
 
 ```bash
 # 停止所有应用
-npm run pm2:stop
+bun run pm2:stop
 
 # 停止特定应用
 pm2 stop crispy-dev
@@ -88,7 +86,7 @@ pm2 stop crispy-ssr
 
 ```bash
 # 重启所有应用
-npm run pm2:restart
+bun run pm2:restart
 
 # 重启特定应用
 pm2 restart crispy-dev
@@ -98,7 +96,7 @@ pm2 restart crispy-dev
 
 ```bash
 # 重载所有应用
-npm run pm2:reload
+bun run pm2:reload
 
 # 重载特定应用
 pm2 reload crispy-dev
@@ -108,7 +106,7 @@ pm2 reload crispy-dev
 
 ```bash
 # 删除所有应用
-npm run pm2:delete
+bun run pm2:delete
 
 # 删除特定应用
 pm2 delete crispy-dev
@@ -120,7 +118,7 @@ pm2 delete crispy-dev
 
 ```bash
 # 查看所有日志
-npm run pm2:logs
+bun run pm2:logs
 
 # 查看特定应用日志
 pm2 logs crispy-dev
@@ -134,7 +132,7 @@ pm2 logs --follow
 
 ```bash
 # 打开监控面板
-npm run pm2:monit
+bun run pm2:monit
 # 或
 pm2 monit
 ```
@@ -156,8 +154,8 @@ module.exports = {
   apps: [
     {
       name: 'crispy-dev', // 应用名称
-      script: 'npm', // 执行脚本
-      args: 'run start', // 脚本参数
+      script: 'bun', // 执行脚本
+      args: 'run --env-file ./.env ng serve', // 脚本参数
       cwd: './', // 工作目录
       env: {
         // 开发环境变量
@@ -187,21 +185,21 @@ module.exports = {
 ### crispy-dev
 
 - **用途**: 开发服务器
-- **命令**: `npm run start`
+- **命令**: `bun run start`
 - **端口**: 4200
 - **环境**: development
 
 ### crispy-ssr
 
 - **用途**: SSR 服务器
-- **命令**: `npm run serve:ssr:crispy`
+- **命令**: `bun run serve:ssr:crispy`
 - **端口**: 4000
 - **环境**: production
 
 ### crispy-watch
 
 - **用途**: 构建监听
-- **命令**: `npm run watch`
+- **命令**: `bun run watch`
 - **环境**: development
 
 ## 常用场景
@@ -210,7 +208,7 @@ module.exports = {
 
 ```bash
 # 启动开发服务器
-npm run pm2:start:dev
+bun run pm2:start:dev
 
 # 查看日志
 pm2 logs crispy-dev --follow
@@ -220,23 +218,23 @@ pm2 logs crispy-dev --follow
 
 ```bash
 # 构建项目
-npm run build
+bun run build
 
 # 启动 SSR 服务器
-npm run pm2:start:ssr
+bun run pm2:start:ssr
 
 # 查看状态
-npm run pm2:status
+bun run pm2:status
 ```
 
 ### 部署更新
 
 ```bash
 # 重载应用（零停机）
-npm run pm2:reload
+bun run pm2:reload
 
 # 或者重启
-npm run pm2:restart
+bun run pm2:restart
 ```
 
 ## 故障排除
@@ -264,8 +262,8 @@ npm run pm2:restart
 ```javascript
 {
   name: 'crispy-ssr',
-  script: 'npm',
-  args: 'run serve:ssr:crispy',
+  script: 'bun',
+  args: 'run --env-file ./.env dist/crispy/server/server.mjs',
   instances: 'max',  // 使用所有 CPU 核心
   exec_mode: 'cluster'
 }

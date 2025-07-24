@@ -61,7 +61,7 @@ clean_dist() {
 # Function to build project
 build_project() {
     print_status "Building project..."
-    npm run build
+    bun run build
     print_success "Project built successfully"
 }
 

@@ -45,7 +45,7 @@ For more information on using the Angular CLI, including detailed command refere
 ## Deploy
 
 ```bash
-bun serve:ssr:crispy
+bun run serve:ssr:crispy
 or
-pm2 start npm --name "crispy-ssr" -- run serve:ssr:crispy
+pm2 start bun --name "crispy-ssr" -- run serve:ssr:crispy
 ```

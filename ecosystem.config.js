@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'crispy-dev',
-      script: 'npm',
-      args: 'run start',
+      script: 'bun',
+      args: 'run --env-file ./.env ng serve',
       cwd: './',
       env: {
         NODE_ENV: 'development',
@@ -24,8 +24,8 @@ module.exports = {
     },
     {
       name: 'crispy-ssr',
-      script: 'npm',
-      args: 'run serve:ssr:crispy',
+      script: 'bun',
+      args: 'run --env-file ./.env dist/crispy/server/server.mjs',
       cwd: './',
       env: {
         NODE_ENV: 'production',
@@ -46,8 +46,8 @@ module.exports = {
     },
     {
       name: 'crispy-watch',
-      script: 'npm',
-      args: 'run watch',
+      script: 'bun',
+      args: 'run --env-file ./.env ng build --watch --configuration development',
       cwd: './',
       env: {
         NODE_ENV: 'development'
@@ -71,7 +71,7 @@ module.exports = {
       repo: 'git@github.com:username/crispy.git',
       path: '/var/www/production',
       'pre-deploy-local': '',
-      'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production',
+      'post-deploy': 'bun install && pm2 reload ecosystem.config.js --env production',
       'pre-setup': ''
     }
   }
