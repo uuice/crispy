@@ -97,7 +97,7 @@ export const createApiLog = async (
     success(res, result, 'API log created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating API log:', err)
@@ -130,7 +130,7 @@ export const updateApiLog = async (
     success(res, { id, ...validatedData }, 'API log updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating API log:', err)

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms'
 import { TreeTableModule } from 'primeng/treetable'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
@@ -14,7 +14,6 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { MenuDetailComponent } from './menu-detail.component'
-// TODO: import MenuDetailComponent when implemented
 
 // 菜单节点类型，递归结构
 interface MenuNode {
@@ -43,7 +42,7 @@ interface MenuNode {
     TreeTableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,

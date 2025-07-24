@@ -70,7 +70,7 @@ export const createTag = async (req: Request, res: Response, next: NextFunction)
     success(res, tag, 'Tag created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating tag:', err)
@@ -91,7 +91,7 @@ export const updateTag = async (req: Request, res: Response, next: NextFunction)
     success(res, tag, 'Tag updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Tag not found') {

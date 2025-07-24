@@ -5,12 +5,11 @@ import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
-import { CalendarModule } from 'primeng/calendar'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AdDetailComponent } from './ad-detail.component'
@@ -26,12 +25,11 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
-    CalendarModule,
     AdDetailComponent,
     AdItemListDialogComponent
   ],
@@ -72,13 +70,12 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
                 (keydown.enter)="onSearch()"
               />
             </span>
-            <p-dropdown
+            <p-select
               [options]="statusOptions"
               [ngModel]="searchStatus()"
               (ngModelChange)="searchStatus.set($event)"
               placeholder="状态"
-              styleClass="p-inputtext-sm"
-            ></p-dropdown>
+            ></p-select>
             <div class="search-actions">
               <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>
               <p-button

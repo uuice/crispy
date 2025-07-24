@@ -102,7 +102,7 @@ export const createKeyword = async (
     success(res, newKeyword, 'Keyword created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating keyword:', err)
@@ -135,7 +135,7 @@ export const updateKeyword = async (
     success(res, { id, ...validatedData }, 'Keyword updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating keyword:', err)

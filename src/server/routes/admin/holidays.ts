@@ -94,7 +94,7 @@ export const createHoliday = async (
     success(res, result, 'Holiday created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating holiday:', err)
@@ -127,7 +127,7 @@ export const updateHoliday = async (
     success(res, { id, ...validatedData }, 'Holiday updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating holiday:', err)

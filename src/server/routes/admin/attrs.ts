@@ -86,7 +86,7 @@ export const createAttr = async (
     success(res, result, 'Attribute created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating attribute:', err)
@@ -119,7 +119,7 @@ export const updateAttr = async (
     success(res, { id, ...validatedData }, 'Attribute updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating attribute:', err)

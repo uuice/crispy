@@ -75,7 +75,7 @@ export const createAdItem = async (
     success(res, adItem, 'Ad item created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Ad not found') {
@@ -104,7 +104,7 @@ export const updateAdItem = async (
     success(res, adItem, 'Ad item updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error) {

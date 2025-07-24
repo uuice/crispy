@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
@@ -37,7 +37,7 @@ interface Config {
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
@@ -111,7 +111,7 @@ interface Config {
               </div>
               <div class="search-item">
                 <label for="status-filter" class="sr-only">状态筛选</label>
-                <p-dropdown
+                <p-select
                   id="status-filter"
                   [options]="statusOptions"
                   [(ngModel)]="searchFilters.status"
@@ -120,7 +120,7 @@ interface Config {
                   optionLabel="label"
                   optionValue="value"
                   class="search-dropdown"
-                ></p-dropdown>
+                ></p-select>
               </div>
             </div>
             <div class="search-actions">

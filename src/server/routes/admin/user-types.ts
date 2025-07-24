@@ -74,7 +74,7 @@ export const createUserType = async (
     success(res, userType, 'User type created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating user type:', err)
@@ -99,7 +99,7 @@ export const updateUserType = async (
     success(res, userType, 'User type updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'User type not found') {

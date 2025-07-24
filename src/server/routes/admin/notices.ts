@@ -98,7 +98,7 @@ export const createNotice = async (
     success(res, newNotice, 'Notice created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating notice:', err)
@@ -131,7 +131,7 @@ export const updateNotice = async (
     success(res, { id, ...validatedData }, 'Notice updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating notice:', err)

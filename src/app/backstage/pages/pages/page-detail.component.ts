@@ -18,7 +18,7 @@ import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
-import { ChipsModule } from 'primeng/chips'
+import { AutoCompleteModule } from 'primeng/autocomplete'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
@@ -83,7 +83,7 @@ interface CategoriesResponse {
     DialogModule,
     ToastModule,
     MessageModule,
-    ChipsModule,
+    AutoCompleteModule,
     EditorModule,
     VditorEditorComponent
   ],
@@ -252,14 +252,18 @@ interface CategoriesResponse {
 
         <div class="field">
           <label for="tags" class="block text-900 font-medium mb-2">标签</label>
-          <p-chips
+          <p-autoComplete
             id="tags"
             formControlName="tags"
+            [multiple]="true"
+            [suggestions]="filteredTags"
+            (completeMethod)="filterTags($event)"
+            (onSelect)="onTagSelect($event)"
+            (onUnselect)="onTagUnselect($event)"
+            (keydown)="onTagKeydown($event)"
             placeholder="请输入标签，按回车键添加"
             class="w-full"
-            [addOnBlur]="true"
-            [allowDuplicate]="false"
-          ></p-chips>
+          ></p-autoComplete>
           <p-message severity="info" text="标签将用逗号分隔保存" styleClass="mt-1"></p-message>
         </div>
 
@@ -301,14 +305,18 @@ interface CategoriesResponse {
 
         <div class="field">
           <label for="image_list" class="block text-900 font-medium mb-2">图片列表</label>
-          <p-chips
+          <p-autoComplete
             id="image_list"
             formControlName="image_list"
+            [multiple]="true"
+            [suggestions]="filteredImages"
+            (completeMethod)="filterImages($event)"
+            (onSelect)="onImageSelect($event)"
+            (onUnselect)="onImageUnselect($event)"
+            (keydown)="onImageKeydown($event)"
             placeholder="请输入图片URL，按回车键添加"
             class="w-full"
-            [addOnBlur]="true"
-            [allowDuplicate]="false"
-          ></p-chips>
+          ></p-autoComplete>
           <p-message severity="info" text="图片URL将用逗号分隔保存" styleClass="mt-1"></p-message>
 
           <!-- Image Preview -->
@@ -611,7 +619,7 @@ export class PageDetailComponent implements OnInit {
   }
 
   loadFormData(page: Page) {
-    // Convert tags string to array for chips component
+    // Convert tags string to array for autoComplete component
     const tags = page.tags
       ? page.tags
           .split(',')
@@ -619,7 +627,7 @@ export class PageDetailComponent implements OnInit {
           .filter((tag) => tag)
       : []
 
-    // Convert image_list string to array for chips component
+    // Convert image_list string to array for autoComplete component
     const imageList = page.image_list
       ? page.image_list
           .split(',')
@@ -747,6 +755,66 @@ export class PageDetailComponent implements OnInit {
   currentMode = signal<'edit' | 'create'>('create')
   availableCategories = signal<Category[]>([])
 
+  // AutoComplete properties and methods
+  filteredTags: string[] = []
+  filteredImages: string[] = []
+
+  filterTags(event: any) {
+    // For tags, we can provide suggestions based on existing tags or allow free input
+    // For now, we'll allow free input by not filtering
+    this.filteredTags = []
+  }
+
+  filterImages(event: any) {
+    // For images, we can provide suggestions based on existing images or allow free input
+    // For now, we'll allow free input by not filtering
+    this.filteredImages = []
+  }
+
+  onTagSelect(event: any) {
+    // Handle tag selection if needed
+    console.log('Tag selected:', event)
+  }
+
+  onTagUnselect(event: any) {
+    // Handle tag unselection if needed
+    console.log('Tag unselected:', event)
+  }
+
+  onImageSelect(event: any) {
+    // Handle image selection if needed
+    console.log('Image selected:', event)
+  }
+
+  onImageUnselect(event: any) {
+    // Handle image unselection if needed
+    console.log('Image unselected:', event)
+  }
+
+  onTagKeydown(event: any) {
+    if (event.key === 'Enter' && event.target.value.trim()) {
+      event.preventDefault()
+      const currentTags = this.pageForm.get('tags')?.value || []
+      const newTag = event.target.value.trim()
+      if (!currentTags.includes(newTag)) {
+        this.pageForm.get('tags')?.setValue([...currentTags, newTag])
+      }
+      event.target.value = ''
+    }
+  }
+
+  onImageKeydown(event: any) {
+    if (event.key === 'Enter' && event.target.value.trim()) {
+      event.preventDefault()
+      const currentImages = this.pageForm.get('image_list')?.value || []
+      const newImage = event.target.value.trim()
+      if (!currentImages.includes(newImage)) {
+        this.pageForm.get('image_list')?.setValue([...currentImages, newImage])
+      }
+      event.target.value = ''
+    }
+  }
+
   onImageError(event: any, index: number) {
     console.error(`Image at index ${index} failed to load:`, event.target.src)
     // Optionally show a message to the user
@@ -780,6 +848,7 @@ export class PageDetailComponent implements OnInit {
       })
   }
 
+  // Restore selectLocalImage method
   selectLocalImage() {
     const input = document.createElement('input')
     input.setAttribute('type', 'file')
@@ -794,13 +863,13 @@ export class PageDetailComponent implements OnInit {
         this.httpService.post('/api/admin/upload/image', formData).subscribe({
           next: (response: any) => {
             if (response.success) {
-              // 通过ViewChild拿到quill实例
+              // Get quill instance via ViewChild
               const quillEditor = this.editorComponent?.quill
               if (quillEditor) {
                 const range = quillEditor.getSelection(true)
                 quillEditor.insertEmbed(range.index, 'image', response.data.url)
                 quillEditor.setSelection(range.index + 1)
-                // 关键：同步内容到表单
+                // Sync content to form
                 const html = quillEditor.root.innerHTML
                 this.pageForm.get('content')?.setValue(html)
               }

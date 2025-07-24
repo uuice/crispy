@@ -97,7 +97,7 @@ export const createVote = async (
     success(res, newVote, 'Vote created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Start time must be before end time') {
@@ -134,7 +134,7 @@ export const updateVote = async (
     success(res, { id, ...validatedData }, 'Vote updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Start time must be before end time') {

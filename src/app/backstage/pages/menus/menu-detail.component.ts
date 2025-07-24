@@ -14,7 +14,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 
 interface MenuNode {
   id: number
@@ -44,7 +44,7 @@ interface MenuNode {
     DialogModule,
     ToastModule,
     MessageModule,
-    DropdownModule
+    SelectModule
   ],
   providers: [MessageService],
   template: `
@@ -165,7 +165,7 @@ interface MenuNode {
           <div class="col-6">
             <div class="field">
               <label for="parent_id" class="block text-900 font-medium mb-2">父级菜单</label>
-              <p-dropdown
+              <p-select
                 id="parent_id"
                 [options]="parentOptions()"
                 formControlName="parent_id"
@@ -175,7 +175,7 @@ interface MenuNode {
                 class="w-full"
                 [showClear]="true"
                 appendTo="body"
-              ></p-dropdown>
+              ></p-select>
             </div>
           </div>
 
@@ -196,14 +196,14 @@ interface MenuNode {
           <div class="col-6">
             <div class="field">
               <label for="status" class="block text-900 font-medium mb-2">状态</label>
-              <p-dropdown
+              <p-select
                 id="status"
                 [options]="statusOptions"
                 formControlName="status"
                 placeholder="请选择状态"
                 class="w-full"
                 appendTo="body"
-              ></p-dropdown>
+              ></p-select>
             </div>
           </div>
         </div>

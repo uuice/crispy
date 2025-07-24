@@ -115,7 +115,7 @@ export const createConfig = async (
     success(res, result, 'Config created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating config:', err)
@@ -143,7 +143,7 @@ export const upsertConfig = async (
     success(res, result, message)
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error upserting config:', err)
@@ -176,7 +176,7 @@ export const updateConfig = async (
     success(res, { id, ...validatedData }, 'Config updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating config:', err)

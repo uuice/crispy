@@ -97,7 +97,7 @@ export const createLink = async (
     success(res, newLink, 'Link created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating link:', err)
@@ -130,7 +130,7 @@ export const updateLink = async (
     success(res, { id, ...validatedData }, 'Link updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating link:', err)

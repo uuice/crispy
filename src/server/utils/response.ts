@@ -88,7 +88,7 @@ export const notFound = (res: Response, message = 'Resource not found'): void =>
  * Enhanced ZodError handler for direct use
  */
 export const handleZodError = (res: Response, error: z.ZodError): void => {
-  validationError(res, error.errors)
+  validationError(res, error.issues)
 }
 
 /**

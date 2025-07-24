@@ -86,7 +86,7 @@ export const createAddition = async (
     success(res, addition, 'Addition created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating addition:', err)
@@ -111,7 +111,7 @@ export const updateAddition = async (
     success(res, addition, 'Addition updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Addition not found') {

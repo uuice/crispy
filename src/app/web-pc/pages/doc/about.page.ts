@@ -1,13 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core'
 import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { HttpService } from '../../services/http.service'
 
 @Component({
   selector: 'cs-doc-about',
   standalone: true,
-  imports: [CardModule, TableModule, TabViewModule],
+  imports: [CardModule, TableModule, TabsModule],
   template: `
     <p-card header="系统信息" styleClass="system-card">
       <table class="min-w-full text-sm border-separate border-spacing-y-2">
@@ -25,48 +25,54 @@ import { HttpService } from '../../services/http.service'
       </table>
     </p-card>
     <p-card header="项目依赖" styleClass="system-card">
-      <p-tabView>
-        <p-tabPanel header="生产依赖">
-          <p-table
-            [value]="prodDependencies()"
-            responsiveLayout="scroll"
-            styleClass="p-datatable-sm beautify-table"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Name</th>
-                <th>Version</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row>
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.version }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-        <p-tabPanel header="开发依赖">
-          <p-table
-            [value]="devDependencies()"
-            responsiveLayout="scroll"
-            styleClass="p-datatable-sm beautify-table"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Name</th>
-                <th>Version</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row>
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.version }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-      </p-tabView>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">生产依赖</p-tab>
+          <p-tab value="1">开发依赖</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <p-table
+              [value]="prodDependencies()"
+              responsiveLayout="scroll"
+              styleClass="p-datatable-sm beautify-table"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Name</th>
+                  <th>Version</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.version }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <p-table
+              [value]="devDependencies()"
+              responsiveLayout="scroll"
+              styleClass="p-datatable-sm beautify-table"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Name</th>
+                  <th>Version</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.version }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </p-card>
     <p-card header="项目信息" styleClass="system-card">
       <div class="space-y-2 text-base">

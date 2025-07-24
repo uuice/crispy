@@ -112,7 +112,7 @@ export const createComment = async (
   try {
     const validation = createCommentSchema.safeParse(req.body)
     if (!validation.success) {
-      validationError(res, validation.error.errors)
+      validationError(res, validation.error.issues)
       return
     }
 
@@ -141,7 +141,7 @@ export const updateComment = async (
 
     const validation = updateCommentSchema.safeParse(req.body)
     if (!validation.success) {
-      validationError(res, validation.error.errors)
+      validationError(res, validation.error.issues)
       return
     }
 

@@ -93,7 +93,7 @@ export const createVoteItem = async (
     success(res, newVoteItem, 'Vote item created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Vote not found') {
@@ -130,7 +130,7 @@ export const updateVoteItem = async (
     success(res, { id, ...validatedData }, 'Vote item updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Vote not found') {

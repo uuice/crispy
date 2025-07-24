@@ -119,7 +119,7 @@ export const createMenu = async (
     success(res, newMenu, 'Menu created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error) {
@@ -156,7 +156,7 @@ export const updateMenu = async (
     success(res, { id, ...validatedData }, 'Menu updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error) {

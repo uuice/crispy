@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { ToastModule } from 'primeng/toast'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CacheDetailComponent } from './cache-detail.component'
@@ -32,125 +32,124 @@ interface MemoryCacheItem {
 @Component({
   selector: 'cs-cache-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    TableModule,
-    ButtonModule,
-    ToastModule,
-    TabViewModule,
-    CacheDetailComponent
-  ],
+  imports: [CommonModule, TableModule, ButtonModule, ToastModule, TabsModule, CacheDetailComponent],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <p-toast></p-toast>
-      <p-tabView>
-        <p-tabPanel header="内存缓存">
-          <div class="tab-actions">
-            <p-button
-              label="刷新统计"
-              icon="pi pi-refresh"
-              (click)="loadStats()"
-              class="mr-2"
-            ></p-button>
-            <p-button
-              label="清理内存缓存"
-              icon="pi pi-trash"
-              (click)="clearMemoryCache()"
-            ></p-button>
-          </div>
-          <div class="stats">
-            <pre>{{ stats() | json }}</pre>
-          </div>
-          <p-table
-            [value]="memoryCacheList()"
-            [paginator]="true"
-            [rows]="20"
-            [totalRecords]="memoryCacheList().length"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>URL</th>
-                <th>Hash</th>
-                <th>过期时间</th>
-                <th>操作</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-item>
-              <tr>
-                <td>{{ item.url }}</td>
-                <td>{{ item.hash }}</td>
-                <td>{{ item.expires | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-                <td>
-                  <p-button
-                    label="详情"
-                    icon="pi pi-eye"
-                    (click)="openDetail(item.hash)"
-                    class="mr-2"
-                  ></p-button>
-                  <p-button
-                    label="删除"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    (click)="deleteCache(item.hash)"
-                  ></p-button>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-        <p-tabPanel header="数据库缓存">
-          <div class="tab-actions">
-            <p-button
-              label="清理过期DB缓存"
-              icon="pi pi-database"
-              (click)="clearExpiredDbCache()"
-            ></p-button>
-          </div>
-          <p-table
-            [value]="dbCaches()"
-            [paginator]="true"
-            [rows]="dbPageSize()"
-            [totalRecords]="dbTotal()"
-            [loading]="dbLoading()"
-            (onPageChange)="onDbPageChange($event)"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>ID</th>
-                <th>URL</th>
-                <th>Hash</th>
-                <th>状态</th>
-                <th>创建时间</th>
-                <th>操作</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-cache>
-              <tr>
-                <td>{{ cache.id }}</td>
-                <td>{{ cache.url }}</td>
-                <td>{{ cache.hash }}</td>
-                <td>{{ cache.status }}</td>
-                <td>{{ cache.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-                <td>
-                  <p-button
-                    label="详情"
-                    icon="pi pi-eye"
-                    (click)="openDbDetail(cache)"
-                    class="mr-2"
-                  ></p-button>
-                  <p-button
-                    label="删除"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    (click)="deleteDbCache(cache)"
-                  ></p-button>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-      </p-tabView>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">内存缓存</p-tab>
+          <p-tab value="1">数据库缓存</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <div class="tab-actions">
+              <p-button
+                label="刷新统计"
+                icon="pi pi-refresh"
+                (click)="loadStats()"
+                class="mr-2"
+              ></p-button>
+              <p-button
+                label="清理内存缓存"
+                icon="pi pi-trash"
+                (click)="clearMemoryCache()"
+              ></p-button>
+            </div>
+            <div class="stats">
+              <pre>{{ stats() | json }}</pre>
+            </div>
+            <p-table
+              [value]="memoryCacheList()"
+              [paginator]="true"
+              [rows]="20"
+              [totalRecords]="memoryCacheList().length"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>URL</th>
+                  <th>Hash</th>
+                  <th>过期时间</th>
+                  <th>操作</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr>
+                  <td>{{ item.url }}</td>
+                  <td>{{ item.hash }}</td>
+                  <td>{{ item.expires | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+                  <td>
+                    <p-button
+                      label="详情"
+                      icon="pi pi-eye"
+                      (click)="openDetail(item.hash)"
+                      class="mr-2"
+                    ></p-button>
+                    <p-button
+                      label="删除"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      (click)="deleteCache(item.hash)"
+                    ></p-button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <div class="tab-actions">
+              <p-button
+                label="清理过期DB缓存"
+                icon="pi pi-database"
+                (click)="clearExpiredDbCache()"
+              ></p-button>
+            </div>
+            <p-table
+              [value]="dbCaches()"
+              [paginator]="true"
+              [rows]="dbPageSize()"
+              [totalRecords]="dbTotal()"
+              [loading]="dbLoading()"
+              (onPageChange)="onDbPageChange($event)"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>ID</th>
+                  <th>URL</th>
+                  <th>Hash</th>
+                  <th>状态</th>
+                  <th>创建时间</th>
+                  <th>操作</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-cache>
+                <tr>
+                  <td>{{ cache.id }}</td>
+                  <td>{{ cache.url }}</td>
+                  <td>{{ cache.hash }}</td>
+                  <td>{{ cache.status }}</td>
+                  <td>{{ cache.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+                  <td>
+                    <p-button
+                      label="详情"
+                      icon="pi pi-eye"
+                      (click)="openDbDetail(cache)"
+                      class="mr-2"
+                    ></p-button>
+                    <p-button
+                      label="删除"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      (click)="deleteDbCache(cache)"
+                    ></p-button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
       @if (isDetailVisible() && selectedKey()) {
         <cs-cache-detail [cacheKey]="selectedKey()!" (closed)="closeDetail()"></cs-cache-detail>
       }

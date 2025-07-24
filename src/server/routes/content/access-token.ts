@@ -14,8 +14,8 @@ const checkTokenSchema = z.object({
 })
 
 const listQuerySchema = z.object({
-  page: z.string().transform(Number).default('1'),
-  pageSize: z.string().transform(Number).default('10'),
+  page: z.number().default(1),
+  pageSize: z.number().default(10),
   app_name: z.string().optional(),
   channel: z.string().optional(),
   token: z.string().optional(),
@@ -41,7 +41,7 @@ export const checkAccessToken = async (
     success(res, { valid: true }, 'Access token is valid')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error checking access token:', err)
@@ -88,7 +88,7 @@ export const getAccessTokens = async (
     success(res, result)
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error fetching access tokens:', err)

@@ -87,7 +87,7 @@ export const createCache = async (
     success(res, result, 'Cache created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating cache:', err)
@@ -120,7 +120,7 @@ export const updateCache = async (
     success(res, { id, ...validatedData }, 'Cache updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating cache:', err)

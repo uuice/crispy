@@ -1,13 +1,13 @@
 import { Component } from '@angular/core'
 import { CardModule } from 'primeng/card'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { ButtonModule } from 'primeng/button'
 import { MessageModule } from 'primeng/message'
 
 @Component({
   selector: 'cs-doc-home',
   standalone: true,
-  imports: [CardModule, TabViewModule, ButtonModule, MessageModule],
+  imports: [CardModule, TabsModule, ButtonModule, MessageModule],
   template: `
     <p-card header="Crispy 项目介绍" styleClass="system-card">
       <div class="flex flex-col gap-4 mb-4">

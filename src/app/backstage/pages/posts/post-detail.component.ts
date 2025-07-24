@@ -18,7 +18,7 @@ import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
-import { ChipsModule } from 'primeng/chips'
+import { AutoCompleteModule } from 'primeng/autocomplete'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
@@ -88,7 +88,7 @@ interface CategoriesResponse {
     DialogModule,
     ToastModule,
     MessageModule,
-    ChipsModule,
+    AutoCompleteModule,
     EditorModule,
     VditorEditorComponent
   ],
@@ -247,14 +247,16 @@ interface CategoriesResponse {
 
         <div class="field">
           <label for="tags" class="block text-900 font-medium mb-2">标签</label>
-          <p-chips
+          <p-autoComplete
             id="tags"
             formControlName="tags"
+            [multiple]="true"
+            [suggestions]="filteredTags"
+            (completeMethod)="filterTags($event)"
+            (keydown)="onTagKeydown($event)"
             placeholder="请输入标签，按回车键添加"
             class="w-full"
-            [addOnBlur]="true"
-            [allowDuplicate]="false"
-          ></p-chips>
+          ></p-autoComplete>
           <p-message severity="info" text="标签将用逗号分隔保存" styleClass="mt-1"></p-message>
         </div>
 
@@ -282,14 +284,16 @@ interface CategoriesResponse {
           <label for="image_list" class="block text-900 font-medium mb-2">图片列表</label>
 
           <div class="field flex items-center gap-2">
-            <p-chips
+            <p-autoComplete
               id="image_list"
               formControlName="image_list"
+              [multiple]="true"
+              [suggestions]="filteredImages"
+              (completeMethod)="filterImages($event)"
+              (keydown)="onImageKeydown($event)"
               placeholder="请输入图片URL，按回车键添加"
               class="w-full"
-              [addOnBlur]="true"
-              [allowDuplicate]="false"
-            ></p-chips>
+            ></p-autoComplete>
             <div class="flex items-center gap-2 w-[100px]">
               <p-button
                 icon="pi pi-upload"
@@ -681,7 +685,7 @@ export class PostDetailComponent implements OnInit {
   }
 
   loadFormData(article: Article) {
-    // Convert tags string to array for chips component
+    // Convert tags string to array for autoComplete component
     const tags = article.tags
       ? article.tags
           .split(',')
@@ -689,7 +693,7 @@ export class PostDetailComponent implements OnInit {
           .filter((tag) => tag)
       : []
 
-    // Convert image_list string to array for chips component
+    // Convert image_list string to array for autoComplete component
     const imageList = article.image_list
       ? article.image_list
           .split(',')
@@ -821,6 +825,44 @@ export class PostDetailComponent implements OnInit {
   currentArticle = signal<Article | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
   availableCategories = signal<Category[]>([])
+
+  // AutoComplete properties and methods
+  filteredTags: string[] = []
+  filteredImages: string[] = []
+
+  filterTags(event: any) {
+    // 允许自由输入，不做过滤
+    this.filteredTags = []
+  }
+
+  filterImages(event: any) {
+    // 允许自由输入，不做过滤
+    this.filteredImages = []
+  }
+
+  onTagKeydown(event: any) {
+    if (event.key === 'Enter' && event.target.value.trim()) {
+      event.preventDefault()
+      const currentTags = this.articleForm.get('tags')?.value || []
+      const newTag = event.target.value.trim()
+      if (!currentTags.includes(newTag)) {
+        this.articleForm.get('tags')?.setValue([...currentTags, newTag])
+      }
+      event.target.value = ''
+    }
+  }
+
+  onImageKeydown(event: any) {
+    if (event.key === 'Enter' && event.target.value.trim()) {
+      event.preventDefault()
+      const currentImages = this.articleForm.get('image_list')?.value || []
+      const newImage = event.target.value.trim()
+      if (!currentImages.includes(newImage)) {
+        this.articleForm.get('image_list')?.setValue([...currentImages, newImage])
+      }
+      event.target.value = ''
+    }
+  }
 
   onImageError(event: any, index?: number) {
     if (index !== undefined) {

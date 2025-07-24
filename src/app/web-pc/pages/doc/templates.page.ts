@@ -1,6 +1,6 @@
 import { Component } from '@angular/core'
 import { CardModule } from 'primeng/card'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { CommonModule } from '@angular/common'
@@ -8,169 +8,179 @@ import { CommonModule } from '@angular/common'
 @Component({
   selector: 'cs-doc-templates',
   standalone: true,
-  imports: [CardModule, TabViewModule, TableModule, ButtonModule, CommonModule],
+  imports: [CardModule, TabsModule, TableModule, ButtonModule, CommonModule],
   template: `
     <p-card header="Nunjucks 模版扩展" styleClass="system-card">
-      <p-tabView>
-        <p-tabPanel header="自定义标签">
-          <p-table
-            [value]="tags"
-            styleClass="p-datatable-sm beautify-table"
-            dataKey="name"
-            [expandedRowKeys]="expandedRows"
-            (onRowExpand)="onRowExpand($event)"
-            (onRowCollapse)="onRowCollapse($event)"
-            [scrollable]="true"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th style="width: 50px"></th>
-                <th>标签名</th>
-                <th>说明</th>
-                <th>用法</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row let-expanded="expanded">
-              <tr>
-                <td>
-                  <p-button
-                    type="button"
-                    pRipple
-                    [pRowToggler]="row"
-                    [text]="true"
-                    severity="secondary"
-                    [rounded]="true"
-                    [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
-                  ></p-button>
-                </td>
-                <td>{{ row.name }}</td>
-                <td>{{ row.desc }}</td>
-                <td>
-                  <code>{{ row.usage }}</code>
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="expandedrow" let-row>
-              <tr>
-                <td colspan="4">
-                  <div class="expansion-content">
-                    <div class="expansion-header">
-                      <h3 class="tag-title">{{ row.name }} 标签详情</h3>
-                      <p class="tag-description">{{ row.desc }}</p>
-                    </div>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">自定义标签</p-tab>
+          <p-tab value="1">过滤器</p-tab>
+          <p-tab value="2">全局方法</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <p-table
+              [value]="tags"
+              styleClass="p-datatable-sm beautify-table"
+              dataKey="name"
+              [expandedRowKeys]="expandedRows"
+              (onRowExpand)="onRowExpand($event)"
+              (onRowCollapse)="onRowCollapse($event)"
+              [scrollable]="true"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 50px"></th>
+                  <th>标签名</th>
+                  <th>说明</th>
+                  <th>用法</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row let-expanded="expanded">
+                <tr>
+                  <td>
+                    <p-button
+                      type="button"
+                      pRipple
+                      [pRowToggler]="row"
+                      [text]="true"
+                      severity="secondary"
+                      [rounded]="true"
+                      [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                    ></p-button>
+                  </td>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.desc }}</td>
+                  <td>
+                    <code>{{ row.usage }}</code>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="expandedrow" let-row>
+                <tr>
+                  <td colspan="4">
+                    <div class="expansion-content">
+                      <div class="expansion-header">
+                        <h3 class="tag-title">{{ row.name }} 标签详情</h3>
+                        <p class="tag-description">{{ row.desc }}</p>
+                      </div>
 
-                    @if (row.parameters && row.parameters.length > 0) {
-                      <div class="parameters-section">
-                        <div class="section-header">
-                          <i class="pi pi-cog"></i>
-                          <h4>参数列表</h4>
-                        </div>
-                        <div class="parameters-table">
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>参数名</th>
-                                <th>类型</th>
-                                <th>必填</th>
-                                <th>默认值</th>
-                                <th>说明</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (param of row.parameters; track param.name) {
+                      @if (row.parameters && row.parameters.length > 0) {
+                        <div class="parameters-section">
+                          <div class="section-header">
+                            <i class="pi pi-cog"></i>
+                            <h4>参数列表</h4>
+                          </div>
+                          <div class="parameters-table">
+                            <table>
+                              <thead>
                                 <tr>
-                                  <td>
-                                    <span class="param-name">{{ param.name }}</span>
-                                  </td>
-                                  <td>
-                                    <span class="param-type">{{ param.type }}</span>
-                                  </td>
-                                  <td>
-                                    <span class="param-required" [class.required]="param.required">
-                                      {{ param.required ? '是' : '否' }}
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <span class="param-default">{{ param.default || '-' }}</span>
-                                  </td>
-                                  <td>{{ param.description }}</td>
+                                  <th>参数名</th>
+                                  <th>类型</th>
+                                  <th>必填</th>
+                                  <th>默认值</th>
+                                  <th>说明</th>
                                 </tr>
-                              }
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                @for (param of row.parameters; track param.name) {
+                                  <tr>
+                                    <td>
+                                      <span class="param-name">{{ param.name }}</span>
+                                    </td>
+                                    <td>
+                                      <span class="param-type">{{ param.type }}</span>
+                                    </td>
+                                    <td>
+                                      <span
+                                        class="param-required"
+                                        [class.required]="param.required"
+                                      >
+                                        {{ param.required ? '是' : '否' }}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <span class="param-default">{{ param.default || '-' }}</span>
+                                    </td>
+                                    <td>{{ param.description }}</td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    }
+                      }
 
-                    @if (row.examples && row.examples.length > 0) {
-                      <div class="examples-section">
-                        <div class="section-header">
-                          <i class="pi pi-code"></i>
-                          <h4>使用示例</h4>
-                        </div>
-                        <div class="examples-list">
-                          @for (example of row.examples; track example.title) {
-                            <div class="example-item">
-                              <div class="example-header">
-                                <h5>{{ example.title }}</h5>
-                                <span class="example-badge">示例</span>
+                      @if (row.examples && row.examples.length > 0) {
+                        <div class="examples-section">
+                          <div class="section-header">
+                            <i class="pi pi-code"></i>
+                            <h4>使用示例</h4>
+                          </div>
+                          <div class="examples-list">
+                            @for (example of row.examples; track example.title) {
+                              <div class="example-item">
+                                <div class="example-header">
+                                  <h5>{{ example.title }}</h5>
+                                  <span class="example-badge">示例</span>
+                                </div>
+                                <div class="code-block">
+                                  <pre><code>{{ example.code }}</code></pre>
+                                </div>
+                                <p class="example-description">{{ example.description }}</p>
                               </div>
-                              <div class="code-block">
-                                <pre><code>{{ example.code }}</code></pre>
-                              </div>
-                              <p class="example-description">{{ example.description }}</p>
-                            </div>
-                          }
+                            }
+                          </div>
                         </div>
-                      </div>
-                    }
-                  </div>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-        <p-tabPanel header="过滤器">
-          <p-table [value]="filters" styleClass="p-datatable-sm beautify-table">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>过滤器名</th>
-                <th>说明</th>
-                <th>用法</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row>
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.desc }}</td>
-                <td>
-                  <code>{{ row.usage }}</code>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-        <p-tabPanel header="全局方法">
-          <p-table [value]="functions" styleClass="p-datatable-sm beautify-table">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>方法名</th>
-                <th>说明</th>
-                <th>用法</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row>
-              <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.desc }}</td>
-                <td>
-                  <code>{{ row.usage }}</code>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-tabPanel>
-      </p-tabView>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <p-table [value]="filters" styleClass="p-datatable-sm beautify-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>过滤器名</th>
+                  <th>说明</th>
+                  <th>用法</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.desc }}</td>
+                  <td>
+                    <code>{{ row.usage }}</code>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+          <p-tabpanel value="2">
+            <p-table [value]="functions" styleClass="p-datatable-sm beautify-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>方法名</th>
+                  <th>说明</th>
+                  <th>用法</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.desc }}</td>
+                  <td>
+                    <code>{{ row.usage }}</code>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </p-card>
   `,
   styles: [

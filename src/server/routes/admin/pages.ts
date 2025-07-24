@@ -154,7 +154,7 @@ export const createPage = async (
     success(res, newPage, 'Page created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating page:', err)
@@ -187,7 +187,7 @@ export const updatePage = async (
     success(res, { id, ...validatedData }, 'Page updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating page:', err)

@@ -97,7 +97,7 @@ export const createOperateLog = async (
     success(res, newLog, 'Operate log created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating operate log:', err)
@@ -130,7 +130,7 @@ export const updateOperateLog = async (
     success(res, { id, ...validatedData }, 'Operate log updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating operate log:', err)

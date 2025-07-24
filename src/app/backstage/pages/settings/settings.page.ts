@@ -3,11 +3,11 @@ import { firstValueFrom } from 'rxjs'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { CardModule } from 'primeng/card'
 import { InputTextModule } from 'primeng/inputtext'
-import { InputSwitchModule } from 'primeng/inputswitch'
-import { DropdownModule } from 'primeng/dropdown'
+import { ToggleSwitchModule } from 'primeng/toggleswitch'
+import { SelectModule } from 'primeng/select'
 import { ButtonModule } from 'primeng/button'
 import { ToastModule } from 'primeng/toast'
 import { MessageService } from 'primeng/api'
@@ -73,11 +73,11 @@ interface ThemeOption {
     CommonModule,
     FormsModule,
     RouterModule,
-    TabViewModule,
+    TabsModule,
     CardModule,
     InputTextModule,
-    InputSwitchModule,
-    DropdownModule,
+    ToggleSwitchModule,
+    SelectModule,
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
@@ -111,392 +111,402 @@ interface ThemeOption {
         </div>
       </div>
 
-      <p-tabView>
-        <!-- 基本设置 -->
-        <p-tabPanel header="基本设置">
-          <div class="grid">
-            <div class="col-12 md:col-6">
-              <p-card>
-                <ng-template pTemplate="title">网站信息</ng-template>
-                <ng-template pTemplate="content">
-                  <div class="field">
-                    <label for="siteName" class="block text-900 font-medium mb-2">网站名称</label>
-                    <input
-                      id="siteName"
-                      type="text"
-                      pInputText
-                      [(ngModel)]="siteSettings.siteName"
-                      class="w-full"
-                    />
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="siteDescription" class="block text-900 font-medium mb-2"
-                      >网站描述</label
-                    >
-                    <textarea
-                      id="siteDescription"
-                      pInputTextarea
-                      [(ngModel)]="siteSettings.siteDescription"
-                      [rows]="3"
-                      class="w-full"
-                    ></textarea>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="siteKeywords" class="block text-900 font-medium mb-2"
-                      >网站关键词</label
-                    >
-                    <input
-                      id="siteKeywords"
-                      type="text"
-                      pInputText
-                      [(ngModel)]="siteSettings.siteKeywords"
-                      class="w-full"
-                    />
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="siteLogo" class="block text-900 font-medium mb-2">网站 Logo</label>
-                    <input
-                      id="siteLogo"
-                      type="text"
-                      pInputText
-                      [(ngModel)]="siteSettings.siteLogo"
-                      class="w-full"
-                    />
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="siteFavicon" class="block text-900 font-medium mb-2"
-                      >网站图标</label
-                    >
-                    <input
-                      id="siteFavicon"
-                      type="text"
-                      pInputText
-                      [(ngModel)]="siteSettings.siteFavicon"
-                      class="w-full"
-                    />
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="siteFooter" class="block text-900 font-medium mb-2">页脚信息</label>
-                    <textarea
-                      id="siteFooter"
-                      pInputTextarea
-                      [(ngModel)]="siteSettings.siteFooter"
-                      [rows]="3"
-                      class="w-full"
-                    ></textarea>
-                  </div>
-                </ng-template>
-              </p-card>
-            </div>
-
-            <div class="col-12 md:col-6">
-              <p-card>
-                <ng-template pTemplate="title">功能设置</ng-template>
-                <ng-template pTemplate="content">
-                  <div class="field">
-                    <label class="block text-900 font-medium mb-2">用户注册</label>
-                    <p-inputSwitch [(ngModel)]="siteSettings.allowRegistration"></p-inputSwitch>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label class="block text-900 font-medium mb-2">评论功能</label>
-                    <p-inputSwitch [(ngModel)]="siteSettings.allowComment"></p-inputSwitch>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label class="block text-900 font-medium mb-2">评论审核</label>
-                    <p-inputSwitch [(ngModel)]="siteSettings.commentAudit"></p-inputSwitch>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="defaultLanguage" class="block text-900 font-medium mb-2"
-                      >默认语言</label
-                    >
-                    <p-dropdown
-                      id="defaultLanguage"
-                      [options]="languageOptions"
-                      [(ngModel)]="siteSettings.defaultLanguage"
-                      placeholder="选择默认语言"
-                      styleClass="w-full"
-                    ></p-dropdown>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="timezone" class="block text-900 font-medium mb-2">时区设置</label>
-                    <p-dropdown
-                      id="timezone"
-                      [options]="timezoneOptions"
-                      [(ngModel)]="siteSettings.timezone"
-                      placeholder="选择时区"
-                      styleClass="w-full"
-                    ></p-dropdown>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="dateFormat" class="block text-900 font-medium mb-2">日期格式</label>
-                    <p-dropdown
-                      id="dateFormat"
-                      [options]="dateFormatOptions"
-                      [(ngModel)]="siteSettings.dateFormat"
-                      placeholder="选择日期格式"
-                      styleClass="w-full"
-                    ></p-dropdown>
-                  </div>
-
-                  <div class="field mt-4">
-                    <label for="timeFormat" class="block text-900 font-medium mb-2">时间格式</label>
-                    <p-dropdown
-                      id="timeFormat"
-                      [options]="timeFormatOptions"
-                      [(ngModel)]="siteSettings.timeFormat"
-                      placeholder="选择时间格式"
-                      styleClass="w-full"
-                    ></p-dropdown>
-                  </div>
-                </ng-template>
-              </p-card>
-            </div>
-          </div>
-        </p-tabPanel>
-
-        <!-- 邮件设置 -->
-        <p-tabPanel header="邮件设置">
-          <div class="grid">
-            <div class="col-12">
-              <p-card>
-                <ng-template pTemplate="title">SMTP 设置</ng-template>
-                <ng-template pTemplate="content">
-                  <div class="grid">
-                    <div class="col-12 md:col-6">
-                      <div class="field">
-                        <label for="smtpHost" class="block text-900 font-medium mb-2"
-                          >SMTP 服务器</label
-                        >
-                        <input
-                          id="smtpHost"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="emailSettings.smtpHost"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="smtpPort" class="block text-900 font-medium mb-2"
-                          >SMTP 端口</label
-                        >
-                        <input
-                          id="smtpPort"
-                          type="number"
-                          pInputText
-                          [(ngModel)]="emailSettings.smtpPort"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="smtpUser" class="block text-900 font-medium mb-2"
-                          >SMTP 用户名</label
-                        >
-                        <input
-                          id="smtpUser"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="emailSettings.smtpUser"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="smtpPassword" class="block text-900 font-medium mb-2"
-                          >SMTP 密码</label
-                        >
-                        <input
-                          id="smtpPassword"
-                          type="password"
-                          pInputText
-                          [(ngModel)]="emailSettings.smtpPassword"
-                          class="w-full"
-                        />
-                      </div>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">基本设置</p-tab>
+          <p-tab value="1">SMTP 设置</p-tab>
+          <p-tab value="2">存储设置</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <!-- 基本设置内容 -->
+            <div class="grid">
+              <div class="col-12 md:col-6">
+                <p-card>
+                  <ng-template pTemplate="content">
+                    <div class="field">
+                      <label for="siteName" class="block text-900 font-medium mb-2">网站名称</label>
+                      <input
+                        id="siteName"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="siteSettings.siteName"
+                        class="w-full"
+                      />
                     </div>
 
-                    <div class="col-12 md:col-6">
-                      <div class="field">
-                        <label class="block text-900 font-medium mb-2">SSL/TLS</label>
-                        <p-inputSwitch [(ngModel)]="emailSettings.smtpSecure"></p-inputSwitch>
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="fromEmail" class="block text-900 font-medium mb-2"
-                          >发件人邮箱</label
-                        >
-                        <input
-                          id="fromEmail"
-                          type="email"
-                          pInputText
-                          [(ngModel)]="emailSettings.fromEmail"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="fromName" class="block text-900 font-medium mb-2"
-                          >发件人名称</label
-                        >
-                        <input
-                          id="fromName"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="emailSettings.fromName"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label class="block text-900 font-medium mb-2">启用邮件通知</label>
-                        <p-inputSwitch
-                          [(ngModel)]="emailSettings.enableEmailNotification"
-                        ></p-inputSwitch>
-                      </div>
-
-                      <div class="field mt-4">
-                        <button
-                          pButton
-                          label="测试邮件发送"
-                          icon="pi pi-send"
-                          class="p-button-info"
-                          (click)="testEmailSettings()"
-                        ></button>
-                      </div>
+                    <div class="field mt-4">
+                      <label for="siteDescription" class="block text-900 font-medium mb-2"
+                        >网站描述</label
+                      >
+                      <textarea
+                        id="siteDescription"
+                        pInputTextarea
+                        [(ngModel)]="siteSettings.siteDescription"
+                        [rows]="3"
+                        class="w-full"
+                      ></textarea>
                     </div>
-                  </div>
-                </ng-template>
-              </p-card>
+
+                    <div class="field mt-4">
+                      <label for="siteKeywords" class="block text-900 font-medium mb-2"
+                        >网站关键词</label
+                      >
+                      <input
+                        id="siteKeywords"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="siteSettings.siteKeywords"
+                        class="w-full"
+                      />
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="siteLogo" class="block text-900 font-medium mb-2"
+                        >网站 Logo</label
+                      >
+                      <input
+                        id="siteLogo"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="siteSettings.siteLogo"
+                        class="w-full"
+                      />
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="siteFavicon" class="block text-900 font-medium mb-2"
+                        >网站图标</label
+                      >
+                      <input
+                        id="siteFavicon"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="siteSettings.siteFavicon"
+                        class="w-full"
+                      />
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="siteFooter" class="block text-900 font-medium mb-2"
+                        >页脚信息</label
+                      >
+                      <textarea
+                        id="siteFooter"
+                        pInputTextarea
+                        [(ngModel)]="siteSettings.siteFooter"
+                        [rows]="3"
+                        class="w-full"
+                      ></textarea>
+                    </div>
+                  </ng-template>
+                </p-card>
+              </div>
+
+              <div class="col-12 md:col-6">
+                <p-card>
+                  <ng-template pTemplate="title">功能设置</ng-template>
+                  <ng-template pTemplate="content">
+                    <div class="field">
+                      <label class="block text-900 font-medium mb-2">用户注册</label>
+                      <p-toggleswitch [(ngModel)]="siteSettings.allowRegistration"></p-toggleswitch>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label class="block text-900 font-medium mb-2">评论功能</label>
+                      <p-toggleswitch [(ngModel)]="siteSettings.allowComment"></p-toggleswitch>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label class="block text-900 font-medium mb-2">评论审核</label>
+                      <p-toggleswitch [(ngModel)]="siteSettings.commentAudit"></p-toggleswitch>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="defaultLanguage" class="block text-900 font-medium mb-2"
+                        >默认语言</label
+                      >
+                      <p-select
+                        id="defaultLanguage"
+                        [options]="languageOptions"
+                        [(ngModel)]="siteSettings.defaultLanguage"
+                        placeholder="选择默认语言"
+                        styleClass="w-full"
+                      ></p-select>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="timezone" class="block text-900 font-medium mb-2">时区设置</label>
+                      <p-select
+                        id="timezone"
+                        [options]="timezoneOptions"
+                        [(ngModel)]="siteSettings.timezone"
+                        placeholder="选择时区"
+                        styleClass="w-full"
+                      ></p-select>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="dateFormat" class="block text-900 font-medium mb-2"
+                        >日期格式</label
+                      >
+                      <p-select
+                        id="dateFormat"
+                        [options]="dateFormatOptions"
+                        [(ngModel)]="siteSettings.dateFormat"
+                        placeholder="选择日期格式"
+                        styleClass="w-full"
+                      ></p-select>
+                    </div>
+
+                    <div class="field mt-4">
+                      <label for="timeFormat" class="block text-900 font-medium mb-2"
+                        >时间格式</label
+                      >
+                      <p-select
+                        id="timeFormat"
+                        [options]="timeFormatOptions"
+                        [(ngModel)]="siteSettings.timeFormat"
+                        placeholder="选择时间格式"
+                        styleClass="w-full"
+                      ></p-select>
+                    </div>
+                  </ng-template>
+                </p-card>
+              </div>
             </div>
-          </div>
-        </p-tabPanel>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <!-- 邮件设置内容 -->
+            <div class="grid">
+              <div class="col-12">
+                <p-card>
+                  <ng-template pTemplate="content">
+                    <div class="grid">
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label for="smtpHost" class="block text-900 font-medium mb-2"
+                            >SMTP 服务器</label
+                          >
+                          <input
+                            id="smtpHost"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="emailSettings.smtpHost"
+                            class="w-full"
+                          />
+                        </div>
 
-        <!-- 存储设置 -->
-        <p-tabPanel header="存储设置">
-          <div class="grid">
-            <div class="col-12">
-              <p-card>
-                <ng-template pTemplate="title">存储配置</ng-template>
-                <ng-template pTemplate="content">
-                  <div class="field">
-                    <label for="storageType" class="block text-900 font-medium mb-2"
-                      >存储类型</label
-                    >
-                    <p-dropdown
-                      id="storageType"
-                      [options]="storageTypeOptions"
-                      [(ngModel)]="storageSettings.storageType"
-                      placeholder="选择存储类型"
-                      styleClass="w-full"
-                    ></p-dropdown>
-                  </div>
+                        <div class="field mt-4">
+                          <label for="smtpPort" class="block text-900 font-medium mb-2"
+                            >SMTP 端口</label
+                          >
+                          <input
+                            id="smtpPort"
+                            type="number"
+                            pInputText
+                            [(ngModel)]="emailSettings.smtpPort"
+                            class="w-full"
+                          />
+                        </div>
 
-                  <p-divider *ngIf="storageSettings.storageType !== 'local'"></p-divider>
+                        <div class="field mt-4">
+                          <label for="smtpUser" class="block text-900 font-medium mb-2"
+                            >SMTP 用户名</label
+                          >
+                          <input
+                            id="smtpUser"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="emailSettings.smtpUser"
+                            class="w-full"
+                          />
+                        </div>
 
-                  <div class="grid" *ngIf="storageSettings.storageType !== 'local'">
-                    <div class="col-12 md:col-6">
-                      <div class="field">
-                        <label for="accessKey" class="block text-900 font-medium mb-2"
-                          >Access Key</label
-                        >
-                        <input
-                          id="accessKey"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="storageSettings.accessKey"
-                          class="w-full"
-                        />
+                        <div class="field mt-4">
+                          <label for="smtpPassword" class="block text-900 font-medium mb-2"
+                            >SMTP 密码</label
+                          >
+                          <input
+                            id="smtpPassword"
+                            type="password"
+                            pInputText
+                            [(ngModel)]="emailSettings.smtpPassword"
+                            class="w-full"
+                          />
+                        </div>
                       </div>
 
-                      <div class="field mt-4">
-                        <label for="secretKey" class="block text-900 font-medium mb-2"
-                          >Secret Key</label
-                        >
-                        <input
-                          id="secretKey"
-                          type="password"
-                          pInputText
-                          [(ngModel)]="storageSettings.secretKey"
-                          class="w-full"
-                        />
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label class="block text-900 font-medium mb-2">SSL/TLS</label>
+                          <p-toggleswitch [(ngModel)]="emailSettings.smtpSecure"></p-toggleswitch>
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="fromEmail" class="block text-900 font-medium mb-2"
+                            >发件人邮箱</label
+                          >
+                          <input
+                            id="fromEmail"
+                            type="email"
+                            pInputText
+                            [(ngModel)]="emailSettings.fromEmail"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="fromName" class="block text-900 font-medium mb-2"
+                            >发件人名称</label
+                          >
+                          <input
+                            id="fromName"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="emailSettings.fromName"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label class="block text-900 font-medium mb-2">启用邮件通知</label>
+                          <p-toggleswitch
+                            [(ngModel)]="emailSettings.enableEmailNotification"
+                          ></p-toggleswitch>
+                        </div>
+
+                        <div class="field mt-4">
+                          <button
+                            pButton
+                            label="测试邮件发送"
+                            icon="pi pi-send"
+                            class="p-button-info"
+                            (click)="testEmailSettings()"
+                          ></button>
+                        </div>
                       </div>
                     </div>
-
-                    <div class="col-12 md:col-6">
-                      <div class="field">
-                        <label for="bucket" class="block text-900 font-medium mb-2">Bucket</label>
-                        <input
-                          id="bucket"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="storageSettings.bucket"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="region" class="block text-900 font-medium mb-2">Region</label>
-                        <input
-                          id="region"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="storageSettings.region"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="domain" class="block text-900 font-medium mb-2">域名</label>
-                        <input
-                          id="domain"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="storageSettings.domain"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <label for="uploadPath" class="block text-900 font-medium mb-2"
-                          >上传路径</label
-                        >
-                        <input
-                          id="uploadPath"
-                          type="text"
-                          pInputText
-                          [(ngModel)]="storageSettings.uploadPath"
-                          class="w-full"
-                        />
-                      </div>
-
-                      <div class="field mt-4">
-                        <button
-                          pButton
-                          label="测试连接"
-                          icon="pi pi-link"
-                          class="p-button-info"
-                          (click)="testStorageConnection()"
-                        ></button>
-                      </div>
-                    </div>
-                  </div>
-                </ng-template>
-              </p-card>
+                  </ng-template>
+                </p-card>
+              </div>
             </div>
-          </div>
-        </p-tabPanel>
-      </p-tabView>
+          </p-tabpanel>
+          <p-tabpanel value="2">
+            <!-- 存储设置内容 -->
+            <div class="grid">
+              <div class="col-12">
+                <p-card>
+                  <ng-template pTemplate="content">
+                    <div class="field">
+                      <label for="storageType" class="block text-900 font-medium mb-2"
+                        >存储类型</label
+                      >
+                      <p-select
+                        id="storageType"
+                        [options]="storageTypeOptions"
+                        [(ngModel)]="storageSettings.storageType"
+                        placeholder="选择存储类型"
+                        styleClass="w-full"
+                      ></p-select>
+                    </div>
+
+                    <p-divider *ngIf="storageSettings.storageType !== 'local'"></p-divider>
+
+                    <div class="grid" *ngIf="storageSettings.storageType !== 'local'">
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label for="accessKey" class="block text-900 font-medium mb-2"
+                            >Access Key</label
+                          >
+                          <input
+                            id="accessKey"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="storageSettings.accessKey"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="secretKey" class="block text-900 font-medium mb-2"
+                            >Secret Key</label
+                          >
+                          <input
+                            id="secretKey"
+                            type="password"
+                            pInputText
+                            [(ngModel)]="storageSettings.secretKey"
+                            class="w-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label for="bucket" class="block text-900 font-medium mb-2">Bucket</label>
+                          <input
+                            id="bucket"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="storageSettings.bucket"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="region" class="block text-900 font-medium mb-2">Region</label>
+                          <input
+                            id="region"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="storageSettings.region"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="domain" class="block text-900 font-medium mb-2">域名</label>
+                          <input
+                            id="domain"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="storageSettings.domain"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="uploadPath" class="block text-900 font-medium mb-2"
+                            >上传路径</label
+                          >
+                          <input
+                            id="uploadPath"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="storageSettings.uploadPath"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <button
+                            pButton
+                            label="测试连接"
+                            icon="pi pi-link"
+                            class="p-button-info"
+                            (click)="testStorageConnection()"
+                          ></button>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </p-card>
+              </div>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </div>
   `
 })

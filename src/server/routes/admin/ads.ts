@@ -82,7 +82,7 @@ export const createAd = async (req: Request, res: Response, next: NextFunction):
     success(res, ad, 'Ad created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating ad:', err)
@@ -103,7 +103,7 @@ export const updateAd = async (req: Request, res: Response, next: NextFunction):
     success(res, ad, 'Ad updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Ad not found') {

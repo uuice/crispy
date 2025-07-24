@@ -100,7 +100,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
     success(res, result, 'Job created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating job:', err)
@@ -129,7 +129,7 @@ export const updateJob = async (req: Request, res: Response, next: NextFunction)
     success(res, { id, ...validatedData }, 'Job updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating job:', err)

@@ -1,118 +1,125 @@
 import { Component } from '@angular/core'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { TagModule } from 'primeng/tag'
 
 @Component({
   selector: 'cs-archives',
   standalone: true,
-  imports: [TabViewModule, TagModule],
+  imports: [TabsModule, TagModule],
   template: `
     <!-- Archive Page Tabs -->
     <section class="max-w-4xl mx-auto mb-16">
       <h1 class="text-3xl font-bold text-main mb-8">归档</h1>
-      <p-tabView>
-        <!-- Category Archive Tab -->
-        <p-tabPanel header="By Category">
-          <div class="space-y-8">
-            <!-- Example Category Block -->
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">Examples</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-05-01</span>
-                  <span class="font-medium text-main">Markdown Extended Features</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-10</span>
-                  <span class="font-medium text-main">Expressive Code Example</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2023-10-01</span>
-                  <span class="font-medium text-main">Markdown Example</span>
-                </li>
-              </ul>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">By Category</p-tab>
+          <p-tab value="1">By Tag</p-tab>
+          <p-tab value="2">By Date</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <!-- Category Archive Tab 内容 -->
+            <div class="space-y-8">
+              <!-- Example Category Block -->
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">Examples</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-05-01</span>
+                    <span class="font-medium text-main">Markdown Extended Features</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-10</span>
+                    <span class="font-medium text-main">Expressive Code Example</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2023-10-01</span>
+                    <span class="font-medium text-main">Markdown Example</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-01</span>
+                    <span class="font-medium text-main">Simple Guides for Fuwari</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-01</span>
-                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
-                </li>
-              </ul>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <!-- Tag Archive Tab 内容 -->
+            <div class="space-y-8">
+              <!-- Example Tag Block -->
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">Blogging</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2023-10-01</span>
+                    <span class="font-medium text-main">Markdown Example</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">Demo</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-05-01</span>
+                    <span class="font-medium text-main">Markdown Extended Features</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-10</span>
+                    <span class="font-medium text-main">Expressive Code Example</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-01</span>
+                    <span class="font-medium text-main">Simple Guides for Fuwari</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </p-tabPanel>
-        <!-- Tag Archive Tab -->
-        <p-tabPanel header="By Tag">
-          <div class="space-y-8">
-            <!-- Example Tag Block -->
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">Blogging</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2023-10-01</span>
-                  <span class="font-medium text-main">Markdown Example</span>
-                </li>
-              </ul>
+          </p-tabpanel>
+          <p-tabpanel value="2">
+            <!-- Date Archive Tab 内容 -->
+            <div class="space-y-8">
+              <!-- Example Year Block -->
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">2024</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-05-01</span>
+                    <span class="font-medium text-main">Markdown Extended Features</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-10</span>
+                    <span class="font-medium text-main">Expressive Code Example</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2024-04-01</span>
+                    <span class="font-medium text-main">Simple Guides for Fuwari</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="blog-card p-card">
+                <h2 class="text-xl font-semibold text-main mb-2">2023</h2>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <span class="blog-icon">2023-10-01</span>
+                    <span class="font-medium text-main">Markdown Example</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">Demo</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-05-01</span>
-                  <span class="font-medium text-main">Markdown Extended Features</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-10</span>
-                  <span class="font-medium text-main">Expressive Code Example</span>
-                </li>
-              </ul>
-            </div>
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">Guides</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-01</span>
-                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </p-tabPanel>
-        <!-- Date Archive Tab -->
-        <p-tabPanel header="By Date">
-          <div class="space-y-8">
-            <!-- Example Year Block -->
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">2024</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-05-01</span>
-                  <span class="font-medium text-main">Markdown Extended Features</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-10</span>
-                  <span class="font-medium text-main">Expressive Code Example</span>
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2024-04-01</span>
-                  <span class="font-medium text-main">Simple Guides for Fuwari</span>
-                </li>
-              </ul>
-            </div>
-            <div class="blog-card p-card">
-              <h2 class="text-xl font-semibold text-main mb-2">2023</h2>
-              <ul class="space-y-2">
-                <li class="flex items-center gap-2">
-                  <span class="blog-icon">2023-10-01</span>
-                  <span class="font-medium text-main">Markdown Example</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </p-tabPanel>
-      </p-tabView>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </section>
   `,
   styles: [

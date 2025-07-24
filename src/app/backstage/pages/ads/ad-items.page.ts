@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
@@ -43,7 +43,7 @@ interface AdsOption {
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
@@ -77,7 +77,7 @@ interface AdsOption {
         <ng-template pTemplate="caption">
           <div class="search-bar">
             <div class="search-controls">
-              <p-dropdown
+              <p-select
                 [options]="adsOptions()"
                 [ngModel]="selectedAdId()"
                 (ngModelChange)="selectedAdId.set($event)"
@@ -85,7 +85,7 @@ interface AdsOption {
                 optionValue="id"
                 placeholder="选择广告"
                 [showClear]="true"
-              ></p-dropdown>
+              ></p-select>
               <input
                 pInputText
                 type="text"
@@ -93,14 +93,14 @@ interface AdsOption {
                 (ngModelChange)="searchTitle.set($event)"
                 placeholder="广告项标题"
               />
-              <p-dropdown
+              <p-select
                 [options]="statusOptions"
                 [ngModel]="searchStatus()"
                 (ngModelChange)="searchStatus.set($event)"
                 optionLabel="label"
                 optionValue="value"
                 placeholder="状态"
-              ></p-dropdown>
+              ></p-select>
             </div>
             <div class="search-actions">
               <p-button label="重置" severity="secondary" (click)="resetFilters()"></p-button>

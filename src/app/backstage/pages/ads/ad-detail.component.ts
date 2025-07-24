@@ -13,8 +13,8 @@ import { DialogModule } from 'primeng/dialog'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
-import { CalendarModule } from 'primeng/calendar'
-import { DropdownModule } from 'primeng/dropdown'
+import { DatePickerModule } from 'primeng/datepicker'
+import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
 
 interface Advertisement {
@@ -44,8 +44,8 @@ interface Advertisement {
     DialogModule,
     ToastModule,
     MessageModule,
-    CalendarModule,
-    DropdownModule
+    DatePickerModule,
+    SelectModule
   ],
   providers: [MessageService],
   template: `
@@ -172,7 +172,7 @@ interface Advertisement {
           <div class="col-6">
             <div class="field">
               <label for="start_time" class="block text-900 font-medium mb-2">开始时间</label>
-              <p-calendar
+              <p-datepicker
                 id="start_time"
                 formControlName="start_time"
                 [showTime]="true"
@@ -180,14 +180,14 @@ interface Advertisement {
                 placeholder="请选择开始时间"
                 class="w-full"
                 appendTo="body"
-              ></p-calendar>
+              ></p-datepicker>
             </div>
           </div>
 
           <div class="col-6">
             <div class="field">
               <label for="end_time" class="block text-900 font-medium mb-2">结束时间</label>
-              <p-calendar
+              <p-datepicker
                 id="end_time"
                 formControlName="end_time"
                 [showTime]="true"
@@ -195,21 +195,21 @@ interface Advertisement {
                 placeholder="请选择结束时间"
                 class="w-full"
                 appendTo="body"
-              ></p-calendar>
+              ></p-datepicker>
             </div>
           </div>
 
           <div class="col-6">
             <div class="field">
               <label for="status" class="block text-900 font-medium mb-2">状态</label>
-              <p-dropdown
+              <p-select
                 id="status"
                 [options]="statusOptions"
                 formControlName="status"
                 placeholder="请选择状态"
                 class="w-full"
                 appendTo="body"
-              ></p-dropdown>
+              ></p-select>
             </div>
           </div>
         </div>

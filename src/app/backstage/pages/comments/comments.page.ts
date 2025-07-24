@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ConfirmationService, MessageService } from 'primeng/api'
@@ -15,7 +15,6 @@ import { BadgeModule } from 'primeng/badge'
 import { AvatarModule } from 'primeng/avatar'
 import { CommentService, type Comment, type CommentFilters } from '../../services/comment.service'
 import { TextareaModule } from 'primeng/textarea'
-import { SelectModule } from 'primeng/select'
 
 @Component({
   selector: 'cs-comments',
@@ -27,7 +26,6 @@ import { SelectModule } from 'primeng/select'
     ButtonModule,
     InputTextModule,
     SelectModule,
-    DropdownModule,
     TagModule,
     ConfirmDialogModule,
     ToastModule,

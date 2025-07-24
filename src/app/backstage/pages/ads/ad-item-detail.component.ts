@@ -18,7 +18,7 @@ import {
 } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { DialogModule } from 'primeng/dialog'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
@@ -54,7 +54,7 @@ interface AdsOption {
     FormsModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     DialogModule,
     ToastModule,
     MessageModule,
@@ -77,7 +77,7 @@ interface AdsOption {
         <div class="formgrid grid">
           <div class="field col-12">
             <label for="ad_id" class="block text-900 font-medium mb-2">所属广告 *</label>
-            <p-dropdown
+            <p-select
               id="ad_id"
               [options]="adsOptions"
               formControlName="ad_id"
@@ -86,7 +86,7 @@ interface AdsOption {
               placeholder="请选择广告"
               class="w-full"
               [showClear]="true"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div class="field col-12">
             <label for="title" class="block text-900 font-medium mb-2">标题 *</label>
@@ -158,7 +158,7 @@ interface AdsOption {
           </div>
           <div class="field col-6">
             <label for="method" class="block text-900 font-medium mb-2">打开方式 *</label>
-            <p-dropdown
+            <p-select
               id="method"
               [options]="methodOptions"
               formControlName="method"
@@ -166,7 +166,7 @@ interface AdsOption {
               optionValue="value"
               placeholder="请选择打开方式"
               class="w-full"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div class="field col-6">
             <label for="sort" class="block text-900 font-medium mb-2">排序</label>
@@ -181,7 +181,7 @@ interface AdsOption {
           </div>
           <div class="field col-6">
             <label for="status" class="block text-900 font-medium mb-2">状态</label>
-            <p-dropdown
+            <p-select
               id="status"
               [options]="statusOptions"
               formControlName="status"
@@ -189,7 +189,7 @@ interface AdsOption {
               optionValue="value"
               placeholder="请选择状态"
               class="w-full"
-            ></p-dropdown>
+            ></p-select>
           </div>
         </div>
       </form>

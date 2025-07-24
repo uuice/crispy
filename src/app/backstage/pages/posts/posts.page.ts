@@ -5,13 +5,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { DropdownModule } from 'primeng/dropdown'
+import { SelectModule } from 'primeng/select'
 import { TagModule } from 'primeng/tag'
 import { TooltipModule } from 'primeng/tooltip'
 import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { DialogModule } from 'primeng/dialog'
-import { SelectModule } from 'primeng/select'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
@@ -93,13 +92,12 @@ interface CategoriesResponse {
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
     DialogModule,
-    SelectModule,
     PostDetailComponent,
     CheckboxModule
   ],

@@ -9,7 +9,6 @@ import {
 } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
-import { CalendarModule } from 'primeng/calendar'
 import { DatePickerModule } from 'primeng/datepicker'
 import { DialogModule } from 'primeng/dialog'
 import { ToastModule } from 'primeng/toast'
@@ -36,7 +35,6 @@ interface Holiday {
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
-    CalendarModule,
     DatePickerModule,
     DialogModule,
     ToastModule,

@@ -140,7 +140,7 @@ export const createArticle = async (
     success(res, result, 'Article created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Category not found') {
@@ -177,7 +177,7 @@ export const updateArticle = async (
     success(res, { id, ...validatedData }, 'Article updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     if (err instanceof Error && err.message === 'Category not found') {

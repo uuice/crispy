@@ -1,12 +1,12 @@
 import { Component } from '@angular/core'
 import { CardModule } from 'primeng/card'
-import { TabViewModule } from 'primeng/tabview'
+import { TabsModule } from 'primeng/tabs'
 import { ButtonModule } from 'primeng/button'
 
 @Component({
   selector: 'cs-doc-api-docs',
   standalone: true,
-  imports: [CardModule, TabViewModule, ButtonModule],
+  imports: [CardModule, TabsModule, ButtonModule],
   template: `
     <p-card header="Swagger API 文档" styleClass="system-card">
       <div class="flex flex-wrap gap-4 mb-4">
@@ -27,19 +27,28 @@ import { ButtonModule } from 'primeng/button'
           style="color: var(--p-content-color)"
         ></a>
       </div>
-      <p-tabView>
-        <p-tabPanel header="接口分组">
-          <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
-            <li>Admin API：后台管理接口，权限严格，支持内容、用户、配置等管理</li>
-            <li>Content API：内容前台接口，面向内容消费，权限宽松</li>
-          </ul>
-        </p-tabPanel>
-        <p-tabPanel header="自动同步说明">
-          <div style="color: var(--p-content-color)">
-            <p>所有 API 文档均自动从路由和参数生成，确保文档与实现一致。</p>
-          </div>
-        </p-tabPanel>
-      </p-tabView>
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">接口分组</p-tab>
+          <p-tab value="1">自动同步说明</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <ul
+              class="list-disc pl-6 space-y-1 text-[1.05rem]"
+              style="color: var(--p-content-color)"
+            >
+              <li>Admin API：后台管理接口，权限严格，支持内容、用户、配置等管理</li>
+              <li>Content API：内容前台接口，面向内容消费，权限宽松</li>
+            </ul>
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <div style="color: var(--p-content-color)">
+              <p>所有 API 文档均自动从路由和参数生成，确保文档与实现一致。</p>
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </p-card>
   `,
   styles: [

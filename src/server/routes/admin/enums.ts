@@ -88,7 +88,7 @@ export const createEnum = async (
     success(res, result, 'Enum created successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error creating enum:', err)
@@ -121,7 +121,7 @@ export const updateEnum = async (
     success(res, { id, ...validatedData }, 'Enum updated successfully')
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      validationError(res, err.errors)
+      validationError(res, err.issues)
       return
     }
     console.error('Error updating enum:', err)
