@@ -11,6 +11,9 @@ import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
 import { configureNunjucks } from './server/config/nunjucks'
 import { pageCacheMiddleware } from './server/middleware'
+// 定时清理内存和数据库缓存
+import './crons/cleanupMemoryCache'
+import './crons/cleanupDatabaseCache'
 
 // test db connection
 testDbConnection()

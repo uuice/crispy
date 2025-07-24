@@ -2,11 +2,13 @@ import { Request, Response, NextFunction } from 'express'
 import { env } from '../config/env'
 import { cacheService } from '../services/cacheService'
 import crypto from 'crypto'
+import { memoryCacheService } from '../services/memoryCacheService'
 
 const PAGE_CACHE_TTL = Number(env['PAGE_CACHE_TTL'] || 60) // seconds
 
 // In-memory cache for frequently accessed pages to reduce database queries
-export const memoryCache = new Map<string, { html: string; expires: number; url: string }>()
+// 移除 memoryCache 定义
+// const memoryCache = new Map<string, { html: string; expires: number; url: string }>()
 const MEMORY_CACHE_TTL = 30 // seconds - shorter than database cache
 
 export async function pageCacheMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -26,7 +28,8 @@ export async function pageCacheMiddleware(req: Request, res: Response, next: Nex
   console.log('page cache check', cacheKey)
 
   // First check memory cache for faster access (now use hash as key)
-  const memoryCached = memoryCache.get(hash)
+  // 替换 memoryCache.get(hash) 为 memoryCacheService.get(hash)
+  const memoryCached = memoryCacheService.get(hash)
   if (memoryCached && memoryCached.expires > Date.now()) {
     console.log('page cache hit (memory)', cacheKey)
     res.set('X-Page-Cache', 'HIT-MEMORY')
@@ -46,7 +49,8 @@ export async function pageCacheMiddleware(req: Request, res: Response, next: Nex
         res.send(dbCached.cache_data)
 
         // Update memory cache for faster future access (use hash as key)
-        memoryCache.set(hash, {
+        // 替换 memoryCache.set(hash, ...) 为 memoryCacheService.set(hash, ...)
+        memoryCacheService.set(hash, {
           html: dbCached.cache_data,
           expires: Date.now() + MEMORY_CACHE_TTL * 1000,
           url: cacheKey
@@ -112,7 +116,8 @@ export async function pageCacheMiddleware(req: Request, res: Response, next: Nex
 async function cacheResponse(hash: string, html: string, url: string) {
   try {
     // Cache in memory for faster access (use hash as key)
-    memoryCache.set(hash, {
+    // 替换 memoryCache.set(hash, ...) 为 memoryCacheService.set(hash, ...)
+    memoryCacheService.set(hash, {
       html,
       expires: Date.now() + MEMORY_CACHE_TTL * 1000,
       url
@@ -141,18 +146,3 @@ async function cacheResponse(hash: string, html: string, url: string) {
     console.error('Error caching response:', error)
   }
 }
-
-/**
- * Clean up expired memory cache entries
- */
-export function cleanupMemoryCache() {
-  const now = Date.now()
-  for (const [key, value] of memoryCache.entries()) {
-    if (value.expires <= now) {
-      memoryCache.delete(key)
-    }
-  }
-}
-
-// Clean up memory cache every 5 minutes
-setInterval(cleanupMemoryCache, 5 * 60 * 1000)

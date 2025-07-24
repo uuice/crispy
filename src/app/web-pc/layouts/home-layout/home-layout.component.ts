@@ -733,7 +733,6 @@ export class HomeLayoutComponent implements OnInit {
   })
 
   constructor(private router: Router) {
-    console.log('router in constructor:', this.router)
     // Initialize currentUrl
     this.currentUrl.set(this.router.url)
     // Listen to route changes and update currentUrl

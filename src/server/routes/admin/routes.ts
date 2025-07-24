@@ -153,14 +153,16 @@ router.put('/caches/:id', cacheController.updateCache)
 router.delete('/caches/:id', cacheController.deleteCache)
 
 // Page cache management routes
-router.get('/page-cache/stats', cacheController.getPageCacheStats)
-router.get('/page-cache/memory/keys', cacheController.getMemoryCacheKeys)
-router.delete('/page-cache/memory', cacheController.clearMemoryCache)
-router.post('/page-cache/memory/cleanup', cacheController.cleanupMemoryCache)
-router.post('/page-cache/database/cleanup', cacheController.clearExpiredDatabaseCache)
-router.delete('/page-cache/:hash', cacheController.deletePageCache)
-router.get('/page-cache/info/:hash', cacheController.getPageCacheInfo)
+router.get('/page-cache/stats', cacheController.getCacheStats)
 router.get('/page-cache/memory/list', cacheController.getMemoryCacheList)
+router.delete('/page-cache/memory/:hash', cacheController.deleteMemoryCache)
+router.get('/page-cache/memory/:hash', cacheController.getMemoryCacheInfo)
+router.post('/page-cache/memory/cleanup', cacheController.cleanupMemoryCache)
+
+router.get('/page-cache/database/list', cacheController.getDatabaseCacheList)
+router.post('/page-cache/database/cleanup', cacheController.clearExpiredDatabaseCache)
+router.delete('/page-cache/database/:hash', cacheController.deleteDatabaseCache)
+router.get('/page-cache/database/:hash', cacheController.getDatabaseCacheInfo)
 
 // Configs routes
 router.get('/configs', configController.getConfigs)

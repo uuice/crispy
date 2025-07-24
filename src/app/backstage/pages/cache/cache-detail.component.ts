@@ -4,6 +4,8 @@ import { DialogModule } from 'primeng/dialog'
 import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 
+export type CacheDetailType = 'memory' | 'database'
+
 @Component({
   selector: 'cs-cache-detail',
   standalone: true,
@@ -12,10 +14,15 @@ import { HttpService } from '../../services/http.service'
     <p-dialog
       [visible]="true"
       [modal]="true"
-      [header]="'缓存详情: ' + cacheKey"
+      [header]="'缓存详情: ' + cacheKey + (type === 'memory' ? ' (内存)' : ' (数据库)')"
       (onHide)="closed.emit()"
     >
-      <pre>{{ cacheInfo() | json }}</pre>
+      <ng-container *ngIf="cacheInfo() && !('error' in cacheInfo())">
+        <pre>{{ cacheInfo() | json }}</pre>
+      </ng-container>
+      <ng-container *ngIf="cacheInfo() && 'error' in cacheInfo()">
+        <div style="color:red">{{ cacheInfo().error }}</div>
+      </ng-container>
       <ng-template pTemplate="footer">
         <p-button label="关闭" icon="pi pi-times" (click)="closed.emit()"></p-button>
       </ng-template>
@@ -24,6 +31,7 @@ import { HttpService } from '../../services/http.service'
 })
 export class CacheDetailComponent implements OnInit {
   @Input() cacheKey!: string
+  @Input() type: CacheDetailType = 'memory'
   @Output() closed = new EventEmitter<void>()
   cacheInfo = signal<any>(null)
 
@@ -31,8 +39,18 @@ export class CacheDetailComponent implements OnInit {
 
   ngOnInit() {
     if (this.cacheKey) {
-      this.http.get<any>(`/api/admin/page-cache/info/${this.cacheKey}`).subscribe({
-        next: (res) => this.cacheInfo.set(res.data),
+      const url =
+        this.type === 'memory'
+          ? `/api/admin/page-cache/memory/${this.cacheKey}`
+          : `/api/admin/page-cache/database/${this.cacheKey}`
+      this.http.get<any>(url).subscribe({
+        // delete html field
+        next: (res) => {
+          const data = res.data
+          delete data.html
+          delete data.cache_data
+          this.cacheInfo.set(data)
+        },
         error: () => this.cacheInfo.set({ error: '获取详情失败' })
       })
     }

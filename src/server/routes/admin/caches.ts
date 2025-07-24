@@ -2,10 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
 import { cacheService } from '../../services/cacheService'
-import { CacheManager } from '../../utils/cache-manager'
-import { memoryCache } from '../../middleware/page-cache'
-
-const cacheManager = new CacheManager(memoryCache)
+import { memoryCacheService } from '../../services/memoryCacheService'
 
 // Validation schemas
 const createCacheSchema = z.object({
@@ -155,117 +152,18 @@ export const deleteCache = async (
   }
 }
 
-// Page cache management functions
-export const getPageCacheStats = async (
+// Memory cache routes
+export const getCacheStats = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const stats = await cacheManager.getStats()
-    success(res, stats)
+    const momentCacheStats = memoryCacheService.getStats()
+    const cacheStats = await cacheService.getCacheStats()
+    success(res, { memory: momentCacheStats, database: cacheStats })
   } catch (err: unknown) {
     console.error('Error getting page cache stats:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const clearMemoryCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const clearedCount = cacheManager.clearMemoryCache()
-    success(res, { clearedCount }, `Cleared ${clearedCount} memory cache entries`)
-  } catch (err: unknown) {
-    console.error('Error clearing memory cache:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const cleanupMemoryCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const cleanedCount = cacheManager.cleanupMemoryCache()
-    success(res, { cleanedCount }, `Cleaned up ${cleanedCount} expired memory cache entries`)
-  } catch (err: unknown) {
-    console.error('Error cleaning up memory cache:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const clearExpiredDatabaseCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const result = await cacheManager.clearExpiredDatabaseCache()
-    success(res, result, `Cleaned up ${result.numUpdatedRows} expired database cache entries`)
-  } catch (err: unknown) {
-    console.error('Error clearing expired database cache:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const deletePageCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { hash } = req.params
-    const result = await cacheManager.deleteCache(hash)
-
-    if (!result.success) {
-      notFound(res, 'Page cache not found')
-      return
-    }
-
-    success(res, null, `Deleted page cache with hash: ${hash}`)
-  } catch (err: unknown) {
-    console.error('Error deleting page cache:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const getMemoryCacheKeys = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const keys = cacheManager.getMemoryCacheKeys()
-    success(res, { keys, count: keys.length })
-  } catch (err: unknown) {
-    console.error('Error getting memory cache keys:', err)
-    error(res, 'Internal server error')
-  }
-}
-
-export const getPageCacheInfo = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { hash } = req.params
-    if (!hash) {
-      error(res, 'Hash is required', 400)
-      return
-    }
-    const info = await cacheManager.getCacheInfo(hash)
-    if (!info) {
-      notFound(res, 'Cache not found')
-      return
-    }
-    success(res, info)
-  } catch (err: unknown) {
-    console.error('Error getting page cache info:', err)
     error(res, 'Internal server error')
   }
 }
@@ -276,13 +174,140 @@ export const getMemoryCacheList = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const list = Array.from(memoryCache.entries()).map(([hash, value]) => ({
+    const list = memoryCacheService.entries().map(([hash, value]: [string, any]) => ({
       hash,
       url: value.url,
       expires: value.expires
     }))
     success(res, { list, count: list.length })
   } catch (err) {
+    error(res, 'Internal server error')
+  }
+}
+
+export const deleteMemoryCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { hash } = req.params
+    const deleted = memoryCacheService.delete(hash)
+    success(res, { deleted }, deleted ? 'Memory cache deleted' : 'Not found')
+  } catch (err: unknown) {
+    console.error('Error deleting memory cache:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+export const getMemoryCacheInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { hash } = req.params
+    if (!hash) {
+      error(res, 'Hash is required', 400)
+      return
+    }
+    const entry = memoryCacheService.get(hash)
+    if (!entry) {
+      notFound(res, 'Memory cache not found')
+      return
+    }
+    success(res, { hash, ...entry })
+  } catch (err: unknown) {
+    console.error('Error getting memory cache info:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+export const cleanupMemoryCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const cleanedCount = memoryCacheService.clear()
+    success(res, { cleanedCount }, `Cleaned up ${cleanedCount} expired memory cache entries`)
+  } catch (err: unknown) {
+    console.error('Error cleaning up memory cache:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+// Database cache routes
+export const getDatabaseCacheList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const page = parseInt(req.query['page'] as string) || 1
+    const pageSize = parseInt(req.query['pageSize'] as string) || 10
+    const result = await cacheService.getCaches({}, { page, pageSize })
+    success(res, result)
+  } catch (err: unknown) {
+    console.error('Error fetching database caches:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+export const clearExpiredDatabaseCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await memoryCacheService.clearExpiredDatabaseCache()
+    success(res, result, `Cleaned up ${result.numUpdatedRows} expired database cache entries`)
+  } catch (err: unknown) {
+    console.error('Error clearing expired database cache:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+export const deleteDatabaseCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { hash } = req.params
+    const cache = await cacheService.getCacheByHash(hash)
+    if (!cache) {
+      notFound(res, 'Database cache not found')
+      return
+    }
+    const result = await cacheService.deleteCache(cache.id)
+
+    success(res, { success: result.success }, 'Database cache deleted')
+  } catch (err: unknown) {
+    console.error('Error deleting database cache:', err)
+    error(res, 'Internal server error')
+  }
+}
+
+export const getDatabaseCacheInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { hash } = req.params
+    if (!hash) {
+      error(res, 'Hash is required', 400)
+      return
+    }
+    const dbCache = await cacheService.getCacheByHash(hash)
+    if (!dbCache) {
+      notFound(res, 'Database cache not found')
+      return
+    }
+    success(res, dbCache)
+  } catch (err: unknown) {
+    console.error('Error getting database cache info:', err)
     error(res, 'Internal server error')
   }
 }
@@ -295,12 +320,13 @@ export const cacheController = {
   updateCache,
   deleteCache,
   // Page cache management
-  getPageCacheStats,
-  clearMemoryCache,
+  getCacheStats,
+  getMemoryCacheList,
+  deleteMemoryCache,
+  getMemoryCacheInfo,
   cleanupMemoryCache,
+  getDatabaseCacheList,
   clearExpiredDatabaseCache,
-  deletePageCache,
-  getMemoryCacheKeys,
-  getPageCacheInfo,
-  getMemoryCacheList
+  deleteDatabaseCache,
+  getDatabaseCacheInfo
 }

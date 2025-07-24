@@ -51,7 +51,8 @@ export default defineConfig([globalIgnores([
         "@angular-eslint/component-class-suffix": 0,
         "@typescript-eslint/no-non-null-assertion": 0,
         "@angular-eslint/prefer-standalone": 0,
-        "prettier/prettier": "error",
+        "prettier/prettier": "error", 
+        "@angular-eslint/prefer-inject": 0
     },
 }, {
     files: ["**/*.html"],

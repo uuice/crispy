@@ -151,11 +151,16 @@ interface MemoryCacheItem {
         </p-tabpanels>
       </p-tabs>
       @if (isDetailVisible() && selectedKey()) {
-        <cs-cache-detail [cacheKey]="selectedKey()!" (closed)="closeDetail()"></cs-cache-detail>
+        <cs-cache-detail
+          [cacheKey]="selectedKey()!"
+          [type]="'memory'"
+          (closed)="closeDetail()"
+        ></cs-cache-detail>
       }
       @if (isDbDetailVisible() && selectedDbCache()?.hash) {
         <cs-cache-detail
           [cacheKey]="selectedDbCache()?.hash!"
+          [type]="'database'"
           (closed)="closeDbDetail()"
         ></cs-cache-detail>
       }
@@ -201,16 +206,17 @@ export class CachePage implements OnInit {
   }
 
   clearMemoryCache() {
-    this.http.delete('/api/admin/page-cache/memory').subscribe({
+    this.http.post('/api/admin/page-cache/memory/cleanup', {}).subscribe({
       next: () => {
         this.message.add({ severity: 'success', summary: '成功', detail: '已清理内存缓存' })
         this.loadMemoryCacheList()
+        this.loadStats()
       }
     })
   }
 
   deleteCache(hash: string) {
-    this.http.delete(`/api/admin/page-cache/${hash}`).subscribe({
+    this.http.delete(`/api/admin/page-cache/memory/${hash}`).subscribe({
       next: () => {
         this.message.add({ severity: 'success', summary: '成功', detail: '缓存已删除' })
         this.loadMemoryCacheList()
@@ -233,7 +239,10 @@ export class CachePage implements OnInit {
   loadDbCaches() {
     this.dbLoading.set(true)
     this.http
-      .get<any>('/api/admin/caches', { page: this.dbPage(), pageSize: this.dbPageSize() })
+      .get<any>('/api/admin/page-cache/database/list', {
+        page: this.dbPage(),
+        pageSize: this.dbPageSize()
+      })
       .subscribe({
         next: (res) => {
           this.dbCaches.set(res.data.dataList)
@@ -264,7 +273,7 @@ export class CachePage implements OnInit {
   }
 
   deleteDbCache(cache: DbCache) {
-    this.http.delete(`/api/admin/page-cache/${cache.hash}`).subscribe({
+    this.http.delete(`/api/admin/page-cache/database/${cache.hash}`).subscribe({
       next: () => {
         this.message.add({ severity: 'success', summary: '成功', detail: '数据库缓存已删除' })
         this.loadDbCaches()
