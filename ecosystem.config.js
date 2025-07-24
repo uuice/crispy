@@ -25,7 +25,7 @@ module.exports = {
     {
       name: 'crispy-ssr',
       script: 'bun',
-      args: 'run --env-file ./.env dist/crispy/server/server.mjs',
+      args: '--env-file ./.env dist/crispy/server/server.mjs',
       cwd: './',
       env: {
         NODE_ENV: 'production',
