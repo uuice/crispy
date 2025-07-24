@@ -4,7 +4,7 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core'
 import { provideRouter, withRouterConfig, RouteReuseStrategy } from '@angular/router'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http'
 
 import { routes } from './app.routes'
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser'
@@ -196,7 +196,7 @@ export const appConfig: ApplicationConfig = {
     },
     provideClientHydration(withEventReplay()),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withFetch(), withInterceptorsFromDi()),
     providePrimeNG({
       theme: {
         preset: lara,

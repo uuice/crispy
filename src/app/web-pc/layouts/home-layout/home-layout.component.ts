@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, inject, computed, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { RouterModule } from '@angular/router'
+import { Router, NavigationEnd, RouterModule } from '@angular/router'
 import { MenubarModule } from 'primeng/menubar'
 import { ButtonModule } from 'primeng/button'
 import { AvatarModule } from 'primeng/avatar'
@@ -141,49 +141,49 @@ import { ScrollTopModule } from 'primeng/scrolltop'
         class="flex-1 w-full max-w-6xl mx-auto flex flex-col-reverse lg:flex-row gap-8 px-4 py-8"
       >
         <!-- Sidebar (Desktop) -->
-        <aside class="lg:block w-full lg:w-80 flex-shrink-0">
-          <!-- Author Card -->
-          <div class="bg-content rounded-xl shadow p-6 mb-8 flex flex-col items-center">
-            <img
-              src="https://randomuser.me/api/portraits/men/32.jpg"
-              alt="Author"
-              class="w-20 h-20 rounded-full mb-3 border-4 border-blue-200 dark:border-blue-900 shadow"
-            />
-            <h2 class="text-lg font-semibold mb-1">Lorem Ipsum</h2>
-            <p class="text-center text-sm mb-2">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            </p>
-            <div class="flex gap-3 mt-2">
-              <a href="#" class="blog-icon-blue hover:opacity-80" title="GitHub"
-                ><i class="pi pi-github text-xl"></i
-              ></a>
-              <a href="#" class="blog-icon-pink hover:opacity-80" title="Twitter"
-                ><i class="pi pi-twitter text-xl"></i
-              ></a>
+        @if (showSidebar()) {
+          <aside class="lg:block w-full lg:w-80 flex-shrink-0">
+            <!-- Author Card -->
+            <div class="bg-content rounded-xl shadow p-6 mb-8 flex flex-col items-center">
+              <img
+                src="https://randomuser.me/api/portraits/men/32.jpg"
+                alt="Author"
+                class="w-20 h-20 rounded-full mb-3 border-4 border-blue-200 dark:border-blue-900 shadow"
+              />
+              <h2 class="text-lg font-semibold mb-1">UUICE</h2>
+              <p class="text-center text-sm mb-2">一个现代、简约的博客启动器，由Crisp和UUICE驱动</p>
+              <div class="flex gap-3 mt-2">
+                <a href="#" class="blog-icon-blue hover:opacity-80" title="GitHub"
+                  ><i class="pi pi-github text-xl"></i
+                ></a>
+                <a href="#" class="blog-icon-pink hover:opacity-80" title="Twitter"
+                  ><i class="pi pi-twitter text-xl"></i
+                ></a>
+              </div>
             </div>
-          </div>
-          <!-- Categories Card -->
-          <div class="rounded-xl shadow p-6 mb-8">
-            <h3 class="text-base font-semibold mb-3">Categories</h3>
-            <div class="flex flex-wrap gap-3">
-              <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
-              <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
+            <!-- Categories Card -->
+            <div class="rounded-xl shadow p-6 mb-8">
+              <h3 class="text-base font-semibold mb-3">Categories</h3>
+              <div class="flex flex-wrap gap-3">
+                <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
+                <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
+              </div>
             </div>
-          </div>
-          <!-- Tags Card -->
-          <div class="rounded-xl shadow p-6">
-            <h3 class="text-base font-semibold mb-3">Tags</h3>
-            <div class="flex flex-wrap gap-2">
-              <span class="blog-tag blog-tag-gray text-xs">Blogging</span>
-              <span class="blog-tag blog-tag-purple text-xs">Customization</span>
-              <span class="blog-tag blog-tag-pink text-xs">Demo</span>
-              <span class="blog-tag blog-tag-blue text-xs">Example</span>
-              <span class="blog-tag blog-tag-green text-xs">Fuwari</span>
-              <span class="blog-tag blog-tag-yellow text-xs">Markdown</span>
-              <span class="blog-tag blog-tag-indigo text-xs">Video</span>
+            <!-- Tags Card -->
+            <div class="rounded-xl shadow p-6">
+              <h3 class="text-base font-semibold mb-3">Tags</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="blog-tag blog-tag-gray text-xs">Blogging</span>
+                <span class="blog-tag blog-tag-purple text-xs">Customization</span>
+                <span class="blog-tag blog-tag-pink text-xs">Demo</span>
+                <span class="blog-tag blog-tag-blue text-xs">Example</span>
+                <span class="blog-tag blog-tag-green text-xs">Fuwari</span>
+                <span class="blog-tag blog-tag-yellow text-xs">Markdown</span>
+                <span class="blog-tag blog-tag-indigo text-xs">Video</span>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        }
         <!-- Main Content Area: always visible on all screens -->
         <main class="flex-1 min-w-0">
           <router-outlet></router-outlet>
@@ -721,6 +721,28 @@ export class HomeLayoutComponent implements OnInit {
 
   // Inject SettingsService
   settingsService = inject(SettingsService)
+
+  // Signal to store current url
+  currentUrl = signal('')
+
+  // Computed property to determine if sidebar should be shown (reactive to route changes)
+  showSidebar = computed(() => {
+    const url = this.currentUrl()
+    // Hide sidebar for /daily-lib and /daily-lib/:url
+    return !/^\/daily-lib(\/[^/]+)?$/.test(url)
+  })
+
+  constructor(private router: Router) {
+    console.log('router in constructor:', this.router)
+    // Initialize currentUrl
+    this.currentUrl.set(this.router.url)
+    // Listen to route changes and update currentUrl
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.currentUrl.set(this.router.url)
+      }
+    })
+  }
 
   // Surface configuration
   selectedSurfaceColor = 'zinc'
