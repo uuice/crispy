@@ -1,4 +1,5 @@
 import { db } from '@src/libs/db'
+import { env } from '../config/env'
 
 export interface CreateCacheData {
   hash: string
@@ -180,7 +181,8 @@ export class CacheService {
   /**
    * Clear expired caches
    */
-  async clearExpiredCaches(expireTime: number) {
+  async clearExpiredCaches() {
+    const expireTime = Date.now() - Number(env['PAGE_CACHE_TTL'] || 60) * 1000
     const result = await db
       .safeUpdateTable('caches')
       .set({

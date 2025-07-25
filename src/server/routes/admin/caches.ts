@@ -260,7 +260,7 @@ export const clearExpiredDatabaseCache = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const result = await memoryCacheService.clearExpiredDatabaseCache()
+    const result = await cacheService.clearExpiredCaches()
     success(res, result, `Cleaned up ${result.numUpdatedRows} expired database cache entries`)
   } catch (err: unknown) {
     console.error('Error clearing expired database cache:', err)

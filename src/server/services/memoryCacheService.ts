@@ -70,13 +70,6 @@ class MemoryCacheService {
     return this.memoryCache
   }
 
-  // 数据库相关操作
-  async clearExpiredDatabaseCache() {
-    // 过期时间逻辑与原 cache-manager 保持一致
-    const expireTime = Date.now() - Number(process.env['PAGE_CACHE_TTL'] || 60) * 1000
-    return await cacheService.clearExpiredCaches(expireTime)
-  }
-
   async deletePageCache(hash: string) {
     const cache = await cacheService.getCacheByHash(hash)
     if (!cache) {
