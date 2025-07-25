@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /search/articles:
+ * /content/search/articles:
  *   get:
  *     tags: [Search]
  *     summary: 全文检索文章
@@ -22,7 +22,7 @@
  */
 /**
  * @swagger
- * /search/pages:
+ * /content/search/pages:
  *   get:
  *     tags: [Search]
  *     summary: 全文检索页面
@@ -44,7 +44,7 @@
  */
 /**
  * @swagger
- * /search/daily:
+ * /content/search/daily:
  *   get:
  *     tags: [Search]
  *     summary: 全文检索每日类库

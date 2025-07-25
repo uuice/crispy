@@ -1,6 +1,7 @@
 import { Document, Charset, DocumentData } from 'flexsearch'
 import fs from 'fs'
 import path from 'path'
+import escapeRegExp from 'lodash/escapeRegExp'
 
 export interface Article {
   id: string
@@ -95,6 +96,36 @@ restoreIndex(articleIndex, ARTICLE_INDEX_FILE)
 restoreIndex(pageIndex, PAGE_INDEX_FILE)
 restoreIndex(dailyIndex, DAILY_INDEX_FILE)
 
+/**
+ * Highlight matched keyword in text with <mark> tag
+ */
+function highlightText(text: string, keyword: string): string {
+  if (!text || !keyword) return text
+  const pattern = keyword.split(/\s+/).filter(Boolean).map(escapeRegExp).join('|')
+  return text.replace(new RegExp(pattern, 'gi'), (match) => `<mark>${match}</mark>`)
+}
+
+/**
+ * Merge and deduplicate flexsearch results, and highlight matched fields
+ * @param raw flexsearch raw result
+ * @param keyword search keyword
+ */
+export function mergeAndHighlightFlexsearchResults(raw: any[], keyword: string): any[] {
+  const map = new Map<string, any>()
+  for (const fieldResult of raw) {
+    const field = fieldResult.field
+    for (const item of fieldResult.result) {
+      if (!map.has(item.id)) {
+        map.set(item.id, { ...item.doc, _highlight: {} })
+      }
+      if (item.doc && item.doc[field]) {
+        map.get(item.id)._highlight[field] = highlightText(item.doc[field], keyword)
+      }
+    }
+  }
+  return Array.from(map.values())
+}
+
 export const flexsearchService = {
   async buildIndexes(articles: Article[], pages: Page[]) {
     articleIndex = createArticleIndex()
@@ -131,13 +162,16 @@ export const flexsearchService = {
     await pageIndex.remove(id)
   },
   async searchArticles(query: string) {
-    return await articleIndex.searchAsync({ query, enrich: true })
+    const raw = await articleIndex.searchAsync({ query, enrich: true })
+    return mergeAndHighlightFlexsearchResults(raw, query)
   },
   async searchPages(query: string) {
-    return await pageIndex.searchAsync({ query, enrich: true })
+    const raw = await pageIndex.searchAsync({ query, enrich: true })
+    return mergeAndHighlightFlexsearchResults(raw, query)
   },
   async searchDaily(query: string) {
-    return await dailyIndex.searchAsync({ query, enrich: true })
+    const raw = await dailyIndex.searchAsync({ query, enrich: true })
+    return mergeAndHighlightFlexsearchResults(raw, query)
   },
   async persistAll() {
     await persistIndex(articleIndex, ARTICLE_INDEX_FILE)
