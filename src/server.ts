@@ -11,9 +11,24 @@ import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
 import { configureNunjucks } from './server/config/nunjucks'
 import { pageCacheMiddleware } from './server/middleware'
+import { flexsearchService } from './server/services/flexsearch-index.service'
+import { articleService } from './server/services/articleService'
+import { pageService } from './server/services/pageService'
+
 // 定时清理内存和数据库缓存
 import './crons/cleanupMemoryCache'
 import './crons/cleanupDatabaseCache'
+import './crons/persistFlexsearchIndex'
+
+// test flexsearch
+if (env['NODE_ENV'] === 'development') {
+  ;(async () => {
+    const articles = await articleService.getArticles({}, { page: 1, pageSize: 1000 })
+    const pages = await pageService.getPages({ page: 1, pageSize: 1000 }, {})
+    await flexsearchService.buildIndexes(articles.dataList, pages.dataList)
+    await flexsearchService.persistAll()
+  })()
+}
 
 // test db connection
 testDbConnection()

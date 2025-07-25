@@ -1,6 +1,6 @@
 /**
  * Content API Swagger 文档模块索引
- * 
+ *
  * 此文件用于导入所有的 Content API Swagger 文档模块
  * Content API 主要提供只读访问，使用 Access Token 认证
  */
@@ -31,6 +31,7 @@ import './usertypes'
 import './votes'
 import './voteitems'
 import './accesstokens'
+import './search'
 
 export default {};
 

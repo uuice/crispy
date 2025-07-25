@@ -135,10 +135,7 @@ export class PageService {
   /**
    * Get pages list with pagination and filters
    */
-  async getPages(
-    pagination: PagePaginationParams,
-    filters?: PageFilters
-  ): Promise<PaginatedPagesResult> {
+  async getPages(pagination: PagePaginationParams, filters?: PageFilters): Promise<any> {
     const { page, pageSize } = pagination
     const offset = (page - 1) * pageSize
 

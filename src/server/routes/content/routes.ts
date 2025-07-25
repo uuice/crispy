@@ -28,6 +28,8 @@ import { AccessTokenService } from '../../services/accessToken.Service'
 import { accessTokenController } from './access-token'
 import { error } from '../../utils/response'
 import { systemRouterController } from './system'
+import { flexsearchService } from '../../services/flexsearch-index.service'
+import { searchController } from './search'
 
 // Define token info interface
 interface TokenInfo {
@@ -207,5 +209,10 @@ router.get('/access-token/:id', accessTokenController.getAccessToken)
 router.post('/access-token/check', accessTokenController.checkAccessToken)
 
 router.get('/system/getSystemInfo', systemRouterController.getSystemInfo)
+
+// 全文检索接口
+router.get('/search/articles', searchController.searchArticles)
+router.get('/search/pages', searchController.searchPages)
+router.get('/search/daily', searchController.searchDaily)
 
 export default router
