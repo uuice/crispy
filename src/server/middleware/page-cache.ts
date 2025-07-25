@@ -58,7 +58,7 @@ export async function pageCacheMiddleware(req: Request, res: Response, next: Nex
         return
       } else {
         // Cache expired, mark as expired in database
-        await cacheService.updateCache(dbCached.id, { status: -10 }) // -10 = expired status
+        await cacheService.deleteCache(dbCached.id)
       }
     }
   } catch (error) {

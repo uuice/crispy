@@ -14,6 +14,17 @@ import { pageCacheMiddleware } from './server/middleware'
 import { flexsearchService } from './server/services/flexsearch-index.service'
 import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
+import { cacheService } from './server/services/cacheService'
+import { memoryCacheService } from './server/services/memoryCacheService'
+
+// 线上重启服务时，清理所有缓存
+if (env['NODE_ENV'] === 'production' || env['NODE_ENV'] === 'development') {
+  ;(async () => {
+    await cacheService.clearAllCaches()
+    memoryCacheService.clear()
+    console.log('All caches cleared on server start.')
+  })()
+}
 
 // 定时清理内存和数据库缓存
 import './crons/cleanupMemoryCache'

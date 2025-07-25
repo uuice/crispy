@@ -128,7 +128,7 @@ export class CacheService {
 
     return {
       success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
+      numUpdatedRows: Number(result.numUpdatedRows)
     }
   }
 
@@ -140,6 +140,7 @@ export class CacheService {
       .safeUpdateTable('caches')
       .set({
         is_delete: 1,
+        status: -10,
         update_time: Date.now()
       })
       .where('id', '=', id)
@@ -148,7 +149,7 @@ export class CacheService {
 
     return {
       success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
+      numUpdatedRows: Number(result.numUpdatedRows)
     }
   }
 
@@ -187,6 +188,7 @@ export class CacheService {
       .safeUpdateTable('caches')
       .set({
         is_delete: 1,
+        status: -10,
         update_time: Date.now()
       })
       .where('create_time', '<', expireTime)
@@ -244,6 +246,23 @@ export class CacheService {
       total: Number(total?.count) || 0,
       active: Number(active?.count) || 0,
       expired: Number(expired?.count) || 0
+    }
+  }
+
+  async clearAllCaches() {
+    const result = await db
+      .safeUpdateTable('caches')
+      .set({
+        is_delete: 1,
+        status: -10,
+        update_time: Date.now()
+      })
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+
+    return {
+      success: result.numUpdatedRows > 0,
+      numUpdatedRows: Number(result.numUpdatedRows)
     }
   }
 }
