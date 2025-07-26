@@ -169,4 +169,81 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
+/**
+ * @swagger
+ * /content/categories/with-count:
+ *   get:
+ *     tags: [ContentCategories]
+ *     summary: 获取分类列表及其文章数
+ *     description: 获取分类列表，包含每个分类下的文章数量
+ *     security:
+ *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: parentAlias
+ *         schema:
+ *           type: string
+ *         description: 父分类别名，如 POST_SYS_CAT
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       title:
+ *                         type: string
+ *                         example: "前端开发"
+ *                       alias:
+ *                         type: string
+ *                         example: "frontend"
+ *                       des:
+ *                         type: string
+ *                         example: "前端开发相关文章"
+ *                       parent_id:
+ *                         type: integer
+ *                         example: 1
+ *                       sort:
+ *                         type: integer
+ *                         example: 0
+ *                       status:
+ *                         type: integer
+ *                         example: 10
+ *                       create_time:
+ *                         type: integer
+ *                         example: 1656499072000
+ *                       update_time:
+ *                         type: integer
+ *                         example: 1656499072000
+ *                       article_count:
+ *                         type: integer
+ *                         example: 15
+ *       400:
+ *         description: 请求参数错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 export default {};

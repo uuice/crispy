@@ -426,6 +426,55 @@ export class CategoryService {
     return path
   }
 
+  /**
+   * Get categories with article count
+   */
+  async getCategoriesWithArticleCount(parentAlias?: string): Promise<any[]> {
+    let query = db
+      .selectFrom('categories as c')
+      .leftJoin('articles as a', (join) =>
+        join
+          .onRef('c.id', '=', 'a.type_id')
+          .on('a.status', '=', 10) // Published articles only
+          .on('a.is_delete', '=', 0)
+      )
+      .select([
+        'c.id',
+        'c.title',
+        'c.alias',
+        'c.des',
+        'c.parent_id',
+        'c.sort',
+        'c.status',
+        'c.create_time',
+        'c.update_time',
+        sql<number>`COUNT(DISTINCT a.id)`.as('article_count')
+      ])
+      .where('c.is_delete', '=', 0)
+      .where('c.status', '=', 10) // Published categories only
+      .groupBy([
+        'c.id',
+        'c.title',
+        'c.alias',
+        'c.des',
+        'c.parent_id',
+        'c.sort',
+        'c.status',
+        'c.create_time',
+        'c.update_time'
+      ])
+
+    // If parentAlias is provided, filter by parent category
+    if (parentAlias) {
+      const parentCategory = await this.getCategoryByAlias(parentAlias)
+      if (parentCategory) {
+        query = query.where('c.parent_id', '=', parentCategory.id)
+      }
+    }
+
+    return await query.orderBy('c.sort', 'asc').orderBy('c.create_time', 'desc').execute()
+  }
+
   // 获取所有分类
   async getAllCategories(): Promise<any[]> {
     return await db.selectFrom('categories').selectAll().where('is_delete', '=', 0).execute()

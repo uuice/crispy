@@ -2,7 +2,7 @@ import { Component, signal, OnInit, inject } from '@angular/core'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, RouterModule } from '@angular/router'
 import { CommonModule } from '@angular/common'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
@@ -36,7 +36,7 @@ interface PaginatedResponse<T> {
 @Component({
   selector: 'cs-archives-detail',
   standalone: true,
-  imports: [TocComponent, CommonModule],
+  imports: [TocComponent, CommonModule, RouterModule],
   template: `
     <!-- Article Banner -->
     <section class="blog-banner">
@@ -58,6 +58,8 @@ interface PaginatedResponse<T> {
         <span
           *ngFor="let tag of articleTags(); let i = index"
           class="blog-tag {{ getTagClass(i) }}"
+          [routerLink]="['/tags', tag]"
+          style="cursor: pointer"
         >
           {{ tag }}
         </span>
@@ -134,6 +136,8 @@ export class ArchivesDetailPage implements OnInit {
                 .map((tag) => tag.trim())
                 .filter((tag) => tag)
               this.articleTags.set(tags)
+            } else {
+              this.articleTags.set([])
             }
 
             // Process content and generate TOC

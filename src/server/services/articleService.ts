@@ -84,8 +84,8 @@ export class ArticleService {
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
       .select(['categories.title as type_name'])
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('articles.id', '=', id)
+      .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
   }
 
@@ -96,7 +96,7 @@ export class ArticleService {
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
       .select(['categories.title as type_name'])
-      .where('url', '=', url)
+      .where('articles.url', '=', url)
       .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
   }

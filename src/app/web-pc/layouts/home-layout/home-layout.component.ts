@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, computed, signal } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { Component, OnInit, inject, computed, signal, PLATFORM_ID } from '@angular/core'
+import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { Router, NavigationEnd, RouterModule } from '@angular/router'
 import { MenubarModule } from 'primeng/menubar'
 import { ButtonModule } from 'primeng/button'
@@ -21,12 +21,20 @@ interface Category {
   id: number
   title: string
   alias: string
-  count?: number
+  des?: string
+  parent_id?: number
+  sort?: number
+  status?: number
+  create_time?: number
+  update_time?: number
+  article_count?: number
+  count?: number // For backward compatibility
 }
 
 interface Tag {
   id: number
   title: string
+  value: string
   count?: number
 }
 
@@ -36,6 +44,16 @@ interface Article {
   url: string
   create_time: number
   click: number
+  type_name: string
+}
+
+interface RecordSettings {
+  icpNumber: string
+  icpLink: string
+  policeNumber: string
+  policeLink: string
+  recordText: string
+  showRecord: boolean
 }
 
 // Update interfaces to match paginated response
@@ -208,10 +226,10 @@ interface PaginatedResponse<T> {
                 <span
                   *ngFor="let category of categories()"
                   class="blog-tag blog-tag-blue text-sm"
-                  [routerLink]="['/category', category.alias]"
+                  [routerLink]="['/categories', category.alias]"
                   style="cursor: pointer;"
                 >
-                  {{ category.title }} ({{ category.count || 0 }})
+                  {{ category.title }} ({{ category.article_count || category.count || 0 }})
                 </span>
               </div>
             </div>
@@ -222,7 +240,7 @@ interface PaginatedResponse<T> {
                 <span
                   *ngFor="let tag of tags(); let i = index"
                   [class]="'blog-tag ' + getTagClass(i) + ' text-xs'"
-                  [routerLink]="['/tag', tag.title]"
+                  [routerLink]="['/tags', tag.title]"
                   style="cursor: pointer;"
                 >
                   {{ tag.title }}
@@ -243,10 +261,10 @@ interface PaginatedResponse<T> {
                       {{ article.title }}
                     </h4>
                     <div class="flex items-center justify-between text-xs text-muted">
-                      <span>{{ article.create_time | date: 'MM-dd' }}</span>
+                      <span>{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
                       <span class="flex items-center gap-1">
                         <i class="pi pi-eye text-xs"></i>
-                        <span>{{ article.click || 0 }}</span>
+                        <span>{{ article.type_name }}</span>
                       </span>
                     </div>
                   </a>
@@ -372,6 +390,34 @@ interface PaginatedResponse<T> {
             <a href="/rss.xml" class="hover:underline">RSS</a>
             <span class="mx-2">/</span>
             <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
+          </div>
+          <!-- 备案信息 -->
+          <div *ngIf="recordSettings().showRecord" class="record-info">
+            <div class="text-sm text-center">
+              <div *ngIf="recordSettings().icpNumber" class="text-xs">
+                <a
+                  [href]="recordSettings().icpLink"
+                  target="_blank"
+                  class="record-link"
+                  rel="noopener noreferrer"
+                >
+                  {{ recordSettings().icpNumber }}
+                </a>
+              </div>
+              <div *ngIf="recordSettings().policeNumber" class="text-xs">
+                <a
+                  [href]="recordSettings().policeLink"
+                  target="_blank"
+                  class="record-link"
+                  rel="noopener noreferrer"
+                >
+                  {{ recordSettings().policeNumber }}
+                </a>
+              </div>
+              <div *ngIf="recordSettings().recordText" class="text-xs record-text">
+                {{ recordSettings().recordText }}
+              </div>
+            </div>
           </div>
           <div class="text-xs text-center md:text-right">
             Powered by <span class="font-semibold">UUICE</span> &
@@ -826,6 +872,21 @@ interface PaginatedResponse<T> {
       .text-muted {
         color: var(--p-text-muted-color, #6b7280);
       }
+
+      .record-info {
+        border-top: 1px solid var(--p-content-border-color, #e5e7eb);
+      }
+
+      .record-link {
+        color: var(--p-text-muted-color, #6b7280);
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
+
+      .record-link:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
     `
   ]
 })
@@ -849,6 +910,14 @@ export class HomeLayoutComponent implements OnInit {
   categories = signal<Category[]>([])
   tags = signal<Tag[]>([])
   latestArticles = signal<Article[]>([])
+  recordSettings = signal<RecordSettings>({
+    icpNumber: '',
+    icpLink: '',
+    policeNumber: '',
+    policeLink: '',
+    recordText: '',
+    showRecord: false
+  })
 
   // Computed property to determine if sidebar should be shown (reactive to route changes)
   showSidebar = computed(() => {
@@ -856,6 +925,7 @@ export class HomeLayoutComponent implements OnInit {
     // Hide sidebar for /daily-lib and /daily-lib/:url
     return !/^\/daily-lib(\/[^/]+)?$/.test(url)
   })
+  private platformId = inject(PLATFORM_ID)
 
   constructor(private router: Router) {
     // Initialize currentUrl
@@ -865,7 +935,10 @@ export class HomeLayoutComponent implements OnInit {
       if (event instanceof NavigationEnd) {
         this.currentUrl.set(this.router.url)
         // Scroll to top when route changes
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+        // check is is ssr
+        if (isPlatformBrowser(this.platformId)) {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
       }
     })
   }
@@ -1097,21 +1170,21 @@ export class HomeLayoutComponent implements OnInit {
     this.loadCategories()
     this.loadTags()
     this.loadLatestArticles()
+    this.loadRecordSettings()
   }
 
   /**
-   * Load categories from API
+   * Load categories from API with article count
    */
   loadCategories() {
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Category>>>('/api/content/categories', {
-        page: 1,
-        pageSize: 20
+      .get<ApiResponse<Category[]>>('/api/content/categories/with-count', {
+        parentAlias: 'POST_SYS_CAT'
       })
       .subscribe({
         next: (response) => {
-          if (response.success && response.data?.dataList) {
-            this.categories.set(response.data.dataList)
+          if (response.success && response.data) {
+            this.categories.set(response.data)
           }
         },
         error: (err) => {
@@ -1161,6 +1234,27 @@ export class HomeLayoutComponent implements OnInit {
           console.error('Failed to load latest articles:', err)
         }
       })
+  }
+
+  /**
+   * Load record settings from API
+   */
+  loadRecordSettings() {
+    this.httpService.get<ApiResponse<any>>('/api/content/configs/alias/RECORD_SETTINGS').subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          try {
+            const settings = JSON.parse(response.data.value)
+            this.recordSettings.set(settings)
+          } catch (e) {
+            console.error('Failed to parse record settings:', e)
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load record settings:', err)
+      }
+    })
   }
 
   toggleDarkMode(): void {

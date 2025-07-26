@@ -26,11 +26,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
-    path: 'categories/:url',
+    path: 'categories/:alias',
     renderMode: RenderMode.Server
   },
   {
-    path: 'tags/:url',
+    path: 'tags/:title',
     renderMode: RenderMode.Server
   },
   {

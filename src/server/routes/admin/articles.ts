@@ -26,6 +26,7 @@ const createArticleSchema = z.object({
   sort: z.number().default(0),
   click: z.number().default(0),
   attrs: z.string().optional(),
+  redirect_url: z.string().optional(),
   is_review: z.number().default(-10)
 })
 

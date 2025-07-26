@@ -127,6 +127,7 @@ router.get('/articles/url/:url', articleController.getArticleByUrl)
 // Category routes
 router.get('/categories', categoryController.getCategories)
 router.get('/categories/tree', categoryController.getCategoryTree)
+router.get('/categories/with-count', categoryController.getCategoriesWithArticleCount)
 router.get('/categories/:id', categoryController.getCategory)
 router.get('/categories/alias/:alias', categoryController.getCategoryByAlias)
 

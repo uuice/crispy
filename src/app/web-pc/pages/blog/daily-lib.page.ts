@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, inject } from '@angular/core'
+import { Component, signal, computed, OnInit, inject, OnDestroy } from '@angular/core'
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext'
 import { PaginatorModule } from 'primeng/paginator'
 import { TagModule } from 'primeng/tag'
 import { HttpService } from '../../services/http.service'
+import { Subject } from 'rxjs'
 
 // Article-like structure for npm libraries
 export interface Article {
@@ -87,7 +88,8 @@ interface Category {
         <input
           pInputText
           [ngModel]="search()"
-          (ngModelChange)="search.set($event)"
+          (ngModelChange)="onSearchChange($event)"
+          (keyup.enter)="onSearchButtonClick()"
           placeholder="搜索库名称"
         />
         <button
@@ -95,10 +97,17 @@ interface Category {
           type="button"
           label="搜索"
           icon="pi pi-search"
-          (click)="onSearch()"
+          (click)="onSearchButtonClick()"
         ></button>
       </div>
       <div class="card-list">
+        <div *ngIf="loading()" class="loading-message">
+          <i class="pi pi-spin pi-spinner"></i> 加载中...
+        </div>
+        <div *ngIf="!loading() && pagedList().length === 0" class="empty-message">
+          <i class="pi pi-search"></i>
+          <p>没有找到相关的库</p>
+        </div>
         <div *ngFor="let lib of pagedList()" class="card-item">
           <p-card
             [header]="lib.title"
@@ -192,12 +201,12 @@ interface Category {
           max-width: 48%;
         }
       }
-      @media (min-width: 1200px) {
-        .card-item {
-          flex: 1 1 31%;
-          max-width: 31%;
-        }
-      }
+      // @media (min-width: 1000px) {
+      //   .card-item {
+      //     flex: 1 1 31%;
+      //     max-width: 31%;
+      //   }
+      // }
       :host ::ng-deep .custom-card {
         background: var(--p-content-background);
         color: var(--p-content-color);
@@ -280,26 +289,54 @@ interface Category {
         color: var(--p-content-color);
         font-size: 24px;
       }
+
+      .loading-message {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        color: var(--p-text-muted-color);
+        font-size: 16px;
+        gap: 8px;
+      }
+
+      .empty-message {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 60px 20px;
+        color: var(--p-text-muted-color);
+        text-align: center;
+      }
+
+      .empty-message i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      .empty-message p {
+        font-size: 16px;
+        margin: 0;
+      }
     `
   ]
 })
-export class DailyLibPage implements OnInit {
+export class DailyLibPage implements OnInit, OnDestroy {
   private httpService = inject(HttpService)
+  private destroy$ = new Subject<void>()
 
   libs = signal<Article[]>([])
   search = signal('')
   page = signal(1)
-  pageSize = signal(3)
+  pageSize = signal(10)
   totalRecords = signal(0)
-
-  filteredList = computed(() => {
-    const q = this.search().toLowerCase()
-    return this.libs().filter((lib) => lib.title.toLowerCase().includes(q))
-  })
+  currentTypeId = signal<number>(0)
+  loading = signal(false)
 
   pagedList = computed(() => {
-    const start = (this.page() - 1) * this.pageSize()
-    return this.filteredList().slice(start, start + this.pageSize())
+    return this.libs()
   })
 
   totalPages = computed(() => Math.ceil(this.totalRecords() / this.pageSize()) || 1)
@@ -308,6 +345,11 @@ export class DailyLibPage implements OnInit {
 
   ngOnInit() {
     this.loadDailyLibs()
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next()
+    this.destroy$.complete()
   }
 
   /**
@@ -325,6 +367,7 @@ export class DailyLibPage implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList && response.data.dataList.length > 0) {
             const category = response.data.dataList[0]
+            this.currentTypeId.set(category.id)
             // Then get articles with this type_id
             this.loadArticlesByTypeId(category.id)
           }
@@ -339,13 +382,22 @@ export class DailyLibPage implements OnInit {
    * Load articles by type_id
    */
   loadArticlesByTypeId(typeId: number) {
+    this.loading.set(true)
+
+    const params: any = {
+      type_id: typeId,
+      page: this.page(),
+      pageSize: this.pageSize(),
+      status: 10
+    }
+
+    // Add search parameter if search term exists
+    if (this.search().trim()) {
+      params.title = this.search().trim()
+    }
+
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
-        type_id: typeId,
-        page: this.page(),
-        pageSize: this.pageSize(),
-        status: 10
-      })
+      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', params)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -353,30 +405,28 @@ export class DailyLibPage implements OnInit {
             // Set pagination info from API response
             this.totalRecords.set(response.data.pagination.total)
           }
+          this.loading.set(false)
         },
         error: (err) => {
           console.error('Failed to load daily lib articles:', err)
+          this.loading.set(false)
         }
       })
   }
 
-  onSearch() {
+  onSearchChange(value: string) {
+    this.search.set(value)
+  }
+
+  onSearchButtonClick() {
     this.page.set(1)
-    this.loadArticlesByTypeId(this.getCurrentTypeId())
+    this.loadArticlesByTypeId(this.currentTypeId())
   }
 
   onPageChange(event: any) {
     this.page.set(Math.floor(event.first / event.rows) + 1)
     this.pageSize.set(event.rows)
-    this.loadArticlesByTypeId(this.getCurrentTypeId())
-  }
-
-  /**
-   * Get current type_id from loaded articles
-   */
-  private getCurrentTypeId(): number {
-    const articles = this.libs()
-    return articles.length > 0 ? articles[0].type_id || 0 : 0
+    this.loadArticlesByTypeId(this.currentTypeId())
   }
 
   gotoDetail(url: string) {

@@ -1,6 +1,6 @@
 import { Component, signal, OnInit, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
 import { ButtonModule } from 'primeng/button'
@@ -28,7 +28,7 @@ interface PaginatedResponse<T> {
 @Component({
   selector: 'cs-daily-lib-detail',
   standalone: true,
-  imports: [CommonModule, TagModule, ButtonModule],
+  imports: [CommonModule, TagModule, ButtonModule, RouterModule],
   template: `
     <div class="lib-detail-flex">
       <!-- 左侧：文章详情 -->
@@ -49,7 +49,14 @@ interface PaginatedResponse<T> {
         <div class="lib-subtitle">{{ lib()?.sub_title }}</div>
         <div class="tags">
           <ng-container *ngIf="lib()?.tags">
-            <p-tag *ngFor="let tag of lib()?.tags!.split(',')" [value]="tag.trim()"></p-tag>
+            <p-tag
+              *ngFor="let tag of lib()?.tags!.split(',')"
+              [value]="tag.trim()"
+              [routerLink]="['/tags', tag]"
+              style="cursor: pointer"
+            >
+              {{ tag }}
+            </p-tag>
           </ng-container>
         </div>
         <div class="btn-group">

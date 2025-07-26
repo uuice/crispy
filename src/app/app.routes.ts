@@ -27,6 +27,15 @@ export const routes: Routes = [
           import('./web-pc/pages/blog/archives-detail.page').then((m) => m.ArchivesDetailPage)
       },
       {
+        path: 'categories/:alias',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/categories.page').then((m) => m.CategoriesPage)
+      },
+      {
+        path: 'tags/:title',
+        loadComponent: () => import('./web-pc/pages/blog/tags.page').then((m) => m.TagsPage)
+      },
+      {
         path: 'links',
         loadComponent: () => import('./web-pc/pages/blog/links.page').then((m) => m.LinksPage)
       },
@@ -39,16 +48,6 @@ export const routes: Routes = [
         path: 'daily-lib/:url',
         loadComponent: () =>
           import('./web-pc/pages/blog/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
-      },
-
-      {
-        path: 'categories/:url',
-        loadComponent: () =>
-          import('./web-pc/pages/blog/categories.page').then((m) => m.CategoriesPage)
-      },
-      {
-        path: 'tags/:url',
-        loadComponent: () => import('./web-pc/pages/blog/tags.page').then((m) => m.TagsPage)
       },
       {
         path: 'pages/:url',

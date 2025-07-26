@@ -7,11 +7,13 @@ import { TocItem } from 'src/utils/markdown'
   template: `
     <nav class="toc-nav-fixed">
       <div class="blog-card" style="padding: 1.25rem;">
-        <div class="font-bold text-main mb-2">Table of Contents</div>
+        <div class="font-bold text-main mb-2">目录</div>
         <ul class="toc-list">
           @for (item of toc(); track item.id) {
             <li class="text-main mb-1">
-              <a href="" class="text-main" (click)="scrollTo(item.id, $event)">{{ item.text }}</a>
+              <a href="" [id]="item.id" class="text-main" (click)="scrollTo(item.id, $event)">{{
+                item.text
+              }}</a>
             </li>
           }
         </ul>

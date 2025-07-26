@@ -114,10 +114,29 @@ export const getCategoryByAlias = async (
   }
 }
 
+// Get categories with article count
+export const getCategoriesWithArticleCount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const parentAlias = req.query['parentAlias'] as string | undefined
+
+    const categories = await categoryService.getCategoriesWithArticleCount(parentAlias)
+
+    success(res, categories)
+  } catch (err: unknown) {
+    console.error('Error fetching categories with article count:', err)
+    error(res, 'Internal server error')
+  }
+}
+
 // Export all functions as a controller object
 export const categoryController = {
   getCategory,
   getCategoryByAlias,
   getCategories,
-  getCategoryTree
+  getCategoryTree,
+  getCategoriesWithArticleCount
 }

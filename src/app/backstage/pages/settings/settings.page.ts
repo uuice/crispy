@@ -56,6 +56,15 @@ interface StorageSettings {
   uploadPath: string
 }
 
+interface RecordSettings {
+  icpNumber: string
+  icpLink: string
+  policeNumber: string
+  policeLink: string
+  recordText: string
+  showRecord: boolean
+}
+
 interface LanguageOption {
   label: string
   value: string
@@ -116,6 +125,7 @@ interface ThemeOption {
           <p-tab value="0">基本设置</p-tab>
           <p-tab value="1">SMTP 设置</p-tab>
           <p-tab value="2">存储设置</p-tab>
+          <p-tab value="3">备案信息</p-tab>
         </p-tablist>
         <p-tabpanels>
           <p-tabpanel value="0">
@@ -505,10 +515,175 @@ interface ThemeOption {
               </div>
             </div>
           </p-tabpanel>
+          <p-tabpanel value="3">
+            <!-- 备案信息设置内容 -->
+            <div class="grid">
+              <div class="col-12">
+                <p-card>
+                  <ng-template pTemplate="content">
+                    <div class="field">
+                      <label class="block text-900 font-medium mb-2">显示备案信息</label>
+                      <p-toggleswitch [(ngModel)]="recordSettings.showRecord"></p-toggleswitch>
+                    </div>
+
+                    <p-divider></p-divider>
+
+                    <div class="grid">
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label for="icpNumber" class="block text-900 font-medium mb-2"
+                            >ICP 备案号</label
+                          >
+                          <input
+                            id="icpNumber"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="recordSettings.icpNumber"
+                            placeholder="如：京ICP备12345678号"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="icpLink" class="block text-900 font-medium mb-2"
+                            >ICP 备案链接</label
+                          >
+                          <input
+                            id="icpLink"
+                            type="url"
+                            pInputText
+                            [(ngModel)]="recordSettings.icpLink"
+                            placeholder="https://beian.miit.gov.cn/"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="recordText" class="block text-900 font-medium mb-2"
+                            >备案显示文本</label
+                          >
+                          <textarea
+                            id="recordText"
+                            pInputTextarea
+                            [(ngModel)]="recordSettings.recordText"
+                            [rows]="3"
+                            placeholder="自定义备案信息显示文本"
+                            class="w-full"
+                          ></textarea>
+                        </div>
+                      </div>
+
+                      <div class="col-12 md:col-6">
+                        <div class="field">
+                          <label for="policeNumber" class="block text-900 font-medium mb-2"
+                            >公安备案号</label
+                          >
+                          <input
+                            id="policeNumber"
+                            type="text"
+                            pInputText
+                            [(ngModel)]="recordSettings.policeNumber"
+                            placeholder="如：京公网安备11010502030123号"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <label for="policeLink" class="block text-900 font-medium mb-2"
+                            >公安备案链接</label
+                          >
+                          <input
+                            id="policeLink"
+                            type="url"
+                            pInputText
+                            [(ngModel)]="recordSettings.policeLink"
+                            placeholder="http://www.beian.gov.cn/"
+                            class="w-full"
+                          />
+                        </div>
+
+                        <div class="field mt-4">
+                          <div class="preview-container">
+                            <h4 class="preview-title">预览效果</h4>
+                            <div class="preview-content">
+                              <div *ngIf="recordSettings.showRecord">
+                                <div *ngIf="recordSettings.icpNumber">
+                                  <a
+                                    [href]="recordSettings.icpLink"
+                                    target="_blank"
+                                    class="preview-link"
+                                  >
+                                    {{ recordSettings.icpNumber }}
+                                  </a>
+                                </div>
+                                <div *ngIf="recordSettings.policeNumber" class="mt-1">
+                                  <a
+                                    [href]="recordSettings.policeLink"
+                                    target="_blank"
+                                    class="preview-link"
+                                  >
+                                    {{ recordSettings.policeNumber }}
+                                  </a>
+                                </div>
+                                <div *ngIf="recordSettings.recordText" class="mt-1">
+                                  {{ recordSettings.recordText }}
+                                </div>
+                              </div>
+                              <div *ngIf="!recordSettings.showRecord" class="preview-hidden">
+                                备案信息已隐藏
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </p-card>
+              </div>
+            </div>
+          </p-tabpanel>
         </p-tabpanels>
       </p-tabs>
     </div>
-  `
+  `,
+  styles: [
+    `
+      .preview-container {
+        padding: 1rem;
+        background: var(--p-content-background, #ffffff);
+        border: 1px solid var(--p-content-border-color, #e5e7eb);
+        border-radius: var(--p-border-radius, 0.5rem);
+        color: var(--p-text-color, #374151);
+      }
+
+      .preview-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--p-text-color, #374151);
+      }
+
+      .preview-content {
+        font-size: 0.875rem;
+        color: var(--p-text-color, #374151);
+      }
+
+      .preview-link {
+        color: var(--p-primary-color, #2196f3);
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
+
+      .preview-link:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+
+      .preview-hidden {
+        color: var(--p-text-muted-color, #6b7280);
+        font-style: italic;
+      }
+    `
+  ]
 })
 export class SettingsPage implements OnInit {
   protected settingsService = inject(SettingsService)
@@ -552,6 +727,15 @@ export class SettingsPage implements OnInit {
     region: '',
     domain: '',
     uploadPath: 'uploads'
+  }
+
+  recordSettings: RecordSettings = {
+    icpNumber: '',
+    icpLink: '',
+    policeNumber: '',
+    policeLink: '',
+    recordText: '',
+    showRecord: true
   }
 
   languageOptions: LanguageOption[] = [
@@ -665,6 +849,26 @@ export class SettingsPage implements OnInit {
       } catch (error: any) {
         console.log('Storage settings not found, using defaults')
       }
+
+      // Load record settings
+      try {
+        const recordConfig = await firstValueFrom(
+          this.httpService.get<any>(
+            `/api/admin/configs/alias/${SYSTEM_SETTINGS_CATEGORY_ALIAS.RECORD_SETTINGS}`
+          )
+        )
+
+        if (recordConfig?.success && recordConfig.data) {
+          const config = recordConfig.data
+          try {
+            this.recordSettings = { ...this.recordSettings, ...JSON.parse(config.value) }
+          } catch (e) {
+            console.error('Failed to parse record settings:', e)
+          }
+        }
+      } catch (error: any) {
+        console.log('Record settings not found, using defaults')
+      }
     } catch (error) {
       console.error('Failed to load settings:', error)
       // Use default settings if loading fails
@@ -694,6 +898,13 @@ export class SettingsPage implements OnInit {
         SYSTEM_SETTINGS_CATEGORY_ALIAS.STORAGE_SETTINGS,
         '存储设置',
         this.storageSettings
+      )
+
+      // Save record settings
+      await this.saveConfigSetting(
+        SYSTEM_SETTINGS_CATEGORY_ALIAS.RECORD_SETTINGS,
+        '备案信息',
+        this.recordSettings
       )
 
       this.messageService.add({
