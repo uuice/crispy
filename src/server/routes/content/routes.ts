@@ -122,11 +122,13 @@ router.get('/api-logs/:id', apiLogController.getApiLog)
 // Article routes
 router.get('/articles', articleController.getArticles)
 router.get('/articles/:id', articleController.getArticle)
+router.get('/articles/url/:url', articleController.getArticleByUrl)
 
 // Category routes
 router.get('/categories', categoryController.getCategories)
 router.get('/categories/tree', categoryController.getCategoryTree)
 router.get('/categories/:id', categoryController.getCategory)
+router.get('/categories/alias/:alias', categoryController.getCategoryByAlias)
 
 // Attrs routes
 router.get('/attrs', attrController.getAttrs)
@@ -186,10 +188,12 @@ router.get('/rules/:id', ruleController.getRule)
 // Tag routes
 router.get('/tags', tagController.getTags)
 router.get('/tags/:id', tagController.getTag)
+router.get('/tags/value/:value', tagController.getTagByValue)
 
 // Page routes
 router.get('/pages', pageController.getPages)
 router.get('/pages/:id', pageController.getPage)
+router.get('/pages/url/:url', pageController.getPageByUrl)
 
 // User type routes
 router.get('/user-types', userTypeController.getUserTypes)

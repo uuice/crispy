@@ -75,6 +75,22 @@ export class TagService {
     return tag
   }
 
+  // get tag by value
+  async getTagByValue(value: string): Promise<any> {
+    const tag = await db
+      .selectFrom('tags')
+      .selectAll()
+      .where('value', '=', value)
+      .where('is_delete', '=', 0)
+      .executeTakeFirst()
+
+    if (!tag) {
+      throw new Error('Tag not found')
+    }
+
+    return tag
+  }
+
   // /**
   //  * Get a single tag by alias
   //  */

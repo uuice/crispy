@@ -56,8 +56,24 @@ export const getTags = async (req: Request, res: Response, next: NextFunction): 
   }
 }
 
+export const getTagByValue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const value = req.params['value']
+    const tag = await tagService.getTagByValue(value)
+    success(res, tag)
+  } catch (err: unknown) {
+    console.error('Error fetching tag by value:', err)
+    error(res, 'Internal server error')
+  }
+}
+
 // Export all functions as a controller object
 export const tagController = {
   getTag,
-  getTags
+  getTags,
+  getTagByValue
 }

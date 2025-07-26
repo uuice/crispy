@@ -165,7 +165,7 @@ interface FriendLinksResponse {
             </td>
             <td>{{ link.des || '-' }}</td>
             <td>
-              <p-tag [value]="getCategoryName(link.type_id)" severity="info" size="small"></p-tag>
+              <p-tag [value]="link.type_name || '未分类'" severity="info" size="small"></p-tag>
             </td>
             <td>{{ link.sort }}</td>
             <td>
@@ -325,6 +325,7 @@ export class LinksPage implements OnInit {
         if (response.success && response.data) {
           // Transform the response to match our interface
           const transformedLinks = response.data.dataList.map((link: any) => ({
+            ...link,
             id: link.id,
             title: link.site_name,
             url: link.url,
@@ -367,12 +368,6 @@ export class LinksPage implements OnInit {
 
   getStatusText(status: number): string {
     return status === 10 ? '启用' : '禁用'
-  }
-
-  getCategoryName(categoryId?: number): string {
-    if (!categoryId) return '未分类'
-    const category = this.categories().find((c) => c.id === categoryId)
-    return category ? category.title : '未知分类'
   }
 
   openCreateDialog() {

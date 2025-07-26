@@ -11,10 +11,8 @@ import { Component } from '@angular/core'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">UUICE(一句话)</h1>
-        <p class="text-lg md:text-xl text-muted mb-2">
-          一个现代、简约的博客启动器，由Crisp和UUICE驱动
-        </p>
+        <h1 class="blog-title text-main">轻盈的鱼</h1>
+        <p class="text-lg md:text-xl text-muted mb-2">幻想变成轻盈的鱼， 畅游在自由的海洋</p>
       </div>
     </section>
   `,

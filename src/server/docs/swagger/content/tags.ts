@@ -111,4 +111,37 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
+/**
+ * @swagger
+ * /content/tags/value/{value}:
+ *   get:
+ *     tags: [ContentTags]
+ *     summary: 根据标签值获取标签详情
+ *     description: 根据标签值获取标签详情
+ *     security:
+ *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: value
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 标签值
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: 标签不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 export default {};

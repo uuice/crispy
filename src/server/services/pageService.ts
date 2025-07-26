@@ -118,6 +118,35 @@ export class PageService {
     } as Page
   }
 
+  // get page by url
+
+  async getPageByUrl(url: string): Promise<Page | null> {
+    const result = await db
+      .selectFrom('pages')
+      .leftJoin('categories', 'categories.id', 'pages.type_id')
+      .selectAll('pages')
+      .select(['categories.id as type_id', 'categories.title as type_title'])
+      .where('pages.url', '=', url)
+      .where('pages.is_delete', '=', 0)
+      .executeTakeFirst()
+
+    if (!result) {
+      return null
+    }
+
+    // Transform the result to include type information
+    const page = result as any
+    return {
+      ...page,
+      type: page.type_id
+        ? {
+            id: page.type_id,
+            title: page.type_title
+          }
+        : null
+    } as Page
+  }
+
   /**
    * Get page by alias
    */

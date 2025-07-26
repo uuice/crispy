@@ -132,7 +132,10 @@ app.use(
 app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
 
 // 4. Angular application routes
-app.use(pageCacheMiddleware)
+
+if (env['NODE_ENV'] === 'production') {
+  app.use(pageCacheMiddleware)
+}
 app.use(createAngularHandler(angularApp))
 
 // 5. 404 handler (must be after all routes)

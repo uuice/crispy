@@ -98,8 +98,24 @@ export const getArticles = async (
   }
 }
 
+export const getArticleByUrl = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const url = req.params['url']
+    const article = await articleService.getArticleByUrl(url)
+    success(res, article)
+  } catch (err: unknown) {
+    console.error('Error fetching article by url:', err)
+    error(res, 'Internal server error')
+  }
+}
+
 // Export all functions as a controller object
 export const articleController = {
   getArticle,
-  getArticles
+  getArticles,
+  getArticleByUrl
 }

@@ -809,7 +809,7 @@ export class PostDetailComponent implements OnInit {
         id: this.currentArticle()?.id || 0
       }
 
-      if (!articleData.id && !articleData.url) {
+      if (!articleData.url) {
         articleData.url = titleToUrl(articleData.title!)
       }
 

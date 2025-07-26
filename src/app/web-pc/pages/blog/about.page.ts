@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core'
+import { Component, signal, OnInit, inject } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { generateTocAndHeadings, TocItem } from 'src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
+import { HttpService, ApiResponse } from '../../services/http.service'
+import { PaginatedPagesResult } from '@src/server/services/pageService'
 
 @Component({
   selector: 'cs-about',
@@ -16,7 +18,7 @@ import { TocComponent } from '../../components/blog/toc.component'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">About</h1>
+        <h1 class="blog-title text-main">{{ pageTitle() }}</h1>
       </div>
     </section>
     <!-- About Content -->
@@ -28,22 +30,47 @@ import { TocComponent } from '../../components/blog/toc.component'
   `,
   styles: []
 })
-export class AboutPage {
-  rawHtml = `
-    <h2>This is the demo site for Fuwari.</h2>
-    <p>saicaca/fuwari</p>
-    <h3>Sources of images used in this site</h3>
-    <ul class="list-disc pl-6">
-      <li>Unsplash</li>
-      <li>星と少女 by Stella</li>
-      <li>Rabbit - v1.4 Showcase by Rabbit_YourMajesty</li>
-    </ul>
-  `
+export class AboutPage implements OnInit {
+  private httpService = inject(HttpService)
+  private sanitizer = inject(DomSanitizer)
+
+  // Signals for content
+  pageTitle = signal<string>('About')
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
-  constructor(private sanitizer: DomSanitizer) {
-    const { html, toc } = generateTocAndHeadings(this.rawHtml)
-    this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
-    this.toc.set(toc)
+
+  ngOnInit() {
+    this.loadPageData()
+  }
+
+  /**
+   * Load page data from API
+   */
+  loadPageData() {
+    // Call content API to get page with url 'about'
+    this.httpService
+      .get<ApiResponse<PaginatedPagesResult>>('/api/content/pages', { url: 'about' })
+      .subscribe({
+        next: (response) => {
+          // get dataList[0]
+          if (
+            response.success &&
+            response.data &&
+            response.data.dataList &&
+            response.data.dataList.length > 0
+          ) {
+            // Set page title
+            this.pageTitle.set(response.data.dataList[0].title || 'About')
+
+            // Process content and generate TOC
+            const { html, toc } = generateTocAndHeadings(response.data.dataList[0].content)
+            this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+            this.toc.set(toc)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load about page:', err)
+        }
+      })
   }
 }

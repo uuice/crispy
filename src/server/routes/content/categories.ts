@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { success, error, validationError, notFound } from '../../utils/response'
 import { categoryService } from '../../services/categoryService'
+import { SYSTEM_CATEGORY_ALIAS_MAP } from '@src/server/config/const'
 
 // Get single category
 export const getCategory = async (
@@ -79,7 +80,17 @@ export const getCategoryTree = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const tree = await categoryService.getCategoryTree()
+    const { id, alias } = req.query
+    const options = {
+      rootId: id ? parseInt(id as string) : undefined,
+      rootAlias: alias as string | undefined
+    }
+    if (alias) {
+      options.rootAlias =
+        SYSTEM_CATEGORY_ALIAS_MAP[alias as keyof typeof SYSTEM_CATEGORY_ALIAS_MAP] || alias
+    }
+
+    const tree = await categoryService.getCategoryTree(options)
 
     success(res, tree)
   } catch (err: unknown) {
@@ -88,9 +99,25 @@ export const getCategoryTree = async (
   }
 }
 
+export const getCategoryByAlias = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const alias = req.params['alias']
+    const category = await categoryService.getCategoryByAlias(alias)
+    success(res, category)
+  } catch (err: unknown) {
+    console.error('Error fetching category by alias:', err)
+    error(res, 'Internal server error')
+  }
+}
+
 // Export all functions as a controller object
 export const categoryController = {
   getCategory,
+  getCategoryByAlias,
   getCategories,
   getCategoryTree
 }

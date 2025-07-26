@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core'
+import { Component, signal, computed, OnInit, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
 import { PaginatorModule } from 'primeng/paginator'
 import { TagModule } from 'primeng/tag'
+import { HttpService } from '../../services/http.service'
 
 // Article-like structure for npm libraries
 export interface Article {
@@ -37,90 +38,36 @@ export interface Article {
   is_delete?: number
 }
 
-// Export mock data for detail page reuse
-export const DAILY_LIBS: Article[] = [
-  {
-    id: 1,
-    title: 'lodash',
-    url: '/daily-lib/1',
-    abstract: '一个现代 JavaScript 工具库，提供丰富的函数式编程工具。',
-    tags: '工具库,函数式',
-    redirect_url: 'https://lodash.com/',
-    image: 'https://raw.githubusercontent.com/lodash/lodash/master/lodash.svg',
-    content: 'Lodash 让 JavaScript 更简单，极大提升了数组、对象、字符串等数据的处理效率。',
-    seo_title: 'Lodash - 现代 JS 工具库',
-    seo_description: 'Lodash 是一个现代 JavaScript 工具库，提供模块化、高性能的函数式工具。',
-    seo_keywords: 'lodash,工具库,javascript',
-    create_time: 1710000000000,
-    update_time: 1710000000000,
-    is_delete: 0
-  },
-  {
-    id: 2,
-    title: 'axios',
-    url: '/daily-lib/2',
-    abstract: '基于 Promise 的 HTTP 客户端，支持浏览器和 Node.js。',
-    tags: 'HTTP,客户端,Ajax',
-    redirect_url: 'https://axios-http.com/',
-    image: 'https://avatars.githubusercontent.com/u/32372333?s=200&v=4',
-    content: 'Axios 是一个基于 Promise 的 HTTP 客户端，支持拦截器、取消请求等高级功能。',
-    seo_title: 'Axios - HTTP 客户端',
-    seo_description: 'Axios 是一个支持浏览器和 Node.js 的 HTTP 客户端。',
-    seo_keywords: 'axios,http,ajax',
-    create_time: 1710000001000,
-    update_time: 1710000001000,
-    is_delete: 0
-  },
-  {
-    id: 3,
-    title: 'moment',
-    url: '/daily-lib/3',
-    abstract: '强大的日期处理库，支持解析、校验、格式化和显示日期。',
-    tags: '日期,时间,格式化',
-    redirect_url: 'https://momentjs.com/',
-    image: 'https://avatars.githubusercontent.com/u/4129662?s=200&v=4',
-    content: 'Moment.js 是一个功能强大的日期处理库，支持多种日期格式的解析和转换。',
-    seo_title: 'Moment.js - 日期库',
-    seo_description: '解析、校验、格式化和显示日期和时间的 JavaScript 库。',
-    seo_keywords: 'moment,日期,时间',
-    create_time: 1710000002000,
-    update_time: 1710000002000,
-    is_delete: 0
-  },
-  {
-    id: 4,
-    title: 'chalk',
-    url: '/daily-lib/4',
-    abstract: '终端字符串样式美化工具，让命令行输出更丰富多彩。',
-    tags: '终端,样式,颜色',
-    redirect_url: 'https://github.com/chalk/chalk',
-    image: 'https://raw.githubusercontent.com/chalk/chalk/main/media/logo.svg',
-    content: 'Chalk 可以让你在 Node.js 终端输出彩色字符串，提升可读性和美观度。',
-    seo_title: 'Chalk - 终端字符串美化',
-    seo_description: '在 Node.js 终端输出彩色字符串的工具库。',
-    seo_keywords: 'chalk,终端,颜色',
-    create_time: 1710000003000,
-    update_time: 1710000003000,
-    is_delete: 0
-  },
-  {
-    id: 5,
-    title: 'express',
-    url: '/daily-lib/5',
-    abstract: '极简且灵活的 Node.js Web 框架，快速构建服务端应用。',
-    tags: 'Web,框架,Node',
-    redirect_url: 'https://expressjs.com/',
-    image:
-      'https://raw.githubusercontent.com/expressjs/expressjs.com/gh-pages/images/express-facebook-share.png',
-    content: 'Express 是一个极简且灵活的 Node.js Web 应用框架，拥有丰富的中间件生态。',
-    seo_title: 'Express - Web 框架',
-    seo_description: '极简、灵活、功能强大的 Node.js Web 框架。',
-    seo_keywords: 'express,web,框架',
-    create_time: 1710000004000,
-    update_time: 1710000004000,
-    is_delete: 0
+// API response interfaces
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message?: string
+}
+
+interface PaginatedResponse<T> {
+  dataList: T[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
   }
-]
+}
+
+// Category/Type interface
+interface Category {
+  id: number
+  title: string
+  alias: string
+  status: number
+  sort: number
+  parent_id: number
+  des?: string
+  create_time: number
+  update_time: number
+  is_delete: number
+}
 
 @Component({
   selector: 'cs-daily-lib',
@@ -167,6 +114,9 @@ export const DAILY_LIBS: Article[] = [
                   class="lib-logo"
                   loading="lazy"
                 />
+                <div *ngIf="!lib.image" class="lib-logo-default">
+                  <i class="pi pi-box"></i>
+                </div>
               </div>
             </ng-template>
             <ng-template pTemplate="content">
@@ -202,7 +152,7 @@ export const DAILY_LIBS: Article[] = [
       <div class="paginator-wrap">
         <p-paginator
           [rows]="pageSize()"
-          [totalRecords]="filteredList().length"
+          [totalRecords]="totalRecords()"
           [first]="(page() - 1) * pageSize()"
           [rowsPerPageOptions]="[5, 10, 20, 50, 100]"
           (onPageChange)="onPageChange($event)"
@@ -319,14 +269,28 @@ export const DAILY_LIBS: Article[] = [
         box-shadow: 0 1px 4px 0 var(--p-content-border-color, rgba(0, 0, 0, 0.08));
         display: block;
       }
+      .lib-logo-default {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--p-content-hover-background, #222);
+        border-radius: 12px;
+        color: var(--p-content-color);
+        font-size: 24px;
+      }
     `
   ]
 })
-export class DailyLibPage {
-  libs = signal(DAILY_LIBS)
+export class DailyLibPage implements OnInit {
+  private httpService = inject(HttpService)
+
+  libs = signal<Article[]>([])
   search = signal('')
   page = signal(1)
   pageSize = signal(3)
+  totalRecords = signal(0)
 
   filteredList = computed(() => {
     const q = this.search().toLowerCase()
@@ -338,17 +302,81 @@ export class DailyLibPage {
     return this.filteredList().slice(start, start + this.pageSize())
   })
 
-  totalPages = computed(() => Math.ceil(this.filteredList().length / this.pageSize()) || 1)
+  totalPages = computed(() => Math.ceil(this.totalRecords() / this.pageSize()) || 1)
 
   constructor(private router: Router) {}
 
+  ngOnInit() {
+    this.loadDailyLibs()
+  }
+
+  /**
+   * Load daily libraries data
+   */
+  loadDailyLibs() {
+    // First get the category with alias 'daily-libs' to get type_id
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Category>>>('/api/content/categories', {
+        alias: 'daily-libs',
+        page: 1,
+        pageSize: 1
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.dataList && response.data.dataList.length > 0) {
+            const category = response.data.dataList[0]
+            // Then get articles with this type_id
+            this.loadArticlesByTypeId(category.id)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load daily-libs category:', err)
+        }
+      })
+  }
+
+  /**
+   * Load articles by type_id
+   */
+  loadArticlesByTypeId(typeId: number) {
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+        type_id: typeId,
+        page: this.page(),
+        pageSize: this.pageSize(),
+        status: 10
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.libs.set(response.data.dataList)
+            // Set pagination info from API response
+            this.totalRecords.set(response.data.pagination.total)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load daily lib articles:', err)
+        }
+      })
+  }
+
   onSearch() {
     this.page.set(1)
+    this.loadArticlesByTypeId(this.getCurrentTypeId())
   }
 
   onPageChange(event: any) {
     this.page.set(Math.floor(event.first / event.rows) + 1)
     this.pageSize.set(event.rows)
+    this.loadArticlesByTypeId(this.getCurrentTypeId())
+  }
+
+  /**
+   * Get current type_id from loaded articles
+   */
+  private getCurrentTypeId(): number {
+    const articles = this.libs()
+    return articles.length > 0 ? articles[0].type_id || 0 : 0
   }
 
   gotoDetail(url: string) {

@@ -86,8 +86,24 @@ export const getPages = async (req: Request, res: Response, next: NextFunction):
   }
 }
 
+export const getPageByUrl = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const url = req.params['url']
+    const page = await pageService.getPageByUrl(url)
+    success(res, page)
+  } catch (err: unknown) {
+    console.error('Error fetching page by url:', err)
+    error(res, 'Internal server error')
+  }
+}
+
 // Export all functions as a controller object
 export const pageController = {
   getPage,
-  getPages
+  getPages,
+  getPageByUrl
 }

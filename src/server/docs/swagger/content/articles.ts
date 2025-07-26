@@ -206,4 +206,37 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
+/**
+ * @swagger
+ * /content/articles/url/{url}:
+ *   get:
+ *     tags: [ContentArticles]
+ *     summary: 根据URL获取文章详情
+ *     description: 根据URL获取文章详情
+ *     security:
+ *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: url
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 文章URL
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: 文章不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 export default {};

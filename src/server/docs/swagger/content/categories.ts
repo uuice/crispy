@@ -136,4 +136,37 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
+/**
+ * @swagger
+ * /content/categories/alias/{alias}:
+ *   get:
+ *     tags: [ContentCategories]
+ *     summary: 根据别名获取分类详情
+ *     description: 根据别名获取分类详情
+ *     security:
+ *       - accessTokenAuth: []
+ *         appNameAuth: []
+ *         channelAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: alias
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 分类别名
+ *     responses:
+ *       200:
+ *         description: 操作成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: 分类不存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 export default {};

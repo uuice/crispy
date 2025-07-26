@@ -81,9 +81,23 @@ export class ArticleService {
   async getArticleById(id: number) {
     return await db
       .selectFrom('articles')
-      .selectAll()
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
       .where('id', '=', id)
       .where('is_delete', '=', 0)
+      .executeTakeFirst()
+  }
+
+  // get article by url
+  async getArticleByUrl(url: string) {
+    return await db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .where('url', '=', url)
+      .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
   }
 

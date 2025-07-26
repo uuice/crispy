@@ -14,6 +14,40 @@ import { DrawerModule } from 'primeng/drawer'
 import { SelectButtonModule } from 'primeng/selectbutton'
 import { FormsModule } from '@angular/forms'
 import { ScrollTopModule } from 'primeng/scrolltop'
+import { HttpService, ApiResponse } from '../../services/http.service'
+
+// Data interfaces
+interface Category {
+  id: number
+  title: string
+  alias: string
+  count?: number
+}
+
+interface Tag {
+  id: number
+  title: string
+  count?: number
+}
+
+interface Article {
+  id: number
+  title: string
+  url: string
+  create_time: number
+  click: number
+}
+
+// Update interfaces to match paginated response
+interface PaginatedResponse<T> {
+  dataList: T[]
+  pagination: {
+    total: number
+    page: number
+    pageSize: number
+    totalPages: number
+  }
+}
 
 @Component({
   selector: 'cs-home-layout',
@@ -146,40 +180,86 @@ import { ScrollTopModule } from 'primeng/scrolltop'
             <!-- Author Card -->
             <div class="bg-content rounded-xl shadow p-6 mb-8 flex flex-col items-center">
               <img
-                src="https://randomuser.me/api/portraits/men/32.jpg"
+                src="assets/images/avatar.jpg"
                 alt="Author"
                 class="w-20 h-20 rounded-full mb-3 border-4 border-blue-200 dark:border-blue-900 shadow"
               />
-              <h2 class="text-lg font-semibold mb-1">UUICE</h2>
-              <p class="text-center text-sm mb-2">一个现代、简约的博客启动器，由Crisp和UUICE驱动</p>
+              <h2 class="text-lg font-semibold mb-1">轻盈的鱼</h2>
+              <p class="text-center text-sm mb-2">幻想变成轻盈的鱼， 畅游在自由的海洋</p>
               <div class="flex gap-3 mt-2">
-                <a href="#" class="blog-icon-blue hover:opacity-80" title="GitHub"
+                <a
+                  href="https://github.com/uuice"
+                  class="blog-icon-blue hover:opacity-80"
+                  title="GitHub"
                   ><i class="pi pi-github text-xl"></i
                 ></a>
-                <a href="#" class="blog-icon-pink hover:opacity-80" title="Twitter"
+                <!-- <a
+                  href="https://twitter.com/uuice"
+                  class="blog-icon-pink hover:opacity-80"
+                  title="Twitter"
                   ><i class="pi pi-twitter text-xl"></i
-                ></a>
+                ></a> -->
               </div>
             </div>
             <!-- Categories Card -->
             <div class="rounded-xl shadow p-6 mb-8">
-              <h3 class="text-base font-semibold mb-3">Categories</h3>
+              <h3 class="text-base font-semibold mb-3">分类</h3>
               <div class="flex flex-wrap gap-3">
-                <span class="blog-tag blog-tag-blue text-sm">Examples (4)</span>
-                <span class="blog-tag blog-tag-green text-sm">Guides (1)</span>
+                <span
+                  *ngFor="let category of categories()"
+                  class="blog-tag blog-tag-blue text-sm"
+                  [routerLink]="['/category', category.alias]"
+                  style="cursor: pointer;"
+                >
+                  {{ category.title }} ({{ category.count || 0 }})
+                </span>
               </div>
             </div>
             <!-- Tags Card -->
-            <div class="rounded-xl shadow p-6">
-              <h3 class="text-base font-semibold mb-3">Tags</h3>
+            <div class="rounded-xl shadow p-6 mb-8">
+              <h3 class="text-base font-semibold mb-3">标签</h3>
               <div class="flex flex-wrap gap-2">
-                <span class="blog-tag blog-tag-gray text-xs">Blogging</span>
-                <span class="blog-tag blog-tag-purple text-xs">Customization</span>
-                <span class="blog-tag blog-tag-pink text-xs">Demo</span>
-                <span class="blog-tag blog-tag-blue text-xs">Example</span>
-                <span class="blog-tag blog-tag-green text-xs">Fuwari</span>
-                <span class="blog-tag blog-tag-yellow text-xs">Markdown</span>
-                <span class="blog-tag blog-tag-indigo text-xs">Video</span>
+                <span
+                  *ngFor="let tag of tags(); let i = index"
+                  [class]="'blog-tag ' + getTagClass(i) + ' text-xs'"
+                  [routerLink]="['/tag', tag.title]"
+                  style="cursor: pointer;"
+                >
+                  {{ tag.title }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Latest Articles Card -->
+            <div class="rounded-xl shadow p-6">
+              <h3 class="text-base font-semibold mb-3">最新文章</h3>
+              <div class="space-y-3">
+                <div *ngFor="let article of latestArticles()" class="latest-article-item">
+                  <a
+                    [routerLink]="['/archives', article.url]"
+                    class="block hover:opacity-80 transition-opacity"
+                  >
+                    <h4 class="text-sm font-medium text-main line-clamp-2 mb-1">
+                      {{ article.title }}
+                    </h4>
+                    <div class="flex items-center justify-between text-xs text-muted">
+                      <span>{{ article.create_time | date: 'MM-dd' }}</span>
+                      <span class="flex items-center gap-1">
+                        <i class="pi pi-eye text-xs"></i>
+                        <span>{{ article.click || 0 }}</span>
+                      </span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-content">
+                <a
+                  routerLink="/archives"
+                  class="text-sm text-primary hover:opacity-80 transition-opacity flex items-center gap-1"
+                >
+                  查看更多
+                  <i class="pi pi-arrow-right text-xs"></i>
+                </a>
               </div>
             </div>
           </aside>
@@ -297,7 +377,9 @@ import { ScrollTopModule } from 'primeng/scrolltop'
             Powered by <span class="font-semibold">UUICE</span> &
             <span class="font-semibold">Crispy</span>
             <span class="mx-2">|</span>
-            <a href="https://github.com/uuice/crispy" class="hover:underline">GitHub</a>
+            <a href="https://github.com/uuice/crispy" target="_blank" class="hover:underline"
+              >GitHub</a
+            >
           </div>
         </div>
       </footer>
@@ -708,10 +790,48 @@ import { ScrollTopModule } from 'primeng/scrolltop'
       .color-dot {
         border-color: var(--p-content-border-color) !important;
       }
+    `,
+    // Latest articles styles
+    `
+      .latest-article-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--p-content-border-color, #e5e7eb);
+      }
+      .latest-article-item:last-child {
+        border-bottom: none;
+      }
+      .latest-article-item h4 {
+        color: var(--p-text-color, #374151);
+        line-height: 1.4;
+        margin-bottom: 0.25rem;
+      }
+      .latest-article-item .text-muted {
+        color: var(--p-text-muted-color, #6b7280);
+      }
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .text-primary {
+        color: var(--p-primary-color, #2196f3);
+      }
+      .border-content {
+        border-color: var(--p-content-border-color, #e5e7eb);
+      }
+      .text-main {
+        color: var(--p-text-color, #374151);
+      }
+      .text-muted {
+        color: var(--p-text-muted-color, #6b7280);
+      }
     `
   ]
 })
 export class HomeLayoutComponent implements OnInit {
+  private httpService = inject(HttpService)
+
   currentYear = new Date().getFullYear()
   menuItems: MenuItem[] = []
 
@@ -724,6 +844,11 @@ export class HomeLayoutComponent implements OnInit {
 
   // Signal to store current url
   currentUrl = signal('')
+
+  // Data signals
+  categories = signal<Category[]>([])
+  tags = signal<Tag[]>([])
+  latestArticles = signal<Article[]>([])
 
   // Computed property to determine if sidebar should be shown (reactive to route changes)
   showSidebar = computed(() => {
@@ -739,6 +864,8 @@ export class HomeLayoutComponent implements OnInit {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.currentUrl.set(this.router.url)
+        // Scroll to top when route changes
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     })
   }
@@ -912,10 +1039,8 @@ export class HomeLayoutComponent implements OnInit {
   tagClassList = [
     'blog-tag-blue',
     'blog-tag-green',
-    'blog-tag-red',
     'blog-tag-yellow',
     'blog-tag-purple',
-    'blog-tag-orange',
     'blog-tag-pink',
     'blog-tag-gray',
     'blog-tag-indigo'
@@ -951,21 +1076,6 @@ export class HomeLayoutComponent implements OnInit {
         routerLink: '/links'
       },
       {
-        label: '分类',
-        icon: 'pi pi-folder',
-        routerLink: '/categories'
-      },
-      {
-        label: '标签',
-        icon: 'pi pi-tag',
-        routerLink: '/tags'
-      },
-      {
-        label: '页面',
-        icon: 'pi pi-file',
-        routerLink: '/pages'
-      },
-      {
         label: '每日一库',
         icon: 'pi pi-book',
         routerLink: '/daily-lib'
@@ -976,11 +1086,81 @@ export class HomeLayoutComponent implements OnInit {
         routerLink: '/about'
       }
     ]
+
     // Initialize theme settings
     this.selectedFontSize = this.settingsService.getFontSize()
     this.selectedDarkMode = this.settingsService.settings().darkMode
     this.selectedPreset = this.settingsService.settings().theme || 'lara'
     this.selectedSurfaceColor = this.settingsService.getSurfaceConfig().color
+
+    // Load sidebar data
+    this.loadCategories()
+    this.loadTags()
+    this.loadLatestArticles()
+  }
+
+  /**
+   * Load categories from API
+   */
+  loadCategories() {
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Category>>>('/api/content/categories', {
+        page: 1,
+        pageSize: 20
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.dataList) {
+            this.categories.set(response.data.dataList)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load categories:', err)
+        }
+      })
+  }
+
+  /**
+   * Load tags from API
+   */
+  loadTags() {
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Tag>>>('/api/content/tags', {
+        page: 1,
+        pageSize: 20
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.dataList) {
+            this.tags.set(response.data.dataList)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load tags:', err)
+        }
+      })
+  }
+
+  /**
+   * Load latest articles from API
+   */
+  loadLatestArticles() {
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+        page: 1,
+        pageSize: 5,
+        status: 10
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.dataList) {
+            this.latestArticles.set(response.data.dataList)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load latest articles:', err)
+        }
+      })
   }
 
   toggleDarkMode(): void {
@@ -1005,5 +1185,12 @@ export class HomeLayoutComponent implements OnInit {
   }
   onSelectPrimary(color: any) {
     this.settingsService.setPrimaryColor(color.palette[500])
+  }
+
+  /**
+   * Get tag class based on index (cycle through tagClassList)
+   */
+  getTagClass(index: number): string {
+    return this.tagClassList[index % this.tagClassList.length]
   }
 }

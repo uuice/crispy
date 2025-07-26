@@ -1,76 +1,66 @@
-import { Component, signal } from '@angular/core'
+import { Component, signal, OnInit, inject } from '@angular/core'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { ActivatedRoute } from '@angular/router'
+import { CommonModule } from '@angular/common'
+import { HttpService, ApiResponse } from '../../services/http.service'
+
+// Article interface
+interface Article {
+  id: number
+  title: string
+  url: string
+  content: string
+  abstract: string
+  author_id: number
+  create_time: number
+  tags: string
+  seo_title?: string
+  seo_keywords?: string
+  seo_description?: string
+  status: number
+}
+
+// Paginated response interface
+interface PaginatedResponse<T> {
+  dataList: T[]
+  pagination: {
+    total: number
+    page: number
+    pageSize: number
+    totalPages: number
+  }
+}
 
 @Component({
   selector: 'cs-archives-detail',
   standalone: true,
-  imports: [TocComponent],
+  imports: [TocComponent, CommonModule],
   template: `
     <!-- Article Banner -->
     <section class="blog-banner">
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">Markdown Extended Features</h1>
+        <h1 class="blog-title text-main">{{ articleTitle() }}</h1>
         <div class="flex flex-wrap gap-3 items-center text-sm text-muted mb-2">
-          <span>2024-05-01</span>
+          <span>{{ articleCreateTime() | date: 'yyyy-MM-dd' }}</span>
           <span>·</span>
-          <span>by <span class="font-semibold blog-icon">Lorem Ipsum</span></span>
+          <span>by <span class="font-semibold blog-icon">作者</span></span>
           <span>·</span>
-          <span class="blog-tag blog-tag-blue text-xs">Examples</span>
+          <span class="blog-tag blog-tag-blue text-xs">文章</span>
         </div>
       </div>
     </section>
     <!-- 主内容 -->
     <section class="blog-section">
-      <div class="blog-prose prose text-main">
-        <h2 id="introduction">Introduction</h2>
-        <p>
-          This article demonstrates extended Markdown features in Fuwari, including code blocks,
-          tables, and more.
-        </p>
-        <h3 id="code-example">Code Example</h3>
-        <pre><code>const greet = (name: string) =&gt; 'Hello, ' + name + '!';
-console.log(greet('Fuwari'));
-</code></pre>
-        <h3 id="table-example">Table Example</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Feature</th>
-              <th>Supported</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Code Highlight</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Tables</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Images</td>
-              <td>Yes</td>
-            </tr>
-          </tbody>
-        </table>
-        <h3 id="image-example">Image Example</h3>
-        <img
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
-          alt="Sample"
-          class="rounded-xl shadow max-w-full"
-        />
-        <h3 id="conclusion">Conclusion</h3>
-        <p>
-          Fuwari provides a beautiful and modern blogging experience with extended Markdown support.
-        </p>
-      </div>
+      <div class="blog-prose prose text-main" [innerHTML]="html()"></div>
       <div class="blog-tags mt-4 text-muted">
-        <span class="blog-tag blog-tag-gray">Blogging</span>
-        <span class="blog-tag blog-tag-purple">Demo</span>
-        <span class="blog-tag blog-tag-blue">Example</span>
+        <span
+          *ngFor="let tag of articleTags(); let i = index"
+          class="blog-tag {{ getTagClass(i) }}"
+        >
+          {{ tag }}
+        </span>
       </div>
     </section>
     <!-- TOC 悬浮在主内容右侧，不占用主内容宽度 -->
@@ -78,22 +68,83 @@ console.log(greet('Fuwari'));
   `,
   styles: []
 })
-export class ArchivesDetailPage {
-  rawHtml = `
-    <h2>This is the demo site for Fuwari.</h2>
-    <p>saicaca/fuwari</p>
-    <h3>Sources of images used in this site</h3>
-    <ul>
-      <li>Unsplash</li>
-      <li>星と少女 by Stella</li>
-      <li>Rabbit - v1.4 Showcase by Rabbit_YourMajesty</li>
-    </ul>
-  `
+export class ArchivesDetailPage implements OnInit {
+  private route = inject(ActivatedRoute)
+  private httpService = inject(HttpService)
+  private sanitizer = inject(DomSanitizer)
+
+  // Article data signals
+  articleTitle = signal<string>('')
+  articleCreateTime = signal<number>(0)
+  articleTags = signal<string[]>([])
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
-  constructor(private sanitizer: DomSanitizer) {
-    const { html, toc } = generateTocAndHeadings(this.rawHtml)
-    this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
-    this.toc.set(toc)
+
+  // Tag color class list for blog tags (same as home-layout)
+  tagClassList = [
+    'blog-tag-blue',
+    'blog-tag-green',
+    'blog-tag-yellow',
+    'blog-tag-purple',
+    'blog-tag-pink',
+    'blog-tag-gray',
+    'blog-tag-indigo'
+  ]
+
+  ngOnInit() {
+    // Get url parameter from route
+    this.route.params.subscribe((params) => {
+      const url = params['url']
+      if (url) {
+        this.loadArticle(url)
+      }
+    })
+  }
+
+  /**
+   * Get tag class based on index (cycle through tagClassList)
+   */
+  getTagClass(index: number): string {
+    return this.tagClassList[index % this.tagClassList.length]
+  }
+
+  /**
+   * Load article data from API
+   */
+  loadArticle(url: string) {
+    this.httpService
+      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+        url: url,
+        page: 1,
+        pageSize: 1
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data?.dataList && response.data.dataList.length > 0) {
+            const article = response.data.dataList[0]
+
+            // Set article data
+            this.articleTitle.set(article.title)
+            this.articleCreateTime.set(article.create_time)
+
+            // Parse tags
+            if (article.tags) {
+              const tags = article.tags
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter((tag) => tag)
+              this.articleTags.set(tags)
+            }
+
+            // Process content and generate TOC
+            const { html, toc } = generateTocAndHeadings(article.content)
+            this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+            this.toc.set(toc)
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load article:', err)
+        }
+      })
   }
 }

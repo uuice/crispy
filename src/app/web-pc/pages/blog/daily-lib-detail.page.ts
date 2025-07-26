@@ -1,9 +1,29 @@
-import { Component, signal } from '@angular/core'
+import { Component, signal, OnInit, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ActivatedRoute } from '@angular/router'
-import { DAILY_LIBS, Article } from './daily-lib.page'
+import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
 import { ButtonModule } from 'primeng/button'
+import { HttpService } from '../../services/http.service'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
+
+// API response interfaces
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message?: string
+}
+
+interface PaginatedResponse<T> {
+  dataList: T[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
+}
 
 @Component({
   selector: 'cs-daily-lib-detail',
@@ -21,6 +41,9 @@ import { ButtonModule } from 'primeng/button'
             class="lib-logo"
             loading="lazy"
           />
+          <div *ngIf="!lib()?.image" class="lib-logo-default">
+            <i class="pi pi-box"></i>
+          </div>
         </div>
         <h1 class="lib-title">{{ lib()?.title }}</h1>
         <div class="lib-subtitle">{{ lib()?.sub_title }}</div>
@@ -45,29 +68,7 @@ import { ButtonModule } from 'primeng/button'
         </div>
         <div class="section" id="content">
           <h2>内容</h2>
-          <div>{{ lib()?.content }}</div>
-        </div>
-        <div class="section" id="seo">
-          <h2>SEO 信息</h2>
-          <div>SEO 标题: {{ lib()?.seo_title }}</div>
-          <div>SEO 描述: {{ lib()?.seo_description }}</div>
-          <div>SEO 关键词: {{ lib()?.seo_keywords }}</div>
-        </div>
-        <div class="section" id="meta">
-          <h2>元信息</h2>
-          <div>url: {{ lib()?.url }}</div>
-          <div>sub_title: {{ lib()?.sub_title }}</div>
-          <div>remark: {{ lib()?.remark }}</div>
-          <div>type_id: {{ lib()?.type_id }}</div>
-          <div>type_ids: {{ lib()?.type_ids }}</div>
-          <div>status: {{ lib()?.status }}</div>
-          <div>sort: {{ lib()?.sort }}</div>
-          <div>click: {{ lib()?.click }}</div>
-          <div>attrs: {{ lib()?.attrs }}</div>
-          <div>is_review: {{ lib()?.is_review }}</div>
-          <div>create_time: {{ lib()?.create_time }}</div>
-          <div>update_time: {{ lib()?.update_time }}</div>
-          <div>is_delete: {{ lib()?.is_delete }}</div>
+          <div [innerHTML]="html()" class="prose"></div>
         </div>
       </div>
       <!-- 右侧：TOC -->
@@ -76,8 +77,9 @@ import { ButtonModule } from 'primeng/button'
         <ul class="toc-list">
           <li><a href="#desc" (click)="scrollTo('desc', $event)">简介</a></li>
           <li><a href="#content" (click)="scrollTo('content', $event)">内容</a></li>
-          <li><a href="#seo" (click)="scrollTo('seo', $event)">SEO 信息</a></li>
-          <li><a href="#meta" (click)="scrollTo('meta', $event)">元信息</a></li>
+          <li *ngFor="let item of toc()">
+            <a [href]="'#' + item.id" (click)="scrollTo(item.id, $event)">{{ item.text }}</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -115,6 +117,17 @@ import { ButtonModule } from 'primeng/button'
         background: var(--p-content-hover-background, #222);
         box-shadow: 0 1px 4px 0 var(--p-content-border-color, rgba(0, 0, 0, 0.08));
         display: block;
+      }
+      .lib-logo-default {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--p-content-hover-background, #222);
+        border-radius: 12px;
+        color: var(--p-content-color);
+        font-size: 24px;
       }
       .lib-title {
         font-size: 2rem;
@@ -195,12 +208,43 @@ import { ButtonModule } from 'primeng/button'
     `
   ]
 })
-export class DailyLibDetailPage {
-  lib = signal<Article | undefined>(undefined)
+export class DailyLibDetailPage implements OnInit {
+  private route = inject(ActivatedRoute)
+  private httpService = inject(HttpService)
+  private sanitizer = inject(DomSanitizer)
 
-  constructor(private route: ActivatedRoute) {
-    // const url = this.route.snapshot.paramMap.get('url')
-    this.lib.set(DAILY_LIBS[0])
+  lib = signal<Article | undefined>(undefined)
+  html = signal<SafeHtml>('')
+  toc = signal<TocItem[]>([])
+
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      const url = params['url']
+      if (url) {
+        this.loadArticleByUrl(url)
+      }
+    })
+  }
+
+  /**
+   * Load article by URL (use new /url/{url} API)
+   */
+  loadArticleByUrl(url: string) {
+    this.httpService.get<ApiResponse<Article>>(`/api/content/articles/url/${url}`).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.lib.set(response.data)
+
+          // Process content and generate TOC
+          const { html, toc } = generateTocAndHeadings(response.data.content || '')
+          this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+          this.toc.set(toc)
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load article:', err)
+      }
+    })
   }
 
   scrollTo(id: string, event: Event) {
