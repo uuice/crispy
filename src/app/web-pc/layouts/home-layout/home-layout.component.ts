@@ -91,7 +91,9 @@ interface PaginatedResponse<T> {
       <header class="header w-full sticky top-0 z-50">
         <nav class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4">
           <div class="flex items-center gap-8">
-            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">UUICE</a>
+            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">
+              轻盈的鱼
+            </a>
             <!-- Desktop Menu -->
             <ul class="hidden md:flex gap-6 text-base font-medium">
               <li *ngFor="let item of menuItems">
@@ -386,7 +388,7 @@ interface PaginatedResponse<T> {
           class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4"
         >
           <div class="text-sm text-center md:text-left">
-            © {{ currentYear }} UUICE. All Rights Reserved. <span class="mx-2">/</span>
+            © {{ currentYear }} 轻盈的鱼. All Rights Reserved. <span class="mx-2">/</span>
             <a href="/rss.xml" class="hover:underline">RSS</a>
             <span class="mx-2">/</span>
             <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
