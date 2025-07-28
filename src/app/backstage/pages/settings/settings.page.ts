@@ -143,7 +143,7 @@ interface ThemeOption {
                         id="siteName"
                         type="text"
                         pInputText
-                        [(ngModel)]="siteSettings.siteName"
+                        [(ngModel)]="siteSettings().siteName"
                         class="w-full"
                       />
                     </div>
@@ -155,7 +155,7 @@ interface ThemeOption {
                       <textarea
                         id="siteDescription"
                         pInputTextarea
-                        [(ngModel)]="siteSettings.siteDescription"
+                        [(ngModel)]="siteSettings().siteDescription"
                         [rows]="3"
                         class="w-full"
                       ></textarea>
@@ -169,7 +169,7 @@ interface ThemeOption {
                         id="siteKeywords"
                         type="text"
                         pInputText
-                        [(ngModel)]="siteSettings.siteKeywords"
+                        [(ngModel)]="siteSettings().siteKeywords"
                         class="w-full"
                       />
                     </div>
@@ -182,7 +182,7 @@ interface ThemeOption {
                         id="siteLogo"
                         type="text"
                         pInputText
-                        [(ngModel)]="siteSettings.siteLogo"
+                        [(ngModel)]="siteSettings().siteLogo"
                         class="w-full"
                       />
                     </div>
@@ -195,7 +195,7 @@ interface ThemeOption {
                         id="siteFavicon"
                         type="text"
                         pInputText
-                        [(ngModel)]="siteSettings.siteFavicon"
+                        [(ngModel)]="siteSettings().siteFavicon"
                         class="w-full"
                       />
                     </div>
@@ -207,7 +207,7 @@ interface ThemeOption {
                       <textarea
                         id="siteFooter"
                         pInputTextarea
-                        [(ngModel)]="siteSettings.siteFooter"
+                        [(ngModel)]="siteSettings().siteFooter"
                         [rows]="3"
                         class="w-full"
                       ></textarea>
@@ -222,17 +222,19 @@ interface ThemeOption {
                   <ng-template pTemplate="content">
                     <div class="field">
                       <label class="block text-900 font-medium mb-2">用户注册</label>
-                      <p-toggleswitch [(ngModel)]="siteSettings.allowRegistration"></p-toggleswitch>
+                      <p-toggleswitch
+                        [(ngModel)]="siteSettings().allowRegistration"
+                      ></p-toggleswitch>
                     </div>
 
                     <div class="field mt-4">
                       <label class="block text-900 font-medium mb-2">评论功能</label>
-                      <p-toggleswitch [(ngModel)]="siteSettings.allowComment"></p-toggleswitch>
+                      <p-toggleswitch [(ngModel)]="siteSettings().allowComment"></p-toggleswitch>
                     </div>
 
                     <div class="field mt-4">
                       <label class="block text-900 font-medium mb-2">评论审核</label>
-                      <p-toggleswitch [(ngModel)]="siteSettings.commentAudit"></p-toggleswitch>
+                      <p-toggleswitch [(ngModel)]="siteSettings().commentAudit"></p-toggleswitch>
                     </div>
 
                     <div class="field mt-4">
@@ -242,7 +244,7 @@ interface ThemeOption {
                       <p-select
                         id="defaultLanguage"
                         [options]="languageOptions"
-                        [(ngModel)]="siteSettings.defaultLanguage"
+                        [(ngModel)]="siteSettings().defaultLanguage"
                         placeholder="选择默认语言"
                         styleClass="w-full"
                       ></p-select>
@@ -253,7 +255,7 @@ interface ThemeOption {
                       <p-select
                         id="timezone"
                         [options]="timezoneOptions"
-                        [(ngModel)]="siteSettings.timezone"
+                        [(ngModel)]="siteSettings().timezone"
                         placeholder="选择时区"
                         styleClass="w-full"
                       ></p-select>
@@ -266,7 +268,7 @@ interface ThemeOption {
                       <p-select
                         id="dateFormat"
                         [options]="dateFormatOptions"
-                        [(ngModel)]="siteSettings.dateFormat"
+                        [(ngModel)]="siteSettings().dateFormat"
                         placeholder="选择日期格式"
                         styleClass="w-full"
                       ></p-select>
@@ -279,7 +281,7 @@ interface ThemeOption {
                       <p-select
                         id="timeFormat"
                         [options]="timeFormatOptions"
-                        [(ngModel)]="siteSettings.timeFormat"
+                        [(ngModel)]="siteSettings().timeFormat"
                         placeholder="选择时间格式"
                         styleClass="w-full"
                       ></p-select>
@@ -305,7 +307,7 @@ interface ThemeOption {
                             id="smtpHost"
                             type="text"
                             pInputText
-                            [(ngModel)]="emailSettings.smtpHost"
+                            [(ngModel)]="emailSettings().smtpHost"
                             class="w-full"
                           />
                         </div>
@@ -318,7 +320,7 @@ interface ThemeOption {
                             id="smtpPort"
                             type="number"
                             pInputText
-                            [(ngModel)]="emailSettings.smtpPort"
+                            [(ngModel)]="emailSettings().smtpPort"
                             class="w-full"
                           />
                         </div>
@@ -331,7 +333,7 @@ interface ThemeOption {
                             id="smtpUser"
                             type="text"
                             pInputText
-                            [(ngModel)]="emailSettings.smtpUser"
+                            [(ngModel)]="emailSettings().smtpUser"
                             class="w-full"
                           />
                         </div>
@@ -344,7 +346,7 @@ interface ThemeOption {
                             id="smtpPassword"
                             type="password"
                             pInputText
-                            [(ngModel)]="emailSettings.smtpPassword"
+                            [(ngModel)]="emailSettings().smtpPassword"
                             class="w-full"
                           />
                         </div>
@@ -353,7 +355,7 @@ interface ThemeOption {
                       <div class="col-12 md:col-6">
                         <div class="field">
                           <label class="block text-900 font-medium mb-2">SSL/TLS</label>
-                          <p-toggleswitch [(ngModel)]="emailSettings.smtpSecure"></p-toggleswitch>
+                          <p-toggleswitch [(ngModel)]="emailSettings().smtpSecure"></p-toggleswitch>
                         </div>
 
                         <div class="field mt-4">
@@ -364,7 +366,7 @@ interface ThemeOption {
                             id="fromEmail"
                             type="email"
                             pInputText
-                            [(ngModel)]="emailSettings.fromEmail"
+                            [(ngModel)]="emailSettings().fromEmail"
                             class="w-full"
                           />
                         </div>
@@ -377,7 +379,7 @@ interface ThemeOption {
                             id="fromName"
                             type="text"
                             pInputText
-                            [(ngModel)]="emailSettings.fromName"
+                            [(ngModel)]="emailSettings().fromName"
                             class="w-full"
                           />
                         </div>
@@ -385,7 +387,7 @@ interface ThemeOption {
                         <div class="field mt-4">
                           <label class="block text-900 font-medium mb-2">启用邮件通知</label>
                           <p-toggleswitch
-                            [(ngModel)]="emailSettings.enableEmailNotification"
+                            [(ngModel)]="emailSettings().enableEmailNotification"
                           ></p-toggleswitch>
                         </div>
 
@@ -418,15 +420,15 @@ interface ThemeOption {
                       <p-select
                         id="storageType"
                         [options]="storageTypeOptions"
-                        [(ngModel)]="storageSettings.storageType"
+                        [(ngModel)]="storageSettings().storageType"
                         placeholder="选择存储类型"
                         styleClass="w-full"
                       ></p-select>
                     </div>
 
-                    <p-divider *ngIf="storageSettings.storageType !== 'local'"></p-divider>
+                    <p-divider *ngIf="storageSettings().storageType !== 'local'"></p-divider>
 
-                    <div class="grid" *ngIf="storageSettings.storageType !== 'local'">
+                    <div class="grid" *ngIf="storageSettings().storageType !== 'local'">
                       <div class="col-12 md:col-6">
                         <div class="field">
                           <label for="accessKey" class="block text-900 font-medium mb-2"
@@ -436,7 +438,7 @@ interface ThemeOption {
                             id="accessKey"
                             type="text"
                             pInputText
-                            [(ngModel)]="storageSettings.accessKey"
+                            [(ngModel)]="storageSettings().accessKey"
                             class="w-full"
                           />
                         </div>
@@ -449,7 +451,7 @@ interface ThemeOption {
                             id="secretKey"
                             type="password"
                             pInputText
-                            [(ngModel)]="storageSettings.secretKey"
+                            [(ngModel)]="storageSettings().secretKey"
                             class="w-full"
                           />
                         </div>
@@ -462,7 +464,7 @@ interface ThemeOption {
                             id="bucket"
                             type="text"
                             pInputText
-                            [(ngModel)]="storageSettings.bucket"
+                            [(ngModel)]="storageSettings().bucket"
                             class="w-full"
                           />
                         </div>
@@ -473,7 +475,7 @@ interface ThemeOption {
                             id="region"
                             type="text"
                             pInputText
-                            [(ngModel)]="storageSettings.region"
+                            [(ngModel)]="storageSettings().region"
                             class="w-full"
                           />
                         </div>
@@ -484,7 +486,7 @@ interface ThemeOption {
                             id="domain"
                             type="text"
                             pInputText
-                            [(ngModel)]="storageSettings.domain"
+                            [(ngModel)]="storageSettings().domain"
                             class="w-full"
                           />
                         </div>
@@ -497,7 +499,7 @@ interface ThemeOption {
                             id="uploadPath"
                             type="text"
                             pInputText
-                            [(ngModel)]="storageSettings.uploadPath"
+                            [(ngModel)]="storageSettings().uploadPath"
                             class="w-full"
                           />
                         </div>
@@ -526,7 +528,7 @@ interface ThemeOption {
                   <ng-template pTemplate="content">
                     <div class="field">
                       <label class="block text-900 font-medium mb-2">显示备案信息</label>
-                      <p-toggleswitch [(ngModel)]="recordSettings.showRecord"></p-toggleswitch>
+                      <p-toggleswitch [(ngModel)]="recordSettings().showRecord"></p-toggleswitch>
                     </div>
 
                     <p-divider></p-divider>
@@ -541,7 +543,7 @@ interface ThemeOption {
                             id="icpNumber"
                             type="text"
                             pInputText
-                            [(ngModel)]="recordSettings.icpNumber"
+                            [(ngModel)]="recordSettings().icpNumber"
                             placeholder="如：京ICP备12345678号"
                             class="w-full"
                           />
@@ -555,7 +557,7 @@ interface ThemeOption {
                             id="icpLink"
                             type="url"
                             pInputText
-                            [(ngModel)]="recordSettings.icpLink"
+                            [(ngModel)]="recordSettings().icpLink"
                             placeholder="https://beian.miit.gov.cn/"
                             class="w-full"
                           />
@@ -568,7 +570,7 @@ interface ThemeOption {
                           <textarea
                             id="recordText"
                             pInputTextarea
-                            [(ngModel)]="recordSettings.recordText"
+                            [(ngModel)]="recordSettings().recordText"
                             [rows]="3"
                             placeholder="自定义备案信息显示文本"
                             class="w-full"
@@ -585,7 +587,7 @@ interface ThemeOption {
                             id="policeNumber"
                             type="text"
                             pInputText
-                            [(ngModel)]="recordSettings.policeNumber"
+                            [(ngModel)]="recordSettings().policeNumber"
                             placeholder="如：京公网安备11010502030123号"
                             class="w-full"
                           />
@@ -599,7 +601,7 @@ interface ThemeOption {
                             id="policeLink"
                             type="url"
                             pInputText
-                            [(ngModel)]="recordSettings.policeLink"
+                            [(ngModel)]="recordSettings().policeLink"
                             placeholder="http://www.beian.gov.cn/"
                             class="w-full"
                           />
@@ -609,30 +611,30 @@ interface ThemeOption {
                           <div class="preview-container">
                             <h4 class="preview-title">预览效果</h4>
                             <div class="preview-content">
-                              <div *ngIf="recordSettings.showRecord">
-                                <div *ngIf="recordSettings.icpNumber">
+                              <div *ngIf="recordSettings().showRecord">
+                                <div *ngIf="recordSettings().icpNumber">
                                   <a
-                                    [href]="recordSettings.icpLink"
+                                    [href]="recordSettings().icpLink"
                                     target="_blank"
                                     class="preview-link"
                                   >
-                                    {{ recordSettings.icpNumber }}
+                                    {{ recordSettings().icpNumber }}
                                   </a>
                                 </div>
-                                <div *ngIf="recordSettings.policeNumber" class="mt-1">
+                                <div *ngIf="recordSettings().policeNumber" class="mt-1">
                                   <a
-                                    [href]="recordSettings.policeLink"
+                                    [href]="recordSettings().policeLink"
                                     target="_blank"
                                     class="preview-link"
                                   >
-                                    {{ recordSettings.policeNumber }}
+                                    {{ recordSettings().policeNumber }}
                                   </a>
                                 </div>
-                                <div *ngIf="recordSettings.recordText" class="mt-1">
-                                  {{ recordSettings.recordText }}
+                                <div *ngIf="recordSettings().recordText" class="mt-1">
+                                  {{ recordSettings().recordText }}
                                 </div>
                               </div>
-                              <div *ngIf="!recordSettings.showRecord" class="preview-hidden">
+                              <div *ngIf="!recordSettings().showRecord" class="preview-hidden">
                                 备案信息已隐藏
                               </div>
                             </div>
@@ -812,7 +814,8 @@ export class SettingsPage implements OnInit {
   clearingCache = signal(false)
   staticGenerationStatus = signal<any>(null)
 
-  siteSettings: SiteSettings = {
+  // Convert settings objects to signals
+  siteSettings = signal<SiteSettings>({
     siteName: '',
     siteDescription: '',
     siteKeywords: '',
@@ -826,9 +829,9 @@ export class SettingsPage implements OnInit {
     timezone: 'Asia/Shanghai',
     dateFormat: 'YYYY-MM-DD',
     timeFormat: 'HH:mm:ss'
-  }
+  })
 
-  emailSettings: EmailSettings = {
+  emailSettings = signal<EmailSettings>({
     smtpHost: '',
     smtpPort: 465,
     smtpUser: '',
@@ -837,9 +840,9 @@ export class SettingsPage implements OnInit {
     fromEmail: '',
     fromName: '',
     enableEmailNotification: false
-  }
+  })
 
-  storageSettings: StorageSettings = {
+  storageSettings = signal<StorageSettings>({
     storageType: 'local',
     accessKey: '',
     secretKey: '',
@@ -847,16 +850,16 @@ export class SettingsPage implements OnInit {
     region: '',
     domain: '',
     uploadPath: 'uploads'
-  }
+  })
 
-  recordSettings: RecordSettings = {
+  recordSettings = signal<RecordSettings>({
     icpNumber: '',
     icpLink: '',
     policeNumber: '',
     policeLink: '',
     recordText: '',
     showRecord: true
-  }
+  })
 
   languageOptions: LanguageOption[] = [
     { label: '简体中文', value: 'zh-CN' },
@@ -922,7 +925,8 @@ export class SettingsPage implements OnInit {
         if (siteConfig?.success && siteConfig.data) {
           const config = siteConfig.data
           try {
-            this.siteSettings = { ...this.siteSettings, ...JSON.parse(config.value) }
+            const parsedSettings = JSON.parse(config.value)
+            this.siteSettings.set({ ...this.siteSettings(), ...parsedSettings })
           } catch (e) {
             console.error('Failed to parse site settings:', e)
           }
@@ -942,7 +946,8 @@ export class SettingsPage implements OnInit {
         if (emailConfig?.success && emailConfig.data) {
           const config = emailConfig.data
           try {
-            this.emailSettings = { ...this.emailSettings, ...JSON.parse(config.value) }
+            const parsedSettings = JSON.parse(config.value)
+            this.emailSettings.set({ ...this.emailSettings(), ...parsedSettings })
           } catch (e) {
             console.error('Failed to parse email settings:', e)
           }
@@ -962,7 +967,8 @@ export class SettingsPage implements OnInit {
         if (storageConfig?.success && storageConfig.data) {
           const config = storageConfig.data
           try {
-            this.storageSettings = { ...this.storageSettings, ...JSON.parse(config.value) }
+            const parsedSettings = JSON.parse(config.value)
+            this.storageSettings.set({ ...this.storageSettings(), ...parsedSettings })
           } catch (e) {
             console.error('Failed to parse storage settings:', e)
           }
@@ -982,7 +988,8 @@ export class SettingsPage implements OnInit {
         if (recordConfig?.success && recordConfig.data) {
           const config = recordConfig.data
           try {
-            this.recordSettings = { ...this.recordSettings, ...JSON.parse(config.value) }
+            const parsedSettings = JSON.parse(config.value)
+            this.recordSettings.set({ ...this.recordSettings(), ...parsedSettings })
           } catch (e) {
             console.error('Failed to parse record settings:', e)
           }
@@ -1004,28 +1011,28 @@ export class SettingsPage implements OnInit {
       await this.saveConfigSetting(
         SYSTEM_SETTINGS_CATEGORY_ALIAS.SITE_SETTINGS,
         '网站设置',
-        this.siteSettings
+        this.siteSettings()
       )
 
       // Save email settings
       await this.saveConfigSetting(
         SYSTEM_SETTINGS_CATEGORY_ALIAS.EMAIL_SETTINGS,
         '邮件设置',
-        this.emailSettings
+        this.emailSettings()
       )
 
       // Save storage settings
       await this.saveConfigSetting(
         SYSTEM_SETTINGS_CATEGORY_ALIAS.STORAGE_SETTINGS,
         '存储设置',
-        this.storageSettings
+        this.storageSettings()
       )
 
       // Save record settings
       await this.saveConfigSetting(
         SYSTEM_SETTINGS_CATEGORY_ALIAS.RECORD_SETTINGS,
         '备案信息',
-        this.recordSettings
+        this.recordSettings()
       )
 
       this.messageService.add({
