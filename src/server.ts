@@ -145,12 +145,12 @@ app.use(notFoundHandler)
 app.use(globalErrorHandler)
 
 // Start server
-if (isMainModule(import.meta.url)) {
-  const port = env['PORT']
-  app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`)
-    console.log(`Environment: ${env['NODE_ENV']}`)
-  })
-}
+// if (isMainModule(import.meta.url)) {
+const port = env['PORT']
+app.listen(port, () => {
+  console.log(`Express server listening on http://localhost:${port}`)
+  console.log(`Environment: ${env['NODE_ENV']}`)
+})
+// }
 
 export const reqHandler = createNodeRequestHandler(app)
