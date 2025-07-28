@@ -1,6 +1,7 @@
 import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@angular/ssr/node'
 import express from 'express'
 import { join } from 'node:path'
+import fs from 'fs'
 import apiRoutes from './server/routes/api'
 import blogRoutes from './server/routes/blog'
 import { applyMiddleware } from './server/middleware'
@@ -50,6 +51,55 @@ const angularApp = new AngularNodeAppEngine()
 
 // 1. Apply basic middleware
 applyMiddleware(app)
+
+// 3. Static file serving
+app.use(
+  express.static(browserDistFolder, {
+    maxAge: '1y',
+    index: false,
+    redirect: false
+  })
+)
+
+// Serve uploaded files
+app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
+
+// Serve static generated pages from temp directory
+app.use(
+  '/static',
+  express.static(join(process.cwd(), 'temp', 'static'), {
+    maxAge: '1y',
+    index: false,
+    redirect: false
+  })
+)
+
+// Static page handler - serve static HTML files from temp directory
+app.get('*path', (req, res, next) => {
+  // Skip API routes, admin routes, and other non-page routes
+  if (
+    req.path.startsWith('/api') ||
+    req.path.startsWith('/admin') ||
+    req.path.startsWith('/backstage') ||
+    req.path.startsWith('/uploads') ||
+    req.path.startsWith('/doc') ||
+    req.path.startsWith('/static') ||
+    req.path.match(/\.(js|css|png|jpg|ico|svg|json|woff|woff2)$/)
+  ) {
+    return next()
+  }
+
+  // Check if static file exists in temp directory
+  const staticPath = join(process.cwd(), 'temp', 'static', req.path, 'index.html')
+
+  if (fs.existsSync(staticPath)) {
+    console.log(`📄 Serving static file: ${req.path}`)
+    return res.sendFile(staticPath)
+  }
+
+  // If no static file, continue to Angular SSR
+  next()
+})
 
 // 2. Configure Nunjucks template engine
 configureNunjucks(app)
@@ -118,19 +168,6 @@ app.get('/doc/content/docs', (req, res) => {
     </html>
   `)
 })
-
-// 3. Static file serving
-app.use(
-  express.static(browserDistFolder, {
-    maxAge: '1y',
-    index: false,
-    redirect: false
-  })
-)
-
-// Serve uploaded files
-app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
-
 // 4. Angular application routes
 
 if (env['NODE_ENV'] === 'production') {

@@ -31,6 +31,7 @@ import { uploadController } from './upload'
 import { getSystemInfo } from './system'
 import { getDashboardOverview } from './dashboard'
 import { operateLogService } from '@src/server/services/operateLogService'
+import { staticGenerationController } from './static-generation'
 
 const router = Router()
 
@@ -305,5 +306,10 @@ router.get('/system/getSystemInfo', getSystemInfo)
 
 // Register dashboard overview route
 router.get('/dashboard/overview', getDashboardOverview)
+
+// Static generation routes
+router.post('/static-generation/generate', staticGenerationController.generateStaticPages)
+router.get('/static-generation/status', staticGenerationController.getStaticGenerationStatus)
+router.post('/static-generation/clear', staticGenerationController.clearStaticCache)
 
 export default router

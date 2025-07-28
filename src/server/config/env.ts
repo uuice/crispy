@@ -3,11 +3,16 @@ import jwt from 'jsonwebtoken'
 // Environment variables with type definitions
 export const env = {
   ['BASE_URL']: process.env['BASE_URL'] || '',
-  ['SWAGGER_BASE_URL']: process.env['SWAGGER_BASE_URL'] || '',
+  ['SWAGGER_BASE_URL']: process.env['SWAGGER_BASE_URL'] || process.env['BASE_URL'] || '',
   // Server
   ['PORT']: process.env['PORT'] || '4000',
   ['NODE_ENV']: process.env['NODE_ENV'] || 'development',
   ['PAGE_CACHE_TTL']: process.env['PAGE_CACHE_TTL'] || '60',
+
+  // Static Generation
+  ['STATIC_GENERATION_ENABLED']: process.env['STATIC_GENERATION_ENABLED'] === 'true',
+  ['STATIC_GENERATION_BASE_URL']:
+    process.env['STATIC_GENERATION_BASE_URL'] || process.env['BASE_URL'] || 'http://localhost:4000',
 
   // JWT
   ['JWT_SECRET']: process.env['JWT_SECRET'] || 'your-super-secret-key-change-in-production',
