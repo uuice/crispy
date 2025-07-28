@@ -19,11 +19,13 @@ export const generateStaticPages = async (
       success(res, {
         message: result.message,
         generatedFiles: result.generatedFiles,
+        mainPages: result.mainPages,
         totalPages: result.totalPages,
         totalArticles: result.totalArticles,
         totalCategories: result.totalCategories,
         totalTags: result.totalTags,
-        errors: result.errors
+        errors: result.errors,
+        performance: result.performance
       })
     } else {
       error(res, result.message, 500)
@@ -31,34 +33,6 @@ export const generateStaticPages = async (
   } catch (err: unknown) {
     console.error('Static generation API error:', err)
     error(res, 'Static generation failed')
-  }
-}
-
-// Clear static cache
-export const clearStaticCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const staticDir = path.join(process.cwd(), 'temp', 'static')
-
-    if (fs.existsSync(staticDir)) {
-      fs.rmSync(staticDir, { recursive: true, force: true })
-      console.log('🗑️ Cleared static cache directory:', staticDir)
-    }
-
-    success(res, {
-      message: 'Static cache cleared successfully',
-      staticDirExists: false,
-      fileCount: 0,
-      totalSize: '0 MB',
-      lastGenerated: null,
-      staticDir: staticDir
-    })
-  } catch (err: unknown) {
-    console.error('Clear static cache error:', err)
-    error(res, 'Failed to clear static cache')
   }
 }
 
@@ -103,6 +77,34 @@ export const getStaticGenerationStatus = async (
   } catch (err: unknown) {
     console.error('Static generation status error:', err)
     error(res, 'Failed to get static generation status')
+  }
+}
+
+// Clear static cache
+export const clearStaticCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const staticDir = path.join(process.cwd(), 'temp', 'static')
+
+    if (fs.existsSync(staticDir)) {
+      fs.rmSync(staticDir, { recursive: true, force: true })
+      console.log('🗑️ Cleared static cache directory:', staticDir)
+    }
+
+    success(res, {
+      message: 'Static cache cleared successfully',
+      staticDirExists: false,
+      fileCount: 0,
+      totalSize: '0 MB',
+      lastGenerated: null,
+      staticDir: staticDir
+    })
+  } catch (err: unknown) {
+    console.error('Clear static cache error:', err)
+    error(res, 'Failed to clear static cache')
   }
 }
 

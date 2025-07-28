@@ -1130,20 +1130,40 @@ export class SettingsPage implements OnInit {
 
   async generateStaticPages() {
     this.generatingStatic.set(true)
-
     try {
       const result = await firstValueFrom(
         this.httpService.post<any>('/api/admin/static-generation/generate', {})
       )
-
       if (result.success) {
+        const performance = result.data.performance
+        const data = result.data
+        const totalGenerated =
+          data.totalArticles +
+          data.totalCategories +
+          data.totalTags +
+          data.totalPages +
+          data.mainPages
+        const successfulFiles = (data.generatedFiles?.length || 0) - (data.errors?.length || 0)
+
+        const message =
+          `静态页面生成完成！\n` +
+          `主页面: ${data.mainPages} 个\n` +
+          `文章页面: ${data.totalArticles} 个\n` +
+          `分类页面: ${data.totalCategories} 个\n` +
+          `标签页面: ${data.totalTags} 个\n` +
+          `自定义页面: ${data.totalPages} 个\n` +
+          `总计: ${totalGenerated} 个页面\n` +
+          `成功生成: ${successfulFiles} 个文件\n` +
+          `总耗时: ${(performance?.totalTime / 1000).toFixed(2)}s\n` +
+          `平均每页: ${performance?.averageTimePerPage?.toFixed(2)}ms\n` +
+          `并发数: ${performance?.concurrentRequests}`
+
         this.messageService.add({
           severity: 'success',
           summary: '成功',
-          detail: `静态页面生成成功！共生成 ${result.data.totalPages + result.data.totalArticles + result.data.totalCategories + result.data.totalTags} 个页面`
+          detail: message,
+          life: 10000
         })
-
-        // Refresh status
         await this.loadStaticGenerationStatus()
       } else {
         this.messageService.add({
@@ -1153,7 +1173,7 @@ export class SettingsPage implements OnInit {
         })
       }
     } catch (error) {
-      console.error('Static generation error:', error)
+      console.error('Generate static pages error:', error)
       this.messageService.add({
         severity: 'error',
         summary: '失败',
