@@ -73,9 +73,6 @@ bun run build:static:clean
 ### 3. Environment Variables
 
 ```bash
-# Enable static generation
-STATIC_GENERATION_ENABLED=true
-
 # Base URL for static generation (default: http://localhost:4000)
 STATIC_GENERATION_BASE_URL=http://localhost:4000
 

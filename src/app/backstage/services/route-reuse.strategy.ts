@@ -7,11 +7,11 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
     const shouldDetach = !!route.data && !!route.data['keepAlive']
     const key = this.getRouteKey(route)
-    console.log('shouldDetach:', key, shouldDetach, {
-      url: route.url.map((s) => s.path),
-      path: route.routeConfig?.path,
-      data: route.data
-    })
+    // console.log('shouldDetach:', key, shouldDetach, {
+    //   url: route.url.map((s) => s.path),
+    //   path: route.routeConfig?.path,
+    //   data: route.data
+    // })
     return shouldDetach
   }
 
@@ -19,20 +19,20 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     if (route.routeConfig && handle) {
       const key = this.getRouteKey(route)
       this.handlers.set(key, handle)
-      console.log('store:', key, {
-        url: route.url.map((s) => s.path),
-        path: route.routeConfig?.path
-      })
+      // console.log('store:', key, {
+      //   url: route.url.map((s) => s.path),
+      //   path: route.routeConfig?.path
+      // })
     }
   }
 
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
     const key = this.getRouteKey(route)
     const shouldAttach = !!route.routeConfig && !!this.handlers.get(key)
-    console.log('shouldAttach:', key, shouldAttach, {
-      url: route.url.map((s) => s.path),
-      path: route.routeConfig?.path
-    })
+    // console.log('shouldAttach:', key, shouldAttach, {
+    //   url: route.url.map((s) => s.path),
+    //   path: route.routeConfig?.path
+    // })
     return shouldAttach
   }
 
@@ -40,16 +40,16 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     if (!route.routeConfig) return null
     const key = this.getRouteKey(route)
     const handle = this.handlers.get(key) || null
-    console.log('retrieve:', key, !!handle, {
-      url: route.url.map((s) => s.path),
-      path: route.routeConfig?.path
-    })
+    // console.log('retrieve:', key, !!handle, {
+    //   url: route.url.map((s) => s.path),
+    //   path: route.routeConfig?.path
+    // })
     return handle
   }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const shouldReuse = future.routeConfig === curr.routeConfig
-    console.log('shouldReuse:', future.routeConfig?.path, curr.routeConfig?.path, shouldReuse)
+    // console.log('shouldReuse:', future.routeConfig?.path, curr.routeConfig?.path, shouldReuse)
     return shouldReuse
   }
 

@@ -1,3 +1,5 @@
+import { env } from './env'
+
 export interface StaticGenerationConfig {
   maxConcurrent: number
   requestTimeout: number
@@ -11,7 +13,7 @@ export interface StaticGenerationConfig {
 
 export const staticGenerationConfig: StaticGenerationConfig = {
   // Maximum concurrent HTTP requests
-  maxConcurrent: 10,
+  maxConcurrent: env['SSR_MAX_CONCURRENT'] || 3,
 
   // Request timeout in milliseconds
   requestTimeout: 30000,

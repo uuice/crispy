@@ -10,9 +10,19 @@ export const env = {
   ['PAGE_CACHE_TTL']: process.env['PAGE_CACHE_TTL'] || '60',
 
   // Static Generation
-  ['STATIC_GENERATION_ENABLED']: process.env['STATIC_GENERATION_ENABLED'] === 'true',
   ['STATIC_GENERATION_BASE_URL']:
     process.env['STATIC_GENERATION_BASE_URL'] || process.env['BASE_URL'] || 'http://localhost:4000',
+
+  // SSR API Configuration - 优化SSR环境下的API访问
+  ['SSR_API_BASE_URL']:
+    process.env['SSR_API_BASE_URL'] ||
+    process.env['STATIC_GENERATION_BASE_URL'] ||
+    process.env['BASE_URL'] ||
+    'http://localhost:4000',
+
+  ['SSR_MAX_CONCURRENT']: process.env['SSR_MAX_CONCURRENT']
+    ? parseInt(process.env['SSR_MAX_CONCURRENT'], 10)
+    : 3,
 
   // JWT
   ['JWT_SECRET']: process.env['JWT_SECRET'] || 'your-super-secret-key-change-in-production',
