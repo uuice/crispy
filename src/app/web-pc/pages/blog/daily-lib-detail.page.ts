@@ -1,5 +1,5 @@
-import { Component, signal, OnInit, inject } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { Component, signal, OnInit, inject, PLATFORM_ID, TransferState, makeStateKey } from '@angular/core'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
@@ -219,6 +219,15 @@ export class DailyLibDetailPage implements OnInit {
   private route = inject(ActivatedRoute)
   private httpService = inject(HttpService)
   private sanitizer = inject(DomSanitizer)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  private getLibKey(url: string) {
+    return makeStateKey<any>(`daily-lib-${url}`)
+  }
+  private getTocKey(url: string) {
+    return makeStateKey<any[]>(`daily-lib-toc-${url}`)
+  }
 
   lib = signal<Article | undefined>(undefined)
   html = signal<SafeHtml>('')
@@ -237,6 +246,14 @@ export class DailyLibDetailPage implements OnInit {
    * Load article by URL (use new /url/{url} API)
    */
   loadArticleByUrl(url: string) {
+    const cachedLib = this.transferState.get(this.getLibKey(url), null)
+    const cachedToc = this.transferState.get(this.getTocKey(url), null)
+    if (cachedLib && cachedToc) {
+      this.lib.set(cachedLib)
+      this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedLib.html))
+      this.toc.set(cachedToc)
+      return
+    }
     this.httpService.get<ApiResponse<Article>>(`/api/content/articles/url/${url}`).subscribe({
       next: (response) => {
         if (response.success && response.data) {
@@ -246,6 +263,10 @@ export class DailyLibDetailPage implements OnInit {
           const { html, toc } = generateTocAndHeadings(response.data.content || '')
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
           this.toc.set(toc)
+          if (isPlatformServer(this.platformId)) {
+            this.transferState.set(this.getLibKey(url), { ...response.data, html })
+            this.transferState.set(this.getTocKey(url), toc)
+          }
         }
       },
       error: (err) => {

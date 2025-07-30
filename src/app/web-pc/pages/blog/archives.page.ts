@@ -1,5 +1,14 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
@@ -225,6 +234,14 @@ interface YearGroup {
 })
 export class ArchivesPage implements OnInit {
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  // TransferState key
+  private readonly ARTICLES_KEY = makeStateKey<Article[]>('archivesArticles')
+
+  // Loading flag
+  private articlesLoaded = false
 
   articles = signal<Article[]>([])
 
@@ -255,6 +272,7 @@ export class ArchivesPage implements OnInit {
   })
 
   ngOnInit() {
+    // Load data - TransferState will handle caching automatically
     this.loadArticles()
   }
 
@@ -262,6 +280,14 @@ export class ArchivesPage implements OnInit {
    * Load all published articles
    */
   loadArticles() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.ARTICLES_KEY, null)
+    if (cachedData) {
+      this.articles.set(cachedData)
+      this.articlesLoaded = true
+      return
+    }
+
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         page: 1,
@@ -272,6 +298,12 @@ export class ArchivesPage implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList) {
             this.articles.set(response.data.dataList)
+            this.articlesLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.ARTICLES_KEY, response.data.dataList)
+            }
           }
         },
         error: (err) => {

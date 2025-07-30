@@ -1,7 +1,18 @@
-import { Component, signal } from '@angular/core'
+import {
+  Component,
+  signal,
+  OnInit,
+  inject,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { isPlatformServer } from '@angular/common'
+import { ActivatedRoute } from '@angular/router'
 import { generateTocAndHeadings, TocItem } from 'src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { HttpService, ApiResponse } from '../../services/http.service'
 
 @Component({
   selector: 'cs-pages',
@@ -16,33 +27,101 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
         class="blog-banner-img"
       />
       <div class="blog-banner-content">
-        <h1 class="blog-title text-main">页面Title</h1>
+        <h1 class="blog-title text-main">{{ pageTitle() }}</h1>
       </div>
     </section>
     <!-- Pages Content -->
     <section class="blog-section">
-      <div class="blog-prose text-main" [innerHTML]="html()"></div>
+      <div class="blog-prose prose text-main" [innerHTML]="html()"></div>
     </section>
+    <!-- TOC 悬浮在主内容右侧，不占用主内容宽度 -->
     <cs-toc [toc]="toc" />
   `,
   styles: []
 })
-export class PagesPage {
-  rawHtml = `
-    <h2>This is the demo site for Fuwari.</h2>
-    <p>saicaca/fuwari</p>
-    <h3>Sources of images used in this site</h3>
-    <ul>
-      <li>Unsplash</li>
-      <li>星と少女 by Stella</li>
-      <li>Rabbit - v1.4 Showcase by Rabbit_YourMajesty</li>
-    </ul>
-  `
+export class PagesPage implements OnInit {
+  private route = inject(ActivatedRoute)
+  private httpService = inject(HttpService)
+  private sanitizer = inject(DomSanitizer)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  // TransferState keys - will be created dynamically based on URL
+  private getPageKey(url: string) {
+    return makeStateKey<any>(`page-${url}`)
+  }
+
+  private getPageTocKey(url: string) {
+    return makeStateKey<TocItem[]>(`pageToc-${url}`)
+  }
+
+  // Loading flag
+  private pageLoaded = false
+
+  // Signals for content
+  pageTitle = signal<string>('页面')
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
-  constructor(private sanitizer: DomSanitizer) {
-    const { html, toc } = generateTocAndHeadings(this.rawHtml)
-    this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
-    this.toc.set(toc)
+
+  ngOnInit() {
+    // Get url parameter from route
+    this.route.params.subscribe((params) => {
+      const url = params['url']
+      if (url) {
+        // Load data - TransferState will handle caching automatically
+        this.loadPageData(url)
+      }
+    })
+  }
+
+  /**
+   * Load page data from API
+   */
+  loadPageData(url: string) {
+    // Get dynamic keys based on URL
+    const pageKey = this.getPageKey(url)
+    const tocKey = this.getPageTocKey(url)
+
+    // Check if data exists in TransferState
+    const cachedPageData = this.transferState.get(pageKey, null)
+    const cachedTocData = this.transferState.get(tocKey, null)
+
+    if (cachedPageData && cachedTocData) {
+      this.pageTitle.set(cachedPageData.title || '页面')
+      this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedPageData.html))
+      this.toc.set(cachedTocData)
+      this.pageLoaded = true
+      return
+    }
+
+    // Call content API to get page by URL
+    this.httpService.get<ApiResponse<any>>(`/api/content/pages/url/${url}`).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const pageData = response.data
+
+          // Set page title
+          this.pageTitle.set(pageData.title || '页面')
+
+          // Process content and generate TOC
+          const { html, toc } = generateTocAndHeadings(pageData.content)
+          this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+          this.toc.set(toc)
+          this.pageLoaded = true
+
+          // Store in TransferState on server-side
+          if (isPlatformServer(this.platformId)) {
+            this.transferState.set(pageKey, {
+              title: pageData.title,
+              html: html
+            })
+            this.transferState.set(tocKey, toc)
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load page:', err)
+      }
+    })
   }
 }

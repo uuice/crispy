@@ -1,5 +1,14 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
@@ -249,6 +258,16 @@ interface PaginatedResponse<T> {
 export class CategoriesPage implements OnInit {
   private route = inject(ActivatedRoute)
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  // TransferState key by alias
+  private getCategoryKey(alias: string) {
+    return makeStateKey<any>(`category-${alias}`)
+  }
+  private getArticlesKey(alias: string) {
+    return makeStateKey<any[]>(`category-articles-${alias}`)
+  }
 
   categoryTitle = signal<string>('分类')
   categoryDescription = signal<string>('')
@@ -262,7 +281,6 @@ export class CategoriesPage implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      // Handle parameter name with trailing space
       const alias = params['alias'] || params['alias ']
       if (alias) {
         this.loadCategoryAndArticles(alias)
@@ -274,6 +292,16 @@ export class CategoriesPage implements OnInit {
    * Load category info and articles
    */
   loadCategoryAndArticles(alias: string) {
+    // 1. 检查 TransferState
+    const cachedCategory = this.transferState.get(this.getCategoryKey(alias), null)
+    const cachedArticles = this.transferState.get(this.getArticlesKey(alias), null)
+    if (cachedCategory && cachedArticles) {
+      this.categoryTitle.set(cachedCategory.title)
+      this.categoryDescription.set(cachedCategory.des || '')
+      this.articles.set(cachedArticles)
+      this.totalRecords.set(cachedArticles.length)
+      return
+    }
     // First get category info using new alias endpoint
     this.httpService
       .get<ApiResponse<Category>>(`/api/content/categories/alias/${alias}`)
@@ -285,7 +313,7 @@ export class CategoriesPage implements OnInit {
             this.categoryDescription.set(category.des || '')
 
             // Then load articles for this category
-            this.loadArticlesByCategory(category.id)
+            this.loadArticlesByCategory(category.id, alias, category)
           }
         },
         error: (err) => {
@@ -297,7 +325,7 @@ export class CategoriesPage implements OnInit {
   /**
    * Load articles by category ID with pagination
    */
-  loadArticlesByCategory(categoryId: number) {
+  loadArticlesByCategory(categoryId: number, alias?: string, categoryObj?: Category) {
     this.loading.set(true)
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
@@ -311,6 +339,11 @@ export class CategoriesPage implements OnInit {
           if (response.success && response.data) {
             this.articles.set(response.data.dataList)
             this.totalRecords.set(response.data.pagination.total)
+            // TransferState only for first page
+            if (isPlatformServer(this.platformId) && alias && categoryObj && this.page() === 1) {
+              this.transferState.set(this.getCategoryKey(alias), categoryObj)
+              this.transferState.set(this.getArticlesKey(alias), response.data.dataList)
+            }
           }
           this.loading.set(false)
         },

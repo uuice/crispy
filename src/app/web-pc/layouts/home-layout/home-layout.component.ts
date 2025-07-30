@@ -1,4 +1,13 @@
-import { Component, OnInit, inject, computed, signal, PLATFORM_ID } from '@angular/core'
+import {
+  Component,
+  OnInit,
+  inject,
+  computed,
+  signal,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
 import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { Router, NavigationEnd, RouterModule } from '@angular/router'
 import { MenubarModule } from 'primeng/menubar'
@@ -91,9 +100,7 @@ interface PaginatedResponse<T> {
       <header class="header w-full sticky top-0 z-50">
         <nav class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4">
           <div class="flex items-center gap-8">
-            <a routerLink="/" class="font-bold text-2xl blog-icon-blue tracking-tight">
-              轻盈的鱼
-            </a>
+            <a routerLink="/" class="font-bold text-2xl tracking-tight"> 轻盈的鱼 </a>
             <!-- Desktop Menu -->
             <ul class="hidden md:flex gap-6 text-base font-medium">
               <li *ngFor="let item of menuItems">
@@ -894,6 +901,19 @@ interface PaginatedResponse<T> {
 })
 export class HomeLayoutComponent implements OnInit {
   private httpService = inject(HttpService)
+  private transferState = inject(TransferState)
+
+  // TransferState keys
+  private readonly CATEGORIES_KEY = makeStateKey<Category[]>('categories')
+  private readonly TAGS_KEY = makeStateKey<Tag[]>('tags')
+  private readonly ARTICLES_KEY = makeStateKey<Article[]>('latestArticles')
+  private readonly RECORD_SETTINGS_KEY = makeStateKey<RecordSettings>('recordSettings')
+
+  // Loading flags
+  private categoriesLoaded = false
+  private tagsLoaded = false
+  private articlesLoaded = false
+  private recordSettingsLoaded = false
 
   currentYear = new Date().getFullYear()
   menuItems: MenuItem[] = []
@@ -1179,6 +1199,14 @@ export class HomeLayoutComponent implements OnInit {
    * Load categories from API with article count
    */
   loadCategories() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.CATEGORIES_KEY, null)
+    if (cachedData) {
+      this.categories.set(cachedData)
+      this.categoriesLoaded = true
+      return
+    }
+
     this.httpService
       .get<ApiResponse<Category[]>>('/api/content/categories/with-count', {
         parentAlias: 'POST_SYS_CAT'
@@ -1187,6 +1215,12 @@ export class HomeLayoutComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data) {
             this.categories.set(response.data)
+            this.categoriesLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.CATEGORIES_KEY, response.data)
+            }
           }
         },
         error: (err) => {
@@ -1199,6 +1233,14 @@ export class HomeLayoutComponent implements OnInit {
    * Load tags from API
    */
   loadTags() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.TAGS_KEY, null)
+    if (cachedData) {
+      this.tags.set(cachedData)
+      this.tagsLoaded = true
+      return
+    }
+
     this.httpService
       .get<ApiResponse<PaginatedResponse<Tag>>>('/api/content/tags', {
         page: 1,
@@ -1208,6 +1250,12 @@ export class HomeLayoutComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList) {
             this.tags.set(response.data.dataList)
+            this.tagsLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.TAGS_KEY, response.data.dataList)
+            }
           }
         },
         error: (err) => {
@@ -1220,6 +1268,14 @@ export class HomeLayoutComponent implements OnInit {
    * Load latest articles from API
    */
   loadLatestArticles() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.ARTICLES_KEY, null)
+    if (cachedData) {
+      this.latestArticles.set(cachedData)
+      this.articlesLoaded = true
+      return
+    }
+
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         page: 1,
@@ -1230,6 +1286,12 @@ export class HomeLayoutComponent implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList) {
             this.latestArticles.set(response.data.dataList)
+            this.articlesLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.ARTICLES_KEY, response.data.dataList)
+            }
           }
         },
         error: (err) => {
@@ -1242,12 +1304,26 @@ export class HomeLayoutComponent implements OnInit {
    * Load record settings from API
    */
   loadRecordSettings() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.RECORD_SETTINGS_KEY, null)
+    if (cachedData) {
+      this.recordSettings.set(cachedData)
+      this.recordSettingsLoaded = true
+      return
+    }
+
     this.httpService.get<ApiResponse<any>>('/api/content/configs/alias/RECORD_SETTINGS').subscribe({
       next: (response) => {
         if (response.success && response.data) {
           try {
             const settings = JSON.parse(response.data.value)
             this.recordSettings.set(settings)
+            this.recordSettingsLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.RECORD_SETTINGS_KEY, settings)
+            }
           } catch (e) {
             console.error('Failed to parse record settings:', e)
           }

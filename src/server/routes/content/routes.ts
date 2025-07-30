@@ -30,6 +30,7 @@ import { error } from '../../utils/response'
 import { systemRouterController } from './system'
 import { flexsearchService } from '../../services/flexsearch-index.service'
 import { searchController } from './search'
+import { getSiteSettings } from './site-settings'
 
 // Define token info interface
 interface TokenInfo {
@@ -142,6 +143,7 @@ router.get('/caches/:id', cacheController.getCache)
 // Configs routes
 router.get('/configs', configController.getConfigs)
 router.get('/configs/alias/:alias', configController.getConfigByAlias)
+router.get('/configs/site-settings', getSiteSettings)
 router.get('/configs/:id', configController.getConfig)
 
 // Enums routes

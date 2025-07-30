@@ -1,6 +1,16 @@
-import { Component, signal, computed, OnInit, inject, OnDestroy } from '@angular/core'
+import {
+  Component,
+  signal,
+  computed,
+  OnInit,
+  inject,
+  OnDestroy,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
 import { Router } from '@angular/router'
-import { CommonModule } from '@angular/common'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
@@ -325,7 +335,11 @@ interface Category {
 })
 export class DailyLibPage implements OnInit, OnDestroy {
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
   private destroy$ = new Subject<void>()
+
+  private readonly LIBS_KEY = makeStateKey<Article[]>('dailyLibs')
 
   libs = signal<Article[]>([])
   search = signal('')
@@ -344,6 +358,12 @@ export class DailyLibPage implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   ngOnInit() {
+    // 优先从 TransferState 读取
+    const cachedLibs = this.transferState.get(this.LIBS_KEY, null)
+    if (cachedLibs) {
+      this.libs.set(cachedLibs)
+      return
+    }
     this.loadDailyLibs()
   }
 
@@ -404,6 +424,9 @@ export class DailyLibPage implements OnInit, OnDestroy {
             this.libs.set(response.data.dataList)
             // Set pagination info from API response
             this.totalRecords.set(response.data.pagination.total)
+            if (isPlatformServer(this.platformId) && this.page() === 1 && !this.search().trim()) {
+              this.transferState.set(this.LIBS_KEY, response.data.dataList)
+            }
           }
           this.loading.set(false)
         },

@@ -1,6 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core'
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule } from '@angular/common'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
 // Data interfaces
@@ -83,12 +91,25 @@ interface PaginatedResponse<T> {
 })
 export class LinksPage implements OnInit {
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  private readonly CATEGORIES_KEY = makeStateKey<Category[]>('linkCategories')
+  private readonly LINKS_KEY = makeStateKey<Link[]>('linkLinks')
 
   // Data signals
   categories = signal<Category[]>([])
   links = signal<Link[]>([])
 
   ngOnInit() {
+    // 优先从 TransferState 读取
+    const cachedCategories = this.transferState.get(this.CATEGORIES_KEY, null)
+    const cachedLinks = this.transferState.get(this.LINKS_KEY, null)
+    if (cachedCategories && cachedLinks) {
+      this.categories.set(cachedCategories)
+      this.links.set(cachedLinks)
+      return
+    }
     this.loadCategoriesAndLinks()
   }
 
@@ -132,6 +153,10 @@ export class LinksPage implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList) {
             this.links.set(response.data.dataList)
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.CATEGORIES_KEY, this.categories())
+              this.transferState.set(this.LINKS_KEY, response.data.dataList)
+            }
           }
         },
         error: (err) => {

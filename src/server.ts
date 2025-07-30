@@ -84,32 +84,35 @@ app.use(
 app.use(performanceMonitor)
 app.use(memoryMonitor)
 
-// 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
-app.get('*path', (req, res, next) => {
-  // Skip API routes, admin routes, and other non-page routes
-  if (
-    req.path.startsWith('/api') ||
-    req.path.startsWith('/admin') ||
-    req.path.startsWith('/backstage') ||
-    req.path.startsWith('/uploads') ||
-    req.path.startsWith('/doc') ||
-    req.path.startsWith('/static') ||
-    req.path.match(/\.(js|css|png|jpg|ico|svg|json|woff|woff2)$/)
-  ) {
-    return next()
-  }
+if (env['NODE_ENV'] === 'production') {
+  // 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
+  app.get('*path', (req, res, next) => {
+    // Skip API routes, admin routes, and other non-page routes
+    if (
+      req.path.startsWith('/api') ||
+      req.path.startsWith('/admin') ||
+      req.path.startsWith('/backstage') ||
+      req.path.startsWith('/uploads') ||
+      req.path.startsWith('/doc') ||
+      req.path.startsWith('/static') ||
+      req.path.match(/\.(js|css|png|jpg|ico|svg|json|woff|woff2)$/)
+    ) {
+      return next()
+    }
 
-  // Check if static file exists in temp directory
-  const staticPath = join(process.cwd(), 'temp', 'static', req.path, 'index.html')
+    // Check if static file exists in temp directory
+    const staticPath = join(process.cwd(), 'temp', 'static', req.path, 'index.html')
 
-  if (fs.existsSync(staticPath)) {
-    console.log(`📄 Serving static file: ${req.path}`)
-    return res.sendFile(staticPath)
-  }
+    if (fs.existsSync(staticPath)) {
+      console.log(`📄 Serving static file: ${req.path}`)
+      res.set('X-Page-Cache', 'HIT-STATIC')
+      return res.sendFile(staticPath)
+    }
 
-  // If no static file, continue to Angular SSR
-  next()
-})
+    // If no static file, continue to Angular SSR
+    next()
+  })
+}
 
 // 7. Apply basic middleware (after static files for better performance)
 applyMiddleware(app)

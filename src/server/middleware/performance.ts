@@ -57,9 +57,9 @@ export const optimizeRoutePerformance = (req: Request, res: Response, next: Next
   }
 
   // Optimize for HTML pages
-  if (req.path.match(/\.html$/) || (!req.path.includes('.') && !req.path.startsWith('/api/'))) {
-    res.set('Cache-Control', 'public, max-age=300') // 5 minutes for HTML pages
-  }
+  // if (req.path.match(/\.html$/) || (!req.path.includes('.') && !req.path.startsWith('/api/'))) {
+  //   res.set('Cache-Control', 'public, max-age=300') // 5 minutes for HTML pages
+  // }
 
   next()
 }

@@ -1,5 +1,14 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
@@ -231,6 +240,15 @@ interface PaginatedResponse<T> {
 export class TagsPage implements OnInit {
   private route = inject(ActivatedRoute)
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  private getTagKey(title: string) {
+    return makeStateKey<any>(`tag-${title}`)
+  }
+  private getArticlesKey(title: string) {
+    return makeStateKey<any[]>(`tag-articles-${title}`)
+  }
 
   tagTitle = signal<string>('标签')
   tagDescription = signal<string>('')
@@ -249,6 +267,15 @@ export class TagsPage implements OnInit {
    * Load tag info and articles
    */
   loadTagAndArticles(title: string) {
+    // 1. 检查 TransferState
+    const cachedTag = this.transferState.get(this.getTagKey(title), null)
+    const cachedArticles = this.transferState.get(this.getArticlesKey(title), null)
+    if (cachedTag && cachedArticles) {
+      this.tagTitle.set(cachedTag.title)
+      this.tagDescription.set(cachedTag.des || '')
+      this.articles.set(cachedArticles)
+      return
+    }
     // // First get tag info using new value endpoint
     // this.httpService.get<ApiResponse<Tag>>(`/api/content/tags/value/${value}`).subscribe({
     //   next: (response) => {
@@ -266,13 +293,13 @@ export class TagsPage implements OnInit {
     //   }
     // })
     this.tagTitle.set(title)
-    this.loadArticlesByTag(title)
+    this.loadArticlesByTag(title, true)
   }
 
   /**
    * Load articles by tag value
    */
-  loadArticlesByTag(tagValue: string) {
+  loadArticlesByTag(tagValue: string, setTransferState = false) {
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         tags: tagValue,
@@ -288,6 +315,10 @@ export class TagsPage implements OnInit {
               (a, b) => b.create_time - a.create_time
             )
             this.articles.set(sortedArticles)
+            if (isPlatformServer(this.platformId) && setTransferState) {
+              this.transferState.set(this.getTagKey(tagValue), { title: tagValue, des: '' })
+              this.transferState.set(this.getArticlesKey(tagValue), sortedArticles)
+            }
           }
         },
         error: (err) => {

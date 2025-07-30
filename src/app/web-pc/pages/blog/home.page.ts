@@ -1,8 +1,16 @@
-import { Component, OnInit, inject, signal } from '@angular/core'
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
 import { AvatarModule } from 'primeng/avatar'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule } from '@angular/common'
+import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { HttpService, ApiResponse } from '../../services/http.service'
 
@@ -120,11 +128,20 @@ interface PaginatedResponse<T> {
 })
 export class HomePage implements OnInit {
   private httpService = inject(HttpService)
+  private platformId = inject(PLATFORM_ID)
+  private transferState = inject(TransferState)
+
+  // TransferState key
+  private readonly HOT_ARTICLES_KEY = makeStateKey<Article[]>('hotArticles')
+
+  // Loading flag
+  private hotArticlesLoaded = false
 
   // Signal for hot articles
   hotArticles = signal<Article[]>([])
 
   ngOnInit() {
+    // Load data - TransferState will handle caching automatically
     this.loadHotArticles()
   }
 
@@ -132,6 +149,14 @@ export class HomePage implements OnInit {
    * Load hot articles from API
    */
   loadHotArticles() {
+    // Check if data exists in TransferState
+    const cachedData = this.transferState.get(this.HOT_ARTICLES_KEY, null)
+    if (cachedData) {
+      this.hotArticles.set(cachedData)
+      this.hotArticlesLoaded = true
+      return
+    }
+
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         page: 1,
@@ -143,6 +168,12 @@ export class HomePage implements OnInit {
         next: (response) => {
           if (response.success && response.data?.dataList) {
             this.hotArticles.set(response.data.dataList)
+            this.hotArticlesLoaded = true
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(this.HOT_ARTICLES_KEY, response.data.dataList)
+            }
           }
         },
         error: (err) => {
