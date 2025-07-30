@@ -80,13 +80,13 @@ export interface Tag {
           </div>
           <div class="col-12">
             <div class="field">
-              <label for="alias" class="block text-900 font-medium mb-2">别名</label>
+              <label for="value" class="block text-900 font-medium mb-2">别名(Value)</label>
               <input
-                id="alias"
+                id="value"
                 type="text"
                 pInputText
-                formControlName="alias"
-                placeholder="请输入标签别名"
+                formControlName="value"
+                placeholder="请输入标签别名(Value)"
                 class="w-full"
               />
             </div>

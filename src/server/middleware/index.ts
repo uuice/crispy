@@ -1,12 +1,12 @@
 import helmet from 'helmet'
-import { Express } from 'express'
-import { jsonParser, urlencodedParser } from './body-parser'
+import express, { Express } from 'express'
+import { jsonParser, urlencodedParser, bodyParserErrorHandler } from './body-parser'
 import { requestLogger } from './request-logger'
-import { errorHandler } from './error-handler'
 import { corsMiddleware } from './cors'
 
-// Apply all middleware
+// Optimized middleware application with better performance and security
 export const applyMiddleware = (app: Express) => {
+  // 1. Security middleware (first line of defense)
   app.use(corsMiddleware)
   // app.use(
   //   helmet({
@@ -39,9 +39,16 @@ export const applyMiddleware = (app: Express) => {
   // )
   app.use(jsonParser)
   app.use(urlencodedParser)
+  app.use(bodyParserErrorHandler)
+
+  // 3. Request logging (after body parsing to avoid logging raw bodies)
   app.use(requestLogger)
-  app.use(errorHandler)
+
+  // Note: Error handler should be applied at the end of the middleware chain
+  // and will be applied separately in server.ts
 }
+
+// Static file optimization middleware
 
 // Export all middleware for individual use
 export * from './request-logger'
@@ -51,5 +58,6 @@ export * from './body-parser'
 export * from './not-found'
 export * from './angular-handler'
 export * from './jwt'
-export * from './api-auth'
 export * from './page-cache'
+export * from './performance'
+export * from './applyStaticMiddleware'

@@ -4,7 +4,13 @@ import { join } from 'node:path'
 import fs from 'fs'
 import apiRoutes from './server/routes/api'
 import blogRoutes from './server/routes/blog'
-import { applyMiddleware } from './server/middleware'
+import {
+  applyMiddleware,
+  applyStaticMiddleware,
+  performanceMonitor,
+  optimizeRoutePerformance,
+  memoryMonitor
+} from './server/middleware'
 import { notFoundHandler, globalErrorHandler } from './server/middleware/errorHandler'
 import { createAngularHandler } from './server/middleware/angular-handler'
 import { env } from './server/config/env'
@@ -49,10 +55,10 @@ const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
 const angularApp = new AngularNodeAppEngine()
 
-// 1. Apply basic middleware
-applyMiddleware(app)
+// 1. Apply static file optimization middleware (first for performance)
+applyStaticMiddleware(app)
 
-// 3. Static file serving
+// 2. Static file serving (early for performance)
 app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
@@ -61,10 +67,10 @@ app.use(
   })
 )
 
-// Serve uploaded files
+// 3. Serve uploaded files (early for performance)
 app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
 
-// Serve static generated pages from temp directory
+// 4. Serve static generated pages from temp directory (early for performance)
 app.use(
   '/static',
   express.static(join(process.cwd(), 'temp', 'static'), {
@@ -74,7 +80,11 @@ app.use(
   })
 )
 
-// Static page handler - serve static HTML files from temp directory
+// 5. Apply performance monitoring middleware (before static handling to avoid header conflicts)
+app.use(performanceMonitor)
+app.use(memoryMonitor)
+
+// 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
 app.get('*path', (req, res, next) => {
   // Skip API routes, admin routes, and other non-page routes
   if (
@@ -101,21 +111,28 @@ app.get('*path', (req, res, next) => {
   next()
 })
 
-// 2. Configure Nunjucks template engine
+// 7. Apply basic middleware (after static files for better performance)
+applyMiddleware(app)
+
+// 8. Apply route-specific performance optimization
+app.use(optimizeRoutePerformance)
+
+// 10. Configure Nunjucks template engine
 configureNunjucks(app)
 
-// 2. API routes
+// 11. API routes (after static handling for better performance)
 app.use(env['API_PREFIX'], apiRoutes)
 
-// Blog routes
+// 12. Blog routes
 app.use(blogRoutes)
 
-// Error reporting endpoint
+// 13. Error reporting endpoint
 app.post('/api/error-report', express.json(), (req, res) => {
   console.error('Client error report:', req.body)
   res.status(200).json({ received: true })
 })
 
+// 14. Swagger documentation routes
 app.get('/doc/admin/swagger.json', (req, res) => {
   res.json(adminSpecs)
 })
@@ -168,17 +185,17 @@ app.get('/doc/content/docs', (req, res) => {
     </html>
   `)
 })
-// 4. Angular application routes
 
+// 15. Angular application routes (with conditional page cache)
 if (env['NODE_ENV'] === 'production') {
   app.use(pageCacheMiddleware)
 }
 app.use(createAngularHandler(angularApp))
 
-// 5. 404 handler (must be after all routes)
+// 16. 404 handler (must be after all routes)
 app.use(notFoundHandler)
 
-// 6. Global error handler (must be last)
+// 17. Global error handler (must be last)
 app.use(globalErrorHandler)
 
 // Start server

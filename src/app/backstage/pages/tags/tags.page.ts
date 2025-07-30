@@ -114,7 +114,7 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
         <ng-template pTemplate="header">
           <tr>
             <th>名称</th>
-            <th>别名</th>
+            <th>别名(Value)</th>
             <th>描述</th>
             <th>值</th>
             <th>分类ID</th>
@@ -127,7 +127,7 @@ import { TagDetailComponent, Tag } from './tag-detail.component'
         <ng-template pTemplate="body" let-rowData>
           <tr>
             <td>{{ rowData.title }}</td>
-            <td>{{ rowData.alias }}</td>
+            <td>{{ rowData.value }}</td>
             <td>{{ rowData.des || '-' }}</td>
             <td>{{ rowData.value || '-' }}</td>
             <td>{{ rowData.type_id || '-' }}</td>
