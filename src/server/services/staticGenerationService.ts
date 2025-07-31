@@ -67,21 +67,33 @@ export class StaticGenerationService {
       // Create all directories in advance to reduce I/O operations
       await this.createDirectories()
 
-      // Generate static pages with concurrency
-      const tasks = [
-        this.generateHomePage(result),
-        this.generateArchivesPage(result),
-        this.generateAboutPage(result),
-        this.generateLinksPage(result),
-        this.generateDailyLibPage(result),
-        this.generateArticlePages(result),
-        this.generateCategoryPages(result),
-        this.generateTagPages(result),
-        this.generateCustomPages(result)
-      ]
+      // 串行执行，避免同时启动多个任务
+      console.log('🏠 Generating home page...')
+      await this.generateHomePage(result)
 
-      // Execute tasks concurrently
-      await Promise.all(tasks)
+      console.log('📚 Generating archives page...')
+      await this.generateArchivesPage(result)
+
+      console.log('ℹ️ Generating about page...')
+      await this.generateAboutPage(result)
+
+      console.log('🔗 Generating links page...')
+      await this.generateLinksPage(result)
+
+      console.log('📖 Generating daily lib page...')
+      await this.generateDailyLibPage(result)
+
+      console.log(' Generating article pages...')
+      await this.generateArticlePages(result)
+
+      console.log('📂 Generating category pages...')
+      await this.generateCategoryPages(result)
+
+      console.log('🏷️ Generating tag pages...')
+      await this.generateTagPages(result)
+
+      console.log('📄 Generating custom pages...')
+      await this.generateCustomPages(result)
 
       result.success = true
 
@@ -184,13 +196,16 @@ export class StaticGenerationService {
   }
 
   /**
-   * Process items with concurrency control
+   * Process items with concurrency control and optimized memory management
    */
   private async processWithConcurrency<T>(
     items: T[],
     processor: (item: T) => Promise<void>,
     batchSize: number = this.maxConcurrent
   ) {
+    console.log(` Processing ${items.length} items with batch size ${batchSize}...`)
+    this.logMemoryUsage('start')
+
     const batches: T[][] = []
     for (let i = 0; i < items.length; i += batchSize) {
       batches.push(items.slice(i, i + batchSize))
@@ -201,7 +216,18 @@ export class StaticGenerationService {
       console.log(`🔄 Processing batch ${i + 1}/${batches.length} (${batch.length} items)...`)
 
       await Promise.all(batch.map((item) => processor(item)))
+
+      // 每5个批次后强制垃圾回收
+      if ((i + 1) % 5 === 0) {
+        if (global.gc) {
+          global.gc()
+          console.log(`🧹 Forced garbage collection after batch ${i + 1}`)
+        }
+        this.logMemoryUsage(`batch ${i + 1}`)
+      }
     }
+
+    this.logMemoryUsage('end')
   }
 
   /**
@@ -215,6 +241,13 @@ export class StaticGenerationService {
       this.writeFile(filePath, html)
       result.generatedFiles.push('index.html')
       result.mainPages++
+
+      // 首页处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after home page processing`)
+      }
+      this.logMemoryUsage('home page completed')
       console.log('✅ Generated home page')
     } catch (error) {
       result.errors.push(`Home page generation failed: ${error}`)
@@ -233,6 +266,13 @@ export class StaticGenerationService {
       this.writeFile(filePath, html)
       result.generatedFiles.push('archives/index.html')
       result.mainPages++
+
+      // 归档页处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after archives page processing`)
+      }
+      this.logMemoryUsage('archives page completed')
       console.log('✅ Generated archives page')
     } catch (error) {
       result.errors.push(`Archives page generation failed: ${error}`)
@@ -251,6 +291,13 @@ export class StaticGenerationService {
       this.writeFile(filePath, html)
       result.generatedFiles.push('about/index.html')
       result.mainPages++
+
+      // 关于页处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after about page processing`)
+      }
+      this.logMemoryUsage('about page completed')
       console.log('✅ Generated about page')
     } catch (error) {
       result.errors.push(`About page generation failed: ${error}`)
@@ -269,6 +316,13 @@ export class StaticGenerationService {
       this.writeFile(filePath, html)
       result.generatedFiles.push('links/index.html')
       result.mainPages++
+
+      // 友情链接页处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after links page processing`)
+      }
+      this.logMemoryUsage('links page completed')
       console.log('✅ Generated links page')
     } catch (error) {
       result.errors.push(`Links page generation failed: ${error}`)
@@ -287,6 +341,13 @@ export class StaticGenerationService {
       this.writeFile(filePath, html)
       result.generatedFiles.push('daily-lib/index.html')
       result.mainPages++
+
+      // 每日一练页处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after daily lib page processing`)
+      }
+      this.logMemoryUsage('daily lib page completed')
       console.log('✅ Generated daily lib page')
     } catch (error) {
       result.errors.push(`Daily lib page generation failed: ${error}`)
@@ -317,6 +378,13 @@ export class StaticGenerationService {
           console.error(`❌ Article generation failed for ${article.url}:`, error)
         }
       })
+
+      // 文章处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after articles processing`)
+      }
+      this.logMemoryUsage('articles completed')
 
       console.log(`✅ Generated ${result.totalArticles} article pages`)
     } catch (error) {
@@ -381,6 +449,13 @@ export class StaticGenerationService {
           console.error(`❌ Category generation failed for ${category.title}:`, error)
         }
       })
+
+      // 分类处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after categories processing`)
+      }
+      this.logMemoryUsage('categories completed')
 
       console.log(`✅ Generated ${result.totalCategories} unique category pages`)
       console.log(`📊 Category Generation Summary:`)
@@ -455,6 +530,13 @@ export class StaticGenerationService {
         }
       })
 
+      // 标签处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after tags processing`)
+      }
+      this.logMemoryUsage('tags completed')
+
       console.log(`✅ Generated ${result.totalTags} unique tag pages`)
       console.log(`📊 Tag Generation Summary:`)
       console.log(`   - Original tags from DB: ${tags.dataList.length}`)
@@ -497,6 +579,13 @@ export class StaticGenerationService {
           console.error(`❌ Custom page generation failed for ${page.url}:`, error)
         }
       })
+
+      // 自定义页面处理完成后强制GC
+      if (global.gc) {
+        global.gc()
+        console.log(`🧹 Forced garbage collection after custom pages processing`)
+      }
+      this.logMemoryUsage('custom pages completed')
 
       console.log(`✅ Generated ${result.totalPages} custom pages`)
     } catch (error) {
@@ -573,6 +662,17 @@ export class StaticGenerationService {
       console.log(`🗑️ Cleaned static directory: ${this.staticDir}`)
     }
     this.ensureStaticDir()
+  }
+
+  /**
+   * Log current memory usage
+   */
+  private logMemoryUsage(context: string) {
+    const used = process.memoryUsage()
+    console.log(` Memory usage at ${context}:`)
+    console.log(`   - Heap used: ${(used.heapUsed / 1024 / 1024).toFixed(2)}MB`)
+    console.log(`   - Heap total: ${(used.heapTotal / 1024 / 1024).toFixed(2)}MB`)
+    console.log(`   - RSS: ${(used.rss / 1024 / 1024).toFixed(2)}MB`)
   }
 }
 

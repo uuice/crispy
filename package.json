@@ -12,7 +12,7 @@
     "build:tar:with-env": "bun run --env-file ./.env build && tar -czf crispy-$(date +%Y%m%d-%H%M%S).tar.gz dist/ package.json .env .env.example",
     "build:tar:full": "bun run --env-file ./.env build && tar -czf crispy-full-$(date +%Y%m%d-%H%M%S).tar.gz dist/ package.json .env .env.example bun.lock",
     "watch": "ng build --watch --configuration development",
-    "serve:ssr:crispy": "bun run --env-file ./.env dist/crispy/server/server.mjs",
+    "serve:ssr:crispy": "bun run --expose-gc --env-file ./.env dist/crispy/server/server.mjs",
     "del:spec": "find . -type f -name '*.spec.ts' -delete",
     "lint": "eslint \"src/**/*.{ts,html}\"",
     "lint:fix": "eslint \"src/**/*.{ts,html}\" --fix",
