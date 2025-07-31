@@ -409,7 +409,7 @@ router.get(
           }),
           ...categoryList.map((cate) => {
             return {
-              loc: join(env['BASE_URL'], 'categories', cate.title),
+              loc: join(env['BASE_URL'], 'categories', cate.alias || cate.title),
               lastmod: '',
               changefreq: 'daily',
               priority: '0.7'
@@ -427,7 +427,7 @@ router.get(
 
           ...pageList.map((page) => {
             return {
-              loc: join(env['BASE_URL'], (page.alias || page.url) as string),
+              loc: join(env['BASE_URL'], 'pages', (page.url || page.alias) as string),
               lastmod: moment(page.update_time as unknown as string).format(),
               changefreq: 'daily',
               priority: '0.7'
