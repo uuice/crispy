@@ -217,12 +217,8 @@ export class StaticGenerationService {
 
       await Promise.all(batch.map((item) => processor(item)))
 
-      // 每5个批次后强制垃圾回收
+      // 每5个批次后记录内存使用
       if ((i + 1) % 5 === 0) {
-        if (global.gc) {
-          global.gc()
-          console.log(`🧹 Forced garbage collection after batch ${i + 1}`)
-        }
         this.logMemoryUsage(`batch ${i + 1}`)
       }
     }
@@ -242,11 +238,6 @@ export class StaticGenerationService {
       result.generatedFiles.push('index.html')
       result.mainPages++
 
-      // 首页处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after home page processing`)
-      }
       this.logMemoryUsage('home page completed')
       console.log('✅ Generated home page')
     } catch (error) {
@@ -267,11 +258,6 @@ export class StaticGenerationService {
       result.generatedFiles.push('archives/index.html')
       result.mainPages++
 
-      // 归档页处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after archives page processing`)
-      }
       this.logMemoryUsage('archives page completed')
       console.log('✅ Generated archives page')
     } catch (error) {
@@ -292,11 +278,6 @@ export class StaticGenerationService {
       result.generatedFiles.push('about/index.html')
       result.mainPages++
 
-      // 关于页处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after about page processing`)
-      }
       this.logMemoryUsage('about page completed')
       console.log('✅ Generated about page')
     } catch (error) {
@@ -317,11 +298,6 @@ export class StaticGenerationService {
       result.generatedFiles.push('links/index.html')
       result.mainPages++
 
-      // 友情链接页处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after links page processing`)
-      }
       this.logMemoryUsage('links page completed')
       console.log('✅ Generated links page')
     } catch (error) {
@@ -342,11 +318,6 @@ export class StaticGenerationService {
       result.generatedFiles.push('daily-lib/index.html')
       result.mainPages++
 
-      // 每日一练页处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after daily lib page processing`)
-      }
       this.logMemoryUsage('daily lib page completed')
       console.log('✅ Generated daily lib page')
     } catch (error) {
@@ -379,11 +350,6 @@ export class StaticGenerationService {
         }
       })
 
-      // 文章处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after articles processing`)
-      }
       this.logMemoryUsage('articles completed')
 
       console.log(`✅ Generated ${result.totalArticles} article pages`)
@@ -450,11 +416,6 @@ export class StaticGenerationService {
         }
       })
 
-      // 分类处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after categories processing`)
-      }
       this.logMemoryUsage('categories completed')
 
       console.log(`✅ Generated ${result.totalCategories} unique category pages`)
@@ -530,11 +491,6 @@ export class StaticGenerationService {
         }
       })
 
-      // 标签处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after tags processing`)
-      }
       this.logMemoryUsage('tags completed')
 
       console.log(`✅ Generated ${result.totalTags} unique tag pages`)
@@ -580,11 +536,6 @@ export class StaticGenerationService {
         }
       })
 
-      // 自定义页面处理完成后强制GC
-      if (global.gc) {
-        global.gc()
-        console.log(`🧹 Forced garbage collection after custom pages processing`)
-      }
       this.logMemoryUsage('custom pages completed')
 
       console.log(`✅ Generated ${result.totalPages} custom pages`)

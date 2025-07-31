@@ -1139,7 +1139,7 @@ export class SettingsPage implements OnInit {
     this.generatingStatic.set(true)
     try {
       const result = await firstValueFrom(
-        this.httpService.post<any>('/api/admin/static-generation/generate', {})
+        this.httpService.postWithTimeout<any>('/api/admin/static-generation/generate', {}, 300000) // 5分钟超时
       )
       if (result.success) {
         const performance = result.data.performance

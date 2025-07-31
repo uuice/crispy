@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs'
-import { catchError } from 'rxjs/operators'
+import { catchError, timeout } from 'rxjs/operators'
 import { MessageService } from 'primeng/api'
 import { AuthService } from './auth.service'
 import { Router } from '@angular/router'
@@ -85,6 +85,25 @@ export class HttpService {
         headers: this.createHeaders(headers)
       })
       .pipe(catchError((err) => this.handleError(err)))
+  }
+
+  /**
+   * HTTP POST request with extended timeout for long-running operations
+   */
+  postWithTimeout<T>(
+    url: string,
+    body: any,
+    timeoutMs: number = 300000,
+    headers?: { [key: string]: string }
+  ): Observable<T> {
+    return this.http
+      .post<T>(url, body, {
+        headers: this.createHeaders(headers)
+      })
+      .pipe(
+        timeout(timeoutMs),
+        catchError((err) => this.handleError(err))
+      )
   }
 
   /**
