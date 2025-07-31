@@ -24,6 +24,8 @@ import { SelectButtonModule } from 'primeng/selectbutton'
 import { FormsModule } from '@angular/forms'
 import { ScrollTopModule } from 'primeng/scrolltop'
 import { HttpService, ApiResponse } from '../../services/http.service'
+import { SsrSeoService } from '../../services/ssr-seo.service'
+import { SiteSettings } from '../../services/site-settings.service'
 
 // Data interfaces
 interface Category {
@@ -1152,6 +1154,8 @@ export class HomeLayoutComponent implements OnInit {
     )
   }
 
+  private ssrSeoService = inject(SsrSeoService)
+
   ngOnInit() {
     this.menuItems = [
       {
@@ -1193,6 +1197,9 @@ export class HomeLayoutComponent implements OnInit {
     this.loadTags()
     this.loadLatestArticles()
     this.loadRecordSettings()
+
+    // Load site settings and set SEO
+    this.loadSiteSettings()
   }
 
   /**
@@ -1364,5 +1371,87 @@ export class HomeLayoutComponent implements OnInit {
    */
   getTagClass(index: number): string {
     return this.tagClassList[index % this.tagClassList.length]
+  }
+
+  /**
+   * Load site settings and set SEO
+   */
+  loadSiteSettings() {
+    // Check if data exists in TransferState
+    const cachedSettings = this.transferState.get(makeStateKey<SiteSettings>('siteSettings'), null)
+    if (cachedSettings) {
+      // Set SEO with cached settings
+      this.ssrSeoService.setSeoData({
+        title: cachedSettings.siteName,
+        description: cachedSettings.siteDescription,
+        keywords: cachedSettings.siteKeywords,
+        author: 'UUICE',
+        ogTitle: cachedSettings.siteName,
+        ogDescription: cachedSettings.siteDescription,
+        ogType: 'website',
+        ogLocale: 'zh_CN',
+        robots: 'index, follow'
+      })
+      return
+    }
+
+    // Load from API
+    this.httpService
+      .get<ApiResponse<SiteSettings>>('/api/content/configs/site-settings')
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            // Set SEO with API settings
+            this.ssrSeoService.setSeoData({
+              title: response.data.siteName,
+              description: response.data.siteDescription,
+              keywords: response.data.siteKeywords,
+              author: 'UUICE',
+              ogTitle: response.data.siteName,
+              ogDescription: response.data.siteDescription,
+              ogType: 'website',
+              ogLocale: 'zh_CN',
+              robots: 'index, follow'
+            })
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(makeStateKey<SiteSettings>('siteSettings'), response.data)
+            }
+          } else {
+            // Set default SEO if API fails
+            this.ssrSeoService.setSeoData({
+              title: '轻盈的鱼',
+              description:
+                '专注于前端开发的程序员，分享Vue、Angular、Node.js等技术栈的学习笔记和解决方案。',
+              keywords: '前端开发, Vue, Angular, Node.js, JavaScript, 学习笔记, 技术博客',
+              author: 'UUICE',
+              ogTitle: '轻盈的鱼',
+              ogDescription:
+                '专注于前端开发的程序员，分享Vue、Angular、Node.js等技术栈的学习笔记和解决方案。',
+              ogType: 'website',
+              ogLocale: 'zh_CN',
+              robots: 'index, follow'
+            })
+          }
+        },
+        error: (err) => {
+          console.error('Failed to load site settings:', err)
+          // Set default SEO on error
+          this.ssrSeoService.setSeoData({
+            title: '轻盈的鱼',
+            description:
+              '专注于前端开发的程序员，分享Vue、Angular、Node.js等技术栈的学习笔记和解决方案。',
+            keywords: '前端开发, Vue, Angular, Node.js, JavaScript, 学习笔记, 技术博客',
+            author: 'UUICE',
+            ogTitle: '轻盈的鱼',
+            ogDescription:
+              '专注于前端开发的程序员，分享Vue、Angular、Node.js等技术栈的学习笔记和解决方案。',
+            ogType: 'website',
+            ogLocale: 'zh_CN',
+            robots: 'index, follow'
+          })
+        }
+      })
   }
 }
