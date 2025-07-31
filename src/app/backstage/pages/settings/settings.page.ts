@@ -19,6 +19,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner'
 import { SettingsService, AppSettings } from '../../services/settings.service'
 import { HttpService } from '../../services/http.service'
 import { SYSTEM_SETTINGS_CATEGORY_ALIAS } from '../../../../server/config/const'
+import { timeout } from 'rxjs/operators'
 
 interface SiteSettings {
   siteName: string
@@ -1138,9 +1139,13 @@ export class SettingsPage implements OnInit {
   async generateStaticPages() {
     this.generatingStatic.set(true)
     try {
+      // 使用Angular HTTP客户端的RxJS timeout操作符方式
       const result = await firstValueFrom(
-        this.httpService.postWithTimeout<any>('/api/admin/static-generation/generate', {}, 300000) // 5分钟超时
+        this.httpService
+          .post<any>('/api/admin/static-generation/generate', {})
+          .pipe(timeout(600000)) // 10分钟超时，使用RxJS的timeout操作符
       )
+
       if (result.success) {
         const performance = result.data.performance
         const data = result.data
@@ -1179,12 +1184,20 @@ export class SettingsPage implements OnInit {
           detail: result.message || '静态页面生成失败'
         })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generate static pages error:', error)
+      let errorMessage = '静态页面生成失败，请检查服务器状态'
+
+      if (error.name === 'TimeoutError') {
+        errorMessage = '请求超时，静态生成可能需要更长时间'
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
       this.messageService.add({
         severity: 'error',
         summary: '失败',
-        detail: '静态页面生成失败，请检查服务器状态'
+        detail: errorMessage
       })
     } finally {
       this.generatingStatic.set(false)
