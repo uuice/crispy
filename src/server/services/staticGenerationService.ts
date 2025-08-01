@@ -85,6 +85,9 @@ export class StaticGenerationService {
       console.log('📖 Generating daily lib page...')
       await this.generateDailyLibPage(result)
 
+      console.log('📖 Generating daily lib detail pages...')
+      await this.generateDailyLibDetailPages(result)
+
       console.log(' Generating article pages...')
       await this.generateArticlePages(result)
 
@@ -230,6 +233,47 @@ export class StaticGenerationService {
     if (existsSync(this.tempStaticDir)) {
       rmSync(this.tempStaticDir, { recursive: true, force: true })
       console.log(`🗑️ Cleaned up temp directory after failure: ${this.tempStaticDir}`)
+    }
+  }
+
+  /**
+   * Generate daily lib detail pages with concurrency
+   */
+  private async generateDailyLibDetailPages(result: StaticGenerationResult) {
+    try {
+      // get category_id 1
+      const category = await categoryService.getCategoryByAlias('daily-lib')
+      if (!category) {
+        console.error('❌ Daily lib category not found')
+        return
+      }
+      const dailyLibs = await articleService.getArticles(
+        { status: 10, type_id: category.id }, // Assuming type_id 1 is for daily-lib
+        { page: 1, pageSize: 10000 }
+      )
+      console.log(
+        `📖 Generating ${dailyLibs.dataList.length} daily lib detail pages with concurrency...`
+      )
+
+      await this.processWithConcurrency(dailyLibs.dataList, async (article) => {
+        try {
+          const html = await this.fetchPage(`/daily-lib/${article.url}`)
+          const filePath = join(this.tempStaticDir, 'daily-lib', `${article.url}`, 'index.html')
+          this.writeFile(filePath, html)
+          result.generatedFiles.push(`daily-lib/${article.url}/index.html`)
+          result.totalArticles++ // Count as articles for total
+        } catch (error) {
+          result.errors.push(`Daily lib detail page generation failed for ${article.url}: ${error}`)
+          console.error(`❌ Daily lib detail generation failed for ${article.url}:`, error)
+        }
+      })
+
+      this.logMemoryUsage('daily lib detail pages completed')
+
+      console.log(`✅ Generated ${result.totalArticles} daily lib detail pages`)
+    } catch (error) {
+      result.errors.push(`Daily lib detail pages generation failed: ${error}`)
+      console.error('❌ Daily lib detail pages generation failed:', error)
     }
   }
 
