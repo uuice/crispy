@@ -7,6 +7,7 @@ import { TabsModule } from 'primeng/tabs'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CacheDetailComponent } from './cache-detail.component'
+import { MessageModule } from 'primeng/message'
 
 interface CacheStats {
   memory: { size: number; keys: string[] }
@@ -32,11 +33,24 @@ interface MemoryCacheItem {
 @Component({
   selector: 'cs-cache-page',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, ToastModule, TabsModule, CacheDetailComponent],
+  imports: [
+    CommonModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    TabsModule,
+    CacheDetailComponent,
+    MessageModule
+  ],
   providers: [MessageService],
   template: `
     <div class="page-container">
       <p-toast></p-toast>
+      <p-message
+        icon="pi pi-exclamation-triangle"
+        severity="warn"
+        text="改成了全站静态化 这个页面暂时不需要了"
+      ></p-message>
       <p-tabs value="0">
         <p-tablist>
           <p-tab value="0">内存缓存</p-tab>

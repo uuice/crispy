@@ -1,0 +1,525 @@
+import puppeteer, { Browser, Page } from 'puppeteer'
+import { join } from 'path'
+import { existsSync, mkdirSync, writeFileSync, rmSync } from 'fs'
+import { env } from '../config/env'
+import { staticGenerationConfig } from '../config/static-generation'
+import { articleService } from './articleService'
+import { categoryService } from './categoryService'
+import { tagService } from './tagService'
+import { pageService } from './pageService'
+
+export interface PuppeteerStaticGenerationResult {
+  success: boolean
+  message: string
+  generatedFiles: string[]
+  errors: string[]
+  totalPages: number
+  totalArticles: number
+  totalCategories: number
+  totalTags: number
+  mainPages: number
+  performance: {
+    totalTime: number
+    averageTimePerPage: number
+    concurrentRequests: number
+  }
+}
+
+export class PuppeteerStaticGenerationService {
+  private staticDir = join(process.cwd(), 'temp', 'static')
+  private baseUrl = env['STATIC_GENERATION_BASE_URL'] || env['BASE_URL'] || 'http://localhost:4000'
+  private maxConcurrent = staticGenerationConfig.maxConcurrent
+  private requestTimeout = staticGenerationConfig.requestTimeout
+  private pagePool: Page[] = []
+  private browser: Browser | null = null
+  private poolSize = 3 // Default page pool size
+
+  constructor() {
+    this.ensureStaticDir()
+  }
+
+  /**
+   * Initialize Puppeteer browser and page pool
+   */
+  private async initializePuppeteer() {
+    if (!this.browser) {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
+        ]
+      })
+
+      // Create page pool
+      for (let i = 0; i < this.poolSize; i++) {
+        const page = await this.browser.newPage()
+        await page.setViewport({ width: 1920, height: 1080 })
+        await page.setUserAgent('Static-Generator/1.0')
+        this.pagePool.push(page)
+      }
+
+      console.log(`🔧 Initialized Puppeteer with ${this.poolSize} page pool`)
+    }
+  }
+
+  /**
+   * Get a page from the pool
+   */
+  private async getPageFromPool(): Promise<Page> {
+    if (this.pagePool.length === 0) {
+      if (this.browser) {
+        const page = await this.browser.newPage()
+        await page.setViewport({ width: 1920, height: 1080 })
+        await page.setUserAgent('Static-Generator/1.0')
+        return page
+      }
+      throw new Error('Browser not initialized')
+    }
+    return this.pagePool.pop()!
+  }
+
+  /**
+   * Return a page to the pool
+   */
+  private returnPageToPool(page: Page) {
+    if (this.pagePool.length < this.poolSize) {
+      this.pagePool.push(page)
+    } else {
+      page.close().catch(console.error)
+    }
+  }
+
+  /**
+   * Close browser and cleanup
+   */
+  private async cleanup() {
+    if (this.browser) {
+      for (const page of this.pagePool) {
+        await page.close().catch(console.error)
+      }
+      this.pagePool = []
+      await this.browser.close()
+      this.browser = null
+      console.log('🧹 Cleaned up Puppeteer resources')
+    }
+  }
+
+  /**
+   * Generate all static pages using Puppeteer
+   */
+  async generateAllStaticPages(): Promise<PuppeteerStaticGenerationResult> {
+    const startTime = Date.now()
+    const result: PuppeteerStaticGenerationResult = {
+      success: false,
+      message: '',
+      generatedFiles: [],
+      errors: [],
+      totalPages: 0,
+      totalArticles: 0,
+      totalCategories: 0,
+      totalTags: 0,
+      mainPages: 0,
+      performance: {
+        totalTime: 0,
+        averageTimePerPage: 0,
+        concurrentRequests: this.maxConcurrent
+      }
+    }
+
+    try {
+      console.log('🚀 Starting Puppeteer static generation...')
+      console.log('📁 Static directory:', this.staticDir)
+      console.log(`⚡ Max concurrent requests: ${this.maxConcurrent}`)
+      console.log(`🔧 Page pool size: ${this.poolSize}`)
+
+      await this.initializePuppeteer()
+      this.cleanStaticDir()
+      await this.createDirectories()
+
+      // Generate pages sequentially
+      console.log('🏠 Generating home page...')
+      await this.generateHomePage(result)
+
+      console.log('📚 Generating archives page...')
+      await this.generateArchivesPage(result)
+
+      console.log('ℹ️ Generating about page...')
+      await this.generateAboutPage(result)
+
+      console.log('🔗 Generating links page...')
+      await this.generateLinksPage(result)
+
+      console.log('📖 Generating daily lib page...')
+      await this.generateDailyLibPage(result)
+
+      console.log('📝 Generating article pages...')
+      await this.generateArticlePages(result)
+
+      console.log('📂 Generating category pages...')
+      await this.generateCategoryPages(result)
+
+      console.log('🏷️ Generating tag pages...')
+      await this.generateTagPages(result)
+
+      console.log('📄 Generating custom pages...')
+      await this.generateCustomPages(result)
+
+      result.success = true
+      result.message = 'Static generation completed successfully'
+
+      const endTime = Date.now()
+      result.performance.totalTime = endTime - startTime
+      const totalGenerated =
+        result.totalArticles +
+        result.totalCategories +
+        result.totalTags +
+        result.totalPages +
+        result.mainPages
+      result.performance.averageTimePerPage =
+        totalGenerated > 0 ? result.performance.totalTime / totalGenerated : 0
+
+      console.log(
+        `✅ Static generation completed in ${(result.performance.totalTime / 1000).toFixed(2)}s`
+      )
+      console.log(
+        `📊 Generated ${totalGenerated} pages (avg: ${result.performance.averageTimePerPage.toFixed(2)}ms per page)`
+      )
+    } catch (error) {
+      result.success = false
+      result.message = `Static generation failed: ${error}`
+      console.error('❌ Static generation failed:', error)
+    } finally {
+      await this.cleanup()
+    }
+
+    return result
+  }
+
+  /**
+   * Create all necessary directories in advance
+   */
+  private async createDirectories() {
+    const directories = ['archives', 'categories', 'tags', 'pages', 'about', 'links', 'daily-lib']
+
+    for (const dir of directories) {
+      const fullPath = join(this.staticDir, dir)
+      if (!existsSync(fullPath)) {
+        mkdirSync(fullPath, { recursive: true })
+      }
+    }
+  }
+
+  /**
+   * Process items with concurrency control
+   */
+  private async processWithConcurrency<T>(
+    items: T[],
+    processor: (item: T) => Promise<void>,
+    batchSize: number = this.maxConcurrent
+  ) {
+    const batches: T[][] = []
+    for (let i = 0; i < items.length; i += batchSize) {
+      batches.push(items.slice(i, i + batchSize))
+    }
+
+    for (const batch of batches) {
+      const promises = batch.map(processor)
+      await Promise.all(promises)
+
+      if (batches.indexOf(batch) < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    }
+  }
+
+  /**
+   * Fetch page HTML using Puppeteer
+   */
+  private async fetchPageWithPuppeteer(path: string): Promise<string> {
+    const url = `${this.baseUrl}${path}`
+    const page = await this.getPageFromPool()
+
+    try {
+      page.setDefaultTimeout(this.requestTimeout)
+      await page.goto(url, {
+        waitUntil: 'networkidle2',
+        timeout: this.requestTimeout
+      })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const html = await page.content()
+      return html
+    } catch (error) {
+      throw new Error(`Failed to fetch ${url}: ${error}`)
+    } finally {
+      this.returnPageToPool(page)
+    }
+  }
+
+  /**
+   * Generate home page
+   */
+  private async generateHomePage(result: PuppeteerStaticGenerationResult) {
+    try {
+      const html = await this.fetchPageWithPuppeteer('/')
+      const filePath = join(this.staticDir, 'index.html')
+      this.writeFile(filePath, html)
+      result.generatedFiles.push('index.html')
+      result.mainPages++
+      console.log('✅ Home page generated')
+    } catch (error) {
+      result.errors.push(`Home page generation failed: ${error}`)
+      console.error('❌ Home page generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate archives page
+   */
+  private async generateArchivesPage(result: PuppeteerStaticGenerationResult) {
+    try {
+      const html = await this.fetchPageWithPuppeteer('/archives')
+      const filePath = join(this.staticDir, 'archives', 'index.html')
+      this.writeFile(filePath, html)
+      result.generatedFiles.push('archives/index.html')
+      result.mainPages++
+      console.log('✅ Archives page generated')
+    } catch (error) {
+      result.errors.push(`Archives page generation failed: ${error}`)
+      console.error('❌ Archives page generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate about page
+   */
+  private async generateAboutPage(result: PuppeteerStaticGenerationResult) {
+    try {
+      const html = await this.fetchPageWithPuppeteer('/about')
+      const filePath = join(this.staticDir, 'about', 'index.html')
+      this.writeFile(filePath, html)
+      result.generatedFiles.push('about/index.html')
+      result.mainPages++
+      console.log('✅ About page generated')
+    } catch (error) {
+      result.errors.push(`About page generation failed: ${error}`)
+      console.error('❌ About page generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate links page
+   */
+  private async generateLinksPage(result: PuppeteerStaticGenerationResult) {
+    try {
+      const html = await this.fetchPageWithPuppeteer('/links')
+      const filePath = join(this.staticDir, 'links', 'index.html')
+      this.writeFile(filePath, html)
+      result.generatedFiles.push('links/index.html')
+      result.mainPages++
+      console.log('✅ Links page generated')
+    } catch (error) {
+      result.errors.push(`Links page generation failed: ${error}`)
+      console.error('❌ Links page generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate daily lib page
+   */
+  private async generateDailyLibPage(result: PuppeteerStaticGenerationResult) {
+    try {
+      const html = await this.fetchPageWithPuppeteer('/daily-lib')
+      const filePath = join(this.staticDir, 'daily-lib', 'index.html')
+      this.writeFile(filePath, html)
+      result.generatedFiles.push('daily-lib/index.html')
+      result.mainPages++
+      console.log('✅ Daily lib page generated')
+    } catch (error) {
+      result.errors.push(`Daily lib page generation failed: ${error}`)
+      console.error('❌ Daily lib page generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate all article pages with concurrency
+   */
+  private async generateArticlePages(result: PuppeteerStaticGenerationResult) {
+    try {
+      const articles = await articleService.getArticles(
+        { status: 10 },
+        { page: 1, pageSize: 10000 }
+      )
+      console.log(`📝 Generating ${articles.dataList.length} article pages with Puppeteer...`)
+
+      await this.processWithConcurrency(articles.dataList, async (article) => {
+        try {
+          const html = await this.fetchPageWithPuppeteer(`/archives/${article.url}`)
+          const filePath = join(this.staticDir, 'archives', `${article.url}`, 'index.html')
+          this.writeFile(filePath, html)
+          result.generatedFiles.push(`archives/${article.url}/index.html`)
+          result.totalArticles++
+        } catch (error) {
+          result.errors.push(`Article page generation failed for ${article.url}: ${error}`)
+          console.error(`❌ Article generation failed for ${article.url}:`, error)
+        }
+      })
+
+      this.logMemoryUsage('articles completed')
+      console.log(`✅ Generated ${result.totalArticles} article pages`)
+    } catch (error) {
+      result.errors.push(`Article pages generation failed: ${error}`)
+      console.error('❌ Article pages generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate all category pages with concurrency
+   */
+  private async generateCategoryPages(result: PuppeteerStaticGenerationResult) {
+    try {
+      const categories = await categoryService.getCategories(
+        { status: 10 },
+        { page: 1, pageSize: 10000 }
+      )
+      console.log(`📂 Generating ${categories.dataList.length} category pages with Puppeteer...`)
+
+      await this.processWithConcurrency(categories.dataList, async (category) => {
+        try {
+          const html = await this.fetchPageWithPuppeteer(
+            `/categories/${category.alias || category.title}`
+          )
+          const filePath = join(
+            this.staticDir,
+            'categories',
+            `${category.alias || category.title}`,
+            'index.html'
+          )
+          this.writeFile(filePath, html)
+          result.generatedFiles.push(`categories/${category.alias || category.title}/index.html`)
+          result.totalCategories++
+        } catch (error) {
+          result.errors.push(`Category page generation failed for ${category.title}: ${error}`)
+          console.error(`❌ Category generation failed for ${category.title}:`, error)
+        }
+      })
+
+      this.logMemoryUsage('categories completed')
+      console.log(`✅ Generated ${result.totalCategories} category pages`)
+    } catch (error) {
+      result.errors.push(`Category pages generation failed: ${error}`)
+      console.error('❌ Category pages generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate all tag pages with concurrency
+   */
+  private async generateTagPages(result: PuppeteerStaticGenerationResult) {
+    try {
+      const tags = await tagService.getTags({ page: 1, pageSize: 10000 }, { status: 10 })
+      console.log(`🏷️ Generating ${tags.dataList.length} tag pages with Puppeteer...`)
+
+      await this.processWithConcurrency(tags.dataList, async (tag) => {
+        try {
+          const html = await this.fetchPageWithPuppeteer(`/tags/${tag.title}`)
+          const filePath = join(this.staticDir, 'tags', `${tag.title}`, 'index.html')
+          this.writeFile(filePath, html)
+          result.generatedFiles.push(`tags/${tag.title}/index.html`)
+          result.totalTags++
+        } catch (error) {
+          result.errors.push(`Tag page generation failed for ${tag.title}: ${error}`)
+          console.error(`❌ Tag generation failed for ${tag.title}:`, error)
+        }
+      })
+
+      this.logMemoryUsage('tags completed')
+      console.log(`✅ Generated ${result.totalTags} tag pages`)
+    } catch (error) {
+      result.errors.push(`Tag pages generation failed: ${error}`)
+      console.error('❌ Tag pages generation failed:', error)
+    }
+  }
+
+  /**
+   * Generate custom pages with concurrency
+   */
+  private async generateCustomPages(result: PuppeteerStaticGenerationResult) {
+    try {
+      const pages = await pageService.getPages({ page: 1, pageSize: 10000 }, {})
+      console.log(`📄 Generating ${pages.dataList.length} custom pages with Puppeteer...`)
+
+      await this.processWithConcurrency(pages.dataList, async (page: any) => {
+        try {
+          const html = await this.fetchPageWithPuppeteer(`/pages/${page.url}`)
+          const filePath = join(this.staticDir, 'pages', `${page.url}`, 'index.html')
+          this.writeFile(filePath, html)
+          result.generatedFiles.push(`pages/${page.url}/index.html`)
+          result.totalPages++
+        } catch (error) {
+          result.errors.push(`Custom page generation failed for ${page.url}: ${error}`)
+          console.error(`❌ Custom page generation failed for ${page.url}:`, error)
+        }
+      })
+
+      this.logMemoryUsage('custom pages completed')
+      console.log(`✅ Generated ${result.totalPages} custom pages`)
+    } catch (error) {
+      result.errors.push(`Custom pages generation failed: ${error}`)
+      console.error('❌ Custom pages generation failed:', error)
+    }
+  }
+
+  /**
+   * Write file to static directory with optimized I/O
+   */
+  private writeFile(filePath: string, content: string) {
+    const dir = join(filePath, '..')
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true })
+    }
+    writeFileSync(filePath, content, 'utf8')
+  }
+
+  /**
+   * Ensure static directory exists
+   */
+  private ensureStaticDir() {
+    if (!existsSync(this.staticDir)) {
+      mkdirSync(this.staticDir, { recursive: true })
+      console.log(`📁 Created static directory: ${this.staticDir}`)
+    }
+  }
+
+  /**
+   * Clean static directory
+   */
+  private cleanStaticDir() {
+    if (existsSync(this.staticDir)) {
+      rmSync(this.staticDir, { recursive: true, force: true })
+      console.log(`🗑️ Cleaned static directory: ${this.staticDir}`)
+    }
+    this.ensureStaticDir()
+  }
+
+  /**
+   * Log current memory usage
+   */
+  private logMemoryUsage(context: string) {
+    const used = process.memoryUsage()
+    console.log(`💾 Memory usage at ${context}:`)
+    console.log(`   - Heap used: ${(used.heapUsed / 1024 / 1024).toFixed(2)}MB`)
+    console.log(`   - Heap total: ${(used.heapTotal / 1024 / 1024).toFixed(2)}MB`)
+    console.log(`   - RSS: ${(used.rss / 1024 / 1024).toFixed(2)}MB`)
+  }
+}
+
+export const puppeteerStaticGenerationService = new PuppeteerStaticGenerationService()

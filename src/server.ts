@@ -17,7 +17,7 @@ import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
 import { configureNunjucks } from './server/config/nunjucks'
-import { pageCacheMiddleware } from './server/middleware'
+// import { pageCacheMiddleware } from './server/middleware'
 import { flexsearchService } from './server/services/flexsearch-index.service'
 import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
@@ -189,10 +189,11 @@ app.get('/doc/content/docs', (req, res) => {
   `)
 })
 
-// 15. Angular application routes (with conditional page cache)
-if (env['NODE_ENV'] === 'production') {
-  app.use(pageCacheMiddleware)
-}
+// The whole site is static, so this is not needed
+// Angular application routes (with conditional page cache)
+// if (env['NODE_ENV'] === 'production') {
+//   app.use(pageCacheMiddleware)
+// }
 app.use(createAngularHandler(angularApp))
 
 // 16. 404 handler (must be after all routes)

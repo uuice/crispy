@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, existsSync, rmSync, readdirSync, statSync } from 'fs'
+import { writeFileSync, mkdirSync, existsSync, rmSync, readdirSync, statSync, renameSync } from 'fs'
 import { join } from 'path'
 import { articleService } from './articleService'
 import { pageService } from './pageService'
@@ -26,6 +26,7 @@ export interface StaticGenerationResult {
 
 export class StaticGenerationService {
   private staticDir = join(process.cwd(), 'temp', 'static')
+  private tempStaticDir = join(process.cwd(), 'temp', 'static-temp')
   private baseUrl = env['STATIC_GENERATION_BASE_URL'] || env['BASE_URL'] || 'http://localhost:4000'
   private maxConcurrent = staticGenerationConfig.maxConcurrent
   private requestTimeout = staticGenerationConfig.requestTimeout
@@ -59,13 +60,14 @@ export class StaticGenerationService {
     try {
       console.log('🚀 Starting optimized static generation...')
       console.log('📁 Static directory:', this.staticDir)
+      console.log('📁 Temp directory:', this.tempStaticDir)
       console.log(`⚡ Max concurrent requests: ${this.maxConcurrent}`)
 
-      // Clean static directory
-      this.cleanStaticDir()
+      // Use temporary directory for generation to ensure service continuity
+      this.prepareTempDirectory()
 
       // Create all directories in advance to reduce I/O operations
-      await this.createDirectories()
+      // await this.createDirectories()
 
       // 串行执行，避免同时启动多个任务
       console.log('🏠 Generating home page...')
@@ -94,6 +96,9 @@ export class StaticGenerationService {
 
       console.log('📄 Generating custom pages...')
       await this.generateCustomPages(result)
+
+      // Replace old static directory with new one
+      this.replaceStaticDirectory()
 
       result.success = true
 
@@ -172,27 +177,60 @@ export class StaticGenerationService {
       result.message = `Static generation failed: ${error}`
       result.errors.push(error as string)
       console.error('❌ Static generation error:', error)
+
+      // Clean up temp directory on failure
+      this.cleanupTempDirectory()
+
       return result
     }
   }
 
   /**
-   * Create all necessary directories in advance
+   * Prepare temporary directory for generation
    */
-  private async createDirectories() {
-    const dirs = [
-      join(this.staticDir, 'archives'),
-      join(this.staticDir, 'categories'),
-      join(this.staticDir, 'tags'),
-      join(this.staticDir, 'pages')
-    ]
-
-    for (const dir of dirs) {
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true })
-      }
+  private prepareTempDirectory() {
+    // Clean temp directory if it exists
+    if (existsSync(this.tempStaticDir)) {
+      rmSync(this.tempStaticDir, { recursive: true, force: true })
+      console.log(`🗑️ Cleaned temp directory: ${this.tempStaticDir}`)
     }
-    console.log('📁 Created all directories in advance')
+
+    // Create temp directory
+    mkdirSync(this.tempStaticDir, { recursive: true })
+    console.log(`📁 Created temp directory: ${this.tempStaticDir}`)
+  }
+
+  /**
+   * Replace old static directory with new one
+   */
+  private replaceStaticDirectory() {
+    try {
+      // Remove old static directory if it exists
+      if (existsSync(this.staticDir)) {
+        rmSync(this.staticDir, { recursive: true, force: true })
+        console.log(`🗑️ Removed old static directory: ${this.staticDir}`)
+      }
+
+      // Rename temp directory to static directory
+      if (existsSync(this.tempStaticDir)) {
+        // Use fs.renameSync for atomic operation
+        renameSync(this.tempStaticDir, this.staticDir)
+        console.log(`🔄 Replaced static directory with new one: ${this.staticDir}`)
+      }
+    } catch (error) {
+      console.error('❌ Error replacing static directory:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Clean up temp directory on failure
+   */
+  private cleanupTempDirectory() {
+    if (existsSync(this.tempStaticDir)) {
+      rmSync(this.tempStaticDir, { recursive: true, force: true })
+      console.log(`🗑️ Cleaned up temp directory after failure: ${this.tempStaticDir}`)
+    }
   }
 
   /**
@@ -233,7 +271,7 @@ export class StaticGenerationService {
     try {
       console.log('🏠 Generating home page...')
       const html = await this.fetchPage('/')
-      const filePath = join(this.staticDir, 'index.html')
+      const filePath = join(this.tempStaticDir, 'index.html')
       this.writeFile(filePath, html)
       result.generatedFiles.push('index.html')
       result.mainPages++
@@ -253,7 +291,7 @@ export class StaticGenerationService {
     try {
       console.log('📚 Generating archives page...')
       const html = await this.fetchPage('/archives')
-      const filePath = join(this.staticDir, 'archives', 'index.html')
+      const filePath = join(this.tempStaticDir, 'archives', 'index.html')
       this.writeFile(filePath, html)
       result.generatedFiles.push('archives/index.html')
       result.mainPages++
@@ -273,7 +311,7 @@ export class StaticGenerationService {
     try {
       console.log('ℹ️ Generating about page...')
       const html = await this.fetchPage('/about')
-      const filePath = join(this.staticDir, 'about', 'index.html')
+      const filePath = join(this.tempStaticDir, 'about', 'index.html')
       this.writeFile(filePath, html)
       result.generatedFiles.push('about/index.html')
       result.mainPages++
@@ -293,7 +331,7 @@ export class StaticGenerationService {
     try {
       console.log('🔗 Generating links page...')
       const html = await this.fetchPage('/links')
-      const filePath = join(this.staticDir, 'links', 'index.html')
+      const filePath = join(this.tempStaticDir, 'links', 'index.html')
       this.writeFile(filePath, html)
       result.generatedFiles.push('links/index.html')
       result.mainPages++
@@ -313,7 +351,7 @@ export class StaticGenerationService {
     try {
       console.log('📖 Generating daily lib page...')
       const html = await this.fetchPage('/daily-lib')
-      const filePath = join(this.staticDir, 'daily-lib', 'index.html')
+      const filePath = join(this.tempStaticDir, 'daily-lib', 'index.html')
       this.writeFile(filePath, html)
       result.generatedFiles.push('daily-lib/index.html')
       result.mainPages++
@@ -340,7 +378,7 @@ export class StaticGenerationService {
       await this.processWithConcurrency(articles.dataList, async (article) => {
         try {
           const html = await this.fetchPage(`/archives/${article.url}`)
-          const filePath = join(this.staticDir, 'archives', `${article.url}`, 'index.html')
+          const filePath = join(this.tempStaticDir, 'archives', `${article.url}`, 'index.html')
           this.writeFile(filePath, html)
           result.generatedFiles.push(`archives/${article.url}/index.html`)
           result.totalArticles++
@@ -401,7 +439,7 @@ export class StaticGenerationService {
           const categoryUrl = encodeURIComponent(categoryKey)
           const html = await this.fetchPage(`/categories/${categoryUrl}`)
 
-          const filePath = join(this.staticDir, 'categories', `${categoryKey}`, 'index.html')
+          const filePath = join(this.tempStaticDir, 'categories', `${categoryKey}`, 'index.html')
           this.writeFile(filePath, html)
           result.generatedFiles.push(`categories/${categoryKey}/index.html`)
           result.totalCategories++
@@ -478,7 +516,7 @@ export class StaticGenerationService {
           const tagUrl = encodeURIComponent(tag.title)
           const html = await this.fetchPage(`/tags/${tagUrl}`)
 
-          const filePath = join(this.staticDir, 'tags', `${tag.title}`, 'index.html')
+          const filePath = join(this.tempStaticDir, 'tags', `${tag.title}`, 'index.html')
           this.writeFile(filePath, html)
           result.generatedFiles.push(`tags/${tag.title}/index.html`)
           result.totalTags++
@@ -526,7 +564,7 @@ export class StaticGenerationService {
       await this.processWithConcurrency(pages.dataList, async (page: any) => {
         try {
           const html = await this.fetchPage(`/pages/${page.url}`)
-          const filePath = join(this.staticDir, 'pages', `${page.url}`, 'index.html')
+          const filePath = join(this.tempStaticDir, 'pages', `${page.url}`, 'index.html')
           this.writeFile(filePath, html)
           result.generatedFiles.push(`pages/${page.url}/index.html`)
           result.totalPages++
@@ -584,7 +622,7 @@ export class StaticGenerationService {
   }
 
   /**
-   * Write file to static directory with optimized I/O
+   * Write file to temp static directory with optimized I/O
    */
   private writeFile(filePath: string, content: string) {
     const dir = join(filePath, '..')
@@ -605,14 +643,11 @@ export class StaticGenerationService {
   }
 
   /**
-   * Clean static directory
+   * Clean static directory (deprecated - use temp directory approach instead)
    */
   private cleanStaticDir() {
-    if (existsSync(this.staticDir)) {
-      rmSync(this.staticDir, { recursive: true, force: true })
-      console.log(`🗑️ Cleaned static directory: ${this.staticDir}`)
-    }
-    this.ensureStaticDir()
+    console.log('⚠️  cleanStaticDir is deprecated - using temp directory approach instead')
+    // This method is kept for backward compatibility but should not be used
   }
 
   /**
