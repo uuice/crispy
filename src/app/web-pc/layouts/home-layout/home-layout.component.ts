@@ -1147,13 +1147,8 @@ export class HomeLayoutComponent implements OnInit {
   // Flatten all colors for backward compatibility
   primaryColors = this.colorCategories.flatMap((category) => category.colors)
 
-  get selectedPrimary() {
-    const current = this.settingsService.getPrimaryColor()
-    return (
-      this.primaryColors.find((c) => c.palette[500].toLowerCase() === current.toLowerCase()) ||
-      this.primaryColors[0]
-    )
-  }
+  // Simple property instead of getter to avoid performance issues
+  selectedPrimary = this.primaryColors[0] // Default to first color
 
   private ssrSeoService = inject(SsrSeoService)
 
@@ -1192,6 +1187,12 @@ export class HomeLayoutComponent implements OnInit {
     this.selectedDarkMode = this.settingsService.settings().darkMode
     this.selectedPreset = this.settingsService.settings().theme || 'lara'
     this.selectedSurfaceColor = this.settingsService.getSurfaceConfig().color
+
+    // Initialize selected primary color
+    const current = this.settingsService.getPrimaryColor()
+    this.selectedPrimary =
+      this.primaryColors.find((c) => c.palette[500].toLowerCase() === current.toLowerCase()) ||
+      this.primaryColors[0]
 
     // Load sidebar data
     this.loadCategories()
