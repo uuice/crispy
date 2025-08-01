@@ -3,6 +3,28 @@ import { sql, ExpressionBuilder } from 'kysely'
 import type { DB } from '@src/db/db.d'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import { tagService } from './tagService'
+import { titleToUrl } from '../utils/titleToUrl'
+
+// Helper function to get tagRef object from tags string
+async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
+  if (!tags) return {}
+
+  const tagNames = tags
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+
+  if (tagNames.length === 0) return {}
+
+  const tagRef: { [key: string]: string } = {}
+
+  for (const tagName of tagNames) {
+    const tagValue = titleToUrl(tagName)
+    tagRef[tagName] = tagValue
+  }
+
+  return tagRef
+}
 
 export interface CreateArticleData {
   title: string
@@ -79,7 +101,7 @@ export class ArticleService {
    * Get a single article by ID
    */
   async getArticleById(id: number) {
-    return await db
+    const article = await db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
@@ -87,11 +109,22 @@ export class ArticleService {
       .where('articles.id', '=', id)
       .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
+
+    if (article) {
+      // Add tagRef object
+      const tagRef = await getTagRef(article.tags || '')
+      return {
+        ...article,
+        tagRef
+      }
+    }
+
+    return article
   }
 
   // get article by url
   async getArticleByUrl(url: string) {
-    return await db
+    const article = await db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
@@ -99,6 +132,17 @@ export class ArticleService {
       .where('articles.url', '=', url)
       .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
+
+    if (article) {
+      // Add tagRef object
+      const tagRef = await getTagRef(article.tags || '')
+      return {
+        ...article,
+        tagRef
+      }
+    }
+
+    return article
   }
 
   /**
@@ -200,8 +244,19 @@ export class ArticleService {
       query.select((eb) => [eb.fn.count('articles.id').as('count')]).executeTakeFirst()
     ])
 
+    // Add tagRef for each article
+    const articlesWithTagRef = await Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return {
+          ...article,
+          tagRef
+        }
+      })
+    )
+
     return {
-      dataList: articles,
+      dataList: articlesWithTagRef,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -242,6 +297,10 @@ export class ArticleService {
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
+    }
+
+    if (!data.url && data.title) {
+      data.url = titleToUrl(data.title)
     }
 
     const now = Date.now()
@@ -287,6 +346,10 @@ export class ArticleService {
       await tagService.upsertTags(tagsArr)
     }
 
+    if (!updateData.url && updateData.title) {
+      updateData.url = titleToUrl(updateData.title)
+    }
+
     const result = await db
       .safeUpdateTable('articles')
       .set(updateData)
@@ -324,7 +387,7 @@ export class ArticleService {
    * Get articles by category ID
    */
   async getArticlesByCategory(type_id: number, limit = 10) {
-    return await db
+    const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where(sql.ref('type_id'), '=', type_id)
@@ -332,13 +395,26 @@ export class ArticleService {
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
+
+    // Add tagRef for each article
+    const articlesWithTagRef = await Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return {
+          ...article,
+          tagRef
+        }
+      })
+    )
+
+    return articlesWithTagRef
   }
 
   /**
    * Get articles by status
    */
   async getArticlesByStatus(status: number, limit = 10) {
-    return await db
+    const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where('status', '=', status)
@@ -346,13 +422,26 @@ export class ArticleService {
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
+
+    // Add tagRef for each article
+    const articlesWithTagRef = await Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return {
+          ...article,
+          tagRef
+        }
+      })
+    )
+
+    return articlesWithTagRef
   }
 
   /**
    * Get articles by tag
    */
   async getArticlesByTag(tag: string, limit = 10) {
-    return await db
+    const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where('tags', 'like', `%${tag}%`)
@@ -360,6 +449,19 @@ export class ArticleService {
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
+
+    // Add tagRef for each article
+    const articlesWithTagRef = await Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return {
+          ...article,
+          tagRef
+        }
+      })
+    )
+
+    return articlesWithTagRef
   }
 
   /**
@@ -440,13 +542,26 @@ export class ArticleService {
 
   // 获取最新文章
   async getRecentArticles(limit: number = 5): Promise<any[]> {
-    return await db
+    const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
+
+    // Add tagRef for each article
+    const articlesWithTagRef = await Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return {
+          ...article,
+          tagRef
+        }
+      })
+    )
+
+    return articlesWithTagRef
   }
 }
 

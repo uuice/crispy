@@ -9,7 +9,7 @@ import {
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { isPlatformServer } from '@angular/common'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, RouterModule } from '@angular/router'
 import { generateTocAndHeadings, TocItem } from 'src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
 import { HttpService, ApiResponse } from '../../services/http.service'
@@ -17,7 +17,7 @@ import { HttpService, ApiResponse } from '../../services/http.service'
 @Component({
   selector: 'cs-pages',
   standalone: true,
-  imports: [TocComponent],
+  imports: [TocComponent, RouterModule],
   template: `
     <!-- Pages Banner -->
     <section class="blog-banner">
@@ -33,6 +33,17 @@ import { HttpService, ApiResponse } from '../../services/http.service'
     <!-- Pages Content -->
     <section class="blog-section">
       <div class="blog-prose prose text-main" [innerHTML]="html()"></div>
+      <div class="blog-tags mt-4 text-muted">
+        @for (tag of pageTags(); track $index) {
+          <span
+            class="blog-tag {{ getTagClass($index) }}"
+            [routerLink]="['/tags', pageTagRef()[tag] || tag]"
+            style="cursor: pointer"
+          >
+            {{ tag }}
+          </span>
+        }
+      </div>
     </section>
     <!-- TOC 悬浮在主内容右侧，不占用主内容宽度 -->
     <cs-toc [toc]="toc" />
@@ -58,8 +69,21 @@ export class PagesPage implements OnInit {
   // Loading flag
   private pageLoaded = false
 
+  // Tag color class list for blog tags
+  tagClassList = [
+    'blog-tag-blue',
+    'blog-tag-green',
+    'blog-tag-yellow',
+    'blog-tag-purple',
+    'blog-tag-pink',
+    'blog-tag-gray',
+    'blog-tag-indigo'
+  ]
+
   // Signals for content
   pageTitle = signal<string>('页面')
+  pageTags = signal<string[]>([])
+  pageTagRef = signal<{ [key: string]: string }>({})
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
 
@@ -72,6 +96,13 @@ export class PagesPage implements OnInit {
         this.loadPageData(url)
       }
     })
+  }
+
+  /**
+   * Get tag class based on index (cycle through tagClassList)
+   */
+  getTagClass(index: number): string {
+    return this.tagClassList[index % this.tagClassList.length]
   }
 
   /**
@@ -88,6 +119,8 @@ export class PagesPage implements OnInit {
 
     if (cachedPageData && cachedTocData) {
       this.pageTitle.set(cachedPageData.title || '页面')
+      this.pageTags.set(cachedPageData.tags || [])
+      this.pageTagRef.set(cachedPageData.tagRef || {})
       this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedPageData.html))
       this.toc.set(cachedTocData)
       this.pageLoaded = true
@@ -103,6 +136,19 @@ export class PagesPage implements OnInit {
           // Set page title
           this.pageTitle.set(pageData.title || '页面')
 
+          // Parse tags
+          let tags: string[] = []
+          if (pageData.tags) {
+            tags = pageData.tags
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag)
+          }
+          this.pageTags.set(tags)
+
+          // Set tagRef from page data
+          this.pageTagRef.set(pageData.tagRef || {})
+
           // Process content and generate TOC
           const { html, toc } = generateTocAndHeadings(pageData.content)
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
@@ -113,6 +159,8 @@ export class PagesPage implements OnInit {
           if (isPlatformServer(this.platformId)) {
             this.transferState.set(pageKey, {
               title: pageData.title,
+              tags: tags,
+              tagRef: pageData.tagRef || {},
               html: html
             })
             this.transferState.set(tocKey, toc)

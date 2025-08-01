@@ -36,6 +36,7 @@ export interface Article {
   remark?: string
   user_id?: number
   tags?: string
+  tagRef?: { [key: string]: string }
   type_id?: number
   type_ids?: string
   status?: number

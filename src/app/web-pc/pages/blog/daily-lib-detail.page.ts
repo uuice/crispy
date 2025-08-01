@@ -15,7 +15,6 @@ import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
-import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 // API response interfaces
 interface ApiResponse<T> {
@@ -61,7 +60,7 @@ interface PaginatedResponse<T> {
             <p-tag
               *ngFor="let tag of lib()?.tags!.split(',')"
               [value]="tag.trim()"
-              [routerLink]="['/tags', titleToUrl(tag)]"
+              [routerLink]="['/tags', lib()?.tagRef?.[tag.trim()] || tag.trim()]"
               style="cursor: pointer"
             >
               {{ tag }}
@@ -230,7 +229,6 @@ export class DailyLibDetailPage implements OnInit {
   private sanitizer = inject(DomSanitizer)
   private platformId = inject(PLATFORM_ID)
   private transferState = inject(TransferState)
-  titleToUrl = titleToUrl
 
   private getLibKey(url: string) {
     return makeStateKey<any>(`daily-lib-${url}`)
@@ -274,7 +272,12 @@ export class DailyLibDetailPage implements OnInit {
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
           this.toc.set(toc)
           if (isPlatformServer(this.platformId)) {
-            this.transferState.set(this.getLibKey(url), { ...response.data, html })
+            // Store complete article data including tagRef
+            this.transferState.set(this.getLibKey(url), {
+              ...response.data,
+              html,
+              tagRef: response.data.tagRef || {}
+            })
             this.transferState.set(this.getTocKey(url), toc)
           }
         }

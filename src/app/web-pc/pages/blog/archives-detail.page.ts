@@ -13,7 +13,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { HttpService, ApiResponse } from '../../services/http.service'
-import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 // Article interface
 interface Article {
@@ -25,6 +24,7 @@ interface Article {
   author_id: number
   create_time: number
   tags: string
+  tagRef: { [key: string]: string }
   seo_title?: string
   seo_keywords?: string
   seo_description?: string
@@ -56,7 +56,7 @@ interface Article {
         <span
           *ngFor="let tag of articleTags(); let i = index"
           class="blog-tag {{ getTagClass(i) }}"
-          [routerLink]="['/tags', titleToUrl(tag)]"
+          [routerLink]="['/tags', articleTagRef()[tag] || tag]"
           style="cursor: pointer"
         >
           {{ tag }}
@@ -87,12 +87,11 @@ export class ArchivesDetailPage implements OnInit {
   // Loading flag
   private articleLoaded = false
 
-  titleToUrl = titleToUrl
-
   // Article data signals
   articleTitle = signal<string>('')
   articleCreateTime = signal<number>(0)
   articleTags = signal<string[]>([])
+  articleTagRef = signal<{ [key: string]: string }>({})
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
 
@@ -142,6 +141,7 @@ export class ArchivesDetailPage implements OnInit {
       this.articleTitle.set(cachedArticleData.title)
       this.articleCreateTime.set(cachedArticleData.create_time)
       this.articleTags.set(cachedArticleData.tags || [])
+      this.articleTagRef.set(cachedArticleData.tagRef || {})
       this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedArticleData.html))
       this.toc.set(cachedTocData)
       this.articleLoaded = true
@@ -168,6 +168,9 @@ export class ArchivesDetailPage implements OnInit {
           }
           this.articleTags.set(tags)
 
+          // Set tagRef from article data
+          this.articleTagRef.set(article.tagRef || {})
+
           // Process content and generate TOC
           const { html, toc } = generateTocAndHeadings(article.content)
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
@@ -180,6 +183,7 @@ export class ArchivesDetailPage implements OnInit {
               title: article.title,
               create_time: article.create_time,
               tags: tags,
+              tagRef: article.tagRef || {},
               html: html
             })
             this.transferState.set(tocKey, toc)

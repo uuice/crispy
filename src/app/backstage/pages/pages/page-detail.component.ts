@@ -22,7 +22,6 @@ import { AutoCompleteModule } from 'primeng/autocomplete'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
-import { titleToUrl } from '@src/server/utils/titleToUrl'
 import Vditor from 'vditor'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'
 
@@ -736,10 +735,6 @@ export class PageDetailComponent implements OnInit {
       const pageData: Partial<Page> = {
         ...sanitizedData,
         id: this.currentPage()?.id || 0
-      }
-
-      if (!pageData.id && !pageData.url) {
-        pageData.url = titleToUrl(pageData.title!)
       }
 
       console.log('content:', formData.content)

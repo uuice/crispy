@@ -1,6 +1,28 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
 import { tagService } from './tagService'
+import { titleToUrl } from '../utils/titleToUrl'
+
+// Helper function to get tagRef object from tags string
+async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
+  if (!tags) return {}
+
+  const tagNames = tags
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+
+  if (tagNames.length === 0) return {}
+
+  const tagRef: { [key: string]: string } = {}
+
+  for (const tagName of tagNames) {
+    const tagValue = titleToUrl(tagName)
+    tagRef[tagName] = tagValue
+  }
+
+  return tagRef
+}
 
 // Data interfaces
 export interface CreatePageData {
@@ -75,6 +97,7 @@ export interface Page {
   tags?: string
   type_id?: number
   user_id?: number
+  tagRef?: { [key: string]: string }
 }
 
 export interface PaginatedPagesResult {
@@ -105,8 +128,10 @@ export class PageService {
       return null
     }
 
-    // Transform the result to include type information
+    // Transform the result to include type information and tagRef
     const page = result as any
+    const tagRef = await getTagRef(page.tags || '')
+
     return {
       ...page,
       type: page.type_id
@@ -114,7 +139,8 @@ export class PageService {
             id: page.type_id,
             title: page.type_title
           }
-        : null
+        : null,
+      tagRef
     } as Page
   }
 
@@ -134,8 +160,10 @@ export class PageService {
       return null
     }
 
-    // Transform the result to include type information
+    // Transform the result to include type information and tagRef
     const page = result as any
+    const tagRef = await getTagRef(page.tags || '')
+
     return {
       ...page,
       type: page.type_id
@@ -143,7 +171,8 @@ export class PageService {
             id: page.type_id,
             title: page.type_title
           }
-        : null
+        : null,
+      tagRef
     } as Page
   }
 
@@ -158,7 +187,16 @@ export class PageService {
       .where('is_delete', '=', 0)
       .executeTakeFirst()
 
-    return result as unknown as Page | null
+    if (!result) {
+      return null
+    }
+
+    // Add tagRef
+    const tagRef = await getTagRef(result.tags || '')
+    return {
+      ...result,
+      tagRef
+    } as unknown as Page
   }
 
   /**
@@ -244,16 +282,22 @@ export class PageService {
       query.select((eb) => [eb.fn.count('pages.id').as('count')]).executeTakeFirst()
     ])
 
-    // Transform the result to include type information
-    const transformedPages = pages.map((page: any) => ({
-      ...page,
-      type: page.type_id
-        ? {
-            id: page.type_id,
-            title: page.type_title
-          }
-        : null
-    }))
+    // Transform the result to include type information and tagRef
+    const transformedPages = await Promise.all(
+      pages.map(async (page: any) => {
+        const tagRef = await getTagRef(page.tags || '')
+        return {
+          ...page,
+          type: page.type_id
+            ? {
+                id: page.type_id,
+                title: page.type_title
+              }
+            : null,
+          tagRef
+        }
+      })
+    )
 
     return {
       dataList: transformedPages as unknown as Page[],
@@ -278,6 +322,11 @@ export class PageService {
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
     }
+
+    if (!data.url && data.title) {
+      data.url = titleToUrl(data.title)
+    }
+
     const now = Date.now()
     const newPage = {
       ...data,
@@ -309,6 +358,10 @@ export class PageService {
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
+    }
+
+    if (!updateData.url && updateData.title) {
+      updateData.url = titleToUrl(updateData.title)
     }
 
     const result = await db
@@ -350,7 +403,18 @@ export class PageService {
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Page[]
+    // Add tagRef for each page
+    const pagesWithTagRef = await Promise.all(
+      result.map(async (page: any) => {
+        const tagRef = await getTagRef(page.tags || '')
+        return {
+          ...page,
+          tagRef
+        }
+      })
+    )
+
+    return pagesWithTagRef as unknown as Page[]
   }
 
   /**
@@ -372,7 +436,18 @@ export class PageService {
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Page[]
+    // Add tagRef for each page
+    const pagesWithTagRef = await Promise.all(
+      result.map(async (page: any) => {
+        const tagRef = await getTagRef(page.tags || '')
+        return {
+          ...page,
+          tagRef
+        }
+      })
+    )
+
+    return pagesWithTagRef as unknown as Page[]
   }
 
   /**
@@ -444,7 +519,18 @@ export class PageService {
       .limit(limit)
       .execute()
 
-    return result as unknown as Page[]
+    // Add tagRef for each page
+    const pagesWithTagRef = await Promise.all(
+      result.map(async (page: any) => {
+        const tagRef = await getTagRef(page.tags || '')
+        return {
+          ...page,
+          tagRef
+        }
+      })
+    )
+
+    return pagesWithTagRef as unknown as Page[]
   }
 }
 

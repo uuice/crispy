@@ -22,7 +22,6 @@ import { AutoCompleteModule } from 'primeng/autocomplete'
 import { EditorModule, Editor } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
-import { titleToUrl } from '../../../../server/utils/titleToUrl'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'
 import Vditor from 'vditor'
 
@@ -807,10 +806,6 @@ export class PostDetailComponent implements OnInit {
       const articleData: Partial<Article> = {
         ...sanitizedData,
         id: this.currentArticle()?.id || 0
-      }
-
-      if (!articleData.url) {
-        articleData.url = titleToUrl(articleData.title!)
       }
 
       console.log('content:', formData.content)
