@@ -63,7 +63,6 @@ interface PaginatedResponse<T> {
               [routerLink]="['/tags', lib()?.tagRef?.[tag.trim()] || tag.trim()]"
               style="cursor: pointer"
             >
-              {{ tag }}
             </p-tag>
           </ng-container>
         </div>
