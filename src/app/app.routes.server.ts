@@ -30,7 +30,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
-    path: 'tags/:title',
+    path: 'tags/:value',
     renderMode: RenderMode.Server
   },
   {

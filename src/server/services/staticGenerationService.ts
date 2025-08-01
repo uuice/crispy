@@ -242,7 +242,7 @@ export class StaticGenerationService {
   private async generateDailyLibDetailPages(result: StaticGenerationResult) {
     try {
       // get category_id 1
-      const category = await categoryService.getCategoryByAlias('daily-lib')
+      const category = await categoryService.getCategoryByAlias('daily-libs')
       if (!category) {
         console.error('❌ Daily lib category not found')
         return
@@ -538,11 +538,11 @@ export class StaticGenerationService {
 
       // Filter out duplicate tags by title
       for (const tag of tags.dataList) {
-        if (uniqueTags.has(tag.title)) {
-          duplicateTags.push(tag.title)
-          console.log(`⚠️  Duplicate tag found: ${tag.title} (ID: ${tag.id})`)
+        if (uniqueTags.has(tag.value)) {
+          duplicateTags.push(tag.value)
+          console.log(`⚠️  Duplicate tag found: ${tag.value} (ID: ${tag.id})`)
         } else {
-          uniqueTags.set(tag.title, tag)
+          uniqueTags.set(tag.value, tag)
         }
       }
 
@@ -557,19 +557,19 @@ export class StaticGenerationService {
 
       await this.processWithConcurrency(uniqueTagList, async (tag) => {
         try {
-          const tagUrl = encodeURIComponent(tag.title)
+          const tagUrl = encodeURIComponent(tag.value)
           const html = await this.fetchPage(`/tags/${tagUrl}`)
 
-          const filePath = join(this.tempStaticDir, 'tags', `${tag.title}`, 'index.html')
+          const filePath = join(this.tempStaticDir, 'tags', `${tag.value}`, 'index.html')
           this.writeFile(filePath, html)
-          result.generatedFiles.push(`tags/${tag.title}/index.html`)
+          result.generatedFiles.push(`tags/${tag.value}/index.html`)
           result.totalTags++
-          successfulTags.push(tag.title)
-          console.log(`✅ Generated tag: ${tag.title} (ID: ${tag.id})`)
+          successfulTags.push(tag.value)
+          console.log(`✅ Generated tag: ${tag.value} (ID: ${tag.id})`)
         } catch (error) {
-          failedTags.push(tag.title)
-          result.errors.push(`Tag page generation failed for ${tag.title}: ${error}`)
-          console.error(`❌ Tag generation failed for ${tag.title}:`, error)
+          failedTags.push(tag.value)
+          result.errors.push(`Tag page generation failed for ${tag.value}: ${error}`)
+          console.error(`❌ Tag generation failed for ${tag.value}:`, error)
         }
       })
 

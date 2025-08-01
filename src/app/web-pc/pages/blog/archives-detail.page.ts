@@ -13,6 +13,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { HttpService, ApiResponse } from '../../services/http.service'
+import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 // Article interface
 interface Article {
@@ -55,7 +56,7 @@ interface Article {
         <span
           *ngFor="let tag of articleTags(); let i = index"
           class="blog-tag {{ getTagClass(i) }}"
-          [routerLink]="['/tags', tag]"
+          [routerLink]="['/tags', titleToUrl(tag)]"
           style="cursor: pointer"
         >
           {{ tag }}
@@ -85,6 +86,8 @@ export class ArchivesDetailPage implements OnInit {
 
   // Loading flag
   private articleLoaded = false
+
+  titleToUrl = titleToUrl
 
   // Article data signals
   articleTitle = signal<string>('')

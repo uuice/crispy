@@ -26,6 +26,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
 import { HttpService, ApiResponse } from '../../services/http.service'
 import { SsrSeoService } from '../../services/ssr-seo.service'
 import { SiteSettings } from '../../services/site-settings.service'
+import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 // Data interfaces
 interface Category {
@@ -251,7 +252,7 @@ interface PaginatedResponse<T> {
                 <span
                   *ngFor="let tag of tags(); let i = index"
                   [class]="'blog-tag ' + getTagClass(i) + ' text-xs'"
-                  [routerLink]="['/tags', tag.title]"
+                  [routerLink]="['/tags', titleToUrl(tag.title)]"
                   style="cursor: pointer;"
                 >
                   {{ tag.title }}
@@ -904,6 +905,7 @@ interface PaginatedResponse<T> {
 export class HomeLayoutComponent implements OnInit {
   private httpService = inject(HttpService)
   private transferState = inject(TransferState)
+  titleToUrl = titleToUrl
 
   // TransferState keys
   private readonly CATEGORIES_KEY = makeStateKey<Category[]>('categories')

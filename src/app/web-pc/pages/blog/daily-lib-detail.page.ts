@@ -1,4 +1,12 @@
-import { Component, signal, OnInit, inject, PLATFORM_ID, TransferState, makeStateKey } from '@angular/core'
+import {
+  Component,
+  signal,
+  OnInit,
+  inject,
+  PLATFORM_ID,
+  TransferState,
+  makeStateKey
+} from '@angular/core'
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
@@ -7,6 +15,7 @@ import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
+import { titleToUrl } from '@src/server/utils/titleToUrl'
 
 // API response interfaces
 interface ApiResponse<T> {
@@ -52,7 +61,7 @@ interface PaginatedResponse<T> {
             <p-tag
               *ngFor="let tag of lib()?.tags!.split(',')"
               [value]="tag.trim()"
-              [routerLink]="['/tags', tag]"
+              [routerLink]="['/tags', titleToUrl(tag)]"
               style="cursor: pointer"
             >
               {{ tag }}
@@ -221,6 +230,7 @@ export class DailyLibDetailPage implements OnInit {
   private sanitizer = inject(DomSanitizer)
   private platformId = inject(PLATFORM_ID)
   private transferState = inject(TransferState)
+  titleToUrl = titleToUrl
 
   private getLibKey(url: string) {
     return makeStateKey<any>(`daily-lib-${url}`)

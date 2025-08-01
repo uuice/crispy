@@ -32,7 +32,7 @@ export const routes: Routes = [
           import('./web-pc/pages/blog/categories.page').then((m) => m.CategoriesPage)
       },
       {
-        path: 'tags/:title',
+        path: 'tags/:value',
         loadComponent: () => import('./web-pc/pages/blog/tags.page').then((m) => m.TagsPage)
       },
       {

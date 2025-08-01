@@ -256,9 +256,9 @@ export class TagsPage implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      const title = params['title']
-      if (title) {
-        this.loadTagAndArticles(title)
+      const value = params['value']
+      if (value) {
+        this.loadTagAndArticles(value)
       }
     })
   }
@@ -266,10 +266,10 @@ export class TagsPage implements OnInit {
   /**
    * Load tag info and articles
    */
-  loadTagAndArticles(title: string) {
+  loadTagAndArticles(value: string) {
     // 1. 检查 TransferState
-    const cachedTag = this.transferState.get(this.getTagKey(title), null)
-    const cachedArticles = this.transferState.get(this.getArticlesKey(title), null)
+    const cachedTag = this.transferState.get(this.getTagKey(value), null)
+    const cachedArticles = this.transferState.get(this.getArticlesKey(value), null)
     if (cachedTag && cachedArticles) {
       this.tagTitle.set(cachedTag.title)
       this.tagDescription.set(cachedTag.des || '')
@@ -292,8 +292,16 @@ export class TagsPage implements OnInit {
     //     console.error('Failed to load tag:', err)
     //   }
     // })
-    this.tagTitle.set(title)
-    this.loadArticlesByTag(title, true)
+    // get tag by value
+    this.httpService.get<ApiResponse<Tag>>(`/api/content/tags/value/${value}`).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.tagTitle.set(response.data.title)
+          this.tagDescription.set(response.data.des || '')
+          this.loadArticlesByTag(response.data.title, true)
+        }
+      }
+    })
   }
 
   /**
