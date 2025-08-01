@@ -100,6 +100,16 @@ if (env['NODE_ENV'] === 'production') {
       return next()
     }
 
+    // Check if this is a static generation request
+    const isStaticGeneration =
+      req.query['static_gen'] === 'true' || req.headers['x-static-generation'] === 'true'
+
+    if (isStaticGeneration) {
+      console.log(`🔄 Static generation request detected: ${req.path}`)
+      // Skip static file serving for static generation requests
+      return next()
+    }
+
     // Check if static file exists in temp directory
     const staticPath = join(process.cwd(), 'temp', 'static', req.path, 'index.html')
 

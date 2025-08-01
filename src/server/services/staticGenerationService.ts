@@ -631,7 +631,9 @@ export class StaticGenerationService {
    * Fetch page HTML from local server with timeout and retry
    */
   private async fetchPage(path: string): Promise<string> {
-    const url = `${this.baseUrl}${path}`
+    // Add static generation identifier to skip cache
+    const separator = path.includes('?') ? '&' : '?'
+    const url = `${this.baseUrl}${path}${separator}static_gen=true`
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout)
@@ -644,7 +646,7 @@ export class StaticGenerationService {
           'Accept-Language': 'en-US,en;q=0.5',
           'Accept-Encoding': 'gzip, deflate',
           Connection: 'keep-alive',
-          'Cache-Control': 'no-cache'
+          'X-Static-Generation': 'true'
         },
         signal: controller.signal
       })
