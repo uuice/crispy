@@ -138,6 +138,14 @@ interface PaginatedResponse<T> {
           </div>
           <div class="flex items-center gap-2">
             <p-button
+              icon="pi pi-search"
+              [text]="true"
+              [rounded]="true"
+              severity="secondary"
+              size="small"
+              (click)="searchVisible.set(true)"
+            ></p-button>
+            <p-button
               [icon]="settingsService.settings().darkMode ? 'pi pi-sun' : 'pi pi-moon'"
               [text]="true"
               [rounded]="true"
@@ -196,6 +204,127 @@ interface PaginatedResponse<T> {
           </li>
         </ul>
       </p-drawer>
+      <!-- Search Drawer -->
+      <p-drawer
+        [(visible)]="searchVisible"
+        position="top"
+        [modal]="true"
+        [dismissible]="true"
+        header="搜索文章"
+        [style]="{
+          width: '100%',
+          height: '100vh',
+          background: 'var(--p-content-background)',
+          color: 'var(--p-text-color)'
+        }"
+      >
+        <div class="search-container p-6">
+          <!-- Search Input -->
+          <div class="search-input-container mb-6">
+            <div class="relative max-w-2xl mx-auto">
+              <i
+                class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="searchQuery"
+                (input)="onSearchInput($event)"
+                placeholder="输入关键词搜索文章..."
+                class="w-full pl-10 pr-4 py-3 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                [style]="{
+                  background: 'var(--p-content-background)',
+                  color: 'var(--p-text-color)',
+                  borderColor: 'var(--p-content-border-color)',
+                  textIndent: '24px'
+                }"
+              />
+              <button
+                *ngIf="searchQuery()"
+                (click)="clearSearch()"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Results -->
+          <div class="search-results max-w-4xl mx-auto">
+            <!-- Loading State -->
+            <div *ngIf="isSearching()" class="text-center py-8">
+              <i class="pi pi-spin pi-spinner text-2xl text-primary mb-2"></i>
+              <p class="text-muted">搜索中...</p>
+            </div>
+
+            <!-- No Results -->
+            <div
+              *ngIf="!isSearching() && searchQuery() && searchResults().length === 0"
+              class="text-center py-8"
+            >
+              <i class="pi pi-search text-4xl text-muted mb-4"></i>
+              <p class="text-lg text-muted mb-2">未找到相关文章</p>
+              <p class="text-sm text-muted">请尝试其他关键词</p>
+            </div>
+
+            <!-- Search Results List -->
+            <div *ngIf="!isSearching() && searchResults().length > 0" class="space-y-4">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">搜索结果 ({{ searchResults().length }})</h3>
+                <button
+                  (click)="searchVisible.set(false)"
+                  class="text-sm text-muted hover:text-primary"
+                >
+                  关闭
+                </button>
+              </div>
+
+              <div class="space-y-4">
+                <div
+                  *ngFor="let result of searchResults()"
+                  class="search-result-item p-4 border rounded-lg hover:bg-hover transition-colors cursor-pointer"
+                  (click)="onResultClick(result)"
+                >
+                  <div class="flex items-start gap-4">
+                    <div class="flex-1">
+                      <h4 class="text-lg font-medium text-main mb-2 line-clamp-2">
+                        <span [innerHTML]="result._highlight?.title || result.title"></span>
+                      </h4>
+                      <p
+                        *ngIf="result._highlight?.abstract || result.abstract"
+                        class="text-sm text-muted mb-2 line-clamp-2"
+                      >
+                        <span [innerHTML]="result._highlight?.abstract || result.abstract"></span>
+                      </p>
+                      <div class="flex items-center gap-4 text-xs text-muted">
+                        <span class="flex items-center gap-1">
+                          <i class="pi pi-calendar"></i>
+                          {{ result.create_time | date: 'yyyy-MM-dd' }}
+                        </span>
+                        <span *ngIf="result.category" class="flex items-center gap-1">
+                          <i class="pi pi-tag"></i>
+                          {{ result.category }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="pi pi-arrow-right text-muted"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Search Tips -->
+            <div *ngIf="!isSearching() && !searchQuery()" class="text-center py-8">
+              <i class="pi pi-search text-4xl text-muted mb-4"></i>
+              <p class="text-lg text-muted mb-2">搜索文章</p>
+              <p class="text-sm text-muted">输入关键词开始搜索</p>
+            </div>
+          </div>
+        </div>
+      </p-drawer>
+
       <!-- Main Content: Sidebar + Content -->
       <!-- banner -->
       <div class="w-full max-w-6xl mx-auto">
@@ -899,6 +1028,56 @@ interface PaginatedResponse<T> {
         opacity: 0.8;
         text-decoration: underline;
       }
+
+      /* Search drawer styles */
+      .search-container {
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .search-input-container {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--p-content-background);
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--p-content-border-color);
+      }
+
+      .search-result-item {
+        background: var(--p-content-background);
+        border-color: var(--p-content-border-color);
+        transition: all 0.2s ease;
+      }
+
+      .search-result-item:hover {
+        background: var(--p-content-hover-background);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .text-primary {
+        color: var(--p-primary-color);
+      }
+
+      .text-muted {
+        color: var(--p-text-muted-color);
+      }
+
+      .text-main {
+        color: var(--p-text-color);
+      }
+
+      .bg-hover {
+        background: var(--p-content-hover-background);
+      }
     `
   ]
 })
@@ -947,10 +1126,17 @@ export class HomeLayoutComponent implements OnInit {
   // Computed property to determine if sidebar should be shown (reactive to route changes)
   showSidebar = computed(() => {
     const url = this.currentUrl()
-    // Hide sidebar for /daily-lib and /daily-lib/:url
-    return !/^\/daily-lib(\/[^/]+)?$/.test(url)
+    // Hide sidebar for /daily-libs and /daily-libs/:url
+    return !/^\/daily-libs(\/[^/]+)?$/.test(url)
   })
   private platformId = inject(PLATFORM_ID)
+
+  searchVisible = signal(false)
+
+  searchQuery = signal('')
+  searchResults = signal<any[]>([])
+  isSearching = signal(false)
+  searchTimeout: any = null
 
   constructor(private router: Router) {
     // Initialize currentUrl
@@ -1173,7 +1359,7 @@ export class HomeLayoutComponent implements OnInit {
       {
         label: '每日一库',
         icon: 'pi pi-book',
-        routerLink: '/daily-lib'
+        routerLink: '/daily-libs'
       },
       {
         label: '关于',
@@ -1455,5 +1641,82 @@ export class HomeLayoutComponent implements OnInit {
           })
         }
       })
+  }
+
+  onSearchInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement
+    this.searchQuery.set(inputElement.value)
+
+    // Clear previous timeout
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout)
+    }
+
+    if (this.searchQuery().length > 0) {
+      this.searchVisible.set(true)
+      this.isSearching.set(true)
+      this.searchResults.set([]) // Clear previous results
+
+      // Debounce search
+      this.searchTimeout = setTimeout(() => {
+        this.performSearch()
+      }, 300)
+    } else {
+      // Don't close the drawer when search is empty, just clear results
+      this.isSearching.set(false)
+      this.searchResults.set([])
+    }
+  }
+
+  clearSearch() {
+    this.searchQuery.set('')
+    this.isSearching.set(false)
+    this.searchResults.set([])
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout)
+    }
+  }
+
+  performSearch() {
+    if (this.searchQuery().length === 0) {
+      this.searchResults.set([])
+      this.isSearching.set(false)
+      return
+    }
+
+    this.isSearching.set(true)
+    this.httpService
+      .get<ApiResponse<any[]>>('/api/content/search/articles', {
+        q: this.searchQuery()
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.searchResults.set(response.data)
+          } else {
+            this.searchResults.set([])
+          }
+          this.isSearching.set(false)
+        },
+        error: (err) => {
+          console.error('Failed to perform search:', err)
+          this.searchResults.set([])
+          this.isSearching.set(false)
+        }
+      })
+  }
+
+  onResultClick(result: any) {
+    // Check if the article is from daily library category
+    if (result.category_alias === 'daily-libs') {
+      this.router.navigate(['/daily-libs', result.url])
+    } else {
+      this.router.navigate(['/archives', result.url])
+    }
+
+    this.searchVisible.set(false)
+    this.searchQuery.set('')
+    this.searchResults.set([])
+    this.isSearching.set(false)
   }
 }

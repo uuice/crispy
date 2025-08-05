@@ -18,11 +18,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
-    path: 'daily-lib',
+    path: 'daily-libs',
     renderMode: RenderMode.Server
   },
   {
-    path: 'daily-lib/:url',
+    path: 'daily-libs/:url',
     renderMode: RenderMode.Server
   },
   {

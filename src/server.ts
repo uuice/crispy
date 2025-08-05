@@ -39,7 +39,7 @@ import './crons/cleanupDatabaseCache'
 import './crons/persistFlexsearchIndex'
 
 // test flexsearch
-if (env['NODE_ENV'] === 'development') {
+if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
   ;(async () => {
     const articles = await articleService.getArticles({}, { page: 1, pageSize: 1000 })
     const pages = await pageService.getPages({ page: 1, pageSize: 1000 }, {})

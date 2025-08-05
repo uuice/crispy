@@ -208,7 +208,7 @@ export class PuppeteerStaticGenerationService {
    * Create all necessary directories in advance
    */
   private async createDirectories() {
-    const directories = ['archives', 'categories', 'tags', 'pages', 'about', 'links', 'daily-lib']
+    const directories = ['archives', 'categories', 'tags', 'pages', 'about', 'links', 'daily-libs']
 
     for (const dir of directories) {
       const fullPath = join(this.staticDir, dir)
@@ -337,10 +337,10 @@ export class PuppeteerStaticGenerationService {
    */
   private async generateDailyLibPage(result: PuppeteerStaticGenerationResult) {
     try {
-      const html = await this.fetchPageWithPuppeteer('/daily-lib')
-      const filePath = join(this.staticDir, 'daily-lib', 'index.html')
+      const html = await this.fetchPageWithPuppeteer('/daily-libs')
+      const filePath = join(this.staticDir, 'daily-libs', 'index.html')
       this.writeFile(filePath, html)
-      result.generatedFiles.push('daily-lib/index.html')
+      result.generatedFiles.push('daily-libs/index.html')
       result.mainPages++
       console.log('✅ Daily lib page generated')
     } catch (error) {

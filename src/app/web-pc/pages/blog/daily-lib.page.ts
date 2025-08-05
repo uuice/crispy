@@ -95,7 +95,7 @@ interface Category {
   ],
   template: `
     <div class="lib-page-root">
-      <div class="search-bar">
+      <!-- <div class="search-bar">
         <input
           pInputText
           [ngModel]="search()"
@@ -110,7 +110,7 @@ interface Category {
           icon="pi pi-search"
           (click)="onSearchButtonClick()"
         ></button>
-      </div>
+      </div> -->
       <div class="card-list">
         <div *ngIf="loading()" class="loading-message">
           <i class="pi pi-spin pi-spinner"></i> 加载中...
@@ -454,6 +454,6 @@ export class DailyLibPage implements OnInit, OnDestroy {
   }
 
   gotoDetail(url: string) {
-    this.router.navigate(['/daily-lib', url])
+    this.router.navigate(['/daily-libs', url])
   }
 }

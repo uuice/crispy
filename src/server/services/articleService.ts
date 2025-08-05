@@ -4,6 +4,7 @@ import type { DB } from '@src/db/db.d'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
+import { flexsearchService } from './flexsearch-index.service'
 
 // Helper function to get tagRef object from tags string
 async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
@@ -106,6 +107,8 @@ export class ArticleService {
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
       .select(['categories.title as type_name'])
+      .select(['categories.title as category'])
+      .select(['categories.alias as category_alias'])
       .where('articles.id', '=', id)
       .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
@@ -129,6 +132,8 @@ export class ArticleService {
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
       .select(['categories.title as type_name'])
+      .select(['categories.alias as category_alias'])
+      .select(['categories.title as category'])
       .where('articles.url', '=', url)
       .where('articles.is_delete', '=', 0)
       .executeTakeFirst()
@@ -160,6 +165,8 @@ export class ArticleService {
       .leftJoin('categories', 'categories.id', 'articles.type_id')
       .selectAll('articles')
       .select(['categories.title as type_name'])
+      .select(['categories.title as category'])
+      .select(['categories.alias as category_alias'])
       .where('articles.is_delete', '=', 0)
 
     // Add filters if provided
@@ -314,8 +321,29 @@ export class ArticleService {
 
     const result = await db.safeInsertInto('articles').values(newArticle).executeTakeFirst()
 
+    const articleId = Number(result.insertId)
+
+    // Sync with flexsearch index
+    try {
+      const createdArticle = await this.getArticleById(articleId)
+      if (createdArticle) {
+        await flexsearchService.addArticle({
+          ...createdArticle,
+          id: articleId.toString(),
+          title: createdArticle.title || '',
+          sub_title: createdArticle.sub_title || '',
+          abstract: createdArticle.abstract || '',
+          content: createdArticle.content || '',
+          category: createdArticle.type_name || '',
+          category_alias: createdArticle.category_alias || ''
+        })
+      }
+    } catch (error) {
+      console.error('Failed to sync article to flexsearch index:', error)
+    }
+
     return {
-      id: Number(result.insertId),
+      id: articleId,
       ...newArticle
     }
   }
@@ -357,6 +385,27 @@ export class ArticleService {
       .where('is_delete', '=', 0)
       .executeTakeFirst()
 
+    // Sync with flexsearch index
+    if (result.numUpdatedRows > 0) {
+      try {
+        const updatedArticle = await this.getArticleById(id)
+        if (updatedArticle) {
+          await flexsearchService.updateArticle({
+            ...updatedArticle,
+            id: id.toString(),
+            title: updatedArticle.title || '',
+            sub_title: updatedArticle.sub_title || '',
+            abstract: updatedArticle.abstract || '',
+            content: updatedArticle.content || '',
+            category: updatedArticle.type_name || '',
+            category_alias: updatedArticle.category_alias || ''
+          })
+        }
+      } catch (error) {
+        console.error('Failed to sync updated article to flexsearch index:', error)
+      }
+    }
+
     return {
       success: result.numUpdatedRows > 0,
       numUpdatedRows: result.numUpdatedRows
@@ -376,6 +425,15 @@ export class ArticleService {
       .where('id', '=', id)
       .where('is_delete', '=', 0)
       .executeTakeFirst()
+
+    // Sync with flexsearch index
+    if (result.numUpdatedRows > 0) {
+      try {
+        await flexsearchService.removeArticle(id.toString())
+      } catch (error) {
+        console.error('Failed to remove article from flexsearch index:', error)
+      }
+    }
 
     return {
       success: result.numUpdatedRows > 0,

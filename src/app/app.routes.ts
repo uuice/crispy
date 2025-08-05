@@ -40,12 +40,12 @@ export const routes: Routes = [
         loadComponent: () => import('./web-pc/pages/blog/links.page').then((m) => m.LinksPage)
       },
       {
-        path: 'daily-lib',
+        path: 'daily-libs',
         loadComponent: () =>
           import('./web-pc/pages/blog/daily-lib.page').then((m) => m.DailyLibPage)
       },
       {
-        path: 'daily-lib/:url',
+        path: 'daily-libs/:url',
         loadComponent: () =>
           import('./web-pc/pages/blog/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
       },

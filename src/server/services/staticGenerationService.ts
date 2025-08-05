@@ -248,7 +248,7 @@ export class StaticGenerationService {
         return
       }
       const dailyLibs = await articleService.getArticles(
-        { status: 10, type_id: category.id }, // Assuming type_id 1 is for daily-lib
+        { status: 10, type_id: category.id }, // Assuming type_id 1 is for daily-libs
         { page: 1, pageSize: 10000 }
       )
       console.log(
@@ -257,10 +257,10 @@ export class StaticGenerationService {
 
       await this.processWithConcurrency(dailyLibs.dataList, async (article) => {
         try {
-          const html = await this.fetchPage(`/daily-lib/${article.url}`)
-          const filePath = join(this.tempStaticDir, 'daily-lib', `${article.url}`, 'index.html')
+          const html = await this.fetchPage(`/daily-libs/${article.url}`)
+          const filePath = join(this.tempStaticDir, 'daily-libs', `${article.url}`, 'index.html')
           this.writeFile(filePath, html)
-          result.generatedFiles.push(`daily-lib/${article.url}/index.html`)
+          result.generatedFiles.push(`daily-libs/${article.url}/index.html`)
           result.totalArticles++ // Count as articles for total
         } catch (error) {
           result.errors.push(`Daily lib detail page generation failed for ${article.url}: ${error}`)
@@ -394,10 +394,10 @@ export class StaticGenerationService {
   private async generateDailyLibPage(result: StaticGenerationResult) {
     try {
       console.log('📖 Generating daily lib page...')
-      const html = await this.fetchPage('/daily-lib')
-      const filePath = join(this.tempStaticDir, 'daily-lib', 'index.html')
+      const html = await this.fetchPage('/daily-libs')
+      const filePath = join(this.tempStaticDir, 'daily-libs', 'index.html')
       this.writeFile(filePath, html)
-      result.generatedFiles.push('daily-lib/index.html')
+      result.generatedFiles.push('daily-libs/index.html')
       result.mainPages++
 
       this.logMemoryUsage('daily lib page completed')

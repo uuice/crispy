@@ -2,6 +2,7 @@ import { db } from '@src/libs/db'
 import { sql } from 'kysely'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
+import { flexsearchService } from './flexsearch-index.service'
 
 // Helper function to get tagRef object from tags string
 async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
@@ -337,8 +338,27 @@ export class PageService {
 
     const result = await db.safeInsertInto('pages').values(newPage).executeTakeFirst()
 
+    const pageId = Number(result.insertId)
+
+    // Sync with flexsearch index
+    try {
+      const createdPage = await this.getPageById(pageId)
+      if (createdPage) {
+        await flexsearchService.addPage({
+          ...createdPage,
+          id: pageId.toString(),
+          title: createdPage.title || '',
+          sub_title: createdPage.sub_title || '',
+          abstract: createdPage.abstract || '',
+          content: createdPage.content || ''
+        })
+      }
+    } catch (error) {
+      console.error('Failed to sync page to flexsearch index:', error)
+    }
+
     return {
-      id: Number(result.insertId),
+      id: pageId,
       ...newPage
     }
   }
@@ -371,6 +391,25 @@ export class PageService {
       .where('is_delete', '=', 0)
       .executeTakeFirst()
 
+    // Sync with flexsearch index
+    if (result.numUpdatedRows > 0) {
+      try {
+        const updatedPage = await this.getPageById(id)
+        if (updatedPage) {
+          await flexsearchService.updatePage({
+            ...updatedPage,
+            id: id.toString(),
+            title: updatedPage.title || '',
+            sub_title: updatedPage.sub_title || '',
+            abstract: updatedPage.abstract || '',
+            content: updatedPage.content || ''
+          })
+        }
+      } catch (error) {
+        console.error('Failed to sync updated page to flexsearch index:', error)
+      }
+    }
+
     return result.numUpdatedRows > 0n
   }
 
@@ -387,6 +426,15 @@ export class PageService {
       .where('id', '=', id)
       .where('is_delete', '=', 0)
       .executeTakeFirst()
+
+    // Sync with flexsearch index
+    if (result.numUpdatedRows > 0) {
+      try {
+        await flexsearchService.removePage(id.toString())
+      } catch (error) {
+        console.error('Failed to remove page from flexsearch index:', error)
+      }
+    }
 
     return result.numUpdatedRows > 0n
   }

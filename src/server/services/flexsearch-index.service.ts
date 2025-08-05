@@ -10,6 +10,7 @@ export interface Article {
   abstract: string
   content: string
   category: string
+  category_alias: string
 }
 
 export interface Page {
@@ -133,7 +134,7 @@ export const flexsearchService = {
     dailyIndex = createDailyIndex()
     for (const article of articles) {
       articleIndex.add(article as any)
-      if (article.category === '每日类库') dailyIndex.add(article as any)
+      if (article.category_alias === 'daily-libs') dailyIndex.add(article as any)
     }
     for (const page of pages) {
       pageIndex.add(page as any)
@@ -141,11 +142,11 @@ export const flexsearchService = {
   },
   async addArticle(article: Article) {
     await articleIndex.add(article as any)
-    if (article.category === '每日类库') await dailyIndex.add(article as any)
+    if (article.category_alias === 'daily-libs') await dailyIndex.add(article as any)
   },
   async updateArticle(article: Article) {
     await articleIndex.update(article as any)
-    if (article.category === '每日类库') await dailyIndex.update(article as any)
+    if (article.category_alias === 'daily-libs') await dailyIndex.update(article as any)
     else await dailyIndex.remove(article.id)
   },
   async removeArticle(id: string) {
