@@ -1015,7 +1015,7 @@ interface PaginatedResponse<T> {
       }
 
       .record-info {
-        border-top: 1px solid var(--p-content-border-color, #e5e7eb);
+        // border-top: 1px solid var(--p-content-border-color, #e5e7eb);
       }
 
       .record-link {
