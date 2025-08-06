@@ -148,7 +148,7 @@ async function generateArticleContent(topic: string) {
 3. 使用开发者熟悉的技术术语
 4. 平衡通用性和专业性`
 
-    const tagsPrompt = `为JavaScript技术文章"${title}"生成5个相关标签，要求：
+    const tagsPrompt = `为JavaScript技术文章"${title}"生成10个相关标签，要求：
 1. 标签要准确反映文章内容
 2. 包含技术关键词
 3. 用逗号分隔
@@ -163,7 +163,7 @@ async function generateArticleContent(topic: string) {
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean)
-      .slice(0, 5)
+      .slice(0, 10)
       .join(',')
 
     // Convert Markdown to HTML
