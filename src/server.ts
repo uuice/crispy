@@ -38,6 +38,9 @@ import './crons/cleanupMemoryCache'
 import './crons/cleanupDatabaseCache'
 import './crons/persistFlexsearchIndex'
 
+// 定时生成JavaScript文章
+import './crons/generateJSArticles'
+
 // test flexsearch
 if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
   ;(async () => {

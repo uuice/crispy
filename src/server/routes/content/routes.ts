@@ -31,6 +31,7 @@ import { systemRouterController } from './system'
 import { flexsearchService } from '../../services/flexsearch-index.service'
 import { searchController } from './search'
 import { getSiteSettings } from './site-settings'
+import { openaiController } from './openai'
 
 // Define token info interface
 interface TokenInfo {
@@ -221,5 +222,15 @@ router.get('/system/getSystemInfo', systemRouterController.getSystemInfo)
 router.get('/search/articles', searchController.searchArticles)
 router.get('/search/pages', searchController.searchPages)
 router.get('/search/daily', searchController.searchDaily)
+
+// OpenAI AI 服务接口
+router.get('/ai/test', openaiController.testConnection)
+router.post('/ai/summary', openaiController.generateSummary)
+router.post('/ai/tags', openaiController.generateTags)
+router.post('/ai/seo-description', openaiController.generateSEODescription)
+router.post('/ai/translate', openaiController.translateText)
+router.post('/ai/explain-code', openaiController.explainCode)
+router.post('/ai/titles', openaiController.generateTitles)
+router.post('/ai/chat', openaiController.chat)
 
 export default router
