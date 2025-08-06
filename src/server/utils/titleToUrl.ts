@@ -14,13 +14,18 @@ export const titleToUrl = (title: string): string => {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .toLowerCase()
+    // Remove the first and last hyphen
+    url = url.replace(/^-|-$/g, '')
     return url
   } else {
     // If the title does not have Chinese, replace the space and convert to lowercase
-    return title
+    let url = title
       .replace(/[^a-zA-Z-\s]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .toLowerCase()
+    // Remove the first and last hyphen
+    url = url.replace(/^-|-$/g, '')
+    return url
   }
 }
