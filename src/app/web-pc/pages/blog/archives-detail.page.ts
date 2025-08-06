@@ -2,10 +2,12 @@ import {
   Component,
   signal,
   OnInit,
+  AfterViewInit,
   inject,
   PLATFORM_ID,
   TransferState,
-  makeStateKey
+  makeStateKey,
+  ElementRef
 } from '@angular/core'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
@@ -13,6 +15,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { HttpService, ApiResponse } from '../../services/http.service'
+import hljs from 'highlight.js'
 
 // Article interface
 interface Article {
@@ -68,12 +71,13 @@ interface Article {
   `,
   styles: []
 })
-export class ArchivesDetailPage implements OnInit {
+export class ArchivesDetailPage implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute)
   private httpService = inject(HttpService)
   private sanitizer = inject(DomSanitizer)
   private platformId = inject(PLATFORM_ID)
   private transferState = inject(TransferState)
+  private elementRef = inject(ElementRef)
 
   // TransferState keys - will be created dynamically based on URL
   private getArticleKey(url: string) {
@@ -107,6 +111,30 @@ export class ArchivesDetailPage implements OnInit {
   ]
 
   ngOnInit() {
+    // Configure highlight.js
+    hljs.configure({
+      languages: [
+        'javascript',
+        'typescript',
+        'html',
+        'css',
+        'python',
+        'java',
+        'cpp',
+        'c',
+        'php',
+        'ruby',
+        'go',
+        'rust',
+        'sql',
+        'json',
+        'xml',
+        'yaml',
+        'bash',
+        'shell'
+      ]
+    })
+
     // Get url parameter from route
     this.route.params.subscribe((params) => {
       const url = params['url']
@@ -115,6 +143,34 @@ export class ArchivesDetailPage implements OnInit {
         this.loadArticle(url)
       }
     })
+  }
+
+  ngAfterViewInit() {
+    // Apply code highlighting after view is initialized
+    this.applyCodeHighlighting()
+  }
+
+  /**
+   * Apply code highlighting to all code blocks in the content
+   */
+  private applyCodeHighlighting() {
+    if (isPlatformBrowser(this.platformId)) {
+      // Wait for the next tick to ensure DOM is updated
+      setTimeout(() => {
+        // Find all code blocks - both pre code and standalone pre elements
+        const codeBlocks = this.elementRef.nativeElement.querySelectorAll('pre code, pre')
+        codeBlocks.forEach((codeBlock: HTMLElement) => {
+          // Check if the code block is already highlighted
+          if (!codeBlock.classList.contains('hljs')) {
+            try {
+              hljs.highlightElement(codeBlock)
+            } catch (error) {
+              console.warn('Failed to highlight code block:', error)
+            }
+          }
+        })
+      }, 100) // Increased timeout to ensure content is fully rendered
+    }
   }
 
   /**
@@ -145,6 +201,11 @@ export class ArchivesDetailPage implements OnInit {
       this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedArticleData.html))
       this.toc.set(cachedTocData)
       this.articleLoaded = true
+
+      // Apply code highlighting after content is loaded from cache
+      setTimeout(() => {
+        this.applyCodeHighlighting()
+      }, 0)
       return
     }
 
@@ -176,6 +237,11 @@ export class ArchivesDetailPage implements OnInit {
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
           this.toc.set(toc)
           this.articleLoaded = true
+
+          // Apply code highlighting after content is loaded
+          setTimeout(() => {
+            this.applyCodeHighlighting()
+          }, 0)
 
           // Store in TransferState on server-side
           if (isPlatformServer(this.platformId)) {

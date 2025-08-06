@@ -2,12 +2,14 @@ import {
   Component,
   signal,
   OnInit,
+  AfterViewInit,
   inject,
   PLATFORM_ID,
   TransferState,
-  makeStateKey
+  makeStateKey,
+  ElementRef
 } from '@angular/core'
-import { CommonModule, isPlatformServer } from '@angular/common'
+import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
@@ -15,6 +17,7 @@ import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
+import hljs from 'highlight.js'
 
 // API response interfaces
 interface ApiResponse<T> {
@@ -222,12 +225,13 @@ interface PaginatedResponse<T> {
     `
   ]
 })
-export class DailyLibDetailPage implements OnInit {
+export class DailyLibDetailPage implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute)
   private httpService = inject(HttpService)
   private sanitizer = inject(DomSanitizer)
   private platformId = inject(PLATFORM_ID)
   private transferState = inject(TransferState)
+  private elementRef = inject(ElementRef)
 
   private getLibKey(url: string) {
     return makeStateKey<any>(`daily-lib-${url}`)
@@ -241,12 +245,64 @@ export class DailyLibDetailPage implements OnInit {
   toc = signal<TocItem[]>([])
 
   ngOnInit() {
+    // Configure highlight.js
+    hljs.configure({
+      languages: [
+        'javascript',
+        'typescript',
+        'html',
+        'css',
+        'python',
+        'java',
+        'cpp',
+        'c',
+        'php',
+        'ruby',
+        'go',
+        'rust',
+        'sql',
+        'json',
+        'xml',
+        'yaml',
+        'bash',
+        'shell'
+      ]
+    })
+
     this.route.params.subscribe((params) => {
       const url = params['url']
       if (url) {
         this.loadArticleByUrl(url)
       }
     })
+  }
+
+  ngAfterViewInit() {
+    // Apply code highlighting after view is initialized
+    this.applyCodeHighlighting()
+  }
+
+  /**
+   * Apply code highlighting to all code blocks in the content
+   */
+  private applyCodeHighlighting() {
+    if (isPlatformBrowser(this.platformId)) {
+      // Wait for the next tick to ensure DOM is updated
+      setTimeout(() => {
+        // Find all code blocks - both pre code and standalone pre elements
+        const codeBlocks = this.elementRef.nativeElement.querySelectorAll('pre code, pre')
+        codeBlocks.forEach((codeBlock: HTMLElement) => {
+          // Check if the code block is already highlighted
+          if (!codeBlock.classList.contains('hljs')) {
+            try {
+              hljs.highlightElement(codeBlock)
+            } catch (error) {
+              console.warn('Failed to highlight code block:', error)
+            }
+          }
+        })
+      }, 100) // Increased timeout to ensure content is fully rendered
+    }
   }
 
   /**
@@ -259,6 +315,11 @@ export class DailyLibDetailPage implements OnInit {
       this.lib.set(cachedLib)
       this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedLib.html))
       this.toc.set(cachedToc)
+
+      // Apply code highlighting after content is loaded from cache
+      setTimeout(() => {
+        this.applyCodeHighlighting()
+      }, 0)
       return
     }
     this.httpService.get<ApiResponse<Article>>(`/api/content/articles/url/${url}`).subscribe({
@@ -270,6 +331,12 @@ export class DailyLibDetailPage implements OnInit {
           const { html, toc } = generateTocAndHeadings(response.data.content || '')
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
           this.toc.set(toc)
+
+          // Apply code highlighting after content is loaded
+          setTimeout(() => {
+            this.applyCodeHighlighting()
+          }, 0)
+
           if (isPlatformServer(this.platformId)) {
             // Store complete article data including tagRef
             this.transferState.set(this.getLibKey(url), {

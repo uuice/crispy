@@ -207,7 +207,7 @@ async function generateAndSaveArticle(): Promise<any> {
       is_markdown: 1, // Mark as markdown content
       tags: articleData.tags,
       type_id: 9, // Assuming category ID 1 for JavaScript articles, adjust as needed
-      status: 20, // Published status
+      status: 10, // Published status
       user_id: 1, // System user ID, adjust as needed
       author_id: 1, // System author ID, adjust as needed
       seo_title: articleData.title,
@@ -238,10 +238,10 @@ setInterval(
   async () => {
     await generateAndSaveArticle()
   },
-  2 * 60 * 60 * 1000 // 2 hours
+  1 * 60 * 60 * 1000 // 1 hours
 )
 
-console.log('[JS Article Generator] Scheduled to run every 2 hours')
+console.log('[JS Article Generator] Scheduled to run every 1 hours')
 
 // Export for manual execution if needed
 export { generateAndSaveArticle, getRandomTopic, generateArticleContent }

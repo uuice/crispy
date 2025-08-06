@@ -2,16 +2,19 @@ import {
   Component,
   signal,
   OnInit,
+  AfterViewInit,
   inject,
   PLATFORM_ID,
   TransferState,
-  makeStateKey
+  makeStateKey,
+  ElementRef
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { isPlatformServer, isPlatformBrowser } from '@angular/common'
 import { generateTocAndHeadings, TocItem } from 'src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
 import { HttpService, ApiResponse } from '../../services/http.service'
+import hljs from 'highlight.js'
 
 @Component({
   selector: 'cs-about',
@@ -38,11 +41,12 @@ import { HttpService, ApiResponse } from '../../services/http.service'
   `,
   styles: []
 })
-export class AboutPage implements OnInit {
+export class AboutPage implements OnInit, AfterViewInit {
   private httpService = inject(HttpService)
   private sanitizer = inject(DomSanitizer)
   private platformId = inject(PLATFORM_ID)
   private transferState = inject(TransferState)
+  private elementRef = inject(ElementRef)
 
   // TransferState keys
   private readonly ABOUT_PAGE_KEY = makeStateKey<any>('aboutPage')
@@ -57,8 +61,60 @@ export class AboutPage implements OnInit {
   toc = signal<TocItem[]>([])
 
   ngOnInit() {
+    // Configure highlight.js
+    hljs.configure({
+      languages: [
+        'javascript',
+        'typescript',
+        'html',
+        'css',
+        'python',
+        'java',
+        'cpp',
+        'c',
+        'php',
+        'ruby',
+        'go',
+        'rust',
+        'sql',
+        'json',
+        'xml',
+        'yaml',
+        'bash',
+        'shell'
+      ]
+    })
+
     // Load data - TransferState will handle caching automatically
     this.loadPageData()
+  }
+
+  ngAfterViewInit() {
+    // Apply code highlighting after view is initialized
+    this.applyCodeHighlighting()
+  }
+
+  /**
+   * Apply code highlighting to all code blocks in the content
+   */
+  private applyCodeHighlighting() {
+    if (isPlatformBrowser(this.platformId)) {
+      // Wait for the next tick to ensure DOM is updated
+      setTimeout(() => {
+        // Find all code blocks - both pre code and standalone pre elements
+        const codeBlocks = this.elementRef.nativeElement.querySelectorAll('pre code, pre')
+        codeBlocks.forEach((codeBlock: HTMLElement) => {
+          // Check if the code block is already highlighted
+          if (!codeBlock.classList.contains('hljs')) {
+            try {
+              hljs.highlightElement(codeBlock)
+            } catch (error) {
+              console.warn('Failed to highlight code block:', error)
+            }
+          }
+        })
+      }, 100) // Increased timeout to ensure content is fully rendered
+    }
   }
 
   /**
@@ -74,6 +130,11 @@ export class AboutPage implements OnInit {
       this.html.set(this.sanitizer.bypassSecurityTrustHtml(cachedPageData.html))
       this.toc.set(cachedTocData)
       this.aboutPageLoaded = true
+
+      // Apply code highlighting after content is loaded from cache
+      setTimeout(() => {
+        this.applyCodeHighlighting()
+      }, 0)
       return
     }
 
@@ -91,6 +152,11 @@ export class AboutPage implements OnInit {
           this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
           this.toc.set(toc)
           this.aboutPageLoaded = true
+
+          // Apply code highlighting after content is loaded
+          setTimeout(() => {
+            this.applyCodeHighlighting()
+          }, 0)
 
           // Store in TransferState on server-side
           if (isPlatformServer(this.platformId)) {
