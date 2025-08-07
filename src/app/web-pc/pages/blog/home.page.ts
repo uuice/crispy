@@ -160,7 +160,7 @@ export class HomePage implements OnInit {
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         page: 1,
-        pageSize: 4,
+        pageSize: 100,
         status: 10,
         attrs: 'hot'
       })

@@ -1439,7 +1439,7 @@ export class HomeLayoutComponent implements OnInit {
     this.httpService
       .get<ApiResponse<PaginatedResponse<Tag>>>('/api/content/tags', {
         page: 1,
-        pageSize: 20
+        pageSize: 1000
       })
       .subscribe({
         next: (response) => {
@@ -1474,7 +1474,7 @@ export class HomeLayoutComponent implements OnInit {
     this.httpService
       .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
         page: 1,
-        pageSize: 5,
+        pageSize: 10,
         status: 10
       })
       .subscribe({
