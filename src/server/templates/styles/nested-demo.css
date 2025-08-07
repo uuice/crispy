@@ -1,0 +1,204 @@
+/* PostCSS Nested Demo - 类似 Less 的嵌套功能 */
+
+/* 1. 基础嵌套 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+
+  /* 嵌套子元素 */
+  .header {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+
+    /* 更深层嵌套 */
+    h1 {
+      margin: 0;
+      color: #333;
+      font-size: 2rem;
+
+      /* 嵌套伪元素 */
+      &::after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 3px;
+        background: #007bff;
+        margin-top: 0.5rem;
+      }
+    }
+  }
+
+  .content {
+    padding: 2rem 0;
+
+    /* 嵌套伪类 */
+    &:hover {
+      background: #f8f9fa;
+    }
+
+    /* 嵌套媒体查询 */
+    @media (max-width: 768px) {
+      padding: 1rem 0;
+    }
+  }
+}
+
+/* 2. 复杂嵌套示例 */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  /* 嵌套状态 */
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* 嵌套修饰符 */
+  &.featured {
+    border: 2px solid #007bff;
+
+    .card-header {
+      background: #007bff;
+      color: white;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .card-header {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+
+  .card-body {
+    padding: 1rem;
+
+    p {
+      margin: 0 0 1rem 0;
+      line-height: 1.6;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .card-footer {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &.primary {
+        background: #007bff;
+        color: white;
+
+        &:hover {
+          background: #0056b3;
+        }
+      }
+
+      &.secondary {
+        background: #6c757d;
+        color: white;
+
+        &:hover {
+          background: #545b62;
+        }
+      }
+    }
+  }
+}
+
+/* 3. 嵌套与 Tailwind @apply 结合 */
+.custom-button {
+  @apply inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors;
+
+  /* 嵌套状态 */
+  &:hover {
+    @apply shadow-md;
+  }
+
+  &:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+
+  /* 嵌套变体 */
+  &.primary {
+    @apply bg-blue-500 text-white;
+
+    &:hover {
+      @apply bg-blue-600;
+    }
+  }
+
+  &.secondary {
+    @apply bg-gray-200 text-gray-800;
+
+    &:hover {
+      @apply bg-gray-300;
+    }
+  }
+
+  &.danger {
+    @apply bg-red-500 text-white;
+
+    &:hover {
+      @apply bg-red-600;
+    }
+  }
+}
+
+/* 4. 嵌套媒体查询 */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+
+  /* 移动端 */
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  /* 平板 */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 桌面端 */
+  @media (min-width: 1025px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    /* 嵌套媒体查询 */
+    @media (max-width: 640px) {
+      padding: 0.75rem;
+    }
+  }
+}

@@ -1,0 +1,119 @@
+/* Test nested CSS with postcss-nested */
+
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+
+  /* Nested selector */
+  .card-header {
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+
+    /* About page styles */
+    a {
+      @apply dark:text-gray-300 dark:hover:bg-gray-700;
+    }
+
+
+    /* Deep nesting */
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+
+      /* Even deeper nesting */
+      .highlight {
+        color: #3b82f6;
+      }
+    }
+  }
+
+  .card-content {
+    color: #374151;
+
+    /* Nested pseudo-selectors */
+    &:hover {
+      color: #1f2937;
+    }
+
+    /* Nested media queries */
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
+  }
+
+  /* Nested pseudo-classes */
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Nested pseudo-elements */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 8px 8px 0 0;
+  }
+}
+
+/* Complex nesting example */
+.button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  /* Nested variants */
+  &.primary {
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      background: #2563eb;
+    }
+
+    &:active {
+      background: #1d4ed8;
+    }
+  }
+
+  &.secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+
+    &:hover {
+      background: #e5e7eb;
+      border-color: #9ca3af;
+    }
+  }
+
+  /* Nested states */
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background: inherit;
+    }
+  }
+
+  /* Nested with @apply (Tailwind) */
+  &.with-tailwind {
+    @apply bg-blue-500 text-white px-4 py-2 rounded-lg;
+
+    &:hover {
+      @apply bg-blue-600;
+    }
+  }
+}

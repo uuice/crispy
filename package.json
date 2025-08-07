@@ -43,12 +43,9 @@
     "pm2:logs": "pm2 logs",
     "pm2:monit": "pm2 monit",
     "pm2:status": "pm2 status",
-    "templates": "bun run templates:build && bun run",
-    "templates:build": "bun run scripts/build-templates.ts build",
-    "templates:watch": "bun run scripts/build-templates.ts watch",
-    "templates:build:prod": "bun run scripts/build-templates.ts build:prod",
-    "templates:clean": "bun run scripts/build-templates.ts clean",
-    "templates:dev": "bun run templates:build && bun run templates:watch"
+    "templates:style:build": "bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css",
+    "templates:style:watch": "bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css --watch",
+    "templates:style:build:prod": "$env:NODE_ENV=\"production\"; bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css"
   },
   "private": true,
   "dependencies": {
@@ -130,8 +127,9 @@
     "less": "^4.4.0",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
-    "postcss-import": "^16.1.1",
-    "postcss-less": "^6.0.0",
+    "postcss-import": "^15.1.0",
+    "postcss-nested": "^7.0.2",
+    "postcss-nesting": "^13.0.2",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.8.3"

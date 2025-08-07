@@ -1,0 +1,4 @@
+/* Index page styles */
+.card-title {
+  @apply text-xl font-semibold text-gray-800 mb-2;
+}
