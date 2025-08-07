@@ -183,7 +183,6 @@ function main(): void {
     showDirectoryTree(serverDir, '', 3)
 
     process.exit(0)
-
   } catch (error) {
     console.error('❌ 复制过程中发生错误:', error)
     process.exit(1)
