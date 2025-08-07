@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templates Demo - Crispy</title>
+    <link rel="stylesheet" href="/assets/styles/templates.css">
+    <link rel="stylesheet" href="/assets/styles/templates.compiled.css">
+</head>
+<body class="bg-gray-50">
+    <div class="template-container">
+        <!-- Header with Tailwind classes -->
+        <header class="template-header">
+            <h1 class="text-4xl font-bold mb-2">Templates Demo</h1>
+            <p class="text-xl opacity-90">Showcasing Tailwind CSS and Less integration</p>
+        </header>
+
+        <!-- Navigation with custom Less classes -->
+        <nav class="template-nav">
+            <ul>
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main content area -->
+        <main class="template-content">
+            <h2 class="text-2xl font-semibold mb-4">Welcome to Templates</h2>
+
+            <!-- Tailwind CSS example -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Tailwind CSS Example</h3>
+                <p class="text-gray-600 mb-4">
+                    This section uses Tailwind CSS classes for styling. You can use any Tailwind utility classes directly in your templates.
+                </p>
+                <div class="flex gap-4">
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Primary Button
+                    </button>
+                    <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Secondary Button
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Less classes example -->
+            <div class="template-card">
+                <h3 class="card-title">Custom Less Classes Example</h3>
+                <p class="card-content">
+                    This section uses custom Less classes defined in <code>templates.less</code>. These classes provide consistent styling across all templates.
+                </p>
+                <button class="card-button">Custom Button</button>
+            </div>
+
+            <!-- Alert examples using Less classes -->
+            <div class="mt-6 space-y-4">
+                <div class="template-alert alert-success">
+                    <strong>Success!</strong> This is a success alert using Less variables.
+                </div>
+                <div class="template-alert alert-warning">
+                    <strong>Warning!</strong> This is a warning alert using Less variables.
+                </div>
+                <div class="template-alert alert-error">
+                    <strong>Error!</strong> This is an error alert using Less variables.
+                </div>
+            </div>
+
+            <!-- Form example using Less classes -->
+            <div class="template-form mt-6">
+                <h3 class="text-xl font-semibold mb-4">Form Example</h3>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+                <button class="form-button">Submit</button>
+            </div>
+
+            <!-- Responsive design example -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm border">
+                    <h4 class="font-semibold text-gray-800 mb-2">Card 1</h4>
+                    <p class="text-gray-600 text-sm">Responsive grid layout using Tailwind CSS.</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border">
+                    <h4 class="font-semibold text-gray-800 mb-2">Card 2</h4>
+                    <p class="text-gray-600 text-sm">Cards automatically stack on mobile devices.</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border">
+                    <h4 class="font-semibold text-gray-800 mb-2">Card 3</h4>
+                    <p class="text-gray-600 text-sm">Built with modern CSS Grid and Flexbox.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="template-footer">
+            <p>&copy; 2024 Crispy Templates. Built with Tailwind CSS and Less.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        // Add some basic interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation active state
+            const navLinks = document.querySelectorAll('.template-nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Button hover effects
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-1px)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
