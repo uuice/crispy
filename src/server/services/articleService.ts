@@ -80,6 +80,7 @@ export interface ArticleFilters {
   publish_end?: number
   has_image?: boolean
   has_redirect_url?: boolean
+  attrs?: string
 }
 
 export interface PaginationParams {
@@ -194,6 +195,11 @@ export class ArticleService {
     if (filters.tag) {
       query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tag}%`)
     }
+
+    if (filters.attrs) {
+      query = query.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
+    }
+
     if (filters.tags) {
       query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
     }
