@@ -233,15 +233,15 @@ async function generateAndSaveArticle(): Promise<any> {
 // Run immediately on startup (optional)
 // generateAndSaveArticle()
 
-// Schedule to run every 2 hours (7200000 ms)
-setInterval(
-  async () => {
-    await generateAndSaveArticle()
-  },
-  1 * 60 * 60 * 1000 // 1 hours
-)
+// Schedule to run every 2 hours (7200000 ms) - REMOVED: Now controlled by server.ts
+// setInterval(
+//   async () => {
+//     await generateAndSaveArticle()
+//   },
+//   1 * 60 * 60 * 1000 // 1 hours
+// )
 
-console.log('[JS Article Generator] Scheduled to run every 1 hours')
+// console.log('[JS Article Generator] Scheduled to run every 1 hours')
 
 // Export for manual execution if needed
 export { generateAndSaveArticle, getRandomTopic, generateArticleContent }

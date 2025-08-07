@@ -38,8 +38,29 @@ import './crons/cleanupMemoryCache'
 import './crons/cleanupDatabaseCache'
 import './crons/persistFlexsearchIndex'
 
-// 定时生成JavaScript文章
-import './crons/generateJSArticles'
+// 定时生成JavaScript文章 - 根据环境变量控制是否启用
+if (env['ENABLE_JS_ARTICLE_GENERATION'] === 'true') {
+  const jsArticleInterval = parseInt(env['JS_ARTICLE_GENERATION_INTERVAL'] || '7200000', 10) // 默认2小时
+  console.log(
+    `[JS Article Generator] Enabled with interval: ${jsArticleInterval}ms (${
+      jsArticleInterval / 1000 / 60
+    } minutes)`
+  )
+  import('./crons/generateJSArticles')
+    .then(({ generateAndSaveArticle }) => {
+      // 立即执行一次
+      generateAndSaveArticle()
+      // 设置定时执行
+      setInterval(generateAndSaveArticle, jsArticleInterval)
+    })
+    .catch((error) => {
+      console.error('[JS Article Generator] Failed to load:', error)
+    })
+} else {
+  console.log(
+    '[JS Article Generator] Disabled by environment variable ENABLE_JS_ARTICLE_GENERATION'
+  )
+}
 
 // test flexsearch
 if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {

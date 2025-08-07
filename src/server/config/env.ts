@@ -44,6 +44,10 @@ export const env = {
   ['LOG_LEVEL']: process.env['LOG_LEVEL'] || 'debug',
   ['LOG_FORMAT']: process.env['LOG_FORMAT'] || 'dev',
 
+  // JavaScript Article Generation
+  ['ENABLE_JS_ARTICLE_GENERATION']: process.env['ENABLE_JS_ARTICLE_GENERATION'] || 'false',
+  ['JS_ARTICLE_GENERATION_INTERVAL']: process.env['JS_ARTICLE_GENERATION_INTERVAL'] || '7200000', // 默认2小时 (毫秒)
+
   // Helper functions
   isDevelopment: () => env['NODE_ENV'] === 'development',
   isProduction: () => env['NODE_ENV'] === 'production',
