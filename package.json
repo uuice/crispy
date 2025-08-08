@@ -45,7 +45,7 @@
     "pm2:status": "pm2 status",
     "templates:style:build": "bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css",
     "templates:style:watch": "bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css --watch",
-    "templates:style:build:prod": "$env:NODE_ENV=\"production\"; bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css"
+    "templates:style:build:prod": "NODE_ENV=production bun x postcss src/server/templates/styles/style.css -o public/assets/styles/style.css"
   },
   "private": true,
   "dependencies": {
