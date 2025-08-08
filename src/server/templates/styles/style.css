@@ -1,18 +1,10 @@
-/* Tailwind CSS input file for templates */
-/* This file is used as input for Tailwind CSS processing */
-
-/* Import custom styles first */
-@import "about.css";
-@import "index.css";
-@import "nested-test.css";
-@import "nested-demo.css";
-
 /* Import Tailwind directives */
+@import "variables.css";
+@import "display-setting.css";
+@import "main.css";
+@import "back-to-top.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom template styles will be added here */
-
-
 

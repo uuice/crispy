@@ -1,0 +1,84 @@
+{% extends "base.njk" %}
+
+{% block title %}每日库 - Fuwari{% endblock %}
+
+{% block description %}每日库 - 浏览所有文章按日期归档{% endblock %}
+
+{% block content %}
+<!-- 归档标题 -->
+<div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-8 mb-8">
+  <div class="flex items-center space-x-3 mb-4">
+    <div class="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center">
+      <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+    </div>
+    <div>
+      <h1 class="text-3xl font-bold text-[var(--deep-text)]">每日库</h1>
+      <p class="text-[var(--btn-content)] mt-1">Browse all posts by date</p>
+      <div class="mt-2 text-sm text-[var(--meta-divider)]">
+        Total {{ articles.length }} posts
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 文章归档列表 -->
+<div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] overflow-hidden">
+  {% set currentYear = '' %}
+  {% set currentMonth = '' %}
+
+  {% for article in articles %}
+    {% set articleYear = article.create_time | dateFormat('YYYY') %}
+    {% set articleMonth = article.create_time | dateFormat('YYYY-MM') %}
+
+    <!-- 年份标题 -->
+    {% if articleYear != currentYear %}
+      {% set currentYear = articleYear %}
+      <div class="border-b border-[var(--line-divider)] p-6 bg-[var(--btn-regular-bg)]">
+        <h2 class="text-2xl font-bold text-[var(--deep-text)]">{{ articleYear }}</h2>
+      </div>
+    {% endif %}
+
+    <!-- 月份标题 -->
+    {% if articleMonth != currentMonth %}
+      {% set currentMonth = articleMonth %}
+      <div class="border-b border-[var(--line-divider)] p-6 bg-[var(--card-bg)]">
+        <h3 class="text-lg font-semibold text-[var(--deep-text)] mb-4">{{ articleMonth }}月</h3>
+      </div>
+    {% endif %}
+
+    <!-- 文章项 -->
+    <div class="p-6 border-b border-[var(--line-divider)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <a href="/archives/{{ article.url }}" class="text-lg font-semibold text-[var(--deep-text)] hover:text-[var(--primary)] transition-colors block mb-2">
+            {{ article.title }}
+          </a>
+          {% if article.summary %}
+          <p class="text-[var(--btn-content)] text-sm line-clamp-1">{{ article.summary }}</p>
+          {% endif %}
+        </div>
+        <div class="text-right text-sm text-[var(--meta-divider)] ml-4">
+          <div class="font-medium">{{ article.create_time | dateFormat('MM-DD') }}</div>
+          <div class="text-xs">{{ article.words or 0 }} words</div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if articles.length === 0 %}
+<div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-12 text-center">
+  <div class="w-16 h-16 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+    <svg class="w-8 h-8 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+  </div>
+  <h3 class="text-xl font-semibold text-[var(--deep-text)] mb-2">暂无文章</h3>
+  <p class="text-[var(--btn-content)]">目前还没有发布任何文章，敬请期待...</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% endblock %}

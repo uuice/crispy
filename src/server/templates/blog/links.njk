@@ -1,0 +1,75 @@
+{% extends "base.njk" %}
+
+{% block title %}友情链接 - {{ siteConfig.site_name or 'Fuwari' }}{% endblock %}
+
+{% block description %}友情链接列表 - 值得推荐的网站和博客{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+  <!-- 页面标题 -->
+  <div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-8">
+    <div class="flex items-center space-x-3 mb-4">
+      <div class="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-[var(--deep-text)]">友情链接</h1>
+        <p class="text-[var(--btn-content)] mt-1">这里是一些值得推荐的网站和博客</p>
+      </div>
+    </div>
+  </div>
+
+  {% if links and links.length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for link in links %}
+        <div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-6 hover:shadow-xl transition-all duration-300 group">
+          <div class="flex items-center mb-4">
+            {% if link.logo %}
+              <img src="{{ link.logo }}" alt="{{ link.site_name }}" class="w-12 h-12 rounded-lg mr-4 object-cover border border-[var(--line-divider)]">
+            {% else %}
+              <div class="w-12 h-12 bg-[var(--primary)]/20 rounded-lg mr-4 flex items-center justify-center border border-[var(--line-divider)]">
+                <span class="text-[var(--primary)] font-bold text-lg">{{ link.site_name[0] }}</span>
+              </div>
+            {% endif %}
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-[var(--deep-text)] group-hover:text-[var(--primary)] transition-colors">{{ link.site_name }}</h3>
+              {% if link.type_name %}
+                <span class="text-sm text-[var(--meta-divider)]">{{ link.type_name }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if link.des %}
+            <p class="text-[var(--btn-content)] text-sm mb-4 line-clamp-2">{{ link.des }}</p>
+          {% endif %}
+
+          <div class="flex justify-between items-center">
+            <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center space-x-2 px-4 py-2 bg-[var(--btn-regular-bg)] text-[var(--btn-content)] rounded-lg hover:bg-[var(--btn-regular-bg-hover)] transition-colors text-sm font-medium">
+              <span>访问网站</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+            </a>
+            {% if link.method %}
+              <span class="text-xs text-[var(--meta-divider)] bg-[var(--btn-regular-bg)] px-2 py-1 rounded">{{ link.method }}</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-12 text-center">
+      <div class="w-16 h-16 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-[var(--deep-text)] mb-2">暂无友情链接</h3>
+      <p class="text-[var(--btn-content)]">目前还没有添加友情链接，敬请期待...</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

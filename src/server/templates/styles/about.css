@@ -1,4 +1,0 @@
-/* About page styles */
-a {
-  @apply dark:text-gray-300 dark:hover:bg-gray-700;
-}

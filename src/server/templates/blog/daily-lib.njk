@@ -31,7 +31,7 @@
 
       <!-- title -->
       <h1 class="text-3xl md:text-4xl font-bold text-[var(--deep-text)] mb-6 relative">
-        {{ article.title or "Markdown Extended Features" }}
+        {{ article.title }}
       </h1>
 
       <!-- metadata -->
@@ -43,7 +43,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
           </div>
-          <span class="text-sm font-medium text-[var(--btn-content)]">{{ article.create_time | dateFormat('YYYY-MM-DD') or "2024-05-01" }}</span>
+          <span class="text-sm font-medium text-[var(--btn-content)]">{{ article.create_time | dateFormat('YYYY-MM-DD') }}</span>
         </div>
 
         <!-- categories -->
