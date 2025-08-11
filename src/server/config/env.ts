@@ -48,6 +48,8 @@ export const env = {
   ['ENABLE_JS_ARTICLE_GENERATION']: process.env['ENABLE_JS_ARTICLE_GENERATION'] || 'false',
   ['JS_ARTICLE_GENERATION_INTERVAL']: process.env['JS_ARTICLE_GENERATION_INTERVAL'] || '7200000', // 默认2小时 (毫秒)
 
+  ['TEMPLATE_ENGINE_ENABLE']: process.env['TEMPLATE_ENGINE_ENABLE'] || 'false',
+
   // Helper functions
   isDevelopment: () => env['NODE_ENV'] === 'development',
   isProduction: () => env['NODE_ENV'] === 'production',

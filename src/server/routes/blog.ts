@@ -11,15 +11,45 @@ import xml2js from 'xml2js'
 import moment from 'moment'
 import { env } from '../config/env'
 import { join } from 'node:path'
+import { ViewData } from '../utils/viewData'
+import { getConfigByAlias } from './admin/configs'
+
 const router = Router()
+
+/**
+ * 获取公共视图数据
+ */
+async function getCommonViewData(pageType: string) {
+  const viewData = new ViewData()
+  viewData.assign('pageType', pageType)
+
+  // 获取网站设置
+  const siteConfig = await configService.getConfigByAlias('SITE_SETTINGS')
+  viewData.assign('siteConfig', siteConfig ? JSON.parse(siteConfig.value) : {})
+
+  // 获取分类列表
+  const { dataList: categoryList } = await categoryService.getCategories(
+    { status: 10 },
+    { page: 1, pageSize: 100 }
+  )
+  viewData.assign('categories', categoryList || [])
+
+  // 获取标签列表
+  const { dataList: tagList } = await tagService.getTags({ page: 1, pageSize: 100 }, { status: 10 })
+  viewData.assign('tags', tagList || [])
+
+  return viewData
+}
 
 /**
  * 博客首页 - 文章列表
  */
 router.get(
-  '/blog',
+  '/',
   catchAsync(async (req, res) => {
-    res.render('blog/index.njk', {})
+    const viewData = await getCommonViewData('Index')
+    console.log(viewData, 'viewData')
+    res.render('blog/index.html', viewData.assign())
   })
 )
 
@@ -27,9 +57,10 @@ router.get(
  * 归档页面
  */
 router.get(
-  '/blog/archives',
+  '/archives',
   catchAsync(async (req, res) => {
-    res.render('blog/archives.njk', {})
+    const viewData = await getCommonViewData('Archive')
+    res.render('blog/archives.html', viewData.assign())
   })
 )
 
@@ -37,9 +68,10 @@ router.get(
  * 归档详情页面
  */
 router.get(
-  '/blog/archives/:url',
+  '/archives/:url',
   catchAsync(async (req, res) => {
-    res.render('blog/archive.njk', {})
+    const viewData = await getCommonViewData('Post')
+    res.render('blog/archive.html', viewData.assign())
   })
 )
 
@@ -47,9 +79,10 @@ router.get(
  * 分类页面（通过别名）
  */
 router.get(
-  '/blog/categories/:alias',
+  '/categories/:alias',
   catchAsync(async (req, res) => {
-    res.render('blog/categories.njk', {})
+    const viewData = await getCommonViewData('Category')
+    res.render('blog/categories.html', viewData.assign())
   })
 )
 
@@ -57,10 +90,11 @@ router.get(
  * 标签页面（通过值）
  */
 router.get(
-  '/blog/tags/:value',
+  '/tags/:value',
   catchAsync(async (req, res) => {
     console.log(req.params['value'])
-    res.render('blog/tags.njk', {})
+    const viewData = await getCommonViewData('Tag')
+    res.render('blog/tags.html', viewData.assign())
   })
 )
 
@@ -68,9 +102,10 @@ router.get(
  * 友情链接页面
  */
 router.get(
-  '/blog/links',
+  '/links',
   catchAsync(async (req, res) => {
-    res.render('blog/links.njk', {})
+    const viewData = await getCommonViewData('Link')
+    res.render('blog/links.html', viewData.assign())
   })
 )
 
@@ -78,9 +113,10 @@ router.get(
  * 每日库页面
  */
 router.get(
-  '/blog/daily-libs',
+  '/daily-libs',
   catchAsync(async (req, res) => {
-    res.render('blog/daily-libs.njk', {})
+    const viewData = await getCommonViewData('DailyLib')
+    res.render('blog/daily-libs.html', viewData.assign())
   })
 )
 
@@ -88,9 +124,10 @@ router.get(
  * 每日库详情页面
  */
 router.get(
-  '/blog/daily-libs/:url',
+  '/daily-libs/:url',
   catchAsync(async (req, res) => {
-    res.render('blog/daily-lib.njk', {})
+    const viewData = await getCommonViewData('DailyLib')
+    res.render('blog/daily-lib.html', viewData.assign())
   })
 )
 
@@ -98,9 +135,10 @@ router.get(
  * 页面详情
  */
 router.get(
-  '/blog/pages/:url',
+  '/pages/:url',
   catchAsync(async (req, res) => {
-    res.render('blog/pages.njk', {})
+    const viewData = await getCommonViewData('Page')
+    res.render('blog/pages.html', viewData.assign())
   })
 )
 
@@ -108,9 +146,10 @@ router.get(
  * 关于页面
  */
 router.get(
-  '/blog/about',
+  '/about',
   catchAsync(async (req, res) => {
-    res.render('blog/about.njk', {})
+    const viewData = await getCommonViewData('Page')
+    res.render('blog/about.html', viewData.assign())
   })
 )
 
@@ -248,5 +287,12 @@ router.get(
     return res.send(xml)
   })
 )
+
+// router.get(
+//   '/:path',
+//   catchAsync(async (req, res) => {
+//     res.render('404.html', {})
+//   })
+// )
 
 export default router

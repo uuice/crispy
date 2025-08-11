@@ -1,4 +1,4 @@
-{% extends "base.njk" %}
+{% extends "base.html" %}
 
 {% block title %}Tailwind CSS 演示 - Crispy{% endblock %}
 
@@ -247,7 +247,7 @@
 {% block scripts %}
 <script>
   console.log('Tailwind CSS 演示页面已加载');
-  
+
   // 添加一些交互效果
   document.addEventListener('DOMContentLoaded', function() {
     // 为按钮添加点击效果

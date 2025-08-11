@@ -2,6 +2,8 @@
 :root {
   --radius-large: 1rem;
   --content-delay: 150ms;
+
+  --page-width: 75rem;
 }
 
 /* CSS Custom Properties for light and dark mode */

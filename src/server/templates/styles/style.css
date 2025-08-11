@@ -10,3 +10,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+* {
+   -webkit-appearance: none;
+}
+

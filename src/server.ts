@@ -108,7 +108,7 @@ app.use(
 app.use(performanceMonitor)
 app.use(memoryMonitor)
 
-if (env['NODE_ENV'] === 'production') {
+if (env['NODE_ENV'] === 'production' && env['TEMPLATE_ENGINE_ENABLE'] !== 'true') {
   // 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
   app.get('*path', (req, res, next) => {
     // Skip API routes, admin routes, and other non-page routes
@@ -161,7 +161,10 @@ configureNunjucks(app)
 app.use(env['API_PREFIX'], apiRoutes)
 
 // 12. Blog routes
-app.use(blogRoutes)
+// Angular ssr has performance issues, so regular template engine rendering is added
+if (env['TEMPLATE_ENGINE_ENABLE'] === 'true') {
+  app.use(blogRoutes)
+}
 
 // 13. Error reporting endpoint
 app.post('/api/error-report', express.json(), (req, res) => {

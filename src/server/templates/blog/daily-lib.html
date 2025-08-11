@@ -1,0 +1,184 @@
+{% extends "base.html" %} {% block title %}{{ article.title }} - Fuwari{% endblock %} {% block
+description %}{{ article.summary or article.title }}{% endblock %} {% block content %}
+<!-- Article content -->
+<div class="space-y-6">
+  <article
+    class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] overflow-hidden"
+  >
+    <div class="p-8">
+      <!-- word count and reading time -->
+      <div class="flex items-center space-x-6 mb-6 text-sm text-[var(--meta-divider)]">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 bg-[var(--primary)]/20 rounded-lg flex items-center justify-center">
+            <svg
+              class="w-4 h-4 text-[var(--primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+          </div>
+          <span>{{ article.words or 1000 }} words</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 bg-[var(--primary)]/20 rounded-lg flex items-center justify-center">
+            <svg
+              class="w-4 h-4 text-[var(--primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <span>{{ article.minutes or 5 }} minutes</span>
+        </div>
+      </div>
+
+      <!-- title -->
+      <h1 class="text-3xl md:text-4xl font-bold text-[var(--deep-text)] mb-6 relative">
+        {{ article.title }}
+      </h1>
+
+      <!-- metadata -->
+      <div
+        class="flex flex-wrap items-center gap-4 gap-x-4 gap-y-2 mb-6 p-4 bg-[var(--btn-regular-bg)] rounded-lg"
+      >
+        <!-- publish date -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-[var(--primary)]/20 rounded-lg flex items-center justify-center">
+            <svg
+              class="w-4 h-4 text-[var(--primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              ></path>
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-[var(--btn-content)]"
+            >{{ article.create_time | dateFormat('YYYY-MM-DD') }}</span
+          >
+        </div>
+
+        <!-- categories -->
+        {% if category %}
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-[var(--primary)]/20 rounded-lg flex items-center justify-center">
+            <svg
+              class="w-4 h-4 text-[var(--primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              ></path>
+            </svg>
+          </div>
+          <a
+            href="/categories/{{ category.alias }}"
+            class="text-sm font-medium text-[var(--btn-content)] hover:text-[var(--primary)] transition-colors"
+          >
+            {{ category.title }}
+          </a>
+        </div>
+        {% endif %}
+
+        <!-- tags -->
+        {% if article.tags %}
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-[var(--primary)]/20 rounded-lg flex items-center justify-center">
+            <svg
+              class="w-4 h-4 text-[var(--primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+              ></path>
+            </svg>
+          </div>
+          <div class="flex items-center space-x-2">
+            {% set tagList = article.tags.split(',') %} {% for tag in tagList %} {% if not
+            loop.first %}
+            <span class="text-[var(--meta-divider)]">/</span>
+            {% endif %}
+            <a
+              href="/tags/{{ tag.trim() }}"
+              class="text-sm font-medium text-[var(--btn-content)] hover:text-[var(--primary)] transition-colors"
+            >
+              {{ tag.trim() }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- cover image -->
+      {% if article.cover_image %}
+      <div class="mb-8 rounded-xl overflow-hidden">
+        <img
+          src="{{ article.cover_image }}"
+          alt="{{ article.title }}"
+          class="w-full h-auto rounded-xl"
+        />
+      </div>
+      {% endif %}
+
+      <!-- content -->
+      <div class="prose prose-lg max-w-none text-[var(--btn-content)]">
+        {{ article.content | safe }}
+      </div>
+
+      <!-- license -->
+      <div class="mt-8 p-4 bg-[var(--license-block-bg)] rounded-lg">
+        <p class="text-sm text-[var(--btn-content)]">
+          © 2025 Fuwari. All Rights Reserved. /RSS /Sitemap
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <!-- navigation -->
+  <div class="flex flex-col md:flex-row justify-between gap-4">
+    <a
+      href="#"
+      class="flex-1 p-4 bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] hover:shadow-xl transition-all duration-300 text-center"
+    >
+      <span class="text-[var(--btn-content)]">← 上一篇</span>
+    </a>
+
+    <a
+      href="#"
+      class="flex-1 p-4 bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] hover:shadow-xl transition-all duration-300 text-center"
+    >
+      <span class="text-[var(--btn-content)]">下一篇 →</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

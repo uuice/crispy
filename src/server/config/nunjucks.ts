@@ -54,7 +54,7 @@ export function configureNunjucks(app: Application) {
   })
 
   // Set view engine
-  app.set('view engine', 'njk')
+  app.set('view engine', 'html')
   app.set('views', templatesPath)
 
   // Add global functions

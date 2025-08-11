@@ -3,9 +3,9 @@ module.exports = {
   content: [
     "./src/server/templates/**/*.{njk,html,js,ts,css}"
   ],
+  darkMode: "class",
   theme: {
     extend: {
-      darkMode: "class",
       fontFamily: {
         sans: ["Roboto", "sans-serif", "Inter", "system-ui"],
         mono: ['JetBrains Mono', 'monospace'],
