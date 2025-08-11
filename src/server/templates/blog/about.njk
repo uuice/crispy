@@ -4,114 +4,16 @@
 
 {% block description %}关于 Fuwari - 现代化的博客系统{% endblock %}
 
-{% block content %}
+{% block mainContent %}
 <!-- About content -->
-<div class="space-y-8">
-  <!-- 页面标题 -->
-  <div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-8">
-    <div class="flex items-center space-x-3 mb-6">
-      <div class="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center">
-        <svg class="w-6 h-6 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      </div>
-      <div>
-        <h1 class="text-3xl font-bold text-[var(--deep-text)]">关于</h1>
-        <p class="text-[var(--btn-content)] mt-1">了解 Fuwari 博客系统</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 主要内容 -->
-  <div class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-8">
-    <div class="prose prose-lg max-w-none text-[var(--btn-content)]">
-      <p class="text-lg mb-6">
-        这是 Fuwari 博客系统的演示站点。Fuwari 是一个现代化的博客系统，专注于用户体验和性能优化。
-      </p>
-
-      <!-- GitHub Repository Card -->
-      <div class="mb-8 p-6 bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)]">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <svg class="w-8 h-8 text-[var(--primary)]" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            <div>
-              <h3 class="font-bold text-[var(--deep-text)]">saicaca/fuwari</h3>
-              <p class="text-sm text-[var(--btn-content)]">现代化的博客系统</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-1">
-              <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span class="text-xs text-[var(--meta-divider)]">00K</span>
-            </div>
-            <div class="flex items-center space-x-1">
-              <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span class="text-xs text-[var(--meta-divider)]">0K</span>
-            </div>
-            <div class="flex items-center space-x-1">
-              <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <span class="text-xs text-[var(--meta-divider)]">0K</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 特性介绍 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="p-4 bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)]">
-          <div class="flex items-center space-x-2 mb-2">
-            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-            <h4 class="font-semibold text-[var(--deep-text)]">高性能</h4>
-          </div>
-          <p class="text-sm text-[var(--btn-content)]">基于 Angular SSR 和现代化的技术栈，提供出色的性能表现</p>
-        </div>
-
-        <div class="p-4 bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)]">
-          <div class="flex items-center space-x-2 mb-2">
-            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-            <h4 class="font-semibold text-[var(--deep-text)]">用户体验</h4>
-          </div>
-          <p class="text-sm text-[var(--btn-content)]">精心设计的界面和交互，为用户提供优秀的浏览体验</p>
-        </div>
-
-        <div class="p-4 bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)]">
-          <div class="flex items-center space-x-2 mb-2">
-            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-            </svg>
-            <h4 class="font-semibold text-[var(--deep-text)]">安全性</h4>
-          </div>
-          <p class="text-sm text-[var(--btn-content)]">采用现代化的安全实践，保护用户数据和系统安全</p>
-        </div>
-
-        <div class="p-4 bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)]">
-          <div class="flex items-center space-x-2 mb-2">
-            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <h4 class="font-semibold text-[var(--deep-text)]">可定制</h4>
-          </div>
-          <p class="text-sm text-[var(--btn-content)]">支持主题定制和功能扩展，满足不同用户的需求</p>
-        </div>
-      </div>
-
-      <!-- Sources of images -->
-      <div class="bg-[var(--license-block-bg)] p-6 rounded-lg border border-[var(--line-divider)]">
-        <h3 class="font-bold text-lg text-[var(--deep-text)] mb-4">图片来源</h3>
-        <ul class="list-disc list-inside space-y-2 text-[var(--btn-content)]">
-          <li>Unsplash - 高质量免费图片</li>
-          <li>星と少女 by Stella</li>
-          <li>Rabbit - v1.4 Showcase by Rabbit_YourMajesty</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"> <div class="card-base z-10 px-9 py-6 relative w-full "> <div data-pagefind-body="" class="prose dark:prose-invert prose-base !max-w-none custom-md mt-2"> <!--<div class="prose dark:prose-invert max-w-none custom-md">--> <!--<div class="max-w-none custom-md">-->  <section><h1 id="about">About<a class="anchor" href="#about"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h1><p>This is the demo site for <a href="https://github.com/saicaca/fuwari">Fuwari</a>.</p><a id="GCg8ggw4-card" class="card-github fetch-waiting no-styling fetch-error" href="https://github.com/saicaca/fuwari" target="_blank" repo="saicaca/fuwari"><div class="gc-titlebar"><div class="gc-titlebar-left"><div class="gc-owner"><div id="GCg8ggw4-avatar" class="gc-avatar"></div><div class="gc-user">saicaca</div></div><div class="gc-divider">/</div><div class="gc-repo">fuwari</div></div><div class="github-logo"></div></div><div id="GCg8ggw4-description" class="gc-description">Description not set</div><div class="gc-infobar"><div id="GCg8ggw4-stars" class="gc-stars">NaN</div><div id="GCg8ggw4-forks" class="gc-forks">NaN</div><div id="GCg8ggw4-license" class="gc-license">0K</div><span id="GCg8ggw4-language" class="gc-language">undefined</span></div>
+<blockquote>
+<section><h3 id="sources-of-images-used-in-this-site">Sources of images used in this site<a class="anchor" href="#sources-of-images-used-in-this-site"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h3><ul>
+<li><a href="https://unsplash.com/">Unsplash</a></li>
+<li><a href="https://www.pixiv.net/artworks/108916539">星と少女</a> by <a href="https://www.pixiv.net/users/93273965">Stella</a></li>
+<li><a href="https://civitai.com/posts/586908">Rabbit - v1.4 Showcase</a> by <a href="https://civitai.com/user/Rabbit_YourMajesty">Rabbit_YourMajesty</a></li>
+</ul></section>
+</blockquote></section>  </div> <script type="module">document.addEventListener("click",function(s){const t=s.target;if(t&&t.classList.contains("copy-btn")){const c=t.closest("pre")?.querySelector("code"),i=Array.from(c?.querySelectorAll(".code:not(summary *)")??[]).map(e=>e.textContent).map(e=>e===`
+`?"":e).join(`
+`);navigator.clipboard.writeText(i);const o=t.getAttribute("data-timeout-id");o&&clearTimeout(parseInt(o)),t.classList.add("success");const n=setTimeout(()=>{t.classList.remove("success")},1e3);t.setAttribute("data-timeout-id",n.toString())}});</script> </div> </div>
 {% endblock %}

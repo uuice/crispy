@@ -3,6 +3,8 @@
 @import "display-setting.css";
 @import "main.css";
 @import "back-to-top.css";
+@import "markdown.css";
+@import "markdown-extend.css";
 
 @tailwind base;
 @tailwind components;

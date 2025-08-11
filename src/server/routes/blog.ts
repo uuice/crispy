@@ -38,7 +38,9 @@ router.get(
  */
 router.get(
   '/blog/archives/:url',
-  catchAsync(async (req, res) => {})
+  catchAsync(async (req, res) => {
+    res.render('blog/archive.njk', {})
+  })
 )
 
 /**
@@ -57,6 +59,7 @@ router.get(
 router.get(
   '/blog/tags/:value',
   catchAsync(async (req, res) => {
+    console.log(req.params['value'])
     res.render('blog/tags.njk', {})
   })
 )
