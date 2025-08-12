@@ -193,7 +193,7 @@
         <!-- TOC component -->
         <div
           id="toc-wrapper"
-          class="hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center toc-hide"
+          class="hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center"
         >
           <div
             id="toc-inner-wrapper"
@@ -201,70 +201,46 @@
           >
             <div id="toc" class="w-full h-full transition-swup-fade">
               <div class="h-8 w-full"></div>
-              <table-of-contents class="group"
-                ><a
-                  href="#github-repository-cards"
-                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
-                  ><div
-                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]"
-                  >
-                    1
-                  </div>
-                  <div class="transition text-sm text-50">GitHub Repository Cards</div></a
-                ><a
-                  href="#admonitions"
-                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
-                  ><div
-                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]"
-                  >
-                    2
-                  </div>
-                  <div class="transition text-sm text-50">Admonitions</div></a
-                ><a
-                  href="#basic-syntax"
-                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
-                  ><div
-                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
-                  >
-                    <div
-                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
-                    ></div>
-                  </div>
-                  <div class="transition text-sm text-50">Basic Syntax</div></a
-                ><a
-                  href="#custom-titles"
-                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
-                  ><div
-                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
-                  >
-                    <div
-                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
-                    ></div>
-                  </div>
-                  <div class="transition text-sm text-50">Custom Titles</div></a
-                ><a
-                  href="#github-syntax"
-                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2 visible"
-                  ><div
-                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
-                  >
-                    <div
-                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
-                    ></div>
-                  </div>
-                  <div class="transition text-sm text-50">GitHub Syntax</div></a
-                >
-                <div
-                  id="active-indicator"
-                  class="-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-xl transition-all group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"
-                  style="top: 0px; height: 0px"
-                ></div
-              ></table-of-contents>
+              {% include "blog/components/toc.html" %}
               <div class="h-8 w-full"></div>
             </div>
           </div>
         </div>
         <!-- #toc needs to exist for Swup to work normally -->
+        <script>
+          $(document).ready(function () {
+            'use strict'
+
+            // TOC show/hide logic based on banner height
+            const toc = document.getElementById('toc-wrapper')
+            const bannerHeight = window.innerHeight * 0.35 // 35vh banner height
+
+            function toggleTOC() {
+              if (
+                document.body.scrollTop > bannerHeight ||
+                document.documentElement.scrollTop > bannerHeight
+              ) {
+                toc.classList.remove('toc-hide')
+              } else {
+                toc.classList.add('toc-hide')
+              }
+            }
+
+            // Initial check
+            toggleTOC()
+
+            // Add scroll listener
+            $(window).on('scroll', toggleTOC)
+
+            // Also check on resize
+            $(window).on('resize', function () {
+              // Update banner height on resize
+              const newBannerHeight = window.innerHeight * 0.35
+              bannerHeight = newBannerHeight
+              toggleTOC()
+            })
+          })
+        </script>
       </div>
     </div>
 
