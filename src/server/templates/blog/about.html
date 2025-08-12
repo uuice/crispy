@@ -1,19 +1,71 @@
-{% extends "base.html" %}
-
-{% block title %}关于 - Fuwari{% endblock %}
-
-{% block description %}关于 Fuwari - 现代化的博客系统{% endblock %}
-
-{% block mainContent %}
+{% extends "base.html" %} {% block title %}关于 - Fuwari{% endblock %} {% block description %}关于
+Fuwari - 现代化的博客系统{% endblock %} {% block mainContent %}
 <!-- About content -->
-<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"> <div class="card-base z-10 px-9 py-6 relative w-full "> <div data-pagefind-body="" class="prose dark:prose-invert prose-base !max-w-none custom-md mt-2"> <!--<div class="prose dark:prose-invert max-w-none custom-md">--> <!--<div class="max-w-none custom-md">-->  <section><h1 id="about">About<a class="anchor" href="#about"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h1><p>This is the demo site for <a href="https://github.com/saicaca/fuwari">Fuwari</a>.</p><a id="GCg8ggw4-card" class="card-github fetch-waiting no-styling fetch-error" href="https://github.com/saicaca/fuwari" target="_blank" repo="saicaca/fuwari"><div class="gc-titlebar"><div class="gc-titlebar-left"><div class="gc-owner"><div id="GCg8ggw4-avatar" class="gc-avatar"></div><div class="gc-user">saicaca</div></div><div class="gc-divider">/</div><div class="gc-repo">fuwari</div></div><div class="github-logo"></div></div><div id="GCg8ggw4-description" class="gc-description">Description not set</div><div class="gc-infobar"><div id="GCg8ggw4-stars" class="gc-stars">NaN</div><div id="GCg8ggw4-forks" class="gc-forks">NaN</div><div id="GCg8ggw4-license" class="gc-license">0K</div><span id="GCg8ggw4-language" class="gc-language">undefined</span></div>
-<blockquote>
-<section><h3 id="sources-of-images-used-in-this-site">Sources of images used in this site<a class="anchor" href="#sources-of-images-used-in-this-site"><span class="anchor-icon" data-pagefind-ignore="">#</span></a></h3><ul>
-<li><a href="https://unsplash.com/">Unsplash</a></li>
-<li><a href="https://www.pixiv.net/artworks/108916539">星と少女</a> by <a href="https://www.pixiv.net/users/93273965">Stella</a></li>
-<li><a href="https://civitai.com/posts/586908">Rabbit - v1.4 Showcase</a> by <a href="https://civitai.com/user/Rabbit_YourMajesty">Rabbit_YourMajesty</a></li>
-</ul></section>
-</blockquote></section>  </div> <script type="module">document.addEventListener("click",function(s){const t=s.target;if(t&&t.classList.contains("copy-btn")){const c=t.closest("pre")?.querySelector("code"),i=Array.from(c?.querySelectorAll(".code:not(summary *)")??[]).map(e=>e.textContent).map(e=>e===`
-`?"":e).join(`
-`);navigator.clipboard.writeText(i);const o=t.getAttribute("data-timeout-id");o&&clearTimeout(parseInt(o)),t.classList.add("success");const n=setTimeout(()=>{t.classList.remove("success")},1e3);t.setAttribute("data-timeout-id",n.toString())}});</script> </div> </div>
-{% endblock %}
+<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+  <div class="card-base z-10 px-9 py-6 relative w-full">
+    <div
+      data-pagefind-body=""
+      class="prose dark:prose-invert prose-base !max-w-none custom-md mt-2"
+    >
+      <section>
+        <h1 id="about">
+          About
+          <a class="anchor" href="#about">
+            <span class="anchor-icon" data-pagefind-ignore="">#</span>
+          </a>
+        </h1>
+        <p>This is the demo site for <a href="https://github.com/saicaca/fuwari">Fuwari</a>.</p>
+        <a
+          id="GCg8ggw4-card"
+          class="card-github fetch-waiting no-styling fetch-error"
+          href="https://github.com/saicaca/fuwari"
+          target="_blank"
+          repo="saicaca/fuwari"
+        >
+          <div class="gc-titlebar">
+            <div class="gc-titlebar-left">
+              <div class="gc-owner">
+                <div id="GCg8ggw4-avatar" class="gc-avatar"></div>
+                <div class="gc-user">saicaca</div>
+              </div>
+              <div class="gc-divider">/</div>
+              <div class="gc-repo">fuwari</div>
+            </div>
+            <div class="github-logo"></div>
+          </div>
+          <div id="GCg8ggw4-description" class="gc-description">Description not set</div>
+          <div class="gc-infobar">
+            <div id="GCg8ggw4-stars" class="gc-stars">NaN</div>
+            <div id="GCg8ggw4-forks" class="gc-forks">NaN</div>
+            <div id="GCg8ggw4-license" class="gc-license">0K</div>
+            <span id="GCg8ggw4-language" class="gc-language">undefined</span>
+          </div>
+        </a>
+      </section>
+    </div>
+  </div>
+  <blockquote>
+    <section>
+      <h3 id="sources-of-images-used-in-this-site">
+        Sources of images used in this site<a
+          class="anchor"
+          href="#sources-of-images-used-in-this-site"
+          ><span class="anchor-icon" data-pagefind-ignore="">#</span></a
+        >
+      </h3>
+      <ul>
+        <li><a href="https://unsplash.com/">Unsplash</a></li>
+        <li>
+          <a href="https://www.pixiv.net/artworks/108916539">星と少女</a> by
+          <a href="https://www.pixiv.net/users/93273965">Stella</a>
+        </li>
+        <li>
+          <a href="https://civitai.com/posts/586908">Rabbit - v1.4 Showcase</a> by
+          <a href="https://civitai.com/user/Rabbit_YourMajesty">Rabbit_YourMajesty</a>
+        </li>
+      </ul>
+    </section>
+  </blockquote>
+
+  {% endblock %}
+</div>

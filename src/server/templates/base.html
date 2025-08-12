@@ -63,28 +63,27 @@
       sizes="192x192"
       media="(prefers-color-scheme: dark)"
     />
-    <script src="/assets/javascript/jquery-3.7.1.min.js" />
+    <script src="/assets/javascript/jquery-3.7.1.min.js"></script>
     <script>
-      ;(function () {
-        const theme = localStorage.getItem('theme') || 'auto'
+      $(function () {
+        var theme = localStorage.getItem('theme') || 'auto'
         switch (theme) {
           case 'light':
-            document.documentElement.classList.remove('dark')
+            $(document.documentElement).removeClass('dark')
             break
           case 'dark':
-            document.documentElement.classList.add('dark')
+            $(document.documentElement).addClass('dark')
             break
           case 'auto':
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              document.documentElement.classList.add('dark')
+              $(document.documentElement).addClass('dark')
             } else {
-              document.documentElement.classList.remove('dark')
+              $(document.documentElement).removeClass('dark')
             }
         }
-
-        const hue = localStorage.getItem('hue') || 250
-        document.documentElement.style.setProperty('--hue', hue)
-      })()
+        var hue = localStorage.getItem('hue') || 250
+        $(document.documentElement).css('--hue', hue)
+      })
     </script>
 
     <link
@@ -202,6 +201,65 @@
           >
             <div id="toc" class="w-full h-full transition-swup-fade">
               <div class="h-8 w-full"></div>
+              <table-of-contents class="group"
+                ><a
+                  href="#github-repository-cards"
+                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
+                  ><div
+                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]"
+                  >
+                    1
+                  </div>
+                  <div class="transition text-sm text-50">GitHub Repository Cards</div></a
+                ><a
+                  href="#admonitions"
+                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
+                  ><div
+                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold bg-[var(--toc-badge-bg)] text-[var(--btn-content)]"
+                  >
+                    2
+                  </div>
+                  <div class="transition text-sm text-50">Admonitions</div></a
+                ><a
+                  href="#basic-syntax"
+                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
+                  ><div
+                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
+                  >
+                    <div
+                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
+                    ></div>
+                  </div>
+                  <div class="transition text-sm text-50">Basic Syntax</div></a
+                ><a
+                  href="#custom-titles"
+                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2"
+                  ><div
+                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
+                  >
+                    <div
+                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
+                    ></div>
+                  </div>
+                  <div class="transition text-sm text-50">Custom Titles</div></a
+                ><a
+                  href="#github-syntax"
+                  class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2 visible"
+                  ><div
+                    class="transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold ml-4"
+                  >
+                    <div
+                      class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"
+                    ></div>
+                  </div>
+                  <div class="transition text-sm text-50">GitHub Syntax</div></a
+                >
+                <div
+                  id="active-indicator"
+                  class="-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-xl transition-all group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"
+                  style="top: 0px; height: 0px"
+                ></div
+              ></table-of-contents>
               <div class="h-8 w-full"></div>
             </div>
           </div>

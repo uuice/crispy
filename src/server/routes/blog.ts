@@ -28,10 +28,7 @@ async function getCommonViewData(pageType: string) {
   viewData.assign('siteConfig', siteConfig ? JSON.parse(siteConfig.value) : {})
 
   // 获取分类列表
-  const { dataList: categoryList } = await categoryService.getCategories(
-    { status: 10 },
-    { page: 1, pageSize: 100 }
-  )
+  const categoryList = await categoryService.getCategoriesWithArticleCount('POST_SYS_CAT')
   viewData.assign('categories', categoryList || [])
 
   // 获取标签列表
