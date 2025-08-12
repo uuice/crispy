@@ -11,7 +11,7 @@
 │   ├── styles/
 │   │   ├── templates-input.css          # Tailwind CSS 输入文件
 │   │   └── templates.less               # Less 样式文件
-│   ├── demo.njk                         # 演示模板
+│   ├── demo.html                         # 演示模板
 │   └── README.md                        # 详细文档
 └── src/styles/
     ├── templates.css                     # Tailwind CSS 输出
@@ -64,7 +64,7 @@
 
 #### ✅ 示例和文档
 
-- 演示模板：`src/server/templates/demo.njk`
+- 演示模板：`src/server/templates/demo.html`
 - 详细文档：`src/server/templates/README.md`
 - 快速指南：`TEMPLATES_BUILD_GUIDE.md`
 
@@ -159,7 +159,7 @@ bun run templates:clean
 3. **在服务器中使用**：
    ```typescript
    // 在 Express 路由中渲染模板
-   res.render('demo.njk', { data: yourData })
+   res.render('demo.html', { data: yourData })
    ```
 
 ## 📚 相关文档

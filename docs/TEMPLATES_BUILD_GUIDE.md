@@ -38,7 +38,7 @@ src/server/templates/
 ├── styles/
 │   ├── templates-input.css    # Tailwind CSS 输入文件
 │   └── templates.less         # Less 样式文件
-├── demo.njk                   # 演示模板
+├── demo.html                   # 演示模板
 └── README.md                  # 详细文档
 
 src/styles/
@@ -117,7 +117,7 @@ module.exports = {
 
 ## 📝 示例模板
 
-查看 `src/server/templates/demo.njk` 了解完整的使用示例。
+查看 `src/server/templates/demo.html` 了解完整的使用示例。
 
 ## 🔍 故障排除
 

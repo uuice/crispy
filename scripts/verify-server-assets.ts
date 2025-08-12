@@ -51,7 +51,7 @@ const assetsToCheck: AssetConfig[] = [
     name: 'Nunjucks 模板',
     source: join(projectRoot, 'src/server/templates'),
     target: join(serverDir, 'templates'),
-    extensions: ['.njk', '.md']
+    extensions: ['.html', '.md']
   }
 ]
 

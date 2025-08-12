@@ -14,13 +14,13 @@
   - `page`: 页码（可选，默认为1）
   - `category`: 分类ID（可选）
   - `tag`: 标签ID（可选）
-- **模板**: `blog/index.njk`
+- **模板**: `blog/index.html`
 
 ### 2. 文章详情 - `/blog/article/:id`
 - **功能**: 显示单篇文章的详细内容
 - **参数**: 
   - `id`: 文章ID（必需）
-- **模板**: `blog/article.njk`
+- **模板**: `blog/article.html`
 - **特性**: 
   - 自动增加阅读量
   - 显示相关文章
@@ -31,38 +31,38 @@
 - **参数**: 
   - `id`: 分类ID（必需）
   - `page`: 页码（可选，默认为1）
-- **模板**: `blog/category.njk`
+- **模板**: `blog/category.html`
 
 ### 4. 标签页面 - `/blog/tag/:id`
 - **功能**: 显示指定标签下的文章列表
 - **参数**: 
   - `id`: 标签ID（必需）
   - `page`: 页码（可选，默认为1）
-- **模板**: `blog/tag.njk`
+- **模板**: `blog/tag.html`
 
 ### 5. 搜索页面 - `/blog/search`
 - **功能**: 根据关键词搜索文章
 - **参数**: 
   - `q`: 搜索关键词（可选）
   - `page`: 页码（可选，默认为1）
-- **模板**: `blog/search.njk`
+- **模板**: `blog/search.html`
 
 ### 6. 归档页面 - `/blog/archives`
 - **功能**: 按时间顺序显示所有文章
 - **参数**: 
   - `page`: 页码（可选，默认为1）
-- **模板**: `blog/archives.njk`
+- **模板**: `blog/archives.html`
 
 ## 模板文件
 
 所有模板文件位于 `src/server/templates/blog/` 目录下：
 
-- `index.njk` - 博客首页模板
-- `article.njk` - 文章详情页模板
-- `category.njk` - 分类页面模板
-- `tag.njk` - 标签页面模板
-- `search.njk` - 搜索页面模板
-- `archives.njk` - 归档页面模板
+- `index.html` - 博客首页模板
+- `article.html` - 文章详情页模板
+- `category.html` - 分类页面模板
+- `tag.html` - 标签页面模板
+- `search.html` - 搜索页面模板
+- `archives.html` - 归档页面模板
 
 ## 数据结构
 

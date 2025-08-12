@@ -63,7 +63,7 @@ export const globalErrorHandler = (
   // 生产环境处理
   if (isOperational) {
     // 可预期的错误，显示友好的错误页面
-    res.status(statusCode).render('error.njk', {
+    res.status(statusCode).render('error.html', {
       statusCode,
       message,
       title: getErrorTitle(statusCode)
@@ -72,7 +72,7 @@ export const globalErrorHandler = (
   }
 
   // 不可预期的错误，显示通用错误页面
-  res.status(500).render('error.njk', {
+  res.status(500).render('error.html', {
     statusCode: 500,
     message: '服务器内部错误，请稍后重试',
     title: '服务器错误'

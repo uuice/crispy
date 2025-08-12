@@ -9,7 +9,7 @@
 - 异步错误捕获包装器 `catchAsync`
 - 404 错误处理中间件 `notFoundHandler`
 - 全局错误处理中间件 `globalErrorHandler`
-- 通用错误页面模板 `error.njk`
+- 通用错误页面模板 `error.html`
 
 ## 组件说明
 
@@ -44,7 +44,7 @@ throw new AppError('数据库连接失败', 500)
 router.get('/blog', catchAsync(async (req, res) => {
   // 异步操作
   const articles = await articleService.getArticles()
-  res.render('blog/index.njk', { articles })
+  res.render('blog/index.html', { articles })
 }))
 ```
 
@@ -97,7 +97,7 @@ export const globalErrorHandler = (
 
 ## 错误页面
 
-### 错误页面模板 (error.njk)
+### 错误页面模板 (error.html)
 
 提供用户友好的错误页面，包含：
 - 错误状态码和图标
@@ -136,7 +136,7 @@ router.get('/blog/article/:id', catchAsync(async (req, res) => {
     throw new AppError('文章不存在', 404)
   }
   
-  res.render('blog/article.njk', { article })
+  res.render('blog/article.html', { article })
 }))
 ```
 
@@ -246,6 +246,6 @@ function reportError() {
 ### 3. 自定义错误页面
 
 可以为不同类型的错误创建专门的页面：
-- 404.njk
-- 500.njk
-- maintenance.njk
+- 404.html
+- 500.html
+- maintenance.html

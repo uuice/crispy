@@ -11,7 +11,7 @@ src/server/templates/
 │   ├── about.less         # About page styles
 │   ├── index.less         # Index page styles
 │   └── templates-input.css # Tailwind CSS input file
-├── demo.njk               # Demo template
+├── demo.html               # Demo template
 └── README.md              # This file
 ```
 
@@ -59,7 +59,7 @@ Compiled files are output to `public/assets/styles/`:
 ### Including Styles in Nunjucks Templates
 
 ```njk
-<!-- In your .njk template files -->
+<!-- In your .html template files -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -202,7 +202,7 @@ In `templates.less`, you can use Less variables and functions:
 
 2. **Edit styles:**
    - Modify `src/server/templates/styles/templates.less` for Less styles and @apply directives
-   - Use Tailwind classes directly in `.njk` files
+   - Use Tailwind classes directly in `.html` files
    - Update `tailwind.templates.config.js` for Tailwind configuration
 
 3. **Files are automatically compiled:**
