@@ -85,6 +85,19 @@
       $('#search-panel').toggleClass('float-panel-closed')
     })
 
+    // 添加点击外部区域关闭搜索面板的功能
+    $(document).on('click', function (event) {
+      // 如果点击的不是搜索面板内的元素，也不是搜索按钮，也不是搜索输入框
+      if (
+        !$(event.target).closest('#search-panel').length &&
+        !$(event.target).closest('#search-switch').length &&
+        !$(event.target).closest('#search-bar').length
+      ) {
+        // 关闭搜索面板
+        $('#search-panel').addClass('float-panel-closed')
+      }
+    })
+
     // 搜索函数
     function performSearch(query) {
       if (!query || query.trim() === '') {
