@@ -30,7 +30,7 @@ function createArticleIndex() {
   return new Document({
     document: {
       id: 'id',
-      index: ['title', 'sub_title', 'abstract', 'content', 'category'],
+      index: ['title', 'abstract'],
       store: true
     },
     // Enable CJK (Chinese, Japanese, Korean) support
@@ -42,7 +42,7 @@ function createPageIndex() {
   return new Document({
     document: {
       id: 'id',
-      index: ['title', 'sub_title', 'abstract', 'content'],
+      index: ['title', 'abstract'],
       store: true
     },
     // Enable CJK (Chinese, Japanese, Korean) support
@@ -54,7 +54,7 @@ function createDailyIndex() {
   return new Document({
     document: {
       id: 'id',
-      index: ['title', 'sub_title', 'abstract', 'content', 'category'],
+      index: ['title', 'abstract'],
       store: true
     },
     // Enable CJK (Chinese, Japanese, Korean) support
