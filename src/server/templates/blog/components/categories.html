@@ -6,7 +6,7 @@
   </div>
   <div id="categories" class="collapse-wrapper px-4 overflow-hidden">
     {% for c in categories %}
-    <a href="/categories/{{ c.url }}" aria-label="{{ c.title }}">
+    <a href="/categories/{{ c.alias }}" aria-label="{{ c.title }}">
       <button
         class="w-full h-10 rounded-lg bg-none hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition-all pl-2 hover:pl-3 text-neutral-700 hover:text-[var(--primary)] dark:text-neutral-300 dark:hover:text-[var(--primary)]"
       >

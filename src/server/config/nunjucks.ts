@@ -8,6 +8,8 @@ import { titleToUrl } from '../nunjucks/filter/titleToUrl'
 import { Console } from '../nunjucks/filter/console'
 import { shorten } from '../nunjucks/filter/shorten'
 import { symbolsCount } from '../nunjucks/filter/symbolsCount'
+import { toFixed } from '../nunjucks/filter/toFixed'
+
 import { dateFormat } from '../nunjucks/function/dateFormat'
 import moment from 'moment'
 import { getColor } from '../nunjucks/function/getColor'
@@ -72,6 +74,7 @@ export function configureNunjucks(app: Application) {
   env.addFilter('stripHtml', stripHtml)
   env.addFilter('titleToUrl', titleToUrl)
   env.addFilter('truncate', truncate)
+  env.addFilter('toFixed', toFixed)
 
   // Add custom tags
   env.addExtension('Config', new Config())

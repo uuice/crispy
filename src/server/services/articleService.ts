@@ -627,6 +627,76 @@ export class ArticleService {
 
     return articlesWithTagRef
   }
+
+  /**
+   * Get previous article by current article id
+   * @param currentId Current article id
+   * @returns Previous article or null
+   */
+  async getPreviousArticle(currentId: number, typeId?: number): Promise<any | null> {
+    let query = db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .select(['categories.alias as category_alias'])
+      .select(['categories.title as category'])
+      .where('articles.id', '<', currentId)
+      .where('articles.is_delete', '=', 0)
+      .where('articles.status', '=', PUBLISH_STATUS.PUBLISHED)
+
+    if (typeof typeId === 'number') {
+      query = query.where('articles.type_id', '=', typeId)
+    }
+
+    const article = await query.orderBy('articles.id', 'desc').limit(1).executeTakeFirst()
+
+    if (article) {
+      // Add tagRef object
+      const tagRef = await getTagRef(article.tags || '')
+      return {
+        ...article,
+        tagRef
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Get next article by current article id
+   * @param currentId Current article id
+   * @returns Next article or null
+   */
+  async getNextArticle(currentId: number, typeId?: number): Promise<any | null> {
+    let query = db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .select(['categories.alias as category_alias'])
+      .select(['categories.title as category'])
+      .where('articles.id', '>', currentId)
+      .where('articles.is_delete', '=', 0)
+      .where('articles.status', '=', PUBLISH_STATUS.PUBLISHED)
+
+    if (typeof typeId === 'number') {
+      query = query.where('articles.type_id', '=', typeId)
+    }
+
+    const article = await query.orderBy('articles.id', 'asc').limit(1).executeTakeFirst()
+
+    if (article) {
+      // Add tagRef object
+      const tagRef = await getTagRef(article.tags || '')
+      return {
+        ...article,
+        tagRef
+      }
+    }
+
+    return null
+  }
 }
 
 export const articleService = new ArticleService()

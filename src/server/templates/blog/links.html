@@ -16,7 +16,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
           ></path>
         </svg>
       </div>
@@ -27,7 +27,101 @@
     </div>
   </div>
 
-  {% if links and links.length > 0 %}
+  {% if groupedLinks and groupedLinks|length > 0 %}
+  <!-- 按分类显示友情链接 -->
+  {% for categoryName, categoryLinks in groupedLinks %}
+  <div
+    class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-6"
+  >
+    <div class="flex items-center mb-6">
+      <div
+        class="w-8 h-8 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mr-3"
+      >
+        <svg
+          class="w-4 h-4 text-[var(--primary)]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          ></path>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-[var(--deep-text)]">{{ categoryName }}</h2>
+      <span
+        class="ml-2 text-sm text-[var(--meta-divider)] bg-[var(--btn-regular-bg)] px-2 py-1 rounded-full"
+      >
+        {{ categoryLinks.length }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for link in categoryLinks %}
+      <div
+        class="bg-[var(--btn-regular-bg)] rounded-lg border border-[var(--line-divider)] p-4 hover:shadow-md transition-all duration-300 group"
+      >
+        <div class="flex items-center mb-3">
+          {% if link.logo %}
+          <img
+            src="{{ link.logo }}"
+            alt="{{ link.site_name }}"
+            class="w-10 h-10 rounded-lg mr-3 object-cover border border-[var(--line-divider)]"
+          />
+          {% else %}
+          <div
+            class="w-10 h-10 bg-[var(--primary)]/20 rounded-lg mr-3 flex items-center justify-center border border-[var(--line-divider)]"
+          >
+            <span class="text-[var(--primary)] font-bold text-sm">{{ link.site_name[0] }}</span>
+          </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <h3
+              class="text-base font-medium text-[var(--deep-text)] group-hover:text-[var(--primary)] transition-colors truncate"
+              title="{{ link.site_name }}"
+            >
+              {{ link.site_name }}
+            </h3>
+          </div>
+        </div>
+
+        {% if link.des %}
+        <p class="text-[var(--btn-content)] text-xs mb-3 line-clamp-2">{{ link.des }}</p>
+        {% endif %}
+
+        <div class="flex justify-between items-center">
+          <a
+            href="{{ link.url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center space-x-1 px-3 py-1.5 bg-[var(--primary)] text-white rounded-md hover:bg-[var(--primary-hover)] transition-colors text-xs font-medium"
+          >
+            <span>访问</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              ></path>
+            </svg>
+          </a>
+          {% if link.method %}
+          <span
+            class="text-xs text-[var(--meta-divider)] bg-[var(--card-bg)] px-2 py-1 rounded text-center"
+            >{{ link.method }}</span
+          >
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %} {% elif links and links.length > 0 %}
+  <!-- 兼容旧格式：如果没有分类，显示所有链接 -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for link in links %}
     <div
@@ -90,7 +184,9 @@
     </div>
     {% endfor %}
   </div>
+
   {% else %}
+  <!-- 没有任何链接时显示 -->
   <div
     class="bg-[var(--card-bg)] rounded-[var(--radius-large)] shadow-lg border border-[var(--line-divider)] p-12 text-center"
   >

@@ -292,7 +292,6 @@
           return
         }
 
-        // 使用与 TOC.astro 相同的逻辑
         const topEntry = this.tocEntries[min]
         const bottomEntry = this.tocEntries[max]
 
@@ -303,7 +302,6 @@
             const parentOffset = scrollContainer[0].getBoundingClientRect().top
             const scrollOffset = scrollContainer.scrollTop()
 
-            // 使用与 TOC.astro 相同的计算方式
             const top = topEntry[0].getBoundingClientRect().top - parentOffset + scrollOffset
             const bottom =
               bottomEntry[0].getBoundingClientRect().bottom - parentOffset + scrollOffset

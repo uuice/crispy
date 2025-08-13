@@ -1,0 +1,10 @@
+{% macro renderWordCountReadingTime(item) %}
+<div
+  class="text-sm text-black/30 dark:text-white/30 flex gap-4 transition"
+  style="--coverWidth: 28%"
+>
+  <div style="--coverWidth: 28%">{{ item.content | wordcount}} words</div>
+  <div style="--coverWidth: 28%">|</div>
+  <div style="--coverWidth: 28%">{{ ((item.content | wordcount) / 60) | toFixed(2)}} 分钟</div>
+</div>
+{% endmacro %}

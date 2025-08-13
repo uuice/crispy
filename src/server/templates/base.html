@@ -6,12 +6,12 @@
     <meta name="description" content="{{ siteConfig.siteDescription }}" />
     <meta name="author" content="uuice" />
     <meta property="og:site_name" content="{{ siteConfig.siteName }}" />
-    <meta property="og:url" content="https://uuice.com/" />
+    <meta property="og:url" content="{{ baseUrl}}" />
     <meta property="og:title" content="{{ siteConfig.siteName }}" />
     <meta property="og:description" content="{{ siteConfig.siteDescription }}" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://uuice.com/" />
+    <meta property="twitter:url" content="{{ baseUrl}}" />
     <meta name="twitter:title" content="{{ siteConfig.siteName }}" />
     <meta name="twitter:description" content="{{ siteConfig.siteDescription }}" />
     <meta name="viewport" content="width=device-width" />
@@ -65,25 +65,25 @@
     />
     <script src="/assets/javascript/jquery-3.7.1.min.js"></script>
     <script>
-      $(function () {
+      ;(function () {
         var theme = localStorage.getItem('theme') || 'auto'
         switch (theme) {
           case 'light':
-            $(document.documentElement).removeClass('dark')
+            document.documentElement.classList.remove('dark')
             break
           case 'dark':
-            $(document.documentElement).addClass('dark')
+            document.documentElement.classList.add('dark')
             break
           case 'auto':
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              $(document.documentElement).addClass('dark')
+              document.documentElement.classList.add('dark')
             } else {
-              $(document.documentElement).removeClass('dark')
+              document.documentElement.classList.remove('dark')
             }
         }
         var hue = localStorage.getItem('hue') || 250
-        $(document.documentElement).css('--hue', hue)
-      })
+        document.documentElement.style.setProperty('--hue', hue)
+      })()
     </script>
 
     <link
@@ -97,7 +97,7 @@
   <body class="min-h-screen transition lg:is-home enable-banner">
     <div
       id="top-row"
-      class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto"
+      class="z-50 pointer-events-none transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto sticky top-0"
     >
       <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
         {% include "blog/components/head.html" %}
