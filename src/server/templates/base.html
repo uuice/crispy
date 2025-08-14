@@ -63,7 +63,6 @@
       sizes="192x192"
       media="(prefers-color-scheme: dark)"
     />
-    <script src="/assets/javascript/jquery-3.7.1.min.js"></script>
     <script>
       ;(function () {
         var theme = localStorage.getItem('theme') || 'auto'
@@ -85,6 +84,7 @@
         document.documentElement.style.setProperty('--hue', hue)
       })()
     </script>
+    <script src="/assets/javascript/jquery-3.7.1.min.js"></script>
 
     <link
       rel="alternate"
@@ -213,7 +213,7 @@
 
             // TOC show/hide logic based on banner height
             const toc = document.getElementById('toc-wrapper')
-            const bannerHeight = window.innerHeight * 0.35 // 35vh banner height
+            let bannerHeight = window.innerHeight * 0.35 // 35vh banner height
 
             function toggleTOC() {
               if (
@@ -257,4 +257,8 @@
       "
     ></div>
   </body>
+  <script src="/assets/javascript/highlight.min.js"></script>
+  <script>
+    hljs.highlightAll()
+  </script>
 </html>

@@ -5,6 +5,7 @@
 @import "back-to-top.css";
 @import "markdown.css";
 @import "markdown-extend.css";
+@import "hljs.css";
 
 @tailwind base;
 @tailwind components;

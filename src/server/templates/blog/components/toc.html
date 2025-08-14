@@ -183,19 +183,20 @@
       }
 
       setupIntersectionObserver() {
-        if (!window.IntersectionObserver) {
-          // Fallback for older browsers
-          this.setupScrollFallback()
-          return
+        // 无论是否支持 IntersectionObserver，都设置滚动事件作为备份
+        this.setupScrollFallback()
+
+        // 如果支持 IntersectionObserver，则使用它
+        if (window.IntersectionObserver) {
+          this.observer = new IntersectionObserver((entries) => this.handleIntersection(entries), {
+            rootMargin: '-10% 0px -80% 0px'
+          })
+
+          // 观察所有标题元素
+          this.headings.forEach((heading) => {
+            this.observer.observe(heading.element)
+          })
         }
-
-        this.observer = new IntersectionObserver((entries) => this.handleIntersection(entries), {
-          threshold: 0
-        })
-
-        this.sections.forEach((section) => {
-          this.observer.observe(section)
-        })
       }
 
       handleIntersection(entries) {
@@ -224,16 +225,17 @@
       setupScrollFallback() {
         // Fallback for browsers without Intersection Observer
         $(window).on('scroll', () => {
+          console.log('scroll')
           this.fallback()
           this.updateActiveStates()
         })
       }
 
       fallback() {
-        if (this.sections.length === 0) return
+        if (this.headings.length === 0) return
 
-        for (let i = 0; i < this.sections.length; i++) {
-          const rect = this.sections[i].getBoundingClientRect()
+        for (let i = 0; i < this.headings.length; i++) {
+          const rect = this.headings[i].element.getBoundingClientRect()
           const offsetTop = rect.top
           const offsetBottom = rect.bottom
 
@@ -245,6 +247,8 @@
             this.activeStates[i] = true
           } else if (offsetTop > window.innerHeight) {
             break
+          } else {
+            this.activeStates[i] = false
           }
         }
       }
@@ -292,40 +296,27 @@
           return
         }
 
-        const topEntry = this.tocEntries[min]
-        const bottomEntry = this.tocEntries[max]
+        // 只使用当前激活的标题（min）
+        const activeEntry = this.tocEntries[min]
 
-        if (topEntry.length && bottomEntry.length) {
-          // 找到实际的滚动容器（toc-inner-wrapper）
-          const scrollContainer = this.tocContainer.closest('#toc-inner-wrapper')
-          if (scrollContainer.length) {
-            const parentOffset = scrollContainer[0].getBoundingClientRect().top
-            const scrollOffset = scrollContainer.scrollTop()
+        if (activeEntry && activeEntry.length) {
+          // 添加相对定位类到容器
+          this.tocContainer.addClass('relative')
 
-            const top = topEntry[0].getBoundingClientRect().top - parentOffset + scrollOffset
-            const bottom =
-              bottomEntry[0].getBoundingClientRect().bottom - parentOffset + scrollOffset
+          // 计算指示器位置和高度
+          const entryRect = activeEntry[0].getBoundingClientRect()
+          const containerRect = this.tocContainer[0].getBoundingClientRect()
 
-            this.activeIndicator.css({
-              top: top + 'px',
-              height: bottom - top + 'px',
-              display: 'block'
-            })
-          } else {
-            // 如果没有找到滚动容器，使用相对位置计算
-            const containerRect = this.tocContainer[0].getBoundingClientRect()
-            const topEntryRect = topEntry[0].getBoundingClientRect()
-            const bottomEntryRect = bottomEntry[0].getBoundingClientRect()
+          const top = entryRect.top - containerRect.top
+          const height = entryRect.height
 
-            const top = topEntryRect.top - containerRect.top
-            const bottom = bottomEntryRect.bottom - containerRect.top
-
-            this.activeIndicator.css({
-              top: top + 'px',
-              height: bottom - top + 'px',
-              display: 'block'
-            })
-          }
+          this.activeIndicator.css({
+            top: top + 'px',
+            height: height + 'px',
+            display: 'block'
+          })
+        } else {
+          this.activeIndicator.hide()
         }
       }
 

@@ -799,7 +799,11 @@ export class PostDetailComponent implements OnInit {
       if (this.articleForm.get('is_markdown')?.value === 1) {
         sanitizedData.content = await Vditor.md2html(sanitizedData.markdown_content, {
           cdn: '',
-          mode: 'light'
+          mode: 'light',
+          hljs: {
+            enable: true,
+            lineNumber: true
+          }
         })
       }
 

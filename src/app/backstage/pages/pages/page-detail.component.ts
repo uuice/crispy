@@ -728,7 +728,11 @@ export class PageDetailComponent implements OnInit {
       if (this.pageForm.get('is_markdown')?.value === 1) {
         sanitizedData.content = await Vditor.md2html(sanitizedData.markdown_content, {
           cdn: '',
-          mode: 'light'
+          mode: 'light',
+          hljs: {
+            enable: true,
+            lineNumber: true
+          }
         })
       }
 
