@@ -113,7 +113,7 @@
   const observer = new MutationObserver(() => {
     // 重新渲染时自动切换颜色
   })
-  observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
   initParticles()
   animate()
