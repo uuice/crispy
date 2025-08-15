@@ -21,12 +21,29 @@
 <script>
   // 粒子参数
   const PARTICLE_NUM = 50
-  // 亮色模式：深色粒子，适中透明度
-  const PARTICLE_COLOR_LIGHT = 'rgba(149,165,255,0.45)'
-  const LINE_COLOR_LIGHT = 'rgba(149,165,255,0.20)'
-  // 暗黑模式：亮色粒子，较高透明度
-  const PARTICLE_COLOR_DARK = 'rgba(149,165,255,0.45)'
-  const LINE_COLOR_DARK = 'rgba(149,165,255,0.20)'
+  // 颜色使用 oklch，hue 由 html 的 --hue 控制
+  function getHue() {
+    const html = document.documentElement
+    const style = getComputedStyle(html)
+    return style.getPropertyValue('--hue').trim() || '325'
+  }
+
+  function getParticleColor() {
+    const hue = getHue()
+    if (getMode() === 'dark') {
+      return `oklch(0.85 0.14 ${hue} / 0.22)`
+    } else {
+      return `oklch(0.75 0.14 ${hue} / 0.45)`
+    }
+  }
+  function getLineColor() {
+    const hue = getHue()
+    if (getMode() === 'dark') {
+      return `oklch(0.85 0.14 ${hue} / 0.10)`
+    } else {
+      return `oklch(0.75 0.14 ${hue} / 0.18)`
+    }
+  }
   const PARTICLE_RADIUS = 3
   const LINE_DISTANCE = 150
 
@@ -44,13 +61,6 @@
   function getMode() {
     // 检查 documentElement 是否有 dark class
     return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  }
-
-  function getParticleColor() {
-    return getMode() === 'dark' ? PARTICLE_COLOR_DARK : PARTICLE_COLOR_LIGHT
-  }
-  function getLineColor() {
-    return getMode() === 'dark' ? LINE_COLOR_DARK : LINE_COLOR_LIGHT
   }
 
   function Particle() {
@@ -109,11 +119,16 @@
     }
   }
 
-  // 监听暗黑模式切换
+  // 监听暗黑模式和 --hue 变化，强制刷新粒子颜色
   const observer = new MutationObserver(() => {
-    // 重新渲染时自动切换颜色
+    // 触发一次重绘（通过清空并重绘所有粒子）
+    // ctx.clearRect(0, 0, canvas.width, canvas.height)
+    // 不需要重建粒子，只需下一帧会自动用新颜色绘制
   })
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class', 'style']
+  })
 
   initParticles()
   animate()
