@@ -60,7 +60,7 @@
       max="360"
       class="slider"
       id="colorSlider"
-      step="5"
+      step="1"
       style="width: 100%"
       aria-label="Theme Color"
     />
@@ -69,8 +69,30 @@
 <script>
   $(function () {
     // 设置面板开关
-    $('#display-settings-switch').on('click', function () {
+    $('#display-settings-switch').on('click', function (e) {
+      e.stopPropagation()
       $('#display-setting').toggleClass('float-panel-closed')
+    })
+
+    // 点击弹框外部关闭面板
+    $(document).on('mousedown', function (e) {
+      var $panel = $('#display-setting')
+      // 只有面板是打开状态才处理
+      if (!$panel.hasClass('float-panel-closed')) {
+        // 如果点击目标不是面板本身且不在面板内部
+        if (
+          !$panel.is(e.target) &&
+          $panel.has(e.target).length === 0 &&
+          !$('#display-settings-switch').is(e.target)
+        ) {
+          $panel.addClass('float-panel-closed')
+        }
+      }
+    })
+
+    // 阻止点击面板内部冒泡到 document
+    $('#display-setting').on('mousedown', function (e) {
+      e.stopPropagation()
     })
 
     // 监听主题色滑块变化
