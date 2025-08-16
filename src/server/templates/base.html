@@ -86,6 +86,9 @@
     </script>
     <script src="/assets/javascript/jquery-3.7.1.min.js"></script>
 
+    <!-- pjax 支持 -->
+    <script src="/assets/javascript/jquery.pjax.js"></script>
+
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -261,5 +264,25 @@
   <script src="/assets/javascript/highlight.min.js"></script>
   <script>
     hljs.highlightAll()
+  </script>
+
+  <!-- pjax 初始化脚本 -->
+  <script>
+    $(function () {
+      // 只对所有 a 标签启用 pjax，排除外部链接和带 target 的链接
+      $(document).pjax(
+        'a:not([target="_blank"]):not([href^="#"]):not([href^="http"]):not([download])',
+        '#swup-container',
+        {
+          fragment: '#swup-container',
+          timeout: 8000
+        }
+      )
+
+      // pjax 完成后重新高亮代码
+      $(document).on('pjax:end', function () {
+        if (window.hljs) hljs.highlightAll()
+      })
+    })
   </script>
 </html>
