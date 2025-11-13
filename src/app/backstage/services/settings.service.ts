@@ -426,7 +426,7 @@ export class SettingsService {
    * Get primary color
    */
   getPrimaryColor(): string {
-    return this._settings().primaryColor || '#22c55e'
+    return this._settings().primaryColor || '#be185d'
   }
 
   /**
@@ -474,7 +474,7 @@ export class SettingsService {
   getSurfaceConfig(): { color: string } {
     return (
       this._settings().surfaceConfig || {
-        color: 'zinc'
+        color: 'slate'
       }
     )
   }

@@ -82,6 +82,20 @@ interface User {
           ></p-message>
         </div>
 
+        <div class="field">
+          <label class="block text-900 font-medium mb-2">头像</label>
+          <div class="avatar-grid">
+            <div
+              class="avatar-item"
+              *ngFor="let url of avatars"
+              (click)="selectAvatar(url)"
+              [class.selected]="currentAvatar() === url"
+            >
+              <img [src]="url" alt="avatar" />
+            </div>
+          </div>
+        </div>
+
         <div class="field" *ngIf="isCreateMode">
           <label for="password" class="block text-900 font-medium mb-2">密码 *</label>
           <input
@@ -198,6 +212,30 @@ interface User {
       .field {
         margin-bottom: 1rem;
       }
+      .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+      }
+      .avatar-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+      }
+      .avatar-item.selected {
+        border-color: #a259e6;
+        box-shadow: 0 0 0 2px rgba(162, 89, 230, 0.3);
+      }
+      .avatar-item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
     `
   ]
 })
@@ -225,11 +263,13 @@ export class UserDetailComponent implements OnInit {
       email: ['', [Validators.email]],
       phone: ['', [Validators.pattern(/^1[3-9]\d{9}$/)]],
       status: [10],
-      is_black: [0]
+      is_black: [0],
+      avatar_url: ['']
     })
   }
 
   ngOnInit() {
+    this.avatars = this.buildAvatars()
     this.currentUser.set(this.user)
     this.currentMode.set(this.mode)
 
@@ -288,7 +328,8 @@ export class UserDetailComponent implements OnInit {
       email: user.email || '',
       phone: user.phone || '',
       status: user.status,
-      is_black: user.is_black
+      is_black: user.is_black,
+      avatar_url: user.avatar_url || ''
     })
 
     this.userForm.get('password')?.clearValidators()
@@ -304,7 +345,8 @@ export class UserDetailComponent implements OnInit {
   resetForm() {
     this.userForm.reset({
       status: 10,
-      is_black: 0
+      is_black: 0,
+      avatar_url: this.avatars[0] || ''
     })
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)])
     this.userForm.get('password')?.updateValueAndValidity()
@@ -431,4 +473,44 @@ export class UserDetailComponent implements OnInit {
 
   currentUser = signal<User | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
+
+  avatars: string[] = []
+  buildAvatars(): string[] {
+    const colors = [
+      '#e57373',
+      '#f06292',
+      '#ba68c8',
+      '#9575cd',
+      '#7986cb',
+      '#64b5f6',
+      '#4fc3f7',
+      '#4dd0e1',
+      '#4db6ac',
+      '#81c784',
+      '#aed581',
+      '#dce775',
+      '#fff176',
+      '#ffd54f',
+      '#ffb74d',
+      '#a1887f',
+      '#90a4ae',
+      '#ff8a65',
+      '#ce93d8',
+      '#b39ddb'
+    ]
+    return colors.map((c) => {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.3"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#g)"/><circle cx="32" cy="28" r="12" fill="#fff" fill-opacity="0.2"/><path d="M16 50c4-8 12-12 16-12s12 4 16 12" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.3"/></svg>`
+      const b64 =
+        typeof window !== 'undefined' && window.btoa
+          ? window.btoa(unescape(encodeURIComponent(svg)))
+          : Buffer.from(svg).toString('base64')
+      return `data:image/svg+xml;base64,${b64}`
+    })
+  }
+  selectAvatar(url: string) {
+    this.userForm.get('avatar_url')?.setValue(url)
+  }
+  currentAvatar(): string {
+    return this.userForm.get('avatar_url')?.value || ''
+  }
 }

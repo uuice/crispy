@@ -15,6 +15,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { AdminDetailComponent } from './admin-detail.component'
+import { AvatarModule } from 'primeng/avatar'
 
 interface Admin {
   id: number
@@ -96,7 +97,8 @@ interface RolesResponse {
     ToastModule,
     DialogModule,
     SelectModule,
-    AdminDetailComponent
+    AdminDetailComponent,
+    AvatarModule
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -188,12 +190,20 @@ interface RolesResponse {
             <td>{{ admin.id }}</td>
             <td>
               @if (admin.avatar_url) {
-                <img
+                <!-- <img
                   [src]="admin.avatar_url"
                   alt="avatar"
                   width="32"
                   height="32"
                   style="border-radius:50%;"
+                /> -->
+                <p-avatar [image]="admin.avatar_url" size="xlarge" shape="circle" />
+              } @else {
+                <p-avatar
+                  [label]="admin.user_name.slice(0, 1).toUpperCase()"
+                  class="mr-2"
+                  size="xlarge"
+                  shape="circle"
                 />
               }
             </td>
@@ -211,7 +221,7 @@ interface RolesResponse {
             <td>
               <div class="admin-type">
                 @if (admin.is_super_admin === 1) {
-                  <p-tag value="超级管理员" severity="danger" styleClass="mr-1"></p-tag>
+                  <p-tag value="超级管理员" severity="danger" class="mr-1"></p-tag>
                 } @else if (admin.is_admin === 1 && admin.is_super_admin !== 1) {
                   <p-tag value="管理员" severity="warning"></p-tag>
                 } @else {

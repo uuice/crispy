@@ -13,6 +13,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
 import { UserDetailComponent } from './user-detail.component'
+import { AvatarModule } from 'primeng/avatar'
 
 interface User {
   id: number
@@ -59,7 +60,8 @@ interface UsersResponse {
     ConfirmDialogModule,
     ToastModule,
     SelectModule,
-    UserDetailComponent
+    UserDetailComponent,
+    AvatarModule
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -142,14 +144,23 @@ interface UsersResponse {
           <tr>
             <td>{{ user.id }}</td>
             <td>
-              <img
-                *ngIf="user.avatar_url"
-                [src]="user.avatar_url"
-                alt="avatar"
-                width="32"
-                height="32"
-                style="border-radius:50%;"
-              />
+              @if (user.avatar_url) {
+                <!-- <img
+                  [src]="admin.avatar_url"
+                  alt="avatar"
+                  width="32"
+                  height="32"
+                  style="border-radius:50%;"
+                /> -->
+                <p-avatar [image]="user.avatar_url" size="xlarge" shape="circle" />
+              } @else {
+                <p-avatar
+                  [label]="user.user_name.slice(0, 1).toUpperCase()"
+                  class="mr-2"
+                  size="xlarge"
+                  shape="circle"
+                />
+              }
             </td>
             <td>{{ user.user_name }}</td>
             <td>{{ user.nick_name }}</td>

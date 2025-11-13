@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import fs from 'fs'
 import apiRoutes from './server/routes/api'
 import blogRoutes from './server/routes/blog'
+import rssRoutes from './server/routes/rss-sitemap'
 import {
   applyMiddleware,
   applyStaticMiddleware,
@@ -79,10 +80,10 @@ const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
 const angularApp = new AngularNodeAppEngine()
 
-// 1. Apply static file optimization middleware (first for performance)
+// Apply static file optimization middleware (first for performance)
 applyStaticMiddleware(app)
 
-// 2. Static file serving (early for performance)
+// Static file serving (early for performance)
 app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
@@ -91,10 +92,10 @@ app.use(
   })
 )
 
-// 3. Serve uploaded files (early for performance)
+// Serve uploaded files (early for performance)
 app.use('/uploads', express.static(join(process.cwd(), 'public', 'uploads')))
 
-// 4. Serve static generated pages from temp directory (early for performance)
+// Serve static generated pages from temp directory (early for performance)
 app.use(
   '/static',
   express.static(join(process.cwd(), 'temp', 'static'), {
@@ -104,11 +105,12 @@ app.use(
   })
 )
 
-// 5. Apply performance monitoring middleware (before static handling to avoid header conflicts)
+// Apply performance monitoring middleware (before static handling to avoid header conflicts)
 app.use(performanceMonitor)
 app.use(memoryMonitor)
 
 if (env['NODE_ENV'] === 'production' && env['TEMPLATE_ENGINE_ENABLE'] !== 'true') {
+  // Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
   // 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
   app.get('*path', (req, res, next) => {
     // Skip API routes, admin routes, and other non-page routes
@@ -148,31 +150,34 @@ if (env['NODE_ENV'] === 'production' && env['TEMPLATE_ENGINE_ENABLE'] !== 'true'
   })
 }
 
-// 7. Apply basic middleware (after static files for better performance)
+// Apply basic middleware (after static files for better performance)
 applyMiddleware(app)
 
-// 8. Apply route-specific performance optimization
+// Apply route-specific performance optimization
 app.use(optimizeRoutePerformance)
 
-// 10. Configure Nunjucks template engine
+// Configure Nunjucks template engine
 configureNunjucks(app)
 
-// 11. API routes (after static handling for better performance)
+// API routes (after static handling for better performance)
 app.use(env['API_PREFIX'], apiRoutes)
 
-// 12. Blog routes
+// Blog routes
 // Angular ssr has performance issues, so regular template engine rendering is added
 if (env['TEMPLATE_ENGINE_ENABLE'] === 'true') {
   app.use(blogRoutes)
 }
 
-// 13. Error reporting endpoint
+// RSS and sitemap routes
+app.use(rssRoutes)
+
+// Error reporting endpoint
 app.post('/api/error-report', express.json(), (req, res) => {
   console.error('Client error report:', req.body)
   res.status(200).json({ received: true })
 })
 
-// 14. Swagger documentation routes
+// Swagger documentation routes
 app.get('/doc/admin/swagger.json', (req, res) => {
   res.json(adminSpecs)
 })

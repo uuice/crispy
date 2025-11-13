@@ -1582,8 +1582,8 @@ const TABLES = [
         comment: '手机号'
       },
       {
-        name: 'avatar',
-        type: 'varchar(255)',
+        name: 'avatar_url',
+        type: 'text',
         nullable: true,
         default: null,
         comment: '头像'
