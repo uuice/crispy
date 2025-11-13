@@ -27,7 +27,7 @@ INSERT INTO `roles` (
   `sort`, `status`, `is_delete`, `create_time`, `update_time`
 ) VALUES (
   '超级管理员', '拥有所有权限的超级管理员角色',
-  1, 1, '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51', 0, 10, 0,
+  1, 1, '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52', 0, 10, 0,
   UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000
 ) ON DUPLICATE KEY UPDATE `update_time` = UNIX_TIMESTAMP() * 1000;
 
@@ -67,7 +67,8 @@ INSERT INTO `rules` (`title`, `alias`, `des`, `condition`, `icon`, `module_id`, 
 ('操作日志', 'operate-logs', '系统操作日志', '/backstage/operate-logs', 'pi pi-history', 1, 1, 0, 21, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
 
 -- Cache Management
-('缓存管理', 'caches', '缓存管理', '/backstage/caches', 'pi pi-cog', 1, 1, 0, 22, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+('缓存管理', 'caches', '缓存管理', '/backstage/caches', 'pi pi-cog', 1, 1, 0, 22, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000),
+('应用管理', 'apps', '应用管理', '/backstage/apps', 'pi pi-server', 1, 1, 0, 23, 10, 0, UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- Insert basic categories (including system categories)
 INSERT INTO `categories` (`title`, `alias`, `des`, `parent_id`, `sort`, `status`, `is_delete`, `create_time`, `update_time`) VALUES

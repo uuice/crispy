@@ -104,18 +104,17 @@ export class AccessTokenService {
    * @param data Data to update
    * @returns Updated access token
    */
-  async update(id: number, data: Updateable<DB['access_token']>): Promise<AccessToken | null> {
-    const token = await db
+  async update(id: number, updateData: Updateable<DB['access_token']>) {
+    const result = await db
       .safeUpdateTable('access_token')
       .set({
-        ...data,
+        ...updateData,
         update_time: Date.now()
       })
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
-      .returningAll()
       .executeTakeFirst()
-    return token as unknown as AccessToken | null
+    return { id, ...updateData }
   }
 
   /**

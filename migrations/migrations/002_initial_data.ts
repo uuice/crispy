@@ -439,6 +439,21 @@ export async function up(db: Kysely<any>): Promise<void> {
       is_delete: 0,
       create_time: Date.now(),
       update_time: Date.now()
+    },
+    {
+      title: '应用管理',
+      alias: 'apps',
+      des: '应用管理',
+      condition: '/backstage/apps',
+      icon: 'pi pi-server',
+      module_id: 1,
+      type_id: 1,
+      parent_id: 0,
+      sort: 23,
+      status: 10,
+      is_delete: 0,
+      create_time: Date.now(),
+      update_time: Date.now()
     }
   ]
 

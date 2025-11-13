@@ -127,6 +127,11 @@ export const BACKSTAGE_ROUTES: Routes = [
         path: 'caches',
         loadChildren: () => import('./pages/cache/caches.routes').then((m) => m.CACHES_ROUTES),
         data: { keepAlive: true }
+      },
+      {
+        path: 'apps',
+        loadChildren: () => import('./pages/apps/apps.routes').then((m) => m.APPS_ROUTES),
+        data: { keepAlive: true }
       }
     ]
   }
