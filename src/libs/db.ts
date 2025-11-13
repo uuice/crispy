@@ -40,6 +40,17 @@ class FilterUndefinedPlugin implements KyselyPlugin {
   }
 }
 
+// 处理 BigInt 类型的插件
+class BigIntTransformPlugin implements KyselyPlugin {
+  transformQuery(args: PluginTransformQueryArgs): any {
+    return args.node
+  }
+
+  transformResult(args: PluginTransformResultArgs): any {
+    return transformBigInt(args.result)
+  }
+}
+
 // 扩展 Kysely 实例的方法
 export const createDbWithHelpers = (kyselyInstance: Kysely<DB>) => {
   // 直接在原始实例上添加方法，避免破坏内部结构
@@ -126,7 +137,7 @@ const kyselyInstance = new Kysely<DB>({
   dialect,
   // Logging configuration
   log: env['NODE_ENV'] === 'development' ? ['query', 'error'] : ['error'],
-  plugins: [new FilterUndefinedPlugin()]
+  plugins: [new FilterUndefinedPlugin(), new BigIntTransformPlugin()]
 })
 
 // Export enhanced db instance with helper methods
