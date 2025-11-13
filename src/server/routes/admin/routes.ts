@@ -32,12 +32,15 @@ import { getSystemInfo } from './system'
 import { getDashboardOverview } from './dashboard'
 import { operateLogService } from '@src/server/services/operateLogService'
 import { staticGenerationController } from './static-generation'
+import { env } from '@src/server/config/env'
 
 const router = Router()
 
 // Create authentication middleware
 const authMiddleware: RequestHandler = (req, res, next) => {
-  console.log(req.path)
+  if (env.isDevelopment()) {
+    console.log(req.path)
+  }
   if (req.path === '/login' || req.path === '/login/') {
     next()
     return

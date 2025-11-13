@@ -28,10 +28,10 @@ import { AccessTokenService } from '../../services/accessToken.Service'
 import { accessTokenController } from './access-token'
 import { error } from '../../utils/response'
 import { systemRouterController } from './system'
-import { flexsearchService } from '../../services/flexsearch-index.service'
 import { searchController } from './search'
 import { getSiteSettings } from './site-settings'
 import { openaiController } from './openai'
+import { env } from '@src/server/config/env'
 
 // Define token info interface
 interface TokenInfo {
@@ -51,7 +51,9 @@ const accessTokenService = new AccessTokenService()
 
 // Create authentication middleware
 const authMiddleware: RequestHandler = async (req: Request, res, next) => {
-  console.log(req.path)
+  if (env.isDevelopment()) {
+    console.log(req.path)
+  }
   if (req.path === '/login' || req.path === '/login/') {
     next()
     return
@@ -68,7 +70,9 @@ const authMiddleware: RequestHandler = async (req: Request, res, next) => {
     // Get app_name and channel from headers
     const app_name = req.headers['x-app-name'] as string
     const channel = req.headers['x-channel'] as string
-    console.log(app_name, channel)
+    if (env.isDevelopment()) {
+      console.log(app_name, channel)
+    }
     if (!app_name || !channel) {
       error(res, 'App name and channel are required', 400)
       return

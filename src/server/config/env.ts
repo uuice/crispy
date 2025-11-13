@@ -58,3 +58,13 @@ export const env = {
 
 // Type for environment variables
 export type Env = typeof env
+
+// Production safety checks
+if (env['NODE_ENV'] === 'production') {
+  if (
+    !process.env['JWT_SECRET'] ||
+    process.env['JWT_SECRET'] === 'your-super-secret-key-change-in-production'
+  ) {
+    throw new Error('JWT_SECRET must be set to a secure value in production')
+  }
+}

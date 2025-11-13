@@ -1,5 +1,6 @@
 import helmet from 'helmet'
 import express, { Express } from 'express'
+import { env } from '../config/env'
 import { jsonParser, urlencodedParser, bodyParserErrorHandler } from './body-parser'
 import { requestLogger } from './request-logger'
 import { corsMiddleware } from './cors'
@@ -8,6 +9,9 @@ import { corsMiddleware } from './cors'
 export const applyMiddleware = (app: Express) => {
   // 1. Security middleware (first line of defense)
   app.use(corsMiddleware)
+  // if (env.isProduction()) {
+  //   app.use(helmet())
+  // }
   // app.use(
   //   helmet({
   //     contentSecurityPolicy: {
