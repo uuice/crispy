@@ -12,7 +12,7 @@ import { MessageModule } from 'primeng/message'
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CategoryDetailComponent } from './category-detail.component'
-import { SYSTEM_CATEGORY_ALIAS, SYSTEM_CATEGORY_PARENT_ID_LIST } from '@src/server/config/const'
+import { SYSTEM_CATEGORY_ALIAS, SYSTEM_CATEGORY_PARENT_ID_LIST } from '@src/shared/const'
 
 interface CategoryNode {
   id: number

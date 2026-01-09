@@ -18,7 +18,7 @@ import { TextareaModule } from 'primeng/textarea'
 import { ProgressSpinnerModule } from 'primeng/progressspinner'
 import { SettingsService, AppSettings } from '../../services/settings.service'
 import { HttpService } from '../../services/http.service'
-import { SYSTEM_SETTINGS_CATEGORY_ALIAS } from '../../../../server/config/const'
+import { SYSTEM_SETTINGS_CATEGORY_ALIAS } from '@src/shared/const'
 import { timeout } from 'rxjs/operators'
 
 interface SiteSettings {
