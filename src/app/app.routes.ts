@@ -98,9 +98,9 @@ export const routes: Routes = [
   {
     path: 'backstage',
     loadChildren: () => import('./backstage/backstage.routes').then((m) => m.BACKSTAGE_ROUTES)
-  },
-  {
-    path: '**',
-    redirectTo: ''
   }
+  // {
+  //   path: '**',
+  //   redirectTo: ''
+  // }
 ]
