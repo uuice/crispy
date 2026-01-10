@@ -8,6 +8,10 @@ import { flexsearchService } from './server/services/flexsearch-index.service'
 import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
 import { testDbConnection } from './libs/db'
+import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
+import { corsPlugin, requestLoggerPlugin } from './server/plugins'
+import { serverTiming } from '@elysiajs/server-timing'
+import { html, Html } from '@elysiajs/html'
 
 const app = new Elysia()
 
@@ -15,8 +19,6 @@ const angularApp = new AngularAppEngine()
 
 // Scheduled tasks
 import './crons/persistFlexsearchIndex'
-import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
-import { corsPlugin, requestLoggerPlugin } from './server/plugins'
 
 // test db connection
 testDbConnection()
@@ -55,6 +57,15 @@ if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
 }
 
 // !cache ignore, no need
+// server timing
+app.use(
+  serverTiming({
+    enabled: true
+    // allow: true
+  })
+)
+
+app.use(html())
 
 // cors plugin
 app.use(corsPlugin)
@@ -74,6 +85,29 @@ app.use(staticPlugin({ prefix: '/uploads', assets: join(process.cwd(), 'public',
 
 // Health check endpoint
 app.get('/health', 'health')
+
+app.get(
+		'/html',
+		() => `
+            <html lang='en'>
+                <head>
+                    <title>Hello World</title>
+                </head>
+                <body>
+                    <h1>Hello World</h1>
+                </body>
+            </html>`
+	)
+	app.get('/jsx', () => (
+		<html lang="en">
+			<head>
+				<title>Hello World</title>
+			</head>
+			<body>
+				<h1>Hello World</h1>
+			</body>
+		</html>
+	))
 
 if (isMainModule(import.meta.url)) {
   const port = env['PORT']
