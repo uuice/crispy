@@ -12,7 +12,6 @@ import { html, Html } from '@elysiajs/html'
 import { serverTiming } from '@elysiajs/server-timing'
 import { openapi } from '@elysiajs/openapi'
 
-
 // test db connection
 testDbConnection()
 
@@ -50,9 +49,6 @@ if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
 }
 const angularApp = new AngularAppEngine()
 
-
-
-
 // Scheduled tasks
 import './crons/persistFlexsearchIndex'
 import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
@@ -63,7 +59,7 @@ import { corsPlugin, requestLoggerPlugin } from './server/plugins'
 const app = new Elysia()
 .use(openapi())
 
-  .use(html())
+.use(html())
 
 //Adding it causes the HTML plugin to stop working; I don't know why.
 // .use(serverTiming())
