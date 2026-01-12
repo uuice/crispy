@@ -102,3 +102,15 @@ export const accessTokenController = {
   getAccessTokens,
   checkAccessToken
 }
+
+import { Elysia, t } from 'elysia'
+// import { z } from 'zod'
+const accessTokenRouter = new Elysia({
+  prefix: '/access-token'
+})
+
+accessTokenRouter.get('/test', () => {
+  return { message: 'Access Token API is working!' }
+})
+
+export default accessTokenRouter

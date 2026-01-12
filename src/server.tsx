@@ -53,11 +53,19 @@ const angularApp = new AngularAppEngine()
 import './crons/persistFlexsearchIndex'
 import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
 import { corsPlugin, requestLoggerPlugin } from './server/plugins'
+import apiRouter from './server/routes/api'
 
 
 
 const app = new Elysia()
-.use(openapi())
+  .use(openapi({
+    documentation: {
+      info: {
+          title: 'Elysia Documentation',
+          version: '1.0.1'
+      }
+  }
+}))
 
 .use(html())
 
@@ -107,6 +115,9 @@ const app = new Elysia()
     </body>
   </html>
 ))
+
+// 挂载api
+.use(apiRouter)
 
 
 

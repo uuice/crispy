@@ -1,14 +1,15 @@
-import { Router } from 'express'
-import adminRoutes from './admin/routes'
-import contentRoutes from './content/routes'
+import adminRouter from './admin/index'
+import contentRouter from './content/index'
 
 // Create API router
-const router = Router()
+import { Elysia, t } from 'elysia'
+const apiRouter = new Elysia({
+  prefix: '/api',
+  detail: {
+    tags: ['API']
+  }
+})
+  .use(adminRouter)
+  .use(contentRouter)
 
-// Mount admin routes
-router.use('/admin', adminRoutes)
-
-// Mount content routes
-router.use('/content', contentRoutes)
-
-export default router
+export default apiRouter
