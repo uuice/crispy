@@ -217,15 +217,6 @@ export const deleteArticle = async (
   }
 }
 
-// Export all functions as a controller object
-export const articleController = {
-  getArticle,
-  getArticles,
-  createArticle,
-  updateArticle,
-  deleteArticle
-}
-
 import { Elysia } from 'elysia'
 const articleRouter = new Elysia({
   prefix: '/articles'

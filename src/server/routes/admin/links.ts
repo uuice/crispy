@@ -165,15 +165,6 @@ export const deleteLink = async (
   }
 }
 
-// Export all functions as a controller object
-export const linkController = {
-  getLink,
-  getLinks,
-  createLink,
-  updateLink,
-  deleteLink
-}
-
 import { Elysia } from 'elysia'
 const linkRouter = new Elysia({
   prefix: '/links'

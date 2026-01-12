@@ -182,18 +182,6 @@ export const resetPassword = async (
   }
 }
 
-// Export all functions as a controller object
-export const userController = {
-  login,
-  logout,
-  getUser,
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  resetPassword
-}
-
 import { Elysia } from 'elysia'
 const userRouter = new Elysia({
   prefix: '/users'

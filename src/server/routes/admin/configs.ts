@@ -211,17 +211,6 @@ export const deleteConfig = async (
   }
 }
 
-// Export all functions as a controller object
-export const configController = {
-  getConfig,
-  getConfigByAlias,
-  getConfigs,
-  createConfig,
-  upsertConfig,
-  updateConfig,
-  deleteConfig
-}
-
 import { Elysia } from 'elysia'
 const configRouter = new Elysia({
   prefix: '/configs'

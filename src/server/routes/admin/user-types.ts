@@ -143,15 +143,6 @@ export const deleteUserType = async (
   }
 }
 
-// Export all functions as a controller object
-export const userTypeController = {
-  getUserType,
-  getUserTypes,
-  createUserType,
-  updateUserType,
-  deleteUserType
-}
-
 import { Elysia } from 'elysia'
 const userTypeRouter = new Elysia({
   prefix: '/user-types'

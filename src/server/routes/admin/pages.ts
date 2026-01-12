@@ -222,15 +222,6 @@ export const deletePage = async (
   }
 }
 
-// Export all functions as a controller object
-export const pageController = {
-  getPage,
-  getPages,
-  createPage,
-  updatePage,
-  deletePage
-}
-
 import { Elysia } from 'elysia'
 const pageRouter = new Elysia({
   prefix: '/pages'

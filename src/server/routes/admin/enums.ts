@@ -156,15 +156,6 @@ export const deleteEnum = async (
   }
 }
 
-// Export all functions as a controller object
-export const enumController = {
-  getEnum,
-  getEnums,
-  createEnum,
-  updateEnum,
-  deleteEnum
-}
-
 import { Elysia } from 'elysia'
 const enumRouter = new Elysia({
   prefix: '/enums'

@@ -148,15 +148,6 @@ export const deleteAddition = async (
   }
 }
 
-// Export all functions as a controller object
-export const additionController = {
-  getAddition,
-  getAdditions,
-  createAddition,
-  updateAddition,
-  deleteAddition
-}
-
 import { Elysia } from 'elysia'
 const additionRouter = new Elysia({
   prefix: '/additions'

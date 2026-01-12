@@ -165,15 +165,6 @@ export const deleteApiLog = async (
   }
 }
 
-// Export all functions as a controller object
-export const apiLogController = {
-  getApiLog,
-  getApiLogs,
-  createApiLog,
-  updateApiLog,
-  deleteApiLog
-}
-
 import { Elysia } from 'elysia'
 const apiLogRouter = new Elysia({
   prefix: '/api-logs'

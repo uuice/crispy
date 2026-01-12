@@ -179,16 +179,6 @@ export const deleteCategory = async (
   }
 }
 
-// Export all functions as a controller object
-export const categoryController = {
-  getCategory,
-  getCategories,
-  getCategoryTree,
-  createCategory,
-  updateCategory,
-  deleteCategory
-}
-
 import { Elysia } from 'elysia'
 const categoryRouter = new Elysia({
   prefix: '/categories'

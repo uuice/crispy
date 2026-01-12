@@ -81,11 +81,6 @@ export const uploadImage = async (
   }
 }
 
-// Export all functions as a controller object
-export const uploadController = {
-  uploadImage
-}
-
 import { Elysia } from 'elysia'
 const uploadRouter = new Elysia({
   prefix: '/upload'

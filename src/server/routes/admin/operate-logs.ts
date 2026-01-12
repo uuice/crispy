@@ -165,15 +165,6 @@ export const deleteOperateLog = async (
   }
 }
 
-// Export all functions as a controller object
-export const operateLogController = {
-  getOperateLog,
-  getOperateLogs,
-  createOperateLog,
-  updateOperateLog,
-  deleteOperateLog
-}
-
 import { Elysia } from 'elysia'
 const operateLogRouter = new Elysia({
   prefix: '/operate-logs'

@@ -136,15 +136,6 @@ export const deleteAd = async (req: Request, res: Response, next: NextFunction):
   }
 }
 
-// Export all functions as a controller object
-export const adController = {
-  getAd,
-  getAds,
-  createAd,
-  updateAd,
-  deleteAd
-}
-
 import { Elysia } from 'elysia'
 const adRouter = new Elysia({
   prefix: '/ads'

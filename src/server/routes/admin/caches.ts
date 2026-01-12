@@ -312,25 +312,6 @@ export const getDatabaseCacheInfo = async (
   }
 }
 
-// Export all functions as a controller object
-export const cacheController = {
-  getCache,
-  getCaches,
-  createCache,
-  updateCache,
-  deleteCache,
-  // Page cache management
-  getCacheStats,
-  getMemoryCacheList,
-  deleteMemoryCache,
-  getMemoryCacheInfo,
-  cleanupMemoryCache,
-  getDatabaseCacheList,
-  clearExpiredDatabaseCache,
-  deleteDatabaseCache,
-  getDatabaseCacheInfo
-}
-
 import { Elysia } from 'elysia'
 const cacheRouter = new Elysia({
   prefix: '/caches'

@@ -136,15 +136,6 @@ export const getAccessTokens = async (
   }
 }
 
-// Export all functions as a controller object
-export const accessTokenController = {
-  createAccessToken,
-  getAccessTokenById,
-  updateAccessToken,
-  deleteAccessToken,
-  getAccessTokens
-}
-
 import { Elysia } from 'elysia'
 const accessTokenRouter = new Elysia({
   prefix: '/access-tokens'

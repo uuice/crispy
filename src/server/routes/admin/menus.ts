@@ -199,16 +199,6 @@ export const deleteMenu = async (
   }
 }
 
-// Export all functions as a controller object
-export const menuController = {
-  getMenu,
-  getMenus,
-  getMenuTree,
-  createMenu,
-  updateMenu,
-  deleteMenu
-}
-
 import { Elysia } from 'elysia'
 const menuRouter = new Elysia({
   prefix: '/menus'

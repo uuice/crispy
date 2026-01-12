@@ -251,18 +251,6 @@ export const getCommentStats = async (
   }
 }
 
-// Export all functions as a controller object
-export const commentController = {
-  getComment,
-  getComments,
-  createComment,
-  updateComment,
-  deleteComment,
-  batchUpdateStatus,
-  batchDeleteComments,
-  getCommentStats
-}
-
 import { Elysia } from 'elysia'
 const commentRouter = new Elysia({
   prefix: '/comments'

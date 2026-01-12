@@ -160,15 +160,6 @@ export const deleteRole = async (
   }
 }
 
-// Export all functions as a controller object
-export const roleController = {
-  getRole,
-  getRoles,
-  createRole,
-  updateRole,
-  deleteRole
-}
-
 import { Elysia } from 'elysia'
 const roleRouter = new Elysia({
   prefix: '/roles'

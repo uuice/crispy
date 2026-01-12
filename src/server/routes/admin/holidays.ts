@@ -162,15 +162,6 @@ export const deleteHoliday = async (
   }
 }
 
-// Export all functions as a controller object
-export const holidayController = {
-  getHoliday,
-  getHolidays,
-  createHoliday,
-  updateHoliday,
-  deleteHoliday
-}
-
 import { Elysia } from 'elysia'
 const holidayRouter = new Elysia({
   prefix: '/holidays'

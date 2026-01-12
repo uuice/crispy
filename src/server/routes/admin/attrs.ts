@@ -154,15 +154,6 @@ export const deleteAttr = async (
   }
 }
 
-// Export all functions as a controller object
-export const attrController = {
-  getAttr,
-  getAttrs,
-  createAttr,
-  updateAttr,
-  deleteAttr
-}
-
 import { Elysia } from 'elysia'
 const attrRouter = new Elysia({
   prefix: '/attrs'

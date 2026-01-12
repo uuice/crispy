@@ -170,15 +170,6 @@ export const deleteKeyword = async (
   }
 }
 
-// Export all functions as a controller object
-export const keywordController = {
-  getKeyword,
-  getKeywords,
-  createKeyword,
-  updateKeyword,
-  deleteKeyword
-}
-
 import { Elysia } from 'elysia'
 const keywordRouter = new Elysia({
   prefix: '/keywords'

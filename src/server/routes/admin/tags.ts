@@ -124,15 +124,6 @@ export const deleteTag = async (req: Request, res: Response, next: NextFunction)
   }
 }
 
-// Export all functions as a controller object
-export const tagController = {
-  getTag,
-  getTags,
-  createTag,
-  updateTag,
-  deleteTag
-}
-
 import { Elysia } from 'elysia'
 const tagRouter = new Elysia({
   prefix: '/tags'

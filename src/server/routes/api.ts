@@ -1,4 +1,4 @@
-import adminRouter from './admin/index'
+import adminRouter from './admin/admin-router'
 import contentRouter from './content/index'
 
 // Create API router

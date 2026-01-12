@@ -181,15 +181,6 @@ export const deleteVote = async (
   }
 }
 
-// Export all functions as a controller object
-export const voteController = {
-  getVote,
-  getVotes,
-  createVote,
-  updateVote,
-  deleteVote
-}
-
 import { Elysia } from 'elysia'
 const voteRouter = new Elysia({
   prefix: '/votes'

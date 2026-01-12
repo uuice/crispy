@@ -131,16 +131,6 @@ export const deleteRule = async (
   }
 }
 
-// Export all functions as a controller object
-export const ruleController = {
-  getRule,
-  getRules,
-  getRuleTree,
-  createRule,
-  updateRule,
-  deleteRule
-}
-
 import { Elysia } from 'elysia'
 const ruleRouter = new Elysia({
   prefix: '/rules'

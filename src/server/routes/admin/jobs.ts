@@ -160,15 +160,6 @@ export const deleteJob = async (req: Request, res: Response, next: NextFunction)
   }
 }
 
-// Export all functions as a controller object
-export const jobController = {
-  getJob,
-  getJobs,
-  createJob,
-  updateJob,
-  deleteJob
-}
-
 import { Elysia } from 'elysia'
 const jobRouter = new Elysia({
   prefix: '/jobs'

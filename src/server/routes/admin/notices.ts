@@ -166,15 +166,6 @@ export const deleteNotice = async (
   }
 }
 
-// Export all functions as a controller object
-export const noticeController = {
-  getNotice,
-  getNotices,
-  createNotice,
-  updateNotice,
-  deleteNotice
-}
-
 import { Elysia } from 'elysia'
 
 const noticeRouter = new Elysia({

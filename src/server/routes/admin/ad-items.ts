@@ -148,14 +148,6 @@ export const deleteAdItem = async (
   }
 }
 
-// Export all functions as a controller object
-export const adItemController = {
-  getAdItem,
-  getAdItems,
-  createAdItem,
-  updateAdItem,
-  deleteAdItem
-}
 
 import { Elysia } from 'elysia'
 
