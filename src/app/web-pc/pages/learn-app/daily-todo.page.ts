@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { Component } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 
@@ -12,7 +11,7 @@ interface TodoItem {
 @Component({
   selector: 'cs-learn-daily-todo',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule],
   template: `
     <h1>Daily Todo</h1>
     <!-- Add new todo -->
@@ -20,7 +19,9 @@ interface TodoItem {
       <input [(ngModel)]="newTitle" name="title" placeholder="Task title" required />
       <select [(ngModel)]="newSubject" name="subject" required>
         <option value="">Select subject</option>
-        <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+        @for (s of subjects; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
       </select>
       <button type="submit" [disabled]="!newTitle || !newSubject">Add</button>
     </form>
@@ -36,40 +37,48 @@ interface TodoItem {
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of todoList">
-          <td>
-            <span *ngIf="editId !== item.id">{{ item.title }}</span>
-            <input
-              *ngIf="editId === item.id"
-              [(ngModel)]="editTitle"
-              name="editTitle{{ item.id }}"
-            />
-          </td>
-          <td>
-            <span *ngIf="editId !== item.id">{{ item.subject }}</span>
-            <select
-              *ngIf="editId === item.id"
-              [(ngModel)]="editSubject"
-              name="editSubject{{ item.id }}"
-            >
-              <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
-            </select>
-          </td>
-          <td>
-            <input
-              type="checkbox"
-              [(ngModel)]="item.done"
-              name="done{{ item.id }}"
-              (change)="toggleDone(item)"
-            />
-            <span>{{ item.done ? 'Done' : 'Pending' }}</span>
-          </td>
-          <td>
-            <button *ngIf="editId !== item.id" (click)="startEdit(item)">Edit</button>
-            <button *ngIf="editId === item.id" (click)="saveEdit(item)">Save</button>
-            <button (click)="deleteTodo(item.id)">Delete</button>
-          </td>
-        </tr>
+        @for (item of todoList; track item) {
+          <tr>
+            <td>
+              @if (editId !== item.id) {
+                <span>{{ item.title }}</span>
+              }
+              @if (editId === item.id) {
+                <input [(ngModel)]="editTitle" name="editTitle{{ item.id }}" />
+              }
+            </td>
+            <td>
+              @if (editId !== item.id) {
+                <span>{{ item.subject }}</span>
+              }
+              @if (editId === item.id) {
+                <select [(ngModel)]="editSubject" name="editSubject{{ item.id }}">
+                  @for (s of subjects; track s) {
+                    <option [value]="s">{{ s }}</option>
+                  }
+                </select>
+              }
+            </td>
+            <td>
+              <input
+                type="checkbox"
+                [(ngModel)]="item.done"
+                name="done{{ item.id }}"
+                (change)="toggleDone(item)"
+              />
+              <span>{{ item.done ? 'Done' : 'Pending' }}</span>
+            </td>
+            <td>
+              @if (editId !== item.id) {
+                <button (click)="startEdit(item)">Edit</button>
+              }
+              @if (editId === item.id) {
+                <button (click)="saveEdit(item)">Save</button>
+              }
+              <button (click)="deleteTodo(item.id)">Delete</button>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
     <br />

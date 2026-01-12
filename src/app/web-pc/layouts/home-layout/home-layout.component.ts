@@ -106,26 +106,30 @@ interface PaginatedResponse<T> {
             <a routerLink="/" class="font-bold text-2xl tracking-tight"> 轻盈的鱼 </a>
             <!-- Desktop Menu -->
             <ul class="hidden md:flex gap-6 text-base font-medium">
-              <li *ngFor="let item of menuItems">
-                <a
-                  *ngIf="!item.url"
-                  [routerLink]="item.routerLink"
-                  routerLinkActive="active"
-                  class="hover:opacity-80 transition"
-                  [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
-                >
-                  {{ item.label }}
-                </a>
-                <a
-                  *ngIf="item.url"
-                  [href]="item.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hover:opacity-80 transition"
-                >
-                  {{ item.label }}
-                </a>
-              </li>
+              @for (item of menuItems; track item) {
+                <li>
+                  @if (!item.url) {
+                    <a
+                      [routerLink]="item.routerLink"
+                      routerLinkActive="active"
+                      class="hover:opacity-80 transition"
+                      [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
+                    >
+                      {{ item.label }}
+                    </a>
+                  }
+                  @if (item.url) {
+                    <a
+                      [href]="item.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="hover:opacity-80 transition"
+                    >
+                      {{ item.label }}
+                    </a>
+                  }
+                </li>
+              }
             </ul>
             <!-- Mobile Menu Button -->
             <button
@@ -180,28 +184,32 @@ interface PaginatedResponse<T> {
         }"
       >
         <ul class="flex flex-col gap-4 mt-4">
-          <li *ngFor="let item of menuItems">
-            <a
-              *ngIf="!item.url"
-              [routerLink]="item.routerLink"
-              (click)="mobileMenuVisible = false"
-              class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
-              [routerLinkActive]="'active'"
-              [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
-            >
-              {{ item.label }}
-            </a>
-            <a
-              *ngIf="item.url"
-              [href]="item.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
-              (click)="mobileMenuVisible = false"
-            >
-              {{ item.label }}
-            </a>
-          </li>
+          @for (item of menuItems; track item) {
+            <li>
+              @if (!item.url) {
+                <a
+                  [routerLink]="item.routerLink"
+                  (click)="mobileMenuVisible = false"
+                  class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
+                  [routerLinkActive]="'active'"
+                  [routerLinkActiveOptions]="item.routerLinkActiveOptions || {}"
+                >
+                  {{ item.label }}
+                </a>
+              }
+              @if (item.url) {
+                <a
+                  [href]="item.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block py-2 px-3 rounded hover:opacity-80 text-base font-medium"
+                  (click)="mobileMenuVisible = false"
+                >
+                  {{ item.label }}
+                </a>
+              }
+            </li>
+          }
         </ul>
       </p-drawer>
       <!-- Search Drawer -->
@@ -239,88 +247,97 @@ interface PaginatedResponse<T> {
                   textIndent: '24px'
                 }"
               />
-              <button
-                *ngIf="searchQuery()"
-                (click)="clearSearch()"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <i class="pi pi-times"></i>
-              </button>
+              @if (searchQuery()) {
+                <button
+                  (click)="clearSearch()"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <i class="pi pi-times"></i>
+                </button>
+              }
             </div>
           </div>
 
           <!-- Search Results -->
           <div class="search-results max-w-4xl mx-auto">
             <!-- Loading State -->
-            <div *ngIf="isSearching()" class="text-center py-8">
-              <i class="pi pi-spin pi-spinner text-2xl text-primary mb-2"></i>
-              <p class="text-muted">搜索中...</p>
-            </div>
+            @if (isSearching()) {
+              <div class="text-center py-8">
+                <i class="pi pi-spin pi-spinner text-2xl text-primary mb-2"></i>
+                <p class="text-muted">搜索中...</p>
+              </div>
+            }
 
             <!-- No Results -->
-            <div
-              *ngIf="!isSearching() && searchQuery() && searchResults().length === 0"
-              class="text-center py-8"
-            >
-              <i class="pi pi-search text-4xl text-muted mb-4"></i>
-              <p class="text-lg text-muted mb-2">未找到相关文章</p>
-              <p class="text-sm text-muted">请尝试其他关键词</p>
-            </div>
+            @if (!isSearching() && searchQuery() && searchResults().length === 0) {
+              <div class="text-center py-8">
+                <i class="pi pi-search text-4xl text-muted mb-4"></i>
+                <p class="text-lg text-muted mb-2">未找到相关文章</p>
+                <p class="text-sm text-muted">请尝试其他关键词</p>
+              </div>
+            }
 
             <!-- Search Results List -->
-            <div *ngIf="!isSearching() && searchResults().length > 0" class="space-y-4">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold">搜索结果 ({{ searchResults().length }})</h3>
-                <button
-                  (click)="searchVisible.set(false)"
-                  class="text-sm text-muted hover:text-primary"
-                >
-                  关闭
-                </button>
-              </div>
-
+            @if (!isSearching() && searchResults().length > 0) {
               <div class="space-y-4">
-                <div
-                  *ngFor="let result of searchResults()"
-                  class="search-result-item p-4 border rounded-lg hover:bg-hover transition-colors cursor-pointer"
-                  (click)="onResultClick(result)"
-                >
-                  <div class="flex items-start gap-4">
-                    <div class="flex-1">
-                      <h4 class="text-lg font-medium text-main mb-2 line-clamp-2">
-                        <span [innerHTML]="result._highlight?.title || result.title"></span>
-                      </h4>
-                      <p
-                        *ngIf="result._highlight?.abstract || result.abstract"
-                        class="text-sm text-muted mb-2 line-clamp-2"
-                      >
-                        <span [innerHTML]="result._highlight?.abstract || result.abstract"></span>
-                      </p>
-                      <div class="flex items-center gap-4 text-xs text-muted">
-                        <span class="flex items-center gap-1">
-                          <i class="pi pi-calendar"></i>
-                          {{ result.create_time | date: 'yyyy-MM-dd' }}
-                        </span>
-                        <span *ngIf="result.category" class="flex items-center gap-1">
-                          <i class="pi pi-tag"></i>
-                          {{ result.category }}
-                        </span>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold">搜索结果 ({{ searchResults().length }})</h3>
+                  <button
+                    (click)="searchVisible.set(false)"
+                    class="text-sm text-muted hover:text-primary"
+                  >
+                    关闭
+                  </button>
+                </div>
+                <div class="space-y-4">
+                  @for (result of searchResults(); track result) {
+                    <div
+                      class="search-result-item p-4 border rounded-lg hover:bg-hover transition-colors cursor-pointer"
+                      (click)="onResultClick(result)"
+                    >
+                      <div class="flex items-start gap-4">
+                        <div class="flex-1">
+                          <h4 class="text-lg font-medium text-main mb-2 line-clamp-2">
+                            <span [innerHTML]="result._highlight?.title || result.title"></span>
+                          </h4>
+                          @if (result._highlight?.abstract || result.abstract) {
+                            <p class="text-sm text-muted mb-2 line-clamp-2">
+                              <span
+                                [innerHTML]="result._highlight?.abstract || result.abstract"
+                              ></span>
+                            </p>
+                          }
+                          <div class="flex items-center gap-4 text-xs text-muted">
+                            <span class="flex items-center gap-1">
+                              <i class="pi pi-calendar"></i>
+                              {{ result.create_time | date: 'yyyy-MM-dd' }}
+                            </span>
+                            @if (result.category) {
+                              <span class="flex items-center gap-1">
+                                <i class="pi pi-tag"></i>
+                                {{ result.category }}
+                              </span>
+                            }
+                          </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                          <i class="pi pi-arrow-right text-muted"></i>
+                        </div>
                       </div>
                     </div>
-                    <div class="flex-shrink-0">
-                      <i class="pi pi-arrow-right text-muted"></i>
-                    </div>
-                  </div>
+                  }
                 </div>
               </div>
-            </div>
+            }
 
             <!-- Search Tips -->
-            <div *ngIf="!isSearching() && !searchQuery()" class="text-center py-8">
-              <i class="pi pi-search text-4xl text-muted mb-4"></i>
-              <p class="text-lg text-muted mb-2">搜索文章</p>
-              <p class="text-sm text-muted">输入关键词开始搜索</p>
-            </div>
+            @if (!isSearching() && !searchQuery()) {
+              <div class="text-center py-8">
+                <i class="pi pi-search text-4xl text-muted mb-4"></i>
+                <p class="text-lg text-muted mb-2">搜索文章</p>
+                <p class="text-sm text-muted">输入关键词开始搜索</p>
+              </div>
+            }
           </div>
         </div>
       </p-drawer>
@@ -353,39 +370,41 @@ interface PaginatedResponse<T> {
                   ><i class="pi pi-github text-xl"></i
                 ></a>
                 <!-- <a
-                  href="https://twitter.com/uuice"
-                  class="blog-icon-pink hover:opacity-80"
-                  title="Twitter"
-                  ><i class="pi pi-twitter text-xl"></i
-                ></a> -->
+                href="https://twitter.com/uuice"
+                class="blog-icon-pink hover:opacity-80"
+                title="Twitter"
+                ><i class="pi pi-twitter text-xl"></i
+              ></a> -->
               </div>
             </div>
             <!-- Categories Card -->
             <div class="rounded-xl shadow p-6 mb-8">
               <h3 class="text-base font-semibold mb-3">分类</h3>
               <div class="flex flex-wrap gap-3">
-                <span
-                  *ngFor="let category of categories()"
-                  class="blog-tag blog-tag-blue text-sm"
-                  [routerLink]="['/categories', category.alias]"
-                  style="cursor: pointer;"
-                >
-                  {{ category.title }} ({{ category.article_count || category.count || 0 }})
-                </span>
+                @for (category of categories(); track category) {
+                  <span
+                    class="blog-tag blog-tag-blue text-sm"
+                    [routerLink]="['/categories', category.alias]"
+                    style="cursor: pointer;"
+                  >
+                    {{ category.title }} ({{ category.article_count || category.count || 0 }})
+                  </span>
+                }
               </div>
             </div>
             <!-- Tags Card -->
             <div class="rounded-xl shadow p-6 mb-8">
               <h3 class="text-base font-semibold mb-3">标签</h3>
               <div class="flex flex-wrap gap-2">
-                <span
-                  *ngFor="let tag of tags(); let i = index"
-                  [class]="'blog-tag ' + getTagClass(i) + ' text-xs'"
-                  [routerLink]="['/tags', tag.value]"
-                  style="cursor: pointer;"
-                >
-                  {{ tag.title }}
-                </span>
+                @for (tag of tags(); track tag; let i = $index) {
+                  <span
+                    [class]="'blog-tag ' + getTagClass(i) + ' text-xs'"
+                    [routerLink]="['/tags', tag.value]"
+                    style="cursor: pointer;"
+                  >
+                    {{ tag.title }}
+                  </span>
+                }
               </div>
             </div>
 
@@ -393,23 +412,25 @@ interface PaginatedResponse<T> {
             <div class="rounded-xl shadow p-6">
               <h3 class="text-base font-semibold mb-3">最新文章</h3>
               <div class="space-y-3">
-                <div *ngFor="let article of latestArticles()" class="latest-article-item">
-                  <a
-                    [routerLink]="['/archives', article.url]"
-                    class="block hover:opacity-80 transition-opacity"
-                  >
-                    <h4 class="text-sm font-medium text-main line-clamp-2 mb-1">
-                      {{ article.title }}
-                    </h4>
-                    <div class="flex items-center justify-between text-xs text-muted">
-                      <span>{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
-                      <span class="flex items-center gap-1">
-                        <i class="pi pi-eye text-xs"></i>
-                        <span>{{ article.type_name }}</span>
-                      </span>
-                    </div>
-                  </a>
-                </div>
+                @for (article of latestArticles(); track article) {
+                  <div class="latest-article-item">
+                    <a
+                      [routerLink]="['/archives', article.url]"
+                      class="block hover:opacity-80 transition-opacity"
+                    >
+                      <h4 class="text-sm font-medium text-main line-clamp-2 mb-1">
+                        {{ article.title }}
+                      </h4>
+                      <div class="flex items-center justify-between text-xs text-muted">
+                        <span>{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
+                        <span class="flex items-center gap-1">
+                          <i class="pi pi-eye text-xs"></i>
+                          <span>{{ article.type_name }}</span>
+                        </span>
+                      </div>
+                    </a>
+                  </div>
+                }
               </div>
               <div class="mt-4 pt-3 border-t border-content">
                 <a
@@ -470,20 +491,23 @@ interface PaginatedResponse<T> {
           <div class="setting-section">
             <div class="label">Surface Config</div>
             <div class="surface-color-options-row">
-              <div
-                *ngFor="let surfaceColor of surfaceColors"
-                class="surface-color-option"
-                [class.selected]="surfaceColor.value === selectedSurfaceColor"
-                (click)="onSelectSurfaceColor(surfaceColor.value)"
-                [title]="surfaceColor.name"
-              >
+              @for (surfaceColor of surfaceColors; track surfaceColor) {
                 <div
-                  class="surface-color-preview"
-                  [ngStyle]="{ background: surfaceColor.preview }"
-                ></div>
-                <span class="surface-color-name">{{ surfaceColor.name }}</span>
-                <i *ngIf="surfaceColor.value === selectedSurfaceColor" class="pi pi-check"></i>
-              </div>
+                  class="surface-color-option"
+                  [class.selected]="surfaceColor.value === selectedSurfaceColor"
+                  (click)="onSelectSurfaceColor(surfaceColor.value)"
+                  [title]="surfaceColor.name"
+                >
+                  <div
+                    class="surface-color-preview"
+                    [ngStyle]="{ background: surfaceColor.preview }"
+                  ></div>
+                  <span class="surface-color-name">{{ surfaceColor.name }}</span>
+                  @if (surfaceColor.value === selectedSurfaceColor) {
+                    <i class="pi pi-check"></i>
+                  }
+                </div>
+              }
             </div>
           </div>
           <!-- Font Size Section -->
@@ -533,33 +557,41 @@ interface PaginatedResponse<T> {
             <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
           </div>
           <!-- 备案信息 -->
-          <div *ngIf="recordSettings().showRecord" class="record-info">
-            <div class="text-sm text-center">
-              <div *ngIf="recordSettings().icpNumber" class="text-xs">
-                <a
-                  [href]="recordSettings().icpLink"
-                  target="_blank"
-                  class="record-link"
-                  rel="noopener noreferrer"
-                >
-                  {{ recordSettings().icpNumber }}
-                </a>
-              </div>
-              <div *ngIf="recordSettings().policeNumber" class="text-xs">
-                <a
-                  [href]="recordSettings().policeLink"
-                  target="_blank"
-                  class="record-link"
-                  rel="noopener noreferrer"
-                >
-                  {{ recordSettings().policeNumber }}
-                </a>
-              </div>
-              <div *ngIf="recordSettings().recordText" class="text-xs record-text">
-                {{ recordSettings().recordText }}
+          @if (recordSettings().showRecord) {
+            <div class="record-info">
+              <div class="text-sm text-center">
+                @if (recordSettings().icpNumber) {
+                  <div class="text-xs">
+                    <a
+                      [href]="recordSettings().icpLink"
+                      target="_blank"
+                      class="record-link"
+                      rel="noopener noreferrer"
+                    >
+                      {{ recordSettings().icpNumber }}
+                    </a>
+                  </div>
+                }
+                @if (recordSettings().policeNumber) {
+                  <div class="text-xs">
+                    <a
+                      [href]="recordSettings().policeLink"
+                      target="_blank"
+                      class="record-link"
+                      rel="noopener noreferrer"
+                    >
+                      {{ recordSettings().policeNumber }}
+                    </a>
+                  </div>
+                }
+                @if (recordSettings().recordText) {
+                  <div class="text-xs record-text">
+                    {{ recordSettings().recordText }}
+                  </div>
+                }
               </div>
             </div>
-          </div>
+          }
           <div class="text-xs text-center md:text-right">
             Powered by <span class="font-semibold">UUICE</span> &
             <span class="font-semibold">Crispy</span>

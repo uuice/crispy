@@ -113,7 +113,9 @@ interface RuleNode {
               <div class="flex align-items-center">
                 <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                 <span class="rule-title">
-                  <i *ngIf="rowData.icon" [class]="rowData.icon" class="mr-2"></i>
+                  @if (rowData.icon) {
+                    <i [class]="rowData.icon" class="mr-2"></i>
+                  }
                   {{ rowData.title }}
                 </span>
               </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
 import { ToastModule } from 'primeng/toast'
@@ -20,7 +20,7 @@ interface Dependency {
 @Component({
   selector: 'cs-system',
   standalone: true,
-  imports: [CommonModule, CardModule, TableModule, AccordionModule, ToastModule],
+  imports: [CardModule, TableModule, AccordionModule, ToastModule],
   providers: [MessageService],
   template: `
     <p-toast></p-toast>

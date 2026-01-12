@@ -17,12 +17,12 @@ export type CacheDetailType = 'memory' | 'database'
       [header]="'缓存详情: ' + cacheKey + (type === 'memory' ? ' (内存)' : ' (数据库)')"
       (onHide)="closed.emit()"
     >
-      <ng-container *ngIf="cacheInfo() && !('error' in cacheInfo())">
+      @if (cacheInfo() && !('error' in cacheInfo())) {
         <pre>{{ cacheInfo() | json }}</pre>
-      </ng-container>
-      <ng-container *ngIf="cacheInfo() && 'error' in cacheInfo()">
+      }
+      @if (cacheInfo() && 'error' in cacheInfo()) {
         <div style="color:red">{{ cacheInfo().error }}</div>
-      </ng-container>
+      }
       <ng-template pTemplate="footer">
         <p-button label="关闭" icon="pi pi-times" (click)="closed.emit()"></p-button>
       </ng-template>

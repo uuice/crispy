@@ -9,7 +9,7 @@ import {
   signal,
   TransferState
 } from '@angular/core'
-import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
+import { isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
@@ -39,35 +39,34 @@ interface PaginatedResponse<T> {
 @Component({
   selector: 'cs-daily-lib-detail',
   standalone: true,
-  imports: [CommonModule, TagModule, ButtonModule, RouterModule],
+  imports: [TagModule, ButtonModule, RouterModule],
   template: `
     <div class="lib-detail-flex">
       <!-- 左侧：文章详情 -->
       <div class="lib-detail-main">
         <div class="lib-logo-wrap">
-          <img
-            *ngIf="lib()?.image"
-            [src]="lib()?.image"
-            [alt]="lib()?.title"
-            class="lib-logo"
-            loading="lazy"
-          />
-          <div *ngIf="!lib()?.image" class="lib-logo-default">
-            <i class="pi pi-box"></i>
-          </div>
+          @if (lib()?.image) {
+            <img [src]="lib()?.image" [alt]="lib()?.title" class="lib-logo" loading="lazy" />
+          }
+          @if (!lib()?.image) {
+            <div class="lib-logo-default">
+              <i class="pi pi-box"></i>
+            </div>
+          }
         </div>
         <h1 class="lib-title">{{ lib()?.title }}</h1>
         <div class="lib-subtitle">{{ lib()?.sub_title }}</div>
         <div class="tags">
-          <ng-container *ngIf="lib()?.tags">
-            <p-tag
-              *ngFor="let tag of lib()?.tags!.split(',')"
-              [value]="tag.trim()"
-              [routerLink]="['/tags', lib()?.tagRef?.[tag.trim()] || tag.trim()]"
-              style="cursor: pointer"
-            >
-            </p-tag>
-          </ng-container>
+          @if (lib()?.tags) {
+            @for (tag of lib()?.tags!.split(','); track tag) {
+              <p-tag
+                [value]="tag.trim()"
+                [routerLink]="['/tags', lib()?.tagRef?.[tag.trim()] || tag.trim()]"
+                style="cursor: pointer"
+              >
+              </p-tag>
+            }
+          }
         </div>
         <div class="btn-group">
           <a
@@ -94,9 +93,11 @@ interface PaginatedResponse<T> {
         <ul class="toc-list">
           <li><a href="#desc" (click)="scrollTo('desc', $event)">简介</a></li>
           <li><a href="#content" (click)="scrollTo('content', $event)">内容</a></li>
-          <li *ngFor="let item of toc()">
-            <a [href]="'#' + item.id" (click)="scrollTo(item.id, $event)">{{ item.text }}</a>
-          </li>
+          @for (item of toc(); track item) {
+            <li>
+              <a [href]="'#' + item.id" (click)="scrollTo(item.id, $event)">{{ item.text }}</a>
+            </li>
+          }
         </ul>
       </div>
     </div>

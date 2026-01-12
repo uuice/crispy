@@ -8,7 +8,7 @@ import {
   TransferState
 } from '@angular/core'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule, isPlatformServer } from '@angular/common'
+import { isPlatformServer } from '@angular/common'
 import { ApiResponse, HttpService } from '../../services/http.service'
 
 // Data interfaces
@@ -51,7 +51,7 @@ interface PaginatedResponse<T> {
 @Component({
   selector: 'cs-links',
   standalone: true,
-  imports: [ButtonModule, CommonModule],
+  imports: [ButtonModule],
   template: `
     <!-- Links Banner -->
     <section class="blog-banner">
@@ -62,29 +62,30 @@ interface PaginatedResponse<T> {
     <!-- Links Content (Dynamic) -->
     <section class="max-w-2xl mx-auto mb-16 px-2 sm:px-4 flex flex-col gap-10">
       <!-- Category Cards -->
-      <div *ngFor="let category of categories()" class="blog-card">
-        <div class="flex items-center gap-2 mb-2">
-          <i class="pi pi-link blog-icon"></i>
-          <h2 class="text-lg font-semibold text-main">{{ category.title }}</h2>
+      @for (category of categories(); track category) {
+        <div class="blog-card">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-link blog-icon"></i>
+            <h2 class="text-lg font-semibold text-main">{{ category.title }}</h2>
+          </div>
+          <ul class="flex flex-col gap-3">
+            @for (link of getLinksByCategory(category.id); track link) {
+              <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <span class="blog-tag">{{ link.site_name }}</span>
+                <span class="text-muted text-xs">{{ link.des || '链接' }}</span>
+                <a [href]="link.url" target="_blank" rel="noopener">
+                  <p-button
+                    label="访问"
+                    icon="pi pi-external-link"
+                    size="small"
+                    styleClass="p-button-text p-button-sm blog-icon hover:opacity-80"
+                  ></p-button>
+                </a>
+              </li>
+            }
+          </ul>
         </div>
-        <ul class="flex flex-col gap-3">
-          <li
-            *ngFor="let link of getLinksByCategory(category.id)"
-            class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3"
-          >
-            <span class="blog-tag">{{ link.site_name }}</span>
-            <span class="text-muted text-xs">{{ link.des || '链接' }}</span>
-            <a [href]="link.url" target="_blank" rel="noopener">
-              <p-button
-                label="访问"
-                icon="pi pi-external-link"
-                size="small"
-                styleClass="p-button-text p-button-sm blog-icon hover:opacity-80"
-              ></p-button>
-            </a>
-          </li>
-        </ul>
-      </div>
+      }
     </section>
   `,
   styles: [``]

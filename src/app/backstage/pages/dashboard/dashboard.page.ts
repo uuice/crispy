@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { CardModule } from 'primeng/card'
 import { ChartModule } from 'primeng/chart'
 import { TableModule } from 'primeng/table'
@@ -31,7 +31,6 @@ interface RecentPost {
   selector: 'cs-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     CardModule,
     ChartModule,
     TableModule,
@@ -46,25 +45,28 @@ interface RecentPost {
     <div class="dashboard">
       <!-- Stats Cards -->
       <div class="stats-grid">
-        <p-card *ngFor="let stat of stats()" class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon" [style.background-color]="stat.color">
-              <i [class]="stat.icon"></i>
-            </div>
-            <div class="stat-info">
-              <h3>{{ stat.title }}</h3>
-              <div class="stat-value">{{ stat.value }}</div>
-              <div
-                class="stat-change"
-                *ngIf="stat.change !== undefined"
-                [class.positive]="stat.change > 0"
-                [class.negative]="stat.change < 0"
-              >
-                {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}%
+        @for (stat of stats(); track stat) {
+          <p-card class="stat-card">
+            <div class="stat-content">
+              <div class="stat-icon" [style.background-color]="stat.color">
+                <i [class]="stat.icon"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ stat.title }}</h3>
+                <div class="stat-value">{{ stat.value }}</div>
+                @if (stat.change !== undefined) {
+                  <div
+                    class="stat-change"
+                    [class.positive]="stat.change > 0"
+                    [class.negative]="stat.change < 0"
+                  >
+                    {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}%
+                  </div>
+                }
               </div>
             </div>
-          </div>
-        </p-card>
+          </p-card>
+        }
       </div>
 
       <!-- Charts -->

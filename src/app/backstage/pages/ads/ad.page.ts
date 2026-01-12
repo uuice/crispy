@@ -109,15 +109,14 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
             <td>{{ ad.type_id || '-' }}</td>
             <td>{{ ad.content || '-' }}</td>
             <td>
-              <img
-                *ngIf="ad.image_url"
-                [src]="ad.image_url"
-                alt="广告图片"
-                style="max-width:60px;max-height:40px;"
-              />
+              @if (ad.image_url) {
+                <img [src]="ad.image_url" alt="广告图片" style="max-width:60px;max-height:40px;" />
+              }
             </td>
             <td>
-              <a *ngIf="ad.url" [href]="ad.url" target="_blank">{{ ad.url }}</a>
+              @if (ad.url) {
+                <a [href]="ad.url" target="_blank">{{ ad.url }}</a>
+              }
             </td>
             <td>{{ ad.start_time ? (ad.start_time | date: 'yyyy-MM-dd HH:mm') : '-' }}</td>
             <td>{{ ad.end_time ? (ad.end_time | date: 'yyyy-MM-dd HH:mm') : '-' }}</td>

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import {
   AfterViewInit,
   Component,
@@ -22,7 +21,7 @@ interface TabItem {
 @Component({
   selector: 'cs-page-tabs',
   standalone: true,
-  imports: [TabsModule, CommonModule],
+  imports: [TabsModule],
   template: `
     @if (tabs.length > 0) {
       <div class="tabs-container">

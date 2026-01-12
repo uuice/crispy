@@ -49,35 +49,40 @@ interface YearGroup {
 
       <!-- Timeline Archive -->
       <div class="archive-timeline">
-        <div *ngFor="let yearGroup of yearGroups()" class="year-group">
-          <!-- Year Header -->
-          <div class="year-header">
-            <div class="year-marker">
-              <i class="pi pi-calendar"></i>
-            </div>
-            <h2 class="year-title">{{ yearGroup.year }}</h2>
-            <span class="year-count">{{ yearGroup.count }} 篇文章</span>
-          </div>
-
-          <!-- Articles List -->
-          <div class="articles-list">
-            <div *ngFor="let article of yearGroup.articles" class="article-item">
-              <div class="article-dot"></div>
-              <div class="article-content">
-                <span class="article-date">{{ article.create_time | date: 'MM-dd' }}</span>
-                <a [routerLink]="['/archives', article.url]" class="article-title">
-                  {{ article.title }}
-                </a>
+        @for (yearGroup of yearGroups(); track yearGroup) {
+          <div class="year-group">
+            <!-- Year Header -->
+            <div class="year-header">
+              <div class="year-marker">
+                <i class="pi pi-calendar"></i>
               </div>
+              <h2 class="year-title">{{ yearGroup.year }}</h2>
+              <span class="year-count">{{ yearGroup.count }} 篇文章</span>
+            </div>
+            <!-- Articles List -->
+            <div class="articles-list">
+              @for (article of yearGroup.articles; track article) {
+                <div class="article-item">
+                  <div class="article-dot"></div>
+                  <div class="article-content">
+                    <span class="article-date">{{ article.create_time | date: 'MM-dd' }}</span>
+                    <a [routerLink]="['/archives', article.url]" class="article-title">
+                      {{ article.title }}
+                    </a>
+                  </div>
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="yearGroups().length === 0" class="empty-state">
-          <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
-          <p class="text-muted">暂无文章</p>
-        </div>
+        @if (yearGroups().length === 0) {
+          <div class="empty-state">
+            <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
+            <p class="text-muted">暂无文章</p>
+          </div>
+        }
       </div>
     </section>
   `,

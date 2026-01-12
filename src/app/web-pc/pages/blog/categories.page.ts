@@ -53,43 +53,54 @@ interface PaginatedResponse<T> {
       </h1>
 
       <!-- Category Description -->
-      <div *ngIf="categoryDescription()" class="category-description mb-8">
-        <p class="text-muted">{{ categoryDescription() }}</p>
-      </div>
+      @if (categoryDescription()) {
+        <div class="category-description mb-8">
+          <p class="text-muted">{{ categoryDescription() }}</p>
+        </div>
+      }
 
       <!-- Articles List -->
       <div class="articles-timeline">
-        <div *ngFor="let article of articles()" class="article-item">
-          <div class="article-dot"></div>
-          <div class="article-content">
-            <div class="article-header">
-              <span class="article-date">{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
-              <a [routerLink]="['/archives', article.url]" class="article-title">
-                {{ article.title }}
-              </a>
-            </div>
-            <div *ngIf="article.abstract" class="article-abstract">
-              {{ article.abstract }}
+        @for (article of articles(); track article) {
+          <div class="article-item">
+            <div class="article-dot"></div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-date">{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
+                <a [routerLink]="['/archives', article.url]" class="article-title">
+                  {{ article.title }}
+                </a>
+              </div>
+              @if (article.abstract) {
+                <div class="article-abstract">
+                  {{ article.abstract }}
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Load More Button -->
-        <div
-          *ngIf="articles().length > 0 && articles().length < totalRecords()"
-          class="load-more-container"
-        >
-          <button (click)="loadMoreArticles()" [disabled]="loading()" class="load-more-btn">
-            <span *ngIf="!loading()">加载更多</span>
-            <span *ngIf="loading()">加载中...</span>
-          </button>
-        </div>
+        @if (articles().length > 0 && articles().length < totalRecords()) {
+          <div class="load-more-container">
+            <button (click)="loadMoreArticles()" [disabled]="loading()" class="load-more-btn">
+              @if (!loading()) {
+                <span>加载更多</span>
+              }
+              @if (loading()) {
+                <span>加载中...</span>
+              }
+            </button>
+          </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="articles().length === 0 && !loading()" class="empty-state">
-          <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
-          <p class="text-muted">该分类下暂无文章</p>
-        </div>
+        @if (articles().length === 0 && !loading()) {
+          <div class="empty-state">
+            <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
+            <p class="text-muted">该分类下暂无文章</p>
+          </div>
+        }
       </div>
     </section>
   `,

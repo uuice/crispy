@@ -147,13 +147,11 @@ interface AdsOption {
               [headers]="uploadHeaders"
             ></p-fileUpload>
             <div class="uploaded-images mt-2">
-              <ng-container *ngIf="adItemForm.get('image_url')?.value">
-                <img
-                  *ngFor="let img of adItemForm.get('image_url')?.value.split(',')"
-                  [src]="img"
-                  style="max-width:40px;max-height:30px;margin-right:2px;"
-                />
-              </ng-container>
+              @if (adItemForm.get('image_url')?.value) {
+                @for (img of adItemForm.get('image_url')?.value.split(','); track img) {
+                  <img [src]="img" style="max-width:40px;max-height:30px;margin-right:2px;" />
+                }
+              }
             </div>
           </div>
           <div class="field col-6">

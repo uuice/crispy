@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { PanelMenuModule } from 'primeng/panelmenu'
 import { ButtonModule } from 'primeng/button'
 import { MenuItem } from 'primeng/api'
@@ -7,7 +7,7 @@ import { MenuItem } from 'primeng/api'
 @Component({
   selector: 'cs-sidebar',
   standalone: true,
-  imports: [CommonModule, PanelMenuModule, ButtonModule],
+  imports: [PanelMenuModule, ButtonModule],
   template: `
     <aside class="sidebar" [class.sidebar-collapsed]="collapsed">
       <p-panelMenu [model]="items"></p-panelMenu>

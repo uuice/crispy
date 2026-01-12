@@ -46,28 +46,30 @@ interface PaginatedResponse<T> {
       <h2 class="text-2xl font-bold mb-6">文章推荐</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Article Card -->
-        <p-card *ngFor="let article of hotArticles()" class="blog-card overflow-hidden">
-          <ng-template pTemplate="header">
-            <img
-              [src]="
-                article.image ||
-                'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80'
-              "
-              [alt]="article.title"
-              class="w-full h-40 object-cover"
-            />
-          </ng-template>
-          <div class="p-4">
-            <h3 class="text-lg font-semibold mb-2">{{ article.title }}</h3>
-            <div class="flex gap-2 text-xs mb-2 text-muted">
-              <span>{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
+        @for (article of hotArticles(); track article) {
+          <p-card class="blog-card overflow-hidden">
+            <ng-template pTemplate="header">
+              <img
+                [src]="
+                  article.image ||
+                  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80'
+                "
+                [alt]="article.title"
+                class="w-full h-40 object-cover"
+              />
+            </ng-template>
+            <div class="p-4">
+              <h3 class="text-lg font-semibold mb-2">{{ article.title }}</h3>
+              <div class="flex gap-2 text-xs mb-2 text-muted">
+                <span>{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
+              </div>
+              <p class="mb-3">{{ article.abstract || '暂无摘要' }}</p>
+              <a [routerLink]="['/archives', article.url]" class="blog-icon-blue hover:opacity-80">
+                阅读更多
+              </a>
             </div>
-            <p class="mb-3">{{ article.abstract || '暂无摘要' }}</p>
-            <a [routerLink]="['/archives', article.url]" class="blog-icon-blue hover:opacity-80">
-              阅读更多
-            </a>
-          </div>
-        </p-card>
+          </p-card>
+        }
       </div>
     </section>
   `,

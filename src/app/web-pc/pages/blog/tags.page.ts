@@ -53,37 +53,49 @@ interface PaginatedResponse<T> {
       </h1>
 
       <!-- Tag Description -->
-      <div *ngIf="tagDescription()" class="tag-description mb-8">
-        <p class="text-muted">{{ tagDescription() }}</p>
-      </div>
+      @if (tagDescription()) {
+        <div class="tag-description mb-8">
+          <p class="text-muted">{{ tagDescription() }}</p>
+        </div>
+      }
 
       <!-- Articles List -->
       <div class="articles-timeline">
-        <div *ngFor="let article of articles()" class="article-item">
-          <div class="article-dot"></div>
-          <div class="article-content">
-            <div class="article-header">
-              <span class="article-date">{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
-              <a [routerLink]="['/archives', article.url]" class="article-title">
-                {{ article.title }}
-              </a>
-            </div>
-            <div *ngIf="article.abstract" class="article-abstract">
-              {{ article.abstract }}
-            </div>
-            <div *ngIf="article.tags" class="article-tags">
-              <span *ngFor="let tag of getArticleTags(article.tags)" class="article-tag">
-                {{ tag }}
-              </span>
+        @for (article of articles(); track article) {
+          <div class="article-item">
+            <div class="article-dot"></div>
+            <div class="article-content">
+              <div class="article-header">
+                <span class="article-date">{{ article.create_time | date: 'yyyy-MM-dd' }}</span>
+                <a [routerLink]="['/archives', article.url]" class="article-title">
+                  {{ article.title }}
+                </a>
+              </div>
+              @if (article.abstract) {
+                <div class="article-abstract">
+                  {{ article.abstract }}
+                </div>
+              }
+              @if (article.tags) {
+                <div class="article-tags">
+                  @for (tag of getArticleTags(article.tags); track tag) {
+                    <span class="article-tag">
+                      {{ tag }}
+                    </span>
+                  }
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="articles().length === 0" class="empty-state">
-          <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
-          <p class="text-muted">该标签下暂无文章</p>
-        </div>
+        @if (articles().length === 0) {
+          <div class="empty-state">
+            <i class="pi pi-inbox text-4xl text-muted mb-4"></i>
+            <p class="text-muted">该标签下暂无文章</p>
+          </div>
+        }
       </div>
     </section>
   `,

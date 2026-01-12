@@ -2,7 +2,6 @@ import { Component } from '@angular/core'
 import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule } from '@angular/common'
 
 // 数据模型，严格根据 migrations/migrations/001_initial_schema.sql 文件生成，所有注释与 SQL 文件 COMMENT 保持一致
 const TABLES = [
@@ -1747,7 +1746,7 @@ const TABLES = [
 @Component({
   selector: 'cs-doc-data-models',
   standalone: true,
-  imports: [CardModule, TableModule, ButtonModule, CommonModule],
+  imports: [CardModule, TableModule, ButtonModule],
   template: `
     <p-card header="数据模型 (Database Schema)" styleClass="system-card">
       <p-table

@@ -3,12 +3,11 @@ import { CardModule } from 'primeng/card'
 import { TabsModule } from 'primeng/tabs'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule } from '@angular/common'
 
 @Component({
   selector: 'cs-doc-templates',
   standalone: true,
-  imports: [CardModule, TabsModule, TableModule, ButtonModule, CommonModule],
+  imports: [CardModule, TabsModule, TableModule, ButtonModule],
   template: `
     <p-card header="Nunjucks 模版扩展" styleClass="system-card">
       <p-tabs value="0">

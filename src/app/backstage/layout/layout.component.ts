@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { MenuItem } from 'primeng/api'
 import { filter } from 'rxjs/operators'
@@ -29,14 +29,7 @@ interface MenuData {
 @Component({
   selector: 'cs-backstage-layout',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    HeaderComponent,
-    SidebarComponent,
-    FooterComponent,
-    PageTabsComponent
-  ],
+  imports: [RouterModule, HeaderComponent, SidebarComponent, FooterComponent, PageTabsComponent],
   template: `
     <div class="backstage-layout">
       <!-- 顶部 -->

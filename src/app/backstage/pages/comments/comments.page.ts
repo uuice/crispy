@@ -263,10 +263,12 @@ import { TextareaModule } from 'primeng/textarea'
                     | date: 'yyyy-MM-dd HH:mm'
                 }}</span>
               </div>
-              <div *ngIf="selectedComment()?.title" class="mb-1">
-                <span class="font-medium text-900 text-sm">标题：</span>
-                <span>{{ selectedComment()?.title }}</span>
-              </div>
+              @if (selectedComment()?.title) {
+                <div class="mb-1">
+                  <span class="font-medium text-900 text-sm">标题：</span>
+                  <span>{{ selectedComment()?.title }}</span>
+                </div>
+              }
               <div>
                 <span class="font-medium text-900 text-sm">内容：</span>
                 <span>{{ selectedComment()?.content }}</span>

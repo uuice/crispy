@@ -30,22 +30,24 @@ export interface OperateLogDetail {
       (onHide)="onClose()"
       [closeOnEscape]="true"
     >
-      <div *ngIf="log">
-        <div class="field"><b>ID：</b>{{ log.id }}</div>
-        <div class="field"><b>操作类型：</b>{{ log.code }}</div>
-        <div class="field"><b>用户ID：</b>{{ log.user_id }}</div>
-        <div class="field"><b>类型ID：</b>{{ log.type_id }}</div>
-        <div class="field">
-          <b>创建时间：</b>{{ log.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}
+      @if (log) {
+        <div>
+          <div class="field"><b>ID：</b>{{ log.id }}</div>
+          <div class="field"><b>操作类型：</b>{{ log.code }}</div>
+          <div class="field"><b>用户ID：</b>{{ log.user_id }}</div>
+          <div class="field"><b>类型ID：</b>{{ log.type_id }}</div>
+          <div class="field">
+            <b>创建时间：</b>{{ log.create_time | date: 'yyyy-MM-dd HH:mm:ss' }}
+          </div>
+          <div class="field">
+            <b>更新时间：</b>{{ log.update_time | date: 'yyyy-MM-dd HH:mm:ss' }}
+          </div>
+          <div class="field">
+            <b>内容：</b>
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ log.content }}</pre>
+          </div>
         </div>
-        <div class="field">
-          <b>更新时间：</b>{{ log.update_time | date: 'yyyy-MM-dd HH:mm:ss' }}
-        </div>
-        <div class="field">
-          <b>内容：</b>
-          <pre style="white-space: pre-wrap; word-break: break-all;">{{ log.content }}</pre>
-        </div>
-      </div>
+      }
       <ng-template pTemplate="footer">
         <p-button label="关闭" icon="pi pi-times" (click)="onClose()"></p-button>
       </ng-template>

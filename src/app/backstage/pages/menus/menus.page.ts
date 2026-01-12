@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core'
-import { CommonModule } from '@angular/common'
+
 import { RouterModule } from '@angular/router'
 import { FormsModule } from '@angular/forms'
 import { TreeTableModule } from 'primeng/treetable'
@@ -35,7 +35,6 @@ interface MenuNode {
   selector: 'cs-menus',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     FormsModule,
     TreeTableModule,
@@ -47,7 +46,6 @@ interface MenuNode {
     ConfirmDialogModule,
     ToastModule,
     MenuDetailComponent
-    // MenuDetailComponent
   ],
   providers: [ConfirmationService, MessageService],
   template: `
@@ -96,7 +94,9 @@ interface MenuNode {
               <div class="flex align-items-center">
                 <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                 <span class="menu-title">
-                  <i *ngIf="rowData.icon" [class]="rowData.icon" class="mr-2"></i>
+                  @if (rowData.icon) {
+                    <i [class]="rowData.icon" class="mr-2"></i>
+                  }
                   {{ rowData.title }}
                 </span>
               </div>

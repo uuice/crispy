@@ -135,13 +135,11 @@ interface AdsOption {
             <td>{{ item.title }}</td>
             <td>{{ item.content || '-' }}</td>
             <td>
-              <ng-container *ngIf="item.image_url">
-                <img
-                  *ngFor="let img of item.image_url.split(',')"
-                  [src]="img"
-                  style="max-width:40px;max-height:30px;margin-right:2px;"
-                />
-              </ng-container>
+              @if (item.image_url) {
+                @for (img of item.image_url.split(','); track img) {
+                  <img [src]="img" style="max-width:40px;max-height:30px;margin-right:2px;" />
+                }
+              }
             </td>
             <td>
               <a [href]="item.url" target="_blank">{{ item.url }}</a>

@@ -61,12 +61,13 @@ interface AccessToken {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('app_name') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('app_name')"
-            severity="error"
-            [text]="getErrorMessage('app_name')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('app_name')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('app_name')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">
@@ -96,12 +97,13 @@ interface AccessToken {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('channel') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('channel')"
-            severity="error"
-            [text]="getErrorMessage('channel')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('channel')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('channel')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">
@@ -115,12 +117,13 @@ interface AccessToken {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('user_id') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('user_id')"
-            severity="error"
-            [text]="getErrorMessage('user_id')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('user_id')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('user_id')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">

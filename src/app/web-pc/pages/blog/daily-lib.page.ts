@@ -96,78 +96,82 @@ interface Category {
   template: `
     <div class="lib-page-root">
       <!-- <div class="search-bar">
-        <input
-          pInputText
-          [ngModel]="search()"
-          (ngModelChange)="onSearchChange($event)"
-          (keyup.enter)="onSearchButtonClick()"
-          placeholder="搜索库名称"
+      <input
+        pInputText
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)"
+        (keyup.enter)="onSearchButtonClick()"
+        placeholder="搜索库名称"
         />
-        <button
-          pButton
-          type="button"
-          label="搜索"
-          icon="pi pi-search"
-          (click)="onSearchButtonClick()"
-        ></button>
-      </div> -->
+      <button
+        pButton
+        type="button"
+        label="搜索"
+        icon="pi pi-search"
+        (click)="onSearchButtonClick()"
+      ></button>
+    </div> -->
       <div class="card-list">
-        <div *ngIf="loading()" class="loading-message">
-          <i class="pi pi-spin pi-spinner"></i> 加载中...
-        </div>
-        <div *ngIf="!loading() && pagedList().length === 0" class="empty-message">
-          <i class="pi pi-search"></i>
-          <p>没有找到相关的库</p>
-        </div>
-        <div *ngFor="let lib of pagedList()" class="card-item">
-          <p-card
-            [header]="lib.title"
-            [subheader]="lib.seo_title"
-            [ngClass]="{ 'custom-card': true }"
-          >
-            <ng-template pTemplate="header">
-              <div class="lib-logo-wrap">
-                <img
-                  *ngIf="lib.image"
-                  [src]="lib.image"
-                  [alt]="lib.title"
-                  class="lib-logo"
-                  loading="lazy"
-                />
-                <div *ngIf="!lib.image" class="lib-logo-default">
-                  <i class="pi pi-box"></i>
+        @if (loading()) {
+          <div class="loading-message"><i class="pi pi-spin pi-spinner"></i> 加载中...</div>
+        }
+        @if (!loading() && pagedList().length === 0) {
+          <div class="empty-message">
+            <i class="pi pi-search"></i>
+            <p>没有找到相关的库</p>
+          </div>
+        }
+        @for (lib of pagedList(); track lib) {
+          <div class="card-item">
+            <p-card
+              [header]="lib.title"
+              [subheader]="lib.seo_title"
+              [ngClass]="{ 'custom-card': true }"
+            >
+              <ng-template pTemplate="header">
+                <div class="lib-logo-wrap">
+                  @if (lib.image) {
+                    <img [src]="lib.image" [alt]="lib.title" class="lib-logo" loading="lazy" />
+                  }
+                  @if (!lib.image) {
+                    <div class="lib-logo-default">
+                      <i class="pi pi-box"></i>
+                    </div>
+                  }
                 </div>
-              </div>
-            </ng-template>
-            <ng-template pTemplate="content">
-              <div class="desc">{{ lib.abstract }}</div>
-              <div class="tags">
-                <ng-container *ngIf="lib.tags">
-                  <p-tag *ngFor="let tag of lib.tags.split(',')" [value]="tag.trim()"></p-tag>
-                </ng-container>
-              </div>
-              <div class="btn-group">
-                <a
-                  pButton
-                  pRipple
-                  class="p-button-sm p-button-outlined"
-                  [href]="lib.redirect_url"
-                  target="_blank"
-                  >主页</a
-                >
-                <button
-                  pButton
-                  type="button"
-                  label="详情"
-                  icon="pi pi-info-circle"
-                  class="p-button-sm p-button-outlined"
-                  (click)="gotoDetail(lib.url)"
-                ></button>
-              </div>
-              <div class="seo-desc">{{ lib.seo_description }}</div>
-            </ng-template>
-          </p-card>
-        </div>
+              </ng-template>
+              <ng-template pTemplate="content">
+                <div class="desc">{{ lib.abstract }}</div>
+                <div class="tags">
+                  @if (lib.tags) {
+                    @for (tag of lib.tags.split(','); track tag) {
+                      <p-tag [value]="tag.trim()"></p-tag>
+                    }
+                  }
+                </div>
+                <div class="btn-group">
+                  <a
+                    pButton
+                    pRipple
+                    class="p-button-sm p-button-outlined"
+                    [href]="lib.redirect_url"
+                    target="_blank"
+                    >主页</a
+                  >
+                  <button
+                    pButton
+                    type="button"
+                    label="详情"
+                    icon="pi pi-info-circle"
+                    class="p-button-sm p-button-outlined"
+                    (click)="gotoDetail(lib.url)"
+                  ></button>
+                </div>
+                <div class="seo-desc">{{ lib.seo_description }}</div>
+              </ng-template>
+            </p-card>
+          </div>
+        }
       </div>
       <div class="paginator-wrap">
         <p-paginator

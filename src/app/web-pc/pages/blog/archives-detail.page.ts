@@ -56,14 +56,15 @@ interface Article {
     <section class="blog-section">
       <div class="blog-prose prose text-main" [innerHTML]="html()"></div>
       <div class="blog-tags mt-4 text-muted">
-        <span
-          *ngFor="let tag of articleTags(); let i = index"
-          class="blog-tag {{ getTagClass(i) }}"
-          [routerLink]="['/tags', articleTagRef()[tag] || tag]"
-          style="cursor: pointer"
-        >
-          {{ tag }}
-        </span>
+        @for (tag of articleTags(); track tag; let i = $index) {
+          <span
+            class="blog-tag {{ getTagClass(i) }}"
+            [routerLink]="['/tags', articleTagRef()[tag] || tag]"
+            style="cursor: pointer"
+          >
+            {{ tag }}
+          </span>
+        }
       </div>
     </section>
     <!-- TOC 悬浮在主内容右侧，不占用主内容宽度 -->

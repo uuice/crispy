@@ -426,95 +426,97 @@ interface ThemeOption {
                       ></p-select>
                     </div>
 
-                    <p-divider *ngIf="storageSettings().storageType !== 'local'"></p-divider>
+                    @if (storageSettings().storageType !== 'local') {
+                      <p-divider></p-divider>
+                    }
 
-                    <div class="grid" *ngIf="storageSettings().storageType !== 'local'">
-                      <div class="col-12 md:col-6">
-                        <div class="field">
-                          <label for="accessKey" class="block text-900 font-medium mb-2"
-                            >Access Key</label
-                          >
-                          <input
-                            id="accessKey"
-                            type="text"
-                            pInputText
-                            [(ngModel)]="storageSettings().accessKey"
-                            class="w-full"
-                          />
+                    @if (storageSettings().storageType !== 'local') {
+                      <div class="grid">
+                        <div class="col-12 md:col-6">
+                          <div class="field">
+                            <label for="accessKey" class="block text-900 font-medium mb-2"
+                              >Access Key</label
+                            >
+                            <input
+                              id="accessKey"
+                              type="text"
+                              pInputText
+                              [(ngModel)]="storageSettings().accessKey"
+                              class="w-full"
+                            />
+                          </div>
+                          <div class="field mt-4">
+                            <label for="secretKey" class="block text-900 font-medium mb-2"
+                              >Secret Key</label
+                            >
+                            <input
+                              id="secretKey"
+                              type="password"
+                              pInputText
+                              [(ngModel)]="storageSettings().secretKey"
+                              class="w-full"
+                            />
+                          </div>
                         </div>
-
-                        <div class="field mt-4">
-                          <label for="secretKey" class="block text-900 font-medium mb-2"
-                            >Secret Key</label
-                          >
-                          <input
-                            id="secretKey"
-                            type="password"
-                            pInputText
-                            [(ngModel)]="storageSettings().secretKey"
-                            class="w-full"
-                          />
+                        <div class="col-12 md:col-6">
+                          <div class="field">
+                            <label for="bucket" class="block text-900 font-medium mb-2"
+                              >Bucket</label
+                            >
+                            <input
+                              id="bucket"
+                              type="text"
+                              pInputText
+                              [(ngModel)]="storageSettings().bucket"
+                              class="w-full"
+                            />
+                          </div>
+                          <div class="field mt-4">
+                            <label for="region" class="block text-900 font-medium mb-2"
+                              >Region</label
+                            >
+                            <input
+                              id="region"
+                              type="text"
+                              pInputText
+                              [(ngModel)]="storageSettings().region"
+                              class="w-full"
+                            />
+                          </div>
+                          <div class="field mt-4">
+                            <label for="domain" class="block text-900 font-medium mb-2">域名</label>
+                            <input
+                              id="domain"
+                              type="text"
+                              pInputText
+                              [(ngModel)]="storageSettings().domain"
+                              class="w-full"
+                            />
+                          </div>
+                          <div class="field mt-4">
+                            <label for="uploadPath" class="block text-900 font-medium mb-2"
+                              >上传路径</label
+                            >
+                            <input
+                              id="uploadPath"
+                              type="text"
+                              pInputText
+                              [(ngModel)]="storageSettings().uploadPath"
+                              class="w-full"
+                            />
+                          </div>
+                          <div class="field mt-4">
+                            <button
+                              pButton
+                              label="测试连接"
+                              icon="pi pi-link"
+                              class="p-button-info"
+                              (click)="testStorageConnection()"
+                            ></button>
+                          </div>
                         </div>
                       </div>
-
-                      <div class="col-12 md:col-6">
-                        <div class="field">
-                          <label for="bucket" class="block text-900 font-medium mb-2">Bucket</label>
-                          <input
-                            id="bucket"
-                            type="text"
-                            pInputText
-                            [(ngModel)]="storageSettings().bucket"
-                            class="w-full"
-                          />
-                        </div>
-
-                        <div class="field mt-4">
-                          <label for="region" class="block text-900 font-medium mb-2">Region</label>
-                          <input
-                            id="region"
-                            type="text"
-                            pInputText
-                            [(ngModel)]="storageSettings().region"
-                            class="w-full"
-                          />
-                        </div>
-
-                        <div class="field mt-4">
-                          <label for="domain" class="block text-900 font-medium mb-2">域名</label>
-                          <input
-                            id="domain"
-                            type="text"
-                            pInputText
-                            [(ngModel)]="storageSettings().domain"
-                            class="w-full"
-                          />
-                        </div>
-
-                        <div class="field mt-4">
-                          <label for="uploadPath" class="block text-900 font-medium mb-2"
-                            >上传路径</label
-                          >
-                          <input
-                            id="uploadPath"
-                            type="text"
-                            pInputText
-                            [(ngModel)]="storageSettings().uploadPath"
-                            class="w-full"
-                          />
-                        </div>
-
-                        <div class="field mt-4">
-                          <button
-                            pButton
-                            label="测试连接"
-                            icon="pi pi-link"
-                            class="p-button-info"
-                            (click)="testStorageConnection()"
-                          ></button>
-                        </div>
-                      </div>
-                    </div>
+                    }
                   </ng-template>
                 </p-card>
               </div>
@@ -611,32 +613,40 @@ interface ThemeOption {
                           <div class="preview-container">
                             <h4 class="preview-title">预览效果</h4>
                             <div class="preview-content">
-                              <div *ngIf="recordSettings().showRecord">
-                                <div *ngIf="recordSettings().icpNumber">
-                                  <a
-                                    [href]="recordSettings().icpLink"
-                                    target="_blank"
-                                    class="preview-link"
-                                  >
-                                    {{ recordSettings().icpNumber }}
-                                  </a>
+                              @if (recordSettings().showRecord) {
+                                <div>
+                                  @if (recordSettings().icpNumber) {
+                                    <div>
+                                      <a
+                                        [href]="recordSettings().icpLink"
+                                        target="_blank"
+                                        class="preview-link"
+                                      >
+                                        {{ recordSettings().icpNumber }}
+                                      </a>
+                                    </div>
+                                  }
+                                  @if (recordSettings().policeNumber) {
+                                    <div class="mt-1">
+                                      <a
+                                        [href]="recordSettings().policeLink"
+                                        target="_blank"
+                                        class="preview-link"
+                                      >
+                                        {{ recordSettings().policeNumber }}
+                                      </a>
+                                    </div>
+                                  }
+                                  @if (recordSettings().recordText) {
+                                    <div class="mt-1">
+                                      {{ recordSettings().recordText }}
+                                    </div>
+                                  }
                                 </div>
-                                <div *ngIf="recordSettings().policeNumber" class="mt-1">
-                                  <a
-                                    [href]="recordSettings().policeLink"
-                                    target="_blank"
-                                    class="preview-link"
-                                  >
-                                    {{ recordSettings().policeNumber }}
-                                  </a>
-                                </div>
-                                <div *ngIf="recordSettings().recordText" class="mt-1">
-                                  {{ recordSettings().recordText }}
-                                </div>
-                              </div>
-                              <div *ngIf="!recordSettings().showRecord" class="preview-hidden">
-                                备案信息已隐藏
-                              </div>
+                              }
+                              @if (!recordSettings().showRecord) {
+                                <div class="preview-hidden">备案信息已隐藏</div>
+                              }
                             </div>
                           </div>
                         </div>

@@ -110,12 +110,13 @@ interface CategoriesResponse {
               class="w-full"
               [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('title') }"
             />
-            <p-message
-              *ngIf="isFieldInvalid('title')"
-              severity="error"
-              [text]="getErrorMessage('title')"
-              styleClass="mt-1"
-            ></p-message>
+            @if (isFieldInvalid('title')) {
+              <p-message
+                severity="error"
+                [text]="getErrorMessage('title')"
+                styleClass="mt-1"
+              ></p-message>
+            }
           </div>
 
           <div class="field">
@@ -187,12 +188,13 @@ interface CategoriesResponse {
               [modules]="editorModules"
               #editorRef
             ></p-editor>
-            <p-message
-              *ngIf="isFieldInvalid('content')"
-              severity="error"
-              [text]="getErrorMessage('content')"
-              styleClass="mt-1"
-            ></p-message>
+            @if (isFieldInvalid('content')) {
+              <p-message
+                severity="error"
+                [text]="getErrorMessage('content')"
+                styleClass="mt-1"
+              ></p-message>
+            }
           </div>
         }
         <div class="grid grid-cols-3 gap-4">

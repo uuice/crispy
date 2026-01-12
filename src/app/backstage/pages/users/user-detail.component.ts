@@ -66,46 +66,51 @@ interface User {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('user_name') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('user_name')"
-            severity="error"
-            [text]="getErrorMessage('user_name')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('user_name')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('user_name')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">
           <label class="block text-900 font-medium mb-2">头像</label>
           <div class="avatar-grid">
-            <div
-              class="avatar-item"
-              *ngFor="let url of avatars"
-              (click)="selectAvatar(url)"
-              [class.selected]="currentAvatar() === url"
-            >
-              <img [src]="url" alt="avatar" />
-            </div>
+            @for (url of avatars; track url) {
+              <div
+                class="avatar-item"
+                (click)="selectAvatar(url)"
+                [class.selected]="currentAvatar() === url"
+              >
+                <img [src]="url" alt="avatar" />
+              </div>
+            }
           </div>
         </div>
 
-        <div class="field" *ngIf="isCreateMode">
-          <label for="password" class="block text-900 font-medium mb-2">密码 *</label>
-          <input
-            id="password"
-            type="password"
-            pInputText
-            formControlName="password"
-            placeholder="请输入密码"
-            class="w-full"
-            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('password') }"
-          />
-          <p-message
-            *ngIf="isFieldInvalid('password')"
-            severity="error"
-            [text]="getErrorMessage('password')"
-            styleClass="mt-1"
-          ></p-message>
-        </div>
+        @if (isCreateMode) {
+          <div class="field">
+            <label for="password" class="block text-900 font-medium mb-2">密码 *</label>
+            <input
+              id="password"
+              type="password"
+              pInputText
+              formControlName="password"
+              placeholder="请输入密码"
+              class="w-full"
+              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('password') }"
+            />
+            @if (isFieldInvalid('password')) {
+              <p-message
+                severity="error"
+                [text]="getErrorMessage('password')"
+                styleClass="mt-1"
+              ></p-message>
+            }
+          </div>
+        }
 
         <div class="field">
           <label for="nick_name" class="block text-900 font-medium mb-2">昵称</label>
@@ -130,12 +135,13 @@ interface User {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('email') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('email')"
-            severity="error"
-            [text]="getErrorMessage('email')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('email')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('email')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">
@@ -149,12 +155,13 @@ interface User {
             class="w-full"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('phone') }"
           />
-          <p-message
-            *ngIf="isFieldInvalid('phone')"
-            severity="error"
-            [text]="getErrorMessage('phone')"
-            styleClass="mt-1"
-          ></p-message>
+          @if (isFieldInvalid('phone')) {
+            <p-message
+              severity="error"
+              [text]="getErrorMessage('phone')"
+              styleClass="mt-1"
+            ></p-message>
+          }
         </div>
 
         <div class="field">

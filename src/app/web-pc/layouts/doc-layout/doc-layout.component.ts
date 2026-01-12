@@ -100,20 +100,23 @@ import { ScrollTopModule } from 'primeng/scrolltop'
           <div class="setting-section">
             <div class="label">Surface Config</div>
             <div class="surface-color-options-row">
-              <div
-                *ngFor="let surfaceColor of surfaceColors"
-                class="surface-color-option"
-                [class.selected]="surfaceColor.value === selectedSurfaceColor"
-                (click)="onSelectSurfaceColor(surfaceColor.value)"
-                [title]="surfaceColor.name"
-              >
+              @for (surfaceColor of surfaceColors; track surfaceColor) {
                 <div
-                  class="surface-color-preview"
-                  [ngStyle]="{ background: surfaceColor.preview }"
-                ></div>
-                <span class="surface-color-name">{{ surfaceColor.name }}</span>
-                <i *ngIf="surfaceColor.value === selectedSurfaceColor" class="pi pi-check"></i>
-              </div>
+                  class="surface-color-option"
+                  [class.selected]="surfaceColor.value === selectedSurfaceColor"
+                  (click)="onSelectSurfaceColor(surfaceColor.value)"
+                  [title]="surfaceColor.name"
+                >
+                  <div
+                    class="surface-color-preview"
+                    [ngStyle]="{ background: surfaceColor.preview }"
+                  ></div>
+                  <span class="surface-color-name">{{ surfaceColor.name }}</span>
+                  @if (surfaceColor.value === selectedSurfaceColor) {
+                    <i class="pi pi-check"></i>
+                  }
+                </div>
+              }
             </div>
           </div>
           <!-- Font Size Section -->
