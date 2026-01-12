@@ -1,7 +1,7 @@
-import { DB, AccessToken } from '@src/db/db.d'
-import { ExpressionBuilder, Insertable, Updateable } from 'kysely'
+import { AccessToken, DB } from '@src/db/db.d'
+import { Insertable, Updateable } from 'kysely'
 import { db } from '@src/libs/db'
-import { DELETE_STATUS, PUBLISH_STATUS, STATUS_PUBLISHED } from '../config/const'
+import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import z from 'zod'
 
 // Types

@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core'
-import { Title, Meta } from '@angular/platform-browser'
+import { inject, Injectable } from '@angular/core'
+import { Meta, Title } from '@angular/platform-browser'
 
 export interface SeoData {
   title?: string

@@ -5,16 +5,16 @@ import {
   OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
-  signal
+  signal,
+  SimpleChanges
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
-  Validators,
-  FormsModule
+  Validators
 } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'

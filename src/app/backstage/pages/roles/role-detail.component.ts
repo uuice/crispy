@@ -13,9 +13,9 @@ import { CommonModule } from '@angular/common'
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
-  Validators,
-  FormsModule
+  Validators
 } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'

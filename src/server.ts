@@ -1,4 +1,4 @@
-import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@angular/ssr/node'
+import { AngularNodeAppEngine, createNodeRequestHandler } from '@angular/ssr/node'
 import express from 'express'
 import { join } from 'node:path'
 import fs from 'fs'
@@ -8,12 +8,12 @@ import rssRoutes from './server/routes/rss-sitemap'
 import {
   applyMiddleware,
   applyStaticMiddleware,
-  performanceMonitor,
+  memoryMonitor,
   optimizeRoutePerformance,
-  memoryMonitor
+  performanceMonitor
 } from './server/middleware'
-import { notFoundHandler, globalErrorHandler } from './server/middleware/errorHandler'
-import { createAngularHandler } from './server/middleware/angular-handler'
+import { globalErrorHandler, notFoundHandler } from './server/middleware/errorHandler'
+import { createAngularHandler } from '@src/server/middleware'
 import { env } from './server/config/env'
 import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
@@ -24,6 +24,10 @@ import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
 import { cacheService } from './server/services/cacheService'
 import { memoryCacheService } from './server/services/memoryCacheService'
+// 定时清理内存和数据库缓存
+import './crons/cleanupMemoryCache'
+import './crons/cleanupDatabaseCache'
+import './crons/persistFlexsearchIndex'
 
 // 线上重启服务时，清理所有缓存
 if (env['NODE_ENV'] === 'production' || env['NODE_ENV'] === 'development') {
@@ -33,11 +37,6 @@ if (env['NODE_ENV'] === 'production' || env['NODE_ENV'] === 'development') {
     console.log('All caches cleared on server start.')
   })()
 }
-
-// 定时清理内存和数据库缓存
-import './crons/cleanupMemoryCache'
-import './crons/cleanupDatabaseCache'
-import './crons/persistFlexsearchIndex'
 
 // 定时生成JavaScript文章 - 根据环境变量控制是否启用
 if (env['ENABLE_JS_ARTICLE_GENERATION'] === 'true') {

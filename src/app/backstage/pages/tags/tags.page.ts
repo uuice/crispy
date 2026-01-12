@@ -11,7 +11,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { TagDetailComponent, Tag } from './tag-detail.component'
+import { Tag, TagDetailComponent } from './tag-detail.component'
 
 @Component({
   selector: 'cs-tags',

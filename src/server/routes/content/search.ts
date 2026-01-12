@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { flexsearchService } from '../../services/flexsearch-index.service'
-import { success, error } from '../../utils/response'
+import { error, success } from '../../utils/response'
 
 // 文章全文检索
 export const searchArticles = async (

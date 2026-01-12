@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
 import { adItemService } from '../../services/adItemService'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { error, notFound, success, validationError } from '../../utils/response'
 
 // Get single ad item
 export const getAdItem = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

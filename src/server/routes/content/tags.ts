@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
+import { NextFunction, Request, Response } from 'express'
 import { tagService } from '../../services/tagService'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { error, notFound, success } from '../../utils/response'
 
 // Get single tag
 export const getTag = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

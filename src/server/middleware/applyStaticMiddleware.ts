@@ -1,4 +1,5 @@
-import express, { Express } from 'express'
+import { Express } from 'express'
+
 export const applyStaticMiddleware = (app: Express) => {
   // Compression and caching for static files
   app.use((req, res, next) => {

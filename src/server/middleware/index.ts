@@ -1,7 +1,6 @@
-import helmet from 'helmet'
-import express, { Express } from 'express'
+import { Express } from 'express'
 import { env } from '../config/env'
-import { jsonParser, urlencodedParser, bodyParserErrorHandler } from './body-parser'
+import { bodyParserErrorHandler, jsonParser, urlencodedParser } from './body-parser'
 import { requestLogger } from './request-logger'
 import { corsMiddleware } from './cors'
 

@@ -1,5 +1,5 @@
-import { Directive, Input, OnInit, inject } from '@angular/core'
-import { SeoService, SeoData } from '../services/seo.service'
+import { Directive, inject, Input, OnInit } from '@angular/core'
+import { SeoData, SeoService } from '../services/seo.service'
 
 @Directive({
   selector: '[csSeo]',

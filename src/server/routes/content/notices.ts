@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  noticeService,
-  CreateNoticeData,
-  UpdateNoticeData,
-  NoticeFilters
-} from '../../services/noticeService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { noticeService } from '../../services/noticeService'
 
 // Get single notice
 export const getNotice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

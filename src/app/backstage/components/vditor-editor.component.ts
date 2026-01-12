@@ -1,20 +1,21 @@
 import {
+  AfterViewInit,
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnDestroy,
-  forwardRef,
-  signal,
   computed,
-  AfterViewInit
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnDestroy,
+  Output,
+  signal
 } from '@angular/core'
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms'
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import Vditor from 'vditor'
 
 import { MessageService } from 'primeng/api'
 import { MessageModule } from 'primeng/message'
 import { ToastModule } from 'primeng/toast'
+
 /**
  * Vditor markdown editor Angular component
  * Supports PrimeNG theme auto switch (classic/dark)

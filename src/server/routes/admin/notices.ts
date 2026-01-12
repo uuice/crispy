@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  noticeService,
-  CreateNoticeData,
-  UpdateNoticeData,
-  NoticeFilters
-} from '../../services/noticeService'
+import { error, notFound, success, validationError } from '../../utils/response'
+import { CreateNoticeData, noticeService, UpdateNoticeData } from '../../services/noticeService'
 
 // Validation schemas
 const createNoticeSchema = z.object({

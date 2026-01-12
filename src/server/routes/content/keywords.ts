@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  keywordService,
-  CreateKeywordData,
-  UpdateKeywordData,
-  KeywordFilters
-} from '../../services/keywordService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { keywordService } from '../../services/keywordService'
 
 // Get single keyword
 export const getKeyword = async (

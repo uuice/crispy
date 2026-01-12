@@ -52,7 +52,7 @@ export const error = (res: Response, message: string, statusCode = 500, error?: 
 /**
  * Send validation error response with beautiful formatting
  */
-export const validationError = (res: Response, zodErrors: z.ZodIssue[]): void => {
+export const validationError = (res: Response, zodErrors: z.core.$ZodIssue[]): void => {
   const details: ValidationErrorDetail[] = zodErrors.map((err) => ({
     field: err.path.join('.'),
     message: err.message,

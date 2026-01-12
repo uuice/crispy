@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  roleService,
-  CreateRoleData,
-  UpdateRoleData,
-  RoleFilters
-} from '../../services/roleService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { roleService } from '../../services/roleService'
 
 // Get single role
 export const getRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

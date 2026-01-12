@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
+import { NextFunction, Request, Response } from 'express'
 import { userService } from '../../services/userService'
-import { success, error, notFound, handleZodError, handleError } from '../../utils/response'
+import { error, handleError, success } from '../../utils/response'
 
 // Get single user
 export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

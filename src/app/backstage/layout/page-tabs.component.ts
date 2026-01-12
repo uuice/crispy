@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common'
 import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
   AfterViewInit,
-  signal,
-  WritableSignal,
+  Component,
+  EventEmitter,
+  Input,
   OnChanges,
-  SimpleChanges
+  Output,
+  signal,
+  SimpleChanges,
+  WritableSignal
 } from '@angular/core'
 import { TabsModule } from 'primeng/tabs'
 

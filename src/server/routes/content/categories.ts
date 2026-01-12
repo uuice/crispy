@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
 import { categoryService } from '../../services/categoryService'
 import { SYSTEM_CATEGORY_ALIAS_MAP } from '@src/server/config/const'
 

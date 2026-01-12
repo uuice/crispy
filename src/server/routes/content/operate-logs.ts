@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  operateLogService,
-  CreateOperateLogData,
-  UpdateOperateLogData,
-  OperateLogFilters
-} from '../../services/operateLogService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { operateLogService } from '../../services/operateLogService'
 
 // Get single operate log
 export const getOperateLog = async (

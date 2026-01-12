@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
+import { NextFunction, Request, Response } from 'express'
 import { ruleService } from '../../services/ruleService'
-import { success, error, notFound, handleZodError, handleError } from '../../utils/response'
+import { error, handleError, success } from '../../utils/response'
 
 // Get single rule
 export const getRule = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

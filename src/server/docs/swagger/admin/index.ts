@@ -35,7 +35,7 @@ import './upload'
 import './system'
 import './dashboard'
 
-export default {};
+export default {}
 
 /**
  * 模块列表：

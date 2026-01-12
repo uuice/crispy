@@ -1,15 +1,15 @@
 import {
   Component,
-  OnInit,
   inject,
-  signal,
+  makeStateKey,
+  OnInit,
   PLATFORM_ID,
-  TransferState,
-  makeStateKey
+  signal,
+  TransferState
 } from '@angular/core'
 import { ButtonModule } from 'primeng/button'
 import { CommonModule, isPlatformServer } from '@angular/common'
-import { HttpService, ApiResponse } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 
 // Data interfaces
 interface Category {

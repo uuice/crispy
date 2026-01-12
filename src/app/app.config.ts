@@ -3,7 +3,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection
 } from '@angular/core'
-import { provideRouter, withRouterConfig, RouteReuseStrategy } from '@angular/router'
+import { provideRouter, RouteReuseStrategy, withRouterConfig } from '@angular/router'
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http'
 
 import { routes } from './app.routes'
@@ -11,10 +11,7 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
 import { providePrimeNG } from 'primeng/config'
-import Aura from '@primeng/themes/aura'
-import nora from '@primeng/themes/nora'
 import lara from '@primeng/themes/lara'
-import material from '@primeng/themes/material'
 
 import { MessageService } from 'primeng/api'
 import { CustomReuseStrategy } from './backstage/services/route-reuse.strategy'

@@ -1,5 +1,5 @@
 import { success } from '@src/server/utils/response'
-import type { Request, Response, NextFunction } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 

@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  commentService,
-  CreateCommentData,
-  UpdateCommentData,
-  CommentFilters
-} from '../../services/commentService'
+import { error, notFound, success, validationError } from '../../utils/response'
+import { commentService, CreateCommentData, UpdateCommentData } from '../../services/commentService'
 
 // Validation schemas
 const createCommentSchema = z.object({

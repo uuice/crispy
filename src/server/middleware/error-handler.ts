@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { env } from '../config/env'
 // Error handler middleware
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {

@@ -5,16 +5,12 @@ import { tagService } from '../services/tagService'
 import { configService } from '../services/configService'
 import { pageService } from '../services/pageService'
 import { linkService } from '../services/linkService'
-import { AppError, catchAsync } from '../middleware/errorHandler'
-import xml2js from 'xml2js'
+import { catchAsync } from '../middleware/errorHandler'
 
 import moment from 'moment'
 import { env } from '../config/env'
-import { join } from 'node:path'
 import { ViewData } from '../utils/viewData'
-import { getConfigByAlias } from './admin/configs'
 import { sampleSize } from 'lodash'
-import { Links } from '../nunjucks/tag/link'
 
 const router = Router()
 

@@ -3,16 +3,12 @@ import { articleService } from '../services/articleService'
 import { categoryService } from '../services/categoryService'
 import { tagService } from '../services/tagService'
 import { pageService } from '../services/pageService'
-import { AppError, catchAsync } from '../middleware/errorHandler'
+import { catchAsync } from '../middleware/errorHandler'
 import xml2js from 'xml2js'
 
 import moment from 'moment'
 import { env } from '../config/env'
 import { join } from 'node:path'
-import { ViewData } from '../utils/viewData'
-import { getConfigByAlias } from './admin/configs'
-import { sampleSize } from 'lodash'
-import { Links } from '../nunjucks/tag/link'
 
 const router = Router()
 

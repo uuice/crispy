@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { success, error } from '../../utils/response'
+import { NextFunction, Request, Response } from 'express'
+import { error, success } from '../../utils/response'
 import { SiteSettingsService } from '../../services/siteSettingsService'
 
 // Get site settings

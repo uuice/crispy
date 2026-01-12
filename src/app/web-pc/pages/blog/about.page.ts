@@ -1,19 +1,19 @@
 import {
-  Component,
-  signal,
-  OnInit,
   AfterViewInit,
+  Component,
+  ElementRef,
   inject,
-  PLATFORM_ID,
-  TransferState,
   makeStateKey,
-  ElementRef
+  OnInit,
+  PLATFORM_ID,
+  signal,
+  TransferState
 } from '@angular/core'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { isPlatformServer, isPlatformBrowser } from '@angular/common'
+import { isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { generateTocAndHeadings, TocItem } from 'src/utils/markdown'
 import { TocComponent } from '../../components/blog/toc.component'
-import { HttpService, ApiResponse } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 
 @Component({

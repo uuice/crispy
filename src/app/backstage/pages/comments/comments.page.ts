@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core'
+import { Component, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
@@ -13,7 +13,7 @@ import { TooltipModule } from 'primeng/tooltip'
 import { DialogModule } from 'primeng/dialog'
 import { BadgeModule } from 'primeng/badge'
 import { AvatarModule } from 'primeng/avatar'
-import { CommentService, type Comment, type CommentFilters } from '../../services/comment.service'
+import { type Comment, type CommentFilters, CommentService } from '../../services/comment.service'
 import { TextareaModule } from 'primeng/textarea'
 
 @Component({

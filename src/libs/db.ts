@@ -1,16 +1,16 @@
 import {
   Kysely,
-  MysqlDialect,
   KyselyPlugin,
+  MysqlDialect,
   PluginTransformQueryArgs,
-  PluginTransformResultArgs
+  PluginTransformResultArgs,
+  sql
 } from 'kysely'
 import { createPool } from 'mysql2'
 
 import { join } from 'path'
 import { fileURLToPath } from 'url'
 import type { DB } from '../db/db.d.ts'
-import { sql } from 'kysely'
 
 import { env } from '../server/config/env'
 

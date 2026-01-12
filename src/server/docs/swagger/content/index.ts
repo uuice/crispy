@@ -33,7 +33,7 @@ import './voteitems'
 import './accesstokens'
 import './search'
 
-export default {};
+export default {}
 
 /**
  * 模块列表：

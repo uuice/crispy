@@ -1,4 +1,4 @@
-import { Request, Response as ExpressResponse, NextFunction } from 'express'
+import { NextFunction, Request, Response as ExpressResponse } from 'express'
 import { AngularNodeAppEngine, writeResponseToNodeResponse } from '@angular/ssr/node'
 
 // Create Angular SSR handler middleware

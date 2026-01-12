@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  pageService,
-  CreatePageData,
-  UpdatePageData,
-  PageFilters
-} from '../../services/pageService'
+import { error, notFound, success, validationError } from '../../utils/response'
+import { CreatePageData, pageService, UpdatePageData } from '../../services/pageService'
 
 // Validation schemas
 const createPageSchema = z.object({

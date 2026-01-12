@@ -1,6 +1,5 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core'
-import { isPlatformServer } from '@angular/common'
-import { Title, Meta } from '@angular/platform-browser'
+import { inject, Injectable, PLATFORM_ID } from '@angular/core'
+import { Meta, Title } from '@angular/platform-browser'
 import { SiteSettingsService } from './site-settings.service'
 
 export interface SeoData {

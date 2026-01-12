@@ -1,18 +1,18 @@
 import {
   Component,
-  OnInit,
   inject,
-  signal,
+  makeStateKey,
+  OnInit,
   PLATFORM_ID,
-  TransferState,
-  makeStateKey
+  signal,
+  TransferState
 } from '@angular/core'
 import { AvatarModule } from 'primeng/avatar'
 import { CardModule } from 'primeng/card'
 import { ButtonModule } from 'primeng/button'
-import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
+import { CommonModule, isPlatformServer } from '@angular/common'
 import { RouterModule } from '@angular/router'
-import { HttpService, ApiResponse } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 
 // Article interface
 interface Article {

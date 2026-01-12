@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { success, error } from '../../utils/response'
+import { NextFunction, Request, Response } from 'express'
+import { error, success } from '../../utils/response'
 import { staticGenerationService } from '../../services/staticGenerationService'
 import fs from 'fs'
 import path from 'path'

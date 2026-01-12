@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  menuService,
-  CreateMenuData,
-  UpdateMenuData,
-  MenuFilters
-} from '../../services/menuService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { menuService } from '../../services/menuService'
 
 // Get single menu
 export const getMenu = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

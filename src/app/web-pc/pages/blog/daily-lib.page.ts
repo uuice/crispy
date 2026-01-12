@@ -1,13 +1,13 @@
 import {
   Component,
-  signal,
   computed,
-  OnInit,
   inject,
+  makeStateKey,
   OnDestroy,
+  OnInit,
   PLATFORM_ID,
-  TransferState,
-  makeStateKey
+  signal,
+  TransferState
 } from '@angular/core'
 import { Router } from '@angular/router'
 import { CommonModule, isPlatformServer } from '@angular/common'

@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core'
+import { Component, OnDestroy, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import {
-  FormsModule,
-  ReactiveFormsModule,
   FormBuilder,
   FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
   Validators
 } from '@angular/forms'
 import { Router } from '@angular/router'

@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core'
+import { Component, inject, OnDestroy, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { RouterModule, Router, NavigationEnd } from '@angular/router'
+import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { MenuItem } from 'primeng/api'
 import { filter } from 'rxjs/operators'
 import { HeaderComponent } from './header.component'

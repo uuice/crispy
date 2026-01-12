@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  voteService,
-  CreateVoteData,
-  UpdateVoteData,
-  VoteFilters
-} from '../../services/voteService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { voteService } from '../../services/voteService'
 
 // Get single vote
 export const getVote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

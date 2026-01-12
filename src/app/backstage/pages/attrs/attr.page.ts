@@ -11,7 +11,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { AttrDetailComponent, SpecialTag } from './attr-detail.component'
+import { AttrDetailComponent } from './attr-detail.component'
 
 @Component({
   selector: 'cs-attrs',

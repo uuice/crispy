@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  linkService,
-  CreateLinkData,
-  UpdateLinkData,
-  LinkFilters
-} from '../../services/linkService'
+import { error, notFound, success, validationError } from '../../utils/response'
+import { CreateLinkData, linkService, UpdateLinkData } from '../../services/linkService'
 
 // Validation schemas
 const createLinkSchema = z.object({

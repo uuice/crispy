@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
 import { articleService } from '../../services/articleService'
 
 // Get single article

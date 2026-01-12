@@ -1,6 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core'
 import { palette, updatePrimaryPalette, usePreset } from '@primeng/themes'
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs'
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs'
 import { HttpService } from './http.service'
 
 export interface AppSettings {

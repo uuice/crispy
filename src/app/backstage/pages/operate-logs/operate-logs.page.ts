@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, WritableSignal, inject } from '@angular/core'
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TableModule } from 'primeng/table'
@@ -8,7 +8,7 @@ import { DialogModule } from 'primeng/dialog'
 import { ToastModule } from 'primeng/toast'
 import { HttpService } from '../../services/http.service'
 import { MessageService } from 'primeng/api'
-import { OperateLogDetail, OperateLogDetailComponent } from './operate-log-detail.component'
+import { OperateLogDetailComponent } from './operate-log-detail.component'
 
 interface OperateLog {
   id: number

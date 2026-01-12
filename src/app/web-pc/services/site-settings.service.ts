@@ -1,14 +1,14 @@
 import {
-  Injectable,
-  signal,
-  WritableSignal,
   inject,
+  Injectable,
+  makeStateKey,
   PLATFORM_ID,
+  signal,
   TransferState,
-  makeStateKey
+  WritableSignal
 } from '@angular/core'
 import { isPlatformServer } from '@angular/common'
-import { HttpService, ApiResponse } from './http.service'
+import { ApiResponse, HttpService } from './http.service'
 
 export interface SiteSettings {
   siteName: string

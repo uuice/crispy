@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { articleService } from '@src/server/services/articleService'
 import { userService } from '@src/server/services/userService'
 import { commentService } from '@src/server/services/commentService'

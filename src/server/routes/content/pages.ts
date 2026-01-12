@@ -1,12 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
-import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  pageService,
-  CreatePageData,
-  UpdatePageData,
-  PageFilters
-} from '../../services/pageService'
+import { NextFunction, Request, Response } from 'express'
+import { error, notFound, success } from '../../utils/response'
+import { pageService } from '../../services/pageService'
 
 // Get single page
 export const getPage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

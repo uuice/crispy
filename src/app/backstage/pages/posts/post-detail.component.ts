@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  signal,
-  WritableSignal,
-  ViewChild
-} from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, signal, ViewChild } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ButtonModule } from 'primeng/button'
@@ -19,7 +10,7 @@ import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { AutoCompleteModule } from 'primeng/autocomplete'
-import { EditorModule, Editor } from 'primeng/editor'
+import { Editor, EditorModule } from 'primeng/editor'
 import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'

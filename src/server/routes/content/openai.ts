@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { openaiService } from '../../services/openaiService'
-import { success, error } from '../../utils/response'
+import { error, success } from '../../utils/response'
 
 // 测试 AI 服务连接
 export const testConnection = async (

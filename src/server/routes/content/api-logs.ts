@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
+import { error, notFound, success } from '../../utils/response'
 import { apiLogService } from '../../services/apiLogService'
 
 // Validation schemas

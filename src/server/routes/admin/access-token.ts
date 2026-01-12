@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express'
-import { success, error, handleError } from '../../utils/response'
+import { NextFunction, Request, Response } from 'express'
+import { error, handleError, success } from '../../utils/response'
 import { generateRandomToken } from '@src/server/utils/token'
-import { accessTokenService } from '../../services/accessToken.Service'
 import {
+  accessTokenService,
   createAccessTokenSchema,
   updateAccessTokenSchema
 } from '../../services/accessToken.Service'

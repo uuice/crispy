@@ -1,15 +1,15 @@
 import {
   Component,
-  OnInit,
-  inject,
   computed,
-  signal,
+  inject,
+  makeStateKey,
+  OnInit,
   PLATFORM_ID,
-  TransferState,
-  makeStateKey
+  signal,
+  TransferState
 } from '@angular/core'
 import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
-import { Router, NavigationEnd, RouterModule } from '@angular/router'
+import { NavigationEnd, Router, RouterModule } from '@angular/router'
 import { MenubarModule } from 'primeng/menubar'
 import { ButtonModule } from 'primeng/button'
 import { AvatarModule } from 'primeng/avatar'
@@ -23,7 +23,7 @@ import { DrawerModule } from 'primeng/drawer'
 import { SelectButtonModule } from 'primeng/selectbutton'
 import { FormsModule } from '@angular/forms'
 import { ScrollTopModule } from 'primeng/scrolltop'
-import { HttpService, ApiResponse } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 import { SsrSeoService } from '../../services/ssr-seo.service'
 import { SiteSettings } from '../../services/site-settings.service'
 

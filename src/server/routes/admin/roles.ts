@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, notFound, handleError } from '../../utils/response'
-import {
-  roleService,
-  CreateRoleData,
-  UpdateRoleData,
-  RoleFilters
-} from '../../services/roleService'
+import { error, handleError, notFound, success } from '../../utils/response'
+import { CreateRoleData, roleService, UpdateRoleData } from '../../services/roleService'
 
 // Validation schemas
 const createRoleSchema = z.object({

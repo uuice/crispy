@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { success, error, validationError, notFound } from '../../utils/response'
-import {
-  menuService,
-  CreateMenuData,
-  UpdateMenuData,
-  MenuFilters
-} from '../../services/menuService'
+import { error, notFound, success, validationError } from '../../utils/response'
+import { CreateMenuData, menuService, UpdateMenuData } from '../../services/menuService'
 
 // Validation schemas
 const createMenuSchema = z.object({

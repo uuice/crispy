@@ -1,22 +1,22 @@
 import {
-  Component,
-  signal,
-  OnInit,
   AfterViewInit,
+  Component,
+  ElementRef,
   inject,
-  PLATFORM_ID,
-  TransferState,
   makeStateKey,
-  ElementRef
+  OnInit,
+  PLATFORM_ID,
+  signal,
+  TransferState
 } from '@angular/core'
-import { CommonModule, isPlatformServer, isPlatformBrowser } from '@angular/common'
+import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
 import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { TocItem, generateTocAndHeadings } from '@src/utils/markdown'
+import { generateTocAndHeadings, TocItem } from '@src/utils/markdown'
 import hljs from 'highlight.js'
 
 // API response interfaces

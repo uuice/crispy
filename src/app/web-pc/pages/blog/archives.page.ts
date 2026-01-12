@@ -1,16 +1,16 @@
 import {
   Component,
-  OnInit,
-  inject,
-  signal,
   computed,
+  inject,
+  makeStateKey,
+  OnInit,
   PLATFORM_ID,
-  TransferState,
-  makeStateKey
+  signal,
+  TransferState
 } from '@angular/core'
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { RouterModule } from '@angular/router'
-import { HttpService, ApiResponse } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 
 // Article interface
 interface Article {
