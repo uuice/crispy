@@ -85,3 +85,9 @@ export const uploadImage = async (
 export const uploadController = {
   uploadImage
 }
+
+import { Elysia } from 'elysia'
+const uploadRouter = new Elysia({
+  prefix: '/upload'
+}).post('/image', uploadImage)
+export default uploadRouter

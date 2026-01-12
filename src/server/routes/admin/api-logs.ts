@@ -173,3 +173,14 @@ export const apiLogController = {
   updateApiLog,
   deleteApiLog
 }
+
+import { Elysia } from 'elysia'
+const apiLogRouter = new Elysia({
+  prefix: '/api-logs'
+})
+  .get('/', getApiLogs)
+  .get('/:id', getApiLog)
+  .post('/', createApiLog)
+  .put('/:id', updateApiLog)
+  .delete('/:id', deleteApiLog)
+export default apiLogRouter

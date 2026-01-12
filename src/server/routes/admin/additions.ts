@@ -156,3 +156,15 @@ export const additionController = {
   updateAddition,
   deleteAddition
 }
+
+import { Elysia } from 'elysia'
+const additionRouter = new Elysia({
+  prefix: '/additions'
+})
+  .get('/', getAdditions)
+  .get('/:id', getAddition)
+  .post('/', createAddition)
+  .put('/:id', updateAddition)
+  .delete('/:id', deleteAddition)
+
+export default additionRouter

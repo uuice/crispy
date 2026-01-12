@@ -188,3 +188,16 @@ export const categoryController = {
   updateCategory,
   deleteCategory
 }
+
+import { Elysia } from 'elysia'
+const categoryRouter = new Elysia({
+  prefix: '/categories'
+})
+  .get('/', getCategories)
+  .get('/:id', getCategory)
+  .get('/tree', getCategoryTree)
+  .post('/', createCategory)
+  .put('/:id', updateCategory)
+  .delete('/:id', deleteCategory)
+
+export default categoryRouter

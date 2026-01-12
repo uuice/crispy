@@ -151,3 +151,14 @@ export const userTypeController = {
   updateUserType,
   deleteUserType
 }
+
+import { Elysia } from 'elysia'
+const userTypeRouter = new Elysia({
+  prefix: '/user-types'
+})
+  .get('/', getUserTypes)
+  .get('/:id', getUserType)
+  .post('/', createUserType)
+  .put('/:id', updateUserType)
+  .delete('/:id', deleteUserType)
+export default userTypeRouter

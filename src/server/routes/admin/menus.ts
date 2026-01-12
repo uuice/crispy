@@ -208,3 +208,15 @@ export const menuController = {
   updateMenu,
   deleteMenu
 }
+
+import { Elysia } from 'elysia'
+const menuRouter = new Elysia({
+  prefix: '/menus'
+})
+  .get('/', getMenus)
+  .get('/:id', getMenu)
+  .get('/tree', getMenuTree)
+  .post('/', createMenu)
+  .put('/:id', updateMenu)
+  .delete('/:id', deleteMenu)
+export default menuRouter

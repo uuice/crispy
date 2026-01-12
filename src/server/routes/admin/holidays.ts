@@ -170,3 +170,14 @@ export const holidayController = {
   updateHoliday,
   deleteHoliday
 }
+
+import { Elysia } from 'elysia'
+const holidayRouter = new Elysia({
+  prefix: '/holidays'
+})
+  .get('/', getHolidays)
+  .get('/:id', getHoliday)
+  .post('/', createHoliday)
+  .put('/:id', updateHoliday)
+  .delete('/:id', deleteHoliday)
+export default holidayRouter

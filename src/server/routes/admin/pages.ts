@@ -230,3 +230,14 @@ export const pageController = {
   updatePage,
   deletePage
 }
+
+import { Elysia } from 'elysia'
+const pageRouter = new Elysia({
+  prefix: '/pages'
+})
+  .get('/', getPages)
+  .get('/:id', getPage)
+  .post('/', createPage)
+  .put('/:id', updatePage)
+  .delete('/:id', deletePage)
+export default pageRouter

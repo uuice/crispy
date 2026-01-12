@@ -193,3 +193,18 @@ export const userController = {
   deleteUser,
   resetPassword
 }
+
+import { Elysia } from 'elysia'
+const userRouter = new Elysia({
+  prefix: '/users'
+})
+  .post('/login', login)
+  .post('/logout', logout)
+  .get('/', getUsers)
+  .get('/:id', getUser)
+  .post('/', createUser)
+  .put('/:id', updateUser)
+  .delete('/:id', deleteUser)
+  .patch('/:id/reset-password', resetPassword)
+
+export default userRouter

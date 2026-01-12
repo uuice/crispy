@@ -225,3 +225,14 @@ export const articleController = {
   updateArticle,
   deleteArticle
 }
+
+import { Elysia } from 'elysia'
+const articleRouter = new Elysia({
+  prefix: '/articles'
+})
+  .get('/', getArticles)
+  .get('/:id', getArticle)
+  .post('/', createArticle)
+  .put('/:id', updateArticle)
+  .delete('/:id', deleteArticle)
+export default articleRouter

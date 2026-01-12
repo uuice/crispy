@@ -173,3 +173,14 @@ export const operateLogController = {
   updateOperateLog,
   deleteOperateLog
 }
+
+import { Elysia } from 'elysia'
+const operateLogRouter = new Elysia({
+  prefix: '/operate-logs'
+})
+  .get('/', getOperateLogs)
+  .get('/:id', getOperateLog)
+  .post('/', createOperateLog)
+  .put('/:id', updateOperateLog)
+  .delete('/:id', deleteOperateLog)
+export default operateLogRouter

@@ -189,3 +189,14 @@ export const voteController = {
   updateVote,
   deleteVote
 }
+
+import { Elysia } from 'elysia'
+const voteRouter = new Elysia({
+  prefix: '/votes'
+})
+  .get('/', getVotes)
+  .get('/:id', getVote)
+  .post('/', createVote)
+  .put('/:id', updateVote)
+  .delete('/:id', deleteVote)
+export default voteRouter

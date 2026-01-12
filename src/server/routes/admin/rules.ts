@@ -140,3 +140,15 @@ export const ruleController = {
   updateRule,
   deleteRule
 }
+
+import { Elysia } from 'elysia'
+const ruleRouter = new Elysia({
+  prefix: '/rules'
+})
+  .get('/', getRules)
+  .get('/tree', getRuleTree)
+  .get('/:id', getRule)
+  .post('/', createRule)
+  .put('/:id', updateRule)
+  .delete('/:id', deleteRule)
+export default ruleRouter

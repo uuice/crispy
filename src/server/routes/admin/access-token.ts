@@ -144,3 +144,15 @@ export const accessTokenController = {
   deleteAccessToken,
   getAccessTokens
 }
+
+import { Elysia } from 'elysia'
+const accessTokenRouter = new Elysia({
+  prefix: '/access-tokens'
+})
+  .get('/', getAccessTokens)
+  .get('/:id', getAccessTokenById)
+  .post('/', createAccessToken)
+  .put('/:id', updateAccessToken)
+  .delete('/:id', deleteAccessToken)
+
+export default accessTokenRouter

@@ -113,3 +113,12 @@ export const staticGenerationController = {
   getStaticGenerationStatus,
   clearStaticCache
 }
+
+import { Elysia } from 'elysia'
+const staticGenerationRouter = new Elysia({
+  prefix: '/static-generation'
+})
+  .get('/generate', generateStaticPages)
+  .get('/status', getStaticGenerationStatus)
+  .get('/clear-cache', clearStaticCache)
+export default staticGenerationRouter

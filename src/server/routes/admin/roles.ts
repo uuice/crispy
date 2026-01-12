@@ -168,3 +168,14 @@ export const roleController = {
   updateRole,
   deleteRole
 }
+
+import { Elysia } from 'elysia'
+const roleRouter = new Elysia({
+  prefix: '/roles'
+})
+  .get('/', getRoles)
+  .get('/:id', getRole)
+  .post('/', createRole)
+  .put('/:id', updateRole)
+  .delete('/:id', deleteRole)
+export default roleRouter

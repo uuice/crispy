@@ -35,3 +35,10 @@ export const getSystemInfo = async (req: Request, res: Response, next: NextFunct
     }
   })
 }
+
+import { Elysia } from 'elysia'
+
+const systemRouter = new Elysia({
+  prefix: '/system'
+}).get('/getSystemInfo', getSystemInfo)
+export default systemRouter

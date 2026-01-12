@@ -174,3 +174,16 @@ export const noticeController = {
   updateNotice,
   deleteNotice
 }
+
+import { Elysia } from 'elysia'
+
+const noticeRouter = new Elysia({
+  prefix: '/notices'
+})
+  .get('/', getNotices)
+  .get('/:id', getNotice)
+  .post('/', createNotice)
+  .put('/:id', updateNotice)
+  .delete('/:id', deleteNotice)
+
+export default noticeRouter

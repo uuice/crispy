@@ -330,3 +330,23 @@ export const cacheController = {
   deleteDatabaseCache,
   getDatabaseCacheInfo
 }
+
+import { Elysia } from 'elysia'
+const cacheRouter = new Elysia({
+  prefix: '/caches'
+})
+  .get('/', getCaches)
+  .get('/:id', getCache)
+  .post('/', createCache)
+  .put('/:id', updateCache)
+  .delete('/:id', deleteCache)
+  .get('/stats', getCacheStats)
+  .get('/memory-cache', getMemoryCacheList)
+  .delete('/memory-cache/:hash', deleteMemoryCache)
+  .get('/memory-cache/:hash', getMemoryCacheInfo)
+  .delete('/memory-cache', cleanupMemoryCache)
+  .get('/database-caches', getDatabaseCacheList)
+  .delete('/database-caches/:hash', deleteDatabaseCache)
+  .get('/database-caches/:hash', getDatabaseCacheInfo)
+
+export default cacheRouter

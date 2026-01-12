@@ -173,3 +173,14 @@ export const linkController = {
   updateLink,
   deleteLink
 }
+
+import { Elysia } from 'elysia'
+const linkRouter = new Elysia({
+  prefix: '/links'
+})
+  .get('/', getLinks)
+  .get('/:id', getLink)
+  .post('/', createLink)
+  .put('/:id', updateLink)
+  .delete('/:id', deleteLink)
+export default linkRouter

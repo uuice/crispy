@@ -168,3 +168,14 @@ export const jobController = {
   updateJob,
   deleteJob
 }
+
+import { Elysia } from 'elysia'
+const jobRouter = new Elysia({
+  prefix: '/jobs'
+})
+  .get('/', getJobs)
+  .get('/:id', getJob)
+  .post('/', createJob)
+  .put('/:id', updateJob)
+  .delete('/:id', deleteJob)
+export default jobRouter

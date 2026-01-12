@@ -164,3 +164,14 @@ export const enumController = {
   updateEnum,
   deleteEnum
 }
+
+import { Elysia } from 'elysia'
+const enumRouter = new Elysia({
+  prefix: '/enums'
+})
+  .get('/', getEnums)
+  .get('/:id', getEnum)
+  .post('/', createEnum)
+  .put('/:id', updateEnum)
+  .delete('/:id', deleteEnum)
+export default enumRouter

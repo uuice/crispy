@@ -178,3 +178,15 @@ export const keywordController = {
   updateKeyword,
   deleteKeyword
 }
+
+import { Elysia } from 'elysia'
+const keywordRouter = new Elysia({
+  prefix: '/keywords'
+})
+  .get('/', getKeywords)
+  .get('/:id', getKeyword)
+  .post('/', createKeyword)
+  .put('/:id', updateKeyword)
+  .delete('/:id', deleteKeyword)
+
+export default keywordRouter

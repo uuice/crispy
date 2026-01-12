@@ -132,3 +132,14 @@ export const tagController = {
   updateTag,
   deleteTag
 }
+
+import { Elysia } from 'elysia'
+const tagRouter = new Elysia({
+  prefix: '/tags'
+})
+  .get('/', getTags)
+  .get('/:id', getTag)
+  .post('/', createTag)
+  .put('/:id', updateTag)
+  .delete('/:id', deleteTag)
+export default tagRouter

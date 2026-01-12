@@ -144,3 +144,14 @@ export const adController = {
   updateAd,
   deleteAd
 }
+
+import { Elysia } from 'elysia'
+const adRouter = new Elysia({
+  prefix: '/ads'
+})
+  .get('/', getAds)
+  .get('/:id', getAd)
+  .post('/', createAd)
+  .put('/:id', updateAd)
+  .delete('/:id', deleteAd)
+export default adRouter

@@ -67,3 +67,9 @@ export const getDashboardOverview = async (req: Request, res: Response, next: Ne
     res.status(500).json({ success: false, message: '获取仪表盘数据失败' })
   }
 }
+
+import { Elysia } from 'elysia'
+const dashboardRouter = new Elysia({
+  prefix: '/dashboard'
+}).get('/overview', getDashboardOverview)
+export default dashboardRouter

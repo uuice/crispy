@@ -262,3 +262,17 @@ export const commentController = {
   batchDeleteComments,
   getCommentStats
 }
+
+import { Elysia } from 'elysia'
+const commentRouter = new Elysia({
+  prefix: '/comments'
+})
+  .get('/', getComments)
+  .get('/:id', getComment)
+  .post('/', createComment)
+  .put('/:id', updateComment)
+  .delete('/:id', deleteComment)
+  .patch('/batch-status', batchUpdateStatus)
+  .patch('/batch-delete', batchDeleteComments)
+  .get('/stats', getCommentStats)
+export default commentRouter

@@ -221,3 +221,16 @@ export const configController = {
   updateConfig,
   deleteConfig
 }
+
+import { Elysia } from 'elysia'
+const configRouter = new Elysia({
+  prefix: '/configs'
+})
+  .get('/', getConfigs)
+  .get('/:id', getConfig)
+  .get('/alias/:alias', getConfigByAlias)
+  .post('/', createConfig)
+  .post('/upsert', upsertConfig)
+  .put('/:id', updateConfig)
+  .delete('/:id', deleteConfig)
+export default configRouter

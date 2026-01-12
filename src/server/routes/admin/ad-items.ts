@@ -156,3 +156,16 @@ export const adItemController = {
   updateAdItem,
   deleteAdItem
 }
+
+import { Elysia } from 'elysia'
+
+const adItemRouter = new Elysia({
+  prefix: '/ad-items'
+})
+  .get('/', getAdItems)
+  .get('/:id', getAdItem)
+  .post('/', createAdItem)
+  .put('/:id', updateAdItem)
+  .delete('/:id', deleteAdItem)
+
+export default adItemRouter

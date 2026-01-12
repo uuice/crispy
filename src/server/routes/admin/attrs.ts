@@ -162,3 +162,14 @@ export const attrController = {
   updateAttr,
   deleteAttr
 }
+
+import { Elysia } from 'elysia'
+const attrRouter = new Elysia({
+  prefix: '/attrs'
+})
+  .get('/', getAttrs)
+  .get('/:id', getAttr)
+  .post('/', createAttr)
+  .put('/:id', updateAttr)
+  .delete('/:id', deleteAttr)
+export default attrRouter

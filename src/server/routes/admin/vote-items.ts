@@ -177,3 +177,14 @@ export const voteItemController = {
   updateVoteItem,
   deleteVoteItem
 }
+
+import { Elysia } from 'elysia'
+const voteItemRouter = new Elysia({
+  prefix: '/vote-items'
+})
+  .get('/', getVoteItems)
+  .get('/:id', getVoteItem)
+  .post('/', createVoteItem)
+  .put('/:id', updateVoteItem)
+  .delete('/:id', deleteVoteItem)
+export default voteItemRouter
