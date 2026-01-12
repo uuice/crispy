@@ -8,15 +8,10 @@ import { flexsearchService } from './server/services/flexsearch-index.service'
 import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
 import { testDbConnection } from './libs/db'
+import { html, Html } from '@elysiajs/html'
+import { serverTiming } from '@elysiajs/server-timing'
+import { openapi } from '@elysiajs/openapi'
 
-const app = new Elysia()
-
-const angularApp = new AngularAppEngine()
-
-// Scheduled tasks
-import './crons/persistFlexsearchIndex'
-import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
-import { corsPlugin, requestLoggerPlugin } from './server/plugins'
 
 // test db connection
 testDbConnection()
@@ -53,39 +48,74 @@ if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
     await flexsearchService.persistAll()
   })()
 }
+const angularApp = new AngularAppEngine()
 
-// !cache ignore, no need
+
+
+
+// Scheduled tasks
+import './crons/persistFlexsearchIndex'
+import { applyStaticPlugin } from './server/plugins/applyStaticPlugin'
+import { corsPlugin, requestLoggerPlugin } from './server/plugins'
+
+
+
+const app = new Elysia()
+.use(openapi())
+
+  .use(html())
+
+//Adding it causes the HTML plugin to stop working; I don't know why.
+// .use(serverTiming())
 
 // cors plugin
-app.use(corsPlugin)
+.use(corsPlugin)
 
 // request logger plugin
-app.use(requestLoggerPlugin)
+.use(requestLoggerPlugin)
 
 // Apply static file optimization plugin (first for performance)
-app.use(applyStaticPlugin)
+.use(applyStaticPlugin)
 
 // Static asset serving endpoint
-const browserDistFolder = join(import.meta.dirname, '../browser')
-app.use(staticPlugin({ assets: browserDistFolder }))
+
+.use(staticPlugin({ assets: join(import.meta.dirname, '../browser') }))
 
 // Serve uploaded files (early for performance)
-app.use(staticPlugin({ prefix: '/uploads', assets: join(process.cwd(), 'public', 'uploads') }))
+.use(staticPlugin({ prefix: '/uploads', assets: join(process.cwd(), 'public', 'uploads') }))
 
 // Health check endpoint
-app.get('/health', 'health')
+.get('/health', 'health')
 
-if (isMainModule(import.meta.url)) {
-  const port = env['PORT']
 
-  app.listen(port, () => {
-    console.log(`Elysia server listening on http://localhost:${port}`)
-    console.log(`Environment: ${env['NODE_ENV']}`)
-  })
-}
+.get(
+  '/html',
+  () => `
+          <html lang='en'>
+              <head>
+                  <title>Hello World</title>
+              </head>
+              <body>
+                  <h1>Hello World</h1>
+              </body>
+          </html>`
+)
+
+.get('/jsx', () => (
+  <html lang="en">
+    <head>
+      <title>Hello World</title>
+    </head>
+    <body>
+      <h1>Hello World</h1>
+    </body>
+  </html>
+))
+
+
 
 // Universal rendering endpoint
-app.get('/*', async (c) => {
+.get('/*', async (c) => {
   const res = await angularApp.handle(c.request, {
     server: 'elysia'
   })
@@ -97,6 +127,17 @@ app.get('/*', async (c) => {
 
   return res
 })
+
+if (isMainModule(import.meta.url)) {
+  const port = env['PORT']
+
+  app.listen(port, () => {
+    console.log(`Elysia server listening on http://localhost:${port}`)
+    console.log(`Environment: ${env['NODE_ENV']}`)
+  })
+}
+
+export type App = typeof app
 
 /**
  * This is a request handler used by the Angular CLI (dev-server and during build).

@@ -14,13 +14,19 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "removeComments": true,
-    "noImplicitThis": false,    
+    "noImplicitThis": false,
     "target": "ES2022",
     "module": "preserve",
     "baseUrl": "./",
     "paths": {
       "@src/*": ["src/*"]
-    }
+    },
+    "types": [
+      "@types/bun"
+    ],
+    "jsx": "react",
+		"jsxFactory": "Html.createElement",
+		"jsxFragmentFactory": "Html.Fragment"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
