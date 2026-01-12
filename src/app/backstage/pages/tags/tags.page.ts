@@ -260,7 +260,7 @@ export class TagsPage implements OnInit {
     this.loadTags(page, pageSize)
   }
 
-  getStatusSeverity(status: number): string {
+  getStatusSeverity(status: number) {
     return status === 10 ? 'success' : 'danger'
   }
 

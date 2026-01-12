@@ -453,8 +453,8 @@ export class PagesPage implements OnInit {
     return result
   }
 
-  getStatusSeverity(status: number): string {
-    return status === 10 ? 'success' : 'warning'
+  getStatusSeverity(status: number) {
+    return status === 10 ? 'success' : 'warn'
   }
 
   getStatusText(status: number): string {

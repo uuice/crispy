@@ -163,12 +163,12 @@ export class CommentService {
   }
 
   // Helper method to get status severity for PrimeNG tag
-  getStatusSeverity(status: number): string {
+  getStatusSeverity(status: number) {
     switch (status) {
       case 20:
         return 'success'
       case 10:
-        return 'warning'
+        return 'warn'
       case -10:
         return 'danger'
       case -20:

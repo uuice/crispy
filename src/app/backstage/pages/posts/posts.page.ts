@@ -534,12 +534,12 @@ export class PostsPage implements OnInit {
     return result
   }
 
-  getStatusSeverity(status: number): string {
+  getStatusSeverity(status: number) {
     switch (status) {
       case 10:
         return 'success'
       case -10:
-        return 'warning'
+        return 'warn'
       case -20:
         return 'info'
       case -100:
@@ -564,8 +564,8 @@ export class PostsPage implements OnInit {
     }
   }
 
-  getReviewSeverity(isReview: number): string {
-    return isReview === 10 ? 'warning' : 'success'
+  getReviewSeverity(isReview: number) {
+    return isReview === 10 ? 'warn' : 'success'
   }
 
   getReviewText(isReview: number): string {

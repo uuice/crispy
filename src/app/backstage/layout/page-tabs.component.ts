@@ -82,7 +82,7 @@ export class PageTabsComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  onTabChange(event: string | number) {
+  onTabChange(event: string | number | undefined) {
     console.log(event)
     this.value.set(Number(event))
     this.tabChange.emit(Number(event))

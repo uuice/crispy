@@ -259,7 +259,7 @@ export class RolesPage implements OnInit {
     })
   }
 
-  getStatusSeverity(status: number): string {
+  getStatusSeverity(status: number) {
     return status === 10 ? 'success' : 'danger'
   }
 

@@ -298,12 +298,12 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
     this.imagePreviewVisible.set(true)
   }
 
-  getMethodSeverity(method: string): string {
+  getMethodSeverity(method: string) {
     switch (method) {
       case '1':
         return 'info' // Article detail
       case '5':
-        return 'warning' // External link
+        return 'warn' // External link
       default:
         return 'secondary'
     }
@@ -320,7 +320,7 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
     }
   }
 
-  getStatusSeverity(status: number): string {
+  getStatusSeverity(status: number) {
     return status === 10 ? 'success' : 'danger'
   }
 

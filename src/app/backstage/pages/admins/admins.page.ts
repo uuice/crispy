@@ -223,7 +223,7 @@ interface RolesResponse {
                 @if (admin.is_super_admin === 1) {
                   <p-tag value="超级管理员" severity="danger" class="mr-1"></p-tag>
                 } @else if (admin.is_admin === 1 && admin.is_super_admin !== 1) {
-                  <p-tag value="管理员" severity="warning"></p-tag>
+                  <p-tag value="管理员" severity="warn"></p-tag>
                 } @else {
                   <span>普通用户</span>
                 }
@@ -433,8 +433,8 @@ export class AdminsPage implements OnInit {
       })
   }
 
-  getStatusSeverity(status: number): string {
-    return status === 10 ? 'success' : 'warning'
+  getStatusSeverity(status: number) {
+    return status === 10 ? 'success' : 'warn'
   }
 
   getStatusText(status: number): string {
