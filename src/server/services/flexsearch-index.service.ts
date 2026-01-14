@@ -1,7 +1,7 @@
 import { Charset, Document, DocumentData } from 'flexsearch'
 import fs from 'fs'
 import path from 'path'
-import escapeRegExp from 'lodash/escapeRegExp'
+import { escapeRegExp } from 'lodash'
 
 export interface Article {
   id: string
