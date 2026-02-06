@@ -36,7 +36,8 @@ export class VoteItemService {
    * @returns List of vote items and pagination info
    */
   async getVoteItems(filters: VoteItemFilters): Promise<PaginatedResult<VoteItemEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, vote_id, status } = filters
     const offset = (page - 1) * pageSize
 

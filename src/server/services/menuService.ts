@@ -33,7 +33,8 @@ export class MenuService {
    * Get menus list with pagination and filters
    */
   async getMenus(filters: MenuFilters): Promise<PaginatedResult<MenuEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('menus').selectAll()

@@ -2,24 +2,7 @@ import { Charset, Document, DocumentData } from 'flexsearch'
 import fs from 'fs'
 import path from 'path'
 import { escapeRegExp } from 'lodash'
-
-export interface Article {
-  id: string
-  title: string
-  sub_title: string
-  abstract: string
-  content: string
-  category: string
-  category_alias: string
-}
-
-export interface Page {
-  id: string
-  title: string
-  sub_title: string
-  abstract: string
-  content: string
-}
+import { ArticleWithCategory, PageEntity } from '@src/types'
 
 const INDEX_DIR = path.resolve(process.cwd(), 'temp/flexsearch')
 const ARTICLE_INDEX_FILE = path.join(INDEX_DIR, 'article-index.json')
@@ -128,7 +111,7 @@ export function mergeAndHighlightFlexsearchResults(raw: any[], keyword: string):
 }
 
 export const flexsearchService = {
-  async buildIndexes(articles: Article[], pages: Page[]) {
+  async buildIndexes(articles: ArticleWithCategory[], pages: PageEntity[]) {
     articleIndex = createArticleIndex()
     pageIndex = createPageIndex()
     dailyIndex = createDailyIndex()
@@ -140,11 +123,11 @@ export const flexsearchService = {
       pageIndex.add(page as any)
     }
   },
-  async addArticle(article: Article) {
+  async addArticle(article: ArticleWithCategory) {
     await articleIndex.add(article as any)
     if (article.category_alias === 'daily-libs') await dailyIndex.add(article as any)
   },
-  async updateArticle(article: Article) {
+  async updateArticle(article: ArticleWithCategory) {
     await articleIndex.update(article as any)
     if (article.category_alias === 'daily-libs') await dailyIndex.update(article as any)
     else await dailyIndex.remove(article.id)
@@ -153,10 +136,10 @@ export const flexsearchService = {
     await articleIndex.remove(id)
     await dailyIndex.remove(id)
   },
-  async addPage(page: Page) {
+  async addPage(page: PageEntity) {
     await pageIndex.add(page as any)
   },
-  async updatePage(page: Page) {
+  async updatePage(page: PageEntity) {
     await pageIndex.update(page as any)
   },
   async removePage(id: string) {

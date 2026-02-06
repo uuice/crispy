@@ -45,7 +45,7 @@ export function Roles(): void {
       filters.has_rules = args.has_rules === 'true' || args.has_rules === true
 
     // Use the enhanced getRoles method with filters
-    const result = await roleService.getRoles({ page, pageSize }, filters)
+    const result = await roleService.getRoles({ ...filters, page, pageSize })
 
     context.ctx.roles = result.dataList
     context.ctx.roles_pagination = result.pagination
@@ -75,7 +75,7 @@ export function RoleItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const role = await roleService.getRoleById(id)
+    const role = await roleService.getById(id)
     context.ctx.role = role
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

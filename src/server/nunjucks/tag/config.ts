@@ -37,7 +37,7 @@ export function Config(): void {
     if (args.start_time !== undefined) filters.start_time = args.start_time
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
-    const result = await configService.getConfigs(filters, { page, pageSize })
+    const result = await configService.getConfigs({ ...filters, page, pageSize })
 
     context.ctx.configs = result.dataList
     context.ctx.configs_pagination = result.pagination
@@ -73,7 +73,7 @@ export function ConfigItem(): void {
 
     let config
     if (id) {
-      config = await configService.getConfigById(id)
+      config = await configService.getById(id)
     } else if (alias) {
       config = await configService.getConfigByAlias(alias)
     }

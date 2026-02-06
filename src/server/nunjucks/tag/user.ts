@@ -52,7 +52,7 @@ export function Users(): void {
     if (args.last_login_end !== undefined) filters.last_login_end = args.last_login_end
 
     // Use the enhanced getUsers method with filters
-    const result = await userService.getUsers({ page, pageSize }, filters)
+    const result = await userService.getUsers({ ...filters, page, pageSize })
 
     context.ctx.users = result.dataList
     context.ctx.users_pagination = result.pagination
@@ -82,7 +82,7 @@ export function UserItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const user = await userService.getUserById(id)
+    const user = await userService.getById(id)
     context.ctx.user = user
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

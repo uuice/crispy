@@ -43,7 +43,7 @@ export function Links(): void {
     if (args.end_time !== undefined) filters.endTime = args.end_time
 
     // Use the enhanced getLinks method with filters
-    const result = await linkService.getLinks({ page, pageSize }, filters)
+    const result = await linkService.getLinks({ ...filters, page, pageSize })
 
     context.ctx.links = result.dataList
     context.ctx.links_pagination = result.pagination
@@ -73,7 +73,7 @@ export function LinkItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const link = await linkService.getLinkById(id)
+    const link = await linkService.getById(id)
     context.ctx.link = link
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

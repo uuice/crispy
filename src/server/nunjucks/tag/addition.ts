@@ -37,7 +37,7 @@ export function Additions(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getAdditions method with filters
-    const result = await additionService.getAdditions({ page, pageSize }, filters)
+    const result = await additionService.getAdditions({ ...filters, page, pageSize })
 
     context.ctx.additions = result.dataList
     context.ctx.additions_pagination = result.pagination
@@ -67,7 +67,7 @@ export function AdditionItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const addition = await additionService.getAdditionById(id)
+    const addition = await additionService.getById(id)
     context.ctx.addition = addition
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

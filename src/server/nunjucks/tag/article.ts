@@ -59,7 +59,7 @@ export function Articles(): void {
       filters.has_redirect_url = args.has_redirect_url === 'true' || args.has_redirect_url === true
 
     // Use the enhanced getArticles method with filters
-    const result = await articleService.getArticles(filters, { page, pageSize })
+    const result = await articleService.getArticles({ ...filters, page, pageSize })
 
     context.ctx.articles = result.dataList
     context.ctx.articles_pagination = result.pagination
@@ -89,7 +89,7 @@ export function ArticleItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const article = await articleService.getArticleById(id)
+    const article = await articleService.getById(id)
     context.ctx.article = article
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

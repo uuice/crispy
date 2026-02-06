@@ -37,7 +37,8 @@ export class AdItemService {
    * @returns List of ad items and pagination info
    */
   async getAdItems(filters: AdItemFilters): Promise<PaginatedResult<AdItemEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { ad_id, title, content, image_url, url, status } = filters
     const offset = (page - 1) * pageSize
 

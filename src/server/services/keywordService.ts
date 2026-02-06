@@ -37,7 +37,8 @@ export class KeywordService {
    * @returns List of keywords and pagination info
    */
   async getKeywords(filters: KeywordFilters): Promise<PaginatedResult<KeywordEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, alias, status } = filters
     const offset = (page - 1) * pageSize
 

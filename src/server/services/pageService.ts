@@ -106,7 +106,8 @@ export class PageService {
    * Get pages list with pagination and filters
    */
   async getPages(filters: PageFilters): Promise<PaginatedResult<PageEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('pages').selectAll()
@@ -247,7 +248,7 @@ export class PageService {
       if (createdPage) {
         await flexsearchService.addPage({
           ...createdPage,
-          id: pageId.toString(),
+          id: pageId,
           title: createdPage.title || '',
           sub_title: createdPage.sub_title || '',
           abstract: createdPage.abstract || '',
@@ -293,7 +294,7 @@ export class PageService {
         if (updatedPage) {
           await flexsearchService.updatePage({
             ...updatedPage,
-            id: id.toString(),
+            id: id,
             title: updatedPage.title || '',
             sub_title: updatedPage.sub_title || '',
             abstract: updatedPage.abstract || '',

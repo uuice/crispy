@@ -217,7 +217,7 @@ async function generateAndSaveArticle(): Promise<any> {
     }
 
     // Save to database
-    const result = await articleService.createArticle(createData)
+    const result = await articleService.create(createData)
 
     console.log(
       `[JS Article Generator] Successfully created article: "${articleData.title}" (ID: ${result.id})`

@@ -38,7 +38,8 @@ export class CategoryService {
    * @returns List of categories and pagination info
    */
   async getCategories(filters: CategoryFilters): Promise<PaginatedResult<CategoryEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('categories').selectAll()

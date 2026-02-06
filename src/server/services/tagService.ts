@@ -71,7 +71,8 @@ export class TagService {
    * @returns List of tags and pagination info
    */
   async getTags(filters: TagFilters): Promise<PaginatedResult<TagEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, des, value, type_id, status } = filters
     const offset = (page - 1) * pageSize
 

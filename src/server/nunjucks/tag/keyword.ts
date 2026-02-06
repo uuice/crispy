@@ -35,7 +35,7 @@ export function Keywords(): void {
     if (args.end_time !== undefined) filters.endTime = args.end_time
 
     // Use the enhanced getKeywords method with filters
-    const result = await keywordService.getKeywords({ page, pageSize }, filters)
+    const result = await keywordService.getKeywords({ ...filters, page, pageSize })
 
     context.ctx.keywords = result.dataList
     context.ctx.keywords_pagination = result.pagination
@@ -65,7 +65,7 @@ export function KeywordItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const keyword = await keywordService.getKeywordById(id)
+    const keyword = await keywordService.getById(id)
     context.ctx.keyword = keyword
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

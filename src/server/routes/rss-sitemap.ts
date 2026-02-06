@@ -15,10 +15,11 @@ const router = Router()
 router.get(
   '/rss.xml',
   catchAsync(async (req, res) => {
-    const { dataList: postList } = await articleService.getArticles(
-      { status: 10 },
-      { page: 1, pageSize: 100 }
-    )
+    const { dataList: postList } = await articleService.getArticles({
+      status: 10,
+      page: 1,
+      pageSize: 100
+    })
     const jsonRss = {
       rss: {
         $: {
@@ -32,9 +33,9 @@ router.get(
             return {
               title: '<![CDATA[' + post.title + ']]',
               link: env['BASE_URL'] + '/archives/' + post.url,
-              description: '<![CDATA[' + (post.excerpt || post.title) + ']]',
+              description: '<![CDATA[' + (post.abstract || post.title) + ']]',
               guid: '/archives/' + post.url,
-              pubDate: moment(post.created_time as string).format('ddd, DD MMM YYYY HH:mm:ss [GMT]')
+              pubDate: moment(Number(post.create_time)).format('ddd, DD MMM YYYY HH:mm:ss [GMT]')
             }
           })
         }
@@ -52,22 +53,22 @@ router.get(
 router.get(
   '/sitemap.xml',
   catchAsync(async (req, res) => {
-    const { dataList: postList } = await articleService.getArticles(
-      { status: 10 },
-      { page: 1, pageSize: 100 }
-    )
-    const { dataList: categoryList } = await categoryService.getCategories(
-      { status: 10 },
-      { page: 1, pageSize: 100 }
-    )
-    const { dataList: tagList } = await tagService.getTags(
-      { page: 1, pageSize: 20 },
-      { status: 10 }
-    )
-    const { dataList: pageList } = await pageService.getPages(
-      { page: 1, pageSize: 100 },
-      { status: 10 }
-    )
+    const { dataList: postList } = await articleService.getArticles({
+      status: 10,
+      page: 1,
+      pageSize: 100
+    })
+    const { dataList: categoryList } = await categoryService.getCategories({
+      status: 10,
+      page: 1,
+      pageSize: 100
+    })
+    const { dataList: tagList } = await tagService.getTags({ page: 1, pageSize: 20, status: 10 })
+    const { dataList: pageList } = await pageService.getPages({
+      page: 1,
+      pageSize: 100,
+      status: 10
+    })
 
     const jsonRss = {
       urlset: {
@@ -85,7 +86,7 @@ router.get(
           ...postList.map((post) => {
             return {
               loc: join(env['BASE_URL'], 'archives', post.url as string),
-              lastmod: moment(post.updated_time as string).format(),
+              lastmod: moment(Number(post.update_time)).format(),
               changefreq: 'daily',
               priority: '0.7'
             }
@@ -111,7 +112,7 @@ router.get(
           ...pageList.map((page) => {
             return {
               loc: join(env['BASE_URL'], 'pages', (page.url || page.alias) as string),
-              lastmod: moment(page.update_time as unknown as string).format(),
+              lastmod: moment(Number(page.update_time)).format(),
               changefreq: 'daily',
               priority: '0.7'
             }

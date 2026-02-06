@@ -35,7 +35,7 @@ export function UserTypes(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getUserTypes method with filters
-    const result = await userTypeService.getUserTypes({ page, pageSize }, filters)
+    const result = await userTypeService.getUserTypes({ ...filters, page, pageSize })
 
     context.ctx.user_types = result.dataList
     context.ctx.user_types_pagination = result.pagination
@@ -65,7 +65,7 @@ export function UserTypeItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const userType = await userTypeService.getUserTypeById(id)
+    const userType = await userTypeService.getById(id)
     context.ctx.userType = userType
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

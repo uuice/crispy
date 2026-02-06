@@ -40,7 +40,8 @@ export class LinkService {
    * @returns List of links with type names and pagination info
    */
   async getLinks(filters: LinkFilters): Promise<PaginatedResult<LinkWithType>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { site_name, url, des, logo, method, status, type_id } = filters
     const offset = (page - 1) * pageSize
 

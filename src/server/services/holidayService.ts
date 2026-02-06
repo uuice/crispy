@@ -36,7 +36,8 @@ export class HolidayService {
    * @returns List of holidays and pagination info
    */
   async getHolidays(filters: HolidayFilters): Promise<PaginatedResult<HolidayEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, value } = filters
     const offset = (page - 1) * pageSize
 

@@ -36,7 +36,7 @@ export function Attrs(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getAttrs method with filters
-    const result = await attrService.getAttrs(filters, { page, pageSize })
+    const result = await attrService.getAttrs({ ...filters, page, pageSize })
 
     context.ctx.attrs = result.dataList
     context.ctx.attrs_pagination = result.pagination
@@ -66,7 +66,7 @@ export function AttrItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const attr = await attrService.getAttrById(id)
+    const attr = await attrService.getById(id)
     context.ctx.attr = attr
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

@@ -53,7 +53,7 @@ export function Pages(): void {
       filters.has_tags = args.has_tags === 'true' || args.has_tags === true
 
     // Use the enhanced getPages method with filters
-    const result = await pageService.getPages({ page, pageSize }, filters)
+    const result = await pageService.getPages({ ...filters, page, pageSize })
 
     context.ctx.pages = result.dataList
     context.ctx.pages_pagination = result.pagination
@@ -87,7 +87,7 @@ export function PageItem(): void {
 
     let page
     if (id) {
-      page = await pageService.getPageById(id)
+      page = await pageService.getById(id)
     } else if (alias) {
       page = await pageService.getPageByAlias(alias)
     }

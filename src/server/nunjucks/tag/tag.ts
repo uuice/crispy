@@ -41,7 +41,7 @@ export function Tags(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getTags method with filters
-    const result = await tagService.getTags({ page, pageSize }, filters)
+    const result = await tagService.getTags({ ...filters, page, pageSize })
 
     context.ctx.tags = result.dataList
     context.ctx.tags_pagination = result.pagination
@@ -75,7 +75,7 @@ export function TagItem(): void {
 
     let tag
     if (id) {
-      tag = await tagService.getTagById(id)
+      tag = await tagService.getById(id)
     }
     // else if (alias) {
     //   tag = await tagService.getTagByAlias(alias)

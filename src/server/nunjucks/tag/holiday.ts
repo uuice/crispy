@@ -33,7 +33,7 @@ export function Holidays(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getHolidays method with filters
-    const result = await holidayService.getHolidays(filters, { page, pageSize })
+    const result = await holidayService.getHolidays({ ...filters, page, pageSize })
 
     context.ctx.holidays = result.dataList
     context.ctx.holidays_pagination = result.pagination
@@ -63,7 +63,7 @@ export function HolidayItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const holiday = await holidayService.getHolidayById(id)
+    const holiday = await holidayService.getById(id)
     context.ctx.holiday = holiday
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

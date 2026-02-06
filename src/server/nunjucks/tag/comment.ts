@@ -49,7 +49,7 @@ export function Comments(): void {
       filters.has_parent = args.has_parent === 'true' || args.has_parent === true
 
     // Use the enhanced getComments method with filters
-    const result = await commentService.getComments({ page, pageSize }, filters)
+    const result = await commentService.getComments({ ...filters, page, pageSize })
 
     context.ctx.comments = result.dataList
     context.ctx.comments_pagination = result.pagination
@@ -79,7 +79,7 @@ export function CommentItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const comment = await commentService.getCommentById(id)
+    const comment = await commentService.getById(id)
     context.ctx.comment = comment
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

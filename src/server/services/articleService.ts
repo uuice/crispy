@@ -95,7 +95,8 @@ export class ArticleService {
    * Get articles with pagination and filters
    */
   async getArticles(filters: ArticleFilters): Promise<PaginatedResult<ArticleWithCategory>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -293,7 +294,7 @@ export class ArticleService {
       if (createdArticle) {
         await flexsearchService.addArticle({
           ...createdArticle,
-          id: articleId.toString(),
+          id: articleId,
           title: createdArticle.title || '',
           sub_title: createdArticle.sub_title || '',
           abstract: createdArticle.abstract || '',
@@ -349,7 +350,7 @@ export class ArticleService {
         if (updatedArticle) {
           await flexsearchService.updateArticle({
             ...updatedArticle,
-            id: id.toString(),
+            id: id,
             title: updatedArticle.title || '',
             sub_title: updatedArticle.sub_title || '',
             abstract: updatedArticle.abstract || '',

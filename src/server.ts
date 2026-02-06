@@ -65,8 +65,8 @@ if (env['ENABLE_JS_ARTICLE_GENERATION'] === 'true') {
 // test flexsearch
 if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
   ;(async () => {
-    const articles = await articleService.getArticles({}, { page: 1, pageSize: 1000 })
-    const pages = await pageService.getPages({ page: 1, pageSize: 1000 }, {})
+    const articles = await articleService.getArticles({ page: 1, pageSize: 1000 })
+    const pages = await pageService.getPages({ page: 1, pageSize: 1000 })
     await flexsearchService.buildIndexes(articles.dataList, pages.dataList)
     await flexsearchService.persistAll()
   })()

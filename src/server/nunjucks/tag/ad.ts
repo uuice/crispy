@@ -17,7 +17,6 @@ export function Ads(): void {
     return new nodes.CallExtensionAsync(this, 'run', args, [body])
   }
   this.run = async function (context: any, args: any, body: any, callback: any) {
-    const position = args.position
     const active = args.active === 'true' || args.active === true
     const limit = args.limit || 10
 
@@ -38,12 +37,10 @@ export function Ads(): void {
     if (args.type_id !== undefined) filters.type_id = Number(args.type_id)
 
     let ads
-    if (position) {
-      ads = await adService.getAdsByPosition(position)
-    } else if (active) {
+    if (active) {
       ads = await adService.getActiveAds()
     } else {
-      const result = await adService.getAds({ page: 1, pageSize: limit }, filters)
+      const result = await adService.getAds({ ...filters, page: 1, pageSize: limit })
       ads = result.dataList
     }
 
@@ -79,7 +76,7 @@ export function AdItem(): void {
     if (withItems) {
       ad = await adService.getAdWithItems(id)
     } else {
-      ad = await adService.getAdById(id)
+      ad = await adService.getById(id)
     }
 
     context.ctx.ad = ad

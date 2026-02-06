@@ -36,7 +36,8 @@ export class ConfigService {
    * @returns List of configs and pagination info
    */
   async getConfigs(filters: ConfigFilters): Promise<PaginatedResult<ConfigEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, alias, type_id, status } = filters
     const offset = (page - 1) * pageSize
 

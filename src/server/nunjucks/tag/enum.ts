@@ -36,7 +36,7 @@ export function Enums(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getEnums method with filters
-    const result = await enumService.getEnums(filters, { page, pageSize })
+    const result = await enumService.getEnums({ ...filters, page, pageSize })
 
     context.ctx.enums = result.dataList
     context.ctx.enums_pagination = result.pagination
@@ -66,7 +66,7 @@ export function EnumItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const enumItem = await enumService.getEnumById(id)
+    const enumItem = await enumService.getById(id)
     context.ctx.enumItem = enumItem
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

@@ -36,7 +36,8 @@ export class NoticeService {
    * @returns List of notices and pagination info
    */
   async getNotices(filters: NoticeFilters): Promise<PaginatedResult<NoticeEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, status } = filters
     const offset = (page - 1) * pageSize
 

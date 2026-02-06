@@ -37,7 +37,8 @@ export class AdditionService {
    * @returns List of additions and pagination info
    */
   async getAdditions(filters: AdditionFilters): Promise<PaginatedResult<AdditionEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { status } = filters
     const offset = (page - 1) * pageSize
 

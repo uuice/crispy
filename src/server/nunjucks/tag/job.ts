@@ -49,7 +49,7 @@ export function Jobs(): void {
       filters.has_address = args.has_address === 'true' || args.has_address === true
 
     // Use the enhanced getJobs method with filters
-    const result = await jobService.getJobs(filters, { page, pageSize })
+    const result = await jobService.getJobs({ ...filters, page, pageSize })
 
     context.ctx.jobs = result.dataList
     context.ctx.jobs_pagination = result.pagination
@@ -79,7 +79,7 @@ export function JobItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const job = await jobService.getJobById(id)
+    const job = await jobService.getById(id)
     context.ctx.job = job
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

@@ -36,7 +36,7 @@ export function Notices(): void {
     if (args.end_time !== undefined) filters.endTime = args.end_time
 
     // Use the enhanced getNotices method with filters
-    const result = await noticeService.getNotices({ page, pageSize }, filters)
+    const result = await noticeService.getNotices({ ...filters, page, pageSize })
 
     context.ctx.notices = result.dataList
     context.ctx.notices_pagination = result.pagination
@@ -66,7 +66,7 @@ export function NoticeItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const notice = await noticeService.getNoticeById(id)
+    const notice = await noticeService.getById(id)
     context.ctx.notice = notice
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

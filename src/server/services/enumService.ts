@@ -36,7 +36,8 @@ export class EnumService {
    * @returns List of enums and pagination info
    */
   async getEnums(filters: EnumFilters): Promise<PaginatedResult<EnumEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { title, alias, code, status } = filters
     const offset = (page - 1) * pageSize
 

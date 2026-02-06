@@ -65,7 +65,6 @@ export const getDashboardOverview = async (req: Request, res: Response, next: Ne
   }
 }
 
-
 export const dashboardController = {
   getDashboardOverview
 }

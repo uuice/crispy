@@ -117,7 +117,8 @@ export class AccessTokenService {
    * @returns List of access tokens and pagination info
    */
   async getAccessTokens(filters: AccessTokenFilters): Promise<PaginatedResult<AccessTokenEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { app_name, channel, status, user_id } = filters
     const offset = (page - 1) * pageSize
 

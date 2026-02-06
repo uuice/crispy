@@ -35,7 +35,7 @@ export function VoteItems(): void {
     if (args.end_time !== undefined) filters.endTime = args.end_time
 
     // Use the enhanced getVoteItems method with filters
-    const result = await voteItemService.getVoteItems({ page, pageSize }, filters)
+    const result = await voteItemService.getVoteItems({ ...filters, page, pageSize })
 
     context.ctx.vote_items = result.dataList
     context.ctx.vote_items_pagination = result.pagination
@@ -65,7 +65,7 @@ export function VoteItemSingle(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const voteItem = await voteItemService.getVoteItemById(id)
+    const voteItem = await voteItemService.getById(id)
     context.ctx.voteItem = voteItem
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)
@@ -106,7 +106,7 @@ export function VoteItemsByVote(): void {
     if (vote_id !== undefined) filters.vote_id = vote_id
 
     // Use the enhanced getVoteItems method with filters
-    const result = await voteItemService.getVoteItems({ page, pageSize }, filters)
+    const result = await voteItemService.getVoteItems({ ...filters, page, pageSize })
 
     context.ctx.vote_items = result.dataList
     context.ctx.vote_items_pagination = result.pagination

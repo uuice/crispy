@@ -34,7 +34,7 @@ export function AdItems(): void {
     if (args.status !== undefined) filters.status = args.status
 
     // Use the enhanced getAdItems method with filters
-    const result = await adItemService.getAdItems({ page, pageSize }, filters)
+    const result = await adItemService.getAdItems({ ...filters, page, pageSize })
 
     context.ctx.adItems = result.dataList
     context.ctx.adItems_pagination = result.pagination
@@ -74,7 +74,7 @@ export function AdItemSingle(): void {
       // Note: adItemService doesn't have getAdItemByTitle method, so we'll use getAdItems with title filter
       const filters: any = { title }
       if (ad_id !== undefined) filters.ad_id = ad_id
-      const result = await adItemService.getAdItems({ page: 1, pageSize: 1 }, filters)
+      const result = await adItemService.getAdItems({ page: 1, pageSize: 1, ...filters })
       adItem = result.dataList[0] || null
     }
 

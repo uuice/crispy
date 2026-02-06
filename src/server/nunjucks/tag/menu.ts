@@ -36,7 +36,7 @@ export function Menus(): void {
     if (args.end_time !== undefined) filters.endTime = args.end_time
 
     // Use the enhanced getMenus method with filters
-    const result = await menuService.getMenus({ page, pageSize }, filters)
+    const result = await menuService.getMenus({ ...filters, page, pageSize })
 
     context.ctx.menus = result.dataList
     context.ctx.menus_pagination = result.pagination
@@ -66,7 +66,7 @@ export function MenuItem(): void {
       return callback(null, new nunjucks.runtime.SafeString(''))
     }
 
-    const menu = await menuService.getMenuById(id)
+    const menu = await menuService.getById(id)
     context.ctx.menu = menu
     const result = new nunjucks.runtime.SafeString(body())
     return callback(null, result)

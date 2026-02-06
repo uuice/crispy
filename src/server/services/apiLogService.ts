@@ -34,7 +34,8 @@ export class ApiLogService {
    * @returns List of api logs and pagination info
    */
   async getApiLogs(filters: ApiLogFilters): Promise<PaginatedResult<ApiLogEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { user_id, method, create_time_start, create_time_end } = filters
     const offset = (page - 1) * pageSize
 

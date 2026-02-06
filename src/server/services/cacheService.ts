@@ -37,7 +37,8 @@ export class CacheService {
    * @returns List of caches and pagination info
    */
   async getCaches(filters: CacheFilters): Promise<PaginatedResult<CacheEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const { hash, status } = filters
     const offset = (page - 1) * pageSize
 

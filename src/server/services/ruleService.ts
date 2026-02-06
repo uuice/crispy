@@ -34,7 +34,8 @@ export class RuleService {
    * Get rules list with pagination and filters
    */
   async getRules(filters: RuleFilters): Promise<PaginatedResult<RuleEntity>> {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('rules').selectAll()

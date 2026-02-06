@@ -41,7 +41,7 @@ export function Categories(): void {
     if (args.end_time !== undefined) filters.end_time = args.end_time
 
     // Use the enhanced getCategories method with filters
-    const result = await categoryService.getCategories(filters, { page, pageSize })
+    const result = await categoryService.getCategories({ ...filters, page, pageSize })
 
     context.ctx.categories = result.dataList
     context.ctx.categories_pagination = result.pagination

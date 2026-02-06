@@ -82,7 +82,8 @@ export class UserService {
   ): Promise<
     PaginatedResult<Omit<UserEntity, 'password'> & { role: { id: number; title: string } | null }>
   > {
-    const { page = 1, pageSize = 10 } = filters
+    const page = Number(filters.page) || 1
+    const pageSize = Number(filters.pageSize) || 10
     const offset = (page - 1) * pageSize
     // Build query conditions with LEFT JOIN to get role information
     let query = db
