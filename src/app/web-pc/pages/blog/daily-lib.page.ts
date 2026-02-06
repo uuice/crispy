@@ -17,69 +17,9 @@ import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext'
 import { PaginatorModule } from 'primeng/paginator'
 import { TagModule } from 'primeng/tag'
-import { HttpService } from '../../services/http.service'
+import { ApiResponse, HttpService } from '../../services/http.service'
 import { Subject } from 'rxjs'
-
-// Article-like structure for npm libraries
-export interface Article {
-  id: number
-  title: string
-  url: string
-  sub_title?: string
-  abstract?: string
-  content?: string
-  image?: string
-  image_list?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  remark?: string
-  user_id?: number
-  tags?: string
-  tagRef?: { [key: string]: string }
-  type_id?: number
-  type_ids?: string
-  status?: number
-  sort?: number
-  click?: number
-  attrs?: string
-  is_review?: number
-  redirect_url?: string
-  create_time?: number
-  update_time?: number
-  is_delete?: number
-}
-
-// API response interfaces
-interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message?: string
-}
-
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    page: number
-    pageSize: number
-    total: number
-    totalPages: number
-  }
-}
-
-// Category/Type interface
-interface Category {
-  id: number
-  title: string
-  alias: string
-  status: number
-  sort: number
-  parent_id: number
-  des?: string
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { ArticleEntity, CategoryEntity, PaginatedResult } from '@src/types'
 
 @Component({
   selector: 'cs-daily-lib',
@@ -344,9 +284,9 @@ export class DailyLibPage implements OnInit, OnDestroy {
   private transferState = inject(TransferState)
   private destroy$ = new Subject<void>()
 
-  private readonly LIBS_KEY = makeStateKey<Article[]>('dailyLibs')
+  private readonly LIBS_KEY = makeStateKey<ArticleEntity[]>('dailyLibs')
 
-  libs = signal<Article[]>([])
+  libs = signal<ArticleEntity[]>([])
   search = signal('')
   page = signal(1)
   pageSize = signal(10)
@@ -383,7 +323,7 @@ export class DailyLibPage implements OnInit, OnDestroy {
   loadDailyLibs() {
     // First get the category with alias 'daily-libs' to get type_id
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Category>>>('/api/content/categories', {
+      .get<ApiResponse<PaginatedResult<CategoryEntity>>>('/api/content/categories', {
         alias: 'daily-libs',
         page: 1,
         pageSize: 1
@@ -422,7 +362,7 @@ export class DailyLibPage implements OnInit, OnDestroy {
     }
 
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', params)
+      .get<ApiResponse<PaginatedResult<ArticleEntity>>>('/api/content/articles', params)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {

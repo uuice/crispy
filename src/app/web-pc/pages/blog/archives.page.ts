@@ -11,31 +11,12 @@ import {
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { ApiResponse, HttpService } from '../../services/http.service'
-
-// Article interface
-interface Article {
-  id: number
-  title: string
-  url: string
-  create_time: number
-  status: number
-}
-
-// Paginated response interface
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { ArticleEntity, PaginatedResult } from '@src/types'
 
 // Year group interface
 interface YearGroup {
   year: number
-  articles: Article[]
+  articles: ArticleEntity[]
   count: number
 }
 
@@ -243,12 +224,12 @@ export class ArchivesPage implements OnInit {
   private transferState = inject(TransferState)
 
   // TransferState key
-  private readonly ARTICLES_KEY = makeStateKey<Article[]>('archivesArticles')
+  private readonly ARTICLES_KEY = makeStateKey<ArticleEntity[]>('archivesArticles')
 
   // Loading flag
   private articlesLoaded = false
 
-  articles = signal<Article[]>([])
+  articles = signal<ArticleEntity[]>([])
 
   // Group articles by year
   yearGroups = computed(() => {
@@ -256,7 +237,7 @@ export class ArchivesPage implements OnInit {
     if (!articles.length) return []
 
     // Group articles by year
-    const groups = new Map<number, Article[]>()
+    const groups = new Map<number, ArticleEntity[]>()
 
     articles.forEach((article) => {
       const year = new Date(article.create_time).getFullYear()
@@ -294,7 +275,7 @@ export class ArchivesPage implements OnInit {
     }
 
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+      .get<ApiResponse<PaginatedResult<ArticleEntity>>>('/api/content/articles', {
         page: 1,
         pageSize: 1000, // Get all articles
         status: 10 // Published articles only

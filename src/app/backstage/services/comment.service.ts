@@ -1,69 +1,22 @@
 import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { HttpService } from './http.service'
+import {
+  CommentEntity,
+  CommentWithAuthor,
+  PaginatedResult,
+  CommentFilters,
+  CreateComment,
+  UpdateComment
+} from '@src/types'
 
-export interface Comment {
-  id: number
-  title: string
-  content: string
-  user_id: number
-  parent_id?: number
-  status: number
-  good_article: number
-  bad_article: number
-  not_article: number
-  create_time: number
-  update_time: number
-  is_delete: number
-  // Joined fields
-  author_name?: string
-  author_email?: string
-  author_avatar?: string
-  parent_content?: string
-}
-
-export interface CommentFilters {
-  content?: string
-  title?: string
-  user_id?: number
-  parent_id?: number
-  status?: number
-  start_time?: number
-  end_time?: number
-}
-
-export interface CreateCommentData {
-  title: string
-  content: string
-  user_id: number
-  parent_id?: number
-  status?: number
-  good_article?: number
-  bad_article?: number
-  not_article?: number
-}
-
-export interface UpdateCommentData {
-  title?: string
-  content?: string
-  status?: number
-  good_article?: number
-  bad_article?: number
-  not_article?: number
-}
+// Re-export for backward compatibility
+export type Comment = CommentWithAuthor
 
 export interface PaginatedCommentsResult {
   success: boolean
   message: string
-  data: {
-    dataList: Comment[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<CommentWithAuthor>
 }
 
 export interface CommentStats {
@@ -73,6 +26,10 @@ export interface CommentStats {
   rejected: number
 }
 
+// Re-export types from index.ts for backward compatibility
+export type CreateCommentData = CreateComment
+export type UpdateCommentData = UpdateComment
+
 @Injectable({ providedIn: 'root' })
 export class CommentService {
   constructor(private http: HttpService) {}
@@ -80,7 +37,7 @@ export class CommentService {
   // Get comments with pagination and filters
   getComments(
     pagination: { page: number; pageSize: number },
-    filters: CommentFilters
+    filters: Partial<CommentFilters>
   ): Observable<PaginatedCommentsResult> {
     const params: any = {
       page: pagination.page.toString(),
@@ -94,27 +51,24 @@ export class CommentService {
       params.parent_id = filters.parent_id === null ? 'null' : filters.parent_id.toString()
     }
     if (filters.status) params.status = filters.status.toString()
-    if (filters.start_time) params.start_time = filters.start_time.toString()
-    if (filters.end_time) params.end_time = filters.end_time.toString()
+    if (filters.create_time_start) params.start_time = filters.create_time_start.toString()
+    if (filters.create_time_end) params.end_time = filters.create_time_end.toString()
 
     return this.http.get<PaginatedCommentsResult>('/api/admin/comments', params)
   }
 
   // Get single comment by ID
-  getCommentById(id: number): Observable<Comment> {
-    return this.http.get<Comment>(`/api/admin/comments/${id}`)
+  getCommentById(id: number): Observable<CommentWithAuthor> {
+    return this.http.get<CommentWithAuthor>(`/api/admin/comments/${id}`)
   }
 
   // Create new comment
-  createComment(data: CreateCommentData): Observable<Comment> {
-    return this.http.post<Comment>('/api/admin/comments', data)
+  createComment(data: CreateComment): Observable<CommentWithAuthor> {
+    return this.http.post<CommentWithAuthor>('/api/admin/comments', data)
   }
 
   // Update comment
-  updateComment(
-    id: number,
-    data: UpdateCommentData
-  ): Observable<{ data: { updatedRows: number } }> {
+  updateComment(id: number, data: UpdateComment): Observable<{ data: { updatedRows: number } }> {
     return this.http.put<{ data: { updatedRows: number } }>(`/api/admin/comments/${id}`, data)
   }
 

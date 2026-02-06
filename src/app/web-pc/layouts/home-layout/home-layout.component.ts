@@ -26,36 +26,19 @@ import { ScrollTopModule } from 'primeng/scrolltop'
 import { ApiResponse, HttpService } from '../../services/http.service'
 import { SsrSeoService } from '../../services/ssr-seo.service'
 import { SiteSettings } from '../../services/site-settings.service'
+import { CategoryEntity, TagEntity, ArticleEntity, PaginatedResult } from '@src/types'
 
-// Data interfaces
-interface Category {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time?: number
-  update_time?: number
+// Extended types for local use
+interface Category extends CategoryEntity {
   article_count?: number
   count?: number // For backward compatibility
 }
 
-interface Tag {
-  id: number
-  title: string
-  value: string
-  count?: number
+interface Tag extends TagEntity {
   tagRef?: { [key: string]: string }
 }
 
-interface Article {
-  id: number
-  title: string
-  url: string
-  create_time: number
-  click: number
+interface Article extends ArticleEntity {
   type_name: string
 }
 
@@ -66,17 +49,6 @@ interface RecordSettings {
   policeLink: string
   recordText: string
   showRecord: boolean
-}
-
-// Update interfaces to match paginated response
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
 }
 
 @Component({
@@ -1469,7 +1441,7 @@ export class HomeLayoutComponent implements OnInit {
     }
 
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Tag>>>('/api/content/tags', {
+      .get<ApiResponse<PaginatedResult<Tag>>>('/api/content/tags', {
         page: 1,
         pageSize: 18
       })
@@ -1504,7 +1476,7 @@ export class HomeLayoutComponent implements OnInit {
     }
 
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+      .get<ApiResponse<PaginatedResult<Article>>>('/api/content/articles', {
         page: 1,
         pageSize: 8,
         status: 10

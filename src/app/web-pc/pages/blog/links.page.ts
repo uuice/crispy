@@ -10,42 +10,11 @@ import {
 import { ButtonModule } from 'primeng/button'
 import { isPlatformServer } from '@angular/common'
 import { ApiResponse, HttpService } from '../../services/http.service'
+import { CategoryEntity, LinkEntity, PaginatedResult } from '@src/types'
 
-// Data interfaces
-interface Category {
-  id: number
-  title: string
-  alias: string
-  sort: number
-  parent_id: number
-  status: number
-  des?: string
+// Data interfaces - extending CategoryEntity with children for tree structure
+interface Category extends CategoryEntity {
   children?: Category[]
-}
-
-interface Link {
-  id: number
-  url: string
-  site_name: string
-  logo?: string
-  des?: string
-  sort: number
-  status: number
-  type_id: number
-  type_name: string
-  create_time: number
-  update_time: number
-}
-
-// Paginated response interface
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
 }
 
 @Component({
@@ -96,11 +65,11 @@ export class LinksPage implements OnInit {
   private transferState = inject(TransferState)
 
   private readonly CATEGORIES_KEY = makeStateKey<Category[]>('linkCategories')
-  private readonly LINKS_KEY = makeStateKey<Link[]>('linkLinks')
+  private readonly LINKS_KEY = makeStateKey<LinkEntity[]>('linkLinks')
 
   // Data signals
   categories = signal<Category[]>([])
-  links = signal<Link[]>([])
+  links = signal<LinkEntity[]>([])
 
   ngOnInit() {
     // 优先从 TransferState 读取
@@ -145,7 +114,7 @@ export class LinksPage implements OnInit {
    */
   loadLinks() {
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Link>>>('/api/content/links', {
+      .get<ApiResponse<PaginatedResult<LinkEntity>>>('/api/content/links', {
         page: 1,
         pageSize: 1000,
         status: 10 // Only published links
@@ -169,7 +138,7 @@ export class LinksPage implements OnInit {
   /**
    * Get links by category ID
    */
-  getLinksByCategory(categoryId: number): Link[] {
+  getLinksByCategory(categoryId: number): LinkEntity[] {
     return this.links().filter((link) => link.type_id === categoryId)
   }
 }

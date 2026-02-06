@@ -10,36 +10,7 @@ import {
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { ApiResponse, HttpService } from '../../services/http.service'
-
-// Article interface
-interface Article {
-  id: number
-  title: string
-  url: string
-  create_time: number
-  status: number
-  abstract?: string
-  type_id?: number
-}
-
-// Category interface
-interface Category {
-  id: number
-  title: string
-  alias: string
-  des?: string
-}
-
-// Paginated response interface
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { ArticleEntity, CategoryEntity, PaginatedResult } from '@src/types'
 
 @Component({
   selector: 'cs-categories',
@@ -281,7 +252,7 @@ export class CategoriesPage implements OnInit {
 
   categoryTitle = signal<string>('分类')
   categoryDescription = signal<string>('')
-  articles = signal<Article[]>([])
+  articles = signal<ArticleEntity[]>([])
 
   // Pagination signals
   page = signal(1)
@@ -314,7 +285,7 @@ export class CategoriesPage implements OnInit {
     }
     // First get category info using new alias endpoint
     this.httpService
-      .get<ApiResponse<Category>>(`/api/content/categories/alias/${alias}`)
+      .get<ApiResponse<CategoryEntity>>(`/api/content/categories/alias/${alias}`)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -335,10 +306,10 @@ export class CategoriesPage implements OnInit {
   /**
    * Load articles by category ID with pagination
    */
-  loadArticlesByCategory(categoryId: number, alias?: string, categoryObj?: Category) {
+  loadArticlesByCategory(categoryId: number, alias?: string, categoryObj?: CategoryEntity) {
     this.loading.set(true)
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+      .get<ApiResponse<PaginatedResult<ArticleEntity>>>('/api/content/articles', {
         type_id: categoryId,
         page: this.page(),
         pageSize: this.pageSize(),

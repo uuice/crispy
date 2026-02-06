@@ -13,28 +13,7 @@ import { ButtonModule } from 'primeng/button'
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { ApiResponse, HttpService } from '../../services/http.service'
-
-// Article interface
-interface Article {
-  id: number
-  title: string
-  url: string
-  abstract: string
-  image: string
-  create_time: number
-  attrs: string
-}
-
-// Paginated response interface
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { ArticleEntity, PaginatedResult } from '@src/types'
 
 @Component({
   selector: 'cs-home',
@@ -134,13 +113,13 @@ export class HomePage implements OnInit {
   private transferState = inject(TransferState)
 
   // TransferState key
-  private readonly HOT_ARTICLES_KEY = makeStateKey<Article[]>('hotArticles')
+  private readonly HOT_ARTICLES_KEY = makeStateKey<ArticleEntity[]>('hotArticles')
 
   // Loading flag
   private hotArticlesLoaded = false
 
   // Signal for hot articles
-  hotArticles = signal<Article[]>([])
+  hotArticles = signal<ArticleEntity[]>([])
 
   ngOnInit() {
     // Load data - TransferState will handle caching automatically
@@ -160,7 +139,7 @@ export class HomePage implements OnInit {
     }
 
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+      .get<ApiResponse<PaginatedResult<ArticleEntity>>>('/api/content/articles', {
         page: 1,
         pageSize: 100,
         status: 10,

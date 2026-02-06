@@ -16,23 +16,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router'
 import { CommonModule, isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { ApiResponse, HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
-
-// Article interface
-interface Article {
-  id: number
-  title: string
-  url: string
-  content: string
-  abstract: string
-  author_id: number
-  create_time: number
-  tags: string
-  tagRef: { [key: string]: string }
-  seo_title?: string
-  seo_keywords?: string
-  seo_description?: string
-  status: number
-}
+import { ArticleWithCategory } from '@src/types'
 
 @Component({
   selector: 'cs-archives-detail',
@@ -211,55 +195,57 @@ export class ArchivesDetailPage implements OnInit, AfterViewInit {
     }
 
     // Call content API to get article by URL
-    this.httpService.get<ApiResponse<Article>>(`/api/content/articles/url/${url}`).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          const article = response.data
+    this.httpService
+      .get<ApiResponse<ArticleWithCategory>>(`/api/content/articles/url/${url}`)
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const article = response.data
 
-          // Set article data
-          this.articleTitle.set(article.title)
-          this.articleCreateTime.set(article.create_time)
+            // Set article data
+            this.articleTitle.set(article.title)
+            this.articleCreateTime.set(article.create_time)
 
-          // Parse tags
-          let tags: string[] = []
-          if (article.tags) {
-            tags = article.tags
-              .split(',')
-              .map((tag) => tag.trim())
-              .filter((tag) => tag)
+            // Parse tags
+            let tags: string[] = []
+            if (article.tags) {
+              tags = article.tags
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter((tag) => tag)
+            }
+            this.articleTags.set(tags)
+
+            // Set tagRef from article data
+            this.articleTagRef.set(article.tagRef || {})
+
+            // Process content and generate TOC
+            const { html, toc } = generateTocAndHeadings(article.content)
+            this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+            this.toc.set(toc)
+            this.articleLoaded = true
+
+            // Apply code highlighting after content is loaded
+            setTimeout(() => {
+              this.applyCodeHighlighting()
+            }, 0)
+
+            // Store in TransferState on server-side
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(articleKey, {
+                title: article.title,
+                create_time: article.create_time,
+                tags: tags,
+                tagRef: article.tagRef || {},
+                html: html
+              })
+              this.transferState.set(tocKey, toc)
+            }
           }
-          this.articleTags.set(tags)
-
-          // Set tagRef from article data
-          this.articleTagRef.set(article.tagRef || {})
-
-          // Process content and generate TOC
-          const { html, toc } = generateTocAndHeadings(article.content)
-          this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
-          this.toc.set(toc)
-          this.articleLoaded = true
-
-          // Apply code highlighting after content is loaded
-          setTimeout(() => {
-            this.applyCodeHighlighting()
-          }, 0)
-
-          // Store in TransferState on server-side
-          if (isPlatformServer(this.platformId)) {
-            this.transferState.set(articleKey, {
-              title: article.title,
-              create_time: article.create_time,
-              tags: tags,
-              tagRef: article.tagRef || {},
-              html: html
-            })
-            this.transferState.set(tocKey, toc)
-          }
+        },
+        error: (err) => {
+          console.error('Failed to load article:', err)
         }
-      },
-      error: (err) => {
-        console.error('Failed to load article:', err)
-      }
-    })
+      })
   }
 }

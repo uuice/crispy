@@ -11,29 +11,19 @@ import {
 } from '@angular/core'
 import { isPlatformBrowser, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
-import { Article } from './daily-lib.page'
 import { TagModule } from 'primeng/tag'
 import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { generateTocAndHeadings, TocItem } from '@src/utils/markdown'
 import hljs from 'highlight.js'
+import { ArticleEntity, ArticleWithCategory } from '@src/types'
 
 // API response interfaces
 interface ApiResponse<T> {
   success: boolean
   data: T
   message?: string
-}
-
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    page: number
-    pageSize: number
-    total: number
-    totalPages: number
-  }
 }
 
 @Component({
@@ -241,7 +231,7 @@ export class DailyLibDetailPage implements OnInit, AfterViewInit {
     return makeStateKey<any[]>(`daily-lib-toc-${url}`)
   }
 
-  lib = signal<Article | undefined>(undefined)
+  lib = signal<ArticleWithCategory | undefined>(undefined)
   html = signal<SafeHtml>('')
   toc = signal<TocItem[]>([])
 
@@ -323,36 +313,38 @@ export class DailyLibDetailPage implements OnInit, AfterViewInit {
       }, 0)
       return
     }
-    this.httpService.get<ApiResponse<Article>>(`/api/content/articles/url/${url}`).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.lib.set(response.data)
+    this.httpService
+      .get<ApiResponse<ArticleWithCategory>>(`/api/content/articles/url/${url}`)
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.lib.set(response.data)
 
-          // Process content and generate TOC
-          const { html, toc } = generateTocAndHeadings(response.data.content || '')
-          this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
-          this.toc.set(toc)
+            // Process content and generate TOC
+            const { html, toc } = generateTocAndHeadings(response.data.content || '')
+            this.html.set(this.sanitizer.bypassSecurityTrustHtml(html))
+            this.toc.set(toc)
 
-          // Apply code highlighting after content is loaded
-          setTimeout(() => {
-            this.applyCodeHighlighting()
-          }, 0)
+            // Apply code highlighting after content is loaded
+            setTimeout(() => {
+              this.applyCodeHighlighting()
+            }, 0)
 
-          if (isPlatformServer(this.platformId)) {
-            // Store complete article data including tagRef
-            this.transferState.set(this.getLibKey(url), {
-              ...response.data,
-              html,
-              tagRef: response.data.tagRef || {}
-            })
-            this.transferState.set(this.getTocKey(url), toc)
+            if (isPlatformServer(this.platformId)) {
+              // Store complete article data including tagRef
+              this.transferState.set(this.getLibKey(url), {
+                ...response.data,
+                html,
+                tagRef: response.data.tagRef || {}
+              })
+              this.transferState.set(this.getTocKey(url), toc)
+            }
           }
+        },
+        error: (err) => {
+          console.error('Failed to load article:', err)
         }
-      },
-      error: (err) => {
-        console.error('Failed to load article:', err)
-      }
-    })
+      })
   }
 
   scrollTo(id: string, event: Event) {

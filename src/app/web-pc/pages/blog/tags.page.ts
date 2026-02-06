@@ -10,17 +10,7 @@ import {
 import { CommonModule, isPlatformServer } from '@angular/common'
 import { ActivatedRoute, RouterModule } from '@angular/router'
 import { ApiResponse, HttpService } from '../../services/http.service'
-
-// Article interface
-interface Article {
-  id: number
-  title: string
-  url: string
-  create_time: number
-  status: number
-  abstract?: string
-  tags?: string
-}
+import { ArticleEntity, PaginatedResult } from '@src/types'
 
 // Tag interface
 interface Tag {
@@ -28,17 +18,6 @@ interface Tag {
   title: string
   value: string
   des?: string
-}
-
-// Paginated response interface
-interface PaginatedResponse<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
 }
 
 @Component({
@@ -263,7 +242,7 @@ export class TagsPage implements OnInit {
 
   tagTitle = signal<string>('标签')
   tagDescription = signal<string>('')
-  articles = signal<Article[]>([])
+  articles = signal<ArticleEntity[]>([])
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -320,7 +299,7 @@ export class TagsPage implements OnInit {
    */
   loadArticlesByTag(tagValue: string, setTransferState = false) {
     this.httpService
-      .get<ApiResponse<PaginatedResponse<Article>>>('/api/content/articles', {
+      .get<ApiResponse<PaginatedResult<ArticleEntity>>>('/api/content/articles', {
         tags: tagValue,
         page: 1,
         pageSize: 1000, // Get all articles
