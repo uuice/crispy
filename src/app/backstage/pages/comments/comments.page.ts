@@ -13,8 +13,9 @@ import { TooltipModule } from 'primeng/tooltip'
 import { DialogModule } from 'primeng/dialog'
 import { BadgeModule } from 'primeng/badge'
 import { AvatarModule } from 'primeng/avatar'
-import { type Comment, type CommentFilters, CommentService } from '../../services/comment.service'
+import { type Comment, CommentService } from '../../services/comment.service'
 import { TextareaModule } from 'primeng/textarea'
+import { CommentFilters } from '@src/types'
 
 @Component({
   selector: 'cs-comments',
@@ -429,7 +430,10 @@ export class CommentsPage implements OnInit {
   loadComments() {
     this.loading.set(true)
 
-    const filters: CommentFilters = {}
+    const filters: CommentFilters = {
+      page: this.pagination().page,
+      pageSize: this.pagination().pageSize
+    }
     if (this.searchText()) {
       filters.content = this.searchText()
     }
@@ -445,20 +449,20 @@ export class CommentsPage implements OnInit {
 
       switch (timeRange) {
         case 'today':
-          filters.start_time = new Date().setHours(0, 0, 0, 0)
-          filters.end_time = now
+          filters.create_time_start = new Date().setHours(0, 0, 0, 0)
+          filters.create_time_end = now
           break
         case 'yesterday':
-          filters.start_time = new Date().setHours(0, 0, 0, 0) - dayMs
-          filters.end_time = new Date().setHours(0, 0, 0, 0) - 1
+          filters.create_time_start = new Date().setHours(0, 0, 0, 0) - dayMs
+          filters.create_time_end = new Date().setHours(0, 0, 0, 0) - 1
           break
         case 'last7days':
-          filters.start_time = now - 7 * dayMs
-          filters.end_time = now
+          filters.create_time_start = now - 7 * dayMs
+          filters.create_time_end = now
           break
         case 'last30days':
-          filters.start_time = now - 30 * dayMs
-          filters.end_time = now
+          filters.create_time_start = now - 30 * dayMs
+          filters.create_time_end = now
           break
       }
     }
