@@ -1,78 +1,33 @@
-import { db, filterUndefined } from '@src/libs/db'
-import { sql } from 'kysely'
+import { db } from '@src/libs/db'
+import { DELETE_STATUS } from '../config/const'
+import {
+  VoteEntity,
+  VoteFilters,
+  CreateVote,
+  createVoteSchema,
+  CreateSuccess,
+  UpdateVote,
+  updateVoteSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  VoteItemEntity
+} from '@src/types'
 
-// Data interfaces
-export interface CreateVoteData {
-  title: string
-  is_multiple: number
-  start_time: number
-  end_time: number
-  status: number
-  vote_items?: string[]
-}
-
-export type UpdateVoteData = Partial<CreateVoteData>
-
-export interface VoteFilters {
-  title?: string
-  is_multiple?: number
-  status?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface VotePaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Vote {
-  id: number
-  title: string
-  is_multiple: number
-  start_time: number
-  end_time: number
-  status: number
-  count: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface VoteWithItems extends Vote {
-  items: VoteItem[]
-}
-
-export interface VoteItem {
-  id: number
-  title: string
-  vote_id: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedVotesResult {
-  dataList: VoteWithItems[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
+export interface VoteWithItems extends VoteEntity {
+  items: VoteItemEntity[]
 }
 
 export class VoteService {
   /**
    * Get single vote by ID with items
    */
-  async getVoteById(id: number): Promise<VoteWithItems | null> {
+  async getById(id: number): Promise<VoteWithItems | null> {
     const vote = await db
       .selectFrom('votes')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (!vote) {
@@ -84,52 +39,56 @@ export class VoteService {
       .selectFrom('vote_items')
       .selectAll()
       .where('vote_id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .execute()
 
     return {
       ...vote,
-      items: voteItems as unknown as VoteItem[]
+      items: voteItems
     } as VoteWithItems
   }
 
   /**
    * Get votes list with pagination and filters
    */
-  async getVotes(
-    pagination: VotePaginationParams,
-    filters?: VoteFilters
-  ): Promise<PaginatedVotesResult> {
-    const { page, pageSize } = pagination
+  async getVotes(filters: VoteFilters): Promise<PaginatedResult<VoteWithItems>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('votes').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('votes').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.is_multiple !== undefined) {
-        query = query.where('is_multiple', '=', filters.is_multiple)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('create_time', '<=', filters.endTime)
-      }
+    if (filters.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
+    }
+    if (filters.is_multiple !== undefined) {
+      query = query.where('is_multiple', '=', filters.is_multiple)
+    }
+    if (filters.status !== undefined) {
+      query = query.where('status', '=', filters.status)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [votes, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('votes')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.is_multiple !== undefined) {
+            qb = qb.where('is_multiple', '=', filters.is_multiple)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     // Get vote items for each vote
@@ -139,9 +98,9 @@ export class VoteService {
           .selectFrom('vote_items')
           .selectAll()
           .where('vote_id', '=', vote.id)
-          .where('is_delete', '=', 0)
+          .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           .execute()
-        return { ...vote, items: items as unknown as VoteItem[] }
+        return { ...vote, items }
       })
     )
 
@@ -159,29 +118,31 @@ export class VoteService {
   /**
    * Create new vote with optional items
    */
-  async createVote(data: CreateVoteData): Promise<Vote> {
+  async create(createData: CreateVote & { vote_items?: string[] }): Promise<CreateSuccess> {
+    const { vote_items, ...voteData } = createData
+    const validated = createVoteSchema.parse({ ...voteData, vote_items })
+    const { vote_items: _, ...validatedData } = validated
+
     // Validate time range
-    if (data.start_time >= data.end_time) {
-      throw new Error('Start time must be before end time')
+    if (validatedData.start_time && validatedData.end_time) {
+      if (validatedData.start_time >= validatedData.end_time) {
+        throw new Error('Start time must be before end time')
+      }
     }
 
     const now = Date.now()
-    const { vote_items, ...voteData } = data
     const newVote = {
-      ...voteData,
+      ...validatedData,
       count: 0,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
     // Start a transaction
     const result = await db.transaction().execute(async (trx) => {
       // Insert vote
-      const voteResult = await trx
-        .insertInto('votes')
-        .values(filterUndefined(newVote))
-        .executeTakeFirst()
+      const voteResult = await trx.insertInto('votes').values(newVote).executeTakeFirst()
       const voteId = Number(voteResult.insertId)
 
       // Insert vote items if provided
@@ -192,7 +153,7 @@ export class VoteService {
           status: 10,
           create_time: now,
           update_time: now,
-          is_delete: 0
+          is_delete: DELETE_STATUS.UN_DELETE
         }))
         await trx.insertInto('vote_items').values(voteItems).execute()
       }
@@ -200,39 +161,35 @@ export class VoteService {
       return voteResult
     })
 
-    return {
-      id: Number(result.insertId),
-      ...newVote
-    }
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update vote by ID with optional items
    */
-  async updateVote(id: number, data: UpdateVoteData): Promise<boolean> {
+  async update(
+    id: number,
+    updateData: UpdateVote & { vote_items?: string[] }
+  ): Promise<UpdateSuccess> {
+    const { vote_items, ...voteUpdateData } = updateData
+    const validated = updateVoteSchema.parse({ ...voteUpdateData, vote_items })
+    const { vote_items: _, ...validatedData } = validated
+
     // Validate time range if both times are provided
-    if (data.start_time && data.end_time) {
-      if (data.start_time >= data.end_time) {
+    if (validatedData.start_time && validatedData.end_time) {
+      if (validatedData.start_time >= validatedData.end_time) {
         throw new Error('Start time must be before end time')
       }
     }
-
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
-    // Remove vote_items from updateData as it's handled separately
-    const { vote_items, ...voteUpdateData } = updateData
 
     // Start a transaction
     const result = await db.transaction().execute(async (trx) => {
       // Update vote
       const voteResult = await trx
         .updateTable('votes')
-        .set(filterUndefined(voteUpdateData))
+        .set({ ...validatedData, update_time: Date.now() })
         .where('id', '=', id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (voteResult.numUpdatedRows === 0n) {
@@ -245,11 +202,11 @@ export class VoteService {
         await trx
           .updateTable('vote_items')
           .set({
-            is_delete: 10,
+            is_delete: DELETE_STATUS.DELETE,
             update_time: Date.now()
           })
           .where('vote_id', '=', id)
-          .where('is_delete', '=', 0)
+          .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           .execute()
 
         // Insert new vote items
@@ -260,7 +217,7 @@ export class VoteService {
             status: 10,
             create_time: Date.now(),
             update_time: Date.now(),
-            is_delete: 0
+            is_delete: DELETE_STATUS.UN_DELETE
           }))
           await trx.insertInto('vote_items').values(voteItems).execute()
         }
@@ -269,24 +226,24 @@ export class VoteService {
       return voteResult
     })
 
-    return result.numUpdatedRows > 0n
+    return { id }
   }
 
   /**
    * Delete vote (logical delete) with associated items
    */
-  async deleteVote(id: number): Promise<boolean> {
+  async delete(id: number): Promise<boolean> {
     // Start a transaction
     const result = await db.transaction().execute(async (trx) => {
       // Delete vote
       const voteResult = await trx
         .updateTable('votes')
         .set({
-          is_delete: 10,
+          is_delete: DELETE_STATUS.DELETE,
           update_time: Date.now()
         })
         .where('id', '=', id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (voteResult.numUpdatedRows === 0n) {
@@ -297,11 +254,11 @@ export class VoteService {
       await trx
         .updateTable('vote_items')
         .set({
-          is_delete: 10,
+          is_delete: DELETE_STATUS.DELETE,
           update_time: Date.now()
         })
         .where('vote_id', '=', id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .execute()
 
       return voteResult
@@ -313,61 +270,66 @@ export class VoteService {
   /**
    * Get votes by status
    */
-  async getVotesByStatus(status: number): Promise<Vote[]> {
-    const result = await db
+  async getVotesByStatus(status: number): Promise<VoteEntity[]> {
+    const votes = await db
       .selectFrom('votes')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Vote[]
+    return votes
   }
 
   /**
    * Get active votes (current time is between start_time and end_time)
    */
-  async getActiveVotes(): Promise<Vote[]> {
+  async getActiveVotes(): Promise<VoteEntity[]> {
     const now = Date.now()
-    const result = await db
+    const votes = await db
       .selectFrom('votes')
       .selectAll()
       .where('status', '=', 10)
-      .where('is_delete', '=', 0)
       .where('start_time', '<=', now)
       .where('end_time', '>=', now)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Vote[]
+    return votes
   }
 
   /**
    * Search votes by title
    */
-  async searchVotes(searchTerm: string): Promise<Vote[]> {
-    const result = await db
+  async searchVotes(searchTerm: string): Promise<VoteEntity[]> {
+    const votes = await db
       .selectFrom('votes')
       .selectAll()
-      .where('is_delete', '=', 0)
       .where('title', 'like', `%${searchTerm}%`)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Vote[]
+    return votes
   }
 
   /**
    * Get votes count by status
    */
   async getVotesCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
+    const results = await db
       .selectFrom('votes')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['status', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
+
+    return results.map((r) => ({
+      status: r.status,
+      count: Number(r.count)
+    }))
   }
 
   /**
@@ -378,7 +340,7 @@ export class VoteService {
       .selectFrom('votes')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -401,13 +363,19 @@ export class VoteService {
   }> {
     const stats = await db
       .selectFrom('votes')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted'),
-        sql<number>`sum(case when is_multiple = 10 then 1 else 0 end)`.as('multiple'),
-        sql<number>`sum(case when is_multiple = -10 then 1 else 0 end)`.as('single')
+      .select((eb) => [
+        eb.fn.count('id').as('total'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 10).then(1).else(0).end()).as('active'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 0).then(1).else(0).end()).as('inactive'),
+        eb.fn
+          .sum<number>(eb.case().when('is_delete', '=', DELETE_STATUS.DELETE).then(1).else(0).end())
+          .as('deleted'),
+        eb.fn
+          .sum<number>(eb.case().when('is_multiple', '=', 10).then(1).else(0).end())
+          .as('multiple'),
+        eb.fn
+          .sum<number>(eb.case().when('is_multiple', '=', -10).then(1).else(0).end())
+          .as('single')
       ])
       .executeTakeFirst()
 

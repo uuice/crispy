@@ -1,142 +1,89 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
-import { sql } from 'kysely'
-
-// Validation schemas
-const createAdSchema = z.object({
-  title: z.string().min(1),
-  content: z.string().optional(),
-  image_url: z.string().optional(),
-  link_url: z.string().optional(),
-  position: z.string().optional(),
-  start_time: z.number().optional(),
-  end_time: z.number().optional(),
-  status: z.number().default(10),
-  sort: z.number().default(0)
-})
-
-const updateAdSchema = createAdSchema.partial()
-
-// Types
-export interface CreateAdData {
-  title: string
-  content?: string
-  image_url?: string
-  link_url?: string
-  position?: string
-  start_time?: number
-  end_time?: number
-  status?: number
-  sort?: number
-}
-
-export type UpdateAdData = Partial<CreateAdData>
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface FilterOptions {
-  title?: string
-  alias?: string
-  content?: string
-  type_id?: number
-  status?: number
-  sort_min?: number
-  sort_max?: number
-  start_time?: number
-  end_time?: number
-  has_image?: boolean
-  has_url?: boolean
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  AdEntity,
+  AdFilters,
+  CreateAd,
+  createAdSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateAd,
+  updateAdSchema,
+  UpdateSuccess
+} from '@src/types'
 
 // Ad Service Class
 export class AdService {
   /**
    * Get a single ad by ID
+   * @param id Ad id
+   * @returns Ad or null if not found
    */
-  async getAdById(id: number): Promise<any> {
+  async getById(id: number): Promise<AdEntity | null> {
     const ad = await db
       .selectFrom('ads')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (!ad) {
-      throw new Error('Ad not found')
-    }
-
-    return ad
+    return ad || null
   }
 
   /**
    * Get ads list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of ads and pagination info
    */
-  async getAds(options: PaginationOptions, filters?: FilterOptions): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = options
+  async getAds(filters: AdFilters): Promise<PaginatedResult<AdEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, content, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('ads').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('ads').selectAll()
 
-    // Add filters if provided
-    if (filters?.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters?.alias) {
-      query = query.where('alias', 'like', `%${filters.alias}%`)
-    }
-    if (filters?.content) {
-      query = query.where('content', 'like', `%${filters.content}%`)
-    }
-    if (filters?.type_id !== undefined && !isNaN(filters.type_id)) {
-      query = query.where('type_id', '=', filters.type_id)
-    }
-    if (filters?.status !== undefined) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters?.sort_min !== undefined && !isNaN(filters.sort_min)) {
-      query = query.where('sort', '>=', filters.sort_min)
-    }
-    if (filters?.sort_max !== undefined && !isNaN(filters.sort_max)) {
-      query = query.where('sort', '<=', filters.sort_max)
-    }
-    if (filters?.start_time !== undefined) {
-      query = query.where('start_time', '>=', filters.start_time)
-    }
-    if (filters?.end_time !== undefined) {
-      query = query.where('end_time', '<=', filters.end_time)
-    }
-    if (filters?.has_image === true) {
-      query = query.where(sql.ref('image_url'), 'is not', null)
-    }
-    if (filters?.has_image === false) {
-      query = query.where(sql.ref('image_url'), 'is', null)
-    }
-    if (filters?.has_url === true) {
-      query = query.where(sql.ref('url'), 'is not', null)
-    }
-    if (filters?.has_url === false) {
-      query = query.where(sql.ref('url'), 'is', null)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by sort asc, create_time desc by default
-    query = query.orderBy(sql.ref('sort'), 'asc').orderBy('create_time', 'desc')
+    if (content) {
+      query = query.where('content', 'like', `%${content}%`)
+    }
+
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted ads
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [ads, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('ads')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (content) {
+            qb = qb.where('content', 'like', `%${content}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -152,134 +99,113 @@ export class AdService {
 
   /**
    * Create a new ad
+   * @param createData Ad data without id
+   * @returns Created ad id
    */
-  async createAd(adData: CreateAdData): Promise<any> {
-    // Validate input data
-    const validatedData = createAdSchema.parse(adData)
-
+  async create(createData: CreateAd): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createAdSchema.parse(createData)
     const now = Date.now()
     const newAd = {
       ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('ads').values(newAd).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newAd
-    }
+    const result = await db.insertInto('ads').values(newAd).executeTakeFirst()
+    if (!result) throw new Error('创建广告失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing ad
+   * @param id Ad id
+   * @param updateData Data to update
+   * @returns Updated ad id
    */
-  async updateAd(id: number, adData: UpdateAdData): Promise<any> {
-    // Validate input data
-    const validatedData = updateAdSchema.parse(adData)
-
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateAd): Promise<UpdateSuccess> {
+    const validatedData = updateAdSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('ads')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Ad not found')
-    }
-
-    return { id, ...updateData }
-  }
-
-  /**
-   * Delete an ad (logical delete)
-   */
-  async deleteAd(id: number): Promise<void> {
-    const result = await db
-      .safeUpdateTable('ads')
+      .updateTable('ads')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Ad not found')
-    }
+    if (!result) throw new Error('更新广告失败')
+    return { id }
   }
 
   /**
-   * Get ads by position
+   * Soft delete ad
+   * @param id Ad id
+   * @returns true if deleted successfully
    */
-  async getAdsByPosition(position: string): Promise<any[]> {
-    return await db
-      .selectFrom('ads')
-      .selectAll()
-      .where(sql.ref('position'), '=', position)
-      .where('is_delete', '=', 0)
-      .where('status', '=', 10)
-      .orderBy(sql.ref('sort'), 'asc')
-      .orderBy('create_time', 'desc')
-      .execute()
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('ads')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get active ads (within time range and status = 10)
+   * @returns List of active ads
    */
-  async getActiveAds(): Promise<any[]> {
+  async getActiveAds(): Promise<AdEntity[]> {
     const now = Date.now()
     return await db
       .selectFrom('ads')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where('status', '=', 10)
-      .where((eb) =>
-        eb.or([eb(sql.ref('start_time'), 'is', null), eb(sql.ref('start_time'), '<=', now)])
-      )
-      .where((eb) =>
-        eb.or([eb(sql.ref('end_time'), 'is', null), eb(sql.ref('end_time'), '>=', now)])
-      )
-      .orderBy(sql.ref('sort'), 'asc')
+      .where((eb) => eb.or([eb('start_time', 'is', null), eb('start_time', '<=', now)]))
+      .where((eb) => eb.or([eb('end_time', 'is', null), eb('end_time', '>=', now)]))
+      .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
   }
 
   /**
    * Check if ad exists by title
+   * @param title Ad title
+   * @returns true if exists
    */
   async adExistsByTitle(title: string): Promise<boolean> {
     const ad = await db
       .selectFrom('ads')
-      .select(['id'])
-      .where(sql.ref('title'), '=', title)
-      .where('is_delete', '=', 0)
+      .select('id')
+      .where('title', '=', title)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
     return !!ad
   }
 
   /**
    * Get ads with their items
+   * @param adId Ad id
+   * @returns Ad with items
    */
-  async getAdWithItems(adId: number): Promise<any> {
-    const ad = await this.getAdById(adId)
+  async getAdWithItems(adId: number) {
+    const ad = await this.getById(adId)
+    if (!ad) return null
 
     const adItems = await db
       .selectFrom('ad_items')
       .selectAll()
       .where('ad_id', '=', adId)
-      .where('is_delete', '=', 0)
-      .orderBy(sql.ref('sort'), 'asc')
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .orderBy('sort', 'asc')
       .execute()
 
     return {
@@ -289,8 +215,4 @@ export class AdService {
   }
 }
 
-// Export service instance
 export const adService = new AdService()
-
-// Export schemas for validation
-export { createAdSchema, updateAdSchema }

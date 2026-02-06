@@ -1,127 +1,103 @@
 import { db } from '@src/libs/db'
 import { sql } from 'kysely'
 import { DELETE_STATUS } from '../config/const'
-
-export interface CreateCategoryData {
-  title: string
-  alias: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-}
-
-export type UpdateCategoryData = Partial<CreateCategoryData>
-
-export interface CategoryFilters {
-  title?: string
-  alias?: string
-  des?: string
-  parent_id?: number
-  status?: number
-  sort_min?: number
-  sort_max?: number
-  start_time?: number
-  end_time?: number
-  has_children?: boolean
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface CategoryNode {
-  id: number
-  title: string
-  alias?: string
-  des: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time: number
-  update_time: number
-  children: CategoryNode[]
-}
+import {
+  CategoryEntity,
+  CategoryEntityNested,
+  CategoryFilters,
+  CreateCategory,
+  createCategorySchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateCategory,
+  updateCategorySchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class CategoryService {
   /**
    * Get a single category by ID
+   * @param id Category id
+   * @returns Category or null if not found
    */
-  async getCategoryById(id: number) {
-    return await db
+  async getCategoryById(id: number): Promise<CategoryEntity | null> {
+    const category = await db
       .selectFrom('categories')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return category || null
   }
 
   /**
    * Get categories with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of categories and pagination info
    */
-  async getCategories(
-    filters: CategoryFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getCategories(filters: CategoryFilters): Promise<PaginatedResult<CategoryEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('categories').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('categories').selectAll()
 
-    // Add filters if provided
+    // Apply filters
     if (filters.title) {
-      query = query.where(sql.ref('title'), 'like', `%${filters.title}%`)
-    }
-    if (filters.alias) {
-      query = query.where(sql.ref('alias'), 'like', `%${filters.alias}%`)
-    }
-    if (filters.des) {
-      query = query.where(sql.ref('des'), 'like', `%${filters.des}%`)
-    }
-    if (filters.parent_id !== undefined && !isNaN(filters.parent_id)) {
-      query = query.where(sql.ref('parent_id'), '=', filters.parent_id)
-    }
-    if (filters.status !== undefined && !isNaN(filters.status)) {
-      query = query.where(sql.ref('status'), '=', filters.status)
-    }
-    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-      query = query.where(sql.ref('sort'), '>=', filters.sort_min)
-    }
-    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-      query = query.where(sql.ref('sort'), '<=', filters.sort_max)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where(sql.ref('create_time'), '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where(sql.ref('create_time'), '<=', filters.end_time)
-    }
-    if (filters.has_children === true) {
-      // This would require a subquery to check if category has children
-      // For now, we'll implement this in a separate method if needed
-    }
-    if (filters.has_children === false) {
-      // This would require a subquery to check if category has no children
-      // For now, we'll implement this in a separate method if needed
+      query = query.where('title', 'like', `%${filters.title}%`)
     }
 
-    // Order by sort and create_time
-    query = query.orderBy('sort', 'asc').orderBy('create_time', 'desc')
+    if (filters.alias) {
+      query = query.where('alias', 'like', `%${filters.alias}%`)
+    }
+
+    if (filters.des) {
+      query = query.where('des', 'like', `%${filters.des}%`)
+    }
+
+    if (filters.parent_id !== undefined) {
+      query = query.where('parent_id', '=', filters.parent_id)
+    }
+
+    if (filters.status !== undefined) {
+      query = query.where('status', '=', filters.status)
+    }
+
+    // Default to only non-deleted categories
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [categories, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('categories')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.alias) {
+            qb = qb.where('alias', 'like', `%${filters.alias}%`)
+          }
+          if (filters.des) {
+            qb = qb.where('des', 'like', `%${filters.des}%`)
+          }
+          if (filters.parent_id !== undefined) {
+            qb = qb.where('parent_id', '=', filters.parent_id)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -138,7 +114,7 @@ export class CategoryService {
   /**
    * Recursively builds a subtree for a given parent ID.
    */
-  private async buildSubTree(parentId: number): Promise<CategoryNode[]> {
+  private async buildSubTree(parentId: number): Promise<CategoryEntityNested[]> {
     const children = await db
       .selectFrom('categories')
       .selectAll()
@@ -168,7 +144,7 @@ export class CategoryService {
   async getCategoryTree(options?: {
     rootId?: number
     rootAlias?: string
-  }): Promise<CategoryNode[]> {
+  }): Promise<CategoryEntityNested[]> {
     console.log('options', options)
     // If a root is specified, build the subtree from there
     if (options?.rootId || options?.rootAlias) {
@@ -200,14 +176,17 @@ export class CategoryService {
 
   /**
    * Verify that a parent category exists
+   * @param parentId Parent category id
+   * @returns true if exists
    */
-  async verifyParentExists(parentId: number) {
-    return await db
+  async verifyParentExists(parentId: number): Promise<boolean> {
+    const parent = await db
       .selectFrom('categories')
       .select('id')
       .where('id', '=', parentId)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return !!parent
   }
 
   /**
@@ -237,23 +216,30 @@ export class CategoryService {
 
   /**
    * Check if category has children
+   * @param categoryId Category id
+   * @returns true if has children
    */
-  async hasChildren(categoryId: number) {
-    return await db
+  async hasChildren(categoryId: number): Promise<boolean> {
+    const child = await db
       .selectFrom('categories')
       .select('id')
       .where('parent_id', '=', categoryId)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return !!child
   }
 
   /**
    * Create a new category
+   * @param createData Category data without id
+   * @returns Created category id
    */
-  async createCategory(data: CreateCategoryData) {
+  async create(createData: CreateCategory): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createCategorySchema.parse(createData)
     // If parent_id is provided, verify that the parent exists
-    if (data.parent_id) {
-      const parent = await this.verifyParentExists(data.parent_id)
+    if (validatedData.parent_id) {
+      const parent = await this.verifyParentExists(validatedData.parent_id)
       if (!parent) {
         throw new Error('父级分类不存在')
       }
@@ -261,95 +247,93 @@ export class CategoryService {
 
     const now = Date.now()
     const newCategory = {
-      title: data.title,
-      alias: data.alias || '',
-      des: data.des || '',
-      parent_id: data.parent_id || 0,
-      sort: data.sort || 0,
-      status: data.status || 10,
+      title: validatedData.title,
+      alias: validatedData.alias,
+      des: validatedData.des || '',
+      parent_id: validatedData.parent_id || 0,
+      sort: validatedData.sort || 0,
+      status: validatedData.status || 10,
       create_time: now,
       update_time: now,
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('categories').values(newCategory).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newCategory
-    }
+    const result = await db.insertInto('categories').values(newCategory).executeTakeFirst()
+    if (!result) throw new Error('创建分类失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update a category
+   * @param id Category id
+   * @param updateData Data to update
+   * @returns Updated category id
    */
-  async updateCategory(id: number, data: UpdateCategoryData) {
+  async update(id: number, updateData: UpdateCategory): Promise<UpdateSuccess> {
+    const validatedData = updateCategorySchema.parse(updateData)
     // If parent_id is being updated, verify that the new parent exists and is not a descendant
-    if (data.parent_id) {
-      if (data.parent_id === id) {
+    if (validatedData.parent_id) {
+      if (validatedData.parent_id === id) {
         throw new Error('分类不能是自己的父级')
       }
 
-      const parent = await this.verifyParentExists(data.parent_id)
+      const parent = await this.verifyParentExists(validatedData.parent_id)
       if (!parent) {
         throw new Error('父级分类不存在')
       }
 
       // Check for circular reference
-      const hasCircularReference = await this.checkCircularReference(id, data.parent_id)
+      const hasCircularReference = await this.checkCircularReference(id, validatedData.parent_id)
       if (hasCircularReference) {
         throw new Error('循环引用检测到')
       }
     }
 
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
     const result = await db
-      .safeUpdateTable('categories')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete a category (logical delete)
-   */
-  async deleteCategory(id: number) {
-    // Check if category has children
-    const hasChildren = await this.hasChildren(id)
-    if (hasChildren) {
-      throw new Error('Cannot delete category with children')
-    }
-
-    const result = await db
-      .safeUpdateTable('categories')
+      .updateTable('categories')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
+    if (!result) throw new Error('更新分类失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete category
+   * @param id Category id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    // Check if category has children
+    const hasChildren = await this.hasChildren(id)
+    if (hasChildren) {
+      throw new Error('无法删除有子分类的分类')
     }
+
+    const result = await db
+      .updateTable('categories')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get categories by parent ID
+   * @param parentId Parent category id
+   * @param limit Max number of results
+   * @returns List of categories
    */
-  async getCategoriesByParent(parentId: number, limit = 10) {
+  async getCategoriesByParent(parentId: number, limit = 10): Promise<CategoryEntity[]> {
     return await db
       .selectFrom('categories')
       .selectAll()
@@ -363,8 +347,10 @@ export class CategoryService {
 
   /**
    * Get root categories (parent_id = 0)
+   * @param limit Max number of results
+   * @returns List of root categories
    */
-  async getRootCategories(limit = 10) {
+  async getRootCategories(limit = 10): Promise<CategoryEntity[]> {
     return await db
       .selectFrom('categories')
       .selectAll()
@@ -378,21 +364,26 @@ export class CategoryService {
 
   /**
    * Get category by alias
+   * @param alias Category alias
+   * @returns Category or null if not found
    */
-  async getCategoryByAlias(alias: string) {
-    console.log('alias', alias)
-    return await db
+  async getCategoryByAlias(alias: string): Promise<CategoryEntity | null> {
+    const category = await db
       .selectFrom('categories')
       .selectAll()
       .where('alias', '=', alias)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return category || null
   }
 
   /**
    * Check if category title already exists
+   * @param title Category title
+   * @param excludeId Category id to exclude from check
+   * @returns true if exists
    */
-  async checkTitleExists(title: string, excludeId?: number) {
+  async checkTitleExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('categories')
       .select('id')
@@ -403,13 +394,16 @@ export class CategoryService {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const category = await query.executeTakeFirst()
+    return !!category
   }
 
   /**
    * Get category path (breadcrumb)
+   * @param categoryId Category id
+   * @returns List of categories from root to current
    */
-  async getCategoryPath(categoryId: number): Promise<any[]> {
+  async getCategoryPath(categoryId: number): Promise<CategoryEntity[]> {
     const path: any = []
     let currentId = categoryId
 
@@ -428,6 +422,8 @@ export class CategoryService {
 
   /**
    * Get categories with article count
+   * @param parentAlias Parent category alias
+   * @returns List of categories with article count
    */
   async getCategoriesWithArticleCount(parentAlias?: string): Promise<any[]> {
     let query = db
@@ -475,9 +471,16 @@ export class CategoryService {
     return await query.orderBy('c.sort', 'asc').orderBy('c.create_time', 'desc').execute()
   }
 
-  // 获取所有分类
-  async getAllCategories(): Promise<any[]> {
-    return await db.selectFrom('categories').selectAll().where('is_delete', '=', 0).execute()
+  /**
+   * Get all categories
+   * @returns List of all categories
+   */
+  async getAllCategories(): Promise<CategoryEntity[]> {
+    return await db
+      .selectFrom('categories')
+      .selectAll()
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .execute()
   }
 }
 

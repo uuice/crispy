@@ -1,122 +1,111 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
-
-// Validation schemas
-const createAdItemSchema = z.object({
-  ad_id: z.number(),
-  title: z.string().min(1),
-  content: z.string().optional(),
-  image_url: z.string().optional(),
-  link_url: z.string().optional(),
-  sort: z.number().default(0),
-  status: z.number().default(10)
-})
-
-const updateAdItemSchema = createAdItemSchema.partial()
-
-// Types
-export interface CreateAdItemData {
-  ad_id: number
-  title: string
-  content?: string
-  image_url?: string
-  link_url?: string
-  sort?: number
-  status?: number
-}
-
-export type UpdateAdItemData = Partial<CreateAdItemData>
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface FilterOptions {
-  ad_id?: number
-  title?: string
-  content?: string
-  image_url?: string
-  url?: string
-  method?: string
-  sort?: number
-  status?: number
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  AdItemEntity,
+  AdItemFilters,
+  CreateAdItem,
+  createAdItemSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateAdItem,
+  updateAdItemSchema,
+  UpdateSuccess
+} from '@src/types'
 
 // Ad Item Service Class
 export class AdItemService {
   /**
    * Get a single ad item by ID
+   * @param id Ad item id
+   * @returns Ad item or null if not found
    */
-  async getAdItemById(id: number): Promise<any> {
+  async getAdItemById(id: number): Promise<AdItemEntity | null> {
     const adItem = await db
       .selectFrom('ad_items')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (!adItem) {
-      throw new Error('Ad item not found')
-    }
-
-    return adItem
+    return adItem || null
   }
 
   /**
    * Get ad items list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of ad items and pagination info
    */
-  async getAdItems(
-    options: PaginationOptions,
-    filters?: FilterOptions
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = options
+  async getAdItems(filters: AdItemFilters): Promise<PaginatedResult<AdItemEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { ad_id, title, content, image_url, url, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('ad_items').selectAll().where('is_delete', '=', 0)
+    // Build query conditions
+    let query = db.selectFrom('ad_items').selectAll()
 
-    // Add ad_id filter if provided
-    if (filters?.ad_id !== undefined) {
-      query = query.where('ad_id', '=', filters.ad_id)
+    // Apply filters
+    if (ad_id !== undefined) {
+      query = query.where('ad_id', '=', ad_id)
     }
 
-    if (filters?.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    if (filters?.content) {
-      query = query.where('content', 'like', `%${filters.content}%`)
+    if (content) {
+      query = query.where('content', 'like', `%${content}%`)
     }
 
-    if (filters?.image_url) {
-      query = query.where('image_url', 'like', `%${filters.image_url}%`)
+    if (image_url) {
+      query = query.where('image_url', 'like', `%${image_url}%`)
     }
 
-    if (filters?.url) {
-      query = query.where('url', 'like', `%${filters.url}%`)
+    if (url) {
+      query = query.where('url', 'like', `%${url}%`)
     }
 
-    if (filters?.method) {
-      query = query.where('method', '=', filters.method)
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
     }
 
-    if (filters?.status !== undefined) {
-      query = query.where('status', '=', filters.status)
-    }
+    // Default to only non-deleted items
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [adItems, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('ad_items')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (ad_id !== undefined) {
+            qb = qb.where('ad_id', '=', ad_id)
+          }
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (content) {
+            qb = qb.where('content', 'like', `%${content}%`)
+          }
+          if (image_url) {
+            qb = qb.where('image_url', 'like', `%${image_url}%`)
+          }
+          if (url) {
+            qb = qb.where('url', 'like', `%${url}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -132,21 +121,23 @@ export class AdItemService {
 
   /**
    * Create a new ad item
+   * @param createData Ad item data without id
+   * @returns Created ad item id
    */
-  async createAdItem(adItemData: CreateAdItemData): Promise<any> {
-    // Validate input data
-    const validatedData = createAdItemSchema.parse(adItemData)
+  async create(createData: CreateAdItem): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createAdItemSchema.parse(createData)
 
     // Verify that the ad exists
     const ad = await db
       .selectFrom('ads')
       .select('id')
       .where('id', '=', validatedData.ad_id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (!ad) {
-      throw new Error('Ad not found')
+      throw new Error('广告不存在')
     }
 
     const now = Date.now()
@@ -154,23 +145,22 @@ export class AdItemService {
       ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('ad_items').values(newAdItem).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newAdItem
-    }
+    const result = await db.insertInto('ad_items').values(newAdItem).executeTakeFirst()
+    if (!result) throw new Error('创建广告项失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing ad item
+   * @param id Ad item id
+   * @param updateData Data to update
+   * @returns Updated ad item id
    */
-  async updateAdItem(id: number, adItemData: UpdateAdItemData): Promise<any> {
-    // Validate input data
-    const validatedData = updateAdItemSchema.parse(adItemData)
+  async update(id: number, updateData: UpdateAdItem): Promise<UpdateSuccess> {
+    const validatedData = updateAdItemSchema.parse(updateData)
 
     // If ad_id is being updated, verify that the new ad exists
     if (validatedData.ad_id) {
@@ -178,61 +168,57 @@ export class AdItemService {
         .selectFrom('ads')
         .select('id')
         .where('id', '=', validatedData.ad_id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (!ad) {
-        throw new Error('Ad not found')
+        throw new Error('广告不存在')
       }
     }
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
     const result = await db
-      .safeUpdateTable('ad_items')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Ad item not found')
-    }
-
-    return { id, ...updateData }
-  }
-
-  /**
-   * Delete an ad item (logical delete)
-   */
-  async deleteAdItem(id: number): Promise<void> {
-    const result = await db
-      .safeUpdateTable('ad_items')
+      .updateTable('ad_items')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Ad item not found')
-    }
+    if (!result) throw new Error('更新广告项失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete ad item
+   * @param id Ad item id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('ad_items')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get ad items by ad_id
+   * @param adId Ad id
+   * @returns List of ad items
    */
-  async getAdItemsByAdId(adId: number): Promise<any[]> {
+  async getAdItemsByAdId(adId: number): Promise<AdItemEntity[]> {
     return await db
       .selectFrom('ad_items')
       .selectAll()
       .where('ad_id', '=', adId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where('status', '=', 10)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
@@ -241,22 +227,20 @@ export class AdItemService {
 
   /**
    * Check if ad item exists by title within the same ad
+   * @param title Ad item title
+   * @param adId Ad id
+   * @returns true if exists
    */
   async adItemExistsByTitle(title: string, adId: number): Promise<boolean> {
     const adItem = await db
       .selectFrom('ad_items')
-      .select(['id'])
+      .select('id')
       .where('title', '=', title)
       .where('ad_id', '=', adId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
     return !!adItem
   }
 }
 
-// Export service instance
 export const adItemService = new AdItemService()
-
-// Export schemas for validation
-export { createAdItemSchema, updateAdItemSchema }

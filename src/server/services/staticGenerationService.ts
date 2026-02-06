@@ -247,10 +247,12 @@ export class StaticGenerationService {
         console.error('❌ Daily lib category not found')
         return
       }
-      const dailyLibs = await articleService.getArticles(
-        { status: 10, type_id: category.id }, // Assuming type_id 1 is for daily-libs
-        { page: 1, pageSize: 10000 }
-      )
+      const dailyLibs = await articleService.getArticles({
+        page: 1,
+        pageSize: 10000,
+        status: 10,
+        type_id: category.id
+      })
       console.log(
         `📖 Generating ${dailyLibs.dataList.length} daily lib detail pages with concurrency...`
       )
@@ -413,10 +415,7 @@ export class StaticGenerationService {
    */
   private async generateArticlePages(result: StaticGenerationResult) {
     try {
-      const articles = await articleService.getArticles(
-        { status: 10 },
-        { page: 1, pageSize: 10000 }
-      )
+      const articles = await articleService.getArticles({ status: 10, page: 1, pageSize: 10000 })
       console.log(`📝 Generating ${articles.dataList.length} article pages with concurrency...`)
 
       await this.processWithConcurrency(articles.dataList, async (article) => {
@@ -446,7 +445,7 @@ export class StaticGenerationService {
    */
   private async generateCategoryPages(result: StaticGenerationResult) {
     try {
-      const categories = await categoryService.getCategories({}, { page: 1, pageSize: 10000 })
+      const categories = await categoryService.getCategories({ page: 1, pageSize: 10000 })
       console.log(`📂 Generating ${categories.dataList.length} category pages with concurrency...`)
 
       // Track unique categories to avoid duplicates
@@ -527,7 +526,7 @@ export class StaticGenerationService {
    */
   private async generateTagPages(result: StaticGenerationResult) {
     try {
-      const tags = await tagService.getTags({ page: 1, pageSize: 10000 }, {})
+      const tags = await tagService.getTags({ page: 1, pageSize: 10000 })
       console.log(`🏷️ Generating ${tags.dataList.length} tag pages with concurrency...`)
 
       // Track unique tags to avoid duplicates
@@ -602,7 +601,7 @@ export class StaticGenerationService {
    */
   private async generateCustomPages(result: StaticGenerationResult) {
     try {
-      const pages = await pageService.getPages({ page: 1, pageSize: 10000 }, {})
+      const pages = await pageService.getPages({ page: 1, pageSize: 10000 })
       console.log(`📄 Generating ${pages.dataList.length} custom pages with concurrency...`)
 
       await this.processWithConcurrency(pages.dataList, async (page: any) => {

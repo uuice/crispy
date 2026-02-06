@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import adminRoutes from './admin/routes'
-import contentRoutes from './content/routes'
+import adminRoutes from './admin-routes'
+import contentRoutes from './content-routes'
 
 // Create API router
 const router = Router()

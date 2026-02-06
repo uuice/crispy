@@ -1,91 +1,47 @@
 import { db } from '@src/libs/db'
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateLink,
+  createLinkSchema,
+  CreateSuccess,
+  LinkEntity,
+  LinkFilters,
+  LinkWithType,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateLink,
+  updateLinkSchema,
+  UpdateSuccess
+} from '@src/types'
 import { sql } from 'kysely'
-
-// Data interfaces
-export interface CreateLinkData {
-  site_name: string
-  des: string
-  url: string
-  logo?: string
-  method?: string
-  type_id: number
-  sort: number
-  status: number
-}
-
-export type UpdateLinkData = Partial<CreateLinkData>
-
-export interface LinkFilters {
-  site_name?: string
-  url?: string
-  des?: string
-  logo?: string
-  method?: string
-  status?: number
-  type_id?: number
-  sort_min?: number
-  sort_max?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface LinkPaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Link {
-  id: number
-  site_name: string
-  des: string
-  url: string
-  logo?: string
-  color?: string
-  method?: string
-  type_id: number
-  type_name?: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedLinksResult {
-  dataList: Link[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
 
 export class LinkService {
   /**
    * Get single link by ID
+   * @param id Link id
+   * @returns Link with type name or null if not found
    */
-  async getLinkById(id: number): Promise<Link | null> {
-    const result = await db
+  async getById(id: number): Promise<LinkWithType | null> {
+    const link = await db
       .selectFrom('links')
       .leftJoin('categories', 'links.type_id', 'categories.id')
       .selectAll('links')
       .select('categories.title as type_name')
       .where('links.id', '=', id)
-      .where('links.is_delete', '=', 0)
+      .where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return result as Link | null
+    return (link as LinkWithType) || null
   }
 
   /**
    * Get links list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of links with type names and pagination info
    */
-  async getLinks(
-    pagination: LinkPaginationParams,
-    filters?: LinkFilters
-  ): Promise<PaginatedLinksResult> {
-    const { page, pageSize } = pagination
+  async getLinks(filters: LinkFilters): Promise<PaginatedResult<LinkWithType>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { site_name, url, des, logo, method, status, type_id } = filters
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -93,55 +49,75 @@ export class LinkService {
       .leftJoin('categories', 'links.type_id', 'categories.id')
       .selectAll('links')
       .select('categories.title as type_name')
-      .where('links.is_delete', '=', 0)
 
     // Apply filters
-    if (filters) {
-      if (filters.site_name) {
-        query = query.where('links.site_name', 'like', `%${filters.site_name}%`)
-      }
-      if (filters.url) {
-        query = query.where('links.url', 'like', `%${filters.url}%`)
-      }
-      if (filters.des) {
-        query = query.where('links.des', 'like', `%${filters.des}%`)
-      }
-      if (filters.logo) {
-        query = query.where('links.logo', 'like', `%${filters.logo}%`)
-      }
-      if (filters.method) {
-        query = query.where('links.method', '=', filters.method)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('links.status', '=', filters.status)
-      }
-      if (filters.type_id !== undefined) {
-        query = query.where('links.type_id', '=', filters.type_id)
-      }
-      if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-        query = query.where('links.sort', '>=', filters.sort_min)
-      }
-      if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-        query = query.where('links.sort', '<=', filters.sort_max)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('links.create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('links.create_time', '<=', filters.endTime)
-      }
+    if (site_name) {
+      query = query.where('links.site_name', 'like', `%${site_name}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('links.create_time', 'desc')
+    if (url) {
+      query = query.where('links.url', 'like', `%${url}%`)
+    }
+
+    if (des) {
+      query = query.where('links.des', 'like', `%${des}%`)
+    }
+
+    if (logo) {
+      query = query.where('links.logo', 'like', `%${logo}%`)
+    }
+
+    if (method) {
+      query = query.where('links.method', '=', method)
+    }
+
+    if (status !== undefined) {
+      query = query.where('links.status', '=', status)
+    }
+
+    if (type_id !== undefined) {
+      query = query.where('links.type_id', '=', type_id)
+    }
+
+    // Default to only non-deleted links
+    query = query.where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [links, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('links.id').as('count')]).executeTakeFirst()
+      query.orderBy('links.create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('links')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (site_name) {
+            qb = qb.where('site_name', 'like', `%${site_name}%`)
+          }
+          if (url) {
+            qb = qb.where('url', 'like', `%${url}%`)
+          }
+          if (des) {
+            qb = qb.where('des', 'like', `%${des}%`)
+          }
+          if (logo) {
+            qb = qb.where('logo', 'like', `%${logo}%`)
+          }
+          if (method) {
+            qb = qb.where('method', '=', method)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          if (type_id !== undefined) {
+            qb = qb.where('type_id', '=', type_id)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: links as Link[],
+      dataList: links as LinkWithType[],
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -153,106 +129,113 @@ export class LinkService {
 
   /**
    * Create new link
+   * @param createData Link data without id
+   * @returns Created link id
    */
-  async createLink(data: CreateLinkData): Promise<Link> {
+  async create(createData: CreateLink): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createLinkSchema.parse(createData)
     const now = Date.now()
     const newLink = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('links').values(newLink).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newLink
-    }
+    const result = await db.insertInto('links').values(newLink).executeTakeFirst()
+    if (!result) throw new Error('创建链接失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update link by ID
+   * @param id Link id
+   * @param updateData Data to update
+   * @returns Updated link id
    */
-  async updateLink(id: number, data: UpdateLinkData): Promise<boolean> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateLink): Promise<UpdateSuccess> {
+    const validatedData = updateLinkSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('links')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return result.numUpdatedRows > 0n
-  }
-
-  /**
-   * Delete link (logical delete)
-   */
-  async deleteLink(id: number): Promise<boolean> {
-    const result = await db
-      .safeUpdateTable('links')
+      .updateTable('links')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新链接失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete link
+   * @param id Link id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('links')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get links by status
+   * @param status Link status
+   * @returns List of links with type names
    */
-  async getLinksByStatus(status: number): Promise<Link[]> {
-    const result = await db
+  async getLinksByStatus(status: number): Promise<LinkWithType[]> {
+    return (await db
       .selectFrom('links')
       .leftJoin('categories', 'links.type_id', 'categories.id')
       .selectAll('links')
       .select('categories.title as type_name')
       .where('links.status', '=', status)
-      .where('links.is_delete', '=', 0)
+      .where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('links.sort', 'asc')
       .orderBy('links.create_time', 'desc')
-      .execute()
-
-    return result as Link[]
+      .execute()) as LinkWithType[]
   }
 
   /**
    * Get links by type
+   * @param typeId Type id
+   * @returns List of links with type names
    */
-  async getLinksByType(typeId: number): Promise<Link[]> {
-    const result = await db
+  async getLinksByType(typeId: number): Promise<LinkWithType[]> {
+    return (await db
       .selectFrom('links')
       .leftJoin('categories', 'links.type_id', 'categories.id')
       .selectAll('links')
       .select('categories.title as type_name')
       .where('links.type_id', '=', typeId)
-      .where('links.is_delete', '=', 0)
+      .where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('links.sort', 'asc')
       .orderBy('links.create_time', 'desc')
-      .execute()
-
-    return result as Link[]
+      .execute()) as LinkWithType[]
   }
 
   /**
    * Search links by site name or URL
+   * @param searchTerm Search term
+   * @returns List of links with type names
    */
-  async searchLinks(searchTerm: string): Promise<Link[]> {
-    const result = await db
+  async searchLinks(searchTerm: string): Promise<LinkWithType[]> {
+    return (await db
       .selectFrom('links')
       .leftJoin('categories', 'links.type_id', 'categories.id')
       .selectAll('links')
       .select('categories.title as type_name')
-      .where('links.is_delete', '=', 0)
+      .where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where((eb) =>
         eb.or([
           eb('links.site_name', 'like', `%${searchTerm}%`),
@@ -261,44 +244,47 @@ export class LinkService {
       )
       .orderBy('links.sort', 'asc')
       .orderBy('links.create_time', 'desc')
-      .execute()
-
-    return result as Link[]
+      .execute()) as LinkWithType[]
   }
 
   /**
    * Get links count by status
+   * @returns Count by status
    */
   async getLinksCountByStatus(): Promise<{ status: number; count: number }[]> {
     return await db
       .selectFrom('links')
       .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
   }
 
   /**
    * Get links count by type
+   * @returns Count by type
    */
   async getLinksCountByType(): Promise<{ type_id: number; count: number }[]> {
     return await db
       .selectFrom('links')
       .select(['type_id', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('type_id')
       .execute()
   }
 
   /**
    * Check if link exists by URL
+   * @param url Link URL
+   * @param excludeId Link id to exclude from check
+   * @returns true if exists
    */
   async checkLinkExistsByUrl(url: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('links')
       .select('id')
       .where('url', '=', url)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -307,39 +293,6 @@ export class LinkService {
     const result = await query.executeTakeFirst()
     return !!result
   }
-
-  /**
-   * Get links statistics
-   */
-  async getLinksStats(): Promise<{
-    total: number
-    active: number
-    inactive: number
-    deleted: number
-    byType: { type_id: number; count: number }[]
-  }> {
-    const [stats, byType] = await Promise.all([
-      db
-        .selectFrom('links')
-        .select([
-          sql<number>`count(*)`.as('total'),
-          sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-          sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-          sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted')
-        ])
-        .executeTakeFirst(),
-      this.getLinksCountByType()
-    ])
-
-    return {
-      total: Number(stats?.total) || 0,
-      active: Number(stats?.active) || 0,
-      inactive: Number(stats?.inactive) || 0,
-      deleted: Number(stats?.deleted) || 0,
-      byType
-    }
-  }
 }
 
-// Export singleton instance
 export const linkService = new LinkService()

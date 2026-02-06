@@ -1,110 +1,43 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
-
-// Validation schemas
-const createRuleSchema = z.object({
-  title: z.string().min(1, '规则名称不能为空'),
-  alias: z.string().min(1, '规则别名不能为空'),
-  condition: z.string().optional(),
-  des: z.string().optional(),
-  icon: z.string().optional(),
-  module_id: z.number().default(0),
-  parent_id: z.number().default(0),
-  sort: z.number().default(0),
-  status: z.number().default(10),
-  type_id: z.number().default(0)
-})
-
-const updateRuleSchema = createRuleSchema.partial()
-
-// Types
-export interface CreateRuleData {
-  title: string
-  alias: string
-  condition?: string
-  des?: string
-  icon?: string
-  module_id?: number
-  parent_id?: number
-  sort?: number
-  status?: number
-  type_id?: number
-}
-
-export type UpdateRuleData = Partial<CreateRuleData>
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface FilterOptions {
-  title?: string
-  alias?: string
-  module_id?: number
-  parent_id?: number
-  type_id?: number
-  status?: number
-}
-
-export interface RuleTreeItem {
-  id: number
-  title: string
-  alias: string
-  condition?: string
-  des?: string
-  icon?: string
-  module_id: number
-  parent_id: number
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-  children?: RuleTreeItem[]
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  RuleEntity,
+  RuleFilters,
+  CreateRule,
+  createRuleSchema,
+  CreateSuccess,
+  UpdateRule,
+  updateRuleSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  RuleTreeItem
+} from '@src/types'
 
 // Rule Service Class
 export class RuleService {
   /**
    * Get a single rule by ID
    */
-  async getRuleById(id: number): Promise<any> {
+  async getById(id: number): Promise<RuleEntity | null> {
     const rule = await db
       .selectFrom('rules')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (!rule) {
-      throw new Error('Rule not found')
-    }
-
-    return rule
+    return rule || null
   }
 
   /**
    * Get rules list with pagination and filters
    */
-  async getRules(
-    options: PaginationOptions,
-    filters: FilterOptions
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = options
+  async getRules(filters: RuleFilters): Promise<PaginatedResult<RuleEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('rules').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('rules').selectAll()
 
     // Add filters if provided
     if (filters.title) {
@@ -126,12 +59,41 @@ export class RuleService {
       query = query.where('status', '=', filters.status)
     }
 
-    // Order by sort asc, create_time desc by default
-    query = query.orderBy('sort', 'asc').orderBy('create_time', 'desc')
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [rules, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('rules')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.alias) {
+            qb = qb.where('alias', 'like', `%${filters.alias}%`)
+          }
+          if (filters.module_id !== undefined) {
+            qb = qb.where('module_id', '=', filters.module_id)
+          }
+          if (filters.parent_id !== undefined) {
+            qb = qb.where('parent_id', '=', filters.parent_id)
+          }
+          if (filters.type_id !== undefined) {
+            qb = qb.where('type_id', '=', filters.type_id)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -152,7 +114,7 @@ export class RuleService {
     const rules = await db
       .selectFrom('rules')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -190,17 +152,16 @@ export class RuleService {
   /**
    * Create a new rule
    */
-  async createRule(ruleData: CreateRuleData): Promise<any> {
-    // Validate input data
-    const validatedData = createRuleSchema.parse(ruleData)
+  async create(createData: CreateRule): Promise<CreateSuccess> {
+    const validatedData = createRuleSchema.parse(createData)
 
     // If parent_id is provided, verify that the parent rule exists
-    if (validatedData.parent_id !== 0) {
+    if (validatedData.parent_id && validatedData.parent_id !== 0) {
       const parentRule = await db
         .selectFrom('rules')
         .select('id')
         .where('id', '=', validatedData.parent_id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (!parentRule) {
@@ -213,23 +174,19 @@ export class RuleService {
       ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('rules').values(newRule).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newRule
-    }
+    const result = await db.insertInto('rules').values(newRule).executeTakeFirst()
+    if (!result) throw new Error('创建规则失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing rule
    */
-  async updateRule(id: number, ruleData: UpdateRuleData): Promise<any> {
-    // Validate input data
-    const validatedData = updateRuleSchema.parse(ruleData)
+  async update(id: number, updateData: UpdateRule): Promise<UpdateSuccess> {
+    const validatedData = updateRuleSchema.parse(updateData)
 
     // If parent_id is being updated, verify that the new parent rule exists
     if (validatedData.parent_id !== undefined && validatedData.parent_id !== 0) {
@@ -237,7 +194,7 @@ export class RuleService {
         .selectFrom('rules')
         .select('id')
         .where('id', '=', validatedData.parent_id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (!parentRule) {
@@ -250,35 +207,27 @@ export class RuleService {
       }
     }
 
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
     const result = await db
-      .safeUpdateTable('rules')
-      .set(updateData)
+      .updateTable('rules')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Rule not found')
-    }
-
-    return { id, ...updateData }
+    if (!result) throw new Error('更新规则失败')
+    return { id }
   }
 
   /**
    * Delete a rule (logical delete)
    */
-  async deleteRule(id: number): Promise<void> {
+  async delete(id: number): Promise<boolean> {
     // Check if rule has children
     const hasChildren = await db
       .selectFrom('rules')
       .select('id')
       .where('parent_id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (hasChildren) {
@@ -286,18 +235,16 @@ export class RuleService {
     }
 
     const result = await db
-      .safeUpdateTable('rules')
+      .updateTable('rules')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Rule not found')
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
@@ -308,7 +255,7 @@ export class RuleService {
       .selectFrom('rules')
       .select(['id'])
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return !!rule
@@ -322,7 +269,7 @@ export class RuleService {
       .selectFrom('rules')
       .select(['id'])
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return !!rule
@@ -331,13 +278,13 @@ export class RuleService {
   /**
    * Get rules by module_id
    */
-  async getRulesByModuleId(moduleId: number): Promise<any[]> {
+  async getRulesByModuleId(moduleId: number): Promise<RuleEntity[]> {
     return await db
       .selectFrom('rules')
       .selectAll()
       .where('module_id', '=', moduleId)
-      .where('is_delete', '=', 0)
       .where('status', '=', 10)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -346,12 +293,12 @@ export class RuleService {
   /**
    * Get child rules by parent_id
    */
-  async getChildRules(parentId: number): Promise<any[]> {
+  async getChildRules(parentId: number): Promise<RuleEntity[]> {
     return await db
       .selectFrom('rules')
       .selectAll()
       .where('parent_id', '=', parentId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -360,6 +307,3 @@ export class RuleService {
 
 // Export service instance
 export const ruleService = new RuleService()
-
-// Export schemas for validation
-export { createRuleSchema, updateRuleSchema }

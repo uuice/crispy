@@ -14,6 +14,7 @@
     "watch": "ng build --watch --configuration development",
     "serve:ssr:crispy": "bun run --expose-gc --env-file ./.env dist/crispy/server/server.mjs",
     "del:spec": "find . -type f -name '*.spec.ts' -delete",
+    "clean:empty-dirs": "bash scripts/clean-empty-dirs.sh",
     "lint": "eslint \"src/**/*.{ts,html}\"",
     "lint:fix": "eslint \"src/**/*.{ts,html}\" --fix",
     "lint:strict": "eslint \"src/**/*.{ts,html}\" --max-warnings=0",

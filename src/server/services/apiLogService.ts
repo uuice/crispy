@@ -1,99 +1,85 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
-
-export interface CreateApiLogData {
-  user_id?: number
-  method: string
-  path: string
-  request_body?: string
-  response_body?: string
-  status_code: number
-  ip?: string
-  user_agent?: string
-  duration?: number
-  status?: number
-  // Added fields
-  body?: string // POST request body
-  query?: string // Query string
-}
-
-export type UpdateApiLogData = Partial<CreateApiLogData>
-
-export interface ApiLogFilters {
-  user_id?: number
-  method?: string
-  path?: string
-  status_code?: number
-  start_time?: number
-  end_time?: number
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  ApiLogEntity,
+  ApiLogFilters,
+  CreateApiLog,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateApiLog,
+  UpdateSuccess
+} from '@src/types'
 
 export class ApiLogService {
   /**
    * Get a single API log by ID
+   * @param id Log id
+   * @returns Api log or null if not found
    */
-  async getApiLogById(id: number) {
-    return await db
+  async getById(id: number): Promise<ApiLogEntity | null> {
+    const log = await db
       .selectFrom('api_logs')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return log || null
   }
 
   /**
    * Get API logs with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of api logs and pagination info
    */
-  async getApiLogs(
-    filters: ApiLogFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getApiLogs(filters: ApiLogFilters): Promise<PaginatedResult<ApiLogEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { user_id, method, create_time_start, create_time_end } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('api_logs').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('api_logs').selectAll()
 
-    // Add filters if provided
-    if (filters.user_id !== undefined && !isNaN(filters.user_id)) {
-      query = query.where(sql.ref('user_id'), '=', filters.user_id)
+    // Apply filters
+    if (user_id !== undefined) {
+      query = query.where('user_id', '=', user_id)
     }
-    if (filters.method) {
-      query = query.where(sql.ref('method'), '=', filters.method)
-    }
-    if (filters.path) {
-      query = query.where(sql.ref('path'), 'like', `%${filters.path}%`)
-    }
-    if (filters.status_code !== undefined && !isNaN(filters.status_code)) {
-      query = query.where(sql.ref('status_code'), '=', filters.status_code)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where(sql.ref('create_time'), '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where(sql.ref('create_time'), '<=', filters.end_time)
+    if (method) {
+      query = query.where('method', '=', method)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+
+    // Default to only non-deleted logs
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [apiLogs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('api_logs')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (user_id !== undefined) {
+            qb = qb.where('user_id', '=', user_id)
+          }
+          if (method) {
+            qb = qb.where('method', '=', method)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -109,77 +95,74 @@ export class ApiLogService {
 
   /**
    * Create a new API log
+   * @param createData Log data
+   * @returns Created log id
    */
-  async createApiLog(data: CreateApiLogData) {
+  async create(createData: CreateApiLog): Promise<CreateSuccess> {
     const now = Date.now()
-    const newApiLog = {
-      ...data,
+    const newLog = {
+      ...createData,
       create_time: now,
       update_time: now,
-      is_delete: 0,
-      query: '',
-      body: ''
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('api_logs').values(newApiLog).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newApiLog
-    }
+    const result = await db.insertInto('api_logs').values(newLog).executeTakeFirst()
+    if (!result) throw new Error('创建API日志失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an API log
+   * @param id Log id
+   * @param updateData Data to update
+   * @returns Updated log id
    */
-  async updateApiLog(id: number, data: UpdateApiLogData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateApiLog): Promise<UpdateSuccess> {
     const result = await db
-      .safeUpdateTable('api_logs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete an API log (logical delete)
-   */
-  async deleteApiLog(id: number) {
-    const result = await db
-      .safeUpdateTable('api_logs')
+      .updateTable('api_logs')
       .set({
-        is_delete: 10,
+        ...updateData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新API日志失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete API log
+   * @param id Log id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('api_logs')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get API logs by user ID
+   * @param userId User id
+   * @param limit Max number of results
+   * @returns List of api logs
    */
-  async getApiLogsByUserId(userId: number, limit = 10) {
+  async getApiLogsByUserId(userId: number, limit = 10): Promise<ApiLogEntity[]> {
     return await db
       .selectFrom('api_logs')
       .selectAll()
       .where('user_id', '=', userId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
@@ -187,13 +170,16 @@ export class ApiLogService {
 
   /**
    * Get API logs by method
+   * @param method HTTP method
+   * @param limit Max number of results
+   * @returns List of api logs
    */
-  async getApiLogsByMethod(method: string, limit = 10) {
+  async getApiLogsByMethod(method: string, limit = 10): Promise<ApiLogEntity[]> {
     return await db
       .selectFrom('api_logs')
       .selectAll()
       .where('method', '=', method)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
@@ -201,13 +187,15 @@ export class ApiLogService {
 
   /**
    * Get API logs by status code
+   * @param statusCode HTTP status code
+   * @param limit Max number of results
+   * @returns List of api logs
    */
-  async getApiLogsByStatusCode(statusCode: number, limit = 10) {
+  async getApiLogsByStatusCode(statusCode: number, limit = 10): Promise<ApiLogEntity[]> {
     return await db
       .selectFrom('api_logs')
       .selectAll()
-      .where(sql.ref('status_code'), '=', statusCode)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()

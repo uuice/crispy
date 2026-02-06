@@ -75,7 +75,7 @@ class MemoryCacheService {
     if (!cache) {
       return { success: false, numUpdatedRows: 0 }
     }
-    return await cacheService.deleteCache(cache.id)
+    return await cacheService.delete(cache.id)
   }
 
   async getCacheInfo(hash: string) {

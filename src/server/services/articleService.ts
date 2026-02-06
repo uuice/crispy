@@ -5,6 +5,19 @@ import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
 import { flexsearchService } from './flexsearch-index.service'
+import {
+  ArticleEntity,
+  ArticleFilters,
+  CreateArticle,
+  createArticleSchema,
+  CreateSuccess,
+  UpdateArticle,
+  updateArticleSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  ArticleWithCategory
+} from '@src/types'
 
 // Helper function to get tagRef object from tags string
 async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
@@ -27,82 +40,11 @@ async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
   return tagRef
 }
 
-export interface CreateArticleData {
-  title: string
-  url?: string
-  sub_title?: string
-  abstract?: string
-  content: string
-  markdown_content?: string
-  is_markdown?: number
-  image?: string
-  image_list?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  remark?: string
-  user_id?: number
-  tags?: string
-  type_id?: number
-  type_ids?: string
-  status?: number // 10: draft, 20: published
-  sort?: number
-  click?: number
-  attrs?: string
-  is_review?: number
-  // Added fields
-  author_id?: number // Article author id
-  redirect_url?: string // Redirect url
-}
-
-export type UpdateArticleData = Partial<CreateArticleData>
-
-export interface ArticleFilters {
-  title?: string
-  sub_title?: string
-  abstract?: string
-  url?: string
-  type_id?: number
-  type_ids?: string
-  status?: number
-  tag?: string
-  tags?: string
-  author_id?: number
-  user_id?: number
-  is_review?: number
-  click_min?: number
-  click_max?: number
-  sort_min?: number
-  sort_max?: number
-  start_time?: number
-  end_time?: number
-  publish_start?: number
-  publish_end?: number
-  has_image?: boolean
-  has_redirect_url?: boolean
-  attrs?: string
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
 export class ArticleService {
   /**
    * Get a single article by ID
    */
-  async getArticleById(id: number) {
+  async getById(id: number): Promise<ArticleWithCategory | null> {
     const article = await db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
@@ -111,23 +53,22 @@ export class ArticleService {
       .select(['categories.title as category'])
       .select(['categories.alias as category_alias'])
       .where('articles.id', '=', id)
-      .where('articles.is_delete', '=', 0)
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (article) {
-      // Add tagRef object
       const tagRef = await getTagRef(article.tags || '')
       return {
         ...article,
         tagRef
-      }
+      } as ArticleWithCategory
     }
 
-    return article
+    return null
   }
 
   // get article by url
-  async getArticleByUrl(url: string) {
+  async getArticleByUrl(url: string): Promise<ArticleWithCategory | null> {
     const article = await db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
@@ -136,29 +77,25 @@ export class ArticleService {
       .select(['categories.alias as category_alias'])
       .select(['categories.title as category'])
       .where('articles.url', '=', url)
-      .where('articles.is_delete', '=', 0)
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (article) {
-      // Add tagRef object
       const tagRef = await getTagRef(article.tags || '')
       return {
         ...article,
         tagRef
-      }
+      } as ArticleWithCategory
     }
 
-    return article
+    return null
   }
 
   /**
    * Get articles with pagination and filters
    */
-  async getArticles(
-    filters: ArticleFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getArticles(filters: ArticleFilters): Promise<PaginatedResult<ArticleWithCategory>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -168,7 +105,6 @@ export class ArticleService {
       .select(['categories.title as type_name'])
       .select(['categories.title as category'])
       .select(['categories.alias as category_alias'])
-      .where('articles.is_delete', '=', 0)
 
     // Add filters if provided
     if (filters.title) {
@@ -183,78 +119,97 @@ export class ArticleService {
     if (filters.url) {
       query = query.where(sql.ref('articles.url'), 'like', `%${filters.url}%`)
     }
-    if (filters.type_id !== undefined && !isNaN(filters.type_id)) {
+    if (filters.type_id !== undefined) {
       query = query.where(sql.ref('articles.type_id'), '=', filters.type_id)
     }
     if (filters.type_ids) {
       query = query.where(sql.ref('articles.type_ids'), 'like', `%${filters.type_ids}%`)
     }
-    if (filters.status !== undefined && !isNaN(filters.status)) {
+    if (filters.status !== undefined) {
       query = query.where(sql.ref('articles.status'), '=', filters.status)
     }
-    if (filters.tag) {
-      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tag}%`)
-    }
-
-    if (filters.attrs) {
-      query = query.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
-    }
-
     if (filters.tags) {
       query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
     }
-    if (filters.author_id !== undefined && !isNaN(filters.author_id)) {
+    if (filters.attrs) {
+      query = query.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
+    }
+    if (filters.tags) {
+      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+    }
+    if (filters.author_id !== undefined) {
       query = query.where(sql.ref('articles.author_id'), '=', filters.author_id)
     }
-    if (filters.user_id !== undefined && !isNaN(filters.user_id)) {
+    if (filters.user_id !== undefined) {
       query = query.where(sql.ref('articles.user_id'), '=', filters.user_id)
     }
-    if (filters.is_review !== undefined && !isNaN(filters.is_review)) {
+    if (filters.is_review !== undefined) {
       query = query.where(sql.ref('articles.is_review'), '=', filters.is_review)
     }
-    if (filters.click_min !== undefined && !isNaN(filters.click_min)) {
-      query = query.where(sql.ref('articles.click'), '>=', filters.click_min)
+    if (filters.click !== undefined) {
+      query = query.where(sql.ref('articles.click'), '=', filters.click)
     }
-    if (filters.click_max !== undefined && !isNaN(filters.click_max)) {
-      query = query.where(sql.ref('articles.click'), '<=', filters.click_max)
-    }
-    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-      query = query.where(sql.ref('articles.sort'), '>=', filters.sort_min)
-    }
-    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-      query = query.where(sql.ref('articles.sort'), '<=', filters.sort_max)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where(sql.ref('articles.create_time'), '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where(sql.ref('articles.create_time'), '<=', filters.end_time)
-    }
-    if (filters.publish_start) {
-      query = query.where(sql.ref('articles.update_time'), '>=', filters.publish_start)
-    }
-    if (filters.publish_end) {
-      query = query.where(sql.ref('articles.update_time'), '<=', filters.publish_end)
-    }
-    if (filters.has_image === true) {
-      query = query.where(sql.ref('articles.image'), 'is not', null)
-    }
-    if (filters.has_image === false) {
-      query = query.where(sql.ref('articles.image'), 'is', null)
-    }
-    if (filters.has_redirect_url === true) {
-      query = query.where(sql.ref('articles.redirect_url'), 'is not', null)
-    }
-    if (filters.has_redirect_url === false) {
-      query = query.where(sql.ref('articles.redirect_url'), 'is', null)
+    if (filters.sort !== undefined) {
+      query = query.where(sql.ref('articles.sort'), '=', filters.sort)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('articles.create_time', 'desc')
+    query = query.where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [articles, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('articles.id').as('count')]).executeTakeFirst()
+      query.orderBy('articles.create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('articles')
+        .select((eb) => [eb.fn.count('articles.id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where(sql.ref('articles.title'), 'like', `%${filters.title}%`)
+          }
+          if (filters.sub_title) {
+            qb = qb.where(sql.ref('articles.sub_title'), 'like', `%${filters.sub_title}%`)
+          }
+          if (filters.abstract) {
+            qb = qb.where(sql.ref('articles.abstract'), 'like', `%${filters.abstract}%`)
+          }
+          if (filters.url) {
+            qb = qb.where(sql.ref('articles.url'), 'like', `%${filters.url}%`)
+          }
+          if (filters.type_id !== undefined) {
+            qb = qb.where(sql.ref('articles.type_id'), '=', filters.type_id)
+          }
+          if (filters.type_ids) {
+            qb = qb.where(sql.ref('articles.type_ids'), 'like', `%${filters.type_ids}%`)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where(sql.ref('articles.status'), '=', filters.status)
+          }
+          if (filters.tags) {
+            qb = qb.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+          }
+          if (filters.attrs) {
+            qb = qb.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
+          }
+          if (filters.tags) {
+            qb = qb.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+          }
+          if (filters.author_id !== undefined) {
+            qb = qb.where(sql.ref('articles.author_id'), '=', filters.author_id)
+          }
+          if (filters.user_id !== undefined) {
+            qb = qb.where(sql.ref('articles.user_id'), '=', filters.user_id)
+          }
+          if (filters.is_review !== undefined) {
+            qb = qb.where(sql.ref('articles.is_review'), '=', filters.is_review)
+          }
+          if (filters.click !== undefined) {
+            qb = qb.where(sql.ref('articles.click'), '=', filters.click)
+          }
+          if (filters.sort !== undefined) {
+            qb = qb.where(sql.ref('articles.sort'), '=', filters.sort)
+          }
+          qb = qb.where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     // Add tagRef for each article
@@ -269,7 +224,7 @@ export class ArticleService {
     )
 
     return {
-      dataList: articlesWithTagRef,
+      dataList: articlesWithTagRef as ArticleWithCategory[],
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -282,56 +237,59 @@ export class ArticleService {
   /**
    * Verify that a category exists
    */
-  async verifyCategoryExists(categoryId: number) {
-    return await db
+  async verifyCategoryExists(categoryId: number): Promise<boolean> {
+    const category = await db
       .selectFrom('categories')
       .select('id')
       .where('id', '=', categoryId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return !!category
   }
 
   /**
    * Create a new article
    */
-  async createArticle(data: CreateArticleData) {
+  async create(createData: CreateArticle): Promise<CreateSuccess> {
+    const validatedData = createArticleSchema.parse(createData)
+
     // If type_id is provided, verify that the category exists
-    if (data.type_id) {
-      const category = await this.verifyCategoryExists(data.type_id)
-      if (!category) {
+    if (validatedData.type_id) {
+      const categoryExists = await this.verifyCategoryExists(validatedData.type_id)
+      if (!categoryExists) {
         throw new Error('Category not found')
       }
     }
 
-    // 新增：处理 tags
-    if (data.tags) {
-      const tagsArr = data.tags
+    // 处理 tags
+    if (validatedData.tags) {
+      const tagsArr = validatedData.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
     }
 
-    if (!data.url && data.title) {
-      data.url = titleToUrl(data.title)
+    if (!validatedData.url && validatedData.title) {
+      validatedData.url = titleToUrl(validatedData.title)
     }
 
     const now = Date.now()
     const newArticle = {
-      ...data,
-      type_id: data.type_id,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('articles').values(newArticle).executeTakeFirst()
+    const result = await db.insertInto('articles').values(newArticle).executeTakeFirst()
+    if (!result) throw new Error('创建文章失败')
 
     const articleId = Number(result.insertId)
 
     // Sync with flexsearch index
     try {
-      const createdArticle = await this.getArticleById(articleId)
+      const createdArticle = await this.getById(articleId)
       if (createdArticle) {
         await flexsearchService.addArticle({
           ...createdArticle,
@@ -348,53 +306,46 @@ export class ArticleService {
       console.error('Failed to sync article to flexsearch index:', error)
     }
 
-    return {
-      id: articleId,
-      ...newArticle
-    }
+    return { id: articleId }
   }
 
   /**
    * Update an article
    */
-  async updateArticle(id: number, data: UpdateArticleData) {
+  async update(id: number, updateData: UpdateArticle): Promise<UpdateSuccess> {
+    const validatedData = updateArticleSchema.parse(updateData)
+
     // If type_id is being updated, verify that the new category exists
-    if (data.type_id) {
-      const category = await this.verifyCategoryExists(data.type_id)
-      if (!category) {
+    if (validatedData.type_id) {
+      const categoryExists = await this.verifyCategoryExists(validatedData.type_id)
+      if (!categoryExists) {
         throw new Error('Category not found')
       }
     }
 
-    const updateData = {
-      ...data,
-      type_id: data.type_id,
-      update_time: Date.now()
-    }
-
-    if (updateData.tags) {
-      const tagsArr = updateData.tags
+    if (validatedData.tags) {
+      const tagsArr = validatedData.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
     }
 
-    if (!updateData.url && updateData.title) {
-      updateData.url = titleToUrl(updateData.title)
+    if (!validatedData.url && validatedData.title) {
+      validatedData.url = titleToUrl(validatedData.title)
     }
 
     const result = await db
-      .safeUpdateTable('articles')
-      .set(updateData)
+      .updateTable('articles')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     // Sync with flexsearch index
     if (result.numUpdatedRows > 0) {
       try {
-        const updatedArticle = await this.getArticleById(id)
+        const updatedArticle = await this.getById(id)
         if (updatedArticle) {
           await flexsearchService.updateArticle({
             ...updatedArticle,
@@ -412,24 +363,22 @@ export class ArticleService {
       }
     }
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新文章失败')
+    return { id }
   }
 
   /**
    * Delete an article (logical delete)
    */
-  async deleteArticle(id: number) {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('articles')
+      .updateTable('articles')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     // Sync with flexsearch index
@@ -441,21 +390,18 @@ export class ArticleService {
       }
     }
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get articles by category ID
    */
-  async getArticlesByCategory(type_id: number, limit = 10) {
+  async getArticlesByCategory(type_id: number, limit = 10): Promise<ArticleWithCategory[]> {
     const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where(sql.ref('type_id'), '=', type_id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
@@ -471,18 +417,18 @@ export class ArticleService {
       })
     )
 
-    return articlesWithTagRef
+    return articlesWithTagRef as ArticleWithCategory[]
   }
 
   /**
    * Get articles by status
    */
-  async getArticlesByStatus(status: number, limit = 10) {
+  async getArticlesByStatus(status: number, limit = 10): Promise<ArticleWithCategory[]> {
     const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
@@ -498,18 +444,18 @@ export class ArticleService {
       })
     )
 
-    return articlesWithTagRef
+    return articlesWithTagRef as ArticleWithCategory[]
   }
 
   /**
    * Get articles by tag
    */
-  async getArticlesByTag(tag: string, limit = 10) {
+  async getArticlesByTag(tag: string, limit = 10): Promise<ArticleWithCategory[]> {
     const articles = await db
       .selectFrom('articles')
       .selectAll()
       .where('tags', 'like', `%${tag}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
@@ -525,7 +471,7 @@ export class ArticleService {
       })
     )
 
-    return articlesWithTagRef
+    return articlesWithTagRef as ArticleWithCategory[]
   }
 
   /**
@@ -533,43 +479,13 @@ export class ArticleService {
    */
   async incrementViewCount(id: number) {
     return await db
-      .safeUpdateTable('articles')
-      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
-        click: eb(sql.ref('click'), '+', 1),
+      .updateTable('articles')
+      .set({
+        click: sql`${sql.ref('click')} + 1`,
         update_time: Date.now()
-      }))
+      })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-  }
-
-  /**
-   * Increment like count for an article
-   */
-  async incrementLikeCount(id: number) {
-    return await db
-      .safeUpdateTable('articles')
-      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
-        like_count: eb(sql.ref('like_count'), '+', 1),
-        update_time: Date.now()
-      }))
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-  }
-
-  /**
-   * Increment comment count for an article
-   */
-  async incrementCommentCount(id: number) {
-    return await db
-      .safeUpdateTable('articles')
-      .set((eb: ExpressionBuilder<DB, 'articles'>) => ({
-        comment_count: eb(sql.ref('comment_count'), '+', 1),
-        update_time: Date.now()
-      }))
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
   }
 
@@ -578,7 +494,7 @@ export class ArticleService {
     const result = await db
       .selectFrom('articles')
       .select((eb) => [eb.fn.count('id').as('count')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
     return Number(result?.count) || 0
   }
@@ -588,7 +504,7 @@ export class ArticleService {
     const result = await db
       .selectFrom('articles')
       .select((eb) => [eb.fn.sum(sql.ref('click')).as('views')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
     return Number(result?.views) || 0
   }
@@ -599,13 +515,13 @@ export class ArticleService {
       .selectFrom('articles')
       .select((eb) => [eb.fn.count('id').as('count')])
       .where('type_id', '=', typeId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
     return Number(result?.count) || 0
   }
 
   // 获取最新文章
-  async getRecentArticles(limit: number = 5): Promise<any[]> {
+  async getRecentArticles(limit: number = 5): Promise<ArticleWithCategory[]> {
     const articles = await db
       .selectFrom('articles')
       .selectAll()
@@ -625,7 +541,7 @@ export class ArticleService {
       })
     )
 
-    return articlesWithTagRef
+    return articlesWithTagRef as ArticleWithCategory[]
   }
 
   /**
@@ -633,7 +549,10 @@ export class ArticleService {
    * @param currentId Current article id
    * @returns Previous article or null
    */
-  async getPreviousArticle(currentId: number, typeId?: number): Promise<any | null> {
+  async getPreviousArticle(
+    currentId: number,
+    typeId?: number
+  ): Promise<ArticleWithCategory | null> {
     let query = db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
@@ -642,8 +561,8 @@ export class ArticleService {
       .select(['categories.alias as category_alias'])
       .select(['categories.title as category'])
       .where('articles.id', '<', currentId)
-      .where('articles.is_delete', '=', 0)
       .where('articles.status', '=', PUBLISH_STATUS.PUBLISHED)
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (typeof typeId === 'number') {
       query = query.where('articles.type_id', '=', typeId)
@@ -652,12 +571,11 @@ export class ArticleService {
     const article = await query.orderBy('articles.id', 'desc').limit(1).executeTakeFirst()
 
     if (article) {
-      // Add tagRef object
       const tagRef = await getTagRef(article.tags || '')
       return {
         ...article,
         tagRef
-      }
+      } as ArticleWithCategory
     }
 
     return null
@@ -668,7 +586,7 @@ export class ArticleService {
    * @param currentId Current article id
    * @returns Next article or null
    */
-  async getNextArticle(currentId: number, typeId?: number): Promise<any | null> {
+  async getNextArticle(currentId: number, typeId?: number): Promise<ArticleWithCategory | null> {
     let query = db
       .selectFrom('articles')
       .leftJoin('categories', 'categories.id', 'articles.type_id')
@@ -677,8 +595,8 @@ export class ArticleService {
       .select(['categories.alias as category_alias'])
       .select(['categories.title as category'])
       .where('articles.id', '>', currentId)
-      .where('articles.is_delete', '=', 0)
       .where('articles.status', '=', PUBLISH_STATUS.PUBLISHED)
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (typeof typeId === 'number') {
       query = query.where('articles.type_id', '=', typeId)
@@ -687,12 +605,11 @@ export class ArticleService {
     const article = await query.orderBy('articles.id', 'asc').limit(1).executeTakeFirst()
 
     if (article) {
-      // Add tagRef object
       const tagRef = await getTagRef(article.tags || '')
       return {
         ...article,
         tagRef
-      }
+      } as ArticleWithCategory
     }
 
     return null

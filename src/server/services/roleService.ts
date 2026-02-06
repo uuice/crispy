@@ -1,136 +1,107 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
-import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
-
-// Data interfaces
-export interface CreateRoleData {
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-}
-
-export type UpdateRoleData = Partial<CreateRoleData>
-
-export interface RoleFilters {
-  title?: string
-  des?: string
-  module_id?: number
-  type_id?: number
-  status?: number
-  sort_min?: number
-  sort_max?: number
-  start_time?: number
-  end_time?: number
-  has_rules?: boolean
-}
-
-export interface RolePaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Role {
-  id: number
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedRolesResult {
-  dataList: Role[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  RoleEntity,
+  RoleFilters,
+  CreateRole,
+  createRoleSchema,
+  CreateSuccess,
+  UpdateRole,
+  updateRoleSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions
+} from '@src/types'
 
 export class RoleService {
   /**
    * Get single role by ID
    */
-  async getRoleById(id: number): Promise<Role | null> {
-    const result = await db
+  async getById(id: number): Promise<RoleEntity | null> {
+    const role = await db
       .selectFrom('roles')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result as unknown as Role | null
+    return role || null
   }
 
   /**
    * Get roles list with pagination and filters
    */
-  async getRoles(
-    pagination: RolePaginationParams,
-    filters?: RoleFilters
-  ): Promise<PaginatedRolesResult> {
-    const { page, pageSize } = pagination
+  async getRoles(filters: RoleFilters): Promise<PaginatedResult<RoleEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('roles').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('roles').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.des) {
-        query = query.where('des', 'like', `%${filters.des}%`)
-      }
-      if (filters.module_id) {
-        query = query.where('module_id', '=', filters.module_id)
-      }
-      if (filters.type_id) {
-        query = query.where('type_id', '=', filters.type_id)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-        query = query.where('sort', '>=', filters.sort_min)
-      }
-      if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-        query = query.where('sort', '<=', filters.sort_max)
-      }
-      if (filters.start_time !== undefined) {
-        query = query.where('create_time', '>=', filters.start_time)
-      }
-      if (filters.end_time !== undefined) {
-        query = query.where('create_time', '<=', filters.end_time)
-      }
-      if (filters.has_rules === true) {
-        query = query.where('rule_ids', '!=', '')
-      }
-      if (filters.has_rules === false) {
-        query = query.where('rule_ids', '=', '')
-      }
+    if (filters.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
+    }
+    if (filters.des) {
+      query = query.where('des', 'like', `%${filters.des}%`)
+    }
+    if (filters.module_id !== undefined) {
+      query = query.where('module_id', '=', filters.module_id)
+    }
+    if (filters.type_id !== undefined) {
+      query = query.where('type_id', '=', filters.type_id)
+    }
+    if (filters.status !== undefined) {
+      query = query.where('status', '=', filters.status)
+    }
+    if (filters.sort !== undefined) {
+      query = query.where('sort', '=', filters.sort)
+    }
+    if (filters.rule_ids) {
+      query = query.where('rule_ids', 'like', `%${filters.rule_ids}%`)
     }
 
-    // Order by sort asc, create_time desc by default
-    query = query.orderBy('sort', 'asc').orderBy('create_time', 'desc')
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [roles, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('roles')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.des) {
+            qb = qb.where('des', 'like', `%${filters.des}%`)
+          }
+          if (filters.module_id !== undefined) {
+            qb = qb.where('module_id', '=', filters.module_id)
+          }
+          if (filters.type_id !== undefined) {
+            qb = qb.where('type_id', '=', filters.type_id)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          if (filters.sort !== undefined) {
+            qb = qb.where('sort', '=', filters.sort)
+          }
+          if (filters.rule_ids) {
+            qb = qb.where('rule_ids', 'like', `%${filters.rule_ids}%`)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: roles as unknown as Role[],
+      dataList: roles,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -143,47 +114,42 @@ export class RoleService {
   /**
    * Create new role
    */
-  async createRole(data: CreateRoleData): Promise<Role> {
+  async create(createData: CreateRole): Promise<CreateSuccess> {
+    const validatedData = createRoleSchema.parse(createData)
     const now = Date.now()
     const newRole = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      status: PUBLISH_STATUS.PUBLISHED,
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('roles').values(newRole).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newRole
-    }
+    const result = await db.insertInto('roles').values(newRole).executeTakeFirst()
+    if (!result) throw new Error('创建角色失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update role by ID
    */
-  async updateRole(id: number, data: UpdateRoleData): Promise<boolean> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateRole): Promise<UpdateSuccess> {
+    const validatedData = updateRoleSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('roles')
-      .set(updateData)
+      .updateTable('roles')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新角色失败')
+    return { id }
   }
 
   /**
    * Delete role (logical delete)
+   * Checks if role is assigned to any users before deletion
    */
-  async deleteRole(id: number): Promise<{ success: boolean; message?: string }> {
+  async delete(id: number): Promise<boolean> {
     // Check if the role is currently assigned to any non-deleted users
     const userCountResult = await db
       .selectFrom('users')
@@ -192,14 +158,12 @@ export class RoleService {
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    console.log(userCountResult)
-
     if (userCountResult && Number(userCountResult.count) > 0) {
-      throw new Error('该角色正在被使用，无法删除。')
+      throw new Error('该角色正在被使用，无法删除')
     }
 
     const result = await db
-      .safeUpdateTable('roles')
+      .updateTable('roles')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
@@ -208,88 +172,88 @@ export class RoleService {
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    console.log(result)
-
-    if (result.numUpdatedRows > 0n) {
-      return { success: true, message: '角色删除成功。' }
-    }
-    return { success: false, message: '角色不存在或已被删除。' }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get roles by status
    */
-  async getRolesByStatus(status: number): Promise<Role[]> {
-    const result = await db
+  async getRolesByStatus(status: number): Promise<RoleEntity[]> {
+    const roles = await db
       .selectFrom('roles')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Role[]
+    return roles
   }
 
   /**
    * Get roles by module ID
    */
-  async getRolesByModuleId(moduleId: number): Promise<Role[]> {
-    const result = await db
+  async getRolesByModuleId(moduleId: number): Promise<RoleEntity[]> {
+    const roles = await db
       .selectFrom('roles')
       .selectAll()
       .where('module_id', '=', moduleId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Role[]
+    return roles
   }
 
   /**
    * Get roles by type ID
    */
-  async getRolesByTypeId(typeId: number): Promise<Role[]> {
-    const result = await db
+  async getRolesByTypeId(typeId: number): Promise<RoleEntity[]> {
+    const roles = await db
       .selectFrom('roles')
       .selectAll()
       .where('type_id', '=', typeId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Role[]
+    return roles
   }
 
   /**
    * Search roles by title
    */
-  async searchRoles(searchTerm: string): Promise<Role[]> {
-    const result = await db
+  async searchRoles(searchTerm: string): Promise<RoleEntity[]> {
+    const roles = await db
       .selectFrom('roles')
       .selectAll()
-      .where('is_delete', '=', 0)
       .where('title', 'like', `%${searchTerm}%`)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as unknown as Role[]
+    return roles
   }
 
   /**
    * Get roles count by status
    */
   async getRolesCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
+    const results = await db
       .selectFrom('roles')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['status', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
+
+    return results.map((r) => ({
+      status: r.status,
+      count: Number(r.count)
+    }))
   }
 
   /**
@@ -300,7 +264,7 @@ export class RoleService {
       .selectFrom('roles')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -321,11 +285,13 @@ export class RoleService {
   }> {
     const stats = await db
       .selectFrom('roles')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted')
+      .select((eb) => [
+        eb.fn.count('id').as('total'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 10).then(1).else(0).end()).as('active'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 0).then(1).else(0).end()).as('inactive'),
+        eb.fn
+          .sum<number>(eb.case().when('is_delete', '=', DELETE_STATUS.DELETE).then(1).else(0).end())
+          .as('deleted')
       ])
       .executeTakeFirst()
 

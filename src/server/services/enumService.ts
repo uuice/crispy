@@ -1,91 +1,90 @@
 import { db } from '@src/libs/db'
-
-export interface CreateEnumData {
-  title: string
-  alias?: string
-  code: string
-  value: string
-  sort?: number
-  status?: number
-}
-
-export type UpdateEnumData = Partial<CreateEnumData>
-
-export interface EnumFilters {
-  title?: string
-  alias?: string
-  code?: string
-  status?: number
-  start_time?: number
-  end_time?: number
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateEnum,
+  createEnumSchema,
+  CreateSuccess,
+  EnumEntity,
+  EnumFilters,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateEnum,
+  updateEnumSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class EnumService {
   /**
    * Get a single enum by ID
+   * @param id Enum id
+   * @returns Enum or null if not found
    */
-  async getEnumById(id: number) {
-    return await db
+  async getById(id: number): Promise<EnumEntity | null> {
+    const enumItem = await db
       .selectFrom('enums')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return enumItem || null
   }
 
   /**
    * Get enums with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of enums and pagination info
    */
-  async getEnums(
-    filters: EnumFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getEnums(filters: EnumFilters): Promise<PaginatedResult<EnumEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, alias, code, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('enums').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('enums').selectAll()
 
-    // Add filters if provided
-    if (filters.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters.alias) {
-      query = query.where('alias', 'like', `%${filters.alias}%`)
-    }
-    if (filters.code) {
-      query = query.where('code', 'like', `%${filters.code}%`)
-    }
-    if (filters.status !== undefined && !isNaN(filters.status)) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (alias) {
+      query = query.where('alias', 'like', `%${alias}%`)
+    }
+
+    if (code) {
+      query = query.where('code', 'like', `%${code}%`)
+    }
+
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted enums
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [enums, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('enums')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (alias) {
+            qb = qb.where('alias', 'like', `%${alias}%`)
+          }
+          if (code) {
+            qb = qb.where('code', 'like', `%${code}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -101,75 +100,77 @@ export class EnumService {
 
   /**
    * Create a new enum
+   * @param createData Enum data without id
+   * @returns Created enum id
    */
-  async createEnum(data: CreateEnumData) {
+  async create(createData: CreateEnum): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createEnumSchema.parse(createData)
     const now = Date.now()
     const newEnum = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('enums').values(newEnum).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newEnum
-    }
+    const result = await db.insertInto('enums').values(newEnum).executeTakeFirst()
+    if (!result) throw new Error('创建枚举失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an enum
+   * @param id Enum id
+   * @param updateData Data to update
+   * @returns Updated enum id
    */
-  async updateEnum(id: number, data: UpdateEnumData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateEnum): Promise<UpdateSuccess> {
+    const validatedData = updateEnumSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('enums')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete an enum (logical delete)
-   */
-  async deleteEnum(id: number) {
-    const result = await db
-      .safeUpdateTable('enums')
+      .updateTable('enums')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新枚举失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete enum
+   * @param id Enum id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('enums')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get enums by code
+   * @param code Enum code
+   * @param limit Max number of results
+   * @returns List of enums
    */
-  async getEnumsByCode(code: string, limit = 10) {
+  async getEnumsByCode(code: string, limit = 10): Promise<EnumEntity[]> {
     return await db
       .selectFrom('enums')
       .selectAll()
       .where('code', '=', code)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -178,13 +179,16 @@ export class EnumService {
 
   /**
    * Get enums by status
+   * @param status Enum status
+   * @param limit Max number of results
+   * @returns List of enums
    */
-  async getEnumsByStatus(status: number, limit = 10) {
+  async getEnumsByStatus(status: number, limit = 10): Promise<EnumEntity[]> {
     return await db
       .selectFrom('enums')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -193,73 +197,88 @@ export class EnumService {
 
   /**
    * Get enum by alias
+   * @param alias Enum alias
+   * @returns Enum or null if not found
    */
-  async getEnumByAlias(alias: string) {
-    return await db
+  async getEnumByAlias(alias: string): Promise<EnumEntity | null> {
+    const enumItem = await db
       .selectFrom('enums')
       .selectAll()
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return enumItem || null
   }
 
   /**
    * Check if enum title already exists
+   * @param title Enum title
+   * @param excludeId Enum id to exclude from check
+   * @returns true if exists
    */
-  async checkTitleExists(title: string, excludeId?: number) {
+  async checkTitleExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('enums')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const result = await query.executeTakeFirst()
+    return !!result
   }
 
   /**
    * Check if enum code already exists
+   * @param code Enum code
+   * @param excludeId Enum id to exclude from check
+   * @returns true if exists
    */
-  async checkCodeExists(code: string, excludeId?: number) {
+  async checkCodeExists(code: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('enums')
       .select('id')
       .where('code', '=', code)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const result = await query.executeTakeFirst()
+    return !!result
   }
 
   /**
    * Get all active enums
+   * @returns List of active enums
    */
-  async getAllActiveEnums() {
+  async getAllActiveEnums(): Promise<EnumEntity[]> {
     return await db
       .selectFrom('enums')
       .selectAll()
       .where('status', '=', 10)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
   }
 
   /**
-   * Get enums by title (search)
+   * Search enums by title
+   * @param title Search keyword
+   * @param limit Max number of results
+   * @returns List of enums
    */
-  async searchEnumsByTitle(title: string, limit = 10) {
+  async searchEnumsByTitle(title: string, limit = 10): Promise<EnumEntity[]> {
     return await db
       .selectFrom('enums')
       .selectAll()
       .where('title', 'like', `%${title}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)

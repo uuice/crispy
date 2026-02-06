@@ -1,104 +1,84 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
-
-// Data interfaces
-export interface CreateVoteItemData {
-  title: string
-  vote_id: number
-  status: number
-}
-
-export type UpdateVoteItemData = Partial<CreateVoteItemData>
-
-export interface VoteItemFilters {
-  title?: string
-  vote_id?: number
-  status?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface VoteItemPaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface VoteItem {
-  id: number
-  title: string
-  vote_id: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedVoteItemsResult {
-  dataList: VoteItem[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  VoteItemEntity,
+  VoteItemFilters,
+  CreateVoteItem,
+  createVoteItemSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateVoteItem,
+  updateVoteItemSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class VoteItemService {
   /**
    * Get single vote item by ID
+   * @param id Vote item id
+   * @returns Vote item or null if not found
    */
-  async getVoteItemById(id: number): Promise<VoteItem | null> {
-    const result = await db
+  async getById(id: number): Promise<VoteItemEntity | null> {
+    const item = await db
       .selectFrom('vote_items')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return result as unknown as VoteItem | null
+    return item || null
   }
 
   /**
    * Get vote items list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of vote items and pagination info
    */
-  async getVoteItems(
-    pagination: VoteItemPaginationParams,
-    filters?: VoteItemFilters
-  ): Promise<PaginatedVoteItemsResult> {
-    const { page, pageSize } = pagination
+  async getVoteItems(filters: VoteItemFilters): Promise<PaginatedResult<VoteItemEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, vote_id, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('vote_items').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('vote_items').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.vote_id !== undefined) {
-        query = query.where('vote_id', '=', filters.vote_id)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('create_time', '<=', filters.endTime)
-      }
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
+    }
+    if (vote_id !== undefined) {
+      query = query.where('vote_id', '=', vote_id)
+    }
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    // Default to only non-deleted items
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [voteItems, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('vote_items')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (vote_id !== undefined) {
+            qb = qb.where('vote_id', '=', vote_id)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: voteItems as unknown as VoteItem[],
+      dataList: voteItems,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -110,159 +90,171 @@ export class VoteItemService {
 
   /**
    * Create new vote item
+   * @param createData Vote item data
+   * @returns Created vote item id
    */
-  async createVoteItem(data: CreateVoteItemData): Promise<VoteItem> {
+  async create(createData: CreateVoteItem): Promise<CreateSuccess> {
+    const validatedData = createVoteItemSchema.parse(createData)
+
     // Verify that the vote exists
     const vote = await db
       .selectFrom('votes')
       .select('id')
-      .where('id', '=', data.vote_id)
-      .where('is_delete', '=', 0)
+      .where('id', '=', validatedData.vote_id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (!vote) {
-      throw new Error('Vote not found')
+      throw new Error('投票不存在')
     }
 
     const now = Date.now()
     const newVoteItem = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('vote_items').values(newVoteItem).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newVoteItem
-    }
+    const result = await db.insertInto('vote_items').values(newVoteItem).executeTakeFirst()
+    if (!result) throw new Error('创建投票项失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update vote item by ID
+   * @param id Vote item id
+   * @param updateData Data to update
+   * @returns Updated vote item id
    */
-  async updateVoteItem(id: number, data: UpdateVoteItemData): Promise<boolean> {
+  async update(id: number, updateData: UpdateVoteItem): Promise<UpdateSuccess> {
+    const validatedData = updateVoteItemSchema.parse(updateData)
+
     // If vote_id is being updated, verify that the new vote exists
-    if (data.vote_id !== undefined) {
+    if (validatedData.vote_id !== undefined) {
       const vote = await db
         .selectFrom('votes')
         .select('id')
-        .where('id', '=', data.vote_id)
-        .where('is_delete', '=', 0)
+        .where('id', '=', validatedData.vote_id)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       if (!vote) {
-        throw new Error('Vote not found')
+        throw new Error('投票不存在')
       }
     }
 
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
     const result = await db
-      .safeUpdateTable('vote_items')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return result.numUpdatedRows > 0n
-  }
-
-  /**
-   * Delete vote item (logical delete)
-   */
-  async deleteVoteItem(id: number): Promise<boolean> {
-    const result = await db
-      .safeUpdateTable('vote_items')
+      .updateTable('vote_items')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新投票项失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete vote item
+   * @param id Vote item id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('vote_items')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get vote items by vote ID
+   * @param voteId Vote id
+   * @returns List of vote items
    */
-  async getVoteItemsByVoteId(voteId: number): Promise<VoteItem[]> {
-    const result = await db
+  async getVoteItemsByVoteId(voteId: number): Promise<VoteItemEntity[]> {
+    return await db
       .selectFrom('vote_items')
       .selectAll()
       .where('vote_id', '=', voteId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as unknown as VoteItem[]
   }
 
   /**
    * Get vote items by status
+   * @param status Vote item status
+   * @returns List of vote items
    */
-  async getVoteItemsByStatus(status: number): Promise<VoteItem[]> {
-    const result = await db
+  async getVoteItemsByStatus(status: number): Promise<VoteItemEntity[]> {
+    return await db
       .selectFrom('vote_items')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as unknown as VoteItem[]
   }
 
   /**
    * Search vote items by title
+   * @param searchTerm Search keyword
+   * @returns List of vote items
    */
-  async searchVoteItems(searchTerm: string): Promise<VoteItem[]> {
-    const result = await db
+  async searchVoteItems(searchTerm: string): Promise<VoteItemEntity[]> {
+    return await db
       .selectFrom('vote_items')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where('title', 'like', `%${searchTerm}%`)
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as unknown as VoteItem[]
   }
 
   /**
    * Get vote items count by vote ID
+   * @param voteId Vote id
+   * @returns Item count
    */
   async getVoteItemsCountByVoteId(voteId: number): Promise<number> {
     const result = await db
       .selectFrom('vote_items')
       .select((eb) => [eb.fn.count('id').as('count')])
       .where('vote_id', '=', voteId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
     return Number(result?.count) || 0
   }
 
   /**
    * Get vote items count by status
+   * @returns List of status counts
    */
   async getVoteItemsCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
+    return (await db
       .selectFrom('vote_items')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['status', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
-      .execute()
+      .execute()) as { status: number; count: number }[]
   }
 
   /**
    * Check if vote item exists by title in a specific vote
+   * @param title Vote item title
+   * @param voteId Vote id
+   * @param excludeId Optional id to exclude
+   * @returns true if exists
    */
   async checkVoteItemExistsByTitle(
     title: string,
@@ -274,7 +266,7 @@ export class VoteItemService {
       .select('id')
       .where('title', '=', title)
       .where('vote_id', '=', voteId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -286,6 +278,7 @@ export class VoteItemService {
 
   /**
    * Get vote items statistics
+   * @returns Statistics data
    */
   async getVoteItemsStats(): Promise<{
     total: number
@@ -295,11 +288,13 @@ export class VoteItemService {
   }> {
     const stats = await db
       .selectFrom('vote_items')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted')
+      .select((eb) => [
+        eb.fn.count('id').as('total'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 10).then(1).else(0).end()).as('active'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 0).then(1).else(0).end()).as('inactive'),
+        eb.fn
+          .sum<number>(eb.case().when('is_delete', '=', DELETE_STATUS.DELETE).then(1).else(0).end())
+          .as('deleted')
       ])
       .executeTakeFirst()
 
@@ -312,5 +307,4 @@ export class VoteItemService {
   }
 }
 
-// Export singleton instance
 export const voteItemService = new VoteItemService()

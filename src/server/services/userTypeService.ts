@@ -1,104 +1,84 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
-
-// Validation schemas
-const createUserTypeSchema = z.object({
-  type_name: z.string().min(1),
-  alias: z.string().min(1),
-  remark: z.string().optional(),
-  status: z.number().default(10)
-})
-
-const updateUserTypeSchema = createUserTypeSchema.partial()
-
-// Types
-export interface CreateUserTypeData {
-  type_name: string
-  alias: string
-  remark?: string
-  status?: number
-}
-
-export type UpdateUserTypeData = Partial<CreateUserTypeData>
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface FilterOptions {
-  type_name?: string
-  alias?: string
-  status?: number
-  start_time?: number
-  end_time?: number
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateSuccess,
+  CreateUserType,
+  createUserTypeSchema,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateSuccess,
+  UpdateUserType,
+  updateUserTypeSchema,
+  UserTypeEntity,
+  UserTypeFilters
+} from '@src/types'
 
 // User Type Service Class
 export class UserTypeService {
   /**
    * Get a single user type by ID
+   * @param id User type id
+   * @returns User type or null if not found
    */
-  async getUserTypeById(id: number): Promise<any> {
+  async getById(id: number): Promise<UserTypeEntity | null> {
     const userType = await db
       .selectFrom('user_types')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (!userType) {
-      throw new Error('User type not found')
-    }
-
-    return userType
+    return userType || null
   }
 
   /**
    * Get user types list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of user types and pagination info
    */
-  async getUserTypes(
-    options: PaginationOptions,
-    filters: FilterOptions
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = options
+  async getUserTypes(filters: UserTypeFilters): Promise<PaginatedResult<UserTypeEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { type_name, alias, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('user_types').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('user_types').selectAll()
 
-    // Add filters if provided
-    if (filters.type_name) {
-      query = query.where('type_name', 'like', `%${filters.type_name}%`)
-    }
-    if (filters.alias) {
-      query = query.where('alias', 'like', `%${filters.alias}%`)
-    }
-    if (filters.status !== undefined) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
+    // Apply filters
+    if (type_name) {
+      query = query.where('type_name', 'like', `%${type_name}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (alias) {
+      query = query.where('alias', 'like', `%${alias}%`)
+    }
+
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted user types
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [userTypes, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('user_types')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (type_name) {
+            qb = qb.where('type_name', 'like', `%${type_name}%`)
+          }
+          if (alias) {
+            qb = qb.where('alias', 'like', `%${alias}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -114,115 +94,106 @@ export class UserTypeService {
 
   /**
    * Create a new user type
+   * @param createData User type data without id
+   * @returns Created user type id
    */
-  async createUserType(userTypeData: CreateUserTypeData): Promise<any> {
-    // Validate input data
-    const validatedData = createUserTypeSchema.parse(userTypeData)
-
+  async create(createData: CreateUserType): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createUserTypeSchema.parse(createData)
     const now = Date.now()
     const newUserType = {
       ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('user_types').values(newUserType).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newUserType
-    }
+    const result = await db.insertInto('user_types').values(newUserType).executeTakeFirst()
+    if (!result) throw new Error('创建用户类型失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing user type
+   * @param id User type id
+   * @param updateData Data to update
+   * @returns Updated user type id
    */
-  async updateUserType(id: number, userTypeData: UpdateUserTypeData): Promise<any> {
-    // Validate input data
-    const validatedData = updateUserTypeSchema.parse(userTypeData)
-
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateUserType): Promise<UpdateSuccess> {
+    const validatedData = updateUserTypeSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('user_types')
-      .set(updateData)
+      .updateTable('user_types')
+      .set({
+        ...validatedData,
+        update_time: Date.now()
+      })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('User type not found')
-    }
-
-    return { id, ...updateData }
+    if (!result) throw new Error('更新用户类型失败')
+    return { id }
   }
 
   /**
-   * Delete a user type (logical delete)
+   * Soft delete user type
+   * @param id User type id
+   * @returns true if deleted successfully
    */
-  async deleteUserType(id: number): Promise<void> {
+  async delete(id: number): Promise<boolean> {
     // Check if user type is in use
     const usersWithType = await db
       .selectFrom('users')
       .select('id')
       .where('type_id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     if (usersWithType) {
-      throw new Error('Cannot delete user type that is in use by users')
+      throw new Error('无法删除正在使用的用户类型')
     }
 
     const result = await db
-      .safeUpdateTable('user_types')
+      .updateTable('user_types')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('User type not found')
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Check if user type exists by type_name
+   * @param typeName User type name
+   * @returns true if exists
    */
   async userTypeExistsByTypeName(typeName: string): Promise<boolean> {
     const userType = await db
       .selectFrom('user_types')
-      .select(['id'])
+      .select('id')
       .where('type_name', '=', typeName)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
     return !!userType
   }
 
   /**
    * Check if user type exists by alias
+   * @param alias User type alias
+   * @returns true if exists
    */
   async userTypeExistsByAlias(alias: string): Promise<boolean> {
     const userType = await db
       .selectFrom('user_types')
-      .select(['id'])
+      .select('id')
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
     return !!userType
   }
 }
 
-// Export service instance
 export const userTypeService = new UserTypeService()
-
-// Export schemas for validation
-export { createUserTypeSchema, updateUserTypeSchema }

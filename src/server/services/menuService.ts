@@ -1,121 +1,90 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
-
-// Data interfaces
-export interface CreateMenuData {
-  title: string
-  alias: string
-  parent_id: number
-  icon?: string
-  url?: string
-  image_url?: string
-  method?: string
-  sort: number
-  status: number
-}
-
-export type UpdateMenuData = Partial<CreateMenuData>
-
-export interface MenuFilters {
-  title?: string
-  alias?: string
-  parentId?: number
-  status?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface MenuPaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Menu {
-  id: number
-  title: string
-  alias: string
-  parent_id: number
-  icon?: string
-  url?: string
-  image_url?: string
-  method?: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-  children?: Menu[]
-}
-
-export interface PaginatedMenusResult {
-  dataList: Menu[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  MenuEntity,
+  MenuFilters,
+  CreateMenu,
+  createMenuSchema,
+  CreateSuccess,
+  UpdateMenu,
+  updateMenuSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  MenuTreeItem
+} from '@src/types'
 
 export class MenuService {
   /**
    * Get single menu by ID
    */
-  async getMenuById(id: number): Promise<Menu | null> {
-    const result = await db
+  async getById(id: number): Promise<MenuEntity | null> {
+    const menu = await db
       .selectFrom('menus')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result as Menu | null
+    return menu || null
   }
 
   /**
    * Get menus list with pagination and filters
    */
-  async getMenus(
-    pagination: MenuPaginationParams,
-    filters?: MenuFilters
-  ): Promise<PaginatedMenusResult> {
-    const { page, pageSize } = pagination
+  async getMenus(filters: MenuFilters): Promise<PaginatedResult<MenuEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('menus').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('menus').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.alias) {
-        query = query.where('alias', 'like', `%${filters.alias}%`)
-      }
-      if (filters.parentId !== undefined) {
-        query = query.where('parent_id', '=', filters.parentId)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('create_time', '<=', filters.endTime)
-      }
+    if (filters.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
+    }
+    if (filters.alias) {
+      query = query.where('alias', 'like', `%${filters.alias}%`)
+    }
+    if (filters.parent_id !== undefined) {
+      query = query.where('parent_id', '=', filters.parent_id)
+    }
+    if (filters.status !== undefined) {
+      query = query.where('status', '=', filters.status)
     }
 
-    // Order by sort asc, create_time desc by default
-    query = query.orderBy('sort', 'asc').orderBy('create_time', 'desc')
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [menus, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('menus')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.alias) {
+            qb = qb.where('alias', 'like', `%${filters.alias}%`)
+          }
+          if (filters.parent_id !== undefined) {
+            qb = qb.where('parent_id', '=', filters.parent_id)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: menus as Menu[],
+      dataList: menus,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -128,18 +97,18 @@ export class MenuService {
   /**
    * Get menu tree structure
    */
-  async getMenuTree(): Promise<Menu[]> {
+  async getMenuTree(): Promise<MenuTreeItem[]> {
     const menus = await db
       .selectFrom('menus')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
     // Build menu tree
-    const menuMap = new Map<number, Menu>()
-    const menuTree: Menu[] = []
+    const menuMap = new Map<number, MenuTreeItem>()
+    const menuTree: MenuTreeItem[] = []
 
     // First pass: create a map of all menus
     menus.forEach((menu) => {
@@ -170,10 +139,12 @@ export class MenuService {
   /**
    * Create new menu
    */
-  async createMenu(data: CreateMenuData): Promise<Menu> {
+  async create(createData: CreateMenu): Promise<CreateSuccess> {
+    const validatedData = createMenuSchema.parse(createData)
+
     // If parent_id is provided, verify that the parent menu exists
-    if (data.parent_id !== 0) {
-      const parentMenu = await this.getMenuById(data.parent_id)
+    if (validatedData.parent_id && validatedData.parent_id !== 0) {
+      const parentMenu = await this.getById(validatedData.parent_id)
       if (!parentMenu) {
         throw new Error('Parent menu not found')
       }
@@ -181,56 +152,51 @@ export class MenuService {
 
     const now = Date.now()
     const newMenu = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('menus').values(newMenu).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newMenu
-    }
+    const result = await db.insertInto('menus').values(newMenu).executeTakeFirst()
+    if (!result) throw new Error('创建菜单失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update menu by ID
    */
-  async updateMenu(id: number, data: UpdateMenuData): Promise<boolean> {
+  async update(id: number, updateData: UpdateMenu): Promise<UpdateSuccess> {
+    const validatedData = updateMenuSchema.parse(updateData)
+
     // If parent_id is being updated, verify that the new parent menu exists
-    if (data.parent_id !== undefined && data.parent_id !== 0) {
-      const parentMenu = await this.getMenuById(data.parent_id)
+    if (validatedData.parent_id !== undefined && validatedData.parent_id !== 0) {
+      const parentMenu = await this.getById(validatedData.parent_id)
       if (!parentMenu) {
         throw new Error('Parent menu not found')
       }
 
       // Prevent circular reference
-      if (data.parent_id === id) {
+      if (validatedData.parent_id === id) {
         throw new Error('Menu cannot be its own parent')
       }
     }
 
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
     const result = await db
-      .safeUpdateTable('menus')
-      .set(updateData)
+      .updateTable('menus')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新菜单失败')
+    return { id }
   }
 
   /**
    * Delete menu (logical delete)
    */
-  async deleteMenu(id: number): Promise<boolean> {
+  async delete(id: number): Promise<boolean> {
     // Check if menu has children
     const hasChildren = await this.menuHasChildren(id)
     if (hasChildren) {
@@ -238,73 +204,73 @@ export class MenuService {
     }
 
     const result = await db
-      .safeUpdateTable('menus')
+      .updateTable('menus')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get menus by status
    */
-  async getMenusByStatus(status: number): Promise<Menu[]> {
-    const result = await db
+  async getMenusByStatus(status: number): Promise<MenuEntity[]> {
+    const menus = await db
       .selectFrom('menus')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as Menu[]
+    return menus
   }
 
   /**
    * Get menus by parent ID
    */
-  async getMenusByParentId(parentId: number): Promise<Menu[]> {
-    const result = await db
+  async getMenusByParentId(parentId: number): Promise<MenuEntity[]> {
+    const menus = await db
       .selectFrom('menus')
       .selectAll()
       .where('parent_id', '=', parentId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as Menu[]
+    return menus
   }
 
   /**
    * Get root menus (parent_id = 0)
    */
-  async getRootMenus(): Promise<Menu[]> {
+  async getRootMenus(): Promise<MenuEntity[]> {
     return await this.getMenusByParentId(0)
   }
 
   /**
    * Search menus by title or alias
    */
-  async searchMenus(searchTerm: string): Promise<Menu[]> {
-    const result = await db
+  async searchMenus(searchTerm: string): Promise<MenuEntity[]> {
+    const menus = await db
       .selectFrom('menus')
       .selectAll()
-      .where('is_delete', '=', 0)
       .where((eb) =>
         eb.or([eb('title', 'like', `%${searchTerm}%`), eb('alias', 'like', `%${searchTerm}%`)])
       )
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
 
-    return result as Menu[]
+    return menus
   }
 
   /**
@@ -315,7 +281,7 @@ export class MenuService {
       .selectFrom('menus')
       .select('id')
       .where('parent_id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return !!result
@@ -324,12 +290,12 @@ export class MenuService {
   /**
    * Get menu path (breadcrumb)
    */
-  async getMenuPath(id: number): Promise<Menu[]> {
-    const path: Menu[] = []
+  async getMenuPath(id: number): Promise<MenuEntity[]> {
+    const path: MenuEntity[] = []
     let currentId = id
 
     while (currentId > 0) {
-      const menu = await this.getMenuById(currentId)
+      const menu = await this.getById(currentId)
       if (!menu) break
 
       path.unshift(menu)
@@ -343,24 +309,34 @@ export class MenuService {
    * Get menus count by status
    */
   async getMenusCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
+    const results = await db
       .selectFrom('menus')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['status', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
+
+    return results.map((r) => ({
+      status: r.status,
+      count: Number(r.count)
+    }))
   }
 
   /**
    * Get menus count by parent
    */
   async getMenusCountByParent(): Promise<{ parent_id: number; count: number }[]> {
-    return await db
+    const results = await db
       .selectFrom('menus')
-      .select(['parent_id', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['parent_id', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('parent_id')
       .execute()
+
+    return results.map((r) => ({
+      parent_id: r.parent_id,
+      count: Number(r.count)
+    }))
   }
 
   /**
@@ -371,7 +347,7 @@ export class MenuService {
       .selectFrom('menus')
       .select('id')
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -394,13 +370,19 @@ export class MenuService {
   }> {
     const stats = await db
       .selectFrom('menus')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted'),
-        sql<number>`sum(case when parent_id = 0 then 1 else 0 end)`.as('rootMenus'),
-        sql<number>`sum(case when parent_id > 0 then 1 else 0 end)`.as('childMenus')
+      .select((eb) => [
+        eb.fn.count('id').as('total'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 10).then(1).else(0).end()).as('active'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 0).then(1).else(0).end()).as('inactive'),
+        eb.fn
+          .sum<number>(eb.case().when('is_delete', '=', DELETE_STATUS.DELETE).then(1).else(0).end())
+          .as('deleted'),
+        eb.fn
+          .sum<number>(eb.case().when('parent_id', '=', 0).then(1).else(0).end())
+          .as('rootMenus'),
+        eb.fn
+          .sum<number>(eb.case().when('parent_id', '>', 0).then(1).else(0).end())
+          .as('childMenus')
       ])
       .executeTakeFirst()
 

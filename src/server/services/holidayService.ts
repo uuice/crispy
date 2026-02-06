@@ -1,80 +1,81 @@
 import { db } from '@src/libs/db'
-
-export interface CreateHolidayData {
-  title: string
-  value: string
-  sort?: number
-}
-
-export type UpdateHolidayData = Partial<CreateHolidayData>
-
-export interface HolidayFilters {
-  title?: string
-  value?: string
-  start_time?: number
-  end_time?: number
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateHoliday,
+  createHolidaySchema,
+  CreateSuccess,
+  HolidayEntity,
+  HolidayFilters,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateHoliday,
+  updateHolidaySchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class HolidayService {
   /**
    * Get a single holiday by ID
+   * @param id Holiday id
+   * @returns Holiday or null if not found
    */
-  async getHolidayById(id: number) {
-    return await db
+  async getById(id: number): Promise<HolidayEntity | null> {
+    const holiday = await db
       .selectFrom('holidays')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return holiday || null
   }
 
   /**
    * Get holidays with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of holidays and pagination info
    */
-  async getHolidays(
-    filters: HolidayFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getHolidays(filters: HolidayFilters): Promise<PaginatedResult<HolidayEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, value } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('holidays').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('holidays').selectAll()
 
-    // Add filters if provided
-    if (filters.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters.value) {
-      query = query.where('value', 'like', `%${filters.value}%`)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (value) {
+      query = query.where('value', 'like', `%${value}%`)
+    }
+
+    // Default to only non-deleted holidays
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [holidays, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('holidays')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (value) {
+            qb = qb.where('value', 'like', `%${value}%`)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -90,99 +91,107 @@ export class HolidayService {
 
   /**
    * Create a new holiday
+   * @param createData Holiday data without id
+   * @returns Created holiday id
    */
-  async createHoliday(data: CreateHolidayData) {
+  async create(createData: CreateHoliday): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createHolidaySchema.parse(createData)
     const now = Date.now()
     const newHoliday = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('holidays').values(newHoliday).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newHoliday
-    }
+    const result = await db.insertInto('holidays').values(newHoliday).executeTakeFirst()
+    if (!result) throw new Error('创建节假日失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update a holiday
+   * @param id Holiday id
+   * @param updateData Data to update
+   * @returns Updated holiday id
    */
-  async updateHoliday(id: number, data: UpdateHolidayData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateHoliday): Promise<UpdateSuccess> {
+    const validatedData = updateHolidaySchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('holidays')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete a holiday (logical delete)
-   */
-  async deleteHoliday(id: number) {
-    const result = await db
-      .safeUpdateTable('holidays')
+      .updateTable('holidays')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新节假日失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete holiday
+   * @param id Holiday id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('holidays')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get holiday by name
+   * @param title Holiday name
+   * @returns Holiday or null if not found
    */
-  async getHolidayByName(title: string) {
-    return await db
+  async getHolidayByName(title: string): Promise<HolidayEntity | null> {
+    const holiday = await db
       .selectFrom('holidays')
       .selectAll()
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return holiday || null
   }
 
   /**
    * Get holiday by value
+   * @param value Holiday value
+   * @returns Holiday or null if not found
    */
-  async getHolidayByValue(value: string) {
-    return await db
+  async getHolidayByValue(value: string): Promise<HolidayEntity | null> {
+    const holiday = await db
       .selectFrom('holidays')
       .selectAll()
       .where('value', '=', value)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return holiday || null
   }
 
   /**
-   * Get holidays by name (search)
+   * Search holidays by name
+   * @param title Search keyword
+   * @param limit Max number of results
+   * @returns List of holidays
    */
-  async searchHolidaysByName(title: string, limit = 10) {
+  async searchHolidaysByName(title: string, limit = 10): Promise<HolidayEntity[]> {
     return await db
       .selectFrom('holidays')
       .selectAll()
       .where('title', 'like', `%${title}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -191,12 +200,13 @@ export class HolidayService {
 
   /**
    * Get all holidays ordered by sort
+   * @returns List of all holidays
    */
-  async getAllHolidays() {
+  async getAllHolidays(): Promise<HolidayEntity[]> {
     return await db
       .selectFrom('holidays')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -204,36 +214,44 @@ export class HolidayService {
 
   /**
    * Check if holiday name already exists
+   * @param title Holiday name
+   * @param excludeId Holiday id to exclude from check
+   * @returns true if exists
    */
-  async checkNameExists(title: string, excludeId?: number) {
+  async checkNameExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('holidays')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const holiday = await query.executeTakeFirst()
+    return !!holiday
   }
 
   /**
    * Check if holiday value already exists
+   * @param value Holiday value
+   * @param excludeId Holiday id to exclude from check
+   * @returns true if exists
    */
-  async checkValueExists(value: string, excludeId?: number) {
+  async checkValueExists(value: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('holidays')
       .select('id')
       .where('value', '=', value)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const holiday = await query.executeTakeFirst()
+    return !!holiday
   }
 }
 

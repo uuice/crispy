@@ -33,7 +33,11 @@ async function getCommonViewData(pageType: string) {
   viewData.assign('categories', categoryList || [])
 
   // 获取标签列表
-  const { dataList: tagList } = await tagService.getTags({ page: 1, pageSize: 100 }, { status: 10 })
+  const { dataList: tagList } = await tagService.getTags({
+    page: 1,
+    pageSize: 100,
+    status: 10
+  } as any)
   viewData.assign('tags', sampleSize(tagList, 18) || [])
 
   viewData.assign('currentYear', new Date().getFullYear())
@@ -49,16 +53,12 @@ router.get(
   '/',
   catchAsync(async (req, res) => {
     const viewData = await getCommonViewData('Index')
-    const hotArticleList = await articleService.getArticles(
-      {
-        status: 10,
-        attrs: 'hot'
-      },
-      {
-        page: 1,
-        pageSize: 100
-      }
-    )
+    const hotArticleList = await articleService.getArticles({
+      status: 10,
+      attrs: 'hot',
+      page: 1,
+      pageSize: 100
+    } as any)
     viewData.assign('hotArticleList', hotArticleList.dataList || [])
     res.render('blog/index.html', viewData.assign())
   })
@@ -72,10 +72,11 @@ router.get(
   catchAsync(async (req, res) => {
     const viewData = await getCommonViewData('Archive')
 
-    const { dataList } = await articleService.getArticles(
-      { status: 10 },
-      { page: 1, pageSize: 1000 }
-    )
+    const { dataList } = await articleService.getArticles({
+      status: 10,
+      page: 1,
+      pageSize: 1000
+    } as any)
 
     const groups: { [year: string]: any[] } = {}
     for (const article of dataList) {
@@ -114,7 +115,7 @@ router.get(
       previousArticle = await articleService.getPreviousArticle(article.id, typeId)
       nextArticle = await articleService.getNextArticle(article.id, typeId)
     }
-    viewData.assign('article', article)
+    viewData.assign('article', (article || {}) as object)
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 
@@ -137,14 +138,16 @@ router.get(
     // When category not found, render with empty list
     let articleList: any[] = []
     if (category) {
-      const { dataList } = await articleService.getArticles(
-        { status: 10, type_id: category.id },
-        { page: 1, pageSize: 1000 }
-      )
+      const { dataList } = await articleService.getArticles({
+        status: 10,
+        type_id: category.id,
+        page: 1,
+        pageSize: 1000
+      } as any)
       articleList = dataList || []
     }
 
-    viewData.assign('currentCategory', category)
+    viewData.assign('currentCategory', (category || {}) as object)
     viewData.assign('articleList', articleList)
 
     res.render('blog/categories.html', viewData.assign())
@@ -162,12 +165,14 @@ router.get(
     const tag = await tagService.getTagByValue(value)
 
     // Get articles by tag
-    const { dataList: articleList } = await articleService.getArticles(
-      { status: 10, tag: tag.title },
-      { page: 1, pageSize: 1000 }
-    )
+    const { dataList: articleList } = await articleService.getArticles({
+      status: 10,
+      tag: tag!.title,
+      page: 1,
+      pageSize: 1000
+    } as any)
 
-    viewData.assign('currentTag', tag)
+    viewData.assign('currentTag', (tag || {}) as object)
     viewData.assign('articleList', articleList || [])
 
     res.render('blog/tags.html', viewData.assign())
@@ -181,16 +186,16 @@ router.get(
   '/links',
   catchAsync(async (req, res) => {
     const viewData = await getCommonViewData('Link')
-    const { dataList: linkCategories } = await categoryService.getCategories(
-      { alias: 'LINK_SYS_CAT' },
-      { page: 1, pageSize: 100 }
-    )
-    const { dataList: links } = await linkService.getLinks(
-      { page: 1, pageSize: 1000 },
-      {
-        status: 10
-      }
-    )
+    const { dataList: linkCategories } = await categoryService.getCategories({
+      alias: 'LINK_SYS_CAT',
+      page: 1,
+      pageSize: 100
+    } as any)
+    const { dataList: links } = await linkService.getLinks({
+      page: 1,
+      pageSize: 1000,
+      status: 10
+    } as any)
 
     // Group links by category
     const groupedLinks: { [key: string]: any[] } = {}
@@ -221,16 +226,12 @@ router.get(
   catchAsync(async (req, res) => {
     const viewData = await getCommonViewData('DailyLib')
     const category = await categoryService.getCategoryByAlias('daily-libs')!
-    const { dataList: articleList } = await articleService.getArticles(
-      {
-        type_id: category!.id,
-        status: 10
-      },
-      {
-        page: 1,
-        pageSize: 100
-      }
-    )
+    const { dataList: articleList } = await articleService.getArticles({
+      type_id: category!.id,
+      status: 10,
+      page: 1,
+      pageSize: 100
+    } as any)
 
     const groups: { [year: string]: any[] } = {}
     for (const article of articleList) {
@@ -244,7 +245,7 @@ router.get(
       .map((year) => ({ year, items: groups[year] }))
 
     viewData.assign('archiveGroups', archiveGroups)
-    viewData.assign('category', category)
+    viewData.assign('category', (category || {}) as object)
     res.render('blog/daily-libs.html', viewData.assign())
   })
 )
@@ -270,7 +271,7 @@ router.get(
       previousArticle = await articleService.getPreviousArticle(article.id)
       nextArticle = await articleService.getNextArticle(article.id)
     }
-    viewData.assign('article', article)
+    viewData.assign('article', (article || {}) as object)
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 

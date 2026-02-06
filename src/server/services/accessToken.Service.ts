@@ -1,44 +1,20 @@
-import { AccessToken, DB } from '@src/db/db.d'
-import { Insertable, Updateable } from 'kysely'
 import { db } from '@src/libs/db'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
-import z from 'zod'
-
-// Types
-export interface AccessTokenFilters {
-  app_name?: string
-  channel?: string
-  status?: number
-  user_id?: number
-  is_delete?: number
-  update_time?: number
-  create_time?: number
-}
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-// Validation schemas
-const createAccessTokenSchema = z.object({
-  app_name: z.string().min(1, 'app_name不能为空'),
-  channel: z.string().min(1, 'channel不能为空'),
-  user_id: z.number().min(1, 'user_id不能为空'),
-  status: z.number().default(10)
-})
-
-const updateAccessTokenSchema = createAccessTokenSchema.partial()
+import {
+  AccessTokenEntity,
+  AccessTokenFilters,
+  CheckAccessTokenData,
+  checkTokenSchema,
+  CreateAccessToken,
+  createAccessTokenSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateAccessToken,
+  updateAccessTokenSchema,
+  UpdateSuccess
+} from '@src/types'
+import { generateRandomToken } from '../utils/token'
 
 /**
  * Service class for handling AccessToken operations
@@ -49,23 +25,21 @@ export class AccessTokenService {
    * @param data AccessToken data without id
    * @returns Created access token
    */
-  async create(data: Insertable<DB['access_token']>): Promise<any> {
+  async create(createData: CreateAccessToken): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createAccessTokenSchema.parse(createData)
+    const randomToken = generateRandomToken()
     const now = Date.now()
     const newToken = {
-      ...data,
+      ...validatedData,
+      token: randomToken,
       create_time: now,
       update_time: now,
       is_delete: DELETE_STATUS.UN_DELETE
     }
-    const result = await db.safeInsertInto('access_token').values(newToken).executeTakeFirst()
+    const result = await db.insertInto('access_token').values(newToken).executeTakeFirst()
     if (!result) throw new Error('创建token失败')
-
-    const { token: _, ...tokenWithoutToken } = {
-      id: Number(result.insertId),
-      ...newToken
-    }
-
-    return tokenWithoutToken
+    return { id: Number(result.insertId) }
   }
 
   /**
@@ -73,14 +47,14 @@ export class AccessTokenService {
    * @param id Access token id
    * @returns Access token or null if not found
    */
-  async getById(id: number): Promise<AccessToken | null> {
+  async getById(id: number): Promise<AccessTokenEntity | null> {
     const token = await db
       .selectFrom('access_token')
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .selectAll()
       .executeTakeFirst()
-    return token as unknown as AccessToken | null
+    return token || null
   }
 
   /**
@@ -88,14 +62,14 @@ export class AccessTokenService {
    * @param userId User id
    * @returns Access token or null if not found
    */
-  async getByUserId(userId: number): Promise<AccessToken | null> {
+  async getByUserId(userId: number): Promise<AccessTokenEntity | null> {
     const token = await db
       .selectFrom('access_token')
       .where('user_id', '=', userId)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .selectAll()
       .executeTakeFirst()
-    return token as unknown as AccessToken | null
+    return token || null
   }
 
   /**
@@ -104,17 +78,19 @@ export class AccessTokenService {
    * @param data Data to update
    * @returns Updated access token
    */
-  async update(id: number, updateData: Updateable<DB['access_token']>) {
+  async update(id: number, updateData: UpdateAccessToken): Promise<UpdateSuccess> {
+    const validatedData = updateAccessTokenSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('access_token')
+      .updateTable('access_token')
       .set({
-        ...updateData,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-    return { id, ...updateData }
+    if (!result) throw new Error('更新token失败')
+    return { id }
   }
 
   /**
@@ -124,7 +100,7 @@ export class AccessTokenService {
    */
   async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('access_token')
+      .updateTable('access_token')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
@@ -132,7 +108,7 @@ export class AccessTokenService {
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-    return result.numUpdatedRows > 0
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
@@ -140,11 +116,8 @@ export class AccessTokenService {
    * @param options Pagination and filter options
    * @returns List of access tokens and pagination info
    */
-  async getAccessTokens(
-    filters: AccessTokenFilters,
-    options: PaginationOptions
-  ): Promise<PaginatedResult<AccessToken>> {
-    const { page, pageSize } = options
+  async getAccessTokens(filters: AccessTokenFilters): Promise<PaginatedResult<AccessTokenEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const { app_name, channel, status, user_id } = filters
     const offset = (page - 1) * pageSize
 
@@ -197,7 +170,7 @@ export class AccessTokenService {
     ])
 
     return {
-      dataList: tokens as unknown as AccessToken[],
+      dataList: tokens,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -214,7 +187,10 @@ export class AccessTokenService {
    * @param token Access token
    * @returns true if token is valid
    */
-  async checkToken(app_name: string, channel: string, token: string): Promise<boolean> {
+  async checkToken(checkData: CheckAccessTokenData): Promise<boolean> {
+    const validatedData = checkTokenSchema.parse(checkData)
+    const { app_name, channel, token } = validatedData
+
     const result = await db
       .selectFrom('access_token')
       .where('app_name', '=', app_name)
@@ -230,6 +206,3 @@ export class AccessTokenService {
 }
 
 export const accessTokenService = new AccessTokenService()
-
-// Export schemas for validation
-export { createAccessTokenSchema, updateAccessTokenSchema }

@@ -1,129 +1,104 @@
 import { db } from '@src/libs/db'
-
-export interface CreateJobData {
-  title: string
-  content: string
-  address?: string
-  branch?: string
-  email?: string
-  nature?: string
-  num: number
-  typeName?: string
-  sort?: number
-}
-
-export type UpdateJobData = Partial<CreateJobData>
-
-export interface JobFilters {
-  title?: string
-  typeName?: string
-  nature?: string
-  branch?: string
-  address?: string
-  email?: string
-  num_min?: number
-  num_max?: number
-  sort_min?: number
-  sort_max?: number
-  start_time?: number
-  end_time?: number
-  has_email?: boolean
-  has_address?: boolean
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateJob,
+  createJobSchema,
+  CreateSuccess,
+  JobEntity,
+  JobFilters,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateJob,
+  updateJobSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class JobService {
   /**
    * Get a single job by ID
+   * @param id Job id
+   * @returns Job or null if not found
    */
-  async getJobById(id: number) {
-    return await db
+  async getById(id: number): Promise<JobEntity | null> {
+    const job = await db
       .selectFrom('jobs')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return job || null
   }
 
   /**
    * Get jobs with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of jobs and pagination info
    */
-  async getJobs(filters: JobFilters, pagination: PaginationParams): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getJobs(filters: JobFilters): Promise<PaginatedResult<JobEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, typeName, nature, branch, address, email } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('jobs').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('jobs').selectAll()
 
-    // Add filters if provided
-    if (filters.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters.typeName) {
-      query = query.where('typeName', 'like', `%${filters.typeName}%`)
-    }
-    if (filters.nature) {
-      query = query.where('nature', 'like', `%${filters.nature}%`)
-    }
-    if (filters.branch) {
-      query = query.where('branch', 'like', `%${filters.branch}%`)
-    }
-    if (filters.address) {
-      query = query.where('address', 'like', `%${filters.address}%`)
-    }
-    if (filters.email) {
-      query = query.where('email', 'like', `%${filters.email}%`)
-    }
-    if (filters.num_min !== undefined && !isNaN(filters.num_min)) {
-      query = query.where('num', '>=', filters.num_min)
-    }
-    if (filters.num_max !== undefined && !isNaN(filters.num_max)) {
-      query = query.where('num', '<=', filters.num_max)
-    }
-    if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-      query = query.where('sort', '>=', filters.sort_min)
-    }
-    if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-      query = query.where('sort', '<=', filters.sort_max)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
-    }
-    if (filters.has_email === true) {
-      query = query.where('email', 'is not', null)
-    }
-    if (filters.has_email === false) {
-      query = query.where('email', 'is', null)
-    }
-    if (filters.has_address === true) {
-      query = query.where('address', 'is not', null)
-    }
-    if (filters.has_address === false) {
-      query = query.where('address', 'is', null)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (typeName) {
+      query = query.where('typeName', 'like', `%${typeName}%`)
+    }
+
+    if (nature) {
+      query = query.where('nature', 'like', `%${nature}%`)
+    }
+
+    if (branch) {
+      query = query.where('branch', 'like', `%${branch}%`)
+    }
+
+    if (address) {
+      query = query.where('address', 'like', `%${address}%`)
+    }
+
+    if (email) {
+      query = query.where('email', 'like', `%${email}%`)
+    }
+
+    // Default to only non-deleted jobs
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [jobs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('jobs')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (typeName) {
+            qb = qb.where('typeName', 'like', `%${typeName}%`)
+          }
+          if (nature) {
+            qb = qb.where('nature', 'like', `%${nature}%`)
+          }
+          if (branch) {
+            qb = qb.where('branch', 'like', `%${branch}%`)
+          }
+          if (address) {
+            qb = qb.where('address', 'like', `%${address}%`)
+          }
+          if (email) {
+            qb = qb.where('email', 'like', `%${email}%`)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -139,75 +114,77 @@ export class JobService {
 
   /**
    * Create a new job
+   * @param createData Job data without id
+   * @returns Created job id
    */
-  async createJob(data: CreateJobData) {
+  async create(createData: CreateJob): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createJobSchema.parse(createData)
     const now = Date.now()
     const newJob = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('jobs').values(newJob).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newJob
-    }
+    const result = await db.insertInto('jobs').values(newJob).executeTakeFirst()
+    if (!result) throw new Error('创建职位失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update a job
+   * @param id Job id
+   * @param updateData Data to update
+   * @returns Updated job id
    */
-  async updateJob(id: number, data: UpdateJobData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateJob): Promise<UpdateSuccess> {
+    const validatedData = updateJobSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('jobs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete a job (logical delete)
-   */
-  async deleteJob(id: number) {
-    const result = await db
-      .safeUpdateTable('jobs')
+      .updateTable('jobs')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新职位失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete job
+   * @param id Job id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('jobs')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get jobs by type name
+   * @param typeName Job type name
+   * @param limit Max number of results
+   * @returns List of jobs
    */
-  async getJobsByType(typeName: string, limit = 10) {
+  async getJobsByType(typeName: string, limit = 10): Promise<JobEntity[]> {
     return await db
       .selectFrom('jobs')
       .selectAll()
       .where('typeName', '=', typeName)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -216,13 +193,16 @@ export class JobService {
 
   /**
    * Get jobs by nature
+   * @param nature Job nature
+   * @param limit Max number of results
+   * @returns List of jobs
    */
-  async getJobsByNature(nature: string, limit = 10) {
+  async getJobsByNature(nature: string, limit = 10): Promise<JobEntity[]> {
     return await db
       .selectFrom('jobs')
       .selectAll()
       .where('nature', '=', nature)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -231,13 +211,16 @@ export class JobService {
 
   /**
    * Get jobs by branch
+   * @param branch Job branch
+   * @param limit Max number of results
+   * @returns List of jobs
    */
-  async getJobsByBranch(branch: string, limit = 10) {
+  async getJobsByBranch(branch: string, limit = 10): Promise<JobEntity[]> {
     return await db
       .selectFrom('jobs')
       .selectAll()
       .where('branch', '=', branch)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -245,14 +228,17 @@ export class JobService {
   }
 
   /**
-   * Get jobs by title (search)
+   * Search jobs by title
+   * @param title Search keyword
+   * @param limit Max number of results
+   * @returns List of jobs
    */
-  async searchJobsByTitle(title: string, limit = 10) {
+  async searchJobsByTitle(title: string, limit = 10): Promise<JobEntity[]> {
     return await db
       .selectFrom('jobs')
       .selectAll()
       .where('title', 'like', `%${title}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -261,12 +247,13 @@ export class JobService {
 
   /**
    * Get all active jobs
+   * @returns List of all jobs
    */
-  async getAllActiveJobs() {
+  async getAllActiveJobs(): Promise<JobEntity[]> {
     return await db
       .selectFrom('jobs')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -274,57 +261,23 @@ export class JobService {
 
   /**
    * Check if job title already exists
+   * @param title Job title
+   * @param excludeId Job id to exclude from check
+   * @returns true if exists
    */
-  async checkTitleExists(title: string, excludeId?: number) {
+  async checkTitleExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('jobs')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
-  }
-
-  /**
-   * Get job statistics
-   */
-  async getJobStats() {
-    const [total, byType, byNature, byBranch] = await Promise.all([
-      db
-        .selectFrom('jobs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('is_delete', '=', 0)
-        .executeTakeFirst(),
-      db
-        .selectFrom('jobs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('typeName', 'is not', null)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst(),
-      db
-        .selectFrom('jobs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('nature', 'is not', null)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst(),
-      db
-        .selectFrom('jobs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('branch', 'is not', null)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst()
-    ])
-
-    return {
-      total: Number(total?.count) || 0,
-      withType: Number(byType?.count) || 0,
-      withNature: Number(byNature?.count) || 0,
-      withBranch: Number(byBranch?.count) || 0
-    }
+    const result = await query.executeTakeFirst()
+    return !!result
   }
 }
 

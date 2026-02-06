@@ -1,81 +1,81 @@
 import { db } from '@src/libs/db'
-
-export interface CreateAttrData {
-  title: string
-  alias?: string
-  sort?: number
-  status?: number
-}
-
-export type UpdateAttrData = Partial<CreateAttrData>
-
-export interface AttrFilters {
-  title?: string
-  status?: number
-  start_time?: number
-  end_time?: number
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  AttrEntity,
+  AttrFilters,
+  CreateAttr,
+  createAttrSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateAttr,
+  updateAttrSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class AttrService {
   /**
    * Get a single attribute by ID
+   * @param id Attribute id
+   * @returns Attribute or null if not found
    */
-  async getAttrById(id: number) {
-    return await db
+  async getById(id: number): Promise<AttrEntity | null> {
+    const attr = await db
       .selectFrom('attrs')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return attr || null
   }
 
   /**
    * Get attributes with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of attributes and pagination info
    */
-  async getAttrs(
-    filters: AttrFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getAttrs(filters: AttrFilters): Promise<PaginatedResult<AttrEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('attrs').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('attrs').selectAll()
 
-    // Add filters if provided
-    if (filters.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters.status !== undefined && !isNaN(filters.status)) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted attributes
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [attrs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query
+        .orderBy('sort', 'asc')
+        .orderBy('create_time', 'desc')
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('attrs')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -91,75 +91,77 @@ export class AttrService {
 
   /**
    * Create a new attribute
+   * @param createData Attribute data without id
+   * @returns Created attribute id
    */
-  async createAttr(data: CreateAttrData) {
+  async create(createData: CreateAttr): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createAttrSchema.parse(createData)
     const now = Date.now()
     const newAttr = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('attrs').values(newAttr).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newAttr
-    }
+    const result = await db.insertInto('attrs').values(newAttr).executeTakeFirst()
+    if (!result) throw new Error('创建属性失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an attribute
+   * @param id Attribute id
+   * @param updateData Data to update
+   * @returns Updated attribute id
    */
-  async updateAttr(id: number, data: UpdateAttrData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateAttr): Promise<UpdateSuccess> {
+    const validatedData = updateAttrSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('attrs')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
-  }
-
-  /**
-   * Delete an attribute (logical delete)
-   */
-  async deleteAttr(id: number) {
-    const result = await db
-      .safeUpdateTable('attrs')
+      .updateTable('attrs')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新属性失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete attribute
+   * @param id Attribute id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('attrs')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get attributes by status
+   * @param status Attribute status
+   * @param limit Max number of results
+   * @returns List of attributes
    */
-  async getAttrsByStatus(status: number, limit = 10) {
+  async getAttrsByStatus(status: number, limit = 10): Promise<AttrEntity[]> {
     return await db
       .selectFrom('attrs')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -167,14 +169,17 @@ export class AttrService {
   }
 
   /**
-   * Get attributes by title (search)
+   * Search attributes by title
+   * @param title Search keyword
+   * @param limit Max number of results
+   * @returns List of attributes
    */
-  async searchAttrsByTitle(title: string, limit = 10) {
+  async searchAttrsByTitle(title: string, limit = 10): Promise<AttrEntity[]> {
     return await db
       .selectFrom('attrs')
       .selectAll()
       .where('title', 'like', `%${title}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -183,13 +188,14 @@ export class AttrService {
 
   /**
    * Get all active attributes
+   * @returns List of active attributes
    */
-  async getAllActiveAttrs() {
+  async getAllActiveAttrs(): Promise<AttrEntity[]> {
     return await db
       .selectFrom('attrs')
       .selectAll()
       .where('status', '=', 10)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -197,31 +203,38 @@ export class AttrService {
 
   /**
    * Check if attribute title already exists
+   * @param title Attribute title
+   * @param excludeId Attribute id to exclude from check
+   * @returns true if exists
    */
-  async checkTitleExists(title: string, excludeId?: number) {
+  async checkTitleExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('attrs')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const attr = await query.executeTakeFirst()
+    return !!attr
   }
 
   /**
-   * Get attributes by alias
+   * Get attribute by alias
+   * @param alias Attribute alias
+   * @returns Attribute or null if not found
    */
-  async getAttrByAlias(alias: string) {
-    return await db
+  async getAttrByAlias(alias: string): Promise<AttrEntity | null> {
+    const attr = await db
       .selectFrom('attrs')
       .selectAll()
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return attr || null
   }
 }
 

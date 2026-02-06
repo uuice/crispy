@@ -1,106 +1,80 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
-
-// Data interfaces
-export interface CreateNoticeData {
-  title: string
-  content: string
-  from_user_id: number
-  publish_time?: number
-  tolds?: string
-  status: number
-}
-
-export type UpdateNoticeData = Partial<CreateNoticeData>
-
-export interface NoticeFilters {
-  title?: string
-  status?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface NoticePaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Notice {
-  id: number
-  title: string
-  content: string
-  from_user_id: number
-  publish_time?: number
-  tolds?: string
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedNoticesResult {
-  dataList: Notice[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateNotice,
+  createNoticeSchema,
+  CreateSuccess,
+  NoticeEntity,
+  NoticeFilters,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateNotice,
+  updateNoticeSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class NoticeService {
   /**
    * Get single notice by ID
+   * @param id Notice id
+   * @returns Notice or null if not found
    */
-  async getNoticeById(id: number): Promise<Notice | null> {
-    const result = await db
+  async getById(id: number): Promise<NoticeEntity | null> {
+    const notice = await db
       .selectFrom('notices')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return result as Notice | null
+    return notice || null
   }
 
   /**
    * Get notices list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of notices and pagination info
    */
-  async getNotices(
-    pagination: NoticePaginationParams,
-    filters?: NoticeFilters
-  ): Promise<PaginatedNoticesResult> {
-    const { page, pageSize } = pagination
+  async getNotices(filters: NoticeFilters): Promise<PaginatedResult<NoticeEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('notices').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('notices').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('create_time', '<=', filters.endTime)
-      }
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted notices
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [notices, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('notices')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: notices as Notice[],
+      dataList: notices,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -112,113 +86,109 @@ export class NoticeService {
 
   /**
    * Create new notice
+   * @param createData Notice data without id
+   * @returns Created notice id
    */
-  async createNotice(data: CreateNoticeData): Promise<Notice> {
+  async create(createData: CreateNotice): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createNoticeSchema.parse(createData)
     const now = Date.now()
     const newNotice = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('notices').values(newNotice).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newNotice
-    }
+    const result = await db.insertInto('notices').values(newNotice).executeTakeFirst()
+    if (!result) throw new Error('创建公告失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update notice by ID
+   * @param id Notice id
+   * @param updateData Data to update
+   * @returns Updated notice id
    */
-  async updateNotice(id: number, data: UpdateNoticeData): Promise<boolean> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateNotice): Promise<UpdateSuccess> {
+    const validatedData = updateNoticeSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('notices')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return result.numUpdatedRows > 0n
-  }
-
-  /**
-   * Delete notice (logical delete)
-   */
-  async deleteNotice(id: number): Promise<boolean> {
-    const result = await db
-      .safeUpdateTable('notices')
+      .updateTable('notices')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新公告失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete notice
+   * @param id Notice id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('notices')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get notices by status
+   * @param status Notice status
+   * @returns List of notices
    */
-  async getNoticesByStatus(status: number): Promise<Notice[]> {
-    const result = await db
+  async getNoticesByStatus(status: number): Promise<NoticeEntity[]> {
+    return await db
       .selectFrom('notices')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as Notice[]
   }
 
   /**
    * Search notices by title or content
+   * @param searchTerm Search term
+   * @returns List of notices
    */
-  async searchNotices(searchTerm: string): Promise<Notice[]> {
-    const result = await db
+  async searchNotices(searchTerm: string): Promise<NoticeEntity[]> {
+    return await db
       .selectFrom('notices')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where((eb) =>
         eb.or([eb('title', 'like', `%${searchTerm}%`), eb('content', 'like', `%${searchTerm}%`)])
       )
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as Notice[]
-  }
-
-  /**
-   * Get notices count by status
-   */
-  async getNoticesCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
-      .selectFrom('notices')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
-      .groupBy('status')
-      .execute()
   }
 
   /**
    * Check if notice exists by title
+   * @param title Notice title
+   * @param excludeId Notice id to exclude from check
+   * @returns true if exists
    */
   async checkNoticeExistsByTitle(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('notices')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -227,34 +197,6 @@ export class NoticeService {
     const result = await query.executeTakeFirst()
     return !!result
   }
-
-  /**
-   * Get notices statistics
-   */
-  async getNoticesStats(): Promise<{
-    total: number
-    active: number
-    inactive: number
-    deleted: number
-  }> {
-    const stats = await db
-      .selectFrom('notices')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted')
-      ])
-      .executeTakeFirst()
-
-    return {
-      total: Number(stats?.total) || 0,
-      active: Number(stats?.active) || 0,
-      inactive: Number(stats?.inactive) || 0,
-      deleted: Number(stats?.deleted) || 0
-    }
-  }
 }
 
-// Export singleton instance
 export const noticeService = new NoticeService()

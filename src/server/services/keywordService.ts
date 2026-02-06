@@ -1,110 +1,88 @@
 import { db } from '@src/libs/db'
+import { DELETE_STATUS } from '../config/const'
+import {
+  CreateKeyword,
+  createKeywordSchema,
+  CreateSuccess,
+  KeywordEntity,
+  KeywordFilters,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateKeyword,
+  updateKeywordSchema,
+  UpdateSuccess
+} from '@src/types'
 import { sql } from 'kysely'
-
-// Data interfaces
-export interface CreateKeywordData {
-  title: string
-  alias: string
-  value?: string
-  url?: string
-  type_id?: number
-  status: number
-}
-
-export type UpdateKeywordData = Partial<CreateKeywordData>
-
-export interface KeywordFilters {
-  title?: string
-  alias?: string
-  status?: number
-  startTime?: number
-  endTime?: number
-}
-
-export interface KeywordPaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Keyword {
-  id: number
-  title: string
-  alias: string
-  value?: string
-  url?: string
-  type_id?: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-export interface PaginatedKeywordsResult {
-  dataList: Keyword[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
 
 export class KeywordService {
   /**
    * Get single keyword by ID
+   * @param id Keyword id
+   * @returns Keyword or null if not found
    */
-  async getKeywordById(id: number): Promise<Keyword | null> {
-    const result = await db
+  async getById(id: number): Promise<KeywordEntity | null> {
+    const keyword = await db
       .selectFrom('keywords')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return result as Keyword | null
+    return keyword || null
   }
 
   /**
    * Get keywords list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of keywords and pagination info
    */
-  async getKeywords(
-    pagination: KeywordPaginationParams,
-    filters?: KeywordFilters
-  ): Promise<PaginatedKeywordsResult> {
-    const { page, pageSize } = pagination
+  async getKeywords(filters: KeywordFilters): Promise<PaginatedResult<KeywordEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, alias, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('keywords').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('keywords').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('title', 'like', `%${filters.title}%`)
-      }
-      if (filters.alias) {
-        query = query.where('alias', 'like', `%${filters.alias}%`)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('status', '=', filters.status)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('create_time', '<=', filters.endTime)
-      }
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (alias) {
+      query = query.where('alias', 'like', `%${alias}%`)
+    }
+
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted keywords
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [keywords, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('keywords')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (alias) {
+            qb = qb.where('alias', 'like', `%${alias}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
-      dataList: keywords as Keyword[],
+      dataList: keywords,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -116,113 +94,122 @@ export class KeywordService {
 
   /**
    * Create new keyword
+   * @param createData Keyword data without id
+   * @returns Created keyword id
    */
-  async createKeyword(data: CreateKeywordData): Promise<Keyword> {
+  async create(createData: CreateKeyword): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createKeywordSchema.parse(createData)
     const now = Date.now()
     const newKeyword = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('keywords').values(newKeyword).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newKeyword
-    }
+    const result = await db.insertInto('keywords').values(newKeyword).executeTakeFirst()
+    if (!result) throw new Error('创建关键词失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update keyword by ID
+   * @param id Keyword id
+   * @param updateData Data to update
+   * @returns Updated keyword id
    */
-  async updateKeyword(id: number, data: UpdateKeywordData): Promise<boolean> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateKeyword): Promise<UpdateSuccess> {
+    const validatedData = updateKeywordSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('keywords')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    return result.numUpdatedRows > 0n
-  }
-
-  /**
-   * Delete keyword (logical delete)
-   */
-  async deleteKeyword(id: number): Promise<boolean> {
-    const result = await db
-      .safeUpdateTable('keywords')
+      .updateTable('keywords')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新关键词失败')
+    return { id }
+  }
+
+  /**
+   * Soft delete keyword
+   * @param id Keyword id
+   * @returns true if deleted successfully
+   */
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('keywords')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .executeTakeFirst()
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get keywords by status
+   * @param status Keyword status
+   * @returns List of keywords
    */
-  async getKeywordsByStatus(status: number): Promise<Keyword[]> {
-    const result = await db
+  async getKeywordsByStatus(status: number): Promise<KeywordEntity[]> {
+    return await db
       .selectFrom('keywords')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as Keyword[]
   }
 
   /**
    * Search keywords by title or alias
+   * @param searchTerm Search term
+   * @returns List of keywords
    */
-  async searchKeywords(searchTerm: string): Promise<Keyword[]> {
-    const result = await db
+  async searchKeywords(searchTerm: string): Promise<KeywordEntity[]> {
+    return await db
       .selectFrom('keywords')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .where((eb) =>
         eb.or([eb('title', 'like', `%${searchTerm}%`), eb('alias', 'like', `%${searchTerm}%`)])
       )
       .orderBy('create_time', 'desc')
       .execute()
-
-    return result as Keyword[]
   }
 
   /**
    * Get keywords count by status
+   * @returns Count by status
    */
   async getKeywordsCountByStatus(): Promise<{ status: number; count: number }[]> {
     return await db
       .selectFrom('keywords')
       .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
   }
 
   /**
    * Check if keyword exists by alias
+   * @param alias Keyword alias
+   * @param excludeId Keyword id to exclude from check
+   * @returns true if exists
    */
   async checkKeywordExistsByAlias(alias: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('keywords')
       .select('id')
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)

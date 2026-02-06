@@ -1,94 +1,70 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
-import { sql } from 'kysely'
-
-// Validation schemas
-const createAdditionSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().min(0),
-  type: z.number().default(1), // 1: 必选, 2: 可选
-  status: z.number().default(10),
-  sort: z.number().default(0)
-})
-
-const updateAdditionSchema = createAdditionSchema.partial()
-
-// Types
-export interface CreateAdditionData {
-  name: string
-  description?: string
-  price: number
-  type?: number
-  status?: number
-  sort?: number
-}
-
-export type UpdateAdditionData = Partial<CreateAdditionData>
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface AdditionFilters {
-  type?: number
-  status?: number
-  is_delete?: number
-  update_time?: number
-  create_time?: number
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  AdditionEntity,
+  AdditionFilters,
+  CreateAddition,
+  createAdditionSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateAddition,
+  updateAdditionSchema,
+  UpdateSuccess
+} from '@src/types'
 
 // Addition Service Class
 export class AdditionService {
   /**
    * Get a single addition by ID
+   * @param id Addition id
+   * @returns Addition or null if not found
    */
-  async getAdditionById(id: number): Promise<any> {
+  async getById(id: number): Promise<AdditionEntity | null> {
     const addition = await db
       .selectFrom('additions')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (!addition) {
-      throw new Error('Addition not found')
-    }
-
-    return addition
+    return addition || null
   }
 
   /**
    * Get additions list with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of additions and pagination info
    */
-  async getAdditions(
-    options: PaginationOptions,
-    filters?: AdditionFilters
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = options
+  async getAdditions(filters: AdditionFilters): Promise<PaginatedResult<AdditionEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('additions').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('additions').selectAll()
 
-    // Add type filter if provided
-    if (filters?.type !== undefined) {
-      query = query.where(sql.ref('type'), '=', filters.type)
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
     }
 
+    // Default to only non-deleted additions
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+
     const [additions, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('additions')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -104,119 +80,65 @@ export class AdditionService {
 
   /**
    * Create a new addition
+   * @param createData Addition data without id
+   * @returns Created addition id
    */
-  async createAddition(additionData: CreateAdditionData): Promise<any> {
-    // Validate input data
-    const validatedData = createAdditionSchema.parse(additionData)
-
+  async create(createData: CreateAddition): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createAdditionSchema.parse(createData)
     const now = Date.now()
     const newAddition = {
       ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0,
-      fields_json: '{}' // Add default empty JSON object
+      fields_json: validatedData.fields_json || '{}',
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('additions').values(newAddition).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newAddition
-    }
+    const result = await db.insertInto('additions').values(newAddition).executeTakeFirst()
+    if (!result) throw new Error('创建附加项失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing addition
+   * @param id Addition id
+   * @param updateData Data to update
+   * @returns Updated addition id
    */
-  async updateAddition(id: number, additionData: UpdateAdditionData): Promise<any> {
-    // Validate input data
-    const validatedData = updateAdditionSchema.parse(additionData)
-
-    const updateData = {
-      ...validatedData,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateAddition): Promise<UpdateSuccess> {
+    const validatedData = updateAdditionSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('additions')
-      .set(updateData)
-      .where('id', '=', id)
-      .where('is_delete', '=', 0)
-      .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Addition not found')
-    }
-
-    return { id, ...updateData }
-  }
-
-  /**
-   * Delete an addition (logical delete)
-   */
-  async deleteAddition(id: number): Promise<void> {
-    const result = await db
-      .safeUpdateTable('additions')
+      .updateTable('additions')
       .set({
-        is_delete: 10,
+        ...validatedData,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('Addition not found')
-    }
+    if (!result) throw new Error('更新附加项失败')
+    return { id }
   }
 
   /**
-   * Get additions by type
+   * Soft delete addition
+   * @param id Addition id
+   * @returns true if deleted successfully
    */
-  async getAdditionsByType(type: number): Promise<any[]> {
-    return await db
-      .selectFrom('additions')
-      .selectAll()
-      .where(sql.ref('type'), '=', type)
-      .where('is_delete', '=', 0)
-      .where('status', '=', 10)
-      .orderBy(sql.ref('sort'), 'asc')
-      .orderBy('create_time', 'desc')
-      .execute()
-  }
-
-  /**
-   * Check if addition exists by name
-   */
-  async additionExistsByName(name: string): Promise<boolean> {
-    const addition = await db
-      .selectFrom('additions')
-      .select(['id'])
-      .where(sql.ref('name'), '=', name)
-      .where('is_delete', '=', 0)
+  async delete(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable('additions')
+      .set({
+        is_delete: DELETE_STATUS.DELETE,
+        update_time: Date.now()
+      })
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return !!addition
-  }
-
-  /**
-   * Get required additions (type = 1)
-   */
-  async getRequiredAdditions(): Promise<any[]> {
-    return await this.getAdditionsByType(1)
-  }
-
-  /**
-   * Get optional additions (type = 2)
-   */
-  async getOptionalAdditions(): Promise<any[]> {
-    return await this.getAdditionsByType(2)
+    return Number(result.numUpdatedRows) > 0
   }
 }
 
-// Export service instance
 export const additionService = new AdditionService()
-
-// Export schemas for validation
-export { createAdditionSchema, updateAdditionSchema }

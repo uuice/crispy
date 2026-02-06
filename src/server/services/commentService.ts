@@ -1,79 +1,23 @@
 import { db } from '@src/libs/db'
-
-export interface Comment {
-  id: number
-  title: string
-  content: string
-  user_id: number
-  parent_id?: number
-  status: number
-  good_article: number
-  bad_article: number
-  not_article: number
-  create_time: number
-  update_time: number
-  is_delete: number
-  // Joined fields
-  author_name?: string
-  author_email?: string
-  author_avatar?: string
-  parent_content?: string
-}
-
-export interface CommentFilters {
-  content?: string
-  title?: string
-  user_id?: number
-  parent_id?: number
-  status?: number
-  good_article_min?: number
-  good_article_max?: number
-  bad_article_min?: number
-  bad_article_max?: number
-  not_article_min?: number
-  not_article_max?: number
-  start_time?: number
-  end_time?: number
-  has_parent?: boolean
-}
-
-export interface CreateCommentData {
-  title: string
-  content: string
-  user_id: number
-  parent_id?: number
-  status?: number
-  good_article?: number
-  bad_article?: number
-  not_article?: number
-}
-
-export interface UpdateCommentData {
-  title?: string
-  content?: string
-  status?: number
-  good_article?: number
-  bad_article?: number
-  not_article?: number
-}
-
-export interface PaginatedCommentsResult {
-  dataList: Comment[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  CommentEntity,
+  CommentFilters,
+  CreateComment,
+  createCommentSchema,
+  CreateSuccess,
+  UpdateComment,
+  updateCommentSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  CommentWithAuthor
+} from '@src/types'
 
 export class CommentService {
   // Get comments with pagination and filters
-  async getComments(
-    pagination: { page: number; pageSize: number },
-    filters: CommentFilters
-  ): Promise<PaginatedCommentsResult> {
-    const { page, pageSize } = pagination
+  async getComments(filters: CommentFilters): Promise<PaginatedResult<CommentWithAuthor>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -87,7 +31,6 @@ export class CommentService {
         'u.avatar_url as author_avatar',
         'pc.content as parent_content'
       ])
-      .where('c.is_delete', '=', 0)
 
     // Apply filters
     if (filters.content) {
@@ -100,75 +43,73 @@ export class CommentService {
       query = query.where('c.user_id', '=', filters.user_id)
     }
     if (filters.parent_id !== undefined) {
-      if (filters.parent_id === null) {
-        query = query.where('c.parent_id', 'is', null)
-      } else {
-        query = query.where('c.parent_id', '=', filters.parent_id)
-      }
+      query = query.where('c.parent_id', '=', filters.parent_id)
     }
     if (filters.status !== undefined) {
       query = query.where('c.status', '=', filters.status)
     }
-    if (filters.start_time !== undefined) {
-      query = query.where('c.create_time', '>=', filters.start_time)
+    if (filters.good_article !== undefined) {
+      query = query.where('c.good_article', '=', filters.good_article)
     }
-    if (filters.end_time !== undefined) {
-      query = query.where('c.create_time', '<=', filters.end_time)
+    if (filters.bad_article !== undefined) {
+      query = query.where('c.bad_article', '=', filters.bad_article)
     }
-    if (filters.good_article_min !== undefined && !isNaN(filters.good_article_min)) {
-      query = query.where('c.good_article', '>=', filters.good_article_min)
-    }
-    if (filters.good_article_max !== undefined && !isNaN(filters.good_article_max)) {
-      query = query.where('c.good_article', '<=', filters.good_article_max)
-    }
-    if (filters.bad_article_min !== undefined && !isNaN(filters.bad_article_min)) {
-      query = query.where('c.bad_article', '>=', filters.bad_article_min)
-    }
-    if (filters.bad_article_max !== undefined && !isNaN(filters.bad_article_max)) {
-      query = query.where('c.bad_article', '<=', filters.bad_article_max)
-    }
-    if (filters.not_article_min !== undefined && !isNaN(filters.not_article_min)) {
-      query = query.where('c.not_article', '>=', filters.not_article_min)
-    }
-    if (filters.not_article_max !== undefined && !isNaN(filters.not_article_max)) {
-      query = query.where('c.not_article', '<=', filters.not_article_max)
-    }
-    if (filters.has_parent === true) {
-      query = query.where('c.parent_id', 'is not', null)
-    }
-    if (filters.has_parent === false) {
-      query = query.where('c.parent_id', 'is', null)
+    if (filters.not_article !== undefined) {
+      query = query.where('c.not_article', '=', filters.not_article)
     }
 
-    // Get total count
-    const countResult = await db
-      .selectFrom('comments as c')
-      .select((eb: any) => [eb.fn.count('c.id').as('count')])
-      .where('c.is_delete', '=', 0)
-      .executeTakeFirst()
-    const total = Number(countResult?.['count']) || 0
+    query = query.where('c.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
-    // Get paginated data
-    const dataList = await query
-      .orderBy('c.create_time', 'desc')
-      .limit(pageSize)
-      .offset(offset)
-      .execute()
+    const [dataList, total] = await Promise.all([
+      query.orderBy('c.create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('comments as c')
+        .select((eb) => [eb.fn.count('c.id').as('count')])
+        .$call((qb) => {
+          if (filters.content) {
+            qb = qb.where('c.content', 'like', `%${filters.content}%`)
+          }
+          if (filters.title) {
+            qb = qb.where('c.title', 'like', `%${filters.title}%`)
+          }
+          if (filters.user_id !== undefined) {
+            qb = qb.where('c.user_id', '=', filters.user_id)
+          }
+          if (filters.parent_id !== undefined) {
+            qb = qb.where('c.parent_id', '=', filters.parent_id)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('c.status', '=', filters.status)
+          }
+          if (filters.good_article !== undefined) {
+            qb = qb.where('c.good_article', '=', filters.good_article)
+          }
+          if (filters.bad_article !== undefined) {
+            qb = qb.where('c.bad_article', '=', filters.bad_article)
+          }
+          if (filters.not_article !== undefined) {
+            qb = qb.where('c.not_article', '=', filters.not_article)
+          }
+          qb = qb.where('c.is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
+    ])
 
     return {
-      dataList: dataList as Comment[],
+      dataList: dataList as CommentWithAuthor[],
       pagination: {
-        total,
+        total: Number(total?.count) || 0,
         page,
         pageSize,
-        totalPages: Math.ceil(total / pageSize)
+        totalPages: Math.ceil((Number(total?.count) || 0) / pageSize)
       }
     }
   }
 
   // Get single comment by ID
-  async getCommentById(id: number): Promise<Comment | null> {
-    const result = await db
+  async getById(id: number): Promise<CommentWithAuthor | null> {
+    const comment = await db
       .selectFrom('comments as c')
       .leftJoin('users as u', 'c.user_id', 'u.id')
       .leftJoin('comments as pc', 'c.parent_id', 'pc.id')
@@ -180,88 +121,67 @@ export class CommentService {
         'pc.content as parent_content'
       ])
       .where('c.id', '=', id)
-      .where('c.is_delete', '=', 0)
+      .where('c.is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return result as Comment | null
+    return (comment as CommentWithAuthor) || null
   }
 
   // Create new comment
-  async createComment(data: CreateCommentData): Promise<Comment> {
+  async create(createData: CreateComment): Promise<CreateSuccess> {
+    const validatedData = createCommentSchema.parse(createData)
     const now = Date.now()
     const newComment = {
-      title: data.title,
-      content: data.content,
-      user_id: data.user_id,
-      parent_id: data.parent_id,
-      status: data.status || 10, // Default to published
-      good_article: data.good_article || 0,
-      bad_article: data.bad_article || 0,
-      not_article: data.not_article || 0,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('comments').values(newComment).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newComment
-    }
+    const result = await db.insertInto('comments').values(newComment).executeTakeFirst()
+    if (!result) throw new Error('创建评论失败')
+    return { id: Number(result.insertId) }
   }
 
   // Update comment
-  async updateComment(
-    id: number,
-    data: UpdateCommentData
-  ): Promise<{ success: boolean; numUpdatedRows: number }> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateComment): Promise<UpdateSuccess> {
+    const validatedData = updateCommentSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('comments')
-      .set(updateData)
+      .updateTable('comments')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: Number(result.numUpdatedRows) > 0,
-      numUpdatedRows: Number(result.numUpdatedRows)
-    }
+    if (!result) throw new Error('更新评论失败')
+    return { id }
   }
 
   // Delete comment (logical delete)
-  async deleteComment(id: number): Promise<{ success: boolean; numUpdatedRows: number }> {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('comments')
+      .updateTable('comments')
       .set({
-        is_delete: 1,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: Number(result.numUpdatedRows) > 0,
-      numUpdatedRows: Number(result.numUpdatedRows)
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   // Batch update comment status
   async batchUpdateStatus(ids: number[], status: number): Promise<number> {
     const result = await db
-      .safeUpdateTable('comments')
+      .updateTable('comments')
       .set({
         status,
         update_time: Date.now()
       })
       .where('id', 'in', ids)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return Number(result.numUpdatedRows)
@@ -270,13 +190,13 @@ export class CommentService {
   // Batch delete comments
   async batchDeleteComments(ids: number[]): Promise<number> {
     const result = await db
-      .safeUpdateTable('comments')
+      .updateTable('comments')
       .set({
-        is_delete: 1,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', 'in', ids)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     return Number(result.numUpdatedRows)
@@ -286,15 +206,15 @@ export class CommentService {
   async countCommentsByStatus(status?: number): Promise<number> {
     let query = db
       .selectFrom('comments')
-      .select((eb: any) => [eb.fn.count('id').as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => [eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
-    if (status) {
+    if (status !== undefined) {
       query = query.where('status', '=', status)
     }
 
     const result = await query.executeTakeFirst()
-    return Number(result?.['count']) || 0
+    return Number(result?.count) || 0
   }
 
   // Get comment statistics

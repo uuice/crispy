@@ -1,8 +1,20 @@
 import { db } from '@src/libs/db'
-import { sql } from 'kysely'
+import { DELETE_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
 import { flexsearchService } from './flexsearch-index.service'
+import {
+  PageEntity,
+  PageFilters,
+  CreatePage,
+  createPageSchema,
+  CreateSuccess,
+  UpdatePage,
+  updatePageSchema,
+  UpdateSuccess,
+  PaginatedResult,
+  PaginationOptions
+} from '@src/types'
 
 // Helper function to get tagRef object from tags string
 async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
@@ -25,283 +37,169 @@ async function getTagRef(tags: string): Promise<{ [key: string]: string }> {
   return tagRef
 }
 
-// Data interfaces
-export interface CreatePageData {
-  title: string
-  url?: string
-  alias: string
-  content: string
-  abstract?: string
-  sub_title?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  image_list?: string
-  tags?: string
-  remark?: string
-  type_id?: number
-  author_id?: number
-  user_id?: number
-  status: number
-}
-
-export type UpdatePageData = Partial<CreatePageData>
-
-export interface PageFilters {
-  title?: string
-  alias?: string
-  sub_title?: string
-  abstract?: string
-  url?: string
-  status?: number
-  type_id?: number
-  author_id?: number
-  user_id?: number
-  sort_min?: number
-  sort_max?: number
-  click_min?: number
-  click_max?: number
-  startTime?: number
-  endTime?: number
-  has_image?: boolean
-  has_tags?: boolean
-}
-
-export interface PagePaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface Page {
-  id: number
-  title: string
-  url?: string
-  alias: string
-  content: string
-  des?: string
-  keywords?: string
-  cover_image?: string
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-  // Additional fields from database
-  abstract?: string
-  author_id?: number
-  click?: number
-  image_list?: string
-  remark?: string
-  seo_description?: string
-  seo_keywords?: string
-  seo_title?: string
-  sub_title?: string
-  tags?: string
-  type_id?: number
-  user_id?: number
-  tagRef?: { [key: string]: string }
-}
-
-export interface PaginatedPagesResult {
-  dataList: Page[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
 export class PageService {
   /**
    * Get single page by ID
    */
-  async getPageById(id: number): Promise<Page | null> {
-    const result = await db
+  async getById(id: number): Promise<PageEntity | null> {
+    const page = await db
       .selectFrom('pages')
-      .leftJoin('categories', 'categories.id', 'pages.type_id')
-      .selectAll('pages')
-      .select(['categories.id as type_id', 'categories.title as type_title'])
-      .where('pages.id', '=', id)
-      .where('pages.is_delete', '=', 0)
+      .selectAll()
+      .where('id', '=', id)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (!result) {
+    if (!page) {
       return null
     }
 
-    // Transform the result to include type information and tagRef
-    const page = result as any
     const tagRef = await getTagRef(page.tags || '')
-
     return {
       ...page,
-      type: page.type_id
-        ? {
-            id: page.type_id,
-            title: page.type_title
-          }
-        : null,
       tagRef
-    } as Page
+    } as PageEntity & { tagRef: { [key: string]: string } }
   }
 
   // get page by url
-
-  async getPageByUrl(url: string): Promise<Page | null> {
-    const result = await db
+  async getPageByUrl(url: string): Promise<PageEntity | null> {
+    const page = await db
       .selectFrom('pages')
-      .leftJoin('categories', 'categories.id', 'pages.type_id')
-      .selectAll('pages')
-      .select(['categories.id as type_id', 'categories.title as type_title'])
-      .where('pages.url', '=', url)
-      .where('pages.is_delete', '=', 0)
+      .selectAll()
+      .where('url', '=', url)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (!result) {
+    if (!page) {
       return null
     }
 
-    // Transform the result to include type information and tagRef
-    const page = result as any
     const tagRef = await getTagRef(page.tags || '')
-
     return {
       ...page,
-      type: page.type_id
-        ? {
-            id: page.type_id,
-            title: page.type_title
-          }
-        : null,
       tagRef
-    } as Page
+    } as PageEntity & { tagRef: { [key: string]: string } }
   }
 
   /**
    * Get page by alias
    */
-  async getPageByAlias(alias: string): Promise<Page | null> {
-    const result = await db
+  async getPageByAlias(alias: string): Promise<PageEntity | null> {
+    const page = await db
       .selectFrom('pages')
       .selectAll()
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    if (!result) {
+    if (!page) {
       return null
     }
 
-    // Add tagRef
-    const tagRef = await getTagRef(result.tags || '')
+    const tagRef = await getTagRef(page.tags || '')
     return {
-      ...result,
+      ...page,
       tagRef
-    } as unknown as Page
+    } as PageEntity & { tagRef: { [key: string]: string } }
   }
 
   /**
    * Get pages list with pagination and filters
    */
-  async getPages(pagination: PagePaginationParams, filters?: PageFilters): Promise<any> {
-    const { page, pageSize } = pagination
+  async getPages(filters: PageFilters): Promise<PaginatedResult<PageEntity>> {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db
-      .selectFrom('pages')
-      .leftJoin('categories', 'categories.id', 'pages.type_id')
-      .selectAll('pages')
-      .select(['categories.id as type_id', 'categories.title as type_title'])
-      .where('pages.is_delete', '=', 0)
+    let query = db.selectFrom('pages').selectAll()
 
     // Apply filters
-    if (filters) {
-      if (filters.title) {
-        query = query.where('pages.title', 'like', `%${filters.title}%`)
-      }
-      if (filters.alias) {
-        query = query.where('pages.alias', 'like', `%${filters.alias}%`)
-      }
-      if (filters.sub_title) {
-        query = query.where('pages.sub_title', 'like', `%${filters.sub_title}%`)
-      }
-      if (filters.abstract) {
-        query = query.where('pages.abstract', 'like', `%${filters.abstract}%`)
-      }
-      if (filters.url) {
-        query = query.where('pages.url', 'like', `%${filters.url}%`)
-      }
-      if (filters.status !== undefined) {
-        query = query.where('pages.status', '=', filters.status)
-      }
-      if (filters.type_id !== undefined) {
-        query = query.where('pages.type_id', '=', filters.type_id)
-      }
-      if (filters.author_id !== undefined && !isNaN(filters.author_id)) {
-        query = query.where('pages.author_id', '=', filters.author_id)
-      }
-      if (filters.user_id !== undefined && !isNaN(filters.user_id)) {
-        query = query.where('pages.user_id', '=', filters.user_id)
-      }
-      if (filters.sort_min !== undefined && !isNaN(filters.sort_min)) {
-        query = query.where(sql.ref('pages.sort'), '>=', filters.sort_min)
-      }
-      if (filters.sort_max !== undefined && !isNaN(filters.sort_max)) {
-        query = query.where(sql.ref('pages.sort'), '<=', filters.sort_max)
-      }
-      if (filters.click_min !== undefined && !isNaN(filters.click_min)) {
-        query = query.where('pages.click', '>=', filters.click_min)
-      }
-      if (filters.click_max !== undefined && !isNaN(filters.click_max)) {
-        query = query.where('pages.click', '<=', filters.click_max)
-      }
-      if (filters.startTime !== undefined) {
-        query = query.where('pages.create_time', '>=', filters.startTime)
-      }
-      if (filters.endTime !== undefined) {
-        query = query.where('pages.create_time', '<=', filters.endTime)
-      }
-      if (filters.has_image === true) {
-        query = query.where('pages.image_list', 'is not', null)
-      }
-      if (filters.has_image === false) {
-        query = query.where('pages.image_list', 'is', null)
-      }
-      if (filters.has_tags === true) {
-        query = query.where('pages.tags', 'is not', null)
-      }
-      if (filters.has_tags === false) {
-        query = query.where('pages.tags', 'is', null)
-      }
+    if (filters.title) {
+      query = query.where('title', 'like', `%${filters.title}%`)
+    }
+    if (filters.alias) {
+      query = query.where('alias', 'like', `%${filters.alias}%`)
+    }
+    if (filters.sub_title) {
+      query = query.where('sub_title', 'like', `%${filters.sub_title}%`)
+    }
+    if (filters.abstract) {
+      query = query.where('abstract', 'like', `%${filters.abstract}%`)
+    }
+    if (filters.url) {
+      query = query.where('url', 'like', `%${filters.url}%`)
+    }
+    if (filters.status !== undefined) {
+      query = query.where('status', '=', filters.status)
+    }
+    if (filters.type_id !== undefined) {
+      query = query.where('type_id', '=', filters.type_id)
+    }
+    if (filters.author_id !== undefined) {
+      query = query.where('author_id', '=', filters.author_id)
+    }
+    if (filters.user_id !== undefined) {
+      query = query.where('user_id', '=', filters.user_id)
+    }
+    if (filters.click !== undefined) {
+      query = query.where('click', '=', filters.click)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('pages.create_time', 'desc')
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [pages, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('pages.id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('pages')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          if (filters.title) {
+            qb = qb.where('title', 'like', `%${filters.title}%`)
+          }
+          if (filters.alias) {
+            qb = qb.where('alias', 'like', `%${filters.alias}%`)
+          }
+          if (filters.sub_title) {
+            qb = qb.where('sub_title', 'like', `%${filters.sub_title}%`)
+          }
+          if (filters.abstract) {
+            qb = qb.where('abstract', 'like', `%${filters.abstract}%`)
+          }
+          if (filters.url) {
+            qb = qb.where('url', 'like', `%${filters.url}%`)
+          }
+          if (filters.status !== undefined) {
+            qb = qb.where('status', '=', filters.status)
+          }
+          if (filters.type_id !== undefined) {
+            qb = qb.where('type_id', '=', filters.type_id)
+          }
+          if (filters.author_id !== undefined) {
+            qb = qb.where('author_id', '=', filters.author_id)
+          }
+          if (filters.user_id !== undefined) {
+            qb = qb.where('user_id', '=', filters.user_id)
+          }
+          if (filters.click !== undefined) {
+            qb = qb.where('click', '=', filters.click)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
-    // Transform the result to include type information and tagRef
-    const transformedPages = await Promise.all(
-      pages.map(async (page: any) => {
+    // Add tagRef for each page
+    const pagesWithTagRef = await Promise.all(
+      pages.map(async (page) => {
         const tagRef = await getTagRef(page.tags || '')
         return {
           ...page,
-          type: page.type_id
-            ? {
-                id: page.type_id,
-                title: page.type_title
-              }
-            : null,
           tagRef
         }
       })
     )
 
     return {
-      dataList: transformedPages as unknown as Page[],
+      dataList: pagesWithTagRef,
       pagination: {
         total: Number(total?.count) || 0,
         page,
@@ -314,35 +212,38 @@ export class PageService {
   /**
    * Create new page
    */
-  async createPage(data: CreatePageData): Promise<Page> {
-    // 新增：处理 tags
-    if (data.tags) {
-      const tagsArr = data.tags
+  async create(createData: CreatePage): Promise<CreateSuccess> {
+    const validatedData = createPageSchema.parse(createData)
+
+    // 处理 tags
+    if (validatedData.tags) {
+      const tagsArr = validatedData.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
     }
 
-    if (!data.url && data.title) {
-      data.url = titleToUrl(data.title)
+    if (!validatedData.url && validatedData.title) {
+      validatedData.url = titleToUrl(validatedData.title)
     }
 
     const now = Date.now()
     const newPage = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('pages').values(newPage).executeTakeFirst()
+    const result = await db.insertInto('pages').values(newPage).executeTakeFirst()
+    if (!result) throw new Error('创建页面失败')
 
     const pageId = Number(result.insertId)
 
     // Sync with flexsearch index
     try {
-      const createdPage = await this.getPageById(pageId)
+      const createdPage = await this.getById(pageId)
       if (createdPage) {
         await flexsearchService.addPage({
           ...createdPage,
@@ -357,44 +258,38 @@ export class PageService {
       console.error('Failed to sync page to flexsearch index:', error)
     }
 
-    return {
-      id: pageId,
-      ...newPage
-    }
+    return { id: pageId }
   }
 
   /**
    * Update page by ID
    */
-  async updatePage(id: number, data: UpdatePageData): Promise<boolean> {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
+  async update(id: number, updateData: UpdatePage): Promise<UpdateSuccess> {
+    const validatedData = updatePageSchema.parse(updateData)
 
-    if (updateData.tags) {
-      const tagsArr = updateData.tags
+    if (validatedData.tags) {
+      const tagsArr = validatedData.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
       await tagService.upsertTags(tagsArr)
     }
 
-    if (!updateData.url && updateData.title) {
-      updateData.url = titleToUrl(updateData.title)
+    if (!validatedData.url && validatedData.title) {
+      validatedData.url = titleToUrl(validatedData.title)
     }
 
     const result = await db
-      .safeUpdateTable('pages')
-      .set(updateData)
+      .updateTable('pages')
+      .set({ ...validatedData, update_time: Date.now() })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     // Sync with flexsearch index
     if (result.numUpdatedRows > 0) {
       try {
-        const updatedPage = await this.getPageById(id)
+        const updatedPage = await this.getById(id)
         if (updatedPage) {
           await flexsearchService.updatePage({
             ...updatedPage,
@@ -410,21 +305,22 @@ export class PageService {
       }
     }
 
-    return result.numUpdatedRows > 0n
+    if (!result) throw new Error('更新页面失败')
+    return { id }
   }
 
   /**
    * Delete page (logical delete)
    */
-  async deletePage(id: number): Promise<boolean> {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('pages')
+      .updateTable('pages')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
     // Sync with flexsearch index
@@ -436,24 +332,24 @@ export class PageService {
       }
     }
 
-    return result.numUpdatedRows > 0n
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get pages by status
    */
-  async getPagesByStatus(status: number): Promise<Page[]> {
-    const result = await db
+  async getPagesByStatus(status: number): Promise<PageEntity[]> {
+    const pages = await db
       .selectFrom('pages')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
 
     // Add tagRef for each page
     const pagesWithTagRef = await Promise.all(
-      result.map(async (page: any) => {
+      pages.map(async (page) => {
         const tagRef = await getTagRef(page.tags || '')
         return {
           ...page,
@@ -462,17 +358,16 @@ export class PageService {
       })
     )
 
-    return pagesWithTagRef as unknown as Page[]
+    return pagesWithTagRef
   }
 
   /**
    * Search pages by title, alias, content or seo_keywords
    */
-  async searchPages(searchTerm: string): Promise<Page[]> {
-    const result = await db
+  async searchPages(searchTerm: string): Promise<PageEntity[]> {
+    const pages = await db
       .selectFrom('pages')
       .selectAll()
-      .where('is_delete', '=', 0)
       .where((eb) =>
         eb.or([
           eb('title', 'like', `%${searchTerm}%`),
@@ -481,12 +376,13 @@ export class PageService {
           eb('seo_keywords', 'like', `%${searchTerm}%`)
         ])
       )
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .execute()
 
     // Add tagRef for each page
     const pagesWithTagRef = await Promise.all(
-      result.map(async (page: any) => {
+      pages.map(async (page) => {
         const tagRef = await getTagRef(page.tags || '')
         return {
           ...page,
@@ -495,19 +391,24 @@ export class PageService {
       })
     )
 
-    return pagesWithTagRef as unknown as Page[]
+    return pagesWithTagRef
   }
 
   /**
    * Get pages count by status
    */
   async getPagesCountByStatus(): Promise<{ status: number; count: number }[]> {
-    return await db
+    const results = await db
       .selectFrom('pages')
-      .select(['status', sql<number>`count(*)`.as('count')])
-      .where('is_delete', '=', 0)
+      .select((eb) => ['status', eb.fn.count('id').as('count')])
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .groupBy('status')
       .execute()
+
+    return results.map((r) => ({
+      status: r.status,
+      count: Number(r.count)
+    }))
   }
 
   /**
@@ -518,7 +419,7 @@ export class PageService {
       .selectFrom('pages')
       .select('id')
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
@@ -539,11 +440,13 @@ export class PageService {
   }> {
     const stats = await db
       .selectFrom('pages')
-      .select([
-        sql<number>`count(*)`.as('total'),
-        sql<number>`sum(case when status = 10 then 1 else 0 end)`.as('active'),
-        sql<number>`sum(case when status = 0 then 1 else 0 end)`.as('inactive'),
-        sql<number>`sum(case when is_delete = 10 then 1 else 0 end)`.as('deleted')
+      .select((eb) => [
+        eb.fn.count('id').as('total'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 10).then(1).else(0).end()).as('active'),
+        eb.fn.sum<number>(eb.case().when('status', '=', 0).then(1).else(0).end()).as('inactive'),
+        eb.fn
+          .sum<number>(eb.case().when('is_delete', '=', DELETE_STATUS.DELETE).then(1).else(0).end())
+          .as('deleted')
       ])
       .executeTakeFirst()
 
@@ -558,18 +461,18 @@ export class PageService {
   /**
    * Get recent pages
    */
-  async getRecentPages(limit: number = 10): Promise<Page[]> {
-    const result = await db
+  async getRecentPages(limit: number = 10): Promise<PageEntity[]> {
+    const pages = await db
       .selectFrom('pages')
       .selectAll()
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
 
     // Add tagRef for each page
     const pagesWithTagRef = await Promise.all(
-      result.map(async (page: any) => {
+      pages.map(async (page) => {
         const tagRef = await getTagRef(page.tags || '')
         return {
           ...page,
@@ -578,7 +481,7 @@ export class PageService {
       })
     )
 
-    return pagesWithTagRef as unknown as Page[]
+    return pagesWithTagRef
   }
 }
 

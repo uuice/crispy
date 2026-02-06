@@ -1,92 +1,90 @@
 import { db } from '@src/libs/db'
-
-export interface CreateConfigData {
-  title: string
-  alias?: string
-  value: string
-  type_id?: number
-  type_ids?: string
-  sort?: number
-  status?: number
-}
-
-export type UpdateConfigData = Partial<CreateConfigData>
-
-export interface ConfigFilters {
-  title?: string
-  alias?: string
-  type_id?: number
-  status?: number
-  start_time?: number
-  end_time?: number
-}
-
-export interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
+import { DELETE_STATUS } from '../config/const'
+import {
+  ConfigEntity,
+  ConfigFilters,
+  CreateConfig,
+  createConfigSchema,
+  CreateSuccess,
+  PaginatedResult,
+  PaginationOptions,
+  UpdateConfig,
+  updateConfigSchema,
+  UpdateSuccess
+} from '@src/types'
 
 export class ConfigService {
   /**
    * Get a single config by ID
+   * @param id Config id
+   * @returns Config or null if not found
    */
-  async getConfigById(id: number) {
-    return await db
+  async getById(id: number): Promise<ConfigEntity | null> {
+    const config = await db
       .selectFrom('configs')
       .selectAll()
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return config || null
   }
 
   /**
    * Get configs with pagination and filters
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of configs and pagination info
    */
-  async getConfigs(
-    filters: ConfigFilters,
-    pagination: PaginationParams
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+  async getConfigs(filters: ConfigFilters): Promise<PaginatedResult<ConfigEntity>> {
+    const { page = 1, pageSize = 10 } = filters
+    const { title, alias, type_id, status } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('configs').selectAll().where('is_delete', '=', 0)
+    let query = db.selectFrom('configs').selectAll()
 
-    // Add filters if provided
-    if (filters.title) {
-      query = query.where('title', 'like', `%${filters.title}%`)
-    }
-    if (filters.alias) {
-      query = query.where('alias', 'like', `%${filters.alias}%`)
-    }
-    if (filters.type_id !== undefined && !isNaN(filters.type_id)) {
-      query = query.where('type_id', '=', filters.type_id)
-    }
-    if (filters.status !== undefined && !isNaN(filters.status)) {
-      query = query.where('status', '=', filters.status)
-    }
-    if (filters.start_time !== undefined) {
-      query = query.where('create_time', '>=', filters.start_time)
-    }
-    if (filters.end_time !== undefined) {
-      query = query.where('create_time', '<=', filters.end_time)
+    // Apply filters
+    if (title) {
+      query = query.where('title', 'like', `%${title}%`)
     }
 
-    // Order by create_time desc by default
-    query = query.orderBy('create_time', 'desc')
+    if (alias) {
+      query = query.where('alias', 'like', `%${alias}%`)
+    }
+
+    if (type_id !== undefined) {
+      query = query.where('type_id', '=', type_id)
+    }
+
+    if (status !== undefined) {
+      query = query.where('status', '=', status)
+    }
+
+    // Default to only non-deleted configs
+    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [configs, total] = await Promise.all([
-      query.limit(pageSize).offset(offset).execute(),
-      query.select((eb) => [eb.fn.count('id').as('count')]).executeTakeFirst()
+      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      db
+        .selectFrom('configs')
+        .select((eb) => [eb.fn.count('id').as('count')])
+        .$call((qb) => {
+          // Apply same filters to count query
+          if (title) {
+            qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (alias) {
+            qb = qb.where('alias', 'like', `%${alias}%`)
+          }
+          if (type_id !== undefined) {
+            qb = qb.where('type_id', '=', type_id)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          return qb
+        })
+        .executeTakeFirst()
     ])
 
     return {
@@ -102,85 +100,85 @@ export class ConfigService {
 
   /**
    * Create a new config
+   * @param createData Config data without id
+   * @returns Created config id
    */
-  async createConfig(data: CreateConfigData) {
+  async create(createData: CreateConfig): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createConfigSchema.parse(createData)
     const now = Date.now()
     const newConfig = {
-      ...data,
+      ...validatedData,
       create_time: now,
       update_time: now,
-      is_delete: 0
+      is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('configs').values(newConfig).executeTakeFirst()
-
-    return {
-      id: Number(result.insertId),
-      ...newConfig
-    }
+    const result = await db.insertInto('configs').values(newConfig).executeTakeFirst()
+    if (!result) throw new Error('创建配置失败')
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update a config
+   * @param id Config id
+   * @param updateData Data to update
+   * @returns Updated config id
    */
-  async updateConfig(id: number, data: UpdateConfigData) {
-    const updateData = {
-      ...data,
-      update_time: Date.now()
-    }
-
+  async update(id: number, updateData: UpdateConfig): Promise<UpdateSuccess> {
+    const validatedData = updateConfigSchema.parse(updateData)
     const result = await db
-      .safeUpdateTable('configs')
-      .set(updateData)
+      .updateTable('configs')
+      .set({
+        ...validatedData,
+        update_time: Date.now()
+      })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    if (!result) throw new Error('更新配置失败')
+    return { id }
   }
 
   /**
    * Upsert a config by alias (insert if not exists, update if exists)
+   * @param createData Config data
+   * @returns Created/updated config info
    */
-  async upsertConfigByAlias(data: CreateConfigData) {
+  async upsertConfigByAlias(createData: CreateConfig) {
     const now = Date.now()
-
-    // Check if config exists by alias
-    const existingConfig = await this.getConfigByAlias(data.alias || '')
+    const existingConfig = await this.getConfigByAlias(createData.alias || '')
 
     if (existingConfig) {
       // Update existing config
-      const updateData = {
-        ...data,
-        update_time: now
-      }
-
-      const result = await db
-        .safeUpdateTable('configs')
-        .set(updateData)
+      await db
+        .updateTable('configs')
+        .set({
+          ...createData,
+          update_time: now
+        })
         .where('id', '=', existingConfig.id)
-        .where('is_delete', '=', 0)
+        .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
         .executeTakeFirst()
 
       return {
         id: existingConfig.id,
-        ...updateData,
+        ...createData,
         create_time: existingConfig.create_time,
+        update_time: now,
         isUpdated: true
       }
     } else {
       // Create new config
       const newConfig = {
-        ...data,
+        ...createData,
         create_time: now,
         update_time: now,
-        is_delete: 0
+        is_delete: DELETE_STATUS.UN_DELETE
       }
 
-      const result = await db.safeInsertInto('configs').values(newConfig).executeTakeFirst()
+      const result = await db.insertInto('configs').values(newConfig).executeTakeFirst()
 
       return {
         id: Number(result.insertId),
@@ -191,46 +189,50 @@ export class ConfigService {
   }
 
   /**
-   * Delete a config (logical delete)
+   * Soft delete config
+   * @param id Config id
+   * @returns true if deleted successfully
    */
-  async deleteConfig(id: number) {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('configs')
+      .updateTable('configs')
       .set({
-        is_delete: 10,
+        is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
       })
       .where('id', '=', id)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    return {
-      success: result.numUpdatedRows > 0,
-      numUpdatedRows: result.numUpdatedRows
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
    * Get config by alias
+   * @param alias Config alias
+   * @returns Config or null if not found
    */
-  async getConfigByAlias(alias: string) {
-    return await db
+  async getConfigByAlias(alias: string): Promise<ConfigEntity | null> {
+    const config = await db
       .selectFrom('configs')
       .selectAll()
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
+    return config || null
   }
 
   /**
    * Get configs by type ID
+   * @param typeId Type id
+   * @param limit Max number of results
+   * @returns List of configs
    */
-  async getConfigsByType(typeId: number, limit = 10) {
+  async getConfigsByType(typeId: number, limit = 10): Promise<ConfigEntity[]> {
     return await db
       .selectFrom('configs')
       .selectAll()
       .where('type_id', '=', typeId)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -239,13 +241,16 @@ export class ConfigService {
 
   /**
    * Get configs by status
+   * @param status Config status
+   * @param limit Max number of results
+   * @returns List of configs
    */
-  async getConfigsByStatus(status: number, limit = 10) {
+  async getConfigsByStatus(status: number, limit = 10): Promise<ConfigEntity[]> {
     return await db
       .selectFrom('configs')
       .selectAll()
       .where('status', '=', status)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -254,13 +259,14 @@ export class ConfigService {
 
   /**
    * Get all active configs
+   * @returns List of active configs
    */
-  async getAllActiveConfigs() {
+  async getAllActiveConfigs(): Promise<ConfigEntity[]> {
     return await db
       .selectFrom('configs')
       .selectAll()
       .where('status', '=', 10)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .execute()
@@ -268,47 +274,58 @@ export class ConfigService {
 
   /**
    * Check if config title already exists
+   * @param title Config title
+   * @param excludeId Config id to exclude from check
+   * @returns true if exists
    */
-  async checkTitleExists(title: string, excludeId?: number) {
+  async checkTitleExists(title: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('configs')
       .select('id')
       .where('title', '=', title)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const result = await query.executeTakeFirst()
+    return !!result
   }
 
   /**
    * Check if config alias already exists
+   * @param alias Config alias
+   * @param excludeId Config id to exclude from check
+   * @returns true if exists
    */
-  async checkAliasExists(alias: string, excludeId?: number) {
+  async checkAliasExists(alias: string, excludeId?: number): Promise<boolean> {
     let query = db
       .selectFrom('configs')
       .select('id')
       .where('alias', '=', alias)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     if (excludeId) {
       query = query.where('id', '!=', excludeId)
     }
 
-    return await query.executeTakeFirst()
+    const result = await query.executeTakeFirst()
+    return !!result
   }
 
   /**
-   * Get configs by title (search)
+   * Search configs by title
+   * @param title Search keyword
+   * @param limit Max number of results
+   * @returns List of configs
    */
-  async searchConfigsByTitle(title: string, limit = 10) {
+  async searchConfigsByTitle(title: string, limit = 10): Promise<ConfigEntity[]> {
     return await db
       .selectFrom('configs')
       .selectAll()
       .where('title', 'like', `%${title}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
@@ -317,48 +334,20 @@ export class ConfigService {
 
   /**
    * Get configs by multiple type IDs
+   * @param typeIds Type IDs string
+   * @param limit Max number of results
+   * @returns List of configs
    */
-  async getConfigsByTypeIds(typeIds: string, limit = 10) {
+  async getConfigsByTypeIds(typeIds: string, limit = 10): Promise<ConfigEntity[]> {
     return await db
       .selectFrom('configs')
       .selectAll()
       .where('type_ids', 'like', `%${typeIds}%`)
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .orderBy('sort', 'asc')
       .orderBy('create_time', 'desc')
       .limit(limit)
       .execute()
-  }
-
-  /**
-   * Get config statistics
-   */
-  async getConfigStats() {
-    const [total, active, byType] = await Promise.all([
-      db
-        .selectFrom('configs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('is_delete', '=', 0)
-        .executeTakeFirst(),
-      db
-        .selectFrom('configs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('status', '=', 10)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst(),
-      db
-        .selectFrom('configs')
-        .select((eb) => [eb.fn.count('id').as('count')])
-        .where('type_id', 'is not', null)
-        .where('is_delete', '=', 0)
-        .executeTakeFirst()
-    ])
-
-    return {
-      total: Number(total?.count) || 0,
-      active: Number(active?.count) || 0,
-      withType: Number(byType?.count) || 0
-    }
   }
 }
 

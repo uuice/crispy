@@ -1,5 +1,4 @@
 import { db } from '@src/libs/db'
-import { z } from 'zod'
 import { generateToken } from '../middleware/jwt'
 import bcrypt from 'bcryptjs'
 import {
@@ -9,142 +8,32 @@ import {
   STATUS_TRUE,
   USER_STATUS
 } from '../config/const'
-
-// Validation schemas
-const createUserSchema = z.object({
-  user_name: z.string().min(1, '用户名不能为空').max(32, '用户名不能超过30个字符'),
-  password: z.string().min(6, '密码至少6个字符'),
-  email: z.string().email('邮箱格式不正确').optional(),
-  phone: z.string().min(11, '手机号不能为空').max(11, '手机号不能超过11个字符').optional(),
-  real_name: z.string().optional(),
-  nick_name: z.string().optional(),
-  avatar_url: z.string().optional(),
-  role_id: z.number().optional(),
-  type_id: z.number().optional(),
-  status: z.number().default(USER_STATUS.ENABLE),
-  is_admin: z.number().default(STATUS_FALSE),
-  is_super_admin: z.number().default(STATUS_FALSE),
-  is_black: z.number().default(STATUS_FALSE)
-})
-
-const updateUserSchema = createUserSchema.partial()
-
-const loginSchema = z.object({
-  user_name: z.string().min(1, '用户名不能为空'),
-  password: z.string().min(1, '密码不能为空')
-})
-
-// Reset password schema
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(6, '原密码至少6个字符').optional(),
-    new_password: z.string().min(6, '新密码至少6个字符'),
-    confirm_password: z.string().min(6, '确认密码至少6个字符')
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: '新密码和确认密码不一致',
-    path: ['confirm_password']
-  })
-
-// Types
-export interface CreateUserData {
-  user_name: string
-  password: string
-  email?: string
-  phone?: string
-  real_name?: string
-  nick_name?: string
-  avatar_url?: string
-  role_id?: number
-  type_id?: number
-  status?: number
-  is_admin?: number
-  is_super_admin?: number
-  is_black?: number
-}
-
-export type UpdateUserData = Partial<CreateUserData>
-
-export interface LoginData {
-  user_name: string
-  password: string
-}
-
-export interface ResetPasswordData {
-  password: string
-  new_password: string
-  confirm_password: string
-}
-
-export interface PaginationOptions {
-  page: number
-  pageSize: number
-  user_name?: string
-  nick_name?: string
-  real_name?: string
-  email?: string
-  phone?: string
-  status?: number
-  isDelete?: number
-  isAdmin?: number
-  is_super_admin?: number
-  is_black?: number
-  role_id?: number
-  type_id?: number
-  start_time?: number
-  end_time?: number
-  last_login_start?: number
-  last_login_end?: number
-}
-
-export interface PaginatedResult<T> {
-  dataList: T[]
-  pagination: {
-    total: number
-    page: number
-    pageSize: number
-    totalPages: number
-  }
-}
-
-export interface LoginResult {
-  user: any
-  token: string
-  menus: any[]
-}
-
-export interface UserFilters {
-  user_name?: string
-  nick_name?: string
-  real_name?: string
-  email?: string
-  phone?: string
-  status?: number
-  isDelete?: number
-  isAdmin?: number
-  is_super_admin?: number
-  is_black?: number
-  role_id?: number
-  type_id?: number
-  start_time?: number
-  end_time?: number
-  last_login_start?: number
-  last_login_end?: number
-  avatar_url?: string
-  password?: string
-  last_login_ip?: string
-  last_login_time?: number
-  update_time?: number
-  create_time?: number
-  id?: number
-}
+import {
+  CreateSuccess,
+  CreateUser,
+  createUserSchema,
+  LoginData,
+  LoginResult,
+  loginSchema,
+  PaginatedResult,
+  PaginationOptions,
+  ResetPasswordData,
+  resetPasswordSchema,
+  UpdateSuccess,
+  UpdateUser,
+  updateUserSchema,
+  UserEntity,
+  UserFilters
+} from '@src/types'
 
 // User Service Class
 export class UserService {
   /**
    * Get a single user by ID
+   * @param id User id
+   * @returns User without password or null if not found
    */
-  async getUserById(id: number): Promise<any> {
+  async getById(id: number): Promise<Omit<UserEntity, 'password'> | null> {
     const user = await db
       .selectFrom('users')
       .selectAll()
@@ -153,7 +42,7 @@ export class UserService {
       .executeTakeFirst()
 
     if (!user) {
-      throw new Error('用户不存在')
+      return null
     }
     const { password: _, ...userWithoutPassword } = user
 
@@ -162,8 +51,10 @@ export class UserService {
 
   /**
    * Get a single user by user_name
+   * @param user_name Username
+   * @returns User without password or null if not found
    */
-  async getUserByUserName(user_name: string): Promise<any> {
+  async getByUserName(user_name: string): Promise<Omit<UserEntity, 'password'> | null> {
     const user = await db
       .selectFrom('users')
       .selectAll()
@@ -172,7 +63,7 @@ export class UserService {
       .executeTakeFirst()
 
     if (!user) {
-      throw new Error('用户不存在')
+      return null
     }
 
     const { password: _, ...userWithoutPassword } = user
@@ -182,12 +73,16 @@ export class UserService {
 
   /**
    * Get users list with pagination
+   * @param filters Filter options
+   * @param options Pagination options
+   * @returns List of users and pagination info
    */
   async getUsers(
-    pagination: { page: number; pageSize: number },
-    filters?: UserFilters
-  ): Promise<PaginatedResult<any>> {
-    const { page, pageSize } = pagination
+    filters: UserFilters
+  ): Promise<
+    PaginatedResult<Omit<UserEntity, 'password'> & { role: { id: number; title: string } | null }>
+  > {
+    const { page = 1, pageSize = 10 } = filters
     const offset = (page - 1) * pageSize
     // Build query conditions with LEFT JOIN to get role information
     let query = db
@@ -196,78 +91,89 @@ export class UserService {
       .selectAll('users')
       .select(['roles.id as role_id', 'roles.title as role_title'])
     // Apply filters
-    if (filters) {
-      const {
-        user_name,
-        nick_name,
-        real_name,
-        email,
-        phone,
-        status,
-        isDelete,
-        isAdmin,
-        is_super_admin,
-        is_black,
-        role_id,
-        type_id,
-        start_time,
-        end_time,
-        last_login_start,
-        last_login_end
-      } = filters
-      if (user_name) {
-        query = query.where('users.user_name', 'like', `%${user_name}%`)
-      }
-      if (nick_name) {
-        query = query.where('users.nick_name', 'like', `%${nick_name}%`)
-      }
-      if (real_name) {
-        query = query.where('users.real_name', 'like', `%${real_name}%`)
-      }
-      if (email) {
-        query = query.where('users.email', 'like', `%${email}%`)
-      }
-      if (phone) {
-        query = query.where('users.phone', 'like', `%${phone}%`)
-      }
-      if (status !== undefined) {
-        query = query.where('users.status', '=', status)
-      }
-      if (isDelete !== undefined) {
-        query = query.where('users.is_delete', '=', isDelete)
-      } else {
-        query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
-      }
-      if (isAdmin !== undefined) {
-        query = query.where('users.is_admin', '=', isAdmin)
-      }
-      if (is_super_admin !== undefined) {
-        query = query.where('users.is_super_admin', '=', is_super_admin)
-      }
-      if (is_black !== undefined) {
-        query = query.where('users.is_black', '=', is_black)
-      }
-      if (role_id !== undefined) {
-        query = query.where('users.role_id', '=', role_id)
-      }
-      if (type_id !== undefined) {
-        query = query.where('users.type_id', '=', type_id)
-      }
-      if (start_time !== undefined) {
-        query = query.where('users.create_time', '>=', start_time)
-      }
-      if (end_time !== undefined) {
-        query = query.where('users.create_time', '<=', end_time)
-      }
-      if (last_login_start !== undefined) {
-        query = query.where('users.last_login_time', '>=', last_login_start)
-      }
-      if (last_login_end !== undefined) {
-        query = query.where('users.last_login_time', '<=', last_login_end)
-      }
+    const {
+      user_name,
+      nick_name,
+      real_name,
+      email,
+      phone,
+      status,
+      is_delete,
+      is_admin,
+      is_super_admin,
+      is_black,
+      role_id,
+      type_id,
+      create_time_start,
+      create_time_end,
+      last_login_start,
+      last_login_end
+    } = filters
+
+    if (user_name) {
+      query = query.where('users.user_name', 'like', `%${user_name}%`)
+    }
+
+    if (nick_name) {
+      query = query.where('users.nick_name', 'like', `%${nick_name}%`)
+    }
+
+    if (real_name) {
+      query = query.where('users.real_name', 'like', `%${real_name}%`)
+    }
+
+    if (email) {
+      query = query.where('users.email', 'like', `%${email}%`)
+    }
+
+    if (phone) {
+      query = query.where('users.phone', 'like', `%${phone}%`)
+    }
+
+    if (status !== undefined) {
+      query = query.where('users.status', '=', status)
+    }
+
+    if (is_delete !== undefined) {
+      query = query.where('users.is_delete', '=', is_delete)
     } else {
-      // Default to only non-deleted users
       query = query.where('users.is_delete', '=', DELETE_STATUS.UN_DELETE)
+    }
+
+    if (is_admin !== undefined) {
+      query = query.where('users.is_admin', '=', is_admin)
+    }
+
+    if (is_super_admin !== undefined) {
+      query = query.where('users.is_super_admin', '=', is_super_admin)
+    }
+
+    if (is_black !== undefined) {
+      query = query.where('users.is_black', '=', is_black)
+    }
+
+    if (role_id !== undefined) {
+      query = query.where('users.role_id', '=', role_id)
+    }
+
+    if (type_id !== undefined) {
+      query = query.where('users.type_id', '=', type_id)
+    }
+
+    if (create_time_start !== undefined) {
+      query = query.where('users.create_time', '>=', create_time_start)
+    }
+
+    if (create_time_end !== undefined) {
+      query = query.where('users.create_time', '<=', create_time_end)
+    }
+
+    if (last_login_start !== undefined) {
+      query = query.where('users.last_login_time', '>=', last_login_start)
+    }
+
+    if (last_login_end !== undefined) {
+      query = query.where('users.last_login_time', '<=', last_login_end)
     }
     const [users, total] = await Promise.all([
       query.limit(pageSize).offset(offset).execute(),
@@ -275,77 +181,56 @@ export class UserService {
         .selectFrom('users')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
-          if (filters) {
-            const {
-              user_name,
-              nick_name,
-              real_name,
-              email,
-              phone,
-              status,
-              isDelete,
-              isAdmin,
-              is_super_admin,
-              is_black,
-              role_id,
-              type_id,
-              start_time,
-              end_time,
-              last_login_start,
-              last_login_end
-            } = filters
-            if (user_name) {
-              qb = qb.where('user_name', 'like', `%${user_name}%`)
-            }
-            if (nick_name) {
-              qb = qb.where('nick_name', 'like', `%${nick_name}%`)
-            }
-            if (real_name) {
-              qb = qb.where('real_name', 'like', `%${real_name}%`)
-            }
-            if (email) {
-              qb = qb.where('email', 'like', `%${email}%`)
-            }
-            if (phone) {
-              qb = qb.where('phone', 'like', `%${phone}%`)
-            }
-            if (status !== undefined) {
-              qb = qb.where('status', '=', status)
-            }
-            if (isDelete !== undefined) {
-              qb = qb.where('is_delete', '=', isDelete)
-            } else {
-              qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
-            }
-            if (isAdmin !== undefined) {
-              qb = qb.where('is_admin', '=', isAdmin)
-            }
-            if (is_super_admin !== undefined) {
-              qb = qb.where('is_super_admin', '=', is_super_admin)
-            }
-            if (is_black !== undefined) {
-              qb = qb.where('is_black', '=', is_black)
-            }
-            if (role_id !== undefined) {
-              qb = qb.where('role_id', '=', role_id)
-            }
-            if (type_id !== undefined) {
-              qb = qb.where('type_id', '=', type_id)
-            }
-            if (start_time !== undefined) {
-              qb = qb.where('create_time', '>=', start_time)
-            }
-            if (end_time !== undefined) {
-              qb = qb.where('create_time', '<=', end_time)
-            }
-            if (last_login_start !== undefined) {
-              qb = qb.where('last_login_time', '>=', last_login_start)
-            }
-            if (last_login_end !== undefined) {
-              qb = qb.where('last_login_time', '<=', last_login_end)
-            }
+          // Apply same filters to count query
+          if (user_name) {
+            qb = qb.where('user_name', 'like', `%${user_name}%`)
+          }
+          if (nick_name) {
+            qb = qb.where('nick_name', 'like', `%${nick_name}%`)
+          }
+          if (real_name) {
+            qb = qb.where('real_name', 'like', `%${real_name}%`)
+          }
+          if (email) {
+            qb = qb.where('email', 'like', `%${email}%`)
+          }
+          if (phone) {
+            qb = qb.where('phone', 'like', `%${phone}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where('status', '=', status)
+          }
+          if (is_delete !== undefined) {
+            qb = qb.where('is_delete', '=', is_delete)
           } else {
             qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+          }
+          if (is_admin !== undefined) {
+            qb = qb.where('is_admin', '=', is_admin)
+          }
+          if (is_super_admin !== undefined) {
+            qb = qb.where('is_super_admin', '=', is_super_admin)
+          }
+          if (is_black !== undefined) {
+            qb = qb.where('is_black', '=', is_black)
+          }
+          if (role_id !== undefined) {
+            qb = qb.where('role_id', '=', role_id)
+          }
+          if (type_id !== undefined) {
+            qb = qb.where('type_id', '=', type_id)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (last_login_start !== undefined) {
+            qb = qb.where('last_login_time', '>=', last_login_start)
+          }
+          if (last_login_end !== undefined) {
+            qb = qb.where('last_login_time', '<=', last_login_end)
           }
           return qb
         })
@@ -378,10 +263,12 @@ export class UserService {
 
   /**
    * Create a new user
+   * @param createData User data without id
+   * @returns Created user id
    */
-  async createUser(userData: CreateUserData): Promise<any> {
-    // Validate input data
-    const validatedData = createUserSchema.parse(userData)
+  async create(createData: CreateUser): Promise<CreateSuccess> {
+    // 验证
+    const validatedData = createUserSchema.parse(createData)
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(validatedData.password, salt)
     const now = Date.now()
@@ -393,24 +280,22 @@ export class UserService {
       is_delete: DELETE_STATUS.UN_DELETE
     }
 
-    const result = await db.safeInsertInto('users').values(newUser).executeTakeFirst()
+    const result = await db.insertInto('users').values(newUser).executeTakeFirst()
+    if (!result) throw new Error('创建用户失败')
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = {
-      id: Number(result.insertId),
-      ...newUser
-    }
-
-    return userWithoutPassword
+    return { id: Number(result.insertId) }
   }
 
   /**
    * Update an existing user
+   * @param id User id
+   * @param updateData Data to update
+   * @returns Updated user id
    */
-  async updateUser(id: number, userData: UpdateUserData): Promise<any> {
-    // Validate input data
-    const validatedData = updateUserSchema.parse(userData)
-    const updateData: any = {
+  async update(id: number, updateData: UpdateUser): Promise<UpdateSuccess> {
+    // 验证
+    const validatedData = updateUserSchema.parse(updateData)
+    const newUpdateData: any = {
       ...validatedData,
       update_time: Date.now()
     }
@@ -418,12 +303,12 @@ export class UserService {
     // Hash password if it's being updated
     if (validatedData.password) {
       const salt = await bcrypt.genSalt(10)
-      updateData.password = await bcrypt.hash(validatedData.password, salt)
+      newUpdateData.password = await bcrypt.hash(validatedData.password, salt)
     }
 
     const result = await db
-      .safeUpdateTable('users')
-      .set(updateData)
+      .updateTable('users')
+      .set(newUpdateData)
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
@@ -432,17 +317,17 @@ export class UserService {
       throw new Error('用户不存在')
     }
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = { id, ...updateData }
-    return userWithoutPassword
+    return { id }
   }
 
   /**
-   * Delete a user (logical delete)
+   * Soft delete user
+   * @param id User id
+   * @returns true if deleted successfully
    */
-  async deleteUser(id: number): Promise<void> {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .safeUpdateTable('users')
+      .updateTable('users')
       .set({
         is_delete: DELETE_STATUS.DELETE,
         update_time: Date.now()
@@ -450,10 +335,7 @@ export class UserService {
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    if (result.numUpdatedRows === 0n) {
-      throw new Error('用户不存在')
-    }
+    return Number(result.numUpdatedRows) > 0
   }
 
   /**
@@ -500,7 +382,7 @@ export class UserService {
 
     // Update last login time
     await db
-      .safeUpdateTable('users')
+      .updateTable('users')
       .set({
         last_login_time: Date.now()
       })
@@ -631,7 +513,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(new_password, salt)
     // Update password
     const result = await db
-      .safeUpdateTable('users')
+      .updateTable('users')
       .set({
         password: hashedPassword,
         update_time: Date.now()
@@ -647,6 +529,8 @@ export class UserService {
 
   /**
    * Check if user exists by username
+   * @param username Username
+   * @returns true if exists
    */
   async userExistsByUsername(username: string): Promise<boolean> {
     const user = await db
@@ -661,6 +545,8 @@ export class UserService {
 
   /**
    * Check if user exists by email
+   * @param email Email
+   * @returns true if exists
    */
   async userExistsByEmail(email: string): Promise<boolean> {
     const user = await db
@@ -673,12 +559,15 @@ export class UserService {
     return !!user
   }
 
-  // 统计用户总数
+  /**
+   * Count total users
+   * @returns Total user count
+   */
   async countUsers(): Promise<number> {
     const result = await db
       .selectFrom('users')
       .select((eb) => [eb.fn.count('id').as('count')])
-      .where('is_delete', '=', 0)
+      .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
     return Number(result?.count) || 0
   }
@@ -686,6 +575,3 @@ export class UserService {
 
 // Export service instance
 export const userService = new UserService()
-
-// Export schemas for validation
-export { createUserSchema, updateUserSchema, loginSchema, resetPasswordSchema }
