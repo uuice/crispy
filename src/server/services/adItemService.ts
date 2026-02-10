@@ -20,7 +20,7 @@ export class AdItemService {
    * @param id Ad item id
    * @returns Ad item or null if not found
    */
-  async getAdItemById(id: number): Promise<AdItemEntity | null> {
+  async getById(id: number): Promise<AdItemEntity | null> {
     const adItem = await db
       .selectFrom('ad_items')
       .selectAll()

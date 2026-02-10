@@ -267,7 +267,7 @@ export interface Articles {
    */
   is_markdown: Generated<number>;
   /**
-   * 是否需要审核 10需要 -10不需要
+   * 是否需要审核 1需要 0不需要
    */
   is_review: Generated<number>;
   /**
@@ -1228,11 +1228,11 @@ export interface Users {
    */
   id: Generated<number>;
   /**
-   * 是否管理员
+   * 是否管理员 1是 0否
    */
   is_admin: Generated<number>;
   /**
-   * 是否黑名单 10 -10
+   * 是否黑名单 1是 0否
    */
   is_black: Generated<number>;
   /**
@@ -1240,7 +1240,7 @@ export interface Users {
    */
   is_delete: Generated<number>;
   /**
-   * 是否系统管理员 10 -10
+   * 是否系统管理员 1是 0否
    */
   is_super_admin: Generated<number>;
   /**
@@ -1377,7 +1377,7 @@ export interface Votes {
    */
   is_delete: Generated<number>;
   /**
-   * 是否多选 10 多选 -10 单选
+   * 是否多选 1多选 0单选
    */
   is_multiple: Generated<number>;
   /**

@@ -69,7 +69,7 @@ export function AdItemSingle(): void {
 
     let adItem
     if (id) {
-      adItem = await adItemService.getAdItemById(id)
+      adItem = await adItemService.getById(id)
     } else if (title) {
       // Note: adItemService doesn't have getAdItemByTitle method, so we'll use getAdItems with title filter
       const filters: any = { title }

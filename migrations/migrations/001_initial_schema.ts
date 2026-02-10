@@ -424,7 +424,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(0)
-        .modifyEnd(sql`COMMENT '是否需要审核 10需要 -10不需要'`)
+        .modifyEnd(sql`COMMENT '是否需要审核 1需要 0不需要'`)
     )
     .addColumn('image_list', 'varchar(500)', (col) =>
       col
@@ -2041,13 +2041,13 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(0)
-        .modifyEnd(sql`COMMENT '是否系统管理员 10 -10'`)
+        .modifyEnd(sql`COMMENT '是否系统管理员 1是 0否'`)
     )
     .addColumn('is_black', 'smallint', (col) =>
       col
         .notNull()
         .defaultTo(0)
-        .modifyEnd(sql`COMMENT '是否黑名单 10 -10'`)
+        .modifyEnd(sql`COMMENT '是否黑名单 1是 0否'`)
     )
     .addColumn('role_id', 'integer', (col) =>
       col
@@ -2073,7 +2073,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(0)
-        .modifyEnd(sql`COMMENT '是否管理员'`)
+        .modifyEnd(sql`COMMENT '是否管理员 1是 0否'`)
     )
     .addColumn('create_time', 'bigint', (col) =>
       col
@@ -2203,7 +2203,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(0)
-        .modifyEnd(sql`COMMENT '是否多选 10 多选 -10 单选'`)
+        .modifyEnd(sql`COMMENT '是否多选 1多选 0单选'`)
     )
     .addColumn('status', 'smallint', (col) =>
       col
