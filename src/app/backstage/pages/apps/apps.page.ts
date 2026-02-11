@@ -16,31 +16,12 @@ import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { AppsDetailComponent } from './apps-detail.component'
 import { AvatarModule } from 'primeng/avatar'
-
-interface AccessToken {
-  id: number
-  app_name: string
-  channel: string
-  token: string
-  status: number // 10=启用, -10=未启用
-  create_time: number
-  update_time: number
-  is_delete: number
-  user_id: number
-}
+import { AccessTokenEntity, PaginatedResult } from '@src/types'
 
 interface AccessTokensResponse {
   success: boolean
   message: string
-  data: {
-    dataList: AccessToken[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<AccessTokenEntity>
 }
 
 @Component({
@@ -200,12 +181,12 @@ interface AccessTokensResponse {
   styles: []
 })
 export class AppsPage implements OnInit {
-  accessTokens: WritableSignal<AccessToken[]> = signal<AccessToken[]>([])
+  accessTokens: WritableSignal<AccessTokenEntity[]> = signal<AccessTokenEntity[]>([])
   loading = signal(false)
   app_name = signal('')
   channel = signal('')
   selectedStatus = signal<number | null>(null)
-  selectedToken = signal<AccessToken | null>(null)
+  selectedToken = signal<AccessTokenEntity | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
@@ -311,7 +292,7 @@ export class AppsPage implements OnInit {
     return status === 10 ? '启用' : '未启用'
   }
 
-  confirmDeleteToken(token: AccessToken) {
+  confirmDeleteToken(token: AccessTokenEntity) {
     this.confirmationService.confirm({
       message: `确定要删除应用 "${token.app_name}" 吗？此操作不可撤销。`,
       header: '删除应用确认',
@@ -356,12 +337,12 @@ export class AppsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(token: AccessToken) {
+  openEditDialog(token: AccessTokenEntity) {
     this.selectedToken.set(token)
     this.isDetailVisible.set(true)
   }
 
-  onTokenSaved(tokenData: AccessToken) {
+  onTokenSaved(tokenData: AccessTokenEntity) {
     if (tokenData.id) {
       // Update access token
       this.httpService.put<any>(`/api/admin/access-token/${tokenData.id}`, tokenData).subscribe({

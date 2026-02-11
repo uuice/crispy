@@ -13,19 +13,7 @@ import { ConfirmationService, MessageService, TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CategoryDetailComponent } from './category-detail.component'
 import { SYSTEM_CATEGORY_ALIAS, SYSTEM_CATEGORY_PARENT_ID_LIST } from '@src/shared/const'
-
-interface CategoryNode {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  parent_id: number
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-  children?: CategoryNode[]
-}
+import { CategoryEntityNested } from '@src/types'
 
 @Component({
   selector: 'cs-categories',
@@ -200,7 +188,7 @@ interface CategoryNode {
 export class CategoriesPage implements OnInit {
   categories = signal<TreeNode[]>([])
   loading = signal(false)
-  selectedCategory = signal<CategoryNode | null>(null)
+  selectedCategory = signal<CategoryEntityNested | null>(null)
   isDetailVisible = signal(false)
   alias = signal<string | null>(null)
 
@@ -253,7 +241,7 @@ export class CategoriesPage implements OnInit {
     })
   }
 
-  convertToTreeNodes(nodes: CategoryNode[]): TreeNode[] {
+  convertToTreeNodes(nodes: CategoryEntityNested[]): TreeNode[] {
     return nodes.map((node) => ({
       data: node,
       children: node.children ? this.convertToTreeNodes(node.children) : undefined,
@@ -274,7 +262,7 @@ export class CategoriesPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(category: CategoryNode) {
+  openEditDialog(category: CategoryEntityNested) {
     if (this.isSystemCategory(category)) {
       this.messageService.add({
         severity: 'error',
@@ -298,7 +286,7 @@ export class CategoriesPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(category: CategoryNode) {
+  confirmDelete(category: CategoryEntityNested) {
     if (this.isSystemCategory(category)) {
       this.messageService.add({
         severity: 'error',
@@ -346,7 +334,7 @@ export class CategoriesPage implements OnInit {
     })
   }
 
-  isSystemCategory(category: CategoryNode): boolean {
+  isSystemCategory(category: CategoryEntityNested): boolean {
     return (
       SYSTEM_CATEGORY_PARENT_ID_LIST.includes(category.parent_id) &&
       category.alias.endsWith(SYSTEM_CATEGORY_ALIAS)

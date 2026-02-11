@@ -16,32 +16,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-interface Rule {
-  id: number
-  title: string
-  alias: string
-  condition?: string
-  des?: string
-  icon?: string
-  module_id: number
-  parent_id: number
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-}
-
-interface RuleNode {
-  id: number
-  title: string
-  alias: string
-  children?: RuleNode[]
-  status?: number
-  sort?: number
-  condition?: string
-}
+import { RuleEntity, RuleTreeItem } from '@src/types'
 
 @Component({
   selector: 'cs-rule-detail',
@@ -236,7 +211,7 @@ interface RuleNode {
   ]
 })
 export class RuleDetailComponent implements OnInit, OnChanges {
-  @Input() rule: Rule | null = null
+  @Input() rule: RuleEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
@@ -244,7 +219,7 @@ export class RuleDetailComponent implements OnInit, OnChanges {
   visible = signal(true)
   ruleForm: FormGroup
   submitting = signal(false)
-  parentOptions = signal<RuleNode[]>([])
+  parentOptions = signal<RuleTreeItem[]>([])
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -322,8 +297,8 @@ export class RuleDetailComponent implements OnInit, OnChanges {
     })
   }
 
-  flattenTreeData(nodes: RuleNode[]): RuleNode[] {
-    let result: RuleNode[] = []
+  flattenTreeData(nodes: RuleTreeItem[]): RuleTreeItem[] {
+    let result: RuleTreeItem[] = []
     nodes.forEach((node) => {
       result.push(node)
       if (node.children && node.children.length > 0) {

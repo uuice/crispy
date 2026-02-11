@@ -15,54 +15,12 @@ import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'
 import Vditor from 'vditor'
-
-interface Article {
-  id: number
-  title: string
-  url: string
-  content: string
-  markdown_content?: string
-  is_markdown?: number
-  abstract?: string
-  sub_title?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  image?: string
-  image_list?: string
-  tags?: string
-  remark?: string
-  type_id?: number
-  type_ids?: string
-  author_id?: number
-  user_id?: number
-  status: number // 10=已发布, -10=待发布, -20=草稿箱, -100=已删除
-  click?: number
-  is_review?: number
-  redirect_url?: string
-  attrs?: string
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-interface Category {
-  id: number
-  title: string
-  alias?: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { ArticleEntity, CategoryEntityNested } from '@src/types'
 
 interface CategoriesResponse {
   success: boolean
   message: string
-  data: Category[]
+  data: CategoryEntityNested[]
 }
 
 @Component({
@@ -495,10 +453,10 @@ interface CategoriesResponse {
   ]
 })
 export class PostDetailComponent implements OnInit {
-  @Input() article: Article | null = null
+  @Input() article: ArticleEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
 
-  @Output() saved = new EventEmitter<Article>()
+  @Output() saved = new EventEmitter<ArticleEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true)
@@ -639,9 +597,9 @@ export class PostDetailComponent implements OnInit {
     return this.flattenCategories(this.availableCategories())
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -676,7 +634,7 @@ export class PostDetailComponent implements OnInit {
     ]
   }
 
-  loadFormData(article: Article) {
+  loadFormData(article: ArticleEntity) {
     // Convert tags string to array for autoComplete component
     const tags = article.tags
       ? article.tags
@@ -800,23 +758,23 @@ export class PostDetailComponent implements OnInit {
         })
       }
 
-      const articleData: Partial<Article> = {
+      const articleData: Partial<ArticleEntity> = {
         ...sanitizedData,
         id: this.currentArticle()?.id || 0
       }
 
       console.log('content:', formData.content)
 
-      this.saved.emit(articleData as Article)
+      this.saved.emit(articleData as ArticleEntity)
       this.submitting.set(false)
     } else {
       this.articleForm.markAllAsTouched()
     }
   }
 
-  currentArticle = signal<Article | null>(null)
+  currentArticle = signal<ArticleEntity | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
-  availableCategories = signal<Category[]>([])
+  availableCategories = signal<CategoryEntityNested[]>([])
 
   // AutoComplete properties and methods
   filteredTags: string[] = []

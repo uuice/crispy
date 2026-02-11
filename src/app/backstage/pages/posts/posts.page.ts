@@ -16,69 +16,18 @@ import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { PostDetailComponent } from './post-detail.component'
 import { CheckboxModule } from 'primeng/checkbox'
-
-interface Article {
-  id: number
-  title: string
-  url: string
-  content: string
-  markdown_content?: string
-  is_markdown?: number
-  abstract?: string
-  sub_title?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  image?: string
-  image_list?: string
-  tags?: string
-  remark?: string
-  type_id?: number
-  type_ids?: string
-  author_id?: number
-  user_id?: number
-  type_name?: string
-  status: number // 10=已发布, -10=待发布, -20=草稿箱, -100=已删除
-  click?: number
-  is_review?: number
-  redirect_url?: string
-  attrs?: string
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-interface Category {
-  id: number
-  title: string
-  alias?: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { ArticleWithCategory, CategoryEntityNested, PaginatedResult } from '@src/types'
 
 interface ArticlesResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Article[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<ArticleWithCategory>
 }
 
 interface CategoriesResponse {
   success: boolean
   message: string
-  data: Category[]
+  data: CategoryEntityNested[]
 }
 
 @Component({
@@ -384,20 +333,20 @@ interface CategoriesResponse {
   ]
 })
 export class PostsPage implements OnInit {
-  articles: WritableSignal<Article[]> = signal<Article[]>([])
+  articles: WritableSignal<ArticleWithCategory[]> = signal<ArticleWithCategory[]>([])
   loading = signal(false)
   title = signal('')
   abstract = signal('')
   statusValue = signal<number | null>(null)
   categoryValue = signal<number | null>(null)
-  selectedArticle = signal<Article | null>(null)
+  selectedArticle = signal<ArticleWithCategory | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
-  categories = signal<Category[]>([])
+  categories = signal<CategoryEntityNested[]>([])
   isDetailVisible = signal(false)
   previewVisible = signal(false)
-  previewArticleData = signal<Article | null>(null)
+  previewArticleData = signal<ArticleWithCategory | null>(null)
   attrsOptions = signal<{ label: string; value: string }[]>([])
   attrsCheckedMap: { [id: number]: string[] } = {}
 
@@ -520,9 +469,9 @@ export class PostsPage implements OnInit {
       })
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -577,7 +526,7 @@ export class PostsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(article: Article) {
+  openEditDialog(article: ArticleWithCategory) {
     // Get full article data for editing
     this.httpService.get<any>(`/api/admin/articles/${article.id}`).subscribe({
       next: (response) => {
@@ -603,7 +552,7 @@ export class PostsPage implements OnInit {
     })
   }
 
-  onArticleSaved(articleData: Article) {
+  onArticleSaved(articleData: ArticleWithCategory) {
     if (articleData.id) {
       // Update article
       this.httpService.put<any>(`/api/admin/articles/${articleData.id}`, articleData).subscribe({
@@ -672,12 +621,12 @@ export class PostsPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  previewArticle(article: Article) {
+  previewArticle(article: ArticleWithCategory) {
     this.previewArticleData.set(article)
     this.previewVisible.set(true)
   }
 
-  confirmDelete(article: Article) {
+  confirmDelete(article: ArticleWithCategory) {
     this.confirmationService.confirm({
       message: `确定要删除文章 "${article.title}" 吗？此操作不可恢复。`,
       header: '删除确认',
@@ -759,7 +708,7 @@ export class PostsPage implements OnInit {
   }
 
   // Handle attribute checkbox change
-  onAttrsChange(article: Article, checkedList: string[]) {
+  onAttrsChange(article: ArticleWithCategory, checkedList: string[]) {
     const newAttrs = checkedList.join(',')
     this.httpService.put<any>(`/api/admin/articles/${article.id}`, { attrs: newAttrs }).subscribe({
       next: (res) => {

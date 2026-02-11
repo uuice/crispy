@@ -13,23 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { RuleDetailComponent } from './rule-detail.component'
-
-interface RuleNode {
-  id: number
-  title: string
-  alias: string
-  condition?: string
-  des?: string
-  icon?: string
-  module_id: number
-  parent_id: number
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-  children?: RuleNode[]
-}
+import { RuleTreeItem } from '@src/types'
 
 @Component({
   selector: 'cs-rules',
@@ -197,7 +181,7 @@ interface RuleNode {
 export class RulesPage implements OnInit {
   rules = signal<TreeNode[]>([])
   loading = signal(false)
-  selectedRule = signal<RuleNode | null>(null)
+  selectedRule = signal<RuleTreeItem | null>(null)
   isDetailVisible = signal(false)
 
   constructor(
@@ -241,7 +225,7 @@ export class RulesPage implements OnInit {
     })
   }
 
-  convertToTreeNodes(rules: RuleNode[]): TreeNode[] {
+  convertToTreeNodes(rules: RuleTreeItem[]): TreeNode[] {
     return rules.map((rule) => ({
       data: rule,
       children: rule.children ? this.convertToTreeNodes(rule.children) : undefined,
@@ -262,7 +246,7 @@ export class RulesPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(rule: RuleNode) {
+  openEditDialog(rule: RuleTreeItem) {
     this.selectedRule.set(rule)
     this.isDetailVisible.set(true)
   }
@@ -278,7 +262,7 @@ export class RulesPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(rule: RuleNode) {
+  confirmDelete(rule: RuleTreeItem) {
     this.confirmationService.confirm({
       message: `确定要删除规则 "${rule.title}" 吗？`,
       header: '删除确认',

@@ -8,37 +8,7 @@ import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
-
-interface Admin {
-  id: number
-  user_name: string
-  nick_name: string
-  email: string
-  phone: string
-  status: number // 10=正常，-10=禁用
-  is_admin: number // 1=管理员，0=普通用户
-  is_super_admin: number // 1=超级管理员，0=普通管理员
-  is_black: number // 1=黑名单，0=正常
-  last_login_time: number
-  avatar_url: string
-  create_time: number
-  update_time: number
-  role_id?: number
-  type_id?: number
-}
-
-interface Role {
-  id: number
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-}
+import { UserEntity, RoleEntity } from '@src/types'
 
 @Component({
   selector: 'cs-admin-detail',
@@ -267,11 +237,11 @@ interface Role {
   ]
 })
 export class AdminDetailComponent implements OnInit {
-  @Input() admin: Admin | null = null
-  @Input() roles: Role[] = []
+  @Input() admin: UserEntity | null = null
+  @Input() roles: RoleEntity[] = []
   @Input() mode: 'edit' | 'create' = 'create'
 
-  @Output() saved = new EventEmitter<Admin>()
+  @Output() saved = new EventEmitter<UserEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true) // Always visible when component is rendered
@@ -356,7 +326,7 @@ export class AdminDetailComponent implements OnInit {
     ]
   }
 
-  loadFormData(admin: Admin) {
+  loadFormData(admin: UserEntity) {
     this.adminForm.patchValue({
       user_name: admin.user_name,
       password: '',
@@ -430,20 +400,20 @@ export class AdminDetailComponent implements OnInit {
       formData.is_admin = 1
       // formData.is_super_admin = 0
 
-      const adminData: Partial<Admin> = {
+      const adminData: Partial<UserEntity> = {
         ...formData,
         id: this.currentAdmin()?.id || 0
       }
 
-      this.saved.emit(adminData as Admin)
+      this.saved.emit(adminData as UserEntity)
       this.submitting.set(false)
     } else {
       this.adminForm.markAllAsTouched()
     }
   }
 
-  currentAdmin = signal<Admin | null>(null)
-  availableRoles = signal<Role[]>([])
+  currentAdmin = signal<UserEntity | null>(null)
+  availableRoles = signal<RoleEntity[]>([])
   currentMode = signal<'edit' | 'create'>('create')
   avatars: string[] = []
   buildAvatars(): string[] {

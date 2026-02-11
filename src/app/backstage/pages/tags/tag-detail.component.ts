@@ -14,19 +14,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-export interface Tag {
-  id: number
-  title: string
-  alias?: string
-  des?: string
-  value?: string
-  type_id?: number
-  status: number
-  sort: number
-  create_time: number
-  update_time: number
-}
+import { TagEntity } from '@src/types'
 
 @Component({
   selector: 'cs-tag-detail',
@@ -182,7 +170,7 @@ export interface Tag {
   ]
 })
 export class TagDetailComponent implements OnInit, OnChanges {
-  @Input() tag: Tag | null = null
+  @Input() tag: TagEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
@@ -236,7 +224,6 @@ export class TagDetailComponent implements OnInit, OnChanges {
     if (this.tag && this.mode === 'edit') {
       this.tagForm.patchValue({
         title: this.tag.title,
-        alias: this.tag.alias || '',
         des: this.tag.des || '',
         value: this.tag.value || '',
         type_id: this.tag.type_id || null,

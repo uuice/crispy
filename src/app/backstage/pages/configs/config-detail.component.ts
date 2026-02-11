@@ -16,19 +16,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-interface Config {
-  id: number
-  title: string
-  alias?: string
-  value: string
-  type_id?: number
-  type_ids?: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-}
+import { ConfigEntity } from '@src/types'
 
 @Component({
   selector: 'cs-config-detail',
@@ -214,7 +202,7 @@ interface Config {
   ]
 })
 export class ConfigDetailComponent implements OnInit, OnChanges {
-  @Input() config: Config | null = null
+  @Input() config: ConfigEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()

@@ -14,18 +14,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-export interface SpecialTag {
-  id: number
-  title: string
-  alias?: string
-  type: number
-  status: number
-  sort: number
-  remark?: string
-  create_time: number
-  update_time: number
-}
+import { AttrEntity } from '@src/types'
 
 @Component({
   selector: 'cs-attr-detail',
@@ -112,19 +101,6 @@ export interface SpecialTag {
               />
             </div>
           </div>
-          <div class="col-12">
-            <div class="field">
-              <label for="remark" class="block text-900 font-medium mb-2">备注</label>
-              <input
-                id="remark"
-                type="text"
-                pInputText
-                formControlName="remark"
-                placeholder="请输入备注"
-                class="w-full"
-              />
-            </div>
-          </div>
         </div>
       </form>
       <ng-template pTemplate="footer">
@@ -155,7 +131,7 @@ export interface SpecialTag {
   ]
 })
 export class AttrDetailComponent implements OnInit, OnChanges {
-  @Input() tag: SpecialTag | null = null
+  @Input() tag: AttrEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
@@ -173,8 +149,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
       title: ['', [Validators.required, Validators.minLength(2)]],
       alias: [''],
       status: [10],
-      sort: [0],
-      remark: ['']
+      sort: [0]
     })
   }
 
@@ -184,8 +159,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
         title: '',
         alias: '',
         status: 10,
-        sort: 0,
-        remark: ''
+        sort: 0
       })
       this.initializeForm()
     })
@@ -207,8 +181,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
         title: this.tag.title,
         alias: this.tag.alias || '',
         status: this.tag.status,
-        sort: this.tag.sort,
-        remark: this.tag.remark || ''
+        sort: this.tag.sort
       })
     } else if (this.mode === 'create') {
       this.resetForm()
@@ -221,8 +194,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
       title: '',
       alias: '',
       status: 10,
-      sort: 0,
-      remark: ''
+      sort: 0
     })
   }
 

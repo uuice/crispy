@@ -11,7 +11,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'
 import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { Tag, TagDetailComponent } from './tag-detail.component'
+import { TagDetailComponent } from './tag-detail.component'
+import { TagEntity } from '@src/types'
 
 @Component({
   selector: 'cs-tags',
@@ -176,10 +177,10 @@ import { Tag, TagDetailComponent } from './tag-detail.component'
   `
 })
 export class TagsPage implements OnInit {
-  tags = signal<Tag[]>([])
+  tags = signal<TagEntity[]>([])
   loading = signal(false)
   total = signal(0)
-  selectedTag = signal<Tag | null>(null)
+  selectedTag = signal<TagEntity | null>(null)
   isDetailVisible = signal(false)
   page = signal(1)
   pageSize = signal(10)
@@ -273,7 +274,7 @@ export class TagsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(tag: Tag) {
+  openEditDialog(tag: TagEntity) {
     this.selectedTag.set(tag)
     this.isDetailVisible.set(true)
   }
@@ -289,7 +290,7 @@ export class TagsPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(tag: Tag) {
+  confirmDelete(tag: TagEntity) {
     this.confirmationService.confirm({
       message: `确定要删除标签 "${tag.title}" 吗？`,
       header: '删除确认',

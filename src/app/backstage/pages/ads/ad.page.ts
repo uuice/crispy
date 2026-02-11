@@ -14,6 +14,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AdDetailComponent } from './ad-detail.component'
 import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
+import { AdEntity } from '@src/types'
 
 @Component({
   selector: 'cs-ads',
@@ -179,14 +180,14 @@ import { AdItemListDialogComponent } from './ad-item-list-dialog.component'
   styles: [``]
 })
 export class AdvertisementsPage implements OnInit {
-  ads: WritableSignal<any[]> = signal([])
+  ads: WritableSignal<AdEntity[]> = signal([])
   loading = signal(false)
   pageSize = signal(10)
   totalRecords = signal(0)
   searchTitle = signal('')
   searchStatus = signal<number | null>(null)
   isDetailVisible = signal(false)
-  selectedAd = signal<any>(null)
+  selectedAd = signal<AdEntity | null>(null)
   isAdItemListVisible = signal(false)
   selectedAdId = signal(0)
 
@@ -238,7 +239,7 @@ export class AdvertisementsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(ad: any) {
+  openEditDialog(ad: AdEntity) {
     this.selectedAd.set({ ...ad })
     this.isDetailVisible.set(true)
   }
@@ -254,7 +255,7 @@ export class AdvertisementsPage implements OnInit {
     this.selectedAd.set(null)
   }
 
-  openAdItemListDialog(ad: any) {
+  openAdItemListDialog(ad: AdEntity) {
     this.selectedAdId.set(ad.id)
     this.isAdItemListVisible.set(true)
   }
@@ -275,7 +276,7 @@ export class AdvertisementsPage implements OnInit {
     this.loadAds(1)
   }
 
-  confirmDelete(ad: any) {
+  confirmDelete(ad: AdEntity) {
     this.confirmationService.confirm({
       message: `确定要删除广告 "${ad.title}" 吗？`,
       header: '删除确认',

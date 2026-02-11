@@ -16,68 +16,25 @@ import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { AdminDetailComponent } from './admin-detail.component'
 import { AvatarModule } from 'primeng/avatar'
+import { UserEntity, RoleEntity, PaginatedResult } from '@src/types'
 
-interface Admin {
-  id: number
-  user_name: string
-  nick_name: string
-  email: string
-  phone: string
-  status: number // 10=正常，-10=禁用
-  is_admin: number // 1=管理员，0=普通用户
-  is_super_admin: number // 1=超级管理员，0=普通管理员
-  is_black: number // 1=黑名单，0=正常
-  last_login_time: number
-  avatar_url: string
-  create_time: number
-  update_time: number
-  role_id?: number
-  type_id?: number
+interface UserWithRole extends UserEntity {
   role?: {
     id: number
     title: string
   }
 }
 
-interface Role {
-  id: number
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-}
-
 interface AdminsResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Admin[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<UserWithRole>
 }
 
 interface RolesResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Role[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<RoleEntity>
 }
 
 @Component({
@@ -293,16 +250,16 @@ interface RolesResponse {
   styles: []
 })
 export class AdminsPage implements OnInit {
-  admins: WritableSignal<Admin[]> = signal<Admin[]>([])
+  admins: WritableSignal<UserWithRole[]> = signal<UserWithRole[]>([])
   loading = signal(false)
   user_name = signal('')
   selectedStatus = signal<number | null>(null)
   selectedRole = signal<number | null>(null)
-  selectedAdmin = signal<Admin | null>(null)
+  selectedAdmin = signal<UserWithRole | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
-  roles = signal<Role[]>([])
+  roles = signal<RoleEntity[]>([])
   isDetailVisible = signal(false)
 
   statusOptions = signal([
@@ -446,12 +403,12 @@ export class AdminsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(admin: Admin) {
+  openEditDialog(admin: UserWithRole) {
     this.selectedAdmin.set(admin)
     this.isDetailVisible.set(true)
   }
 
-  onAdminSaved(adminData: Admin) {
+  onAdminSaved(adminData: UserWithRole) {
     if (adminData.id) {
       // Update admin
       this.httpService.put<any>(`/api/admin/users/${adminData.id}`, adminData).subscribe({
@@ -520,7 +477,7 @@ export class AdminsPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmRevokeAdmin(admin: Admin) {
+  confirmRevokeAdmin(admin: UserWithRole) {
     this.confirmationService.confirm({
       message: `确定要取消 "${admin.user_name}" 的管理员权限吗？取消后该用户将变为普通用户。`,
       header: '取消管理员权限确认',

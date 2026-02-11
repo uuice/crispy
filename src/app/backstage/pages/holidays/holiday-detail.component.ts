@@ -15,16 +15,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-interface Holiday {
-  id: number
-  title: string
-  value: string
-  sort: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { HolidayEntity } from '@src/types'
 
 @Component({
   selector: 'cs-holiday-detail',
@@ -161,7 +152,7 @@ interface Holiday {
   ]
 })
 export class HolidayDetailComponent implements OnInit, OnChanges {
-  @Input() holiday: Holiday | null = null
+  @Input() holiday: HolidayEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()

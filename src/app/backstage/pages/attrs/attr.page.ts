@@ -12,6 +12,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AttrDetailComponent } from './attr-detail.component'
+import { AttrEntity } from '@src/types'
 
 @Component({
   selector: 'cs-attrs',
@@ -168,10 +169,10 @@ import { AttrDetailComponent } from './attr-detail.component'
   `
 })
 export class AttrsPage implements OnInit {
-  tags = signal<any[]>([])
+  tags = signal<AttrEntity[]>([])
   loading = signal(false)
   total = signal(0)
-  selectedTag = signal<any | null>(null)
+  selectedTag = signal<AttrEntity | null>(null)
   isDetailVisible = signal(false)
   page = 1
   pageSize = 10
@@ -274,7 +275,7 @@ export class AttrsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(tag: any) {
+  openEditDialog(tag: AttrEntity) {
     this.selectedTag.set(tag)
     this.isDetailVisible.set(true)
   }
@@ -290,7 +291,7 @@ export class AttrsPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(tag: any) {
+  confirmDelete(tag: AttrEntity) {
     this.confirmationService.confirm({
       message: `确定要删除特殊标签 "${tag.title}" 吗？`,
       header: '删除确认',

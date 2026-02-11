@@ -15,67 +15,18 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { PageDetailComponent } from './page-detail.component'
-
-interface Page {
-  id: number
-  title: string
-  url: string
-  alias: string
-  content: string
-  markdown_content?: string
-  is_markdown?: number
-  abstract?: string
-  sub_title?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  image_list?: string
-  tags?: string
-  remark?: string
-  type_id?: number
-  author_id?: number
-  user_id?: number
-  status: number // 10=正常，-10=禁用
-  create_time: number
-  update_time: number
-  is_delete: number
-  type?: {
-    id: number
-    title: string
-  }
-}
-
-interface Category {
-  id: number
-  title: string
-  alias?: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { PageEntity, CategoryEntityNested, PaginatedResult } from '@src/types'
 
 interface PagesResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Page[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<PageEntity>
 }
 
 interface CategoriesResponse {
   success: boolean
   message: string
-  data: Category[]
+  data: CategoryEntityNested[]
 }
 
 @Component({
@@ -300,17 +251,17 @@ interface CategoriesResponse {
   ]
 })
 export class PagesPage implements OnInit {
-  pages: WritableSignal<Page[]> = signal<Page[]>([])
+  pages: WritableSignal<PageEntity[]> = signal<PageEntity[]>([])
   loading = signal(false)
   title = signal('')
   alias = signal('')
   selectedStatus = signal<number | null>(null)
   selectedCategory = signal<number | null>(null)
-  selectedPage = signal<Page | null>(null)
+  selectedPage = signal<PageEntity | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
-  categories = signal<Category[]>([])
+  categories = signal<CategoryEntityNested[]>([])
   isDetailVisible = signal(false)
 
   statusOptions = signal([
@@ -439,9 +390,9 @@ export class PagesPage implements OnInit {
       })
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -466,7 +417,7 @@ export class PagesPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(page: Page) {
+  openEditDialog(page: PageEntity) {
     // Get full page data for editing
     this.httpService.get<any>(`/api/admin/pages/${page.id}`).subscribe({
       next: (response) => {
@@ -492,7 +443,7 @@ export class PagesPage implements OnInit {
     })
   }
 
-  onPageSaved(pageData: Page) {
+  onPageSaved(pageData: PageEntity) {
     if (pageData.id) {
       // Update page
       this.httpService.put<any>(`/api/admin/pages/${pageData.id}`, pageData).subscribe({
@@ -561,7 +512,7 @@ export class PagesPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(page: Page) {
+  confirmDelete(page: PageEntity) {
     this.confirmationService.confirm({
       message: `确定要删除页面 "${page.title}" 吗？此操作不可恢复。`,
       header: '删除确认',

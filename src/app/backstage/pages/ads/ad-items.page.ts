@@ -13,20 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AdItemDetailComponent } from './ad-item-detail.component'
-
-interface AdItem {
-  id: number
-  ad_id: number
-  title: string
-  content: string
-  url: string
-  image_url: string
-  method: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-}
+import { AdItemEntity } from '@src/types'
 
 interface AdsOption {
   id: number
@@ -192,14 +179,14 @@ interface AdsOption {
   styles: []
 })
 export class AdItemsPage implements OnInit {
-  adItems: WritableSignal<AdItem[]> = signal([])
+  adItems: WritableSignal<AdItemEntity[]> = signal([])
   adsOptions: WritableSignal<AdsOption[]> = signal([])
   loading = signal(false)
   totalRecords = signal(0)
   selectedAdId = signal<number | null>(null)
   searchTitle = signal('')
   searchStatus = signal<number | null>(null)
-  selectedAdItem = signal<AdItem | null>(null)
+  selectedAdItem = signal<AdItemEntity | null>(null)
   isDetailVisible = signal(false)
   currentPage = signal(1)
   pageSize = signal(20)
@@ -292,12 +279,12 @@ export class AdItemsPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(item: AdItem) {
+  openEditDialog(item: AdItemEntity) {
     this.selectedAdItem.set({ ...item })
     this.isDetailVisible.set(true)
   }
 
-  onAdItemSaved(itemData: Partial<AdItem>) {
+  onAdItemSaved(itemData: Partial<AdItemEntity>) {
     const apiCall = itemData.id
       ? this.httpService.put<any>(`/api/admin/ad-items/${itemData.id}`, itemData)
       : this.httpService.post<any>('/api/admin/ad-items', itemData)
@@ -334,7 +321,7 @@ export class AdItemsPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(item: AdItem) {
+  confirmDelete(item: AdItemEntity) {
     this.confirmationService.confirm({
       message: `确定要删除广告项 "${item.title}" 吗？`,
       header: '删除确认',

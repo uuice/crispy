@@ -8,20 +8,11 @@ import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { CacheDetailComponent } from './cache-detail.component'
 import { MessageModule } from 'primeng/message'
+import { CacheEntity } from '@src/types'
 
 interface CacheStats {
   memory: { size: number; keys: string[] }
   database: { total: number; active: number; expired: number }
-}
-
-interface DbCache {
-  id: number
-  hash: string
-  cache_data: string
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
 }
 
 interface MemoryCacheItem {
@@ -187,12 +178,12 @@ export class CachePage implements OnInit {
   selectedKey = signal<string | null>(null)
   isDetailVisible = signal(false)
 
-  dbCaches = signal<DbCache[]>([])
+  dbCaches = signal<CacheEntity[]>([])
   dbPage = signal(1)
   dbPageSize = signal(20)
   dbTotal = signal(0)
   dbLoading = signal(false)
-  selectedDbCache = signal<DbCache | null>(null)
+  selectedDbCache = signal<CacheEntity | null>(null)
   isDbDetailVisible = signal(false)
 
   private http = inject(HttpService)
@@ -276,7 +267,7 @@ export class CachePage implements OnInit {
     this.loadDbCaches()
   }
 
-  openDbDetail(cache: DbCache) {
+  openDbDetail(cache: CacheEntity) {
     this.selectedDbCache.set(cache)
     this.isDbDetailVisible.set(true)
   }
@@ -286,7 +277,7 @@ export class CachePage implements OnInit {
     this.selectedDbCache.set(null)
   }
 
-  deleteDbCache(cache: DbCache) {
+  deleteDbCache(cache: CacheEntity) {
     this.http.delete(`/api/admin/page-cache/database/${cache.hash}`).subscribe({
       next: () => {
         this.message.add({ severity: 'success', summary: '成功', detail: '数据库缓存已删除' })

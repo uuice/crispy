@@ -16,35 +16,12 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { JobDetailComponent } from './job-detail.component'
-
-interface Job {
-  id: number
-  title: string
-  content: string
-  address?: string
-  branch?: string
-  email?: string
-  nature?: string
-  num: number
-  typeName?: string
-  sort?: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { JobEntity, PaginatedResult } from '@src/types'
 
 interface JobsResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Job[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<JobEntity>
 }
 
 @Component({
@@ -237,13 +214,13 @@ interface JobsResponse {
   ]
 })
 export class JobPage implements OnInit {
-  jobs: WritableSignal<Job[]> = signal<Job[]>([])
+  jobs: WritableSignal<JobEntity[]> = signal<JobEntity[]>([])
   loading = signal(false)
   title = signal('')
   typeName = signal('')
   nature = signal('')
   branch = signal('')
-  selectedJob = signal<Job | null>(null)
+  selectedJob = signal<JobEntity | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
@@ -327,7 +304,7 @@ export class JobPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(job: Job) {
+  openEditDialog(job: JobEntity) {
     this.httpService.get<any>(`/api/admin/jobs/${job.id}`).subscribe({
       next: (response) => {
         if (response.success) {
@@ -352,7 +329,7 @@ export class JobPage implements OnInit {
     })
   }
 
-  onJobSaved(jobData: Job) {
+  onJobSaved(jobData: JobEntity) {
     if (jobData.id) {
       this.httpService.put<any>(`/api/admin/jobs/${jobData.id}`, jobData).subscribe({
         next: (response) => {
@@ -419,7 +396,7 @@ export class JobPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(job: Job) {
+  confirmDelete(job: JobEntity) {
     this.confirmationService.confirm({
       message: `确定要删除招聘信息 "${job.title}" 吗？此操作不可恢复。`,
       header: '删除确认',

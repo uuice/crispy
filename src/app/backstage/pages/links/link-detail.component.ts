@@ -25,32 +25,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { TextareaModule } from 'primeng/textarea'
 import { HttpService } from '../../services/http.service'
-
-interface FriendLink {
-  id: number
-  title: string
-  url: string
-  description?: string
-  logo?: string
-  sort: number
-  status: number
-  type_id?: number
-  create_time: number
-  update_time: number
-}
-
-interface Category {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  parent_id: number
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { LinkEntity, CategoryEntityNested } from '@src/types'
 
 @Component({
   selector: 'cs-link-detail',
@@ -83,20 +58,20 @@ interface Category {
       <form [formGroup]="friendLinkForm" (ngSubmit)="onSubmit()">
         <div class="formgrid grid">
           <div class="field col-12">
-            <label for="title" class="block text-900 font-medium mb-2">链接名称 *</label>
+            <label for="site_name" class="block text-900 font-medium mb-2">链接名称 *</label>
             <input
-              id="title"
+              id="site_name"
               type="text"
               pInputText
-              formControlName="title"
+              formControlName="site_name"
               placeholder="请输入链接名称"
               class="w-full"
-              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('title') }"
+              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('site_name') }"
             />
-            @if (isFieldInvalid('title')) {
+            @if (isFieldInvalid('site_name')) {
               <p-message
                 severity="error"
-                [text]="getErrorMessage('title')"
+                [text]="getErrorMessage('site_name')"
                 styleClass="mt-1"
               ></p-message>
             }
@@ -213,13 +188,13 @@ interface Category {
   ]
 })
 export class LinkDetailComponent implements OnInit, OnChanges {
-  @Input() friendLink: FriendLink | null = null
+  @Input() friendLink: LinkEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
-  @Output() saved = new EventEmitter<Partial<FriendLink>>()
+  @Output() saved = new EventEmitter<Partial<LinkEntity>>()
   @Output() cancelled = new EventEmitter<void>()
 
   submitting = signal(false)
-  categories = signal<Category[]>([])
+  categories = signal<CategoryEntityNested[]>([])
   friendLinkForm: FormGroup
 
   statusOptions = [
@@ -233,7 +208,7 @@ export class LinkDetailComponent implements OnInit, OnChanges {
     private httpService: HttpService
   ) {
     this.friendLinkForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(2)]],
+      site_name: ['', [Validators.required, Validators.minLength(2)]],
       url: ['', [Validators.required, Validators.pattern('https?://.+')]],
       des: [''],
       logo: [''],
@@ -269,9 +244,9 @@ export class LinkDetailComponent implements OnInit, OnChanges {
     })
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -292,9 +267,9 @@ export class LinkDetailComponent implements OnInit, OnChanges {
       this.friendLinkForm.patchValue(this.friendLink)
     } else {
       this.friendLinkForm.reset({
-        title: '',
+        site_name: '',
         url: '',
-        description: '',
+        des: '',
         logo: '',
         type_id: null,
         sort: 0,
@@ -334,7 +309,7 @@ export class LinkDetailComponent implements OnInit, OnChanges {
   onSubmit() {
     if (this.friendLinkForm.valid) {
       this.submitting.set(true)
-      const formData: Partial<FriendLink> = {
+      const formData: Partial<LinkEntity> = {
         ...this.friendLinkForm.value
       }
       if (this.friendLink) {

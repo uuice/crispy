@@ -15,22 +15,7 @@ import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { SelectModule } from 'primeng/select'
-
-interface MenuNode {
-  id: number
-  title: string
-  alias: string
-  icon?: string
-  url?: string
-  image_url?: string
-  method?: string
-  sort: number
-  status: number
-  parent_id: number
-  create_time: number
-  update_time: number
-  children?: MenuNode[]
-}
+import { MenuEntity, MenuTreeItem } from '@src/types'
 
 @Component({
   selector: 'cs-menu-detail',
@@ -237,7 +222,7 @@ interface MenuNode {
   ]
 })
 export class MenuDetailComponent implements OnInit, OnChanges {
-  @Input() menu: MenuNode | null = null
+  @Input() menu: MenuEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
@@ -245,7 +230,7 @@ export class MenuDetailComponent implements OnInit, OnChanges {
   visible = signal(true)
   menuForm: FormGroup
   submitting = signal(false)
-  parentOptions = signal<MenuNode[]>([])
+  parentOptions = signal<MenuTreeItem[]>([])
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -312,8 +297,8 @@ export class MenuDetailComponent implements OnInit, OnChanges {
     })
   }
 
-  flattenTreeData(nodes: MenuNode[]): MenuNode[] {
-    let result: MenuNode[] = []
+  flattenTreeData(nodes: MenuTreeItem[]): MenuTreeItem[] {
+    let result: MenuTreeItem[] = []
     nodes.forEach((node) => {
       result.push(node)
       if (node.children && node.children.length > 0) {

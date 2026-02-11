@@ -8,22 +8,7 @@ import { SelectModule } from 'primeng/select'
 import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
-
-interface Job {
-  id: number
-  title: string
-  content: string
-  address?: string
-  branch?: string
-  email?: string
-  nature?: string
-  num: number
-  typeName?: string
-  sort?: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { JobEntity } from '@src/types'
 
 @Component({
   selector: 'cs-job-detail',
@@ -199,9 +184,9 @@ interface Job {
   ]
 })
 export class JobDetailComponent implements OnInit {
-  @Input() job: Job | null = null
+  @Input() job: JobEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
-  @Output() saved = new EventEmitter<Job>()
+  @Output() saved = new EventEmitter<JobEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true)
@@ -234,7 +219,7 @@ export class JobDetailComponent implements OnInit {
     return this.mode === 'create' ? 'Create Job' : 'Edit Job'
   }
 
-  loadFormData(job: Job) {
+  loadFormData(job: JobEntity) {
     this.jobForm.patchValue({
       title: job.title,
       typeName: job.typeName || '',
@@ -276,11 +261,11 @@ export class JobDetailComponent implements OnInit {
     if (this.jobForm.valid) {
       this.submitting.set(true)
       const formData = this.jobForm.value
-      const jobData: Partial<Job> = {
+      const jobData: Partial<JobEntity> = {
         ...formData,
         id: this.job?.id || 0
       }
-      this.saved.emit(jobData as Job)
+      this.saved.emit(jobData as JobEntity)
       this.submitting.set(false)
     } else {
       this.jobForm.markAllAsTouched()

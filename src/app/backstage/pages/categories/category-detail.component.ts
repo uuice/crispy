@@ -16,26 +16,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-interface Category {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  parent_id: number
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-}
-
-interface CategoryNode {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  children?: CategoryNode[]
-}
+import { CategoryEntity, CategoryEntityNested } from '@src/types'
 
 @Component({
   selector: 'cs-category-detail',
@@ -202,7 +183,7 @@ interface CategoryNode {
   ]
 })
 export class CategoryDetailComponent implements OnInit, OnChanges {
-  @Input() category: Category | null = null
+  @Input() category: CategoryEntityNested | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()
@@ -210,7 +191,7 @@ export class CategoryDetailComponent implements OnInit, OnChanges {
   visible = signal(true)
   categoryForm: FormGroup
   submitting = signal(false)
-  parentOptions = signal<CategoryNode[]>([])
+  parentOptions = signal<CategoryEntityNested[]>([])
 
   statusOptions = [
     { label: '启用', value: 10 },
@@ -284,8 +265,8 @@ export class CategoryDetailComponent implements OnInit, OnChanges {
     })
   }
 
-  flattenTreeData(nodes: CategoryNode[]): CategoryNode[] {
-    let result: CategoryNode[] = []
+  flattenTreeData(nodes: CategoryEntityNested[]): CategoryEntityNested[] {
+    let result: CategoryEntityNested[] = []
     nodes.forEach((node) => {
       result.push(node)
       if (node.children && node.children.length > 0) {

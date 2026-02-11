@@ -9,22 +9,7 @@ import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { HttpService } from '../../services/http.service'
-
-interface User {
-  id: number
-  user_name: string
-  nick_name: string
-  email: string
-  phone: string
-  status: number // 10=正常，-10=禁用
-  is_admin: number // 1=管理员，0=普通用户
-  is_super_admin: number // 1=超级管理员，0=普通管理员
-  is_black: number // 1=黑名单，0=正常
-  last_login_time: number
-  avatar_url: string
-  create_time: number
-  update_time: number
-}
+import { UserEntity } from '@src/types'
 
 @Component({
   selector: 'cs-user-detail',
@@ -239,10 +224,10 @@ interface User {
   ]
 })
 export class UserDetailComponent implements OnInit {
-  @Input() user: User | null = null
+  @Input() user: UserEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
 
-  @Output() saved = new EventEmitter<User>()
+  @Output() saved = new EventEmitter<UserEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true) // Always visible when component is rendered
@@ -319,7 +304,7 @@ export class UserDetailComponent implements OnInit {
     ]
   }
 
-  loadFormData(user: User) {
+  loadFormData(user: UserEntity) {
     this.userForm.patchValue({
       user_name: user.user_name,
       password: '',
@@ -395,7 +380,7 @@ export class UserDetailComponent implements OnInit {
         formData.is_super_admin = 0
       }
 
-      const userData: Partial<User> = {
+      const userData: Partial<UserEntity> = {
         ...formData,
         id: this.currentUser()?.id || 0
       }
@@ -410,7 +395,7 @@ export class UserDetailComponent implements OnInit {
                 summary: '成功',
                 detail: '用户创建成功'
               })
-              this.saved.emit(userData as User)
+              this.saved.emit(userData as UserEntity)
             } else {
               this.messageService.add({
                 severity: 'error',
@@ -443,7 +428,7 @@ export class UserDetailComponent implements OnInit {
                   summary: '成功',
                   detail: '用户更新成功'
                 })
-                this.saved.emit(userData as User)
+                this.saved.emit(userData as UserEntity)
               } else {
                 this.messageService.add({
                   severity: 'error',
@@ -470,7 +455,7 @@ export class UserDetailComponent implements OnInit {
     }
   }
 
-  currentUser = signal<User | null>(null)
+  currentUser = signal<UserEntity | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
 
   avatars: string[] = []

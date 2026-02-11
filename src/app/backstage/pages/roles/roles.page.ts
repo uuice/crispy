@@ -13,32 +13,12 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { RoleDetailComponent } from './role-detail.component'
-
-interface Role {
-  id: number
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-}
+import { RoleEntity, PaginatedResult } from '@src/types'
 
 interface RolesResponse {
   success: boolean
   message: string
-  data: {
-    dataList: Role[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<RoleEntity>
 }
 
 @Component({
@@ -182,11 +162,11 @@ interface RolesResponse {
   styles: [``]
 })
 export class RolesPage implements OnInit {
-  roles: WritableSignal<Role[]> = signal([])
+  roles: WritableSignal<RoleEntity[]> = signal([])
   loading = signal(false)
   titleValue = signal('')
   statusValue = signal<number | null>(null)
-  selectedRole = signal<Role | null>(null)
+  selectedRole = signal<RoleEntity | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
@@ -272,12 +252,12 @@ export class RolesPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(role: Role) {
+  openEditDialog(role: RoleEntity) {
     this.selectedRole.set({ ...role })
     this.isDetailVisible.set(true)
   }
 
-  onRoleSaved(roleData: Partial<Role>) {
+  onRoleSaved(roleData: Partial<RoleEntity>) {
     const apiCall = roleData.id
       ? this.httpService.put<any>(`/api/admin/roles/${roleData.id}`, roleData)
       : this.httpService.post<any>('/api/admin/roles', roleData)
@@ -317,7 +297,7 @@ export class RolesPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(role: Role) {
+  confirmDelete(role: RoleEntity) {
     this.confirmationService.confirm({
       message: `确定要删除角色 "${role.title}" 吗？`,
       header: '删除确认',

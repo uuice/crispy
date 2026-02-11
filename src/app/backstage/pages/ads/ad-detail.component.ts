@@ -16,21 +16,7 @@ import { MessageService } from 'primeng/api'
 import { DatePickerModule } from 'primeng/datepicker'
 import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
-
-interface Advertisement {
-  id?: number
-  title: string
-  alias?: string
-  content?: string
-  // image_url?: string
-  // link_url?: string
-  // position?: string
-  start_time?: number
-  end_time?: number
-  status: number
-  sort?: number
-  type_id?: number
-}
+import { AdEntity } from '@src/types'
 
 @Component({
   selector: 'cs-ad-detail',
@@ -243,7 +229,7 @@ interface Advertisement {
   ]
 })
 export class AdDetailComponent implements OnInit, OnChanges {
-  @Input() ad: Advertisement | null = null
+  @Input() ad: AdEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Output() saved = new EventEmitter<void>()
   @Output() cancelled = new EventEmitter<void>()

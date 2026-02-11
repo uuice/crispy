@@ -9,30 +9,12 @@ import { ToastModule } from 'primeng/toast'
 import { HttpService } from '../../services/http.service'
 import { MessageService } from 'primeng/api'
 import { OperateLogDetailComponent } from './operate-log-detail.component'
-
-interface OperateLog {
-  id: number
-  code: string
-  content: string
-  type_id: number
-  user_id: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { OperateLogEntity, PaginatedResult } from '@src/types'
 
 interface OperateLogsResponse {
   success: boolean
   message: string
-  data: {
-    dataList: OperateLog[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<OperateLogEntity>
 }
 
 @Component({
@@ -166,7 +148,7 @@ interface OperateLogsResponse {
   styles: []
 })
 export class OperateLogsPage implements OnInit {
-  logs: WritableSignal<OperateLog[]> = signal([])
+  logs: WritableSignal<OperateLogEntity[]> = signal([])
   loading = signal(false)
   totalRecords = signal(0)
   currentPage = signal(1)
@@ -176,7 +158,7 @@ export class OperateLogsPage implements OnInit {
   searchKeyword = signal('')
   searchStartTime = signal('')
   searchEndTime = signal('')
-  selectedLog = signal<OperateLog | null>(null)
+  selectedLog = signal<OperateLogEntity | null>(null)
   detailVisible = signal(false)
 
   private httpService = inject(HttpService)
@@ -245,7 +227,7 @@ export class OperateLogsPage implements OnInit {
     })
   }
 
-  openDetail(log: OperateLog) {
+  openDetail(log: OperateLogEntity) {
     this.selectedLog.set(log)
     this.detailVisible.set(true)
   }

@@ -13,47 +13,12 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { LinkDetailComponent } from './link-detail.component'
-
-interface FriendLink {
-  id: number
-  title: string
-  url: string
-  des?: string
-  logo?: string
-  method?: string
-  sort: number
-  status: number
-  type_id?: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-interface Category {
-  id: number
-  title: string
-  alias: string
-  des?: string
-  parent_id: number
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { LinkEntity, CategoryEntityNested, PaginatedResult } from '@src/types'
 
 interface FriendLinksResponse {
   success: boolean
   message: string
-  data: {
-    dataList: FriendLink[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<LinkEntity>
 }
 
 @Component({
@@ -230,13 +195,13 @@ interface FriendLinksResponse {
   ]
 })
 export class LinksPage implements OnInit {
-  friendLinks: WritableSignal<FriendLink[]> = signal([])
-  categories: WritableSignal<Category[]> = signal([])
+  friendLinks: WritableSignal<LinkEntity[]> = signal([])
+  categories: WritableSignal<CategoryEntityNested[]> = signal([])
   loading = signal(false)
   titleValue = signal('')
   categoryValue = signal<number | null>(null)
   statusValue = signal<number | null>(null)
-  selectedFriendLink = signal<FriendLink | null>(null)
+  selectedFriendLink = signal<LinkEntity | null>(null)
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
@@ -248,7 +213,7 @@ export class LinksPage implements OnInit {
     { label: '禁用', value: -10 }
   ])
 
-  categoryOptions = signal<Category[]>([])
+  categoryOptions = signal<CategoryEntityNested[]>([])
 
   private confirmationService = inject(ConfirmationService)
   private messageService = inject(MessageService)
@@ -289,9 +254,9 @@ export class LinksPage implements OnInit {
     })
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -375,15 +340,15 @@ export class LinksPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(link: FriendLink) {
+  openEditDialog(link: LinkEntity) {
     this.selectedFriendLink.set({ ...link })
     this.isDetailVisible.set(true)
   }
 
-  onFriendLinkSaved(linkData: Partial<FriendLink>) {
+  onFriendLinkSaved(linkData: Partial<LinkEntity>) {
     // Transform the data to match the backend API
     const transformedData = {
-      site_name: linkData.title,
+      site_name: linkData.site_name,
       url: linkData.url,
       des: linkData.des || '',
       logo: linkData.logo || '',
@@ -431,9 +396,9 @@ export class LinksPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(link: FriendLink) {
+  confirmDelete(link: LinkEntity) {
     this.confirmationService.confirm({
-      message: `确定要删除友情链接 "${link.title}" 吗？`,
+      message: `确定要删除友情链接 "${link.site_name}" 吗？`,
       header: '删除确认',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {

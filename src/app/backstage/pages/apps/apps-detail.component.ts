@@ -8,18 +8,7 @@ import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
-
-interface AccessToken {
-  id: number
-  app_name: string
-  channel: string
-  token: string
-  status: number // 10=启用, -10=未启用
-  create_time: number
-  update_time: number
-  is_delete: number
-  user_id: number
-}
+import { AccessTokenEntity } from '@src/types'
 
 @Component({
   selector: 'cs-apps-detail',
@@ -189,10 +178,10 @@ interface AccessToken {
   ]
 })
 export class AppsDetailComponent implements OnInit {
-  @Input() accessToken: AccessToken | null = null
+  @Input() accessToken: AccessTokenEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
 
-  @Output() saved = new EventEmitter<AccessToken>()
+  @Output() saved = new EventEmitter<AccessTokenEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true) // Always visible when component is rendered
@@ -261,7 +250,7 @@ export class AppsDetailComponent implements OnInit {
     ]
   }
 
-  loadFormData(token: AccessToken) {
+  loadFormData(token: AccessTokenEntity) {
     this.adminForm.patchValue({
       app_name: token.app_name,
       token: token.token,
@@ -317,19 +306,19 @@ export class AppsDetailComponent implements OnInit {
       this.submitting.set(true)
       const formData = this.adminForm.value
 
-      const tokenData: Partial<AccessToken> = {
+      const tokenData: Partial<AccessTokenEntity> = {
         ...formData,
         id: this.currentToken()?.id || 0
       }
 
-      this.saved.emit(tokenData as AccessToken)
+      this.saved.emit(tokenData as AccessTokenEntity)
       this.submitting.set(false)
     } else {
       this.adminForm.markAllAsTouched()
     }
   }
 
-  currentToken = signal<AccessToken | null>(null)
+  currentToken = signal<AccessTokenEntity | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
 
   /**

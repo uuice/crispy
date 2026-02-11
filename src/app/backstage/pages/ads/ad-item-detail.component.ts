@@ -25,20 +25,7 @@ import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { FileUploadModule } from 'primeng/fileupload'
 import { HttpHeaders } from '@angular/common/http'
-
-interface AdItem {
-  id?: number
-  ad_id: number
-  title: string
-  content: string
-  url: string
-  image_url: string
-  method: string
-  sort: number
-  status: number
-  create_time?: number
-  update_time?: number
-}
+import { AdItemEntity } from '@src/types'
 
 interface AdsOption {
   id: number
@@ -221,10 +208,10 @@ interface AdsOption {
   ]
 })
 export class AdItemDetailComponent implements OnInit, OnChanges {
-  @Input() adItem: AdItem | null = null
+  @Input() adItem: AdItemEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
   @Input() adsOptions: AdsOption[] = []
-  @Output() saved = new EventEmitter<Partial<AdItem>>()
+  @Output() saved = new EventEmitter<Partial<AdItemEntity>>()
   @Output() cancelled = new EventEmitter<void>()
 
   submitting = signal(false)
@@ -302,7 +289,7 @@ export class AdItemDetailComponent implements OnInit, OnChanges {
   onSubmit() {
     if (this.adItemForm.valid) {
       this.submitting.set(true)
-      const formData: Partial<AdItem> = {
+      const formData: Partial<AdItemEntity> = {
         ...this.adItemForm.value
       }
       if (this.adItem) {

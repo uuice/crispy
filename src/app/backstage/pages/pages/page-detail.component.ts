@@ -15,49 +15,12 @@ import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import Vditor from 'vditor'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'
-
-interface Page {
-  id: number
-  title: string
-  url: string
-  alias: string
-  content: string
-  markdown_content?: string
-  is_markdown?: number
-  abstract?: string
-  sub_title?: string
-  seo_title?: string
-  seo_description?: string
-  seo_keywords?: string
-  image_list?: string
-  tags?: string
-  remark?: string
-  type_id?: number
-  author_id?: number
-  user_id?: number
-  status: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
-
-interface Category {
-  id: number
-  title: string
-  alias?: string
-  des?: string
-  parent_id?: number
-  sort?: number
-  status?: number
-  create_time: number
-  update_time: number
-  children?: Category[]
-}
+import { PageEntity, CategoryEntityNested } from '@src/types'
 
 interface CategoriesResponse {
   success: boolean
   message: string
-  data: Category[]
+  data: CategoryEntityNested[]
 }
 
 @Component({
@@ -446,10 +409,10 @@ interface CategoriesResponse {
   ]
 })
 export class PageDetailComponent implements OnInit {
-  @Input() page: Page | null = null
+  @Input() page: PageEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
 
-  @Output() saved = new EventEmitter<Page>()
+  @Output() saved = new EventEmitter<PageEntity>()
   @Output() cancelled = new EventEmitter<void>()
 
   visible = signal(true) // Always visible when component is rendered
@@ -583,9 +546,9 @@ export class PageDetailComponent implements OnInit {
     return this.flattenCategories(this.availableCategories())
   }
 
-  flattenCategories(categories: Category[]): Category[] {
-    const result: Category[] = []
-    const flatten = (cats: Category[]) => {
+  flattenCategories(categories: CategoryEntityNested[]): CategoryEntityNested[] {
+    const result: CategoryEntityNested[] = []
+    const flatten = (cats: CategoryEntityNested[]) => {
       cats.forEach((cat) => {
         result.push(cat)
         if (cat.children && cat.children.length > 0) {
@@ -611,7 +574,7 @@ export class PageDetailComponent implements OnInit {
     ]
   }
 
-  loadFormData(page: Page) {
+  loadFormData(page: PageEntity) {
     // Convert tags string to array for autoComplete component
     const tags = page.tags
       ? page.tags
@@ -730,23 +693,23 @@ export class PageDetailComponent implements OnInit {
         })
       }
 
-      const pageData: Partial<Page> = {
+      const pageData: Partial<PageEntity> = {
         ...sanitizedData,
         id: this.currentPage()?.id || 0
       }
 
       console.log('content:', formData.content)
 
-      this.saved.emit(pageData as Page)
+      this.saved.emit(pageData as PageEntity)
       this.submitting.set(false)
     } else {
       this.pageForm.markAllAsTouched()
     }
   }
 
-  currentPage = signal<Page | null>(null)
+  currentPage = signal<PageEntity | null>(null)
   currentMode = signal<'edit' | 'create'>('create')
-  availableCategories = signal<Category[]>([])
+  availableCategories = signal<CategoryEntityNested[]>([])
 
   // AutoComplete properties and methods
   filteredTags: string[] = []

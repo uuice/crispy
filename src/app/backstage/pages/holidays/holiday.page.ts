@@ -13,16 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { HolidayDetailComponent } from './holiday-detail.component'
-
-interface Holiday {
-  id: number
-  title: string
-  value: string
-  sort: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { HolidayEntity } from '@src/types'
 
 @Component({
   selector: 'cs-holidays',
@@ -192,10 +183,10 @@ interface Holiday {
   ]
 })
 export class HolidayPage implements OnInit {
-  holidays = signal<Holiday[]>([])
+  holidays = signal<HolidayEntity[]>([])
   loading = signal(false)
   total = signal(0)
-  selectedHoliday = signal<Holiday | null>(null)
+  selectedHoliday = signal<HolidayEntity | null>(null)
   isDetailVisible = signal(false)
   page = 1
   pageSize = 10
@@ -291,7 +282,7 @@ export class HolidayPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(holiday: Holiday) {
+  openEditDialog(holiday: HolidayEntity) {
     this.selectedHoliday.set(holiday)
     this.isDetailVisible.set(true)
   }
@@ -307,7 +298,7 @@ export class HolidayPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(holiday: Holiday) {
+  confirmDelete(holiday: HolidayEntity) {
     this.confirmationService.confirm({
       message: `确定要删除假期 "${holiday.title}" 吗？`,
       header: '删除确认',

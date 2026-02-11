@@ -2,17 +2,7 @@ import { Component, EventEmitter, Input, Output, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { DialogModule } from 'primeng/dialog'
 import { ButtonModule } from 'primeng/button'
-
-export interface OperateLogDetail {
-  id: number
-  code: string
-  content: string
-  type_id: number
-  user_id: number
-  create_time: number
-  update_time: number
-  is_delete: number
-}
+import { OperateLogEntity } from '@src/types'
 
 @Component({
   selector: 'cs-operate-log-detail',
@@ -69,7 +59,7 @@ export interface OperateLogDetail {
   ]
 })
 export class OperateLogDetailComponent {
-  @Input() log: OperateLogDetail | null = null
+  @Input() log: OperateLogEntity | null = null
   @Input() visible = signal(false)
   @Output() closed = new EventEmitter<void>()
 

@@ -13,19 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { ConfigDetailComponent } from './config-detail.component'
-
-interface Config {
-  id: number
-  title: string
-  alias?: string
-  value: string
-  type_id?: number
-  type_ids?: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-}
+import { ConfigEntity } from '@src/types'
 
 @Component({
   selector: 'cs-configuration',
@@ -204,10 +192,10 @@ interface Config {
   `
 })
 export class ConfigPage implements OnInit {
-  configs = signal<Config[]>([])
+  configs = signal<ConfigEntity[]>([])
   loading = signal(false)
   total = signal(0)
-  selectedConfig = signal<Config | null>(null)
+  selectedConfig = signal<ConfigEntity | null>(null)
   isDetailVisible = signal(false)
   page = 1
   pageSize = 10
@@ -316,7 +304,7 @@ export class ConfigPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(config: Config) {
+  openEditDialog(config: ConfigEntity) {
     this.selectedConfig.set(config)
     this.isDetailVisible.set(true)
   }
@@ -332,7 +320,7 @@ export class ConfigPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(config: Config) {
+  confirmDelete(config: ConfigEntity) {
     this.confirmationService.confirm({
       message: `确定要删除配置 "${config.title}" 吗？`,
       header: '删除确认',

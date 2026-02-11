@@ -30,33 +30,11 @@ import { TooltipModule } from 'primeng/tooltip'
 import { CheckboxModule } from 'primeng/checkbox'
 import { TagModule } from 'primeng/tag'
 import { HttpService } from '../../services/http.service'
-
-interface Role {
-  id: number
-  title: string
-  des?: string
-  module_id: number
-  rule_ids: string
-  sort: number
-  status: number
-  type_id: number
-  create_time: number
-  update_time: number
-}
-
-interface RuleNode {
-  id: number
-  title: string
-  alias: string
-  children?: RuleNode[]
-  status?: number
-  sort?: number
-  condition?: string
-}
+import { RoleEntity, RuleTreeItem } from '@src/types'
 
 interface RulesTreeResponse {
   success: boolean
-  data: RuleNode[]
+  data: RuleTreeItem[]
 }
 
 @Component({
@@ -298,15 +276,15 @@ interface RulesTreeResponse {
   ]
 })
 export class RoleDetailComponent implements OnInit, OnChanges {
-  @Input() role: Role | null = null
+  @Input() role: RoleEntity | null = null
   @Input() mode: 'edit' | 'create' = 'create'
-  @Output() saved = new EventEmitter<Partial<Role>>()
+  @Output() saved = new EventEmitter<Partial<RoleEntity>>()
   @Output() cancelled = new EventEmitter<void>()
 
   submitting = signal(false)
   loadingRules = signal(false)
   roleForm: FormGroup
-  ruleTreeNodes = signal<TreeNode<RuleNode>[]>([])
+  ruleTreeNodes = signal<TreeNode<RuleTreeItem>[]>([])
   selectedRuleIds = signal<number[]>([])
   allNodeIds: number[] = []
 
@@ -349,7 +327,7 @@ export class RoleDetailComponent implements OnInit, OnChanges {
       next: (res: RulesTreeResponse) => {
         if (res.success) {
           const allIds: number[] = []
-          const flattenIds = (nodes: RuleNode[]) => {
+          const flattenIds = (nodes: RuleTreeItem[]) => {
             nodes.forEach((node) => {
               allIds.push(node.id)
               if (node.children) {
@@ -386,11 +364,11 @@ export class RoleDetailComponent implements OnInit, OnChanges {
   }
 
   private buildTreeNodes(
-    rules: RuleNode[],
-    parent: TreeNode<RuleNode> | null = null
-  ): TreeNode<RuleNode>[] {
+    rules: RuleTreeItem[],
+    parent: TreeNode<RuleTreeItem> | null = null
+  ): TreeNode<RuleTreeItem>[] {
     return rules.map((rule) => {
-      const node: TreeNode<RuleNode> = {
+      const node: TreeNode<RuleTreeItem> = {
         key: rule.id.toString(),
         data: rule,
         expanded: true,
@@ -439,7 +417,7 @@ export class RoleDetailComponent implements OnInit, OnChanges {
     return ids.join(',')
   }
 
-  viewRuleDetail(rule: RuleNode) {
+  viewRuleDetail(rule: RuleTreeItem) {
     const statusText = rule.status === 10 ? '启用' : '禁用'
     this.messageService.add({
       severity: 'info',
@@ -480,7 +458,7 @@ export class RoleDetailComponent implements OnInit, OnChanges {
 
     if (this.roleForm.valid) {
       this.submitting.set(true)
-      const formData: Partial<Role> = {
+      const formData: Partial<RoleEntity> = {
         ...this.roleForm.value
       }
       if (this.role) {

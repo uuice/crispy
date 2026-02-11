@@ -13,23 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { MenuDetailComponent } from './menu-detail.component'
-
-// 菜单节点类型，递归结构
-interface MenuNode {
-  id: number
-  title: string
-  alias: string
-  icon?: string
-  url?: string
-  image_url?: string
-  method?: string
-  sort: number
-  status: number
-  parent_id: number
-  create_time: number
-  update_time: number
-  children?: MenuNode[]
-}
+import { MenuEntity, MenuTreeItem } from '@src/types'
 
 @Component({
   selector: 'cs-menus',
@@ -175,7 +159,7 @@ interface MenuNode {
 export class MenusPage implements OnInit {
   menus = signal<TreeNode[]>([])
   loading = signal(false)
-  selectedMenu = signal<MenuNode | null>(null)
+  selectedMenu = signal<MenuEntity | null>(null)
   isDetailVisible = signal(false)
 
   constructor(
@@ -218,7 +202,7 @@ export class MenusPage implements OnInit {
     })
   }
 
-  convertToTreeNodes(menus: MenuNode[]): TreeNode[] {
+  convertToTreeNodes(menus: MenuTreeItem[]): TreeNode[] {
     return menus.map((menu) => ({
       data: menu,
       children: menu.children ? this.convertToTreeNodes(menu.children) : undefined,
@@ -239,7 +223,7 @@ export class MenusPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(menu: MenuNode) {
+  openEditDialog(menu: MenuEntity) {
     this.selectedMenu.set(menu)
     this.isDetailVisible.set(true)
   }
@@ -255,7 +239,7 @@ export class MenusPage implements OnInit {
     this.isDetailVisible.set(false)
   }
 
-  confirmDelete(menu: MenuNode) {
+  confirmDelete(menu: MenuEntity) {
     this.confirmationService.confirm({
       message: `确定要删除菜单 "${menu.title}" 吗？`,
       header: '删除确认',

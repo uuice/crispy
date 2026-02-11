@@ -15,20 +15,7 @@ import { TagModule } from 'primeng/tag'
 import { ToastModule } from 'primeng/toast'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-
-interface AdItem {
-  id: number
-  ad_id: number
-  title: string
-  content: string
-  image_url: string
-  url: string
-  method: string
-  sort: number
-  status: number
-  create_time: number
-  update_time: number
-}
+import { AdItemEntity } from '@src/types'
 
 @Component({
   selector: 'cs-ad-item-list-dialog',
@@ -229,7 +216,7 @@ export class AdItemListDialogComponent implements OnInit, OnChanges {
   @Input() adId: number = 0
   @Input() visible: boolean = false
 
-  adItems: WritableSignal<AdItem[]> = signal<AdItem[]>([])
+  adItems: WritableSignal<AdItemEntity[]> = signal<AdItemEntity[]>([])
   loading = signal(false)
   imagePreviewVisible = signal(false)
   previewImageUrl = signal('')

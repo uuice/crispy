@@ -14,35 +14,12 @@ import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
 import { UserDetailComponent } from './user-detail.component'
 import { AvatarModule } from 'primeng/avatar'
-
-interface User {
-  id: number
-  user_name: string
-  nick_name: string
-  email: string
-  phone: string
-  status: number // 10=正常，-10=禁用/黑名单
-  is_admin: number
-  is_super_admin: number
-  is_black: number // 1=黑名单，0=正常
-  last_login_time: number
-  avatar_url: string
-  create_time: number
-  update_time: number
-}
+import { UserEntity, PaginatedResult } from '@src/types'
 
 interface UsersResponse {
   success: boolean
   message: string
-  data: {
-    dataList: User[]
-    pagination: {
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-  }
+  data: PaginatedResult<UserEntity>
 }
 
 @Component({
@@ -228,7 +205,7 @@ interface UsersResponse {
   styles: []
 })
 export class UsersPage implements OnInit {
-  users: WritableSignal<User[]> = signal<User[]>([])
+  users: WritableSignal<UserEntity[]> = signal<UserEntity[]>([])
   loading = signal(false)
   user_name = signal('')
   statusValue = signal<number | null>(null)
@@ -240,7 +217,7 @@ export class UsersPage implements OnInit {
   currentPage = signal(1)
   pageSize = signal(20)
   totalRecords = signal(0)
-  selectedUser = signal<User | null>(null)
+  selectedUser = signal<UserEntity | null>(null)
   isDetailVisible = signal(false)
 
   constructor(
@@ -309,7 +286,7 @@ export class UsersPage implements OnInit {
     })
   }
 
-  confirmDelete(user: User) {
+  confirmDelete(user: UserEntity) {
     this.confirmationService.confirm({
       message: `确定要删除用户 ${user.user_name} 吗？`,
       header: '删除确认',
@@ -369,7 +346,7 @@ export class UsersPage implements OnInit {
     this.isDetailVisible.set(true)
   }
 
-  openEditDialog(user: User) {
+  openEditDialog(user: UserEntity) {
     this.selectedUser.set(user)
     this.isDetailVisible.set(true)
   }

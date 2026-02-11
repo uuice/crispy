@@ -17,11 +17,11 @@ export type CacheDetailType = 'memory' | 'database'
       [header]="'缓存详情: ' + cacheKey + (type === 'memory' ? ' (内存)' : ' (数据库)')"
       (onHide)="closed.emit()"
     >
-      @if (cacheInfo() && !('error' in cacheInfo())) {
+      @if (cacheInfo() && !('error' in cacheInfo()!)) {
         <pre>{{ cacheInfo() | json }}</pre>
       }
-      @if (cacheInfo() && 'error' in cacheInfo()) {
-        <div style="color:red">{{ cacheInfo().error }}</div>
+      @if (cacheInfo() && 'error' in cacheInfo()!) {
+        <div style="color:red">{{ cacheInfo()!['error'] }}</div>
       }
       <ng-template pTemplate="footer">
         <p-button label="关闭" icon="pi pi-times" (click)="closed.emit()"></p-button>
@@ -33,7 +33,7 @@ export class CacheDetailComponent implements OnInit {
   @Input() cacheKey!: string
   @Input() type: CacheDetailType = 'memory'
   @Output() closed = new EventEmitter<void>()
-  cacheInfo = signal<any>(null)
+  cacheInfo = signal<Record<string, unknown> | null>(null)
 
   private http = inject(HttpService)
 
