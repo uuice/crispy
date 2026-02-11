@@ -5,7 +5,6 @@ import {
   CreateUserType,
   createUserTypeSchema,
   PaginatedResult,
-  PaginationOptions,
   UpdateSuccess,
   UpdateUserType,
   updateUserTypeSchema,

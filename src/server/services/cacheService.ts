@@ -8,7 +8,6 @@ import {
   createCacheSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateCache,
   updateCacheSchema,
   UpdateSuccess

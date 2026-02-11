@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { attrService } from '../../services/attrService'
 import { TRPCError } from '@trpc/server'
-import {
-  createAttrSchema,
-  updateAttrSchema,
-  commonFiltersSchema,
-  attrFiltersSchema
-} from '@src/types'
+import { attrFiltersSchema, createAttrSchema, updateAttrSchema } from '@src/types'
 import { z } from 'zod'
 
 export const attrRouter = router({

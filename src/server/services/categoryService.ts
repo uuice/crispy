@@ -9,7 +9,6 @@ import {
   createCategorySchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateCategory,
   updateCategorySchema,
   UpdateSuccess

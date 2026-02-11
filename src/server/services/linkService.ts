@@ -4,11 +4,9 @@ import {
   CreateLink,
   createLinkSchema,
   CreateSuccess,
-  LinkEntity,
   LinkFilters,
   LinkWithType,
   PaginatedResult,
-  PaginationOptions,
   UpdateLink,
   updateLinkSchema,
   UpdateSuccess

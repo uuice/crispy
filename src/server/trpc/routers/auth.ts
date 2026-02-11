@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure, protectedProcedure } from '../trpc'
+import { protectedProcedure, publicProcedure, router } from '../trpc'
 import { userService } from '../../services/userService'
 import { TRPCError } from '@trpc/server'
 import { loginSchema, resetPasswordSchema } from '@src/types'

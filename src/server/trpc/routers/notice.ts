@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { noticeService } from '../../services/noticeService'
 import { TRPCError } from '@trpc/server'
-import {
-  createNoticeSchema,
-  updateNoticeSchema,
-  commonFiltersSchema,
-  noticeFiltersSchema
-} from '@src/types'
+import { createNoticeSchema, noticeFiltersSchema, updateNoticeSchema } from '@src/types'
 import { z } from 'zod'
 
 export const noticeRouter = router({

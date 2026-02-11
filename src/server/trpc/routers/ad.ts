@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { adService } from '../../services/adService'
 import { TRPCError } from '@trpc/server'
-import { createAdSchema, updateAdSchema, commonFiltersSchema, adFiltersSchema } from '@src/types'
+import { adFiltersSchema, createAdSchema, updateAdSchema } from '@src/types'
 import { z } from 'zod'
 
 export const adRouter = router({

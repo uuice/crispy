@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { menuService } from '../../services/menuService'
 import { TRPCError } from '@trpc/server'
-import {
-  createMenuSchema,
-  updateMenuSchema,
-  commonFiltersSchema,
-  menuFiltersSchema
-} from '@src/types'
+import { createMenuSchema, menuFiltersSchema, updateMenuSchema } from '@src/types'
 import { z } from 'zod'
 
 export const menuRouter = router({

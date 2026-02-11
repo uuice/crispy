@@ -25,7 +25,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { TextareaModule } from 'primeng/textarea'
 import { HttpService } from '../../services/http.service'
-import { LinkEntity, CategoryEntityNested } from '@src/types'
+import { CategoryEntityNested, LinkEntity } from '@src/types'
 
 @Component({
   selector: 'cs-link-detail',

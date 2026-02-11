@@ -15,7 +15,7 @@ import { HttpService } from '../../services/http.service'
 import hljs from 'highlight.js'
 import Vditor from 'vditor'
 import { VditorEditorComponent } from '../../components/vditor-editor.component'
-import { PageEntity, CategoryEntityNested } from '@src/types'
+import { CategoryEntityNested, PageEntity } from '@src/types'
 
 interface CategoriesResponse {
   success: boolean

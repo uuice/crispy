@@ -7,7 +7,6 @@ import {
   KeywordEntity,
   KeywordFilters,
   PaginatedResult,
-  PaginationOptions,
   UpdateKeyword,
   updateKeywordSchema,
   UpdateSuccess

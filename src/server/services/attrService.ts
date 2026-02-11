@@ -7,7 +7,6 @@ import {
   createAttrSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateAttr,
   updateAttrSchema,
   UpdateSuccess

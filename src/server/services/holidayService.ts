@@ -7,7 +7,6 @@ import {
   HolidayEntity,
   HolidayFilters,
   PaginatedResult,
-  PaginationOptions,
   UpdateHoliday,
   updateHolidaySchema,
   UpdateSuccess

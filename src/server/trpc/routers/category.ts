@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { categoryService } from '../../services/categoryService'
 import { TRPCError } from '@trpc/server'
-import { createCategorySchema, updateCategorySchema, categoryFiltersSchema } from '@src/types'
+import { categoryFiltersSchema, createCategorySchema, updateCategorySchema } from '@src/types'
 import { z } from 'zod'
 
 export const categoryRouter = router({

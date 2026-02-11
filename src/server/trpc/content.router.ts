@@ -1,7 +1,6 @@
-import { initTRPC } from '@trpc/server'
+import { initTRPC, TRPCError } from '@trpc/server'
 import { createContext } from './context'
 import { tokenProtectedProcedure } from './trpc'
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 // Import services
@@ -28,16 +27,15 @@ import { keywordService } from '../services/keywordService'
 import { noticeService } from '../services/noticeService'
 import { operateLogService } from '../services/operateLogService'
 import { apiLogService } from '../services/apiLogService'
-import { accessTokenService } from '../services/accessToken.Service'
 
 // Import Zod schemas from index.ts
 import {
-  userFiltersSchema,
   articleFiltersSchema,
   categoryFiltersSchema,
-  tagFiltersSchema,
   commentFiltersSchema,
-  configFiltersSchema
+  configFiltersSchema,
+  tagFiltersSchema,
+  userFiltersSchema
 } from '@src/types'
 
 // 初始化 tRPC 实例，使用 token 认证

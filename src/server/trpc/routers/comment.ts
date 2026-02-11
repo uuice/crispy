@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { commentService } from '../../services/commentService'
 import { TRPCError } from '@trpc/server'
-import {
-  createCommentSchema,
-  updateCommentSchema,
-  commonFiltersSchema,
-  commentFiltersSchema
-} from '@src/types'
+import { commentFiltersSchema, createCommentSchema, updateCommentSchema } from '@src/types'
 import { z } from 'zod'
 
 export const commentRouter = router({

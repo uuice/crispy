@@ -13,7 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { LinkDetailComponent } from './link-detail.component'
-import { LinkEntity, CategoryEntityNested, PaginatedResult } from '@src/types'
+import { CategoryEntityNested, LinkEntity, PaginatedResult } from '@src/types'
 
 interface FriendLinksResponse {
   success: boolean

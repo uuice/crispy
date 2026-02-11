@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { operateLogService } from '../../services/operateLogService'
 import { TRPCError } from '@trpc/server'
-import {
-  createOperateLogSchema,
-  updateOperateLogSchema,
-  commonFiltersSchema,
-  operateLogFiltersSchema
-} from '@src/types'
+import { createOperateLogSchema, operateLogFiltersSchema, updateOperateLogSchema } from '@src/types'
 import { z } from 'zod'
 
 export const operateLogRouter = router({

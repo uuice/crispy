@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { userTypeService } from '../../services/userTypeService'
 import { TRPCError } from '@trpc/server'
-import {
-  createUserTypeSchema,
-  updateUserTypeSchema,
-  commonFiltersSchema,
-  userTypeFiltersSchema
-} from '@src/types'
+import { createUserTypeSchema, updateUserTypeSchema, userTypeFiltersSchema } from '@src/types'
 import { z } from 'zod'
 
 export const userTypeRouter = router({

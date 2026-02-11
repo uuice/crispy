@@ -7,7 +7,6 @@ import {
   EnumEntity,
   EnumFilters,
   PaginatedResult,
-  PaginationOptions,
   UpdateEnum,
   updateEnumSchema,
   UpdateSuccess

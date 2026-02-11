@@ -7,7 +7,6 @@ import {
   JobEntity,
   JobFilters,
   PaginatedResult,
-  PaginationOptions,
   UpdateJob,
   updateJobSchema,
   UpdateSuccess

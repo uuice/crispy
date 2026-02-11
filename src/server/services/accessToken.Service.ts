@@ -9,7 +9,6 @@ import {
   createAccessTokenSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateAccessToken,
   updateAccessTokenSchema,
   UpdateSuccess

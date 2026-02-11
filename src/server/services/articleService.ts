@@ -1,22 +1,19 @@
 import { db } from '@src/libs/db'
-import { ExpressionBuilder, sql } from 'kysely'
-import type { DB } from '@src/db/db.d'
+import { sql } from 'kysely'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
 import { flexsearchService } from './flexsearch-index.service'
 import {
-  ArticleEntity,
   ArticleFilters,
+  ArticleWithCategory,
   CreateArticle,
   createArticleSchema,
   CreateSuccess,
+  PaginatedResult,
   UpdateArticle,
   updateArticleSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions,
-  ArticleWithCategory
+  UpdateSuccess
 } from '@src/types'
 
 // Helper function to get tagRef object from tags string

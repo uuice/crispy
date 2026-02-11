@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { apiLogService } from '../../services/apiLogService'
 import { TRPCError } from '@trpc/server'
-import {
-  createApiLogSchema,
-  updateApiLogSchema,
-  commonFiltersSchema,
-  apiLogFiltersSchema
-} from '@src/types'
+import { apiLogFiltersSchema, createApiLogSchema, updateApiLogSchema } from '@src/types'
 import { z } from 'zod'
 
 export const apiLogRouter = router({

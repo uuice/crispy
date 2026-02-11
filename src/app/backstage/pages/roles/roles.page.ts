@@ -13,7 +13,7 @@ import { ToastModule } from 'primeng/toast'
 import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { RoleDetailComponent } from './role-detail.component'
-import { RoleEntity, PaginatedResult } from '@src/types'
+import { PaginatedResult, RoleEntity } from '@src/types'
 
 interface RolesResponse {
   success: boolean

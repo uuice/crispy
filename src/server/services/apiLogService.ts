@@ -6,7 +6,6 @@ import {
   CreateApiLog,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateApiLog,
   UpdateSuccess
 } from '@src/types'

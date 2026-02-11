@@ -1,16 +1,15 @@
 import { db } from '@src/libs/db'
 import { DELETE_STATUS } from '../config/const'
 import {
-  VoteEntity,
-  VoteFilters,
+  CreateSuccess,
   CreateVote,
   createVoteSchema,
-  CreateSuccess,
+  PaginatedResult,
+  UpdateSuccess,
   UpdateVote,
   updateVoteSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions,
+  VoteEntity,
+  VoteFilters,
   VoteItemEntity
 } from '@src/types'
 

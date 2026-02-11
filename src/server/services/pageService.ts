@@ -4,16 +4,15 @@ import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
 import { flexsearchService } from './flexsearch-index.service'
 import {
-  PageEntity,
-  PageFilters,
   CreatePage,
   createPageSchema,
   CreateSuccess,
+  PageEntity,
+  PageFilters,
+  PaginatedResult,
   UpdatePage,
   updatePageSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions
+  UpdateSuccess
 } from '@src/types'
 
 // Helper function to get tagRef object from tags string

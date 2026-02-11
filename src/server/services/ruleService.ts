@@ -1,17 +1,16 @@
 import { db } from '@src/libs/db'
 import { DELETE_STATUS } from '../config/const'
 import {
-  RuleEntity,
-  RuleFilters,
   CreateRule,
   createRuleSchema,
   CreateSuccess,
+  PaginatedResult,
+  RuleEntity,
+  RuleFilters,
+  RuleTreeItem,
   UpdateRule,
   updateRuleSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions,
-  RuleTreeItem
+  UpdateSuccess
 } from '@src/types'
 
 // Rule Service Class

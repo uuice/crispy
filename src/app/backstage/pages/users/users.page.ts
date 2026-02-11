@@ -14,7 +14,7 @@ import { SelectModule } from 'primeng/select'
 import { HttpService } from '../../services/http.service'
 import { UserDetailComponent } from './user-detail.component'
 import { AvatarModule } from 'primeng/avatar'
-import { UserEntity, PaginatedResult } from '@src/types'
+import { PaginatedResult, UserEntity } from '@src/types'
 
 interface UsersResponse {
   success: boolean

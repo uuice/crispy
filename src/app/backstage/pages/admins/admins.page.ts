@@ -16,7 +16,7 @@ import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { AdminDetailComponent } from './admin-detail.component'
 import { AvatarModule } from 'primeng/avatar'
-import { UserEntity, RoleEntity, PaginatedResult } from '@src/types'
+import { PaginatedResult, RoleEntity, UserEntity } from '@src/types'
 
 interface UserWithRole extends UserEntity {
   role?: {

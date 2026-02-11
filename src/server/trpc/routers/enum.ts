@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { enumService } from '../../services/enumService'
 import { TRPCError } from '@trpc/server'
-import {
-  createEnumSchema,
-  updateEnumSchema,
-  commonFiltersSchema,
-  enumFiltersSchema
-} from '@src/types'
+import { createEnumSchema, enumFiltersSchema, updateEnumSchema } from '@src/types'
 import { z } from 'zod'
 
 export const enumRouter = router({

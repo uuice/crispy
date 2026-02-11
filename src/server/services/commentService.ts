@@ -1,17 +1,15 @@
 import { db } from '@src/libs/db'
 import { DELETE_STATUS } from '../config/const'
 import {
-  CommentEntity,
   CommentFilters,
+  CommentWithAuthor,
   CreateComment,
   createCommentSchema,
   CreateSuccess,
+  PaginatedResult,
   UpdateComment,
   updateCommentSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions,
-  CommentWithAuthor
+  UpdateSuccess
 } from '@src/types'
 
 export class CommentService {

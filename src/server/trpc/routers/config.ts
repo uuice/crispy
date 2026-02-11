@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { configService } from '../../services/configService'
 import { TRPCError } from '@trpc/server'
-import {
-  createConfigSchema,
-  updateConfigSchema,
-  commonFiltersSchema,
-  configFiltersSchema
-} from '@src/types'
+import { configFiltersSchema, createConfigSchema, updateConfigSchema } from '@src/types'
 import { z } from 'zod'
 
 export const configRouter = router({

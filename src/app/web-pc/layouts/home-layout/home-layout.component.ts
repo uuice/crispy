@@ -26,7 +26,7 @@ import { ScrollTopModule } from 'primeng/scrolltop'
 import { ApiResponse, HttpService } from '../../services/http.service'
 import { SsrSeoService } from '../../services/ssr-seo.service'
 import { SiteSettings } from '../../services/site-settings.service'
-import { CategoryEntity, TagEntity, ArticleEntity, PaginatedResult } from '@src/types'
+import { ArticleEntity, CategoryEntity, PaginatedResult, TagEntity } from '@src/types'
 
 // Extended types for local use
 interface Category extends CategoryEntity {

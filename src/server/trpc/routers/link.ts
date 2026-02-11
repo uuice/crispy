@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { linkService } from '../../services/linkService'
 import { TRPCError } from '@trpc/server'
-import {
-  createLinkSchema,
-  updateLinkSchema,
-  commonFiltersSchema,
-  linkFiltersSchema
-} from '@src/types'
+import { createLinkSchema, linkFiltersSchema, updateLinkSchema } from '@src/types'
 import { z } from 'zod'
 
 export const linkRouter = router({

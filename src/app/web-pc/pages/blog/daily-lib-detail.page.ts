@@ -17,7 +17,7 @@ import { HttpService } from '../../services/http.service'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { generateTocAndHeadings, TocItem } from '@src/utils/markdown'
 import hljs from 'highlight.js'
-import { ArticleEntity, ArticleWithCategory } from '@src/types'
+import { ArticleWithCategory } from '@src/types'
 
 // API response interfaces
 interface ApiResponse<T> {

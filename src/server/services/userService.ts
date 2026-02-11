@@ -1,13 +1,7 @@
 import { db } from '@src/libs/db'
 import { generateToken } from '../middleware/jwt'
 import bcrypt from 'bcryptjs'
-import {
-  DELETE_STATUS,
-  PUBLISH_STATUS,
-  STATUS_FALSE,
-  STATUS_TRUE,
-  USER_STATUS
-} from '../config/const'
+import { DELETE_STATUS, PUBLISH_STATUS, STATUS_TRUE, USER_STATUS } from '../config/const'
 import {
   CreateSuccess,
   CreateUser,
@@ -16,7 +10,6 @@ import {
   LoginResult,
   loginSchema,
   PaginatedResult,
-  PaginationOptions,
   ResetPasswordData,
   resetPasswordSchema,
   UpdateSuccess,

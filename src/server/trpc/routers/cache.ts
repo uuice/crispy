@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { cacheService } from '../../services/cacheService'
 import { TRPCError } from '@trpc/server'
-import {
-  createCacheSchema,
-  updateCacheSchema,
-  commonFiltersSchema,
-  cacheFiltersSchema
-} from '@src/types'
+import { cacheFiltersSchema, createCacheSchema, updateCacheSchema } from '@src/types'
 import { z } from 'zod'
 
 export const cacheRouter = router({

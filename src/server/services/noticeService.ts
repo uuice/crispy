@@ -7,7 +7,6 @@ import {
   NoticeEntity,
   NoticeFilters,
   PaginatedResult,
-  PaginationOptions,
   UpdateNotice,
   updateNoticeSchema,
   UpdateSuccess

@@ -7,7 +7,6 @@ import {
   createAdSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateAd,
   updateAdSchema,
   UpdateSuccess

@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { roleService } from '../../services/roleService'
 import { TRPCError } from '@trpc/server'
-import {
-  createRoleSchema,
-  updateRoleSchema,
-  commonFiltersSchema,
-  roleFiltersSchema
-} from '@src/types'
+import { createRoleSchema, roleFiltersSchema, updateRoleSchema } from '@src/types'
 import { z } from 'zod'
 
 export const roleRouter = router({

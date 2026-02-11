@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { keywordService } from '../../services/keywordService'
 import { TRPCError } from '@trpc/server'
-import {
-  createKeywordSchema,
-  updateKeywordSchema,
-  commonFiltersSchema,
-  keywordFiltersSchema
-} from '@src/types'
+import { createKeywordSchema, keywordFiltersSchema, updateKeywordSchema } from '@src/types'
 import { z } from 'zod'
 
 export const keywordRouter = router({

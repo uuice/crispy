@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { adItemService } from '../../services/adItemService'
 import { TRPCError } from '@trpc/server'
-import {
-  createAdItemSchema,
-  updateAdItemSchema,
-  commonFiltersSchema,
-  adItemFiltersSchema
-} from '@src/types'
+import { adItemFiltersSchema, createAdItemSchema, updateAdItemSchema } from '@src/types'
 import { z } from 'zod'
 
 export const adItemRouter = router({

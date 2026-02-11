@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { ruleService } from '../../services/ruleService'
 import { TRPCError } from '@trpc/server'
-import {
-  createRuleSchema,
-  updateRuleSchema,
-  commonFiltersSchema,
-  ruleFiltersSchema
-} from '@src/types'
+import { createRuleSchema, ruleFiltersSchema, updateRuleSchema } from '@src/types'
 import { z } from 'zod'
 
 export const ruleRouter = router({

@@ -8,7 +8,7 @@ import { DialogModule } from 'primeng/dialog'
 import { MessageService } from 'primeng/api'
 import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
-import { UserEntity, RoleEntity } from '@src/types'
+import { RoleEntity, UserEntity } from '@src/types'
 
 @Component({
   selector: 'cs-admin-detail',

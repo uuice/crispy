@@ -7,7 +7,6 @@ import {
   createAdditionSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateAddition,
   updateAdditionSchema,
   UpdateSuccess

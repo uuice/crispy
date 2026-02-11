@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { Context, createContext } from './context'
+import { Context } from './context'
 import { env } from '../config/env'
 
 // 初始化 tRPC

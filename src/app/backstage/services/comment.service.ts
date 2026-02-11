@@ -2,11 +2,10 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { HttpService } from './http.service'
 import {
-  CommentEntity,
-  CommentWithAuthor,
-  PaginatedResult,
   CommentFilters,
+  CommentWithAuthor,
   CreateComment,
+  PaginatedResult,
   UpdateComment
 } from '@src/types'
 

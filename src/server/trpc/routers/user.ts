@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { userService } from '../../services/userService'
 import { TRPCError } from '@trpc/server'
-import { createUserSchema, commonFiltersSchema, userFiltersSchema } from '@src/types'
+import { createUserSchema, userFiltersSchema } from '@src/types'
 import { z } from 'zod'
 
 const updateUserSchema = createUserSchema.partial().extend({

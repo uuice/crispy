@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { jobService } from '../../services/jobService'
 import { TRPCError } from '@trpc/server'
-import { createJobSchema, updateJobSchema, commonFiltersSchema, jobFiltersSchema } from '@src/types'
+import { createJobSchema, jobFiltersSchema, updateJobSchema } from '@src/types'
 import { z } from 'zod'
 
 export const jobRouter = router({

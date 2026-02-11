@@ -5,7 +5,6 @@ import {
   CreateTag,
   createTagSchema,
   PaginatedResult,
-  PaginationOptions,
   TagEntity,
   TagFilters,
   UpdateSuccess,

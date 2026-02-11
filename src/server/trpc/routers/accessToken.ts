@@ -1,10 +1,10 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { accessTokenService } from '../../services/accessToken.Service'
 import { TRPCError } from '@trpc/server'
 import {
+  accessTokenFiltersSchema,
   createAccessTokenSchema,
-  updateAccessTokenSchema,
-  accessTokenFiltersSchema
+  updateAccessTokenSchema
 } from '@src/types'
 import { z } from 'zod'
 import { generateRandomToken } from '@src/server/utils/token'

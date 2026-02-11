@@ -7,7 +7,6 @@ import {
   createConfigSchema,
   CreateSuccess,
   PaginatedResult,
-  PaginationOptions,
   UpdateConfig,
   updateConfigSchema,
   UpdateSuccess

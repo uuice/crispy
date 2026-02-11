@@ -1,12 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { pageService } from '../../services/pageService'
 import { TRPCError } from '@trpc/server'
-import {
-  createPageSchema,
-  updatePageSchema,
-  commonFiltersSchema,
-  pageFiltersSchema
-} from '@src/types'
+import { createPageSchema, pageFiltersSchema, updatePageSchema } from '@src/types'
 import { z } from 'zod'
 
 export const pageRouter = router({

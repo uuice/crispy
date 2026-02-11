@@ -16,7 +16,7 @@ import { ToastModule } from 'primeng/toast'
 import { MessageModule } from 'primeng/message'
 import { MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
-import { CategoryEntity, CategoryEntityNested } from '@src/types'
+import { CategoryEntityNested } from '@src/types'
 
 @Component({
   selector: 'cs-category-detail',

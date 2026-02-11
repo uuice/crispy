@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { protectedProcedure, router } from '../trpc'
 import { tagService } from '../../services/tagService'
 import { TRPCError } from '@trpc/server'
-import { createTagSchema, updateTagSchema, commonFiltersSchema, tagFiltersSchema } from '@src/types'
+import { createTagSchema, tagFiltersSchema, updateTagSchema } from '@src/types'
 import { z } from 'zod'
 
 export const tagRouter = router({

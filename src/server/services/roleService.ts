@@ -1,16 +1,15 @@
 import { db } from '@src/libs/db'
 import { DELETE_STATUS } from '../config/const'
 import {
-  RoleEntity,
-  RoleFilters,
   CreateRole,
   createRoleSchema,
   CreateSuccess,
+  PaginatedResult,
+  RoleEntity,
+  RoleFilters,
   UpdateRole,
   updateRoleSchema,
-  UpdateSuccess,
-  PaginatedResult,
-  PaginationOptions
+  UpdateSuccess
 } from '@src/types'
 
 export class RoleService {

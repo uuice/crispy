@@ -15,7 +15,7 @@ import { ConfirmationService, MessageService } from 'primeng/api'
 import { HttpService } from '../../services/http.service'
 import { AuthService } from '../../services/auth.service'
 import { PageDetailComponent } from './page-detail.component'
-import { PageEntity, CategoryEntityNested, PaginatedResult } from '@src/types'
+import { CategoryEntityNested, PageEntity, PaginatedResult } from '@src/types'
 
 interface PagesResponse {
   success: boolean
