@@ -1,7 +1,7 @@
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express'
 import { env } from '../config/env'
-import { jwtMiddleware } from '../middleware/jwt'
 import { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 
 // 用户信息接口
 export interface UserInfo {
@@ -41,30 +41,11 @@ export async function createContext({ req, res }: CreateExpressContextOptions): 
     const token = authHeader.substring(7)
     try {
       // 验证 JWT token 并解析用户信息
-      // const decoded = jwt.verify(token, env.JWT_SECRET) as UserInfo
-      // ctx.user = decoded
+      const decoded = jwt.verify(token, env.JWT_SECRET) as UserInfo
+      ctx.user = decoded
     } catch (e) {
       // Token 无效，不设置用户
-    }
-  } else {
-    // 尝试使用 JWT 中间件
-    try {
-      await new Promise((resolve, reject) => {
-        jwtMiddleware(req, res, (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(undefined)
-          }
-        })
-      })
-
-      // 如果中间件设置了用户信息
-      if ((req as any).user) {
-        ctx.user = (req as any).user
-      }
-    } catch (e) {
-      // JWT 验证失败，继续执行
+      console.log('[tRPC] JWT verification failed:', (e as Error).message)
     }
   }
 

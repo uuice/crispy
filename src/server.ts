@@ -24,6 +24,9 @@ import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
 import { cacheService } from './server/services/cacheService'
 import { memoryCacheService } from './server/services/memoryCacheService'
+import * as trpcExpress from '@trpc/server/adapters/express'
+import { appRouter } from './server/trpc/trpc.router'
+import { createContext } from './server/trpc/context'
 // 定时清理内存和数据库缓存
 import './crons/cleanupMemoryCache'
 import './crons/cleanupDatabaseCache'
@@ -162,15 +165,6 @@ configureNunjucks(app)
 app.use(env['API_PREFIX'], apiRoutes)
 
 // trpc
-import { initTRPC } from '@trpc/server'
-import * as trpcExpress from '@trpc/server/adapters/express'
-import z from 'zod'
-import { appRouter } from './server/trpc/trpc.router'
-
-// created for each request
-const createContext = ({ req, res }: trpcExpress.CreateExpressContextOptions) => ({}) // no context
-type Context = Awaited<ReturnType<typeof createContext>>
-
 app.use(
   '/trpc',
   trpcExpress.createExpressMiddleware({

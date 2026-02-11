@@ -12,7 +12,7 @@ export const getAdItem = async (req: Request, res: Response, next: NextFunction)
       return
     }
 
-    const adItem = await adItemService.getAdItemById(id)
+    const adItem = await adItemService.getById(id)
     if (!adItem) {
       error(res, '广告项不存在', 404)
       return
