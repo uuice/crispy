@@ -259,6 +259,147 @@ async function testContentRouters(client: ReturnType<typeof createTestClient>) {
   await testEndpoint('content.publicConfig', 'siteSettings', () =>
     client.content.publicConfig.siteSettings.query()
   )
+
+  // PublicAd 路由
+  await testEndpoint('content.publicAd', 'list', () =>
+    client.content.publicAd.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicAd', 'getById', () =>
+    client.content.publicAd.getById.query({ id: 1 })
+  )
+
+  // PublicAdItem 路由
+  await testEndpoint('content.publicAdItem', 'list', () =>
+    client.content.publicAdItem.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicAdItem', 'getById', () =>
+    client.content.publicAdItem.getById.query({ id: 1 })
+  )
+
+  // PublicLink 路由
+  await testEndpoint('content.publicLink', 'list', () =>
+    client.content.publicLink.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicLink', 'getById', () =>
+    client.content.publicLink.getById.query({ id: 1 })
+  )
+
+  // PublicMenu 路由
+  await testEndpoint('content.publicMenu', 'list', () =>
+    client.content.publicMenu.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicMenu', 'tree', () => client.content.publicMenu.tree.query())
+  await testEndpoint('content.publicMenu', 'getById', () =>
+    client.content.publicMenu.getById.query({ id: 1 })
+  )
+
+  // PublicPage 路由
+  await testEndpoint('content.publicPage', 'list', () =>
+    client.content.publicPage.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicPage', 'getById', () =>
+    client.content.publicPage.getById.query({ id: 1 })
+  )
+  await testEndpoint('content.publicPage', 'getByAlias', () =>
+    client.content.publicPage.getByAlias.query({ alias: 'test' })
+  )
+
+  // PublicRole 路由
+  await testEndpoint('content.publicRole', 'list', () =>
+    client.content.publicRole.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicRole', 'getById', () =>
+    client.content.publicRole.getById.query({ id: 1 })
+  )
+
+  // PublicRule 路由
+  await testEndpoint('content.publicRule', 'list', () =>
+    client.content.publicRule.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicRule', 'tree', () => client.content.publicRule.tree.query())
+  await testEndpoint('content.publicRule', 'getById', () =>
+    client.content.publicRule.getById.query({ id: 1 })
+  )
+
+  // PublicUserType 路由
+  await testEndpoint('content.publicUserType', 'list', () =>
+    client.content.publicUserType.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicUserType', 'getById', () =>
+    client.content.publicUserType.getById.query({ id: 1 })
+  )
+
+  // PublicAttr 路由
+  await testEndpoint('content.publicAttr', 'list', () =>
+    client.content.publicAttr.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicAttr', 'getById', () =>
+    client.content.publicAttr.getById.query({ id: 1 })
+  )
+
+  // PublicCache 路由
+  await testEndpoint('content.publicCache', 'list', () =>
+    client.content.publicCache.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicCache', 'getById', () =>
+    client.content.publicCache.getById.query({ id: 1 })
+  )
+
+  // PublicEnum 路由
+  await testEndpoint('content.publicEnum', 'list', () =>
+    client.content.publicEnum.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicEnum', 'getById', () =>
+    client.content.publicEnum.getById.query({ id: 1 })
+  )
+
+  // PublicHoliday 路由
+  await testEndpoint('content.publicHoliday', 'list', () =>
+    client.content.publicHoliday.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicHoliday', 'getById', () =>
+    client.content.publicHoliday.getById.query({ id: 1 })
+  )
+
+  // PublicJob 路由
+  await testEndpoint('content.publicJob', 'list', () =>
+    client.content.publicJob.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicJob', 'getById', () =>
+    client.content.publicJob.getById.query({ id: 1 })
+  )
+
+  // PublicKeyword 路由
+  await testEndpoint('content.publicKeyword', 'list', () =>
+    client.content.publicKeyword.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicKeyword', 'getById', () =>
+    client.content.publicKeyword.getById.query({ id: 1 })
+  )
+
+  // PublicNotice 路由
+  await testEndpoint('content.publicNotice', 'list', () =>
+    client.content.publicNotice.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicNotice', 'getById', () =>
+    client.content.publicNotice.getById.query({ id: 1 })
+  )
+
+  // PublicOperateLog 路由
+  await testEndpoint('content.publicOperateLog', 'list', () =>
+    client.content.publicOperateLog.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicOperateLog', 'getById', () =>
+    client.content.publicOperateLog.getById.query({ id: 1 })
+  )
+
+  // PublicApiLog 路由
+  await testEndpoint('content.publicApiLog', 'list', () =>
+    client.content.publicApiLog.list.query({ page: 1, pageSize: 10 })
+  )
+  await testEndpoint('content.publicApiLog', 'getById', () =>
+    client.content.publicApiLog.getById.query({ id: 1 })
+  )
 }
 
 // ==================== 主测试函数 ====================
