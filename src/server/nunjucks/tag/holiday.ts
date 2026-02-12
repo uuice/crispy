@@ -21,19 +21,7 @@ export function Holidays(): void {
     const page = args.page || 1
     const pageSize = args.page_size || limit
 
-    // Build filters object from args
-    const filters: any = {}
-
-    // Search filters - 字符串，空字符串通常不是有效值
-    if (args.name) filters.name = args.name
-    if (args.value) filters.value = args.value
-
-    // Date filters - 时间戳，0 是有效值
-    if (args.start_time !== undefined) filters.start_time = args.start_time
-    if (args.end_time !== undefined) filters.end_time = args.end_time
-
-    // Use the enhanced getHolidays method with filters
-    const result = await holidayService.getHolidays({ ...filters, page, pageSize })
+    const result = await holidayService.getHolidays({ ...args, page, pageSize })
 
     context.ctx.holidays = result.dataList
     context.ctx.holidays_pagination = result.pagination

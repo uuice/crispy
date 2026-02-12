@@ -37,7 +37,14 @@ export class NoticeService {
   async getNotices(filters: NoticeFilters): Promise<PaginatedResult<NoticeEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { title, status } = filters
+    const {
+      title,
+      status,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('notices').selectAll()
@@ -49,6 +56,22 @@ export class NoticeService {
 
     if (status !== undefined) {
       query = query.where('status', '=', status)
+    }
+
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted notices
@@ -66,6 +89,18 @@ export class NoticeService {
           }
           if (status !== undefined) {
             qb = qb.where('status', '=', status)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

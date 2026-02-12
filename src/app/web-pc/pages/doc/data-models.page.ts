@@ -3,7 +3,7 @@ import { CardModule } from 'primeng/card'
 import { TableModule } from 'primeng/table'
 import { ButtonModule } from 'primeng/button'
 
-// 数据模型，严格根据 migrations/migrations/001_initial_schema.sql 文件生成，所有注释与 SQL 文件 COMMENT 保持一致
+// 数据模型，根据 migrations 001_initial_schema 及 003_update_post_page、004_update_cache、005_add_performance_indexes、006_user_avatar_url 同步，注释与 SQL COMMENT 保持一致
 const TABLES = [
   {
     name: 'access_token',
@@ -404,6 +404,20 @@ const TABLES = [
         comment: '内容'
       },
       {
+        name: 'markdown_content',
+        type: 'TEXT',
+        nullable: false,
+        default: "''",
+        comment: 'markdown 内容'
+      },
+      {
+        name: 'is_markdown',
+        type: 'tinyint(1) unsigned',
+        nullable: false,
+        default: '0',
+        comment: '是否是markdown 内容'
+      },
+      {
         name: 'author_id',
         type: 'int(11) unsigned',
         nullable: false,
@@ -459,6 +473,15 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_type_id', columns: ['type_id'] },
+      { name: 'idx_create_time', columns: ['create_time'] },
+      { name: 'idx_status_create_time', columns: ['status', 'create_time'] },
+      { name: 'idx_type_id_status', columns: ['type_id', 'status'] },
+      { name: 'idx_url', columns: ['url'] },
+      { name: 'idx_tags', columns: ['tags'] }
     ]
   },
   {
@@ -518,7 +541,7 @@ const TABLES = [
   },
   {
     name: 'caches',
-    comment: '缓存表',
+    comment: '缓存',
     columns: [
       {
         name: 'id',
@@ -528,25 +551,32 @@ const TABLES = [
         comment: '自增id'
       },
       {
-        name: 'key',
+        name: 'hash',
+        type: 'varchar(64)',
+        nullable: false,
+        default: "''",
+        comment: 'hash'
+      },
+      {
+        name: 'url',
         type: 'varchar(255)',
         nullable: false,
         default: "''",
-        comment: '缓存键'
+        comment: '原始url'
       },
       {
-        name: 'value',
+        name: 'cache_data',
         type: 'longtext',
         nullable: false,
-        default: null,
-        comment: '缓存值'
+        default: "''",
+        comment: '缓存数据'
       },
       {
-        name: 'expire_time',
-        type: 'bigint(13) unsigned',
+        name: 'status',
+        type: 'tinyint',
         nullable: false,
         default: '0',
-        comment: '过期时间'
+        comment: '状态'
       },
       {
         name: 'create_time',
@@ -569,6 +599,11 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_hash', columns: ['hash'] },
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_create_time', columns: ['create_time'] }
     ]
   },
   {
@@ -624,6 +659,11 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_parent_id', columns: ['parent_id'] },
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_alias', columns: ['alias'] }
     ]
   },
   {
@@ -727,6 +767,10 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_create_time', columns: ['create_time'] }
     ]
   },
   {
@@ -1258,6 +1302,41 @@ const TABLES = [
         comment: '排序'
       },
       {
+        name: 'url',
+        type: 'varchar(255)',
+        nullable: false,
+        default: "''",
+        comment: '路由美化'
+      },
+      {
+        name: 'status',
+        type: 'tinyint',
+        nullable: false,
+        default: '0',
+        comment: '10已发布 -10待发布 -100已删除 -20草稿箱'
+      },
+      {
+        name: 'content',
+        type: 'longtext',
+        nullable: false,
+        default: null,
+        comment: '页面内容'
+      },
+      {
+        name: 'markdown_content',
+        type: 'TEXT',
+        nullable: false,
+        default: "''",
+        comment: 'markdown 内容'
+      },
+      {
+        name: 'is_markdown',
+        type: 'tinyint(1) unsigned',
+        nullable: false,
+        default: '0',
+        comment: '是否是markdown 内容'
+      },
+      {
         name: 'create_time',
         type: 'bigint(13) unsigned',
         nullable: false,
@@ -1278,6 +1357,11 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_create_time', columns: ['create_time'] },
+      { name: 'idx_url', columns: ['url'] }
     ]
   },
   {
@@ -1326,6 +1410,11 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_type_id', columns: ['type_id'] },
+      { name: 'idx_sort', columns: ['sort'] }
     ]
   },
   {
@@ -1583,8 +1672,8 @@ const TABLES = [
       {
         name: 'avatar_url',
         type: 'text',
-        nullable: true,
-        default: null,
+        nullable: false,
+        default: "''",
         comment: '头像'
       },
       {
@@ -1622,6 +1711,10 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_role_id', columns: ['role_id'] }
     ]
   },
   {
@@ -1830,6 +1923,32 @@ const TABLES = [
                     </table>
                   </div>
                 </div>
+                @if (row.indexes && row.indexes.length > 0) {
+                  <div class="parameters-section">
+                    <div class="section-header">
+                      <i class="pi pi-list"></i>
+                      <h4>索引列表 (005_add_performance_indexes)</h4>
+                    </div>
+                    <div class="parameters-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>索引名</th>
+                            <th>字段</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (idx of row.indexes; track idx.name) {
+                            <tr>
+                              <td><span class="param-name">{{ idx.name }}</span></td>
+                              <td><span class="param-type">{{ idx.columns.join(', ') }}</span></td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
               </div>
             </td>
           </tr>

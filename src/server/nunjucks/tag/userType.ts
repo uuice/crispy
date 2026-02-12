@@ -21,21 +21,7 @@ export function UserTypes(): void {
     const page = args.page || 1
     const pageSize = args.page_size || limit
 
-    // Build filters object from args
-    const filters: any = {}
-
-    // Search filters - 字符串，空字符串通常不是有效值
-    if (args.type_name) filters.type_name = args.type_name
-    if (args.alias) filters.alias = args.alias
-    // 需要 !== undefined 因为可能包含 0 等 falsy 值
-    if (args.status !== undefined) filters.status = args.status
-
-    // Date filters - 时间戳，0 是有效值
-    if (args.start_time !== undefined) filters.start_time = args.start_time
-    if (args.end_time !== undefined) filters.end_time = args.end_time
-
-    // Use the enhanced getUserTypes method with filters
-    const result = await userTypeService.getUserTypes({ ...filters, page, pageSize })
+    const result = await userTypeService.getUserTypes({ ...args, page, pageSize })
 
     context.ctx.user_types = result.dataList
     context.ctx.user_types_pagination = result.pagination

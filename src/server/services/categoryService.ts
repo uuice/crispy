@@ -64,6 +64,22 @@ export class CategoryService {
       query = query.where('status', '=', filters.status)
     }
 
+    if (filters.create_time_start !== undefined) {
+      query = query.where('create_time', '>=', filters.create_time_start)
+    }
+
+    if (filters.create_time_end !== undefined) {
+      query = query.where('create_time', '<=', filters.create_time_end)
+    }
+
+    if (filters.update_time_start !== undefined) {
+      query = query.where('update_time', '>=', filters.update_time_start)
+    }
+
+    if (filters.update_time_end !== undefined) {
+      query = query.where('update_time', '<=', filters.update_time_end)
+    }
+
     // Default to only non-deleted categories
     query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
@@ -93,6 +109,18 @@ export class CategoryService {
           }
           if (filters.status !== undefined) {
             qb = qb.where('status', '=', filters.status)
+          }
+          if (filters.create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', filters.create_time_start)
+          }
+          if (filters.create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', filters.create_time_end)
+          }
+          if (filters.update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', filters.update_time_start)
+          }
+          if (filters.update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', filters.update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

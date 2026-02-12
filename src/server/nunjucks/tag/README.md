@@ -53,12 +53,35 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
-- `category_id` (number): 按分类ID过滤
+- `sub_title` (string): 按副标题搜索
+- `url` (string): 按URL搜索
+- `content` (string): 按内容搜索
+- `markdown_content` (string): 按Markdown内容搜索
+- `is_markdown` (number): 是否为Markdown格式
+- `abstract` (string): 按摘要搜索
+- `image` (string): 按图片搜索
+- `image_list` (string): 按图片列表搜索
+- `seo_title` (string): 按SEO标题搜索
+- `seo_description` (string): 按SEO描述搜索
+- `seo_keywords` (string): 按SEO关键词搜索
+- `remark` (string): 按备注搜索
 - `user_id` (number): 按用户ID过滤
+- `tags` (string): 按标签搜索
+- `attrs` (string): 按属性搜索
+- `type_id` (number): 按类型ID过滤
+- `type_ids` (string): 按类型IDs搜索
+- `author_id` (number): 按作者ID过滤
+- `redirect_url` (string): 按重定向URL搜索
+- `is_review` (number): 是否需要审核
+- `click` (number): 按点击数过滤
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### ArticleItem Tag
 
@@ -103,11 +126,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `alias` (string): 按别名搜索
+- `des` (string): 按描述搜索
 - `parent_id` (number): 父分类ID，0表示顶级分类
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### CategoryItem Tag
 
@@ -152,10 +181,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认50
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `des` (string): 按描述搜索
+- `sort` (number): 按排序值过滤
+- `type_id` (number): 按类型ID过滤
+- `value` (string): 按值搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### TagItem Tag
 
@@ -203,12 +239,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `content` (string): 按内容搜索
 - `article_id` (number): 按文章ID过滤
 - `user_id` (number): 按用户ID过滤
+- `good_article` (number): 按好评过滤
+- `bad_article` (number): 按差评过滤
+- `not_article` (number): 按不相关过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### CommentItem Tag
 
@@ -257,12 +299,28 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
-- `username` (string): 按用户名搜索
+- `id` (number): 按ID过滤
+- `user_name` (string): 按用户名搜索
+- `password` (string): 按密码搜索
 - `email` (string): 按邮箱搜索
+- `phone` (string): 按手机号搜索
+- `real_name` (string): 按真实姓名搜索
+- `nick_name` (string): 按昵称搜索
+- `avatar_url` (string): 按头像URL搜索
+- `role_id` (number): 按角色ID过滤
 - `type_id` (number): 按用户类型过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `is_admin` (number): 是否为管理员
+- `is_super_admin` (number): 是否为超级管理员
+- `is_black` (number): 是否被拉黑
+- `last_login_ip` (string): 按最后登录IP搜索
+- `last_login_time` (number): 按最后登录时间过滤
+- `last_login_start` (number): 最后登录时间开始时间戳
+- `last_login_end` (number): 最后登录时间结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### UserItem Tag
 
@@ -310,11 +368,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `url` (string): 按URL搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### LinkItem Tag
 
@@ -360,11 +421,20 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `alias` (string): 按别名搜索
 - `parent_id` (number): 父菜单ID，0表示顶级菜单
+- `icon` (string): 按图标搜索
+- `url` (string): 按URL搜索
+- `image_url` (string): 按图片URL搜索
+- `method` (string): 按请求方法搜索
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### MenuItem Tag
 
@@ -411,11 +481,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `content` (string): 按内容搜索
+- `from_user_id` (number): 按发送用户ID过滤
+- `publish_time` (number): 按发布时间过滤
+- `tolds` (string): 按接收者搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### NoticeItem Tag
 
@@ -465,11 +541,30 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `url` (string): 按URL搜索
 - `alias` (string): 按别名搜索
+- `content` (string): 按内容搜索
+- `markdown_content` (string): 按Markdown内容搜索
+- `is_markdown` (number): 是否为Markdown格式
+- `abstract` (string): 按摘要搜索
+- `sub_title` (string): 按副标题搜索
+- `seo_title` (string): 按SEO标题搜索
+- `seo_keywords` (string): 按SEO关键词搜索
+- `seo_description` (string): 按SEO描述搜索
+- `image_list` (string): 按图片列表搜索
+- `tags` (string): 按标签搜索
+- `author_id` (number): 按作者ID过滤
+- `user_id` (number): 按用户ID过滤
+- `type_id` (number): 按类型ID过滤
+- `click` (number): 按点击数过滤
+- `remark` (string): 按备注搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### PageItem Tag
 
@@ -520,10 +615,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认20
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `des` (string): 按描述搜索
+- `module_id` (number): 按模块ID过滤
+- `rule_ids` (string): 按规则IDs搜索
+- `sort` (number): 按排序值过滤
+- `type_id` (number): 按类型ID过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### RoleItem Tag
 
@@ -572,12 +675,18 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认1000
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `alias` (string): 按别名搜索
+- `value` (string): 按值搜索
 - `type_id` (number): 按类型ID过滤
+- `type_ids` (string): 按类型IDs搜索
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### ConfigItem Tag
 
@@ -623,12 +732,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `alias` (string): 按别名搜索
 - `code` (string): 按代码搜索
+- `value` (string): 按值搜索
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### EnumItem Tag
 
@@ -674,11 +788,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `alias` (string): 按别名搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### KeywordItem Tag
 
@@ -728,17 +845,17 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `alias` (string): 按别名搜索
 - `content` (string): 按内容搜索
 - `type_id` (number): 按类型ID过滤
 - `status` (number): 按状态过滤
-- `sort_min` (number): 最小排序值
-- `sort_max` (number): 最大排序值
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
-- `has_image` (boolean): 是否有图片
-- `has_url` (boolean): 是否有链接
+- `sort` (number): 按排序值过滤
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### AdItem Tag
 
@@ -792,6 +909,7 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `ad_id` (number): 按广告ID过滤
 - `title` (string): 按标题搜索
 - `content` (string): 按内容搜索
@@ -799,6 +917,10 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `url` (string): 按链接URL搜索
 - `method` (string): 按请求方法过滤
 - `status` (number): 按状态过滤
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### AdItemSingle Tag
 
@@ -851,11 +973,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `is_multiple` (number): 是否多选（1=是，0=否）
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### VoteItem Tag
 
@@ -907,11 +1032,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `vote_id` (number): 按投票ID过滤
 - `title` (string): 按标题搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### VoteItemSingle Tag
 
@@ -963,10 +1091,15 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
+- `alias` (string): 按别名搜索
+- `sort` (number): 按排序值过滤
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### AttrItem Tag
 
@@ -1018,8 +1151,16 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
+- `name` (string): 按名称搜索
+- `description` (string): 按描述搜索
+- `price` (number): 按价格过滤
 - `type` (number): 按类型过滤（1=必选，2=可选）
 - `status` (number): 按状态过滤
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### AdditionItem Tag
 
@@ -1072,20 +1213,19 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `type_name` (string): 按职位类型搜索
 - `nature` (string): 按工作性质搜索
 - `branch` (string): 按部门搜索
 - `address` (string): 按地址搜索
 - `email` (string): 按邮箱搜索
-- `num_min` (number): 最小招聘人数
-- `num_max` (number): 最大招聘人数
-- `sort_min` (number): 最小排序值
-- `sort_max` (number): 最大排序值
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
-- `has_email` (boolean): 是否有邮箱
-- `has_address` (boolean): 是否有地址
+- `num` (number): 按招聘人数过滤
+- `sort` (number): 按排序值过滤
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### JobItem Tag
 
@@ -1137,10 +1277,14 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `value` (string): 按日期值搜索
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `sort` (number): 按排序值过滤
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### HolidayItem Tag
 
@@ -1191,11 +1335,15 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `type_name` (string): 按类型名称搜索
 - `alias` (string): 按别名搜索
+- `remark` (string): 按备注搜索
 - `status` (number): 按状态过滤
-- `start_time` (number): 开始时间戳
-- `end_time` (number): 结束时间戳
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### UserTypeItem Tag
 
@@ -1263,13 +1411,22 @@ This document describes all available Nunjucks template tags for the CMS system.
 - `limit` (number): 限制返回数量，默认10
 - `page` (number): 页码，默认1
 - `page_size` (number): 每页数量，默认等于limit
+- `id` (number): 按ID过滤
 - `title` (string): 按标题搜索
 - `alias` (string): 按别名搜索
+- `condition` (string): 按条件搜索
+- `des` (string): 按描述搜索
+- `icon` (string): 按图标搜索
 - `module_id` (number): 按模块ID过滤
 - `parent_id` (number): 按父规则ID过滤
+- `sort` (number): 按排序值过滤
 - `type_id` (number): 按类型ID过滤
 - `status` (number): 按状态过滤
 - `tree` (boolean): 是否返回树形结构
+- `create_time_start` (number): 创建时间开始时间戳
+- `create_time_end` (number): 创建时间结束时间戳
+- `update_time_start` (number): 更新时间开始时间戳
+- `update_time_end` (number): 更新时间结束时间戳
 
 ### RuleItem Tag
 

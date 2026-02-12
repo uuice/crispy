@@ -1,4 +1,5 @@
 import { db } from '@src/libs/db'
+import { sql } from 'kysely'
 import { DELETE_STATUS } from '../config/const'
 import {
   AdEntity,
@@ -38,22 +39,74 @@ export class AdService {
   async getAds(filters: AdFilters): Promise<PaginatedResult<AdEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { title, content, status } = filters
+    const {
+      id,
+      title,
+      alias,
+      content,
+      status,
+      sort,
+      type_id,
+      start_time,
+      end_time,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('ads').selectAll()
 
     // Apply filters
+    if (id !== undefined) {
+      query = query.where('id', '=', id)
+    }
+
     if (title) {
       query = query.where('title', 'like', `%${title}%`)
+    }
+
+    if (alias) {
+      query = query.where('alias', 'like', `%${alias}%`)
     }
 
     if (content) {
       query = query.where('content', 'like', `%${content}%`)
     }
 
+    if (type_id !== undefined) {
+      query = query.where('type_id', '=', type_id)
+    }
+
     if (status !== undefined) {
       query = query.where('status', '=', status)
+    }
+
+    if (sort !== undefined) {
+      query = query.where('sort', '=', sort)
+    }
+
+    if (start_time !== undefined) {
+      query = query.where('start_time', '=', start_time)
+    }
+
+    if (end_time !== undefined) {
+      query = query.where('end_time', '=', end_time)
+    }
+
+    // 时间范围过滤
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted ads
@@ -71,14 +124,45 @@ export class AdService {
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
           // Apply same filters to count query
+          if (id !== undefined) {
+            qb = qb.where('id', '=', id)
+          }
           if (title) {
             qb = qb.where('title', 'like', `%${title}%`)
+          }
+          if (alias) {
+            qb = qb.where('alias', 'like', `%${alias}%`)
           }
           if (content) {
             qb = qb.where('content', 'like', `%${content}%`)
           }
+          if (type_id !== undefined) {
+            qb = qb.where('type_id', '=', type_id)
+          }
           if (status !== undefined) {
             qb = qb.where('status', '=', status)
+          }
+          if (sort !== undefined) {
+            qb = qb.where('sort', '=', sort)
+          }
+          if (start_time !== undefined) {
+            qb = qb.where('start_time', '=', start_time)
+          }
+          if (end_time !== undefined) {
+            qb = qb.where('end_time', '=', end_time)
+          }
+          // 时间范围过滤
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

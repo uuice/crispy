@@ -37,7 +37,8 @@ export class HolidayService {
   async getHolidays(filters: HolidayFilters): Promise<PaginatedResult<HolidayEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { title, value } = filters
+    const { title, value, create_time_start, create_time_end, update_time_start, update_time_end } =
+      filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('holidays').selectAll()
@@ -49,6 +50,22 @@ export class HolidayService {
 
     if (value) {
       query = query.where('value', 'like', `%${value}%`)
+    }
+
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted holidays
@@ -71,6 +88,18 @@ export class HolidayService {
           }
           if (value) {
             qb = qb.where('value', 'like', `%${value}%`)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

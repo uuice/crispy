@@ -78,7 +78,7 @@ export const createAccessTokenSchema = z.object({
 })
 export const updateAccessTokenSchema = createAccessTokenSchema.partial()
 export type AccessTokenEntity = Selectable<AccessToken>
-export type AccessTokenFilters = QueryFilter<AccessTokenEntity>
+export type AccessTokenFilters = QueryFilter<Omit<AccessTokenEntity, 'token'>>
 export type CreateAccessToken = Insertable<AccessToken>
 export type UpdateAccessToken = Updateable<AccessToken>
 

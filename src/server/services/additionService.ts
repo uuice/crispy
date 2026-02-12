@@ -38,13 +38,49 @@ export class AdditionService {
   async getAdditions(filters: AdditionFilters): Promise<PaginatedResult<AdditionEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { status } = filters
+    const {
+      id,
+      fields_json,
+      primary_id,
+      status,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('additions').selectAll()
 
+    // Apply filters
+    if (id !== undefined) {
+      query = query.where('id', '=', id)
+    }
+
+    if (fields_json) {
+      query = query.where('fields_json', 'like', `%${fields_json}%`)
+    }
+
+    if (primary_id !== undefined) {
+      query = query.where('primary_id', '=', primary_id)
+    }
+
     if (status !== undefined) {
       query = query.where('status', '=', status)
+    }
+
+    // 时间范围过滤
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted additions
@@ -57,9 +93,30 @@ export class AdditionService {
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
           // Apply same filters to count query
-
+          if (id !== undefined) {
+            qb = qb.where('id', '=', id)
+          }
+          if (fields_json) {
+            qb = qb.where('fields_json', 'like', `%${fields_json}%`)
+          }
+          if (primary_id !== undefined) {
+            qb = qb.where('primary_id', '=', primary_id)
+          }
           if (status !== undefined) {
             qb = qb.where('status', '=', status)
+          }
+          // 时间范围过滤
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

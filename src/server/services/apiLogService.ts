@@ -35,46 +35,100 @@ export class ApiLogService {
   async getApiLogs(filters: ApiLogFilters): Promise<PaginatedResult<ApiLogEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { user_id, method, create_time_start, create_time_end } = filters
+    const {
+      id,
+      user_id,
+      ip,
+      method,
+      body,
+      query,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
-    let query = db.selectFrom('api_logs').selectAll()
+    let queryBuilder = db.selectFrom('api_logs').selectAll()
 
     // Apply filters
-    if (user_id !== undefined) {
-      query = query.where('user_id', '=', user_id)
-    }
-    if (method) {
-      query = query.where('method', '=', method)
+    if (id !== undefined) {
+      queryBuilder = queryBuilder.where('id', '=', id)
     }
 
+    if (user_id !== undefined) {
+      queryBuilder = queryBuilder.where('user_id', '=', user_id)
+    }
+
+    if (ip) {
+      queryBuilder = queryBuilder.where('ip', 'like', `%${ip}%`)
+    }
+
+    if (method) {
+      queryBuilder = queryBuilder.where('method', '=', method)
+    }
+
+    if (body) {
+      queryBuilder = queryBuilder.where('body', 'like', `%${body}%`)
+    }
+
+    if (query) {
+      queryBuilder = queryBuilder.where('query', 'like', `%${query}%`)
+    }
+
+    // 时间范围过滤
     if (create_time_start !== undefined) {
-      query = query.where('create_time', '>=', create_time_start)
+      queryBuilder = queryBuilder.where('create_time', '>=', create_time_start)
     }
     if (create_time_end !== undefined) {
-      query = query.where('create_time', '<=', create_time_end)
+      queryBuilder = queryBuilder.where('create_time', '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      queryBuilder = queryBuilder.where('update_time', '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      queryBuilder = queryBuilder.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted logs
-    query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
+    queryBuilder = queryBuilder.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
     const [apiLogs, total] = await Promise.all([
-      query.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
+      queryBuilder.orderBy('create_time', 'desc').limit(pageSize).offset(offset).execute(),
       db
         .selectFrom('api_logs')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
+          if (id !== undefined) {
+            qb = qb.where('id', '=', id)
+          }
           if (user_id !== undefined) {
             qb = qb.where('user_id', '=', user_id)
+          }
+          if (ip) {
+            qb = qb.where('ip', 'like', `%${ip}%`)
           }
           if (method) {
             qb = qb.where('method', '=', method)
           }
+          if (body) {
+            qb = qb.where('body', 'like', `%${body}%`)
+          }
+          if (query) {
+            qb = qb.where('query', 'like', `%${query}%`)
+          }
+          // 时间范围过滤
           if (create_time_start !== undefined) {
             qb = qb.where('create_time', '>=', create_time_start)
           }
           if (create_time_end !== undefined) {
             qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

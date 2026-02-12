@@ -1,4 +1,5 @@
 import { db } from '@src/libs/db'
+import { sql } from 'kysely'
 import { DELETE_STATUS } from '../config/const'
 import {
   CreateJob,
@@ -37,12 +38,34 @@ export class JobService {
   async getJobs(filters: JobFilters): Promise<PaginatedResult<JobEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { title, typeName, nature, branch, address, email } = filters
+    const {
+      id,
+      title,
+      typeName,
+      nature,
+      branch,
+      address,
+      email,
+      num_min,
+      num_max,
+      sort_min,
+      sort_max,
+      has_email,
+      has_address,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('jobs').selectAll()
 
     // Apply filters
+    if (id !== undefined) {
+      query = query.where('id', '=', id)
+    }
+
     if (title) {
       query = query.where('title', 'like', `%${title}%`)
     }
@@ -67,6 +90,50 @@ export class JobService {
       query = query.where('email', 'like', `%${email}%`)
     }
 
+    if (num_min !== undefined) {
+      query = query.where('num', '>=', num_min)
+    }
+
+    if (num_max !== undefined) {
+      query = query.where('num', '<=', num_max)
+    }
+
+    if (sort_min !== undefined) {
+      query = query.where('sort', '>=', sort_min)
+    }
+
+    if (sort_max !== undefined) {
+      query = query.where('sort', '<=', sort_max)
+    }
+
+    if (has_email === true) {
+      query = query.where(sql`(email IS NOT NULL AND email != '')`)
+    } else if (has_email === false) {
+      query = query.where(sql`(email IS NULL OR email = '')`)
+    }
+
+    if (has_address === true) {
+      query = query.where(sql`(address IS NOT NULL AND address != '')`)
+    } else if (has_address === false) {
+      query = query.where(sql`(address IS NULL OR address = '')`)
+    }
+
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
+    }
+
     // Default to only non-deleted jobs
     query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
@@ -77,6 +144,9 @@ export class JobService {
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
           // Apply same filters to count query
+          if (id !== undefined) {
+            qb = qb.where('id', '=', id)
+          }
           if (title) {
             qb = qb.where('title', 'like', `%${title}%`)
           }
@@ -94,6 +164,40 @@ export class JobService {
           }
           if (email) {
             qb = qb.where('email', 'like', `%${email}%`)
+          }
+          if (num_min !== undefined) {
+            qb = qb.where('num', '>=', num_min)
+          }
+          if (num_max !== undefined) {
+            qb = qb.where('num', '<=', num_max)
+          }
+          if (sort_min !== undefined) {
+            qb = qb.where('sort', '>=', sort_min)
+          }
+          if (sort_max !== undefined) {
+            qb = qb.where('sort', '<=', sort_max)
+          }
+          if (has_email === true) {
+            qb = qb.where(sql`(email IS NOT NULL AND email != '')`)
+          } else if (has_email === false) {
+            qb = qb.where(sql`(email IS NULL OR email = '')`)
+          }
+          if (has_address === true) {
+            qb = qb.where(sql`(address IS NOT NULL AND address != '')`)
+          } else if (has_address === false) {
+            qb = qb.where(sql`(address IS NULL OR address = '')`)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

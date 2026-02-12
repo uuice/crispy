@@ -40,11 +40,23 @@ export class RuleService {
     let query = db.selectFrom('rules').selectAll()
 
     // Add filters if provided
+    if (filters.id !== undefined) {
+      query = query.where('id', '=', filters.id)
+    }
     if (filters.title) {
       query = query.where('title', 'like', `%${filters.title}%`)
     }
     if (filters.alias) {
       query = query.where('alias', 'like', `%${filters.alias}%`)
+    }
+    if (filters.condition) {
+      query = query.where('condition', 'like', `%${filters.condition}%`)
+    }
+    if (filters.des) {
+      query = query.where('des', 'like', `%${filters.des}%`)
+    }
+    if (filters.icon) {
+      query = query.where('icon', 'like', `%${filters.icon}%`)
     }
     if (filters.module_id !== undefined) {
       query = query.where('module_id', '=', filters.module_id)
@@ -52,11 +64,26 @@ export class RuleService {
     if (filters.parent_id !== undefined) {
       query = query.where('parent_id', '=', filters.parent_id)
     }
+    if (filters.sort !== undefined) {
+      query = query.where('sort', '=', filters.sort)
+    }
     if (filters.type_id !== undefined) {
       query = query.where('type_id', '=', filters.type_id)
     }
     if (filters.status !== undefined) {
       query = query.where('status', '=', filters.status)
+    }
+    if (filters.create_time_start !== undefined) {
+      query = query.where('create_time', '>=', filters.create_time_start)
+    }
+    if (filters.create_time_end !== undefined) {
+      query = query.where('create_time', '<=', filters.create_time_end)
+    }
+    if (filters.update_time_start !== undefined) {
+      query = query.where('update_time', '>=', filters.update_time_start)
+    }
+    if (filters.update_time_end !== undefined) {
+      query = query.where('update_time', '<=', filters.update_time_end)
     }
 
     query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
@@ -72,11 +99,23 @@ export class RuleService {
         .selectFrom('rules')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
+          if (filters.id !== undefined) {
+            qb = qb.where('id', '=', filters.id)
+          }
           if (filters.title) {
             qb = qb.where('title', 'like', `%${filters.title}%`)
           }
           if (filters.alias) {
             qb = qb.where('alias', 'like', `%${filters.alias}%`)
+          }
+          if (filters.condition) {
+            qb = qb.where('condition', 'like', `%${filters.condition}%`)
+          }
+          if (filters.des) {
+            qb = qb.where('des', 'like', `%${filters.des}%`)
+          }
+          if (filters.icon) {
+            qb = qb.where('icon', 'like', `%${filters.icon}%`)
           }
           if (filters.module_id !== undefined) {
             qb = qb.where('module_id', '=', filters.module_id)
@@ -84,11 +123,26 @@ export class RuleService {
           if (filters.parent_id !== undefined) {
             qb = qb.where('parent_id', '=', filters.parent_id)
           }
+          if (filters.sort !== undefined) {
+            qb = qb.where('sort', '=', filters.sort)
+          }
           if (filters.type_id !== undefined) {
             qb = qb.where('type_id', '=', filters.type_id)
           }
           if (filters.status !== undefined) {
             qb = qb.where('status', '=', filters.status)
+          }
+          if (filters.create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', filters.create_time_start)
+          }
+          if (filters.create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', filters.create_time_end)
+          }
+          if (filters.update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', filters.update_time_start)
+          }
+          if (filters.update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', filters.update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

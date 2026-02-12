@@ -94,6 +94,37 @@ export class ArticleService {
   async getArticles(filters: ArticleFilters): Promise<PaginatedResult<ArticleWithCategory>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
+    const {
+      id,
+      title,
+      sub_title,
+      abstract,
+      url,
+      content,
+      markdown_content,
+      is_markdown,
+      image,
+      image_list,
+      seo_title,
+      seo_description,
+      seo_keywords,
+      remark,
+      redirect_url,
+      type_id,
+      type_ids,
+      status,
+      tags,
+      attrs,
+      author_id,
+      user_id,
+      is_review,
+      click,
+      sort,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -105,50 +136,94 @@ export class ArticleService {
       .select(['categories.alias as category_alias'])
 
     // Add filters if provided
-    if (filters.title) {
-      query = query.where(sql.ref('articles.title'), 'like', `%${filters.title}%`)
+    if (id !== undefined) {
+      query = query.where(sql.ref('articles.id'), '=', id)
     }
-    if (filters.sub_title) {
-      query = query.where(sql.ref('articles.sub_title'), 'like', `%${filters.sub_title}%`)
+    if (title) {
+      query = query.where(sql.ref('articles.title'), 'like', `%${title}%`)
     }
-    if (filters.abstract) {
-      query = query.where(sql.ref('articles.abstract'), 'like', `%${filters.abstract}%`)
+    if (sub_title) {
+      query = query.where(sql.ref('articles.sub_title'), 'like', `%${sub_title}%`)
     }
-    if (filters.url) {
-      query = query.where(sql.ref('articles.url'), 'like', `%${filters.url}%`)
+    if (abstract) {
+      query = query.where(sql.ref('articles.abstract'), 'like', `%${abstract}%`)
     }
-    if (filters.type_id !== undefined) {
-      query = query.where(sql.ref('articles.type_id'), '=', filters.type_id)
+    if (url) {
+      query = query.where(sql.ref('articles.url'), 'like', `%${url}%`)
     }
-    if (filters.type_ids) {
-      query = query.where(sql.ref('articles.type_ids'), 'like', `%${filters.type_ids}%`)
+    if (content) {
+      query = query.where(sql.ref('articles.content'), 'like', `%${content}%`)
     }
-    if (filters.status !== undefined) {
-      query = query.where(sql.ref('articles.status'), '=', filters.status)
+    if (markdown_content) {
+      query = query.where(sql.ref('articles.markdown_content'), 'like', `%${markdown_content}%`)
     }
-    if (filters.tags) {
-      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+    if (is_markdown !== undefined) {
+      query = query.where(sql.ref('articles.is_markdown'), '=', is_markdown)
     }
-    if (filters.attrs) {
-      query = query.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
+    if (image) {
+      query = query.where(sql.ref('articles.image'), 'like', `%${image}%`)
     }
-    if (filters.tags) {
-      query = query.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+    if (image_list) {
+      query = query.where(sql.ref('articles.image_list'), 'like', `%${image_list}%`)
     }
-    if (filters.author_id !== undefined) {
-      query = query.where(sql.ref('articles.author_id'), '=', filters.author_id)
+    if (seo_title) {
+      query = query.where(sql.ref('articles.seo_title'), 'like', `%${seo_title}%`)
     }
-    if (filters.user_id !== undefined) {
-      query = query.where(sql.ref('articles.user_id'), '=', filters.user_id)
+    if (seo_description) {
+      query = query.where(sql.ref('articles.seo_description'), 'like', `%${seo_description}%`)
     }
-    if (filters.is_review !== undefined) {
-      query = query.where(sql.ref('articles.is_review'), '=', filters.is_review)
+    if (seo_keywords) {
+      query = query.where(sql.ref('articles.seo_keywords'), 'like', `%${seo_keywords}%`)
     }
-    if (filters.click !== undefined) {
-      query = query.where(sql.ref('articles.click'), '=', filters.click)
+    if (remark) {
+      query = query.where(sql.ref('articles.remark'), 'like', `%${remark}%`)
     }
-    if (filters.sort !== undefined) {
-      query = query.where(sql.ref('articles.sort'), '=', filters.sort)
+    if (redirect_url) {
+      query = query.where(sql.ref('articles.redirect_url'), 'like', `%${redirect_url}%`)
+    }
+    if (type_id !== undefined) {
+      query = query.where(sql.ref('articles.type_id'), '=', type_id)
+    }
+    if (type_ids) {
+      query = query.where(sql.ref('articles.type_ids'), 'like', `%${type_ids}%`)
+    }
+    if (status !== undefined) {
+      query = query.where(sql.ref('articles.status'), '=', status)
+    }
+    if (tags) {
+      query = query.where(sql.ref('articles.tags'), 'like', `%${tags}%`)
+    }
+    if (attrs) {
+      query = query.where(sql.ref('articles.attrs'), 'like', `%${attrs}%`)
+    }
+    if (author_id !== undefined) {
+      query = query.where(sql.ref('articles.author_id'), '=', author_id)
+    }
+    if (user_id !== undefined) {
+      query = query.where(sql.ref('articles.user_id'), '=', user_id)
+    }
+    if (is_review !== undefined) {
+      query = query.where(sql.ref('articles.is_review'), '=', is_review)
+    }
+    if (click !== undefined) {
+      query = query.where(sql.ref('articles.click'), '=', click)
+    }
+    if (sort !== undefined) {
+      query = query.where(sql.ref('articles.sort'), '=', sort)
+    }
+
+    // 时间范围过滤
+    if (create_time_start !== undefined) {
+      query = query.where(sql.ref('articles.create_time'), '>=', create_time_start)
+    }
+    if (create_time_end !== undefined) {
+      query = query.where(sql.ref('articles.create_time'), '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      query = query.where(sql.ref('articles.update_time'), '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      query = query.where(sql.ref('articles.update_time'), '<=', update_time_end)
     }
 
     query = query.where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
@@ -159,50 +234,93 @@ export class ArticleService {
         .selectFrom('articles')
         .select((eb) => [eb.fn.count('articles.id').as('count')])
         .$call((qb) => {
-          if (filters.title) {
-            qb = qb.where(sql.ref('articles.title'), 'like', `%${filters.title}%`)
+          if (id !== undefined) {
+            qb = qb.where(sql.ref('articles.id'), '=', id)
           }
-          if (filters.sub_title) {
-            qb = qb.where(sql.ref('articles.sub_title'), 'like', `%${filters.sub_title}%`)
+          if (title) {
+            qb = qb.where(sql.ref('articles.title'), 'like', `%${title}%`)
           }
-          if (filters.abstract) {
-            qb = qb.where(sql.ref('articles.abstract'), 'like', `%${filters.abstract}%`)
+          if (sub_title) {
+            qb = qb.where(sql.ref('articles.sub_title'), 'like', `%${sub_title}%`)
           }
-          if (filters.url) {
-            qb = qb.where(sql.ref('articles.url'), 'like', `%${filters.url}%`)
+          if (abstract) {
+            qb = qb.where(sql.ref('articles.abstract'), 'like', `%${abstract}%`)
           }
-          if (filters.type_id !== undefined) {
-            qb = qb.where(sql.ref('articles.type_id'), '=', filters.type_id)
+          if (url) {
+            qb = qb.where(sql.ref('articles.url'), 'like', `%${url}%`)
           }
-          if (filters.type_ids) {
-            qb = qb.where(sql.ref('articles.type_ids'), 'like', `%${filters.type_ids}%`)
+          if (content) {
+            qb = qb.where(sql.ref('articles.content'), 'like', `%${content}%`)
           }
-          if (filters.status !== undefined) {
-            qb = qb.where(sql.ref('articles.status'), '=', filters.status)
+          if (markdown_content) {
+            qb = qb.where(sql.ref('articles.markdown_content'), 'like', `%${markdown_content}%`)
           }
-          if (filters.tags) {
-            qb = qb.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+          if (is_markdown !== undefined) {
+            qb = qb.where(sql.ref('articles.is_markdown'), '=', is_markdown)
           }
-          if (filters.attrs) {
-            qb = qb.where(sql.ref('articles.attrs'), 'like', `%${filters.attrs}%`)
+          if (image) {
+            qb = qb.where(sql.ref('articles.image'), 'like', `%${image}%`)
           }
-          if (filters.tags) {
-            qb = qb.where(sql.ref('articles.tags'), 'like', `%${filters.tags}%`)
+          if (image_list) {
+            qb = qb.where(sql.ref('articles.image_list'), 'like', `%${image_list}%`)
           }
-          if (filters.author_id !== undefined) {
-            qb = qb.where(sql.ref('articles.author_id'), '=', filters.author_id)
+          if (seo_title) {
+            qb = qb.where(sql.ref('articles.seo_title'), 'like', `%${seo_title}%`)
           }
-          if (filters.user_id !== undefined) {
-            qb = qb.where(sql.ref('articles.user_id'), '=', filters.user_id)
+          if (seo_description) {
+            qb = qb.where(sql.ref('articles.seo_description'), 'like', `%${seo_description}%`)
           }
-          if (filters.is_review !== undefined) {
-            qb = qb.where(sql.ref('articles.is_review'), '=', filters.is_review)
+          if (seo_keywords) {
+            qb = qb.where(sql.ref('articles.seo_keywords'), 'like', `%${seo_keywords}%`)
           }
-          if (filters.click !== undefined) {
-            qb = qb.where(sql.ref('articles.click'), '=', filters.click)
+          if (remark) {
+            qb = qb.where(sql.ref('articles.remark'), 'like', `%${remark}%`)
           }
-          if (filters.sort !== undefined) {
-            qb = qb.where(sql.ref('articles.sort'), '=', filters.sort)
+          if (redirect_url) {
+            qb = qb.where(sql.ref('articles.redirect_url'), 'like', `%${redirect_url}%`)
+          }
+          if (type_id !== undefined) {
+            qb = qb.where(sql.ref('articles.type_id'), '=', type_id)
+          }
+          if (type_ids) {
+            qb = qb.where(sql.ref('articles.type_ids'), 'like', `%${type_ids}%`)
+          }
+          if (status !== undefined) {
+            qb = qb.where(sql.ref('articles.status'), '=', status)
+          }
+          if (tags) {
+            qb = qb.where(sql.ref('articles.tags'), 'like', `%${tags}%`)
+          }
+          if (attrs) {
+            qb = qb.where(sql.ref('articles.attrs'), 'like', `%${attrs}%`)
+          }
+          if (author_id !== undefined) {
+            qb = qb.where(sql.ref('articles.author_id'), '=', author_id)
+          }
+          if (user_id !== undefined) {
+            qb = qb.where(sql.ref('articles.user_id'), '=', user_id)
+          }
+          if (is_review !== undefined) {
+            qb = qb.where(sql.ref('articles.is_review'), '=', is_review)
+          }
+          if (click !== undefined) {
+            qb = qb.where(sql.ref('articles.click'), '=', click)
+          }
+          if (sort !== undefined) {
+            qb = qb.where(sql.ref('articles.sort'), '=', sort)
+          }
+          // 时间范围过滤
+          if (create_time_start !== undefined) {
+            qb = qb.where(sql.ref('articles.create_time'), '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where(sql.ref('articles.create_time'), '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where(sql.ref('articles.update_time'), '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where(sql.ref('articles.update_time'), '<=', update_time_end)
           }
           qb = qb.where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

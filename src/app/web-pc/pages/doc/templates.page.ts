@@ -463,71 +463,40 @@ export class DocTemplatesPage {
       name: 'Articles',
       desc: '获取文章列表，支持多种查询条件',
       usage:
-        '{% Articles limit=10 page=1 page_size=20 title="search" category_id=1 user_id=1 status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endArticles %}',
+        '{% Articles limit=10 page=1 page_size=20 title="search" type_id=1 user_id=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endArticles %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '20',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'category_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按分类ID过滤'
-        },
-        {
-          name: 'user_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按用户ID过滤'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '20', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'sub_title', type: 'string', required: false, default: '-', description: '按副标题搜索' },
+        { name: 'url', type: 'string', required: false, default: '-', description: '按URL搜索' },
+        { name: 'content', type: 'string', required: false, default: '-', description: '按内容搜索' },
+        { name: 'markdown_content', type: 'string', required: false, default: '-', description: '按Markdown内容搜索' },
+        { name: 'is_markdown', type: 'number', required: false, default: '-', description: '是否为Markdown格式' },
+        { name: 'abstract', type: 'string', required: false, default: '-', description: '按摘要搜索' },
+        { name: 'image', type: 'string', required: false, default: '-', description: '按图片搜索' },
+        { name: 'image_list', type: 'string', required: false, default: '-', description: '按图片列表搜索' },
+        { name: 'seo_title', type: 'string', required: false, default: '-', description: '按SEO标题搜索' },
+        { name: 'seo_description', type: 'string', required: false, default: '-', description: '按SEO描述搜索' },
+        { name: 'seo_keywords', type: 'string', required: false, default: '-', description: '按SEO关键词搜索' },
+        { name: 'remark', type: 'string', required: false, default: '-', description: '按备注搜索' },
+        { name: 'user_id', type: 'number', required: false, default: '-', description: '按用户ID过滤' },
+        { name: 'tags', type: 'string', required: false, default: '-', description: '按标签搜索' },
+        { name: 'attrs', type: 'string', required: false, default: '-', description: '按属性搜索' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按栏目ID过滤' },
+        { name: 'type_ids', type: 'string', required: false, default: '-', description: '按栏目IDs搜索' },
+        { name: 'author_id', type: 'number', required: false, default: '-', description: '按作者ID过滤' },
+        { name: 'redirect_url', type: 'string', required: false, default: '-', description: '按重定向URL搜索' },
+        { name: 'is_review', type: 'number', required: false, default: '-', description: '是否需要审核' },
+        { name: 'click', type: 'number', required: false, default: '-', description: '按点击数过滤' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -540,17 +509,17 @@ export class DocTemplatesPage {
           description: '获取前10篇文章'
         },
         {
-          title: '按分类获取文章',
-          code: `{% Articles category_id=2 limit=5 %}
+          title: '按栏目获取文章',
+          code: `{% Articles type_id=2 limit=5 %}
   {% for article in articles %}
     <h2>{{ article.title }}</h2>
   {% endfor %}
 {% endArticles %}`,
-          description: '获取分类ID为2的前5篇文章'
+          description: '获取栏目ID为2的前5篇文章'
         },
         {
           title: '按时间范围获取文章',
-          code: `{% Articles start_time=1704067200000 end_time=1706745600000 %}
+          code: `{% Articles create_time_start=1704067200000 create_time_end=1706745600000 %}
   {% for article in articles %}
     <h2>{{ article.title }}</h2>
     <span>{{ article.create_time | date('YYYY-MM-DD') }}</span>
@@ -589,12 +558,12 @@ export class DocTemplatesPage {
         },
         {
           title: '多条件组合筛选',
-          code: `{% Articles category_id=1 user_id=2 status=10 %}
+          code: `{% Articles type_id=1 user_id=2 status=10 %}
   {% for article in articles %}
     <h2>{{ article.title }}</h2>
   {% endfor %}
 {% endArticles %}`,
-          description: '按分类、用户、状态组合筛选'
+          description: '按栏目、用户、状态组合筛选'
         }
       ]
     },
@@ -643,64 +612,22 @@ export class DocTemplatesPage {
       name: 'Categories',
       desc: '获取分类列表，支持多种查询条件',
       usage:
-        '{% Categories limit=20 page=1 page_size=10 title="search" parent_id=0 status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endCategories %}',
+        '{% Categories limit=20 page=1 page_size=10 title="search" parent_id=0 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endCategories %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '20',
-          description: '限制返回数量，默认20'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'parent_id',
-          type: 'number',
-          required: false,
-          default: '0',
-          description: '父分类ID，0表示顶级分类'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '20', description: '限制返回数量，默认20' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'alias', type: 'string', required: false, default: '-', description: '按别名搜索' },
+        { name: 'des', type: 'string', required: false, default: '-', description: '按描述搜索' },
+        { name: 'parent_id', type: 'number', required: false, default: '0', description: '父分类ID，0表示顶级分类' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -772,15 +699,15 @@ export class DocTemplatesPage {
           title: '通过ID获取分类',
           code: `{% CategoryItem id=1 %}
   <h2>{{ category.title }}</h2>
-  <p>{{ category.description }}</p>
+  <p>{{ category.des }}</p>
 {% endCategoryItem %}`,
-          description: '通过分类ID获取分类详细信息'
+          description: '通过分类ID获取分类详细信息（des 为备注描述）'
         },
         {
           title: '通过标题获取分类',
           code: `{% CategoryItem title="技术" %}
   <h2>{{ category.title }}</h2>
-  <p>{{ category.description }}</p>
+  <p>{{ category.des }}</p>
 {% endCategoryItem %}`,
           description: '通过标题模糊搜索获取分类'
         }
@@ -790,7 +717,7 @@ export class DocTemplatesPage {
       name: 'Pages',
       desc: '获取页面列表，支持多种查询条件',
       usage:
-        '{% Pages limit=20 page=1 page_size=10 title="search" alias=search status=10 start_time=16499520 end_time=16499520 %}...{% endPages %}',
+        '{% Pages limit=20 page=1 page_size=10 title="search" alias=search status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endPages %}',
       parameters: [
         {
           name: 'limit',
@@ -814,11 +741,25 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'title',
           type: 'string',
           required: false,
           default: '-',
           description: '按标题搜索'
+        },
+        {
+          name: 'url',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按URL搜索'
         },
         {
           name: 'alias',
@@ -828,6 +769,111 @@ export class DocTemplatesPage {
           description: '按别名搜索'
         },
         {
+          name: 'content',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按内容搜索'
+        },
+        {
+          name: 'markdown_content',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按Markdown内容搜索'
+        },
+        {
+          name: 'is_markdown',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '是否为Markdown格式'
+        },
+        {
+          name: 'abstract',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按摘要搜索'
+        },
+        {
+          name: 'sub_title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按副标题搜索'
+        },
+        {
+          name: 'seo_title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按SEO标题搜索'
+        },
+        {
+          name: 'seo_keywords',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按SEO关键词搜索'
+        },
+        {
+          name: 'seo_description',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按SEO描述搜索'
+        },
+        {
+          name: 'image_list',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按图片列表搜索'
+        },
+        {
+          name: 'tags',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按标签搜索'
+        },
+        {
+          name: 'author_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按作者ID过滤'
+        },
+        {
+          name: 'user_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按用户ID过滤'
+        },
+        {
+          name: 'type_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按类型ID过滤'
+        },
+        {
+          name: 'click',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按点击数过滤'
+        },
+        {
+          name: 'remark',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按备注搜索'
+        },
+        {
           name: 'status',
           type: 'number',
           required: false,
@@ -835,18 +881,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -923,57 +983,23 @@ export class DocTemplatesPage {
       name: 'Roles',
       desc: '获取角色列表，支持多种查询条件',
       usage:
-        '{% Roles limit=20 page=1 page_size=10 title="search" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endRoles %}',
+        '{% Roles limit=20 page=1 page_size=10 title="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endRoles %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '20',
-          description: '限制返回数量，默认20'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '20', description: '限制返回数量，默认20' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'des', type: 'string', required: false, default: '-', description: '按描述搜索' },
+        { name: 'module_id', type: 'number', required: false, default: '-', description: '按模块ID过滤' },
+        { name: 'rule_ids', type: 'string', required: false, default: '-', description: '按规则IDs搜索' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按类型ID过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -982,11 +1008,11 @@ export class DocTemplatesPage {
   {% for role in roles %}
     <div class="role">
       <h3>{{ role.title }}</h3>
-      <p>{{ role.description }}</p>
+      <p>{{ role.des }}</p>
     </div>
   {% endfor %}
 {% endRoles %}`,
-          description: '获取前20个角色。'
+          description: '获取前20个角色（des 为数据库描述字段）'
         },
         {
           title: '按标题模糊搜索角色',
@@ -997,7 +1023,7 @@ export class DocTemplatesPage {
     </div>
   {% endfor %}
 {% endRoles %}`,
-          description: '按标题模糊搜索包含"管理员"的角色。'
+          description: '按标题模糊搜索包含"管理员"的角色'
         },
         {
           title: '分页获取角色',
@@ -1027,10 +1053,10 @@ export class DocTemplatesPage {
           code: `{% RoleItem id=1 %}
   <div class="role">
     <h3>{{ role.title }}</h3>
-    <p>{{ role.description }}</p>
+    <p>{{ role.des }}</p>
   </div>
 {% endRoleItem %}`,
-          description: '获取指定角色的详细信息'
+          description: '获取指定角色的详细信息（des 为描述字段）'
         },
         {
           title: '通过标题获取角色',
@@ -1044,79 +1070,31 @@ export class DocTemplatesPage {
       ]
     },
     {
-      name: 'Configs',
+      name: 'Config',
       desc: '获取配置列表，支持多种查询条件',
       usage:
-        '{% Config limit=1000 page=1 page_size=50 title="search" alias="search" type_id=1 status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endConfig %}',
+        '{% Config limit=1000 page=1 page_size=50 title="search" alias="search" type_id=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endConfig %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '1000',
-          description: '限制返回数量，默认1000'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '50',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'alias',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按别名搜索'
-        },
-        {
-          name: 'type_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按类型ID过滤'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '1000', description: '限制返回数量，默认1000' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '50', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'alias', type: 'string', required: false, default: '-', description: '按别名搜索' },
+        { name: 'value', type: 'string', required: false, default: '-', description: '按值搜索' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按类型ID过滤' },
+        { name: 'type_ids', type: 'string', required: false, default: '-', description: '按类型IDs搜索' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
           title: '获取配置列表',
-          code: `{% Config limit=1000 page=1 page_size=50 title="search" alias="search" type_id=1 status=10 start_time=1640995200000 end_time=1640995200000 %}
+          code: `{% Config limit=1000 page=1 page_size=50 title="search" alias="search" type_id=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}
   {% for config in configs %}
     <div class="config">
       <strong>{{ config.title }}:</strong> {{ config.value }}
@@ -1160,71 +1138,22 @@ export class DocTemplatesPage {
       name: 'Enums',
       desc: '获取枚举列表，支持多种查询条件',
       usage:
-        '{% Enums limit=10 page=1 page_size=10 title="search" alias="search" code="user_status" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endEnums %}',
+        '{% Enums limit=10 page=1 page_size=10 title="search" alias="search" code="user_status" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endEnums %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'alias',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按别名搜索'
-        },
-        {
-          name: 'code',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按代码搜索'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'alias', type: 'string', required: false, default: '-', description: '按别名搜索' },
+        { name: 'code', type: 'string', required: false, default: '-', description: '按代码搜索' },
+        { name: 'value', type: 'string', required: false, default: '-', description: '按值搜索' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -1288,69 +1217,24 @@ export class DocTemplatesPage {
       name: 'Keywords',
       desc: '获取关键词列表，支持多种查询条件',
       usage:
-        '{% Keywords limit=10 page=1 page_size=10 title="search" alias="search" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endKeywords %}',
+        '{% Keywords limit=10 page=1 page_size=10 title="search" alias="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endKeywords %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'alias',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按别名搜索'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'alias', type: 'string', required: false, default: '-', description: '按别名搜索' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
           title: '获取关键词列表',
-          code: `{% Keywords limit=10 page=1 page_size=10 title="search" alias="search" status=10 start_time=1640995200000 end_time=1640995200000 %}
+          code: `{% Keywords limit=10 page=1 page_size=10 title="search" alias="search" status=10 %}
   {% for keyword in keywords %}
     <span class="keyword">{{ keyword.title }}</span>
   {% endfor %}
@@ -1389,7 +1273,7 @@ export class DocTemplatesPage {
       name: 'Ads',
       desc: '获取广告列表，支持多种查询条件',
       usage:
-        '{% Ads limit=10 page=1 page_size=10 title="search" alias="search" content="search" type_id=1 status=10 sort_min=0 sort_max=100 start_time=1640995200000 end_time=1640995200000 has_image=true has_url=true %}...{% endAds %}',
+        '{% Ads limit=10 page=1 page_size=10 title="search" alias="search" content="search" type_id=1 status=10 sort_min=0 sort_max=100 create_time_start=1640995200000 create_time_end=1640995200000 has_image=true has_url=true %}...{% endAds %}',
       parameters: [
         {
           name: 'limit',
@@ -1411,6 +1295,13 @@ export class DocTemplatesPage {
           required: false,
           default: '10',
           description: '每页数量，默认等于limit'
+        },
+        {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
         },
         {
           name: 'title',
@@ -1448,32 +1339,53 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
+          name: 'sort',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按排序值过滤'
+        },
+        {
           name: 'sort_min',
           type: 'number',
           required: false,
-          default: '0',
+          default: '-',
           description: '最小排序值'
         },
         {
           name: 'sort_max',
           type: 'number',
           required: false,
-          default: '100',
+          default: '-',
           description: '最大排序值'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         },
         {
           name: 'has_image',
@@ -1566,29 +1478,12 @@ export class DocTemplatesPage {
       name: 'AdItems',
       desc: '获取广告项列表，支持多种查询条件',
       usage:
-        '{% AdItems limit=10 page=1 page_size=10 ad_id=1 title="search" content="search" image_url="search" url="search" method="GET" status=10 %}...{% endAdItems %}',
+        '{% AdItems limit=10 page=1 page_size=10 ad_id=1 title="search" content="search" image_url="search" url="search" method="GET" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endAdItems %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
         {
           name: 'ad_id',
           type: 'number',
@@ -1637,6 +1532,34 @@ export class DocTemplatesPage {
           required: false,
           default: '10',
           description: '按状态过滤'
+        },
+        {
+          name: 'create_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '创建时间开始时间戳'
+        },
+        {
+          name: 'create_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -1693,29 +1616,12 @@ export class DocTemplatesPage {
       name: 'Votes',
       desc: '获取投票列表，支持多种查询条件',
       usage:
-        '{% Votes limit=10 page=1 page_size=10 title="search" is_multiple=1 status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endVotes %}',
+        '{% Votes limit=10 page=1 page_size=10 title="search" is_multiple=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endVotes %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
         {
           name: 'title',
           type: 'string',
@@ -1738,24 +1644,38 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
         {
           title: '获取投票列表',
-          code: `{% Votes limit=10 page=1 page_size=10 title="search" is_multiple=1 status=10 start_time=1640995200000 end_time=1640995200000 %}
+          code: `{% Votes limit=10 page=1 page_size=10 title="search" is_multiple=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}
   {% for vote in votes %}
     <div class="vote">
       <h3>{{ vote.title }}</h3>
@@ -1801,69 +1721,24 @@ export class DocTemplatesPage {
       name: 'VoteItems',
       desc: '获取投票项列表，支持多种查询条件',
       usage:
-        '{% VoteItems limit=10 page=1 page_size=10 vote_id=1 title="search" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endVoteItems %}',
+        '{% VoteItems limit=10 page=1 page_size=10 vote_id=1 title="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endVoteItems %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'vote_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按投票ID过滤'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'vote_id', type: 'number', required: false, default: '-', description: '按投票ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
           title: '获取投票项列表',
-          code: `{% VoteItems limit=10 page=1 page_size=10 vote_id=1 title="search" status=10 start_time=1640995200000 end_time=1640995200000 %}
+          code: `{% VoteItems limit=10 page=1 page_size=10 vote_id=1 title="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}
   {% for voteItem in voteItems %}
     <div class="vote-item">
       <label>
@@ -1923,7 +1798,7 @@ export class DocTemplatesPage {
       name: 'Attrs',
       desc: '获取属性列表，支持多种查询条件',
       usage:
-        '{% Attrs limit=10 page=1 page_size=10 title="search" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endAttrs %}',
+        '{% Attrs limit=10 page=1 page_size=10 title="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endAttrs %}',
       parameters: [
         {
           name: 'limit',
@@ -1947,11 +1822,32 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'title',
           type: 'string',
           required: false,
           default: '-',
           description: '按标题搜索'
+        },
+        {
+          name: 'alias',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按别名搜索'
+        },
+        {
+          name: 'sort',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按排序值过滤'
         },
         {
           name: 'status',
@@ -1961,18 +1857,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -2134,7 +2044,7 @@ export class DocTemplatesPage {
       name: 'Jobs',
       desc: '获取职位列表，支持多种查询条件',
       usage:
-        '{% Jobs limit=10 page=1 page_size=10 title="search" type_name="full-time" nature="permanent" branch="HQ" address="New York" email="hr@company.com" num_min=1 num_max=10 sort_min=0 sort_max=100 start_time=1640995200000 end_time=1640995200000 has_email=true has_address=true %}...{% endJobs %}',
+        '{% Jobs limit=10 page=1 page_size=10 title="search" type_name="full-time" nature="permanent" branch="HQ" address="New York" email="hr@company.com" num_min=1 num_max=10 sort_min=0 sort_max=100 create_time_start=1640995200000 create_time_end=1640995200000 has_email=true has_address=true %}...{% endJobs %}',
       parameters: [
         {
           name: 'limit',
@@ -2228,18 +2138,32 @@ export class DocTemplatesPage {
           description: '最大排序值'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         },
         {
           name: 'has_email',
@@ -2323,7 +2247,7 @@ export class DocTemplatesPage {
       name: 'Holidays',
       desc: '获取节假日列表，支持多种查询条件',
       usage:
-        '{% Holidays limit=10 page=1 page_size=10 title="search" value="2024-01-01" start_time=1640995200000 end_time=1640995200000 %}...{% endHolidays %}',
+        '{% Holidays limit=10 page=1 page_size=10 title="search" value="2024-01-01" create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endHolidays %}',
       parameters: [
         {
           name: 'limit',
@@ -2361,18 +2285,32 @@ export class DocTemplatesPage {
           description: '按日期值搜索'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -2442,7 +2380,7 @@ export class DocTemplatesPage {
       name: 'UserTypes',
       desc: '获取用户类型列表，支持多种查询条件',
       usage:
-        '{% UserTypes limit=10 page=1 page_size=10 type_name="search" alias="search" status=10 start_time=1640995200000 end_time=1640995200000 %}...{% endUserTypes %}',
+        '{% UserTypes limit=10 page=1 page_size=10 type_name="search" alias="search" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endUserTypes %}',
       parameters: [
         {
           name: 'limit',
@@ -2487,18 +2425,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -2555,80 +2507,29 @@ export class DocTemplatesPage {
     },
     {
       name: 'Rules',
-      desc: '获取规则列表，支持多种查询条件和树形结构',
+      desc: '获取规则列表，支持多种查询条件；tree=true 时返回树形结构',
       usage:
-        '{% Rules limit=10 page=1 page_size=10 title="search" alias="search" module_id=1 parent_id=0 type_id=1 status=10 tree=true %}...{% endRules %}',
+        '{% Rules limit=10 page=1 page_size=10 title="search" alias="search" module_id=1 parent_id=0 type_id=1 status=10 tree=false %}...{% endRules %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '限制返回数量，默认10'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'alias',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按别名搜索'
-        },
-        {
-          name: 'module_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按模块ID过滤'
-        },
-        {
-          name: 'parent_id',
-          type: 'number',
-          required: false,
-          default: '0',
-          description: '按父规则ID过滤'
-        },
-        {
-          name: 'type_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按类型ID过滤'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'tree',
-          type: 'boolean',
-          required: false,
-          default: '-',
-          description: '是否返回树形结构'
-        }
+        { name: 'limit', type: 'number', required: false, default: '10', description: '限制返回数量，默认10' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'alias', type: 'string', required: false, default: '-', description: '按别名搜索' },
+        { name: 'condition', type: 'string', required: false, default: '-', description: '按条件搜索' },
+        { name: 'des', type: 'string', required: false, default: '-', description: '按描述搜索' },
+        { name: 'icon', type: 'string', required: false, default: '-', description: '按图标搜索' },
+        { name: 'module_id', type: 'number', required: false, default: '-', description: '按模块ID过滤' },
+        { name: 'parent_id', type: 'number', required: false, default: '0', description: '按父规则ID过滤' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按类型ID过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'tree', type: 'boolean', required: false, default: 'false', description: '是否返回树形结构' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -2696,71 +2597,32 @@ export class DocTemplatesPage {
       name: 'Users',
       desc: '获取用户列表，支持多种查询条件',
       usage:
-        '{% Users limit=20 page=1 page_size=10 username="search" email=search type_id=1 status=10 start_time=1640995200 end_time=164995200000}...{% endUsers %}',
+        '{% Users limit=20 page=1 page_size=10 user_name="search" email="search" type_id=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endUsers %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '20',
-          description: '限制返回数量，默认20'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'username',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按用户名搜索'
-        },
-        {
-          name: 'email',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按邮箱搜索'
-        },
-        {
-          name: 'type_id',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '按用户类型过滤'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '20', description: '限制返回数量，默认20' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '10', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'user_name', type: 'string', required: false, default: '-', description: '按用户名搜索' },
+        { name: 'email', type: 'string', required: false, default: '-', description: '按邮箱搜索' },
+        { name: 'phone', type: 'string', required: false, default: '-', description: '按手机号搜索' },
+        { name: 'real_name', type: 'string', required: false, default: '-', description: '按真实姓名搜索' },
+        { name: 'nick_name', type: 'string', required: false, default: '-', description: '按昵称搜索' },
+        { name: 'avatar_url', type: 'string', required: false, default: '-', description: '按头像URL搜索' },
+        { name: 'role_id', type: 'number', required: false, default: '-', description: '按角色ID过滤' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按用户类型过滤' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'is_admin', type: 'number', required: false, default: '-', description: '是否为管理员' },
+        { name: 'is_super_admin', type: 'number', required: false, default: '-', description: '是否为超级管理员' },
+        { name: 'is_black', type: 'number', required: false, default: '-', description: '是否被拉黑' },
+        { name: 'last_login_ip', type: 'string', required: false, default: '-', description: '按最后登录IP搜索' },
+        { name: 'last_login_time', type: 'number', required: false, default: '-', description: '按最后登录时间过滤' },
+        { name: 'last_login_start', type: 'number', required: false, default: '-', description: '最后登录时间开始时间戳' },
+        { name: 'last_login_end', type: 'number', required: false, default: '-', description: '最后登录时间结束时间戳' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -2768,19 +2630,19 @@ export class DocTemplatesPage {
           code: `{% Users limit=20 %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
       <p>{{ user.email }}</p>
     </div>
   {% endfor %}
 {% endUsers %}`,
-          description: '获取前20个用户。'
+          description: '获取前20个用户（user_name 为数据库字段）'
         },
         {
           title: '按用户名搜索',
-          code: `{% Users username="admin" %}
+          code: `{% Users user_name="admin" %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
       <p>{{ user.email }}</p>
     </div>
   {% endfor %}
@@ -2789,10 +2651,10 @@ export class DocTemplatesPage {
         },
         {
           title: '按邮箱搜索',
-          code: `{% Users email=example.com %}
+          code: `{% Users email="example.com" %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
       <p>{{ user.email }}</p>
     </div>
   {% endfor %}
@@ -2804,7 +2666,7 @@ export class DocTemplatesPage {
           code: `{% Users type_id=1 limit=10 %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
       <p>Type: {{ user.type_name }}</p>
     </div>
   {% endfor %}
@@ -2816,7 +2678,7 @@ export class DocTemplatesPage {
           code: `{% Users page=2 page_size=5 %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
     </div>
   {% endfor %}
   <p>当前页: {{ users_pagination.page }}</p>
@@ -2825,10 +2687,10 @@ export class DocTemplatesPage {
         },
         {
           title: '按时间范围筛选',
-          code: `{% Users start_time=1704067200 end_time=1706745600000 %}
+          code: `{% Users create_time_start=1704067200000 create_time_end=1706745600000 %}
   {% for user in users %}
     <div class="user">
-      <h4>{{ user.username }}</h4>
+      <h4>{{ user.user_name }}</h4>
       <p>注册时间: {{ user.create_time | date('YYYY-MM-DD') }}</p>
     </div>
   {% endfor %}
@@ -2843,7 +2705,7 @@ export class DocTemplatesPage {
       usage: '{% UserItem id=1 %}',
       parameters: [
         { name: 'id', type: 'number', required: true, default: '-', description: '用户ID' },
-        { name: 'username', type: 'string', required: false, default: '-', description: '用户名' },
+        { name: 'user_name', type: 'string', required: false, default: '-', description: '用户名' },
         { name: 'email', type: 'string', required: false, default: '-', description: '邮箱' }
       ],
       examples: [
@@ -2851,17 +2713,17 @@ export class DocTemplatesPage {
           title: '通过ID获取用户',
           code: `{% UserItem id=1 %}
   <div class="user">
-    <h4>{{ user.username }}</h4>
+    <h4>{{ user.user_name }}</h4>
     <p>{{ user.email }}</p>
   </div>
 {% endUserItem %}`,
-          description: '通过用户ID获取用户详细信息'
+          description: '通过用户ID获取用户详细信息（user_name 为数据库字段）'
         },
         {
           title: '通过用户名获取用户',
-          code: `{% UserItem username="admin" %}
+          code: `{% UserItem user_name="admin" %}
   <div class="user">
-    <h4>{{ user.username }}</h4>
+    <h4>{{ user.user_name }}</h4>
     <p>{{ user.email }}</p>
   </div>
 {% endUserItem %}`,
@@ -2869,9 +2731,9 @@ export class DocTemplatesPage {
         },
         {
           title: '通过邮箱获取用户',
-          code: `{% UserItem email=admin@example.com %}
+          code: `{% UserItem email="admin@example.com" %}
   <div class="user">
-    <h4>{{ user.username }}</h4>
+    <h4>{{ user.user_name }}</h4>
     <p>{{ user.email }}</p>
   </div>
 {% endUserItem %}`,
@@ -2883,57 +2745,22 @@ export class DocTemplatesPage {
       name: 'Tags',
       desc: '获取标签列表，支持多种查询条件',
       usage:
-        '{% Tags limit=50 page=1 page_size=20 title="search" status=10 start_time=1640995200 end_time=1649952000 %}...{% endTags %}',
+        '{% Tags limit=50 page=1 page_size=20 title="search" type_id=0 value="slug" status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endTags %}',
       parameters: [
-        {
-          name: 'limit',
-          type: 'number',
-          required: false,
-          default: '50',
-          description: '限制返回数量，默认50'
-        },
-        {
-          name: 'page',
-          type: 'number',
-          required: false,
-          default: '1',
-          description: '页码，默认1'
-        },
-        {
-          name: 'page_size',
-          type: 'number',
-          required: false,
-          default: '20',
-          description: '每页数量，默认等于limit'
-        },
-        {
-          name: 'title',
-          type: 'string',
-          required: false,
-          default: '-',
-          description: '按标题搜索'
-        },
-        {
-          name: 'status',
-          type: 'number',
-          required: false,
-          default: '10',
-          description: '按状态过滤'
-        },
-        {
-          name: 'start_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '开始时间戳'
-        },
-        {
-          name: 'end_time',
-          type: 'number',
-          required: false,
-          default: '-',
-          description: '结束时间戳'
-        }
+        { name: 'limit', type: 'number', required: false, default: '50', description: '限制返回数量，默认50' },
+        { name: 'page', type: 'number', required: false, default: '1', description: '页码，默认1' },
+        { name: 'page_size', type: 'number', required: false, default: '20', description: '每页数量，默认等于limit' },
+        { name: 'id', type: 'number', required: false, default: '-', description: '按ID过滤' },
+        { name: 'title', type: 'string', required: false, default: '-', description: '按标题搜索' },
+        { name: 'des', type: 'string', required: false, default: '-', description: '按描述搜索' },
+        { name: 'sort', type: 'number', required: false, default: '-', description: '按排序值过滤' },
+        { name: 'type_id', type: 'number', required: false, default: '-', description: '按类型ID过滤' },
+        { name: 'value', type: 'string', required: false, default: '-', description: '按值搜索' },
+        { name: 'status', type: 'number', required: false, default: '10', description: '按状态过滤' },
+        { name: 'create_time_start', type: 'number', required: false, default: '-', description: '创建时间开始时间戳' },
+        { name: 'create_time_end', type: 'number', required: false, default: '-', description: '创建时间结束时间戳' },
+        { name: 'update_time_start', type: 'number', required: false, default: '-', description: '更新时间开始时间戳' },
+        { name: 'update_time_end', type: 'number', required: false, default: '-', description: '更新时间结束时间戳' }
       ],
       examples: [
         {
@@ -2972,16 +2799,17 @@ export class DocTemplatesPage {
       usage: '{% TagItem id=1 %}',
       parameters: [
         { name: 'id', type: 'number', required: true, default: '-', description: '标签ID' },
-        { name: 'title', type: 'string', required: false, default: '-', description: '标签标题' }
+        { name: 'title', type: 'string', required: false, default: '-', description: '标签标题' },
+        { name: 'value', type: 'string', required: false, default: '-', description: '标签值（用于 URL 等）' }
       ],
       examples: [
         {
           title: '通过ID获取标签',
           code: `{% TagItem id=1 %}
   <span class="tag">{{ tag.title }}</span>
-  <p>{{ tag.description }}</p>
+  <p>{{ tag.des }}</p>
 {% endTagItem %}`,
-          description: '通过标签ID获取标签详细信息'
+          description: '通过标签ID获取标签详细信息（des 为描述）'
         },
         {
           title: '通过标题获取标签',
@@ -2996,7 +2824,7 @@ export class DocTemplatesPage {
       name: 'Comments',
       desc: '获取评论列表，支持多种查询条件',
       usage:
-        '{% Comments limit=20 page=1 page_size=10 t="search" article_id=1 user_id=1 status=10 start_time=1640995200 end_time=164995200000 %}...{% endComments %}',
+        '{% Comments limit=20 page=1 page_size=10 content="search" article_id=1 user_id=1 status=10 create_time_start=1640995200000 create_time_end=1640995200000 %}...{% endComments %}',
       parameters: [
         {
           name: 'limit',
@@ -3020,11 +2848,25 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'content',
           type: 'string',
           required: false,
           default: '-',
           description: '按内容搜索'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按评论标题搜索'
         },
         {
           name: 'article_id',
@@ -3041,6 +2883,27 @@ export class DocTemplatesPage {
           description: '按用户ID过滤'
         },
         {
+          name: 'good_article',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按好评过滤'
+        },
+        {
+          name: 'bad_article',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按差评过滤'
+        },
+        {
+          name: 'not_article',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按不相关过滤'
+        },
+        {
           name: 'status',
           type: 'number',
           required: false,
@@ -3048,18 +2911,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -3125,7 +3002,7 @@ export class DocTemplatesPage {
       name: 'Links',
       desc: '获取链接列表，支持多种查询条件',
       usage:
-        '{% Links limit=20 page=1 page_size=10 title="search" url=search status=10 start_time=1640995200 end_time=1649952000 %}...{% endLinks %}',
+        '{% Links limit=20 page=1 page_size=10 title="search" url="search" status=10 create_time_start=1640995200000 create_time_end=1649952000000 %}...{% endLinks %}',
       parameters: [
         {
           name: 'limit',
@@ -3149,6 +3026,13 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'title',
           type: 'string',
           required: false,
@@ -3170,18 +3054,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -3236,7 +3134,7 @@ export class DocTemplatesPage {
       name: 'Menus',
       desc: '获取菜单列表，支持多种查询条件',
       usage:
-        '{% Menus limit=20 page=1 page_size=10 title="search" parent_id=0 status=10 start_time=1640995200 end_time=1649952000 %}...{% endMenus %}',
+        '{% Menus limit=20 page=1 page_size=10 title="search" parent_id=0 status=10 create_time_start=1640995200000 create_time_end=1649952000000 %}...{% endMenus %}',
       parameters: [
         {
           name: 'limit',
@@ -3260,11 +3158,25 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'title',
           type: 'string',
           required: false,
           default: '-',
           description: '按标题搜索'
+        },
+        {
+          name: 'alias',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按别名搜索'
         },
         {
           name: 'parent_id',
@@ -3274,6 +3186,41 @@ export class DocTemplatesPage {
           description: '父菜单ID，0表示顶级菜单'
         },
         {
+          name: 'icon',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按图标搜索'
+        },
+        {
+          name: 'url',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按URL搜索'
+        },
+        {
+          name: 'image_url',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按图片URL搜索'
+        },
+        {
+          name: 'method',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按请求方法搜索'
+        },
+        {
+          name: 'sort',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按排序值过滤'
+        },
+        {
           name: 'status',
           type: 'number',
           required: false,
@@ -3281,18 +3228,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [
@@ -3345,7 +3306,7 @@ export class DocTemplatesPage {
       name: 'Notices',
       desc: '获取公告列表，支持多种查询条件',
       usage:
-        '{% Notices limit=10 page=1 page_size=5 title="search" content=search status=10 start_time=1640995200 end_time=1649952000 %}...{% endNotices %}',
+        '{% Notices limit=10 page=1 page_size=5 title="search" content="search" status=10 create_time_start=1640995200000 create_time_end=1649952000000 %}...{% endNotices %}',
       parameters: [
         {
           name: 'limit',
@@ -3369,6 +3330,13 @@ export class DocTemplatesPage {
           description: '每页数量，默认等于limit'
         },
         {
+          name: 'id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按ID过滤'
+        },
+        {
           name: 'title',
           type: 'string',
           required: false,
@@ -3383,6 +3351,27 @@ export class DocTemplatesPage {
           description: '按内容搜索'
         },
         {
+          name: 'from_user_id',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按发送用户ID过滤'
+        },
+        {
+          name: 'publish_time',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '按发布时间过滤'
+        },
+        {
+          name: 'tolds',
+          type: 'string',
+          required: false,
+          default: '-',
+          description: '按接收者搜索'
+        },
+        {
           name: 'status',
           type: 'number',
           required: false,
@@ -3390,18 +3379,32 @@ export class DocTemplatesPage {
           description: '按状态过滤'
         },
         {
-          name: 'start_time',
+          name: 'create_time_start',
           type: 'number',
           required: false,
           default: '-',
-          description: '开始时间戳'
+          description: '创建时间开始时间戳'
         },
         {
-          name: 'end_time',
+          name: 'create_time_end',
           type: 'number',
           required: false,
           default: '-',
-          description: '结束时间戳'
+          description: '创建时间结束时间戳'
+        },
+        {
+          name: 'update_time_start',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间开始时间戳'
+        },
+        {
+          name: 'update_time_end',
+          type: 'number',
+          required: false,
+          default: '-',
+          description: '更新时间结束时间戳'
         }
       ],
       examples: [

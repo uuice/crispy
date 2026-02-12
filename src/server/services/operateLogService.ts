@@ -37,9 +37,16 @@ export class OperateLogService {
   async getOperateLogs(filters: OperateLogFilters): Promise<PaginatedResult<OperateLogEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { code, content, type_id, user_id } = filters
-    const start_time = filters.create_time
-    const end_time = filters.update_time
+    const {
+      code,
+      content,
+      type_id,
+      user_id,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('operate_logs').selectAll()
@@ -57,11 +64,17 @@ export class OperateLogService {
     if (user_id !== undefined) {
       query = query.where('user_id', '=', user_id)
     }
-    if (start_time !== undefined) {
-      query = query.where('create_time', '>=', start_time)
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
     }
-    if (end_time !== undefined) {
-      query = query.where('create_time', '<=', end_time)
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted logs
@@ -85,11 +98,17 @@ export class OperateLogService {
           if (user_id !== undefined) {
             qb = qb.where('user_id', '=', user_id)
           }
-          if (start_time !== undefined) {
-            qb = qb.where('create_time', '>=', start_time)
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
           }
-          if (end_time !== undefined) {
-            qb = qb.where('create_time', '<=', end_time)
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

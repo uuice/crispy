@@ -40,7 +40,21 @@ export class LinkService {
   async getLinks(filters: LinkFilters): Promise<PaginatedResult<LinkWithType>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { site_name, url, des, logo, method, status, type_id } = filters
+    const {
+      title,
+      site_name,
+      url,
+      des,
+      logo,
+      method,
+      status,
+      type_id,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
+    const siteNameSearch = title ?? site_name
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -49,9 +63,9 @@ export class LinkService {
       .selectAll('links')
       .select('categories.title as type_name')
 
-    // Apply filters
-    if (site_name) {
-      query = query.where('links.site_name', 'like', `%${site_name}%`)
+    // Apply filters（title 与 site_name 等价，按站点名称搜索）
+    if (siteNameSearch) {
+      query = query.where('links.site_name', 'like', `%${siteNameSearch}%`)
     }
 
     if (url) {
@@ -78,6 +92,22 @@ export class LinkService {
       query = query.where('links.type_id', '=', type_id)
     }
 
+    if (create_time_start !== undefined) {
+      query = query.where('links.create_time', '>=', create_time_start)
+    }
+
+    if (create_time_end !== undefined) {
+      query = query.where('links.create_time', '<=', create_time_end)
+    }
+
+    if (update_time_start !== undefined) {
+      query = query.where('links.update_time', '>=', update_time_start)
+    }
+
+    if (update_time_end !== undefined) {
+      query = query.where('links.update_time', '<=', update_time_end)
+    }
+
     // Default to only non-deleted links
     query = query.where('links.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
@@ -88,8 +118,8 @@ export class LinkService {
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
           // Apply same filters to count query
-          if (site_name) {
-            qb = qb.where('site_name', 'like', `%${site_name}%`)
+          if (siteNameSearch) {
+            qb = qb.where('site_name', 'like', `%${siteNameSearch}%`)
           }
           if (url) {
             qb = qb.where('url', 'like', `%${url}%`)
@@ -108,6 +138,18 @@ export class LinkService {
           }
           if (type_id !== undefined) {
             qb = qb.where('type_id', '=', type_id)
+          }
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

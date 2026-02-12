@@ -112,6 +112,9 @@ export class PageService {
     let query = db.selectFrom('pages').selectAll()
 
     // Apply filters
+    if (filters.id !== undefined) {
+      query = query.where('id', '=', filters.id)
+    }
     if (filters.title) {
       query = query.where('title', 'like', `%${filters.title}%`)
     }
@@ -126,6 +129,33 @@ export class PageService {
     }
     if (filters.url) {
       query = query.where('url', 'like', `%${filters.url}%`)
+    }
+    if (filters.content) {
+      query = query.where('content', 'like', `%${filters.content}%`)
+    }
+    if (filters.markdown_content) {
+      query = query.where('markdown_content', 'like', `%${filters.markdown_content}%`)
+    }
+    if (filters.is_markdown !== undefined) {
+      query = query.where('is_markdown', '=', filters.is_markdown)
+    }
+    if (filters.seo_title) {
+      query = query.where('seo_title', 'like', `%${filters.seo_title}%`)
+    }
+    if (filters.seo_keywords) {
+      query = query.where('seo_keywords', 'like', `%${filters.seo_keywords}%`)
+    }
+    if (filters.seo_description) {
+      query = query.where('seo_description', 'like', `%${filters.seo_description}%`)
+    }
+    if (filters.image_list) {
+      query = query.where('image_list', 'like', `%${filters.image_list}%`)
+    }
+    if (filters.tags) {
+      query = query.where('tags', 'like', `%${filters.tags}%`)
+    }
+    if (filters.remark) {
+      query = query.where('remark', 'like', `%${filters.remark}%`)
     }
     if (filters.status !== undefined) {
       query = query.where('status', '=', filters.status)
@@ -142,6 +172,18 @@ export class PageService {
     if (filters.click !== undefined) {
       query = query.where('click', '=', filters.click)
     }
+    if (filters.create_time_start !== undefined) {
+      query = query.where('create_time', '>=', filters.create_time_start)
+    }
+    if (filters.create_time_end !== undefined) {
+      query = query.where('create_time', '<=', filters.create_time_end)
+    }
+    if (filters.update_time_start !== undefined) {
+      query = query.where('update_time', '>=', filters.update_time_start)
+    }
+    if (filters.update_time_end !== undefined) {
+      query = query.where('update_time', '<=', filters.update_time_end)
+    }
 
     query = query.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
 
@@ -151,6 +193,9 @@ export class PageService {
         .selectFrom('pages')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
+          if (filters.id !== undefined) {
+            qb = qb.where('id', '=', filters.id)
+          }
           if (filters.title) {
             qb = qb.where('title', 'like', `%${filters.title}%`)
           }
@@ -166,6 +211,33 @@ export class PageService {
           if (filters.url) {
             qb = qb.where('url', 'like', `%${filters.url}%`)
           }
+          if (filters.content) {
+            qb = qb.where('content', 'like', `%${filters.content}%`)
+          }
+          if (filters.markdown_content) {
+            qb = qb.where('markdown_content', 'like', `%${filters.markdown_content}%`)
+          }
+          if (filters.is_markdown !== undefined) {
+            qb = qb.where('is_markdown', '=', filters.is_markdown)
+          }
+          if (filters.seo_title) {
+            qb = qb.where('seo_title', 'like', `%${filters.seo_title}%`)
+          }
+          if (filters.seo_keywords) {
+            qb = qb.where('seo_keywords', 'like', `%${filters.seo_keywords}%`)
+          }
+          if (filters.seo_description) {
+            qb = qb.where('seo_description', 'like', `%${filters.seo_description}%`)
+          }
+          if (filters.image_list) {
+            qb = qb.where('image_list', 'like', `%${filters.image_list}%`)
+          }
+          if (filters.tags) {
+            qb = qb.where('tags', 'like', `%${filters.tags}%`)
+          }
+          if (filters.remark) {
+            qb = qb.where('remark', 'like', `%${filters.remark}%`)
+          }
           if (filters.status !== undefined) {
             qb = qb.where('status', '=', filters.status)
           }
@@ -180,6 +252,18 @@ export class PageService {
           }
           if (filters.click !== undefined) {
             qb = qb.where('click', '=', filters.click)
+          }
+          if (filters.create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', filters.create_time_start)
+          }
+          if (filters.create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', filters.create_time_end)
+          }
+          if (filters.update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', filters.update_time_start)
+          }
+          if (filters.update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', filters.update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

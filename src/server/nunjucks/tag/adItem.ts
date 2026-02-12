@@ -21,20 +21,7 @@ export function AdItems(): void {
     const page = args.page || 1
     const pageSize = args.page_size || limit
 
-    // Build filters object from args
-    const filters: any = {}
-
-    // Basic filters
-    if (args.ad_id !== undefined) filters.ad_id = args.ad_id
-    if (args.title) filters.title = args.title
-    if (args.content) filters.content = args.content
-    if (args.image_url) filters.image_url = args.image_url
-    if (args.url) filters.url = args.url
-    if (args.method) filters.method = args.method
-    if (args.status !== undefined) filters.status = args.status
-
-    // Use the enhanced getAdItems method with filters
-    const result = await adItemService.getAdItems({ ...filters, page, pageSize })
+    const result = await adItemService.getAdItems({ ...args, page, pageSize })
 
     context.ctx.adItems = result.dataList
     context.ctx.adItems_pagination = result.pagination
@@ -71,10 +58,7 @@ export function AdItemSingle(): void {
     if (id) {
       adItem = await adItemService.getById(id)
     } else if (title) {
-      // Note: adItemService doesn't have getAdItemByTitle method, so we'll use getAdItems with title filter
-      const filters: any = { title }
-      if (ad_id !== undefined) filters.ad_id = ad_id
-      const result = await adItemService.getAdItems({ page: 1, pageSize: 1, ...filters })
+      const result = await adItemService.getAdItems({ ...args, page: 1, pageSize: 1 })
       adItem = result.dataList[0] || null
     }
 

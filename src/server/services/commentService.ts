@@ -56,6 +56,18 @@ export class CommentService {
     if (filters.not_article !== undefined) {
       query = query.where('c.not_article', '=', filters.not_article)
     }
+    if (filters.create_time_start !== undefined) {
+      query = query.where('c.create_time', '>=', filters.create_time_start)
+    }
+    if (filters.create_time_end !== undefined) {
+      query = query.where('c.create_time', '<=', filters.create_time_end)
+    }
+    if (filters.update_time_start !== undefined) {
+      query = query.where('c.update_time', '>=', filters.update_time_start)
+    }
+    if (filters.update_time_end !== undefined) {
+      query = query.where('c.update_time', '<=', filters.update_time_end)
+    }
 
     query = query.where('c.is_delete', '=', DELETE_STATUS.UN_DELETE)
 
@@ -88,6 +100,18 @@ export class CommentService {
           }
           if (filters.not_article !== undefined) {
             qb = qb.where('c.not_article', '=', filters.not_article)
+          }
+          if (filters.create_time_start !== undefined) {
+            qb = qb.where('c.create_time', '>=', filters.create_time_start)
+          }
+          if (filters.create_time_end !== undefined) {
+            qb = qb.where('c.create_time', '<=', filters.create_time_end)
+          }
+          if (filters.update_time_start !== undefined) {
+            qb = qb.where('c.update_time', '>=', filters.update_time_start)
+          }
+          if (filters.update_time_end !== undefined) {
+            qb = qb.where('c.update_time', '<=', filters.update_time_end)
           }
           qb = qb.where('c.is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

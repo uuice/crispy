@@ -38,17 +38,43 @@ export class CacheService {
   async getCaches(filters: CacheFilters): Promise<PaginatedResult<CacheEntity>> {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
-    const { hash, status } = filters
+    const {
+      id,
+      hash,
+      status,
+      create_time_start,
+      create_time_end,
+      update_time_start,
+      update_time_end
+    } = filters
     const offset = (page - 1) * pageSize
 
     let query = db.selectFrom('caches').selectAll()
 
     // Apply filters
+    if (id !== undefined) {
+      query = query.where('id', '=', id)
+    }
+
     if (hash) {
       query = query.where('hash', 'like', `%${hash}%`)
     }
     if (status !== undefined) {
       query = query.where('status', '=', status)
+    }
+
+    // 时间范围过滤
+    if (create_time_start !== undefined) {
+      query = query.where('create_time', '>=', create_time_start)
+    }
+    if (create_time_end !== undefined) {
+      query = query.where('create_time', '<=', create_time_end)
+    }
+    if (update_time_start !== undefined) {
+      query = query.where('update_time', '>=', update_time_start)
+    }
+    if (update_time_end !== undefined) {
+      query = query.where('update_time', '<=', update_time_end)
     }
 
     // Default to only non-deleted caches
@@ -60,11 +86,27 @@ export class CacheService {
         .selectFrom('caches')
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
+          if (id !== undefined) {
+            qb = qb.where('id', '=', id)
+          }
           if (hash) {
             qb = qb.where('hash', 'like', `%${hash}%`)
           }
           if (status !== undefined) {
             qb = qb.where('status', '=', status)
+          }
+          // 时间范围过滤
+          if (create_time_start !== undefined) {
+            qb = qb.where('create_time', '>=', create_time_start)
+          }
+          if (create_time_end !== undefined) {
+            qb = qb.where('create_time', '<=', create_time_end)
+          }
+          if (update_time_start !== undefined) {
+            qb = qb.where('update_time', '>=', update_time_start)
+          }
+          if (update_time_end !== undefined) {
+            qb = qb.where('update_time', '<=', update_time_end)
           }
           qb = qb.where('is_delete', '=', DELETE_STATUS.UN_DELETE)
           return qb

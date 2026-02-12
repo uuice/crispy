@@ -21,31 +21,7 @@ export function Roles(): void {
     const page = args.page || 1
     const pageSize = args.page_size || limit
 
-    // Build filters object from args
-    const filters: any = {}
-
-    // Search filters - 字符串，空字符串通常不是有效值
-    if (args.title) filters.title = args.title
-    if (args.des) filters.des = args.des
-    // 需要 !== undefined 因为可能包含 0 等 falsy 值
-    if (args.module_id !== undefined) filters.module_id = args.module_id
-    if (args.type_id !== undefined) filters.type_id = args.type_id
-    if (args.status !== undefined) filters.status = args.status
-
-    // Range filters - 需要 !== undefined 因为可能包含 0
-    if (args.sort_min !== undefined) filters.sort_min = args.sort_min
-    if (args.sort_max !== undefined) filters.sort_max = args.sort_max
-
-    // Date filters - 时间戳，0 是有效值
-    if (args.start_time !== undefined) filters.start_time = args.start_time
-    if (args.end_time !== undefined) filters.end_time = args.end_time
-
-    // Boolean filters - 需要 !== undefined 因为 false 是有效值
-    if (args.has_rules !== undefined)
-      filters.has_rules = args.has_rules === 'true' || args.has_rules === true
-
-    // Use the enhanced getRoles method with filters
-    const result = await roleService.getRoles({ ...filters, page, pageSize })
+    const result = await roleService.getRoles({ ...args, page, pageSize })
 
     context.ctx.roles = result.dataList
     context.ctx.roles_pagination = result.pagination
