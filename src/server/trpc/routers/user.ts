@@ -1,12 +1,8 @@
 import { protectedProcedure, router } from '../trpc'
 import { userService } from '../../services/userService'
 import { TRPCError } from '@trpc/server'
-import { createUserSchema, userFiltersSchema } from '@src/types'
+import { createUserSchema, updateUserSchema, userFiltersSchema } from '@src/types'
 import { z } from 'zod'
-
-const updateUserSchema = createUserSchema.partial().extend({
-  id: z.number()
-})
 
 export const userRouter = router({
   // 获取用户列表
@@ -72,21 +68,27 @@ export const userRouter = router({
   }),
 
   // 更新用户
-  update: protectedProcedure.input(updateUserSchema).mutation(async ({ input }) => {
-    const { id, ...updateFields } = input
-    try {
-      const result = await userService.update(id, updateFields)
-      return {
-        success: true,
-        data: result
-      }
-    } catch (error: any) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: error.message || '更新用户失败'
+  update: protectedProcedure
+    .input(
+      updateUserSchema.extend({
+        id: z.number()
       })
-    }
-  }),
+    )
+    .mutation(async ({ input }) => {
+      const { id, ...updateFields } = input
+      try {
+        const result = await userService.update(id, updateFields)
+        return {
+          success: true,
+          data: result
+        }
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: error.message || '更新用户失败'
+        })
+      }
+    }),
 
   // 删除用户
   delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {

@@ -76,7 +76,12 @@ export const createAccessTokenSchema = z.object({
   user_id: z.number().min(1, 'user_id不能为空'),
   status: z.number().default(10)
 })
-export const updateAccessTokenSchema = createAccessTokenSchema.partial()
+export const updateAccessTokenSchema = z.object({
+  app_name: z.string().min(1, 'app_name不能为空'),
+  channel: z.string().min(1, 'channel不能为空'),
+  user_id: z.number().min(1, 'user_id不能为空'),
+  status: z.number().optional()
+})
 export type AccessTokenEntity = Selectable<AccessToken>
 export type AccessTokenFilters = QueryFilter<Omit<AccessTokenEntity, 'token'>>
 export type CreateAccessToken = Insertable<AccessToken>
@@ -109,15 +114,15 @@ export interface CheckAccessTokenData {
 
 // Additions
 export const createAdditionSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().min(0),
-  type: z.number().default(1), // 1: 必选, 2: 可选
-  status: z.number().default(10),
-  sort: z.number().default(0),
-  fields_json: z.string().min(1, 'fields_json不能为空')
+  primary_id: z.number(),
+  fields_json: z.string().min(1, 'fields_json不能为空'),
+  status: z.number().default(10)
 })
-export const updateAdditionSchema = createAdditionSchema.partial()
+export const updateAdditionSchema = z.object({
+  primary_id: z.number().optional(),
+  fields_json: z.string().min(1, 'fields_json不能为空').optional(),
+  status: z.number().optional()
+})
 export type AdditionEntity = Selectable<Additions>
 export type AdditionFilters = QueryFilter<AdditionEntity>
 export type CreateAddition = Insertable<Additions>
@@ -136,14 +141,22 @@ export const additionFiltersSchema = z
 // AdItems
 export const createAdItemSchema = z.object({
   ad_id: z.number(),
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   content: z.string().optional(),
   image_url: z.string().optional(),
   link_url: z.string().optional(),
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateAdItemSchema = createAdItemSchema.partial()
+export const updateAdItemSchema = z.object({
+  ad_id: z.number().optional(),
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().optional(),
+  image_url: z.string().optional(),
+  link_url: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type AdItemEntity = Selectable<AdItems>
 export type AdItemFilters = QueryFilter<AdItemEntity>
 export type CreateAdItem = Insertable<AdItems>
@@ -166,7 +179,7 @@ export const adItemFiltersSchema = z
 
 // Ads
 export const createAdSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   content: z.string().optional(),
   image_url: z.string().optional(),
   link_url: z.string().optional(),
@@ -176,7 +189,17 @@ export const createAdSchema = z.object({
   status: z.number().default(10),
   sort: z.number().default(0)
 })
-export const updateAdSchema = createAdSchema.partial()
+export const updateAdSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().optional(),
+  image_url: z.string().optional(),
+  link_url: z.string().optional(),
+  position: z.string().optional(),
+  start_time: z.number().optional(),
+  end_time: z.number().optional(),
+  status: z.number().optional(),
+  sort: z.number().optional()
+})
 export type AdEntity = Selectable<Ads>
 export type AdFilters = QueryFilter<AdEntity>
 export type CreateAd = Insertable<Ads>
@@ -205,7 +228,13 @@ export const createApiLogSchema = z.object({
   body: z.string(),
   ip: z.string().optional()
 })
-export const updateApiLogSchema = createApiLogSchema.partial()
+export const updateApiLogSchema = z.object({
+  user_id: z.number().optional(),
+  method: z.string().optional(),
+  query: z.string().optional(),
+  body: z.string().optional(),
+  ip: z.string().optional()
+})
 export type ApiLogEntity = Selectable<ApiLogs>
 export type ApiLogFilters = QueryFilter<ApiLogEntity>
 export type CreateApiLog = Insertable<ApiLogs>
@@ -225,10 +254,10 @@ export const apiLogFiltersSchema = z
 
 // Articles
 export const createArticleSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   sub_title: z.string().optional(),
   url: z.string().optional(),
-  content: z.string().min(1),
+  content: z.string().min(1, '内容不能为空'),
   markdown_content: z.string().optional(),
   is_markdown: z.number().default(0),
   abstract: z.string().optional(),
@@ -250,7 +279,35 @@ export const createArticleSchema = z.object({
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateArticleSchema = createArticleSchema.partial()
+export const updateArticleSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  sub_title: z.string().optional(),
+  url: z.string().optional(),
+  content: z.string().min(1, '内容不能为空'),
+  markdown_content: z.string().optional(),
+  is_markdown: z.number().optional(),
+  abstract: z.string().optional(),
+  image: z.string().optional(),
+  image_list: z.string().optional(),
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  seo_keywords: z.string().optional(),
+  remark: z.string().optional(),
+  user_id: z.number().optional(),
+  tags: z.string().optional(),
+  attrs: z.string().optional(),
+  type_id: z.number().optional(),
+  type_ids: z.string().optional(),
+  author_id: z.number().optional(),
+  author: z.string().optional(),
+  source: z.string().optional(),
+  redirect_url: z.string().optional(),
+  is_top: z.number().optional(),
+  is_review: z.number().optional(),
+  click: z.number().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type ArticleEntity = Selectable<Articles>
 export type ArticleFilters = QueryFilter<ArticleEntity>
 export type CreateArticle = Insertable<Articles>
@@ -296,12 +353,17 @@ export const articleFiltersSchema = z
 
 // Attrs
 export const createAttrSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   alias: z.string().optional(),
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateAttrSchema = createAttrSchema.partial()
+export const updateAttrSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type AttrEntity = Selectable<Attrs>
 export type AttrFilters = QueryFilter<AttrEntity>
 export type CreateAttr = Insertable<Attrs>
@@ -325,7 +387,12 @@ export const createCacheSchema = z.object({
   cache_data: z.string().min(1),
   status: z.number().default(10)
 })
-export const updateCacheSchema = createCacheSchema.partial()
+export const updateCacheSchema = z.object({
+  hash: z.string().min(1).optional(),
+  url: z.string().optional(),
+  cache_data: z.string().min(1).optional(),
+  status: z.number().optional()
+})
 export type CacheEntity = Selectable<Caches>
 export type CacheFilters = QueryFilter<CacheEntity>
 export type CreateCache = Insertable<Caches>
@@ -351,7 +418,14 @@ export const createCategorySchema = z.object({
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateCategorySchema = createCategorySchema.partial()
+export const updateCategorySchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  des: z.string().optional(),
+  parent_id: z.number().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type CategoryEntity = Selectable<Categories>
 export type CategoryFilters = QueryFilter<CategoryEntity>
 export type CreateCategory = Insertable<Categories>
@@ -375,8 +449,8 @@ export const categoryFiltersSchema = z
 
 // Comments
 export const createCommentSchema = z.object({
-  title: z.string().min(1),
-  content: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().min(1, '内容不能为空'),
   user_id: z.number(),
   parent_id: z.number().optional(),
   status: z.number().default(10),
@@ -384,7 +458,16 @@ export const createCommentSchema = z.object({
   bad_article: z.number().default(0),
   not_article: z.number().default(0)
 })
-export const updateCommentSchema = createCommentSchema.partial()
+export const updateCommentSchema = z.object({
+  title: z.string().min(1, '标题不能为空').optional(),
+  content: z.string().min(1, '内容不能为空').optional(),
+  parent_id: z.number().optional(),
+  user_id: z.number().optional(),
+  status: z.number().optional(),
+  good_article: z.number().optional(),
+  bad_article: z.number().optional(),
+  not_article: z.number().optional()
+})
 export type CommentEntity = Selectable<Comments>
 export type CommentFilters = QueryFilter<CommentEntity>
 export type CreateComment = Insertable<Comments>
@@ -414,15 +497,23 @@ export const commentFiltersSchema = z
 
 // Configs
 export const createConfigSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   alias: z.string().optional(),
-  value: z.string().min(1),
+  value: z.string().min(1, '值不能为空'),
   type_id: z.number().optional(),
   type_ids: z.string().optional(),
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateConfigSchema = createConfigSchema.partial()
+export const updateConfigSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().optional(),
+  value: z.string().min(1, '值不能为空'),
+  type_id: z.number().optional(),
+  type_ids: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type ConfigEntity = Selectable<Configs>
 export type ConfigFilters = QueryFilter<ConfigEntity>
 export type CreateConfig = Insertable<Configs>
@@ -451,7 +542,14 @@ export const createEnumSchema = z.object({
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateEnumSchema = createEnumSchema.partial()
+export const updateEnumSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().optional(),
+  code: z.string().min(1, '代码不能为空'),
+  value: z.string().min(1, '值不能为空'),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type EnumEntity = Selectable<Enums>
 export type EnumFilters = QueryFilter<EnumEntity>
 export type CreateEnum = Insertable<Enums>
@@ -476,7 +574,11 @@ export const createHolidaySchema = z.object({
   value: z.string().min(1, '日期不能为空'),
   sort: z.number().default(0)
 })
-export const updateHolidaySchema = createHolidaySchema.partial()
+export const updateHolidaySchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  value: z.string().min(1, '日期不能为空'),
+  sort: z.number().optional()
+})
 export type HolidayEntity = Selectable<Holidays>
 export type HolidayFilters = QueryFilter<HolidayEntity>
 export type CreateHoliday = Insertable<Holidays>
@@ -494,17 +596,27 @@ export const holidayFiltersSchema = z
 
 // Jobs
 export const createJobSchema = z.object({
-  title: z.string().min(1),
-  content: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().min(1, '内容不能为空'),
   address: z.string().optional(),
   branch: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email('邮箱格式不正确').optional(),
   nature: z.string().optional(),
-  num: z.number().min(0),
+  num: z.number().min(0, '数量不能小于0'),
   typeName: z.string().optional(),
   sort: z.number().default(0)
 })
-export const updateJobSchema = createJobSchema.partial()
+export const updateJobSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  address: z.string().optional(),
+  branch: z.string().optional(),
+  email: z.string().email('邮箱格式不正确').optional(),
+  nature: z.string().optional(),
+  num: z.number().min(0, '数量不能小于0').optional(),
+  typeName: z.string().optional(),
+  sort: z.number().optional()
+})
 export type JobEntity = Selectable<Jobs>
 export type JobFilters = QueryFilter<JobEntity>
 export type CreateJob = Insertable<Jobs>
@@ -528,14 +640,21 @@ export const jobFiltersSchema = z
 
 // Keywords
 export const createKeywordSchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
   value: z.string().optional(),
   url: z.string().optional(),
   type_id: z.number().optional(),
   status: z.number().default(10)
 })
-export const updateKeywordSchema = createKeywordSchema.partial()
+export const updateKeywordSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  value: z.string().optional(),
+  url: z.string().optional(),
+  type_id: z.number().optional(),
+  status: z.number().optional()
+})
 export type KeywordEntity = Selectable<Keywords>
 export type KeywordFilters = QueryFilter<KeywordEntity>
 export type CreateKeyword = Insertable<Keywords>
@@ -566,7 +685,16 @@ export const createLinkSchema = z.object({
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateLinkSchema = createLinkSchema.partial()
+export const updateLinkSchema = z.object({
+  site_name: z.string().min(1, '站点名称不能为空'),
+  des: z.string().min(1, '描述不能为空'),
+  url: z.string().url('请输入有效的URL地址'),
+  logo: z.string().optional(),
+  method: z.string().optional(),
+  type_id: z.number().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type LinkEntity = Selectable<Links>
 export type LinkFilters = QueryFilter<LinkEntity>
 export type CreateLink = Insertable<Links>
@@ -594,8 +722,8 @@ export const linkFiltersSchema = z
 
 // Menus
 export const createMenuSchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().min(1),
+  title: z.string().min(1, '菜单名称不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
   parent_id: z.number().default(0),
   icon: z.string().optional(),
   url: z.string().optional(),
@@ -604,7 +732,17 @@ export const createMenuSchema = z.object({
   sort: z.number().default(0),
   status: z.number().default(10)
 })
-export const updateMenuSchema = createMenuSchema.partial()
+export const updateMenuSchema = z.object({
+  title: z.string().min(1, '菜单名称不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  parent_id: z.number().optional(),
+  icon: z.string().optional(),
+  url: z.string().optional(),
+  image_url: z.string().optional(),
+  method: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional()
+})
 export type MenuEntity = Selectable<Menus>
 export type MenuFilters = QueryFilter<MenuEntity>
 export type CreateMenu = Insertable<Menus>
@@ -632,14 +770,21 @@ export const menuFiltersSchema = z
 
 // Notices
 export const createNoticeSchema = z.object({
-  title: z.string().min(1),
-  content: z.string().min(1),
-  from_user_id: z.number().min(1),
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  from_user_id: z.number().min(1, '发布者ID不能为空'),
   publish_time: z.number().optional(),
   tolds: z.string().optional(),
   status: z.number().default(10)
 })
-export const updateNoticeSchema = createNoticeSchema.partial()
+export const updateNoticeSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  from_user_id: z.number().min(1, '发布者ID不能为空'),
+  publish_time: z.number().optional(),
+  tolds: z.string().optional(),
+  status: z.number().optional()
+})
 export type NoticeEntity = Selectable<Notices>
 export type NoticeFilters = QueryFilter<NoticeEntity>
 export type CreateNotice = Insertable<Notices>
@@ -660,12 +805,17 @@ export const noticeFiltersSchema = z
 
 // OperateLogs
 export const createOperateLogSchema = z.object({
-  code: z.string().min(1),
-  content: z.string().min(1),
+  code: z.string().min(1, '操作码不能为空'),
+  content: z.string().min(1, '内容不能为空'),
   type_id: z.number().default(0),
-  user_id: z.number().min(1)
+  user_id: z.number().min(1, '用户ID不能为空')
 })
-export const updateOperateLogSchema = createOperateLogSchema.partial()
+export const updateOperateLogSchema = z.object({
+  code: z.string().min(1, '操作码不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  type_id: z.number().optional(),
+  user_id: z.number().min(1, '用户ID不能为空')
+})
 export type OperateLogEntity = Selectable<OperateLogs>
 export type OperateLogFilters = QueryFilter<OperateLogEntity>
 export type CreateOperateLog = Insertable<OperateLogs>
@@ -719,7 +869,27 @@ export const createPageSchema = z.object({
   status: z.number().default(10),
   remark: z.string().optional()
 })
-export const updatePageSchema = createPageSchema.partial()
+export const updatePageSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  url: z.string().optional(),
+  alias: z.string().min(1, '别名不能为空'),
+  content: z.string().min(1, '内容不能为空'),
+  markdown_content: z.string().optional(),
+  is_markdown: z.number().optional(),
+  abstract: z.string().optional(),
+  sub_title: z.string().optional(),
+  seo_title: z.string().optional(),
+  seo_keywords: z.string().optional(),
+  seo_description: z.string().optional(),
+  image_list: z.string().optional(),
+  tags: z.string().optional(),
+  author_id: z.number().optional(),
+  user_id: z.number().optional(),
+  type_id: z.number().optional(),
+  click: z.number().optional(),
+  status: z.number().optional(),
+  remark: z.string().optional()
+})
 export type PageEntity = Selectable<Pages>
 export type PageFilters = QueryFilter<PageEntity>
 export type CreatePage = Insertable<Pages>
@@ -761,7 +931,15 @@ export const createRoleSchema = z.object({
   status: z.number().default(10),
   type_id: z.number().default(0)
 })
-export const updateRoleSchema = createRoleSchema.partial()
+export const updateRoleSchema = z.object({
+  title: z.string().min(1, '角色名称不能为空'),
+  des: z.string().optional(),
+  module_id: z.number().optional(),
+  rule_ids: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional(),
+  type_id: z.number().optional()
+})
 export type RoleEntity = Selectable<Roles>
 export type RoleFilters = QueryFilter<RoleEntity>
 export type CreateRole = Insertable<Roles>
@@ -794,7 +972,18 @@ export const createRuleSchema = z.object({
   status: z.number().default(10),
   type_id: z.number().default(0)
 })
-export const updateRuleSchema = createRuleSchema.partial()
+export const updateRuleSchema = z.object({
+  title: z.string().min(1, '规则名称不能为空'),
+  alias: z.string().min(1, '规则别名不能为空'),
+  condition: z.string().optional(),
+  des: z.string().optional(),
+  icon: z.string().optional(),
+  module_id: z.number().optional(),
+  parent_id: z.number().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional(),
+  type_id: z.number().optional()
+})
 export type RuleEntity = Selectable<Rules>
 export type RuleFilters = QueryFilter<RuleEntity>
 export type CreateRule = Insertable<Rules>
@@ -830,7 +1019,14 @@ export const createTagSchema = z.object({
   type_id: z.number().default(0),
   value: z.string().optional()
 })
-export const updateTagSchema = createTagSchema.partial()
+export const updateTagSchema = z.object({
+  title: z.string().min(1, '标签名称不能为空'),
+  des: z.string().optional(),
+  sort: z.number().optional(),
+  status: z.number().optional(),
+  type_id: z.number().optional(),
+  value: z.string().optional()
+})
 export type TagEntity = Selectable<Tags>
 export type TagFilters = QueryFilter<TagEntity>
 export type CreateTag = Insertable<Tags>
@@ -865,7 +1061,21 @@ export const createUserSchema = z.object({
   is_super_admin: z.number().default(0),
   is_black: z.number().default(0)
 })
-export const updateUserSchema = createUserSchema.partial()
+export const updateUserSchema = z.object({
+  user_name: z.string().min(1, '用户名不能为空').max(32, '用户名不能超过30个字符'),
+  password: z.string().min(6, '密码至少6个字符').optional(),
+  email: z.string().email('邮箱格式不正确').optional(),
+  phone: z.string().min(11, '手机号不能为空').max(11, '手机号不能超过11个字符').optional(),
+  real_name: z.string().optional(),
+  nick_name: z.string().optional(),
+  avatar_url: z.string().optional(),
+  role_id: z.number().optional(),
+  type_id: z.number().optional(),
+  status: z.number().optional(),
+  is_admin: z.number().optional(),
+  is_super_admin: z.number().optional(),
+  is_black: z.number().optional()
+})
 
 export const loginSchema = z.object({
   user_name: z.string().min(1, '用户名不能为空'),
@@ -935,12 +1145,17 @@ export const userFiltersSchema = z
 
 // UserTypes
 export const createUserTypeSchema = z.object({
-  type_name: z.string().min(1),
-  alias: z.string().min(1),
+  type_name: z.string().min(1, '类型名称不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
   remark: z.string().optional(),
   status: z.number().default(10)
 })
-export const updateUserTypeSchema = createUserTypeSchema.partial()
+export const updateUserTypeSchema = z.object({
+  type_name: z.string().min(1, '类型名称不能为空'),
+  alias: z.string().min(1, '别名不能为空'),
+  remark: z.string().optional(),
+  status: z.number().optional()
+})
 export type UserTypeEntity = Selectable<UserTypes>
 export type UserTypeFilters = QueryFilter<UserTypeEntity>
 export type CreateUserType = Insertable<UserTypes>
@@ -959,11 +1174,15 @@ export const userTypeFiltersSchema = z
 
 // VoteItems
 export const createVoteItemSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   vote_id: z.number(),
   status: z.number().default(10)
 })
-export const updateVoteItemSchema = createVoteItemSchema.partial()
+export const updateVoteItemSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  vote_id: z.number().optional(),
+  status: z.number().optional()
+})
 export type VoteItemEntity = Selectable<VoteItems>
 export type VoteItemFilters = QueryFilter<VoteItemEntity>
 export type CreateVoteItem = Insertable<VoteItems>
@@ -981,14 +1200,21 @@ export const voteItemFiltersSchema = z
 
 // Votes
 export const createVoteSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, '标题不能为空'),
   is_multiple: z.number().default(0),
   start_time: z.number(),
   end_time: z.number(),
   status: z.number().default(10),
   vote_items: z.string().optional()
 })
-export const updateVoteSchema = createVoteSchema.partial()
+export const updateVoteSchema = z.object({
+  title: z.string().min(1, '标题不能为空'),
+  is_multiple: z.number().optional(),
+  start_time: z.number().optional(),
+  end_time: z.number().optional(),
+  status: z.number().optional(),
+  vote_items: z.string().optional()
+})
 export type VoteEntity = Selectable<Votes>
 export type VoteFilters = QueryFilter<VoteEntity>
 export type CreateVote = Insertable<Votes>

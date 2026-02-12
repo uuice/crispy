@@ -289,7 +289,7 @@ export class UserService {
   async update(id: number, updateData: UpdateUser): Promise<UpdateSuccess> {
     // 验证
     const validatedData = updateUserSchema.parse(updateData)
-    const newUpdateData: any = {
+    const newUpdateData = {
       ...validatedData,
       update_time: Date.now()
     }
