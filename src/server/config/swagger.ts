@@ -144,6 +144,40 @@ const adminOptions: swaggerJsdoc.Options = {
             }
           }
         },
+        // Addition schemas
+        Addition: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: '附加信息ID'
+            },
+            primary_id: {
+              type: 'integer',
+              description: '主表ID'
+            },
+            fields_json: {
+              type: 'string',
+              description: 'JSON格式的扩展字段'
+            },
+            status: {
+              type: 'integer',
+              description: '状态'
+            },
+            create_time: {
+              type: 'integer',
+              description: '创建时间戳'
+            },
+            update_time: {
+              type: 'integer',
+              description: '更新时间戳'
+            },
+            is_delete: {
+              type: 'integer',
+              description: '删除状态'
+            }
+          }
+        },
         // Login schemas
         LoginRequest: {
           type: 'object',
@@ -325,6 +359,40 @@ const contentOptions: swaggerJsdoc.Options = {
               type: 'string',
               format: 'date-time',
               description: 'Last update timestamp'
+            }
+          }
+        },
+        // Addition schemas
+        Addition: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: '附加信息ID'
+            },
+            primary_id: {
+              type: 'integer',
+              description: '主表ID'
+            },
+            fields_json: {
+              type: 'string',
+              description: 'JSON格式的扩展字段'
+            },
+            status: {
+              type: 'integer',
+              description: '状态'
+            },
+            create_time: {
+              type: 'integer',
+              description: '创建时间戳'
+            },
+            update_time: {
+              type: 'integer',
+              description: '更新时间戳'
+            },
+            is_delete: {
+              type: 'integer',
+              description: '删除状态'
             }
           }
         }

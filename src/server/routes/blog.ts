@@ -190,12 +190,12 @@ router.get(
       alias: 'LINK_SYS_CAT',
       page: 1,
       pageSize: 100
-    } as any)
+    })
     const { dataList: links } = await linkService.getLinks({
       page: 1,
       pageSize: 1000,
       status: 10
-    } as any)
+    })
 
     // Group links by category
     const groupedLinks: { [key: string]: any[] } = {}
