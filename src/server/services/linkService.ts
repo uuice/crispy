@@ -41,7 +41,6 @@ export class LinkService {
     const page = Number(filters.page) || 1
     const pageSize = Number(filters.pageSize) || 10
     const {
-      title,
       site_name,
       url,
       des,
@@ -54,7 +53,6 @@ export class LinkService {
       update_time_start,
       update_time_end
     } = filters
-    const siteNameSearch = title ?? site_name
     const offset = (page - 1) * pageSize
 
     let query = db
@@ -64,8 +62,8 @@ export class LinkService {
       .select('categories.title as type_name')
 
     // Apply filters（title 与 site_name 等价，按站点名称搜索）
-    if (siteNameSearch) {
-      query = query.where('links.site_name', 'like', `%${siteNameSearch}%`)
+    if (site_name) {
+      query = query.where('links.site_name', 'like', `%${site_name}%`)
     }
 
     if (url) {
@@ -118,8 +116,8 @@ export class LinkService {
         .select((eb) => [eb.fn.count('id').as('count')])
         .$call((qb) => {
           // Apply same filters to count query
-          if (siteNameSearch) {
-            qb = qb.where('site_name', 'like', `%${siteNameSearch}%`)
+          if (site_name) {
+            qb = qb.where('site_name', 'like', `%${site_name}%`)
           }
           if (url) {
             qb = qb.where('url', 'like', `%${url}%`)

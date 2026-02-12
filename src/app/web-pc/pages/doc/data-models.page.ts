@@ -719,6 +719,10 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_create_time', columns: ['create_time'] }
     ]
   },
   {
@@ -1504,6 +1508,11 @@ const TABLES = [
         default: '0',
         comment: '是否删除'
       }
+    ],
+    indexes: [
+      { name: 'idx_status', columns: ['status'] },
+      { name: 'idx_type_id', columns: ['type_id'] },
+      { name: 'idx_sort', columns: ['sort'] }
     ]
   },
   {
