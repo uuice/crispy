@@ -46,12 +46,6 @@ export class JobService {
       branch,
       address,
       email,
-      num_min,
-      num_max,
-      sort_min,
-      sort_max,
-      has_email,
-      has_address,
       create_time_start,
       create_time_end,
       update_time_start,
@@ -88,34 +82,6 @@ export class JobService {
 
     if (email) {
       query = query.where('email', 'like', `%${email}%`)
-    }
-
-    if (num_min !== undefined) {
-      query = query.where('num', '>=', num_min)
-    }
-
-    if (num_max !== undefined) {
-      query = query.where('num', '<=', num_max)
-    }
-
-    if (sort_min !== undefined) {
-      query = query.where('sort', '>=', sort_min)
-    }
-
-    if (sort_max !== undefined) {
-      query = query.where('sort', '<=', sort_max)
-    }
-
-    if (has_email === true) {
-      query = query.where(sql`(email IS NOT NULL AND email != '')`)
-    } else if (has_email === false) {
-      query = query.where(sql`(email IS NULL OR email = '')`)
-    }
-
-    if (has_address === true) {
-      query = query.where(sql`(address IS NOT NULL AND address != '')`)
-    } else if (has_address === false) {
-      query = query.where(sql`(address IS NULL OR address = '')`)
     }
 
     if (create_time_start !== undefined) {
@@ -164,28 +130,6 @@ export class JobService {
           }
           if (email) {
             qb = qb.where('email', 'like', `%${email}%`)
-          }
-          if (num_min !== undefined) {
-            qb = qb.where('num', '>=', num_min)
-          }
-          if (num_max !== undefined) {
-            qb = qb.where('num', '<=', num_max)
-          }
-          if (sort_min !== undefined) {
-            qb = qb.where('sort', '>=', sort_min)
-          }
-          if (sort_max !== undefined) {
-            qb = qb.where('sort', '<=', sort_max)
-          }
-          if (has_email === true) {
-            qb = qb.where(sql`(email IS NOT NULL AND email != '')`)
-          } else if (has_email === false) {
-            qb = qb.where(sql`(email IS NULL OR email = '')`)
-          }
-          if (has_address === true) {
-            qb = qb.where(sql`(address IS NOT NULL AND address != '')`)
-          } else if (has_address === false) {
-            qb = qb.where(sql`(address IS NULL OR address = '')`)
           }
           if (create_time_start !== undefined) {
             qb = qb.where('create_time', '>=', create_time_start)
