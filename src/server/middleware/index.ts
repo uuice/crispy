@@ -55,10 +55,8 @@ export const applyMiddleware = (app: Express) => {
 
 // Export all middleware for individual use
 export * from './request-logger'
-export * from './error-handler'
 export * from './cors'
 export * from './body-parser'
-export * from './not-found'
 export * from './angular-handler'
 export * from './jwt'
 export * from './performance'

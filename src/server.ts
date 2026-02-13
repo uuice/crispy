@@ -1,4 +1,4 @@
-import { AngularNodeAppEngine, createNodeRequestHandler } from '@angular/ssr/node'
+import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@angular/ssr/node'
 import express from 'express'
 import { join } from 'node:path'
 import fs from 'fs'
@@ -107,47 +107,6 @@ app.use(
 app.use(performanceMonitor)
 app.use(memoryMonitor)
 
-if (env['NODE_ENV'] === 'production' && env['TEMPLATE_ENGINE_ENABLE'] !== 'true') {
-  // Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
-  // 6. Static page handler - serve static HTML files from temp directory (highest priority for HTML caching)
-  app.get('*path', (req, res, next) => {
-    // Skip API routes, admin routes, and other non-page routes
-    if (
-      req.path.startsWith('/api') ||
-      req.path.startsWith('/admin') ||
-      req.path.startsWith('/backstage') ||
-      req.path.startsWith('/uploads') ||
-      req.path.startsWith('/doc') ||
-      req.path.startsWith('/static') ||
-      req.path.match(/\.(js|css|png|jpg|ico|svg|json|woff|woff2)$/)
-    ) {
-      return next()
-    }
-
-    // Check if this is a static generation request
-    const isStaticGeneration =
-      req.query['static_gen'] === 'true' || req.headers['x-static-generation'] === 'true'
-
-    if (isStaticGeneration) {
-      console.log(`🔄 Static generation request detected: ${req.path}`)
-      // Skip static file serving for static generation requests
-      return next()
-    }
-
-    // Check if static file exists in temp directory
-    const staticPath = join(process.cwd(), 'temp', 'static', req.path, 'index.html')
-
-    if (fs.existsSync(staticPath)) {
-      console.log(`📄 Serving static file: ${req.path}`)
-      res.set('X-Page-Cache', 'HIT-STATIC')
-      return res.sendFile(staticPath)
-    }
-
-    // If no static file, continue to Angular SSR
-    next()
-  })
-}
-
 // Apply basic middleware (after static files for better performance)
 applyMiddleware(app)
 
@@ -179,18 +138,10 @@ app.use(
 
 // Blog routes
 // Angular ssr has performance issues, so regular template engine rendering is added
-if (env['TEMPLATE_ENGINE_ENABLE'] === 'true') {
-  app.use(blogRoutes)
-}
+app.use(blogRoutes)
 
 // RSS and sitemap routes
 app.use(rssRoutes)
-
-// Error reporting endpoint
-app.post('/api/error-report', express.json(), (req, res) => {
-  console.error('Client error report:', req.body)
-  res.status(200).json({ received: true })
-})
 
 // Swagger documentation routes
 app.get('/doc/admin/swagger.json', (req, res) => {
@@ -260,12 +211,12 @@ app.use(notFoundHandler)
 app.use(globalErrorHandler)
 
 // Start server
-// if (isMainModule(import.meta.url)) {
-const port = env['PORT']
-app.listen(port, () => {
-  console.log(`Express server listening on http://localhost:${port}`)
-  console.log(`Environment: ${env['NODE_ENV']}`)
-})
-// }
+if (isMainModule(import.meta.url)) {
+  const port = env['PORT']
+  app.listen(port, () => {
+    console.log(`Express server listening on http://localhost:${port}`)
+    console.log(`Environment: ${env['NODE_ENV']}`)
+  })
+}
 
 export const reqHandler = createNodeRequestHandler(app)
