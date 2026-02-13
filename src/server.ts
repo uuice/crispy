@@ -15,9 +15,8 @@ import {
 import { globalErrorHandler, notFoundHandler } from './server/middleware/errorHandler'
 import { createAngularHandler } from '@src/server/middleware'
 import { env } from './server/config/env'
-import { testDbConnection } from './libs/db'
 import { adminSpecs, contentSpecs } from './server/config/swagger'
-import { configureNunjucks } from './server/config/nunjucks'
+import { useJSXEngine } from './libs/express_jsx'
 // import { pageCacheMiddleware } from './server/middleware'
 import { flexsearchService } from './server/services/flexsearch-index.service'
 import { articleService } from './server/services/articleService'
@@ -74,9 +73,6 @@ if (env['NODE_ENV'] === 'development' || env['NODE_ENV'] === 'production') {
     await flexsearchService.persistAll()
   })()
 }
-
-// test db connection
-testDbConnection()
 
 const browserDistFolder = join(import.meta.dirname, '../browser')
 const app = express()
@@ -158,8 +154,16 @@ applyMiddleware(app)
 // Apply route-specific performance optimization
 app.use(optimizeRoutePerformance)
 
-// Configure Nunjucks template engine
-configureNunjucks(app)
+// Configure JSX template engine
+const isDevelopment = process.env['NODE_ENV'] === 'development'
+const viewsDir = isDevelopment
+  ? join(process.cwd(), 'src/server/templates')
+  : join(import.meta.dirname, 'templates')
+useJSXEngine(app, {
+  viewsDir: viewsDir,
+  extension: '.tsx',
+  cache: false
+})
 
 // API routes (after static handling for better performance)
 app.use(env['API_PREFIX'], apiRoutes)

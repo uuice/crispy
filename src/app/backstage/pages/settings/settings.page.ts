@@ -128,7 +128,6 @@ interface ThemeOption {
           <p-tab value="1">SMTP 设置</p-tab>
           <p-tab value="2">存储设置</p-tab>
           <p-tab value="3">备案信息</p-tab>
-          <p-tab value="4">静态化设置</p-tab>
         </p-tablist>
         <p-tabpanels>
           <p-tabpanel value="0">
@@ -657,120 +656,6 @@ interface ThemeOption {
               </div>
             </div>
           </p-tabpanel>
-          <p-tabpanel value="4">
-            <!-- 静态化设置内容 -->
-            <div class="grid">
-              <div class="col-12">
-                <p-card>
-                  <ng-template pTemplate="content">
-                    <!-- Static Generation Status -->
-                    @if (staticGenerationStatus()) {
-                      <div class="mb-4">
-                        <h3 class="text-lg font-semibold mb-3">静态化状态</h3>
-                        <div class="grid">
-                          <div class="col-12 md:col-3">
-                            <div class="text-center">
-                              <div class="text-2xl font-bold text-primary">
-                                {{ staticGenerationStatus()?.fileCount || 0 }}
-                              </div>
-                              <div class="text-sm text-muted">生成文件数</div>
-                            </div>
-                          </div>
-                          <div class="col-12 md:col-3">
-                            <div class="text-center">
-                              <div class="text-2xl font-bold text-success">
-                                {{ staticGenerationStatus()?.totalSize || '0 MB' }}
-                              </div>
-                              <div class="text-sm text-muted">总大小</div>
-                            </div>
-                          </div>
-                          <div class="col-12 md:col-3">
-                            <div class="text-center">
-                              <div class="text-2xl font-bold text-info">
-                                {{
-                                  staticGenerationStatus()?.lastGenerated
-                                    ? (staticGenerationStatus()?.lastGenerated
-                                      | date: 'yyyy-MM-dd HH:mm:ss')
-                                    : '未生成'
-                                }}
-                              </div>
-                              <div class="text-sm text-muted">最后生成时间</div>
-                            </div>
-                          </div>
-                          <div class="col-12 md:col-3">
-                            <div class="text-center">
-                              <div
-                                class="text-2xl font-bold"
-                                [class]="
-                                  staticGenerationStatus()?.staticDirExists
-                                    ? 'text-success'
-                                    : 'text-danger'
-                                "
-                              >
-                                {{
-                                  staticGenerationStatus()?.staticDirExists ? '已启用' : '未启用'
-                                }}
-                              </div>
-                              <div class="text-sm text-muted">静态化状态</div>
-                            </div>
-                          </div>
-                        </div>
-                        @if (staticGenerationStatus()?.staticDir) {
-                          <div class="mt-3 text-sm text-muted">
-                            <strong>静态文件目录:</strong> {{ staticGenerationStatus()?.staticDir }}
-                          </div>
-                        }
-                      </div>
-                    }
-
-                    <!-- Static Generation Progress -->
-                    @if (generatingStatic()) {
-                      <div class="mb-4 flex flex-col items-center justify-center">
-                        <h3 class="text-lg font-semibold mb-3">正在生成静态页面...</h3>
-                        <div class="flex items-center justify-center p-4">
-                          <p-progressSpinner
-                            styleClass="w-12 h-12"
-                            strokeWidth="4"
-                            fill="var(--surface-ground)"
-                            animationDuration="1s"
-                          ></p-progressSpinner>
-                        </div>
-                        <span class="mt-3">正在生成静态页面，请稍候...</span>
-                      </div>
-                    }
-
-                    <!-- Static Generation Actions -->
-                    <div class="mt-4">
-                      <h3 class="text-lg font-semibold mb-3">操作</h3>
-                      <div class="flex gap-2">
-                        <button
-                          pButton
-                          label="重新生成静态页面"
-                          icon="pi pi-refresh"
-                          class="p-button-warning"
-                          [loading]="generatingStatic()"
-                          (click)="generateStaticPages()"
-                        ></button>
-                        <button
-                          pButton
-                          label="清除静态缓存"
-                          icon="pi pi-trash"
-                          class="p-button-danger ml-2"
-                          [loading]="clearingCache()"
-                          (click)="clearStaticCache()"
-                        ></button>
-                      </div>
-                      <div class="mt-3 text-sm text-muted">
-                        <p>• 静态化可以显著提升网站访问速度</p>
-                        <p>• 生成后的页面将保存在 temp/static 目录</p>
-                        <p>• 建议在内容更新后重新生成静态页面</p>
-                      </div>
-                    </div>
-                  </ng-template>
-                </p-card>
-              </div>
-            </div>
-          </p-tabpanel>
         </p-tabpanels>
       </p-tabs>
     </div>
@@ -820,9 +705,6 @@ export class SettingsPage implements OnInit {
 
   settings: AppSettings = this.settingsService.settings()
   saving = signal(false)
-  generatingStatic = signal(false)
-  clearingCache = signal(false)
-  staticGenerationStatus = signal<any>(null)
 
   // Convert settings objects to signals
   siteSettings = signal<SiteSettings>({
@@ -914,7 +796,6 @@ export class SettingsPage implements OnInit {
 
   async ngOnInit() {
     await this.loadConfigSettings()
-    await this.loadStaticGenerationStatus()
   }
 
   loadSettings() {
@@ -1143,123 +1024,5 @@ export class SettingsPage implements OnInit {
     a.download = 'backstage-settings.json'
     a.click()
     URL.revokeObjectURL(url)
-  }
-
-  async generateStaticPages() {
-    this.generatingStatic.set(true)
-    try {
-      // 使用Angular HTTP客户端的RxJS timeout操作符方式
-      const result = await firstValueFrom(
-        this.httpService
-          .post<any>('/api/admin/static-generation/generate', {})
-          .pipe(timeout(600000)) // 10分钟超时，使用RxJS的timeout操作符
-      )
-
-      if (result.success) {
-        const performance = result.data.performance
-        const data = result.data
-        const totalGenerated =
-          data.totalArticles +
-          data.totalCategories +
-          data.totalTags +
-          data.totalPages +
-          data.mainPages
-        const successfulFiles = (data.generatedFiles?.length || 0) - (data.errors?.length || 0)
-
-        const message =
-          `静态页面生成完成！\n` +
-          `主页面: ${data.mainPages} 个\n` +
-          `文章页面: ${data.totalArticles} 个\n` +
-          `分类页面: ${data.totalCategories} 个\n` +
-          `标签页面: ${data.totalTags} 个\n` +
-          `自定义页面: ${data.totalPages} 个\n` +
-          `总计: ${totalGenerated} 个页面\n` +
-          `成功生成: ${successfulFiles} 个文件\n` +
-          `总耗时: ${(performance?.totalTime / 1000).toFixed(2)}s\n` +
-          `平均每页: ${performance?.averageTimePerPage?.toFixed(2)}ms\n` +
-          `并发数: ${performance?.concurrentRequests}`
-
-        this.messageService.add({
-          severity: 'success',
-          summary: '成功',
-          detail: message,
-          life: 10000
-        })
-        await this.loadStaticGenerationStatus()
-      } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: '失败',
-          detail: result.message || '静态页面生成失败'
-        })
-      }
-    } catch (error: any) {
-      console.error('Generate static pages error:', error)
-      let errorMessage = '静态页面生成失败，请检查服务器状态'
-
-      if (error.name === 'TimeoutError') {
-        errorMessage = '请求超时，静态生成可能需要更长时间'
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-
-      this.messageService.add({
-        severity: 'error',
-        summary: '失败',
-        detail: errorMessage
-      })
-    } finally {
-      this.generatingStatic.set(false)
-    }
-  }
-
-  async loadStaticGenerationStatus() {
-    try {
-      const result = await firstValueFrom(
-        this.httpService.get<any>('/api/admin/static-generation/status', {})
-      )
-
-      if (result.success) {
-        this.staticGenerationStatus.set(result.data)
-      }
-    } catch (error) {
-      console.error('Failed to load static generation status:', error)
-    }
-  }
-
-  async clearStaticCache() {
-    this.clearingCache.set(true)
-
-    try {
-      const result = await firstValueFrom(
-        this.httpService.post<any>('/api/admin/static-generation/clear', {})
-      )
-
-      if (result.success) {
-        this.messageService.add({
-          severity: 'success',
-          summary: '成功',
-          detail: '静态缓存已清除'
-        })
-
-        // Refresh status
-        await this.loadStaticGenerationStatus()
-      } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: '失败',
-          detail: result.message || '清除静态缓存失败'
-        })
-      }
-    } catch (error) {
-      console.error('Clear static cache error:', error)
-      this.messageService.add({
-        severity: 'error',
-        summary: '失败',
-        detail: '清除静态缓存失败，请检查服务器状态'
-      })
-    } finally {
-      this.clearingCache.set(false)
-    }
   }
 }
