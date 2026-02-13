@@ -1,0 +1,18 @@
+/* Import Tailwind directives */
+@import "variables.css";
+@import "display-setting.css";
+@import "main.css";
+@import "back-to-top.css";
+@import "markdown.css";
+@import "markdown-extend.css";
+@import "hljs.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+* {
+   -webkit-appearance: none;
+}
+

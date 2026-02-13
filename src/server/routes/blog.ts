@@ -60,7 +60,7 @@ router.get(
       pageSize: 100
     } as any)
     viewData.assign('hotArticleList', hotArticleList.dataList || [])
-    res.render('blog/index.html', viewData.assign())
+    res.renderJSX('blog/index.jsx', viewData.assign())
   })
 )
 
@@ -91,7 +91,7 @@ router.get(
 
     viewData.assign('archiveGroups', archiveGroups)
 
-    res.render('blog/archives.html', viewData.assign())
+    res.render('blog/archives.jsx', viewData.assign())
   })
 )
 
@@ -119,7 +119,7 @@ router.get(
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 
-    res.render('blog/archive.html', viewData.assign())
+    res.renderJSX('blog/archive.jsx', viewData.assign())
   })
 )
 
@@ -150,7 +150,7 @@ router.get(
     viewData.assign('currentCategory', (category || {}) as object)
     viewData.assign('articleList', articleList)
 
-    res.render('blog/categories.html', viewData.assign())
+    res.renderJSX('blog/categories.jsx', viewData.assign())
   })
 )
 
@@ -175,7 +175,7 @@ router.get(
     viewData.assign('currentTag', (tag || {}) as object)
     viewData.assign('articleList', articleList || [])
 
-    res.render('blog/tags.html', viewData.assign())
+    res.renderJSX('blog/tags.jsx', viewData.assign())
   })
 )
 
@@ -214,7 +214,7 @@ router.get(
     viewData.assign('groupedLinks', groupedLinks)
     viewData.assign('links', links || [])
 
-    res.render('blog/links.html', viewData.assign())
+    res.renderJSX('blog/links.jsx', viewData.assign())
   })
 )
 
@@ -246,7 +246,7 @@ router.get(
 
     viewData.assign('archiveGroups', archiveGroups)
     viewData.assign('category', (category || {}) as object)
-    res.render('blog/daily-libs.html', viewData.assign())
+    res.renderJSX('blog/daily-libs.jsx', viewData.assign())
   })
 )
 
@@ -275,7 +275,7 @@ router.get(
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 
-    res.render('blog/daily-lib.html', viewData.assign())
+    res.renderJSX('blog/daily-lib.jsx', viewData.assign())
   })
 )
 
@@ -290,7 +290,7 @@ router.get(
 
     const page = await pageService.getPageByUrl(url)
     viewData.assign('page', page!)
-    res.render('blog/pages.html', viewData.assign())
+    res.renderJSX('blog/pages.jsx', viewData.assign())
   })
 )
 
@@ -303,7 +303,7 @@ router.get(
     const viewData = await getCommonViewData('Page')
     const page = await pageService.getPageByUrl('about')
     viewData.assign('page', page!)
-    res.render('blog/about.html', viewData.assign())
+    res.renderJSX('blog/about.jsx', viewData.assign())
   })
 )
 
