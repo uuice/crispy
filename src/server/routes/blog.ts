@@ -50,7 +50,7 @@ async function getCommonViewData(pageType: string) {
  * 博客首页 - 文章列表
  */
 router.get(
-  '/',
+  '/blog',
   catchAsync(async (req, res) => {
     const viewData = await getCommonViewData('Index')
     const hotArticleList = await articleService.getArticles({
@@ -60,7 +60,7 @@ router.get(
       pageSize: 100
     } as any)
     viewData.assign('hotArticleList', hotArticleList.dataList || [])
-    res.renderJSX('blog/index.jsx', viewData.assign())
+    res.renderJSX('blog/index', viewData.assign())
   })
 )
 
@@ -91,7 +91,7 @@ router.get(
 
     viewData.assign('archiveGroups', archiveGroups)
 
-    res.render('blog/archives.jsx', viewData.assign())
+    res.render('blog/archives', viewData.assign())
   })
 )
 
@@ -119,7 +119,7 @@ router.get(
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 
-    res.renderJSX('blog/archive.jsx', viewData.assign())
+    res.renderJSX('blog/archive', viewData.assign())
   })
 )
 
@@ -150,7 +150,7 @@ router.get(
     viewData.assign('currentCategory', (category || {}) as object)
     viewData.assign('articleList', articleList)
 
-    res.renderJSX('blog/categories.jsx', viewData.assign())
+    res.renderJSX('blog/categories', viewData.assign())
   })
 )
 
@@ -175,7 +175,7 @@ router.get(
     viewData.assign('currentTag', (tag || {}) as object)
     viewData.assign('articleList', articleList || [])
 
-    res.renderJSX('blog/tags.jsx', viewData.assign())
+    res.renderJSX('blog/tags', viewData.assign())
   })
 )
 
@@ -214,7 +214,7 @@ router.get(
     viewData.assign('groupedLinks', groupedLinks)
     viewData.assign('links', links || [])
 
-    res.renderJSX('blog/links.jsx', viewData.assign())
+    res.renderJSX('blog/links', viewData.assign())
   })
 )
 
@@ -246,7 +246,7 @@ router.get(
 
     viewData.assign('archiveGroups', archiveGroups)
     viewData.assign('category', (category || {}) as object)
-    res.renderJSX('blog/daily-libs.jsx', viewData.assign())
+    res.renderJSX('blog/daily-libs', viewData.assign())
   })
 )
 
@@ -275,7 +275,7 @@ router.get(
     viewData.assign('previousArticle', previousArticle)
     viewData.assign('nextArticle', nextArticle)
 
-    res.renderJSX('blog/daily-lib.jsx', viewData.assign())
+    res.renderJSX('blog/daily-lib', viewData.assign())
   })
 )
 
@@ -290,7 +290,7 @@ router.get(
 
     const page = await pageService.getPageByUrl(url)
     viewData.assign('page', page!)
-    res.renderJSX('blog/pages.jsx', viewData.assign())
+    res.renderJSX('blog/pages', viewData.assign())
   })
 )
 
@@ -303,7 +303,7 @@ router.get(
     const viewData = await getCommonViewData('Page')
     const page = await pageService.getPageByUrl('about')
     viewData.assign('page', page!)
-    res.renderJSX('blog/about.jsx', viewData.assign())
+    res.renderJSX('blog/about', viewData.assign())
   })
 )
 
