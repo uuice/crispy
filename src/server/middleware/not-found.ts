@@ -10,8 +10,8 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
     return
   }
 
-  // For non-API requests, render the 404 template with Nunjucks
-  res.status(404).render('404.html', {
+  // For non-API requests, render the 404 template
+  res.status(404).renderJSX('404.jsx', {
     timestamp: new Date(),
     path: req.path,
     userAgent: req.get('User-Agent')

@@ -5,7 +5,7 @@ import { join, relative } from 'path'
 
 /**
  * 将服务端资源从源目录复制到构建后的 server 目录
- * 确保 Swagger 文档和 Nunjucks 模板在生产环境中可用
+ * 确保 Swagger 文档和 Template 模板在生产环境中可用
  */
 
 interface AssetConfig {
@@ -33,7 +33,7 @@ const assetsToCopy: AssetConfig[] = [
     target: join(serverDir, 'docs/swagger')
   },
   {
-    name: 'Nunjucks 模板',
+    name: 'Template 模板',
     source: join(projectRoot, 'src/server/templates'),
     target: join(serverDir, 'templates')
   }
