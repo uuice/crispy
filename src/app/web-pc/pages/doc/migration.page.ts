@@ -45,6 +45,7 @@ import { AccordionModule } from 'primeng/accordion'
         box-shadow: none;
         padding: 1.2rem 1.2rem 1rem 1.2rem;
         transition: border-color 0.2s;
+        margin-bottom: 0.5rem;
       }
       .system-card:hover {
         border-color: var(--p-primary-color) !important;
