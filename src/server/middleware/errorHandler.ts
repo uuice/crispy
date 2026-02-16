@@ -1,4 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
+import React from 'react'
+import { renderToString } from 'react-dom/server'
+import ErrorPage from '../templates/ErrorPage'
+import NotFoundPage from '../templates/NotFoundPage'
 
 // 自定义错误类
 export class AppError extends Error {
@@ -63,20 +67,38 @@ export const globalErrorHandler = (
   // 生产环境处理
   if (isOperational) {
     // 可预期的错误，显示友好的错误页面
-    res.status(statusCode).render('error.html', {
-      statusCode,
-      message,
-      title: getErrorTitle(statusCode)
-    })
+    if (statusCode === 404) {
+      const html = renderToString(
+        React.createElement(NotFoundPage, {
+          timestamp: new Date().toISOString(),
+          siteConfig: {} // 可以从请求或其他地方获取站点配置
+        })
+      )
+      res.status(statusCode).send(html)
+    } else {
+      const html = renderToString(
+        React.createElement(ErrorPage, {
+          statusCode,
+          message,
+          title: getErrorTitle(statusCode),
+          siteConfig: {} // 可以从请求或其他地方获取站点配置
+        })
+      )
+      res.status(statusCode).send(html)
+    }
     return
   }
 
   // 不可预期的错误，显示通用错误页面
-  res.status(500).render('error.html', {
-    statusCode: 500,
-    message: '服务器内部错误，请稍后重试',
-    title: '服务器错误'
-  })
+  const html = renderToString(
+    React.createElement(ErrorPage, {
+      statusCode: 500,
+      message: '服务器内部错误，请稍后重试',
+      title: '服务器错误',
+      siteConfig: {} // 可以从请求或其他地方获取站点配置
+    })
+  )
+  res.status(500).send(html)
 }
 
 // 获取错误标题

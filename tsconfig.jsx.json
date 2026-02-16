@@ -5,6 +5,7 @@
   },
   "include": [
     "src/views/**/*.tsx",
+    "src/server/templates/**/*.tsx",
     "src/libs/express_jsx.ts"
   ]
 }

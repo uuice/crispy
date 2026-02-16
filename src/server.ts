@@ -119,8 +119,6 @@ const viewsDir = isDevelopment
   ? join(process.cwd(), 'src/server/templates')
   : join(import.meta.dirname, 'templates')
 useJSXEngine(app, {
-  viewsDir: viewsDir,
-  extension: '.tsx',
   cache: false
 })
 

@@ -171,7 +171,7 @@ $(function () {
     if (
       !$(event.target).closest('#search-panel').length &&
       !$(event.target).closest('#search-switch').length &&
-      !$(event.target).closest('#search-bar').length
+      !$(event.target).closest('#search-input').length
     ) {
       // 关闭搜索面板
       $('#search-panel').addClass('float-panel-closed')
