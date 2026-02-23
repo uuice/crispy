@@ -34,7 +34,7 @@ export default function DailyLibPage({
       <div className="max-w-6xl mx-auto">
         {article ? (
           <article className="bg-white rounded-3xl overflow-hidden shadow-2xl">
-            {/* 库详情头部横幅 */}
+            {/* 类库详情头部横幅 */}
             <div className="relative">
               {article.cover_image ? (
                 <div className="h-80 relative overflow-hidden">
@@ -47,19 +47,19 @@ export default function DailyLibPage({
                   <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                     <div className="max-w-4xl">
                       <div className="flex items-center gap-4 mb-6">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                           {article.title?.charAt(0) || '库'}
                         </div>
                         <div>
-                          <span className="inline-block px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-sm font-bold mb-3">
-                            📚 每日库推荐
+                          <span className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-sm font-bold mb-3">
+                            📦 前端库推荐
                           </span>
                           <h1 className="text-4xl font-bold mt-2">
                             {article.title}
                           </h1>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-wrap items-center gap-6">
                         <div className="flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
                           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -88,14 +88,14 @@ export default function DailyLibPage({
                   </div>
                 </div>
               ) : (
-                <div className="h-64 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-8">
+                <div className="h-64 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500 flex items-center justify-center p-8">
                   <div className="text-center text-white max-w-2xl">
                     <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <span className="text-3xl font-bold">{article.title?.charAt(0) || '库'}</span>
                     </div>
                     <div className="mb-6">
                       <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-bold mb-4">
-                        📚 每日库推荐
+                        📦 前端库推荐
                       </span>
                       <h1 className="text-4xl font-bold">{article.title}</h1>
                     </div>
@@ -123,15 +123,38 @@ export default function DailyLibPage({
               )}
             </div>
 
-            {/* 库详情内容 */}
+            {/* 类库详情内容 */}
             <div className="p-8 md:p-12">
               <div className="prose prose-lg max-w-none">
                 {article.summary && (
-                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500 p-6 mb-8 rounded-r-lg">
-                    <h3 className="text-lg font-semibold mb-3 text-indigo-800">项目简介</h3>
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-lg">
+                    <h3 className="text-lg font-semibold mb-3 text-blue-800">库简介</h3>
                     <p className="text-gray-700 leading-relaxed">{article.summary}</p>
                   </div>
                 )}
+
+                {/* 添加库信息卡片 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+                    <h3 className="text-xl font-bold mb-4 text-blue-800 flex items-center">
+                      <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                      安装方式
+                    </h3>
+                    <div className="bg-gray-800 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                      <code>npm install {article.title.toLowerCase()}</code>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100">
+                    <h3 className="text-xl font-bold mb-4 text-indigo-800 flex items-center">
+                      <span className="w-3 h-3 bg-indigo-500 rounded-full mr-3"></span>
+                      使用示例
+                    </h3>
+                    <div className="bg-gray-800 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                      <code>import {article.title} from '{article.title.toLowerCase()}'</code>
+                    </div>
+                  </div>
+                </div>
 
                 <div
                   className="custom-md"
@@ -148,7 +171,7 @@ export default function DailyLibPage({
                       <a
                         key={tag}
                         href={`/tags/${tag}`}
-                        className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 rounded-full text-sm font-medium hover:from-indigo-200 hover:to-purple-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-md"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-medium hover:from-blue-200 hover:to-indigo-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-md"
                       >
                         #{tag}
                       </a>
@@ -165,16 +188,16 @@ export default function DailyLibPage({
                   {previousArticle ? (
                     <a
                       href={`/daily-libs/${previousArticle.url}`}
-                      className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 group flex-1"
+                      className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group flex-1"
                     >
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white flex-shrink-0">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-500 mb-1 font-medium">上一篇推荐</div>
-                        <div className="font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors truncate">
+                        <div className="text-sm text-gray-500 mb-1 font-medium">上一个库</div>
+                        <div className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors truncate">
                           {previousArticle.title}
                         </div>
                       </div>
@@ -186,15 +209,15 @@ export default function DailyLibPage({
                   {nextArticle ? (
                     <a
                       href={`/daily-libs/${nextArticle.url}`}
-                      className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 group flex-1"
+                      className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group flex-1"
                     >
                       <div className="flex-1 min-w-0 text-right">
-                        <div className="text-sm text-gray-500 mb-1 font-medium">下一篇推荐</div>
-                        <div className="font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors truncate">
+                        <div className="text-sm text-gray-500 mb-1 font-medium">下一个库</div>
+                        <div className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors truncate">
                           {nextArticle.title}
                         </div>
                       </div>
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white flex-shrink-0">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -209,23 +232,23 @@ export default function DailyLibPage({
           </article>
         ) : (
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/30">
-            <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <h3 className="text-2xl font-bold mb-4 text-gray-800">未找到该库</h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              抱歉，没有找到您要查看的库推荐，可能已被删除或移动。
+              抱歉，没有找到您要查看的前端库，可能已被删除或移动。
             </p>
             <a
               href="/daily-libs"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
               </svg>
-              返回每日库列表
+              返回前端库列表
             </a>
           </div>
         )}

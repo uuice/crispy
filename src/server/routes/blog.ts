@@ -15,10 +15,10 @@ import {
   BlogAbout
 } from '../templates'
 
-import moment from 'moment'
-import { env } from '../config/env'
+// 导入新创建的导航页面组件
+import BlogNavigation from '../templates/blog/navigation'
+
 import { ViewData } from '../utils/viewData'
-import { sampleSize } from 'lodash'
 
 const router = Router()
 
@@ -119,6 +119,16 @@ router.get(
   '/about',
   catchAsync(async (req, res) => {
     await res.renderJSX(BlogAbout, new ViewData().assign())
+  })
+)
+
+/**
+ * 导航页面
+ */
+router.get(
+  '/navigation',
+  catchAsync(async (req, res) => {
+    await res.renderJSX(BlogNavigation, new ViewData().assign())
   })
 )
 

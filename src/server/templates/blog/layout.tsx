@@ -158,14 +158,11 @@ export default function BlogLayout({
                 <a href="/" className={`link ${pageType === 'Index' ? 'text-[var(--primary)]' : ''}`}>
                   首页
                 </a>
-                <a href="/archives" className={`link ${pageType === 'Archive' ? 'text-[var(--primary)]' : ''}`}>
-                  归档
-                </a>
                 <a href="/daily-libs" className={`link ${pageType === 'DailyLib' ? 'text-[var(--primary)]' : ''}`}>
-                  每日库
+                  前端库
                 </a>
-                <a href="/links" className={`link ${pageType === 'Link' ? 'text-[var(--primary)]' : ''}`}>
-                  友链
+                <a href="/navigation" className={`link ${pageType === 'Navigation' ? 'text-[var(--primary)]' : ''}`}>
+                  导航
                 </a>
                 <a href="/about" className={`link ${pageType === 'Page' ? 'text-[var(--primary)]' : ''}`}>
                   关于
@@ -234,9 +231,8 @@ export default function BlogLayout({
         <div className="absolute top-0 right-0 w-64 h-full bg-[var(--page-bg)] shadow-xl p-6">
           <nav className="space-y-4">
             <a href="/" className={`block py-2 ${pageType === 'Index' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>首页</a>
-            <a href="/archives" className={`block py-2 ${pageType === 'Archive' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>归档</a>
-            <a href="/daily-libs" className={`block py-2 ${pageType === 'DailyLib' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>每日库</a>
-            <a href="/links" className={`block py-2 ${pageType === 'Link' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>友链</a>
+            <a href="/daily-libs" className={`block py-2 ${pageType === 'DailyLib' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>前端库</a>
+            <a href="/navigation" className={`block py-2 ${pageType === 'Navigation' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>导航</a>
             <a href="/about" className={`block py-2 ${pageType === 'Page' ? 'text-[var(--primary)]' : 'text-[var(--deep-text)]'}`}>关于</a>
           </nav>
         </div>
@@ -254,114 +250,321 @@ export default function BlogLayout({
           {/* 侧边栏 */}
           <aside className="lg:w-80 space-y-6">
             {/* 作者信息卡片 */}
-            <div className="card-base p-6">
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-6 shadow-lg border border-gray-200">
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-[var(--primary)] mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
-                  {siteConfig?.author?.charAt(0) || '我'}
+                <div className="relative inline-block mb-4">
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 mx-auto flex items-center justify-center text-white text-3xl font-bold shadow-xl">
+                    {siteConfig?.author?.charAt(0) || '前'}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2">{siteConfig?.author || '博主'}</h3>
-                <p className="text-sm text-[var(--btn-content)] mb-4">
-                  {siteConfig?.description || '一个热爱技术的开发者'}
+                <h3 className="text-2xl font-bold mb-2 text-gray-800">{siteConfig?.author || '前端资源分享'}</h3>
+                <p className="text-gray-600 mb-4 leading-relaxed">
+                  {siteConfig?.description || '分享实用的前端工具，帮助大家提高开发效率'}
                 </p>
-                <div className="flex justify-center space-x-4">
+                <div className="flex justify-center space-x-4 mb-4">
                   {siteConfig?.github && (
-                    <a href={siteConfig.github} target="_blank" rel="noopener noreferrer" className="text-[var(--btn-content)] hover:text-[var(--primary)] transition-colors">
+                    <a
+                      href={siteConfig.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 bg-gray-800 text-white rounded-xl flex items-center justify-center hover:bg-gray-900 transition-colors shadow-md hover:shadow-lg"
+                      title="GitHub"
+                    >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
                       </svg>
                     </a>
                   )}
-                  {siteConfig?.twitter && (
-                    <a href={siteConfig.twitter} target="_blank" rel="noopener noreferrer" className="text-[var(--btn-content)] hover:text-[var(--primary)] transition-colors">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.29 18.251c7.29 0 11.39-6.021 11.39-11.39 0-.179 0-.357-.012-.531A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
+                  {siteConfig?.email && (
+                    <a
+                      href={`mailto:${siteConfig.email}`}
+                      className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl flex items-center justify-center hover:from-blue-600 hover:to-indigo-600 transition-colors shadow-md hover:shadow-lg"
+                      title="Email"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </a>
                   )}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>🌟</span>
+                    <span>优质资源</span>
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <span>⚡</span>
+                    <span>持续更新</span>
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* 统计信息卡片 */}
-            <div className="card-base p-6">
-              <h3 className="text-lg font-semibold mb-4">统计信息</h3>
+            <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-6 shadow-lg border border-gray-200">
+              <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">📊</span>
+                </div>
+                网站统计
+              </h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[var(--primary)]">0</div>
-                  <div className="text-sm text-[var(--btn-content)]">文章数</div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-green-200 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white text-xl">📁</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">{categories.length}</div>
+                  <div className="text-sm text-gray-600">分类数</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[var(--primary)]">{categories.length}</div>
-                  <div className="text-sm text-[var(--btn-content)]">分类数</div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-green-200 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white text-xl">🏷️</span>
+                  </div>
+                  <div className="text-2xl font-bold text-purple-600">{tags.length}</div>
+                  <div className="text-sm text-gray-600">标签数</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[var(--primary)]">{tags.length}</div>
-                  <div className="text-sm text-[var(--btn-content)]">标签数</div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-green-200 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white text-xl">📅</span>
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">{currentYear}</div>
+                  <div className="text-sm text-gray-600">建站年份</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-[var(--primary)]">{currentYear}</div>
-                  <div className="text-sm text-[var(--btn-content)]">建站年份</div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-green-200 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white text-xl">📚</span>
+                  </div>
+                  <div className="text-2xl font-bold text-red-600">0</div>
+                  <div className="text-sm text-gray-600">库数量</div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-green-200">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>🔄</span>
+                    <span>实时更新</span>
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <span>📈</span>
+                    <span>数据统计</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 快速导航卡片 */}
+            <div className="bg-gradient-to-br from-white to-indigo-50 rounded-2xl p-6 shadow-lg border border-gray-200">
+              <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">🚀</span>
+                </div>
+                快速导航
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href="/daily-libs"
+                  className="group flex flex-col items-center gap-2 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-indigo-200 hover:border-indigo-300 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white text-xl">
+                    📚
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 text-center">前端库</span>
+                </a>
+                <a
+                  href="/navigation"
+                  className="group flex flex-col items-center gap-2 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-indigo-200 hover:border-indigo-300 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl">
+                    🔗
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 text-center">导航</span>
+                </a>
+                <a
+                  href="/categories"
+                  className="group flex flex-col items-center gap-2 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-indigo-200 hover:border-indigo-300 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl">
+                    📁
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 text-center">分类</span>
+                </a>
+                <a
+                  href="/tags"
+                  className="group flex flex-col items-center gap-2 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-indigo-200 hover:border-indigo-300 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-xl">
+                    🏷️
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 text-center">标签</span>
+                </a>
+              </div>
+              <div className="mt-4 pt-4 border-t border-indigo-200">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span>⚡</span>
+                    <span>一键直达</span>
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <span>🧭</span>
+                    <span>便捷导航</span>
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* 分类卡片 */}
             {categories.length > 0 && (
-              <div className="card-base p-6">
-                <h3 className="text-lg font-semibold mb-4">分类</h3>
-                <div className="space-y-2">
-                  {categories.map((category: any) => (
+              <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-6 shadow-lg border border-gray-200">
+                <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">📁</span>
+                  </div>
+                  分类导航
+                </h3>
+                <div className="space-y-3">
+                  {categories.map((category: any, index: number) => (
                     <a
                       key={category.id}
                       href={`/categories/${category.alias}`}
-                      className="flex justify-between items-center p-2 rounded-lg hover:bg-[var(--btn-plain-bg-hover)] transition-colors"
+                      className="group block bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-purple-200 hover:border-purple-300 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                     >
-                      <span className="text-[var(--btn-content)]">{category.name}</span>
-                      <span className="text-xs bg-[var(--btn-regular-bg)] text-[var(--btn-content)] px-2 py-1 rounded-full">
-                        {category.article_count || 0}
-                      </span>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center text-purple-600 font-bold">
+                            {index + 1}
+                          </div>
+                          <span className="text-gray-700 group-hover:text-purple-600 font-medium">{category.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                            {category.article_count || 0} 个
+                          </span>
+                          <svg className="w-4 h-4 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
                     </a>
                   ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-purple-200 text-center">
+                  <a
+                    href="/categories"
+                    className="inline-flex items-center gap-1 text-sm text-purple-600 hover:text-purple-800 font-medium"
+                  >
+                    <span>查看所有分类</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
                 </div>
               </div>
             )}
 
             {/* 标签云卡片 */}
             {tags.length > 0 && (
-              <div className="card-base p-6">
-                <h3 className="text-lg font-semibold mb-4">标签云</h3>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag: any) => (
+              <div className="bg-gradient-to-br from-white to-yellow-50 rounded-2xl p-6 shadow-lg border border-gray-200">
+                <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🏷️</span>
+                  </div>
+                  热门标签
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {tags.map((tag: any, index: number) => (
                     <a
                       key={tag.id}
                       href={`/tags/${tag.value}`}
-                      className="text-sm px-3 py-1 rounded-full bg-[var(--btn-regular-bg)] text-[var(--btn-content)] hover:bg-[var(--primary)] hover:text-white transition-colors"
+                      className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700 rounded-xl hover:from-yellow-200 hover:to-orange-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border border-yellow-200"
                     >
-                      {tag.title}
+                      <span className="text-lg">#{index + 1}</span>
+                      <span className="font-medium">{tag.title}</span>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>🔥</span>
+                      </div>
                     </a>
                   ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-yellow-200">
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <span>📊</span>
+                      <span>共 {tags.length} 个标签</span>
+                    </span>
+                    <a
+                      href="/tags"
+                      className="text-yellow-600 hover:text-yellow-800 font-medium flex items-center gap-1"
+                    >
+                      <span>全部标签</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* 最新文章卡片 */}
-            <div className="card-base p-6">
-              <h3 className="text-lg font-semibold mb-4">最新文章</h3>
-              <div className="space-y-3">
+            {/* 热门推荐卡片 */}
+            <div className="bg-gradient-to-br from-white to-red-50 rounded-2xl p-6 shadow-lg border border-gray-200">
+              <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">🔥</span>
+                </div>
+                热门推荐
+              </h3>
+              <div className="space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <a
                     key={i}
                     href="#"
-                    className="block group"
+                    className="group block bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-red-200 hover:border-red-300 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                   >
-                    <div className="text-sm text-[var(--btn-content)] group-hover:text-[var(--primary)] transition-colors line-clamp-2">
-                      这里是第{i}篇示例文章的标题，展示最新文章的样式
-                    </div>
-                    <div className="text-xs text-[var(--btn-content)]/60 mt-1">
-                      2024-01-0{i}
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">
+                        {i}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800 group-hover:text-red-600 mb-1">
+                          第{i}个热门前端库
+                        </h4>
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                          实用的前端开发工具，接口简单，功能实用，能有效提升开发效率。
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <span>⭐</span>
+                              <span>4.8</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span>📥</span>
+                              <span>10K+</span>
+                            </span>
+                          </div>
+                          <span className="text-xs text-red-600 font-medium">NEW</span>
+                        </div>
+                      </div>
                     </div>
                   </a>
                 ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-red-200 text-center">
+                <a
+                  href="/daily-libs"
+                  className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
+                >
+                  <span>查看所有推荐</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
               </div>
             </div>
           </aside>

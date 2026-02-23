@@ -29,182 +29,177 @@ export default function IndexPage({
     >
       <div className="space-y-12">
         {/* Hero Banner 区域 */}
-        <div className="relative overflow-hidden rounded-3xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-500"></div>
+        <div className="relative overflow-hidden rounded-3xl mb-16">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600"></div>
           <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative p-12 text-white">
-            <div className="max-w-4xl">
-              <div className="flex items-center mb-4">
-                <div className="w-3 h-3 bg-white rounded-full mr-2 animate-pulse"></div>
-                <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">欢迎来到</span>
+          <div className="relative p-16 text-white">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <span className="text-3xl">📚</span>
+                </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                探索<span className="text-yellow-300">技术</span>的无限可能
-              </h1>
-              <p className="text-xl md:text-2xl opacity-90 mb-8 max-w-2xl">
-                {siteConfig?.description || '分享前沿技术见解，记录编程旅程中的每一个精彩瞬间'}
+              <h1 className="text-5xl font-bold mb-6">发现优秀前端库</h1>
+              <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+                {siteConfig?.description || '分享实用的前端工具和框架，帮助开发者提高效率'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-wrap gap-6 justify-center">
                 <a
-                  href="/archives"
-                  className="inline-flex items-center px-8 py-4 bg-white text-purple-600 hover:bg-gray-100 rounded-xl font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+                  href="/daily-libs"
+                  className="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-2"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
-                  浏览精选文章
+                  <span>🔍</span>
+                  浏览前端库
                 </a>
                 <a
                   href="/about"
-                  className="inline-flex items-center px-8 py-4 bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 rounded-xl font-semibold transition-all duration-300"
+                  className="px-8 py-4 bg-white/20 text-white rounded-xl font-bold hover:bg-white/30 transition-all duration-300 backdrop-blur-sm flex items-center gap-2"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  了解更多故事
+                  <span>👤</span>
+                  关于我们
                 </a>
               </div>
             </div>
           </div>
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-t from-white/10 to-transparent rounded-tl-full"></div>
         </div>
 
-        {/* 热门文章 */}
+        {/* 热门前端库 */}
         {hotArticleList.length > 0 && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/30">
-            <div className="flex items-center mb-8">
-              <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full mr-3"></div>
-              <h2 className="text-3xl font-bold text-gray-800">🔥 热门精选</h2>
-              <div className="ml-auto flex items-center">
-                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                  {hotArticleList.length} 篇精选文章
-                </span>
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg">🔥</span>
+                </div>
+                热门前端库
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full">实时更新</span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">{hotArticleList.length}个精选</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {hotArticleList.slice(0, 4).map((article: any, index: number) => (
-                <article
-                  key={article.id}
-                  className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {hotArticleList.slice(0, 4).map((lib: any, index: number) => (
+                <a
+                  key={lib.id}
+                  href={`/daily-libs/${lib.url}`}
+                  className="group block bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  {article.cover_image && (
-                    <div className="h-48 relative overflow-hidden">
-                      <img
-                        src={article.cover_image}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                          #{index + 1} 热门
-                        </span>
-                      </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center text-blue-600 font-bold text-lg flex-shrink-0">
+                      {index + 1}
                     </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors">
-                      <a
-                        href={`/archives/${article.url}`}
-                        className="text-gray-800 hover:text-purple-600 transition-colors"
-                      >
-                        {article.title}
-                      </a>
-                    </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                      {article.summary || article.content?.substring(0, 150) + '...'}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                      <div className="flex items-center space-x-4">
-                        <span className="flex items-center bg-gray-100 px-2 py-1 rounded-full">
-                          <svg className="w-4 h-4 mr-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                          </svg>
-                          {new Date(article.create_time).toLocaleDateString('zh-CN', {
-                            month: '2-digit',
-                            day: '2-digit'
-                          })}
-                        </span>
-                        {article.category_name && (
-                          <span className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full font-medium">
-                            {article.category_name}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 mb-2">
+                        {lib.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                        {lib.summary || '这个工具可以帮助你解决开发中的实际问题'}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-xs text-gray-500 gap-3">
+                          <span className="flex items-center gap-1">
+                            <span>📅</span>
+                            {new Date(lib.create_time).toLocaleDateString('zh-CN', {
+                              month: '2-digit',
+                              day: '2-digit'
+                            })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span>👁️</span>
+                            {lib.view_count || 0}
+                          </span>
+                        </div>
+                        {lib.category_name && (
+                          <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-xs font-medium">
+                            {lib.category_name}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="flex items-center bg-gray-100 px-2 py-1 rounded-full">
-                          <svg className="w-4 h-4 mr-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                          </svg>
-                          {article.view_count || 0}
-                        </span>
-                        <span className="flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                          HOT
-                        </span>
-                      </div>
                     </div>
                   </div>
-                </article>
+                </a>
               ))}
+            </div>
+            <div className="text-center mt-8">
+              <a
+                href="/daily-libs"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <span>看查看全部热门库</span>
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
             </div>
           </div>
         )}
 
-        {/* 最新文章列表 */}
-        <div>
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-[var(--line-divider)]">
-            <h2 className="text-2xl font-bold">最新文章</h2>
-            <a
-              href="/archives"
-              className="text-[var(--primary)] hover:underline text-sm font-medium"
-            >
-              查看更多 →
-            </a>
-          </div>
-
-          <div className="space-y-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <article
-                key={i}
-                className="card-base p-6 hover:shadow-md transition-shadow group"
+        {/* 最新前端库列表 */}
+        <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg">🆕</span>
+              </div>
+              最新前端库
+            </h2>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">每日更新</span>
+              <a
+                href="/daily-libs"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md"
               >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-2">
-                      <a
-                        href="#"
-                        className="text-[var(--deep-text)] group-hover:text-[var(--primary)] transition-colors"
-                      >
-                        这是第{i}篇文章的标题 - 展示博客文章列表的样式
-                      </a>
-                    </h3>
-                    <p className="text-[var(--btn-content)] mb-4 line-clamp-2">
-                      这里是文章的摘要内容，用于展示文章的主要内容。摘要应该简洁明了，
-                      能够吸引读者继续阅读完整文章。这里可以包含一些关键信息或者文章亮点。
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--btn-content)]">
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                        </svg>
-                        2024-01-0{i}
-                      </span>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                        </svg>
-                        {Math.floor(Math.random() * 100) + 10}
-                      </span>
-                      <span className="px-2 py-1 bg-[var(--btn-regular-bg)] rounded-full">
-                        技术分享
-                      </span>
+                全部库
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <a
+                key={i}
+                href="#"
+                className="group block bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                      JS
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600">第{i}个前端库示例</h3>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">NEW</span>
+                      </div>
+                      <p className="text-gray-600 mb-3">实用的前端开发工具，接口简单易用，功能丰富，能有效提升开发效率。</p>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span>⭐</span>
+                          4.8 评分
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span>📥</span>
+                          10K+ 下载
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span>📅</span>
+                          2024-01-0{i}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="md:w-24 h-20 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 mb-2">更新时间</div>
+                    <div className="text-lg font-bold text-blue-600">2024-01-0{i}</div>
+                    <div className="mt-2">
+                      <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-xs font-medium">JavaScript</span>
+                    </div>
+                  </div>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
         </div>
