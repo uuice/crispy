@@ -46,12 +46,6 @@ const assetsToCheck: AssetConfig[] = [
     source: join(projectRoot, 'src/server/docs/swagger'),
     target: join(serverDir, 'docs/swagger'),
     extensions: ['.ts']
-  },
-  {
-    name: 'Template 模板',
-    source: join(projectRoot, 'src/server/templates'),
-    target: join(serverDir, 'templates'),
-    extensions: ['.html', '.md']
   }
 ]
 

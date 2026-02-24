@@ -31,11 +31,6 @@ const assetsToCopy: AssetConfig[] = [
     name: 'Swagger 文档',
     source: join(projectRoot, 'src/server/docs/swagger'),
     target: join(serverDir, 'docs/swagger')
-  },
-  {
-    name: 'Template 模板',
-    source: join(projectRoot, 'src/server/templates'),
-    target: join(serverDir, 'templates')
   }
 ]
 

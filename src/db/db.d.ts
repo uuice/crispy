@@ -3,12 +3,11 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely'
+import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
 
 export interface AccessToken {
   /**
@@ -365,6 +364,37 @@ export interface Attrs {
    * 标题
    */
   title: Generated<string>;
+  /**
+   * 更新时间
+   */
+  update_time: Generated<number>;
+}
+
+export interface Binary {
+  /**
+   * 二进制字符串
+   */
+  binary_str: string;
+  /**
+   * 创建时间
+   */
+  create_time: Generated<number>;
+  /**
+   * 自增id
+   */
+  id: Generated<number>;
+  /**
+   * 是否删除
+   */
+  is_delete: Generated<number>;
+  /**
+   * 键名
+   */
+  key: Generated<string>;
+  /**
+   * 状态
+   */
+  status: Generated<number>;
   /**
    * 更新时间
    */
@@ -1410,6 +1440,7 @@ export interface DB {
   api_logs: ApiLogs;
   articles: Articles;
   attrs: Attrs;
+  binary: Binary;
   caches: Caches;
   categories: Categories;
   comments: Comments;

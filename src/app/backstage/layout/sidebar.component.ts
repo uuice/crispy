@@ -10,7 +10,7 @@ import { MenuItem } from 'primeng/api'
   imports: [PanelMenuModule, ButtonModule],
   template: `
     <aside class="sidebar" [class.sidebar-collapsed]="collapsed">
-      <p-panelMenu [model]="items"></p-panelMenu>
+      <p-panelMenu [model]="items" [multiple]="true"></p-panelMenu>
       <div class="sidebar-header">
         <p-button
           icon="pi pi-bars"
