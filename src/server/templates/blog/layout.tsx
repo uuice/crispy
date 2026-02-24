@@ -146,61 +146,93 @@ export default function BlogLayout({
           ></canvas>
 
           {/* Header */}
-      <header className="sticky top-0 z-50 bg-[var(--page-bg)]/80 backdrop-blur-md border-b border-[var(--line-divider)]">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
-              <a href="/" className="text-2xl font-bold text-[var(--primary)] hover:opacity-80 transition-opacity">
-                {siteConfig?.siteName || '我的博客'}
+              <a href="/" className="flex items-center space-x-2 group">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  {siteConfig?.siteName?.charAt(0) || '前'}
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-indigo-600 dark:group-hover:from-blue-400 dark:group-hover:to-indigo-400 transition-all">
+                  {siteConfig?.siteName || '前端资源'}
+                </span>
               </a>
 
-              <nav className="hidden md:flex space-x-6">
-                <a href="/" className={`link ${pageType === 'Index' ? 'text-[var(--primary)]' : ''}`}>
+              <nav className="hidden md:flex items-center space-x-1">
+                <a
+                  href="/"
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${pageType === 'Index'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                `}
+                >
                   首页
                 </a>
-                <a href="/daily-libs" className={`link ${pageType === 'DailyLib' ? 'text-[var(--primary)]' : ''}`}>
+                <a
+                  href="/daily-libs"
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${pageType === 'DailyLib'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                `}
+                >
                   前端库
                 </a>
-                <a href="/navigation" className={`link ${pageType === 'Navigation' ? 'text-[var(--primary)]' : ''}`}>
+                <a
+                  href="/navigation"
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${pageType === 'Navigation'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                `}
+                >
                   导航
                 </a>
-                <a href="/about" className={`link ${pageType === 'Page' ? 'text-[var(--primary)]' : ''}`}>
+                <a
+                  href="/about"
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${pageType === 'Page'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                `}
+                >
                   关于
                 </a>
               </nav>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               {/* 搜索按钮 */}
               <button
                 id="search-switch"
-                className="btn-regular p-2 rounded-full"
+                className="p-2 rounded-lg text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
                 aria-label="搜索"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
 
               {/* 暗黑模式切换按钮 */}
               <button
                 id="scheme-switch"
-                className="btn-regular p-2 rounded-full"
+                className="p-2 rounded-lg text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
                 aria-label="切换暗黑模式"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+                <svg className="w-5 h-5 dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
                 </svg>
               </button>
 
               {/* 移动端菜单按钮 */}
               <button
                 id="nav-menu-switch"
-                className="btn-regular p-2 rounded-full md:hidden"
+                className="p-2 rounded-lg text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 md:hidden"
                 aria-label="菜单"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
             </div>
@@ -573,14 +605,108 @@ export default function BlogLayout({
       </div>
 
       {/* Footer */}
-      <footer className="bg-[var(--card-bg)] border-t border-[var(--line-divider)] py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-[var(--btn-content)]">
-            © {currentYear} {siteConfig?.author || '博主'}. All rights reserved.
-          </p>
-          <p className="text-sm text-[var(--btn-content)]/60 mt-2">
-            Powered by Crispy Blog
-          </p>
+      <footer className="bg-gradient-to-t from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-t border-gray-200 dark:border-gray-700 py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start space-x-2 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold">
+                  {siteConfig?.siteName?.charAt(0) || '前'}
+                </div>
+                <span className="text-xl font-bold text-gray-800 dark:text-white">
+                  {siteConfig?.siteName || '前端资源'}
+                </span>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 mb-4 max-w-md">
+                分享实用的前端工具和框架，帮助开发者提高工作效率，解决实际开发问题。
+              </p>
+              <div className="flex justify-center md:justify-start space-x-4">
+                {siteConfig?.github && (
+                  <a
+                    href={siteConfig.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-800 text-white rounded-xl flex items-center justify-center hover:bg-gray-900 transition-colors shadow-md hover:shadow-lg"
+                    title="GitHub"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                    </svg>
+                  </a>
+                )}
+                {siteConfig?.email && (
+                  <a
+                    href={`mailto:${siteConfig.email}`}
+                    className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl flex items-center justify-center hover:from-blue-600 hover:to-indigo-600 transition-colors shadow-md hover:shadow-lg"
+                    title="Email"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="text-center md:text-right">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">统计信息</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{categories.length}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">分类</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{tags.length}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">标签</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{currentYear}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">建站年份</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">0</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">库数量</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 快速导航单独一行 */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-6 text-center">快速导航</h3>
+            <div className="flex flex-wrap justify-center gap-6">
+              <a href="/" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                首页
+              </a>
+              <a href="/daily-libs" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                前端库
+              </a>
+              <a href="/navigation" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                导航
+              </a>
+              <a href="/categories" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                分类
+              </a>
+              <a href="/tags" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                标签
+              </a>
+              <a href="/about" className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:shadow-md transition-all duration-300">
+                关于
+              </a>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-600 dark:text-gray-300 text-center md:text-left">
+                © {currentYear} {siteConfig?.author || '前端资源分享'}. 保留所有权利。
+              </p>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Powered by</span>
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Crispy Blog</span>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
