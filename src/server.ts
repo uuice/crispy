@@ -1,7 +1,6 @@
 import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule } from '@angular/ssr/node'
 import express from 'express'
 import { join } from 'node:path'
-import fs from 'fs'
 import apiRoutes from './server/routes/api'
 import blogRoutes from './server/routes/blog'
 import rssRoutes from './server/routes/rss-sitemap'
@@ -15,7 +14,6 @@ import {
 import { globalErrorHandler, notFoundHandler } from './server/middleware/errorHandler'
 import { createAngularHandler } from '@src/server/middleware'
 import { env } from './server/config/env'
-import { adminSpecs, contentSpecs } from './server/config/swagger'
 import { useJSXEngine } from './libs/express_jsx'
 // import { pageCacheMiddleware } from './server/middleware'
 import { flexsearchService } from './server/services/flexsearch-index.service'
@@ -141,11 +139,6 @@ app.use(blogRoutes)
 // RSS and sitemap routes
 app.use(rssRoutes)
 
-// Swagger documentation routes
-app.get('/doc/admin/swagger.json', (req, res) => {
-  res.json(adminSpecs)
-})
-
 // Admin Swagger documentation route
 app.get('/doc/admin/docs', (req, res) => {
   res.send(`
@@ -167,10 +160,6 @@ app.get('/doc/admin/docs', (req, res) => {
     </body>
     </html>
   `)
-})
-
-app.get('/doc/content/swagger.json', (req, res) => {
-  res.json(contentSpecs)
 })
 
 app.get('/doc/content/docs', (req, res) => {

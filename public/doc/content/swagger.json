@@ -1,0 +1,5589 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Crispy API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for Crispy application",
+    "contact": {
+      "name": "API Support",
+      "email": "support@crispy.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4200/api",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "accessTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-access-token",
+        "description": "Access Token - 必需"
+      },
+      "appNameAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-app-name",
+        "description": "Application Name - 必需"
+      },
+      "channelAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-channel",
+        "description": "Channel Name - 必需"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "message": {
+            "type": "string",
+            "description": "Response message"
+          },
+          "data": {
+            "type": "object",
+            "description": "Response data"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error details"
+          }
+        }
+      },
+      "AccessTokenValidation": {
+        "type": "object",
+        "required": [
+          "app_name",
+          "channel"
+        ],
+        "properties": {
+          "app_name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email"
+          },
+          "role": {
+            "type": "string",
+            "description": "User role"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        }
+      },
+      "Addition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "附加信息ID"
+          },
+          "primary_id": {
+            "type": "integer",
+            "description": "主表ID"
+          },
+          "fields_json": {
+            "type": "string",
+            "description": "JSON格式的扩展字段"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态"
+          },
+          "create_time": {
+            "type": "integer",
+            "description": "创建时间戳"
+          },
+          "update_time": {
+            "type": "integer",
+            "description": "更新时间戳"
+          },
+          "is_delete": {
+            "type": "integer",
+            "description": "删除状态"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "accessTokenAuth": [],
+      "appNameAuth": [],
+      "channelAuth": []
+    }
+  ],
+  "paths": {
+    "/content/access-token": {
+      "get": {
+        "tags": [
+          "ContentAccessTokens"
+        ],
+        "summary": "获取Access Token列表",
+        "description": "获取Access Token列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "app_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "应用名称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "schema": {
+              "type": "string"
+            },
+            "description": "渠道名称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态"
+          },
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/access-token/{id}": {
+      "get": {
+        "tags": [
+          "ContentAccessTokens"
+        ],
+        "summary": "获取Access Token详情",
+        "description": "获取Access Token详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Access TokenID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Access Token不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/access-token/check": {
+      "post": {
+        "tags": [
+          "ContentAccessTokens"
+        ],
+        "summary": "验证Access Token",
+        "description": "验证Access Token",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "app_name",
+                  "channel",
+                  "token"
+                ],
+                "properties": {
+                  "app_name": {
+                    "type": "string",
+                    "description": "应用名称"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "description": "渠道名称"
+                  },
+                  "token": {
+                    "type": "string",
+                    "description": "Access Token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token验证失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/additions": {
+      "get": {
+        "tags": [
+          "ContentAdditions"
+        ],
+        "summary": "获取附加信息列表",
+        "description": "获取附加信息列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "fields_json",
+            "schema": {
+              "type": "string"
+            },
+            "description": "JSON字段内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "primary_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "主表ID"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "create_time_start",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间起始"
+          },
+          {
+            "in": "query",
+            "name": "create_time_end",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间结束"
+          },
+          {
+            "in": "query",
+            "name": "update_time_start",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间起始"
+          },
+          {
+            "in": "query",
+            "name": "update_time_end",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间结束"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "请求是否成功"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "响应消息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "dataList": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Addition"
+                          },
+                          "description": "附加信息列表"
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer",
+                              "description": "总数"
+                            },
+                            "page": {
+                              "type": "integer",
+                              "description": "当前页"
+                            },
+                            "pageSize": {
+                              "type": "integer",
+                              "description": "每页数量"
+                            },
+                            "totalPages": {
+                              "type": "integer",
+                              "description": "总页数"
+                            }
+                          },
+                          "description": "分页信息"
+                        }
+                      },
+                      "description": "返回的数据"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/additions/{id}": {
+      "get": {
+        "tags": [
+          "ContentAdditions"
+        ],
+        "summary": "获取附加信息详情",
+        "description": "获取附加信息详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "附加信息ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "请求是否成功"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "响应消息"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Addition",
+                      "description": "附加信息数据"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "附加信息不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/ad-items": {
+      "get": {
+        "tags": [
+          "ContentAdItems"
+        ],
+        "summary": "获取广告项目列表",
+        "description": "获取广告项目列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "ad_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "广告ID过滤"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "广告项目标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "广告项目内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "image_url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "图片URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "链接地址（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "打开方式"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态过滤"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/ad-items/{id}": {
+      "get": {
+        "tags": [
+          "ContentAdItems"
+        ],
+        "summary": "获取广告项目详情",
+        "description": "获取广告项目详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "广告项目ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "广告项目不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/ads": {
+      "get": {
+        "tags": [
+          "ContentAds"
+        ],
+        "summary": "获取广告列表",
+        "description": "获取广告列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "广告标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "广告别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "广告类型ID"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "广告状态"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间戳"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间戳"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "广告内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/ads/{id}": {
+      "get": {
+        "tags": [
+          "ContentAds"
+        ],
+        "summary": "获取广告详情",
+        "description": "获取广告详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "广告ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "广告不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/api-logs": {
+      "get": {
+        "tags": [
+          "ContentApiLogs"
+        ],
+        "summary": "获取API日志列表",
+        "description": "获取API日志列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "请求方法"
+          },
+          {
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            },
+            "description": "请求路径（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "status_code",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "响应状态码"
+          },
+          {
+            "in": "query",
+            "name": "body",
+            "schema": {
+              "type": "string"
+            },
+            "description": "POST请求体（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Query参数（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            },
+            "description": "来源IP"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "日志状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/api-logs/{id}": {
+      "get": {
+        "tags": [
+          "ContentApiLogs"
+        ],
+        "summary": "获取API日志详情",
+        "description": "获取API日志详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "API日志ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "API日志不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/articles": {
+      "get": {
+        "tags": [
+          "ContentArticles"
+        ],
+        "summary": "获取文章列表",
+        "description": "获取文章列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "文章标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sub_title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "副标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "abstract",
+            "schema": {
+              "type": "string"
+            },
+            "description": "摘要（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "author_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "作者ID"
+          },
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "分类ID"
+          },
+          {
+            "in": "query",
+            "name": "type_ids",
+            "schema": {
+              "type": "string"
+            },
+            "description": "分类ID列表（逗号分隔）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态 (10已发布 -10待发布 -100已删除 -20草稿)"
+          },
+          {
+            "in": "query",
+            "name": "is_review",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否审核 (0-未审核, 1-已审核)"
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "attrs",
+            "schema": {
+              "type": "string"
+            },
+            "description": "属性（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "redirect_url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "重定向URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "image",
+            "schema": {
+              "type": "string"
+            },
+            "description": "图片（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "image_list",
+            "schema": {
+              "type": "string"
+            },
+            "description": "图片列表（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_description",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_keywords",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO关键词（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "remark",
+            "schema": {
+              "type": "string"
+            },
+            "description": "备注（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "click",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "点击量"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否删除 (0-未删除, 1-已删除)"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间（时间戳）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/articles/{id}": {
+      "get": {
+        "tags": [
+          "ContentArticles"
+        ],
+        "summary": "获取文章详情",
+        "description": "获取文章详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "文章ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "文章不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/articles/url/{url}": {
+      "get": {
+        "tags": [
+          "ContentArticles"
+        ],
+        "summary": "根据URL获取文章详情",
+        "description": "根据URL获取文章详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "文章URL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "文章不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/attrs": {
+      "get": {
+        "tags": [
+          "ContentAttrs"
+        ],
+        "summary": "获取属性列表",
+        "description": "获取属性列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "属性标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "属性别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "属性状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/attrs/{id}": {
+      "get": {
+        "tags": [
+          "ContentAttrs"
+        ],
+        "summary": "获取属性详情",
+        "description": "获取属性详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "属性ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "属性不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/caches": {
+      "get": {
+        "tags": [
+          "ContentCaches"
+        ],
+        "summary": "获取缓存列表",
+        "description": "获取缓存列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "hash",
+            "schema": {
+              "type": "string"
+            },
+            "description": "缓存哈希（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "cache_data",
+            "schema": {
+              "type": "string"
+            },
+            "description": "缓存内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "缓存状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/caches/{id}": {
+      "get": {
+        "tags": [
+          "ContentCaches"
+        ],
+        "summary": "获取缓存详情",
+        "description": "获取缓存详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "缓存ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "缓存不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/categories": {
+      "get": {
+        "tags": [
+          "ContentCategories"
+        ],
+        "summary": "获取分类列表",
+        "description": "获取分类列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "分类标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "分类别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "des",
+            "schema": {
+              "type": "string"
+            },
+            "description": "分类描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "parent_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "父分类ID"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态 (-10-禁用, 10-启用)"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否删除 (0-未删除, 1-已删除)"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间（时间戳）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/categories/tree": {
+      "get": {
+        "tags": [
+          "ContentCategories"
+        ],
+        "summary": "获取分类树形结构",
+        "description": "获取分类树形结构",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/categories/{id}": {
+      "get": {
+        "tags": [
+          "ContentCategories"
+        ],
+        "summary": "获取分类详情",
+        "description": "获取分类详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "分类ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "分类不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/categories/alias/{alias}": {
+      "get": {
+        "tags": [
+          "ContentCategories"
+        ],
+        "summary": "根据别名获取分类详情",
+        "description": "根据别名获取分类详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alias",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "分类别名"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "分类不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/categories/with-count": {
+      "get": {
+        "tags": [
+          "ContentCategories"
+        ],
+        "summary": "获取分类列表及其文章数",
+        "description": "获取分类列表，包含每个分类下的文章数量",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "parentAlias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "父分类别名，如 POST_SYS_CAT"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "前端开发"
+                          },
+                          "alias": {
+                            "type": "string",
+                            "example": "frontend"
+                          },
+                          "des": {
+                            "type": "string",
+                            "example": "前端开发相关文章"
+                          },
+                          "parent_id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "sort": {
+                            "type": "integer",
+                            "example": 0
+                          },
+                          "status": {
+                            "type": "integer",
+                            "example": 10
+                          },
+                          "create_time": {
+                            "type": "integer",
+                            "example": 1656499072000
+                          },
+                          "update_time": {
+                            "type": "integer",
+                            "example": 1656499072000
+                          },
+                          "article_count": {
+                            "type": "integer",
+                            "example": 15
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/configs": {
+      "get": {
+        "tags": [
+          "ContentConfigs"
+        ],
+        "summary": "获取配置列表",
+        "description": "获取配置列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "配置标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "配置别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "配置类型ID"
+          },
+          {
+            "in": "query",
+            "name": "type_ids",
+            "schema": {
+              "type": "string"
+            },
+            "description": "配置类型ID列表（逗号分隔）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "配置状态"
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            },
+            "description": "配置值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间戳"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/configs/alias/{alias}": {
+      "get": {
+        "tags": [
+          "ContentConfigs"
+        ],
+        "summary": "根据别名获取配置",
+        "description": "根据别名获取配置",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alias",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "配置别名"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "配置不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/configs/{id}": {
+      "get": {
+        "tags": [
+          "ContentConfigs"
+        ],
+        "summary": "获取配置详情",
+        "description": "获取配置详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "配置ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "配置不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/enums": {
+      "get": {
+        "tags": [
+          "ContentEnums"
+        ],
+        "summary": "获取枚举列表",
+        "description": "获取枚举列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "枚举标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "枚举别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "description": "枚举代码（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            },
+            "description": "枚举值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "枚举状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/enums/{id}": {
+      "get": {
+        "tags": [
+          "ContentEnums"
+        ],
+        "summary": "获取枚举详情",
+        "description": "获取枚举详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "枚举ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "枚举不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/holidays": {
+      "get": {
+        "tags": [
+          "ContentHolidays"
+        ],
+        "summary": "获取节假日列表",
+        "description": "获取节假日列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "节假日标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            },
+            "description": "节假日日期值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/holidays/{id}": {
+      "get": {
+        "tags": [
+          "ContentHolidays"
+        ],
+        "summary": "获取节假日详情",
+        "description": "获取节假日详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "节假日ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "节假日不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/jobs": {
+      "get": {
+        "tags": [
+          "ContentJobs"
+        ],
+        "summary": "获取任务列表",
+        "description": "获取任务列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "职位名称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "typeName",
+            "schema": {
+              "type": "string"
+            },
+            "description": "职位类别（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "nature",
+            "schema": {
+              "type": "string"
+            },
+            "description": "工作性质（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "branch",
+            "schema": {
+              "type": "string"
+            },
+            "description": "所在部门（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "type": "string"
+            },
+            "description": "工作地址（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            },
+            "description": "简历发送邮箱（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "招聘信息（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "num",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "招聘人数"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间戳"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/jobs/{id}": {
+      "get": {
+        "tags": [
+          "ContentJobs"
+        ],
+        "summary": "获取任务详情",
+        "description": "获取任务详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/keywords": {
+      "get": {
+        "tags": [
+          "ContentKeywords"
+        ],
+        "summary": "获取关键词列表",
+        "description": "获取关键词列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "关键词标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "关键词别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "关键词计数"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "关键词状态"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "关键词类型ID"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "关键词URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            },
+            "description": "关键词值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/keywords/{id}": {
+      "get": {
+        "tags": [
+          "ContentKeywords"
+        ],
+        "summary": "获取关键词详情",
+        "description": "获取关键词详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "关键词ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "关键词不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/links": {
+      "get": {
+        "tags": [
+          "ContentLinks"
+        ],
+        "summary": "获取链接列表",
+        "description": "获取链接列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "site_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "站点名称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "des",
+            "schema": {
+              "type": "string"
+            },
+            "description": "链接描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "logo",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Logo图标（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "打开方式"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "分类ID"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "链接状态"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "链接地址（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间戳"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/links/{id}": {
+      "get": {
+        "tags": [
+          "ContentLinks"
+        ],
+        "summary": "获取链接详情",
+        "description": "获取链接详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "链接ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "链接不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/menus": {
+      "get": {
+        "tags": [
+          "ContentMenus"
+        ],
+        "summary": "获取菜单列表",
+        "description": "获取菜单列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "菜单标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "菜单别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "parent_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "父菜单ID"
+          },
+          {
+            "in": "query",
+            "name": "icon",
+            "schema": {
+              "type": "string"
+            },
+            "description": "菜单图标（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "菜单链接（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "image_url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "图片URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "打开方式"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "菜单状态"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间戳"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/menus/tree": {
+      "get": {
+        "tags": [
+          "ContentMenus"
+        ],
+        "summary": "获取菜单树形结构",
+        "description": "获取菜单树形结构",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/menus/{id}": {
+      "get": {
+        "tags": [
+          "ContentMenus"
+        ],
+        "summary": "获取菜单详情",
+        "description": "获取菜单详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "菜单ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "菜单不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/notices": {
+      "get": {
+        "tags": [
+          "ContentNotices"
+        ],
+        "summary": "获取通知列表",
+        "description": "获取通知列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "通知标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "通知内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "from_user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "发布者用户ID"
+          },
+          {
+            "in": "query",
+            "name": "tolds",
+            "schema": {
+              "type": "string"
+            },
+            "description": "接收者ID列表（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "通知状态"
+          },
+          {
+            "in": "query",
+            "name": "publish_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "发布时间戳"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/notices/{id}": {
+      "get": {
+        "tags": [
+          "ContentNotices"
+        ],
+        "summary": "获取通知详情",
+        "description": "获取通知详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "通知ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "通知不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/operate-logs": {
+      "get": {
+        "tags": [
+          "ContentOperateLogs"
+        ],
+        "summary": "获取操作日志列表",
+        "description": "获取操作日志列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "description": "操作代码（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": {
+              "type": "string"
+            },
+            "description": "操作内容（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "操作类型ID"
+          },
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/operate-logs/{id}": {
+      "get": {
+        "tags": [
+          "ContentOperateLogs"
+        ],
+        "summary": "获取操作日志详情",
+        "description": "获取操作日志详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "操作日志ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "操作日志不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/pages": {
+      "get": {
+        "tags": [
+          "ContentPages"
+        ],
+        "summary": "获取页面列表",
+        "description": "获取页面列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "页面标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "页面别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态 (10已发布 -10待发布 -100已删除 -20草稿)"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "分类ID"
+          },
+          {
+            "in": "query",
+            "name": "author_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "作者ID"
+          },
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "remark",
+            "schema": {
+              "type": "string"
+            },
+            "description": "备注（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_description",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "seo_keywords",
+            "schema": {
+              "type": "string"
+            },
+            "description": "SEO关键词（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sub_title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "副标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "abstract",
+            "schema": {
+              "type": "string"
+            },
+            "description": "摘要（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "image_list",
+            "schema": {
+              "type": "string"
+            },
+            "description": "图片列表（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否删除 (0-未删除, 1-已删除)"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "开始时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "结束时间（时间戳）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/pages/{id}": {
+      "get": {
+        "tags": [
+          "ContentPages"
+        ],
+        "summary": "获取页面详情",
+        "description": "获取页面详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "页面ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "页面不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/pages/url/{url}": {
+      "get": {
+        "tags": [
+          "ContentPages"
+        ],
+        "summary": "根据URL获取页面详情",
+        "description": "根据URL获取页面详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "页面URL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "页面不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/roles": {
+      "get": {
+        "tags": [
+          "ContentRoles"
+        ],
+        "summary": "获取角色列表",
+        "description": "获取角色列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "角色标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "des",
+            "schema": {
+              "type": "string"
+            },
+            "description": "角色描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "module_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "模块ID"
+          },
+          {
+            "in": "query",
+            "name": "rule_ids",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则ID列表（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "角色状态"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "角色类型ID"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/roles/{id}": {
+      "get": {
+        "tags": [
+          "ContentRoles"
+        ],
+        "summary": "获取角色详情",
+        "description": "获取角色详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "角色ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "角色不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/rules": {
+      "get": {
+        "tags": [
+          "ContentRules"
+        ],
+        "summary": "获取规则列表",
+        "description": "获取规则列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则名称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则别名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "condition",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则条件（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "des",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "icon",
+            "schema": {
+              "type": "string"
+            },
+            "description": "规则图标（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "module_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "模块ID"
+          },
+          {
+            "in": "query",
+            "name": "parent_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "父规则ID"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "规则状态"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "规则类型ID"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间戳"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/rules/tree": {
+      "get": {
+        "tags": [
+          "ContentRules"
+        ],
+        "summary": "获取规则树形结构",
+        "description": "获取规则树形结构",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/rules/{id}": {
+      "get": {
+        "tags": [
+          "ContentRules"
+        ],
+        "summary": "获取规则详情",
+        "description": "获取规则详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "规则ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "规则不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/search/articles": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "全文检索文章",
+        "description": "根据关键词进行文章的全文检索",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "检索关键词"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "检索成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/search/pages": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "全文检索页面",
+        "description": "根据关键词进行页面的全文检索",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "检索关键词"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "检索成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/search/daily": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "全文检索每日类库",
+        "description": "根据关键词检索每日类库文章",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "检索关键词"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "检索成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/tags": {
+      "get": {
+        "tags": [
+          "ContentTags"
+        ],
+        "summary": "获取标签列表",
+        "description": "获取标签列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签标题（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "des",
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签描述（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签值（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "排序值"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "标签状态"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "标签类型ID"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间戳"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "删除状态"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/tags/{id}": {
+      "get": {
+        "tags": [
+          "ContentTags"
+        ],
+        "summary": "获取标签详情",
+        "description": "获取标签详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "标签ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "标签不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/tags/value/{value}": {
+      "get": {
+        "tags": [
+          "ContentTags"
+        ],
+        "summary": "根据标签值获取标签详情",
+        "description": "根据标签值获取标签详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "value",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "标签值"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "标签不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/users": {
+      "get": {
+        "tags": [
+          "ContentUsers"
+        ],
+        "summary": "获取用户列表",
+        "description": "获取用户列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "user_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "real_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "真实姓名（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "nick_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "昵称（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            },
+            "description": "邮箱（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "phone",
+            "schema": {
+              "type": "string"
+            },
+            "description": "手机号（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "avatar_url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "头像URL（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "password",
+            "schema": {
+              "type": "string"
+            },
+            "description": "密码（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "role_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "角色ID"
+          },
+          {
+            "in": "query",
+            "name": "type_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户类型ID"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "状态 (-10-禁用, 10-启用)"
+          },
+          {
+            "in": "query",
+            "name": "is_admin",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否管理员 (0-否, 1-是)"
+          },
+          {
+            "in": "query",
+            "name": "is_super_admin",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否超级管理员 (0-否, 1-是)"
+          },
+          {
+            "in": "query",
+            "name": "is_black",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否黑名单 (0-否, 1-是)"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "是否删除 (0-未删除, 1-已删除)"
+          },
+          {
+            "in": "query",
+            "name": "last_login_ip",
+            "schema": {
+              "type": "string"
+            },
+            "description": "最后登录IP（模糊搜索）"
+          },
+          {
+            "in": "query",
+            "name": "last_login_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "最后登录时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "更新时间（时间戳）"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "创建时间（时间戳）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/users/{id}": {
+      "get": {
+        "tags": [
+          "ContentUsers"
+        ],
+        "summary": "获取用户详情",
+        "description": "获取用户详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/user-types": {
+      "get": {
+        "tags": [
+          "ContentUserTypes"
+        ],
+        "summary": "获取用户类型列表",
+        "description": "获取用户类型列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "type_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "User type name (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "schema": {
+              "type": "string"
+            },
+            "description": "User type alias (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "remark",
+            "schema": {
+              "type": "string"
+            },
+            "description": "User type remark (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "User type status"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Deletion status"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Update timestamp"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Creation timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/user-types/{id}": {
+      "get": {
+        "tags": [
+          "ContentUserTypes"
+        ],
+        "summary": "获取用户类型详情",
+        "description": "获取用户类型详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "用户类型ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户类型不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/vote-items": {
+      "get": {
+        "tags": [
+          "ContentVoteItems"
+        ],
+        "summary": "获取投票项目列表",
+        "description": "获取投票项目列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Vote item title (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "vote_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vote ID filter"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Status filter"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Deletion status"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Update timestamp"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Creation timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/vote-items/{id}": {
+      "get": {
+        "tags": [
+          "ContentVoteItems"
+        ],
+        "summary": "获取投票项目详情",
+        "description": "获取投票项目详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "投票项目ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "投票项目不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/votes": {
+      "get": {
+        "tags": [
+          "ContentVotes"
+        ],
+        "summary": "获取投票列表",
+        "description": "获取投票列表",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页数量"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Vote title (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vote count"
+          },
+          {
+            "in": "query",
+            "name": "is_multiple",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Whether multiple selection is allowed"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Vote status"
+          },
+          {
+            "in": "query",
+            "name": "vote_items",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Vote items (fuzzy search)"
+          },
+          {
+            "in": "query",
+            "name": "is_delete",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Deletion status"
+          },
+          {
+            "in": "query",
+            "name": "update_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Update timestamp"
+          },
+          {
+            "in": "query",
+            "name": "create_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Creation timestamp"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Start time timestamp"
+          },
+          {
+            "in": "query",
+            "name": "end_time",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "End time timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/votes/{id}": {
+      "get": {
+        "tags": [
+          "ContentVotes"
+        ],
+        "summary": "获取投票详情",
+        "description": "获取投票详情",
+        "security": [
+          {
+            "accessTokenAuth": [],
+            "appNameAuth": [],
+            "channelAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "投票ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "投票不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
