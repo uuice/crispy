@@ -50,9 +50,6 @@ export const env = {
 
   ['TEMPLATE_ENGINE_ENABLE']: process.env['TEMPLATE_ENGINE_ENABLE'] || 'false',
 
-  // tRPC
-  ['TRPC_SKIP_AUTH']: process.env['TRPC_SKIP_AUTH'] || 'false',
-
   // Helper functions
   isDevelopment: () => env['NODE_ENV'] === 'development',
   isProduction: () => env['NODE_ENV'] === 'production',

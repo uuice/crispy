@@ -55,12 +55,9 @@ import { CommonModule } from '@angular/common'
               <i class="pi pi-function mr-2"></i>工具函数
             </p-tab>
             <p-tab value="2">
-              <i class="pi pi-plug mr-2"></i>TRPC服务集成
-            </p-tab>
-            <p-tab value="3">
               <i class="pi pi-exchange mr-2"></i>Express API服务集成
             </p-tab>
-            <p-tab value="4">
+            <p-tab value="3">
               <i class="pi pi-server mr-2"></i>Express直接服务集成
             </p-tab>
           </p-tablist>
@@ -140,63 +137,6 @@ import { CommonModule } from '@angular/common'
             </p-tabpanel>
 
             <p-tabpanel value="2">
-              <div class="tabpanel-content">
-                <p-panel header="tRPC 服务集成" [toggleable]="true" styleClass="feature-panel">
-                  <div class="panel-content">
-                    <div class="feature-section">
-                      <div class="section-header">
-                        <h4 class="section-title">客户端配置</h4>
-                        <p-chip label="连接配置" styleClass="primary-chip"></p-chip>
-                      </div>
-                      <p-message severity="info" text="import { trpcClient } from '@/server/trpc/trpc.client'"></p-message>
-                    </div>
-
-                    <p-divider></p-divider>
-
-                    <div class="feature-section">
-                      <div class="section-header">
-                        <h4 class="section-title">完整TRPC服务列表 (28个)</h4>
-                        <p-chip label="28项服务" styleClass="primary-chip"></p-chip>
-                      </div>
-                      <div class="table-container">
-                        <p-table [value]="trpcServices" [tableStyle]="{ 'min-width': '50rem' }" styleClass="service-table">
-                          <ng-template pTemplate="header">
-                            <tr>
-                              <th>服务名称</th>
-                              <th>可用方法</th>
-                            </tr>
-                          </ng-template>
-                          <ng-template pTemplate="body" let-item>
-                            <tr>
-                              <td>
-                                <p-tag [value]="item.service" severity="info"></p-tag>
-                              </td>
-                              <td>
-                                <div class="method-list">
-                                  <p-tag *ngFor="let method of item.methods.split(', ')" [value]="method" severity="success" styleClass="method-tag"></p-tag>
-                                </div>
-                              </td>
-                            </tr>
-                          </ng-template>
-                        </p-table>
-                      </div>
-                    </div>
-
-                    <p-divider></p-divider>
-
-                    <div class="feature-section">
-                      <div class="section-header">
-                        <h4 class="section-title">数据获取方式</h4>
-                        <p-chip label="React Hooks" styleClass="primary-chip"></p-chip>
-                      </div>
-                      <p-message severity="success" text="tRPC方式: 使用 useQuery 进行数据查询，useMutation 进行数据修改"></p-message>
-                    </div>
-                  </div>
-                </p-panel>
-              </div>
-            </p-tabpanel>
-
-            <p-tabpanel value="3">
               <div class="tabpanel-content">
                 <p-panel header="Express API 服务集成" [toggleable]="true" styleClass="feature-panel">
                   <div class="panel-content">
@@ -379,7 +319,7 @@ import { CommonModule } from '@angular/common'
               </div>
             </p-tabpanel>
 
-            <p-tabpanel value="4">
+            <p-tabpanel value="3">
               <div class="tabpanel-content">
                 <p-panel header="Express 直接服务集成" [toggleable]="true" styleClass="feature-panel">
                   <div class="panel-content">
@@ -388,7 +328,7 @@ import { CommonModule } from '@angular/common'
                         <h4 class="section-title">服务文件结构</h4>
                         <p-badge value="31个服务" severity="contrast"></p-badge>
                       </div>
-                      <p-message severity="info" text="项目服务代码位于 /src/server/services 目录下，除 tRPC 服务外，还包含独立的普通服务模块，支持直接导入调用"></p-message>
+                      <p-message severity="info" text="项目服务代码位于 /src/server/services 目录下，包含独立的普通服务模块，支持直接导入调用"></p-message>
                     </div>
 
                     <p-divider></p-divider>
@@ -880,35 +820,4 @@ import { CommonModule } from '@angular/common'
     `
   ]
 })
-export class DocTemplatesPage {
-  trpcServices = [
-    { service: '文章服务', methods: 'article.list, article.byId, article.create, article.update, article.delete' },
-    { service: '分类服务', methods: 'category.list, category.byId, category.create, category.update, category.delete' },
-    { service: '标签服务', methods: 'tag.list, tag.byId, tag.create, tag.update, tag.delete' },
-    { service: '用户服务', methods: 'user.list, user.byId, user.create, user.update, user.delete' },
-    { service: '页面服务', methods: 'page.list, page.byId, page.create, page.update, page.delete' },
-    { service: '评论服务', methods: 'comment.list, comment.byId, comment.create, comment.update, comment.delete' },
-    { service: '配置服务', methods: 'config.list, config.update' },
-    { service: '菜单服务', methods: 'menu.list, menu.create, menu.update, menu.delete' },
-    { service: '角色服务', methods: 'role.list, role.byId, role.create, role.update, role.delete' },
-    { service: '权限服务', methods: 'rule.list, rule.create, rule.update, rule.delete' },
-    { service: '广告服务', methods: 'ad.list, ad.byId, ad.create, ad.update, ad.delete' },
-    { service: '广告项服务', methods: 'adItem.list, adItem.byId, adItem.create, adItem.update, adItem.delete' },
-    { service: '链接服务', methods: 'link.list, link.byId, link.create, link.update, link.delete' },
-    { service: '任务服务', methods: 'job.list, job.byId, job.create, job.update, job.delete' },
-    { service: '通知服务', methods: 'notice.list, notice.byId, notice.create, notice.update, notice.delete' },
-    { service: '操作日志服务', methods: 'operateLog.list, operateLog.byId' },
-    { service: 'API日志服务', methods: 'apiLog.list, apiLog.byId' },
-    { service: '访问令牌服务', methods: 'accessToken.list, accessToken.create, accessToken.delete' },
-    { service: '用户类型服务', methods: 'userType.list, userType.byId, userType.create, userType.update, userType.delete' },
-    { service: '属性服务', methods: 'attr.list, attr.byId, attr.create, attr.update, attr.delete' },
-    { service: '关键词服务', methods: 'keyword.list, keyword.byId, keyword.create, keyword.update, keyword.delete' },
-    { service: '投票服务', methods: 'vote.list, vote.byId, vote.create, vote.update, vote.delete' },
-    { service: '投票项服务', methods: 'voteItem.list, voteItem.byId, voteItem.create, voteItem.update, voteItem.delete' },
-    { service: '站点设置服务', methods: 'siteSettings.get, siteSettings.update' },
-    { service: '缓存服务', methods: 'cache.get, cache.set, cache.delete, cache.clear' },
-    { service: '内存缓存服务', methods: 'memoryCache.get, memoryCache.set, memoryCache.delete, memoryCache.clear' },
-    { service: '搜索索引服务', methods: 'flexsearch.rebuild, flexsearch.search' },
-    { service: '节假日服务', methods: 'holiday.list, holiday.check' }
-  ];
-}
+export class DocTemplatesPage {}

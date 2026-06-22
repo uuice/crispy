@@ -21,9 +21,6 @@ import { articleService } from './server/services/articleService'
 import { pageService } from './server/services/pageService'
 import { cacheService } from './server/services/cacheService'
 import { memoryCacheService } from './server/services/memoryCacheService'
-import * as trpcExpress from '@trpc/server/adapters/express'
-import { appRouter } from './server/trpc/trpc.router'
-import { createContext } from './server/trpc/context'
 // 定时清理内存和数据库缓存
 import './crons/cleanupMemoryCache'
 import './crons/cleanupDatabaseCache'
@@ -122,15 +119,6 @@ useJSXEngine(app, {
 
 // API routes (after static handling for better performance)
 app.use(env['API_PREFIX'], apiRoutes)
-
-// trpc
-app.use(
-  '/trpc',
-  trpcExpress.createExpressMiddleware({
-    router: appRouter,
-    createContext
-  })
-)
 
 // Blog routes
 // Angular ssr has performance issues, so regular template engine rendering is added

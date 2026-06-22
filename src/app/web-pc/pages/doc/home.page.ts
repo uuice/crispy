@@ -55,7 +55,7 @@ crispy/
     <p-card header="技术栈" styleClass="system-card">
       <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
         <li>前端：Angular 20、PrimeNG、TailwindCSS</li>
-        <li>后端：<b>Node.js + Express</b>、Kysely、PM2、Trpc</li>
+        <li>后端：<b>Node.js + Express</b>、Kysely、PM2</li>
         <li>模板：React JSX Engine</li>
         <li>数据库：MariaDB</li>
         <li>API文档：Swagger</li>
