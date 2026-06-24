@@ -17,7 +17,7 @@ bun scripts/clean-empty-dirs.sh
 # Or run directly
 bash scripts/clean-empty-dirs.sh
 
-# Or use the npm script
+# Or use the bun script
 bun run clean:empty-dirs
 ```
 

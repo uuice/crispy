@@ -4,7 +4,7 @@
 
 - Crispy is a modern full-stack content management system.
 - The front-end uses Angular + PrimeNG + Tailwind
-- The back-end is based on Node.js/Express, and the database layer uses Kysely.
+- The back-end is based on Bun/Express, and the database layer uses Kysely.
 - It supports SSR, permissions, content modeling, API automatic documentation, etc.
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.2.
@@ -45,7 +45,6 @@ For more information on using the Angular CLI, including detailed command refere
 ## Deploy
 
 ```bash
+bun run build
 bun run serve:ssr:crispy
-or
-pm2 start bun --name "crispy-ssr" -- run serve:ssr:crispy
 ```

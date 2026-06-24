@@ -2,7 +2,6 @@ import { db } from '@src/libs/db'
 import { DELETE_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
-import { flexsearchService } from './flexsearch-index.service'
 import {
   CreatePage,
   createPageSchema,
@@ -325,23 +324,6 @@ export class PageService {
 
     const pageId = Number(result.insertId)
 
-    // Sync with flexsearch index
-    try {
-      const createdPage = await this.getById(pageId)
-      if (createdPage) {
-        await flexsearchService.addPage({
-          ...createdPage,
-          id: pageId,
-          title: createdPage.title || '',
-          sub_title: createdPage.sub_title || '',
-          abstract: createdPage.abstract || '',
-          content: createdPage.content || ''
-        })
-      }
-    } catch (error) {
-      console.error('Failed to sync page to flexsearch index:', error)
-    }
-
     return { id: pageId }
   }
 
@@ -370,25 +352,6 @@ export class PageService {
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    // Sync with flexsearch index
-    if (result.numUpdatedRows > 0) {
-      try {
-        const updatedPage = await this.getById(id)
-        if (updatedPage) {
-          await flexsearchService.updatePage({
-            ...updatedPage,
-            id: id,
-            title: updatedPage.title || '',
-            sub_title: updatedPage.sub_title || '',
-            abstract: updatedPage.abstract || '',
-            content: updatedPage.content || ''
-          })
-        }
-      } catch (error) {
-        console.error('Failed to sync updated page to flexsearch index:', error)
-      }
-    }
-
     if (!result) throw new Error('更新页面失败')
     return { id }
   }
@@ -406,15 +369,6 @@ export class PageService {
       .where('id', '=', id)
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
-
-    // Sync with flexsearch index
-    if (result.numUpdatedRows > 0) {
-      try {
-        await flexsearchService.removePage(id.toString())
-      } catch (error) {
-        console.error('Failed to remove page from flexsearch index:', error)
-      }
-    }
 
     return Number(result.numUpdatedRows) > 0
   }

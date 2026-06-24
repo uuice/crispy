@@ -3,7 +3,6 @@ import { sql } from 'kysely'
 import { DELETE_STATUS, PUBLISH_STATUS } from '../config/const'
 import { tagService } from './tagService'
 import { titleToUrl } from '../utils/titleToUrl'
-import { flexsearchService } from './flexsearch-index.service'
 import {
   ArticleFilters,
   ArticleWithCategory,
@@ -403,25 +402,6 @@ export class ArticleService {
 
     const articleId = Number(result.insertId)
 
-    // Sync with flexsearch index
-    try {
-      const createdArticle = await this.getById(articleId)
-      if (createdArticle) {
-        await flexsearchService.addArticle({
-          ...createdArticle,
-          id: articleId,
-          title: createdArticle.title || '',
-          sub_title: createdArticle.sub_title || '',
-          abstract: createdArticle.abstract || '',
-          content: createdArticle.content || '',
-          category: createdArticle.type_name || '',
-          category_alias: createdArticle.category_alias || ''
-        })
-      }
-    } catch (error) {
-      console.error('Failed to sync article to flexsearch index:', error)
-    }
-
     return { id: articleId }
   }
 
@@ -458,27 +438,6 @@ export class ArticleService {
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    // Sync with flexsearch index
-    if (result.numUpdatedRows > 0) {
-      try {
-        const updatedArticle = await this.getById(id)
-        if (updatedArticle) {
-          await flexsearchService.updateArticle({
-            ...updatedArticle,
-            id: id,
-            title: updatedArticle.title || '',
-            sub_title: updatedArticle.sub_title || '',
-            abstract: updatedArticle.abstract || '',
-            content: updatedArticle.content || '',
-            category: updatedArticle.type_name || '',
-            category_alias: updatedArticle.category_alias || ''
-          })
-        }
-      } catch (error) {
-        console.error('Failed to sync updated article to flexsearch index:', error)
-      }
-    }
-
     if (!result) throw new Error('更新文章失败')
     return { id }
   }
@@ -497,16 +456,68 @@ export class ArticleService {
       .where('is_delete', '=', DELETE_STATUS.UN_DELETE)
       .executeTakeFirst()
 
-    // Sync with flexsearch index
-    if (result.numUpdatedRows > 0) {
-      try {
-        await flexsearchService.removeArticle(id.toString())
-      } catch (error) {
-        console.error('Failed to remove article from flexsearch index:', error)
-      }
-    }
-
     return Number(result.numUpdatedRows) > 0
+  }
+
+  /**
+   * Search articles by title or abstract
+   */
+  async searchArticles(searchTerm: string): Promise<ArticleWithCategory[]> {
+    const articles = await db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .select(['categories.alias as category_alias'])
+      .select(['categories.title as category'])
+      .where((eb) =>
+        eb.or([
+          eb('articles.title', 'like', `%${searchTerm}%`),
+          eb('articles.abstract', 'like', `%${searchTerm}%`)
+        ])
+      )
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .orderBy('articles.create_time', 'desc')
+      .limit(50)
+      .execute()
+
+    return Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return { ...article, tagRef } as ArticleWithCategory
+      })
+    )
+  }
+
+  /**
+   * Search daily-lib articles by title or abstract
+   */
+  async searchDailyArticles(searchTerm: string): Promise<ArticleWithCategory[]> {
+    const articles = await db
+      .selectFrom('articles')
+      .leftJoin('categories', 'categories.id', 'articles.type_id')
+      .selectAll('articles')
+      .select(['categories.title as type_name'])
+      .select(['categories.alias as category_alias'])
+      .select(['categories.title as category'])
+      .where('categories.alias', '=', 'daily-libs')
+      .where((eb) =>
+        eb.or([
+          eb('articles.title', 'like', `%${searchTerm}%`),
+          eb('articles.abstract', 'like', `%${searchTerm}%`)
+        ])
+      )
+      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
+      .orderBy('articles.create_time', 'desc')
+      .limit(50)
+      .execute()
+
+    return Promise.all(
+      articles.map(async (article) => {
+        const tagRef = await getTagRef(article.tags || '')
+        return { ...article, tagRef } as ArticleWithCategory
+      })
+    )
   }
 
   /**

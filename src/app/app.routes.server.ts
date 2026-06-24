@@ -2,6 +2,47 @@ import { RenderMode, ServerRoute } from '@angular/ssr'
 
 export const serverRoutes: ServerRoute[] = [
   {
+    path: '',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'archives',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'archives/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'links',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'daily-libs',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'daily-libs/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'categories/:alias',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'tags/:value',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'pages/:url',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'about',
+    renderMode: RenderMode.Server
+  },
+
+  {
     path: 'doc',
     renderMode: RenderMode.Prerender
   },

@@ -73,7 +73,7 @@ import { SelectButtonModule } from 'primeng/selectbutton'
             }
           </p-button>
           <p-avatar
-            image="/assets/avatar.png"
+            image="/assets/images/avatar.jpg"
             shape="circle"
             size="large"
             class="header-avatar"

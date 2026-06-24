@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from 'express'
-import { flexsearchService } from '../services/flexsearch-index.service'
+import { articleService } from '../services/articleService'
+import { pageService } from '../services/pageService'
+import { withSearchHighlight } from '../utils/searchHighlight'
 import { error, success } from '../utils/response'
 
-// 文章全文检索
 export const searchArticles = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> => {
   try {
     const { q } = req.query
@@ -15,19 +16,18 @@ export const searchArticles = async (
       return
     }
 
-    const result = await flexsearchService.searchArticles(q)
-    success(res, result)
+    const articles = await articleService.searchArticles(q)
+    success(res, withSearchHighlight(articles, q, ['title', 'abstract']))
   } catch (err: unknown) {
     console.error('Error searching articles:', err)
     error(res, 'Internal server error')
   }
 }
 
-// 页面全文检索
 export const searchPages = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> => {
   try {
     const { q } = req.query
@@ -36,19 +36,18 @@ export const searchPages = async (
       return
     }
 
-    const result = await flexsearchService.searchPages(q)
-    success(res, result)
+    const pages = await pageService.searchPages(q)
+    success(res, withSearchHighlight(pages, q, ['title', 'abstract']))
   } catch (err: unknown) {
     console.error('Error searching pages:', err)
     error(res, 'Internal server error')
   }
 }
 
-// 每日类库文章检索
 export const searchDaily = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> => {
   try {
     const { q } = req.query
@@ -57,15 +56,14 @@ export const searchDaily = async (
       return
     }
 
-    const result = await flexsearchService.searchDaily(q)
-    success(res, result)
+    const articles = await articleService.searchDailyArticles(q)
+    success(res, withSearchHighlight(articles, q, ['title', 'abstract']))
   } catch (err: unknown) {
     console.error('Error searching daily articles:', err)
     error(res, 'Internal server error')
   }
 }
 
-// 导出控制器
 export const searchController = {
   searchArticles,
   searchPages,

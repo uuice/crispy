@@ -9,21 +9,6 @@ export const env = {
   ['NODE_ENV']: process.env['NODE_ENV'] || 'development',
   ['PAGE_CACHE_TTL']: process.env['PAGE_CACHE_TTL'] || '60',
 
-  // Static Generation
-  ['STATIC_GENERATION_BASE_URL']:
-    process.env['STATIC_GENERATION_BASE_URL'] || process.env['BASE_URL'] || 'http://localhost:4000',
-
-  // SSR API Configuration - 优化SSR环境下的API访问
-  ['SSR_API_BASE_URL']:
-    process.env['SSR_API_BASE_URL'] ||
-    process.env['STATIC_GENERATION_BASE_URL'] ||
-    process.env['BASE_URL'] ||
-    'http://localhost:4000',
-
-  ['SSR_MAX_CONCURRENT']: process.env['SSR_MAX_CONCURRENT']
-    ? parseInt(process.env['SSR_MAX_CONCURRENT'], 10)
-    : 3,
-
   // JWT
   ['JWT_SECRET']: process.env['JWT_SECRET'] || 'your-super-secret-key-change-in-production',
   // JWT expiration time in seconds (e.g., '7d' = 7 days)
@@ -43,12 +28,6 @@ export const env = {
   // Logging
   ['LOG_LEVEL']: process.env['LOG_LEVEL'] || 'debug',
   ['LOG_FORMAT']: process.env['LOG_FORMAT'] || 'dev',
-
-  // JavaScript Article Generation
-  ['ENABLE_JS_ARTICLE_GENERATION']: process.env['ENABLE_JS_ARTICLE_GENERATION'] || 'false',
-  ['JS_ARTICLE_GENERATION_INTERVAL']: process.env['JS_ARTICLE_GENERATION_INTERVAL'] || '7200000', // 默认2小时 (毫秒)
-
-  ['TEMPLATE_ENGINE_ENABLE']: process.env['TEMPLATE_ENGINE_ENABLE'] || 'false',
 
   // Helper functions
   isDevelopment: () => env['NODE_ENV'] === 'development',

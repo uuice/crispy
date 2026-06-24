@@ -1,7 +1,64 @@
 import { Routes } from '@angular/router'
 import { DocLayoutComponent } from './web-pc/layouts/doc-layout/doc-layout.component'
+import { HomeLayoutComponent } from './web-pc/layouts/home-layout/home-layout.component'
 
 export const routes: Routes = [
+  {
+    path: '',
+    component: HomeLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./web-pc/pages/blog/home.page').then((m) => m.HomePage)
+      },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/home-banner.component').then((m) => m.HomeBannerComponent),
+        outlet: 'banner'
+      },
+      {
+        path: 'archives',
+        loadComponent: () => import('./web-pc/pages/blog/archives.page').then((m) => m.ArchivesPage)
+      },
+      {
+        path: 'archives/:url',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/archives-detail.page').then((m) => m.ArchivesDetailPage)
+      },
+      {
+        path: 'categories/:alias',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/categories.page').then((m) => m.CategoriesPage)
+      },
+      {
+        path: 'tags/:value',
+        loadComponent: () => import('./web-pc/pages/blog/tags.page').then((m) => m.TagsPage)
+      },
+      {
+        path: 'links',
+        loadComponent: () => import('./web-pc/pages/blog/links.page').then((m) => m.LinksPage)
+      },
+      {
+        path: 'daily-libs',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/daily-lib.page').then((m) => m.DailyLibPage)
+      },
+      {
+        path: 'daily-libs/:url',
+        loadComponent: () =>
+          import('./web-pc/pages/blog/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
+      },
+      {
+        path: 'pages/:url',
+        loadComponent: () => import('./web-pc/pages/blog/pages.page').then((m) => m.PagesPage)
+      },
+      {
+        path: 'about',
+        loadComponent: () => import('./web-pc/pages/blog/about.page').then((m) => m.AboutPage)
+      }
+    ]
+  },
   {
     path: 'doc',
     component: DocLayoutComponent,
@@ -36,7 +93,6 @@ export const routes: Routes = [
       }
     ]
   },
-  // Backstage routes (client-side rendering)
   {
     path: 'backstage',
     loadChildren: () => import('./backstage/backstage.routes').then((m) => m.BACKSTAGE_ROUTES)
