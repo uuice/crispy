@@ -1,6 +1,5 @@
 import {
   AccessToken,
-  Additions,
   AdItems,
   Ads,
   ApiLogs,
@@ -8,21 +7,16 @@ import {
   Attrs,
   Caches,
   Categories,
-  Comments,
   Configs,
-  Enums,
   Jobs,
-  Keywords,
   Links,
   Menus,
-  Notices,
   OperateLogs,
   Pages,
   Roles,
   Rules,
   Tags,
-  Users,
-  UserTypes
+  Users
 } from '@src/db/db'
 import { Insertable, Selectable, Updateable } from 'kysely'
 import z from 'zod'
@@ -108,32 +102,6 @@ export interface CheckAccessTokenData {
   channel: string
   token: string
 }
-
-// Additions
-export const createAdditionSchema = z.object({
-  primary_id: z.number(),
-  fields_json: z.string().min(1, 'fields_json不能为空'),
-  status: z.number().default(10)
-})
-export const updateAdditionSchema = z.object({
-  primary_id: z.number().optional(),
-  fields_json: z.string().min(1, 'fields_json不能为空').optional(),
-  status: z.number().optional()
-})
-export type AdditionEntity = Selectable<Additions>
-export type AdditionFilters = QueryFilter<AdditionEntity>
-export type CreateAddition = Insertable<Additions>
-export type UpdateAddition = Updateable<Additions>
-
-export const additionFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    fields_json: z.string().optional(),
-    primary_id: z.number().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
 
 // AdItems
 export const createAdItemSchema = z.object({
@@ -444,54 +412,6 @@ export const categoryFiltersSchema = z
   })
   .extend(commonFiltersSchema.shape)
 
-// Comments
-export const createCommentSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  content: z.string().min(1, '内容不能为空'),
-  user_id: z.number(),
-  parent_id: z.number().optional(),
-  status: z.number().default(10),
-  good_article: z.number().default(0),
-  bad_article: z.number().default(0),
-  not_article: z.number().default(0)
-})
-export const updateCommentSchema = z.object({
-  title: z.string().min(1, '标题不能为空').optional(),
-  content: z.string().min(1, '内容不能为空').optional(),
-  parent_id: z.number().optional(),
-  user_id: z.number().optional(),
-  status: z.number().optional(),
-  good_article: z.number().optional(),
-  bad_article: z.number().optional(),
-  not_article: z.number().optional()
-})
-export type CommentEntity = Selectable<Comments>
-export type CommentFilters = QueryFilter<CommentEntity>
-export type CreateComment = Insertable<Comments>
-export type UpdateComment = Updateable<Comments>
-
-export interface CommentWithAuthor extends CommentEntity {
-  author_name: string
-  author_email: string
-  author_avatar: string
-  parent_content: string
-}
-
-export const commentFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    content: z.string().optional(),
-    user_id: z.number().optional(),
-    parent_id: z.number().optional(),
-    good_article: z.number().optional(),
-    bad_article: z.number().optional(),
-    not_article: z.number().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
 // Configs
 export const createConfigSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
@@ -524,41 +444,6 @@ export const configFiltersSchema = z
     value: z.string().optional(),
     type_id: z.number().optional(),
     type_ids: z.string().optional(),
-    sort: z.number().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// Enums
-export const createEnumSchema = z.object({
-  title: z.string().min(1),
-  alias: z.string().optional(),
-  code: z.string().min(1),
-  value: z.string().min(1),
-  sort: z.number().default(0),
-  status: z.number().default(10)
-})
-export const updateEnumSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  alias: z.string().optional(),
-  code: z.string().min(1, '代码不能为空'),
-  value: z.string().min(1, '值不能为空'),
-  sort: z.number().optional(),
-  status: z.number().optional()
-})
-export type EnumEntity = Selectable<Enums>
-export type EnumFilters = QueryFilter<EnumEntity>
-export type CreateEnum = Insertable<Enums>
-export type UpdateEnum = Updateable<Enums>
-
-export const enumFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    alias: z.string().optional(),
-    code: z.string().optional(),
-    value: z.string().optional(),
     sort: z.number().optional(),
     status: z.number().optional(),
     is_delete: z.number().optional()
@@ -605,42 +490,6 @@ export const jobFiltersSchema = z
     num: z.number().optional(),
     typeName: z.string().optional(),
     sort: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// Keywords
-export const createKeywordSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  alias: z.string().min(1, '别名不能为空'),
-  value: z.string().optional(),
-  url: z.string().optional(),
-  type_id: z.number().optional(),
-  status: z.number().default(10)
-})
-export const updateKeywordSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  alias: z.string().min(1, '别名不能为空'),
-  value: z.string().optional(),
-  url: z.string().optional(),
-  type_id: z.number().optional(),
-  status: z.number().optional()
-})
-export type KeywordEntity = Selectable<Keywords>
-export type KeywordFilters = QueryFilter<KeywordEntity>
-export type CreateKeyword = Insertable<Keywords>
-export type UpdateKeyword = Updateable<Keywords>
-
-export const keywordFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    alias: z.string().optional(),
-    value: z.string().optional(),
-    url: z.string().optional(),
-    type_id: z.number().optional(),
-    count: z.number().optional(),
-    status: z.number().optional(),
     is_delete: z.number().optional()
   })
   .extend(commonFiltersSchema.shape)
@@ -734,41 +583,6 @@ export const menuFiltersSchema = z
     image_url: z.string().optional(),
     method: z.string().optional(),
     sort: z.number().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// Notices
-export const createNoticeSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  content: z.string().min(1, '内容不能为空'),
-  from_user_id: z.number().min(1, '发布者ID不能为空'),
-  publish_time: z.number().optional(),
-  tolds: z.string().optional(),
-  status: z.number().default(10)
-})
-export const updateNoticeSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  content: z.string().min(1, '内容不能为空'),
-  from_user_id: z.number().min(1, '发布者ID不能为空'),
-  publish_time: z.number().optional(),
-  tolds: z.string().optional(),
-  status: z.number().optional()
-})
-export type NoticeEntity = Selectable<Notices>
-export type NoticeFilters = QueryFilter<NoticeEntity>
-export type CreateNotice = Insertable<Notices>
-export type UpdateNotice = Updateable<Notices>
-
-export const noticeFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    content: z.string().optional(),
-    from_user_id: z.number().optional(),
-    publish_time: z.number().optional(),
-    tolds: z.string().optional(),
     status: z.number().optional(),
     is_delete: z.number().optional()
   })
@@ -1110,35 +924,6 @@ export const userFiltersSchema = z
     last_login_time: z.number().optional(),
     last_login_start: z.number().optional(),
     last_login_end: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// UserTypes
-export const createUserTypeSchema = z.object({
-  type_name: z.string().min(1, '类型名称不能为空'),
-  alias: z.string().min(1, '别名不能为空'),
-  remark: z.string().optional(),
-  status: z.number().default(10)
-})
-export const updateUserTypeSchema = z.object({
-  type_name: z.string().min(1, '类型名称不能为空'),
-  alias: z.string().min(1, '别名不能为空'),
-  remark: z.string().optional(),
-  status: z.number().optional()
-})
-export type UserTypeEntity = Selectable<UserTypes>
-export type UserTypeFilters = QueryFilter<UserTypeEntity>
-export type CreateUserType = Insertable<UserTypes>
-export type UpdateUserType = Updateable<UserTypes>
-
-export const userTypeFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    type_name: z.string().optional(),
-    alias: z.string().optional(),
-    remark: z.string().optional(),
-    status: z.number().optional(),
     is_delete: z.number().optional()
   })
   .extend(commonFiltersSchema.shape)

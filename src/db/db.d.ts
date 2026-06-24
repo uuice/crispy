@@ -48,37 +48,6 @@ export interface AccessToken {
   user_id: Generated<number>;
 }
 
-export interface Additions {
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * json对象字符串
-   */
-  fields_json: string;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 主表id
-   */
-  primary_id: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-}
-
 export interface AdItems {
   /**
    * 广告位id
@@ -370,37 +339,6 @@ export interface Attrs {
   update_time: Generated<number>;
 }
 
-export interface Binary {
-  /**
-   * 二进制字符串
-   */
-  binary_str: string;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 键名
-   */
-  key: Generated<string>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-}
-
 export interface Caches {
   /**
    * 缓存数据
@@ -479,57 +417,6 @@ export interface Categories {
   update_time: Generated<number>;
 }
 
-export interface Comments {
-  /**
-   * 差评
-   */
-  bad_article: Generated<number>;
-  /**
-   * 评论内容
-   */
-  content: string;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 好评
-   */
-  good_article: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 中立
-   */
-  not_article: Generated<number>;
-  /**
-   * 上级评论
-   */
-  parent_id: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 评论标题
-   */
-  title: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 评论者Id
-   */
-  user_id: Generated<number>;
-}
-
 export interface Configs {
   /**
    * 别名
@@ -567,49 +454,6 @@ export interface Configs {
    * 类型ids
    */
   type_ids: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 值
-   */
-  value: Generated<string>;
-}
-
-export interface Enums {
-  /**
-   * 别名
-   */
-  alias: Generated<string>;
-  /**
-   * code
-   */
-  code: Generated<string>;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 排序
-   */
-  sort: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 标题
-   */
-  title: Generated<string>;
   /**
    * 更新时间
    */
@@ -673,53 +517,6 @@ export interface Jobs {
    * 更新时间
    */
   update_time: Generated<number>;
-}
-
-export interface Keywords {
-  /**
-   * 别名
-   */
-  alias: Generated<string>;
-  /**
-   * 点击数
-   */
-  count: Generated<number>;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 标题
-   */
-  title: Generated<string>;
-  /**
-   * 分类id
-   */
-  type_id: Generated<number>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 链接
-   */
-  url: Generated<string>;
-  /**
-   * 值
-   */
-  value: Generated<string>;
 }
 
 export interface Links {
@@ -826,49 +623,6 @@ export interface Menus {
    * 链接
    */
   url: Generated<string>;
-}
-
-export interface Notices {
-  /**
-   * 内容
-   */
-  content: Generated<string>;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 发布者id
-   */
-  from_user_id: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 发布时间
-   */
-  publish_time: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 标题
-   */
-  title: Generated<string>;
-  /**
-   * 接收者id列表
-   */
-  tolds: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
 }
 
 export interface OperateLogs {
@@ -1229,65 +983,23 @@ export interface Users {
   user_name: Generated<string>;
 }
 
-export interface UserTypes {
-  /**
-   * 别名
-   */
-  alias: Generated<string>;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 说明
-   */
-  remark: Generated<string>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 用户类型名称
-   */
-  type_name: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-}
-
 export interface DB {
   access_token: AccessToken;
   ad_items: AdItems;
-  additions: Additions;
   ads: Ads;
   api_logs: ApiLogs;
   articles: Articles;
   attrs: Attrs;
-  binary: Binary;
   caches: Caches;
   categories: Categories;
-  comments: Comments;
   configs: Configs;
-  enums: Enums;
   jobs: Jobs;
-  keywords: Keywords;
   links: Links;
   menus: Menus;
-  notices: Notices;
   operate_logs: OperateLogs;
   pages: Pages;
   roles: Roles;
   rules: Rules;
   tags: Tags;
-  user_types: UserTypes;
   users: Users;
 }

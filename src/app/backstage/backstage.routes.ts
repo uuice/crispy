@@ -40,12 +40,6 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'comments',
-        loadChildren: () =>
-          import('./pages/comments/comments.routes').then((m) => m.COMMENTS_ROUTES),
-        data: { keepAlive: true }
-      },
-      {
         path: 'users',
         loadChildren: () => import('./pages/users/users.routes').then((m) => m.USERS_ROUTES),
         data: { keepAlive: true }

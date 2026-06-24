@@ -18,14 +18,6 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
-    path: 'daily-libs',
-    renderMode: RenderMode.Server
-  },
-  {
-    path: 'daily-libs/:url',
-    renderMode: RenderMode.Server
-  },
-  {
     path: 'categories/:alias',
     renderMode: RenderMode.Server
   },
@@ -56,10 +48,6 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'doc/api-docs',
-    renderMode: RenderMode.Prerender
-  },
-  {
-    path: 'doc/templates',
     renderMode: RenderMode.Prerender
   },
   {

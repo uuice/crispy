@@ -41,9 +41,6 @@
  *                         totalArticles:
  *                           type: integer
  *                           description: 总文章数
- *                         totalComments:
- *                           type: integer
- *                           description: 总评论数
  *                         totalViews:
  *                           type: integer
  *                           description: 总访问量

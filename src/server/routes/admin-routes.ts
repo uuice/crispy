@@ -1,7 +1,6 @@
 import { RequestHandler, Router } from 'express'
 import { userController } from '../controller/users'
 import { adController } from '../controller/ads'
-import { additionController } from '../controller/additions'
 import { adItemController } from '../controller/ad-items'
 import { apiLogController } from '../controller/api-logs'
 import { articleController } from '../controller/articles'
@@ -9,19 +8,14 @@ import { categoryController } from '../controller/categories'
 import { attrController } from '../controller/attrs'
 import { cacheController } from '../controller/caches'
 import { configController } from '../controller/configs'
-import { enumController } from '../controller/enums'
 import { jobController } from '../controller/jobs'
-import { keywordController } from '../controller/keywords'
 import { linkController } from '../controller/links'
 import { menuController } from '../controller/menus'
-import { noticeController } from '../controller/notices'
 import { operateLogController } from '../controller/operate-logs'
 import { pageController } from '../controller/pages'
 import { roleController } from '../controller/roles'
 import { ruleController } from '../controller/rules'
 import { tagController } from '../controller/tags'
-import { userTypeController } from '../controller/user-types'
-import { commentController } from '../controller/comments'
 import { jwtMiddleware } from '@src/server/middleware'
 import { accessTokenController } from '../controller/access-token'
 import { uploadController } from '../controller/upload'
@@ -109,13 +103,6 @@ router.post('/ad-items', adItemController.createAdItem)
 router.put('/ad-items/:id', adItemController.updateAdItem)
 router.delete('/ad-items/:id', adItemController.deleteAdItem)
 
-// Addition routes
-router.get('/additions', additionController.getAdditions)
-router.get('/additions/:id', additionController.getAddition)
-router.post('/additions', additionController.createAddition)
-router.put('/additions/:id', additionController.updateAddition)
-router.delete('/additions/:id', additionController.deleteAddition)
-
 // API log routes
 router.get('/api-logs', apiLogController.getApiLogs)
 router.get('/api-logs/:id', apiLogController.getApiLog)
@@ -154,11 +141,6 @@ router.delete('/caches/:id', cacheController.deleteCache)
 
 // Page cache management routes
 router.get('/page-cache/stats', cacheController.getCacheStats)
-router.get('/page-cache/memory/list', cacheController.getMemoryCacheList)
-router.delete('/page-cache/memory/:hash', cacheController.deleteMemoryCache)
-router.get('/page-cache/memory/:hash', cacheController.getMemoryCacheInfo)
-router.post('/page-cache/memory/cleanup', cacheController.cleanupMemoryCache)
-
 router.get('/page-cache/database/list', cacheController.getDatabaseCacheList)
 router.post('/page-cache/database/cleanup', cacheController.clearExpiredDatabaseCache)
 router.delete('/page-cache/database/:hash', cacheController.deleteDatabaseCache)
@@ -173,26 +155,12 @@ router.post('/configs/upsert', configController.upsertConfig)
 router.put('/configs/:id', configController.updateConfig)
 router.delete('/configs/:id', configController.deleteConfig)
 
-// Enums routes
-router.get('/enums', enumController.getEnums)
-router.get('/enums/:id', enumController.getEnum)
-router.post('/enums', enumController.createEnum)
-router.put('/enums/:id', enumController.updateEnum)
-router.delete('/enums/:id', enumController.deleteEnum)
-
 // Job routes
 router.get('/jobs', jobController.getJobs)
 router.get('/jobs/:id', jobController.getJob)
 router.post('/jobs', jobController.createJob)
 router.put('/jobs/:id', jobController.updateJob)
 router.delete('/jobs/:id', jobController.deleteJob)
-
-// Keyword routes
-router.get('/keywords', keywordController.getKeywords)
-router.get('/keywords/:id', keywordController.getKeyword)
-router.post('/keywords', keywordController.createKeyword)
-router.put('/keywords/:id', keywordController.updateKeyword)
-router.delete('/keywords/:id', keywordController.deleteKeyword)
 
 // Link routes
 router.get('/links', linkController.getLinks)
@@ -208,13 +176,6 @@ router.get('/menus/:id', menuController.getMenu)
 router.post('/menus', menuController.createMenu)
 router.put('/menus/:id', menuController.updateMenu)
 router.delete('/menus/:id', menuController.deleteMenu)
-
-// Notice routes
-router.get('/notices', noticeController.getNotices)
-router.get('/notices/:id', noticeController.getNotice)
-router.post('/notices', noticeController.createNotice)
-router.put('/notices/:id', noticeController.updateNotice)
-router.delete('/notices/:id', noticeController.deleteNotice)
 
 // Operate log routes
 router.get('/operate-logs', operateLogController.getOperateLogs)
@@ -251,23 +212,6 @@ router.get('/pages/:id', pageController.getPage)
 router.post('/pages', pageController.createPage)
 router.put('/pages/:id', pageController.updatePage)
 router.delete('/pages/:id', pageController.deletePage)
-
-// User type routes
-router.get('/user-types', userTypeController.getUserTypes)
-router.get('/user-types/:id', userTypeController.getUserType)
-router.post('/user-types', userTypeController.createUserType)
-router.put('/user-types/:id', userTypeController.updateUserType)
-router.delete('/user-types/:id', userTypeController.deleteUserType)
-
-// Comment routes
-router.get('/comments', commentController.getComments)
-router.get('/comments/:id', commentController.getComment)
-router.post('/comments', commentController.createComment)
-router.put('/comments/:id', commentController.updateComment)
-router.delete('/comments/:id', commentController.deleteComment)
-router.post('/comments/batch-update-status', commentController.batchUpdateStatus)
-router.post('/comments/batch-delete', commentController.batchDeleteComments)
-router.get('/comments/stats', commentController.getCommentStats)
 
 // Register access token routes
 router.get('/access-token', accessTokenController.getAccessTokens)

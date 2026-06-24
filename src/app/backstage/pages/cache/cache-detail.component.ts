@@ -4,8 +4,6 @@ import { DialogModule } from 'primeng/dialog'
 import { ButtonModule } from 'primeng/button'
 import { HttpService } from '../../services/http.service'
 
-export type CacheDetailType = 'memory' | 'database'
-
 @Component({
   selector: 'cs-cache-detail',
   standalone: true,
@@ -14,7 +12,7 @@ export type CacheDetailType = 'memory' | 'database'
     <p-dialog
       [visible]="true"
       [modal]="true"
-      [header]="'缓存详情: ' + cacheKey + (type === 'memory' ? ' (内存)' : ' (数据库)')"
+      [header]="'缓存详情: ' + cacheKey + ' (数据库)'"
       (onHide)="closed.emit()"
     >
       @if (cacheInfo() && !('error' in cacheInfo()!)) {
@@ -31,7 +29,6 @@ export type CacheDetailType = 'memory' | 'database'
 })
 export class CacheDetailComponent implements OnInit {
   @Input() cacheKey!: string
-  @Input() type: CacheDetailType = 'memory'
   @Output() closed = new EventEmitter<void>()
   cacheInfo = signal<Record<string, unknown> | null>(null)
 
@@ -39,12 +36,7 @@ export class CacheDetailComponent implements OnInit {
 
   ngOnInit() {
     if (this.cacheKey) {
-      const url =
-        this.type === 'memory'
-          ? `/api/admin/page-cache/memory/${this.cacheKey}`
-          : `/api/admin/page-cache/database/${this.cacheKey}`
-      this.http.get<any>(url).subscribe({
-        // delete html field
+      this.http.get<any>(`/api/admin/page-cache/database/${this.cacheKey}`).subscribe({
         next: (res) => {
           const data = res.data
           delete data.html

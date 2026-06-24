@@ -40,16 +40,6 @@ export const routes: Routes = [
         loadComponent: () => import('./web-pc/pages/blog/links.page').then((m) => m.LinksPage)
       },
       {
-        path: 'daily-libs',
-        loadComponent: () =>
-          import('./web-pc/pages/blog/daily-lib.page').then((m) => m.DailyLibPage)
-      },
-      {
-        path: 'daily-libs/:url',
-        loadComponent: () =>
-          import('./web-pc/pages/blog/daily-lib-detail.page').then((m) => m.DailyLibDetailPage)
-      },
-      {
         path: 'pages/:url',
         loadComponent: () => import('./web-pc/pages/blog/pages.page').then((m) => m.PagesPage)
       },
@@ -80,11 +70,6 @@ export const routes: Routes = [
         path: 'api-docs',
         loadComponent: () =>
           import('./web-pc/pages/doc/api-docs.page').then((m) => m.DocApiDocsPage)
-      },
-      {
-        path: 'templates',
-        loadComponent: () =>
-          import('./web-pc/pages/doc/templates.page').then((m) => m.DocTemplatesPage)
       },
       {
         path: 'data-models',

@@ -44,28 +44,7 @@ export const searchPages = async (
   }
 }
 
-export const searchDaily = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): Promise<void> => {
-  try {
-    const { q } = req.query
-    if (!q || typeof q !== 'string') {
-      error(res, 'Query parameter "q" is required and must be a string', 400)
-      return
-    }
-
-    const articles = await articleService.searchDailyArticles(q)
-    success(res, withSearchHighlight(articles, q, ['title', 'abstract']))
-  } catch (err: unknown) {
-    console.error('Error searching daily articles:', err)
-    error(res, 'Internal server error')
-  }
-}
-
 export const searchController = {
   searchArticles,
-  searchPages,
-  searchDaily
+  searchPages
 }

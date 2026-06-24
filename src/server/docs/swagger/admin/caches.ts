@@ -197,91 +197,12 @@
  * /admin/page-cache/stats:
  *   get:
  *     tags: [PageCache]
- *     summary: 获取页面缓存统计信息
- *     description: 获取页面缓存的统计数据
+ *     summary: 获取页面数据库缓存统计信息
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: 获取成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- */
-/**
- * @swagger
- * /admin/page-cache/memory/list:
- *   get:
- *     tags: [PageCache]
- *     summary: 获取内存缓存列表
- *     description: 获取所有页面内存缓存的列表
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: 获取成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- */
-/**
- * @swagger
- * /admin/page-cache/memory/{hash}:
- *   get:
- *     tags: [PageCache]
- *     summary: 获取指定内存缓存详情
- *     description: 根据 hash 获取页面内存缓存详情
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: hash
- *         required: true
- *         schema:
- *           type: string
- *         description: 缓存哈希
- *     responses:
- *       200:
- *         description: 获取成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *   delete:
- *     tags: [PageCache]
- *     summary: 删除指定内存缓存
- *     description: 根据 hash 删除页面内存缓存
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: hash
- *         required: true
- *         schema:
- *           type: string
- *         description: 缓存哈希
- *     responses:
- *       200:
- *         description: 删除成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- */
-/**
- * @swagger
- * /admin/page-cache/memory/cleanup:
- *   post:
- *     tags: [PageCache]
- *     summary: 清理过期内存缓存
- *     description: 清理所有过期的页面内存缓存
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: 清理成功
  *         content:
  *           application/json:
  *             schema:

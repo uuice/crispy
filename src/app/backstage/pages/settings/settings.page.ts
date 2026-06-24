@@ -28,8 +28,6 @@ interface SiteSettings {
   siteFavicon: string
   siteFooter: string
   allowRegistration: boolean
-  allowComment: boolean
-  commentAudit: boolean
   defaultLanguage: string
   timezone: string
   dateFormat: string
@@ -224,16 +222,6 @@ interface ThemeOption {
                       <p-toggleswitch
                         [(ngModel)]="siteSettings().allowRegistration"
                       ></p-toggleswitch>
-                    </div>
-
-                    <div class="field mt-4">
-                      <label class="block text-900 font-medium mb-2">评论功能</label>
-                      <p-toggleswitch [(ngModel)]="siteSettings().allowComment"></p-toggleswitch>
-                    </div>
-
-                    <div class="field mt-4">
-                      <label class="block text-900 font-medium mb-2">评论审核</label>
-                      <p-toggleswitch [(ngModel)]="siteSettings().commentAudit"></p-toggleswitch>
                     </div>
 
                     <div class="field mt-4">
@@ -715,8 +703,6 @@ export class SettingsPage implements OnInit {
     siteFavicon: '',
     siteFooter: '',
     allowRegistration: true,
-    allowComment: true,
-    commentAudit: true,
     defaultLanguage: 'zh-CN',
     timezone: 'Asia/Shanghai',
     dateFormat: 'YYYY-MM-DD',

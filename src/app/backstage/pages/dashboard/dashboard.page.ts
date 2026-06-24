@@ -264,13 +264,6 @@ export class DashboardPage implements OnInit {
               change: statsRaw.viewsChange || 0
             },
             {
-              title: '评论总数',
-              value: statsRaw.totalComments || 0,
-              icon: 'pi pi-comments',
-              color: '#f59e42',
-              change: statsRaw.commentsChange || 0
-            },
-            {
               title: '用户总数',
               value: statsRaw.totalUsers || 0,
               icon: 'pi pi-users',

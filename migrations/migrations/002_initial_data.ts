@@ -44,47 +44,6 @@ export async function up(db: Kysely<any>): Promise<void> {
       .execute()
   }
 
-  // Insert user types (check if they exist first)
-  const existingUserTypes = await db.selectFrom('user_types').select('alias').execute()
-
-  const existingAliases = existingUserTypes.map((ut) => ut.alias)
-
-  const userTypes = [
-    {
-      type_name: '管理员',
-      remark: '系统管理员用户类型',
-      alias: 'admin',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      type_name: '普通用户',
-      remark: '普通用户类型',
-      alias: 'user',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      type_name: 'VIP用户',
-      remark: 'VIP用户类型',
-      alias: 'vip',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  const newUserTypes = userTypes.filter((ut) => !existingAliases.includes(ut.alias))
-
-  if (newUserTypes.length > 0) {
-    await db.insertInto('user_types').values(newUserTypes).execute()
-  }
-
   // Insert default role (with error handling for duplicates)
   try {
     await db
@@ -196,21 +155,6 @@ export async function up(db: Kysely<any>): Promise<void> {
       type_id: 1,
       parent_id: 2,
       sort: 6,
-      status: 10,
-      is_delete: 0,
-      create_time: Date.now(),
-      update_time: Date.now()
-    },
-    {
-      title: '评论管理',
-      alias: 'comments',
-      des: '用户评论管理',
-      condition: '/backstage/comments',
-      icon: 'pi pi-comments',
-      module_id: 1,
-      type_id: 1,
-      parent_id: 2,
-      sort: 7,
       status: 10,
       is_delete: 0,
       create_time: Date.now(),
@@ -1602,78 +1546,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   await safeInsert(db, 'attrs', attrs, 'attrs')
 
-  // Insert sample enums
-  const enums = [
-    {
-      title: '启用',
-      alias: 'enabled',
-      value: '10',
-      sort: 1,
-      code: 'STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '禁用',
-      alias: 'disabled',
-      value: '-10',
-      sort: 2,
-      code: 'STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '已发布',
-      alias: 'published',
-      value: '10',
-      sort: 1,
-      code: 'ARTICLE_STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '待发布',
-      alias: 'pending',
-      value: '-10',
-      sort: 2,
-      code: 'ARTICLE_STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '草稿',
-      alias: 'draft',
-      value: '-20',
-      sort: 3,
-      code: 'ARTICLE_STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '已删除',
-      alias: 'deleted',
-      value: '-100',
-      sort: 4,
-      code: 'ARTICLE_STATUS',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  await safeInsert(db, 'enums', enums, 'enums')
-
   // Insert sample access tokens
   const accessTokens = [
     {
@@ -1709,39 +1581,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   ]
 
   await safeInsert(db, 'access_token', accessTokens, 'access tokens')
-
-  // Insert sample additions (extended fields for articles)
-  const additions = [
-    {
-      primary_id: 1,
-      fields_json:
-        '{"reading_time": "5分钟", "difficulty": "初级", "author_bio": "资深前端开发工程师", "related_articles": [2, 3]}',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      primary_id: 2,
-      fields_json:
-        '{"reading_time": "8分钟", "difficulty": "中级", "prerequisites": ["JavaScript基础", "HTML基础"], "code_examples": true}',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      primary_id: 3,
-      fields_json:
-        '{"reading_time": "6分钟", "difficulty": "初级", "typescript_version": "5.0+", "playground_url": "https://typescript-playground.com"}',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  await safeInsert(db, 'additions', additions, 'additions')
 
   // Insert sample API logs
   const apiLogs = [
@@ -1818,180 +1657,6 @@ export async function up(db: Kysely<any>): Promise<void> {
   ]
 
   await safeInsert(db, 'caches', caches, 'caches')
-
-  // Insert sample comments
-  const comments = [
-    {
-      title: '很好的文章',
-      content: '这篇文章写得非常详细，对我帮助很大！',
-      parent_id: 0,
-      user_id: 1,
-      good_article: 1,
-      bad_article: 0,
-      not_article: 0,
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '感谢分享',
-      content: '感谢作者的分享，学到了很多新知识。',
-      parent_id: 0,
-      user_id: 1,
-      good_article: 1,
-      bad_article: 0,
-      not_article: 0,
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '回复：很好的文章',
-      content: '谢谢你的支持，我会继续努力写更好的文章。',
-      parent_id: 1,
-      user_id: 1,
-      good_article: 0,
-      bad_article: 0,
-      not_article: 0,
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      title: '有疑问',
-      content: '文章中提到的方法在实际项目中是否适用？',
-      parent_id: 0,
-      user_id: 1,
-      good_article: 0,
-      bad_article: 0,
-      not_article: 1,
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  await safeInsert(db, 'comments', comments, 'comments')
-
-  // Insert sample keywords
-  const keywords = [
-    {
-      alias: 'angular-development',
-      value: 'Angular开发',
-      count: 0,
-      type_id: 0,
-      url: '',
-      title: 'Angular开发',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      alias: 'typescript-tutorial',
-      value: 'TypeScript教程',
-      count: 0,
-      type_id: 0,
-      url: '',
-      title: 'TypeScript教程',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      alias: 'frontend-tech',
-      value: '前端技术',
-      count: 0,
-      type_id: 0,
-      url: '',
-      title: '前端技术',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      alias: 'web-development',
-      value: 'Web开发',
-      count: 0,
-      type_id: 0,
-      url: '',
-      title: 'Web开发',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      alias: 'javascript',
-      value: 'JavaScript',
-      count: 0,
-      type_id: 0,
-      url: '',
-      title: 'JavaScript',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  await safeInsert(db, 'keywords', keywords, 'keywords')
-
-  // Insert sample notices
-  const notices = [
-    {
-      from_user_id: 1,
-      title: '系统维护通知',
-      content: '系统将于2024年1月15日凌晨2:00-4:00进行维护，期间可能无法正常访问，请提前做好准备。',
-      publish_time: Date.now(),
-      tolds: '',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      from_user_id: 1,
-      title: '新功能上线',
-      content: '我们新增了评论功能，现在用户可以对文章进行评论和互动了！',
-      publish_time: Date.now(),
-      tolds: '',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      from_user_id: 1,
-      title: '安全更新',
-      content: '为了保障用户数据安全，我们进行了安全更新，建议用户及时修改密码。',
-      publish_time: Date.now(),
-      tolds: '',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    },
-    {
-      from_user_id: 1,
-      title: '招聘信息',
-      content: '我们正在招聘前端开发工程师，欢迎有经验的朋友加入我们的团队！',
-      publish_time: Date.now(),
-      tolds: '',
-      status: 10,
-      create_time: Date.now(),
-      update_time: Date.now(),
-      is_delete: 0
-    }
-  ]
-
-  await safeInsert(db, 'notices', notices, 'notices')
 
   // Insert sample operate logs
   const operateLogs = [
@@ -2279,14 +1944,9 @@ export async function down(db: Kysely<any>): Promise<void> {
     'votes',
     'todos',
     'operate_logs',
-    'notices',
-    'keywords',
-    'comments',
     'caches',
     'api_logs',
-    'additions',
     'access_token',
-    'enums',
     'attrs',
     'holidays',
     'jobs',
@@ -2301,7 +1961,6 @@ export async function down(db: Kysely<any>): Promise<void> {
     'categories',
     'rules',
     'roles',
-    'user_types',
     'users'
   ]
 

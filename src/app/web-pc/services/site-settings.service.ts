@@ -18,8 +18,6 @@ export interface SiteSettings {
   siteFavicon: string
   siteFooter: string
   allowRegistration: boolean
-  allowComment: boolean
-  commentAudit: boolean
   defaultLanguage: string
   timezone: string
   dateFormat: string
@@ -100,8 +98,6 @@ export class SiteSettingsService {
             siteFavicon: '',
             siteFooter: '',
             allowRegistration: false,
-            allowComment: true,
-            commentAudit: true,
             defaultLanguage: 'zh-CN',
             timezone: 'Asia/Shanghai',
             dateFormat: 'YYYY-MM-DD',
@@ -165,20 +161,6 @@ export class SiteSettingsService {
    */
   isRegistrationAllowed(): boolean {
     return this._siteSettings()?.allowRegistration || false
-  }
-
-  /**
-   * Check if comments are allowed
-   */
-  isCommentAllowed(): boolean {
-    return this._siteSettings()?.allowComment || false
-  }
-
-  /**
-   * Check if comment audit is enabled
-   */
-  isCommentAuditEnabled(): boolean {
-    return this._siteSettings()?.commentAudit || false
   }
 
   /**

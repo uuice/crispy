@@ -1128,11 +1128,7 @@ export class HomeLayoutComponent implements OnInit {
   })
 
   // Computed property to determine if sidebar should be shown (reactive to route changes)
-  showSidebar = computed(() => {
-    const url = this.currentUrl()
-    // Hide sidebar for /daily-libs and /daily-libs/:url
-    return !/^\/daily-libs(\/[^/]+)?$/.test(url)
-  })
+  showSidebar = computed(() => true)
   private platformId = inject(PLATFORM_ID)
 
   searchVisible = signal(false)
@@ -1359,11 +1355,6 @@ export class HomeLayoutComponent implements OnInit {
         label: '友情链接',
         icon: 'pi pi-link',
         routerLink: '/links'
-      },
-      {
-        label: '每日一库',
-        icon: 'pi pi-book',
-        routerLink: '/daily-libs'
       },
       {
         label: '关于',
@@ -1711,12 +1702,7 @@ export class HomeLayoutComponent implements OnInit {
   }
 
   onResultClick(result: any) {
-    // Check if the article is from daily library category
-    if (result.category_alias === 'daily-libs') {
-      this.router.navigate(['/daily-libs', result.url])
-    } else {
-      this.router.navigate(['/archives', result.url])
-    }
+    this.router.navigate(['/archives', result.url])
 
     this.searchVisible.set(false)
     this.searchQuery.set('')

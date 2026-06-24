@@ -23,11 +23,6 @@ export const env = {
 
   // API
   ['API_PREFIX']: process.env['API_PREFIX'] || '/api',
-  ['API_VERSION']: process.env['API_VERSION'] || 'v1',
-
-  // Logging
-  ['LOG_LEVEL']: process.env['LOG_LEVEL'] || 'debug',
-  ['LOG_FORMAT']: process.env['LOG_FORMAT'] || 'dev',
 
   // Helper functions
   isDevelopment: () => env['NODE_ENV'] === 'development',

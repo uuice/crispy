@@ -490,37 +490,6 @@ export class ArticleService {
   }
 
   /**
-   * Search daily-lib articles by title or abstract
-   */
-  async searchDailyArticles(searchTerm: string): Promise<ArticleWithCategory[]> {
-    const articles = await db
-      .selectFrom('articles')
-      .leftJoin('categories', 'categories.id', 'articles.type_id')
-      .selectAll('articles')
-      .select(['categories.title as type_name'])
-      .select(['categories.alias as category_alias'])
-      .select(['categories.title as category'])
-      .where('categories.alias', '=', 'daily-libs')
-      .where((eb) =>
-        eb.or([
-          eb('articles.title', 'like', `%${searchTerm}%`),
-          eb('articles.abstract', 'like', `%${searchTerm}%`)
-        ])
-      )
-      .where('articles.is_delete', '=', DELETE_STATUS.UN_DELETE)
-      .orderBy('articles.create_time', 'desc')
-      .limit(50)
-      .execute()
-
-    return Promise.all(
-      articles.map(async (article) => {
-        const tagRef = await getTagRef(article.tags || '')
-        return { ...article, tagRef } as ArticleWithCategory
-      })
-    )
-  }
-
-  /**
    * Get articles by category ID
    */
   async getArticlesByCategory(type_id: number, limit = 10): Promise<ArticleWithCategory[]> {

@@ -8,8 +8,6 @@ export interface SiteSettings {
   siteFavicon: string
   siteFooter: string
   allowRegistration: boolean
-  allowComment: boolean
-  commentAudit: boolean
   defaultLanguage: string
   timezone: string
   dateFormat: string

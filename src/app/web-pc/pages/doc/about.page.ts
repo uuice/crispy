@@ -74,6 +74,16 @@ import { HttpService } from '../../services/http.service'
         </p-tabpanels>
       </p-tabs>
     </p-card>
+    <p-card header="项目说明" styleClass="system-card">
+      <div class="text-base leading-relaxed space-y-2" style="color: var(--p-content-color)">
+        <p>
+          Crispy 面向公司官网运营场景：维护单页、新闻文章、导航菜单、友情链接、招聘职位、广告位及站点全局配置；后台基于 RBAC（roles / rules）控制菜单与操作权限。
+        </p>
+        <p class="text-sm" style="color: var(--p-text-muted-color)">
+          当前库表 18 张，详见「数据模型」文档页。评论、daily-libs 等模块已移除。
+        </p>
+      </div>
+    </p-card>
     <p-card header="项目信息" styleClass="system-card">
       <div class="space-y-2 text-base">
         <div>

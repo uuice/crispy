@@ -573,11 +573,6 @@ export class DocLayoutComponent implements OnInit {
         routerLink: '/doc/api-docs'
       },
       {
-        label: '模版',
-        icon: 'pi pi-code',
-        routerLink: '/doc/templates'
-      },
-      {
         label: '数据模型',
         icon: 'pi pi-database',
         routerLink: '/doc/data-models'

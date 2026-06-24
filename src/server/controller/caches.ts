@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { error, handleError, success } from '../utils/response'
 import { cacheService } from '../services/cacheService'
-import { memoryCacheService } from '../services/memoryCacheService'
 import { CacheFilters } from '@src/types'
 
 // Get single cache
@@ -96,84 +95,16 @@ export const deleteCache = async (
   }
 }
 
-// Memory cache routes
 export const getCacheStats = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const momentCacheStats = memoryCacheService.getStats()
     const cacheStats = await cacheService.getCacheStats()
-    success(res, { memory: momentCacheStats, database: cacheStats })
+    success(res, cacheStats)
   } catch (err: unknown) {
     handleError(res, err, 'getCacheStats')
-  }
-}
-
-export const getMemoryCacheList = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const list = memoryCacheService.entries().map(([hash, value]: [string, any]) => ({
-      hash,
-      url: value.url,
-      expires: value.expires
-    }))
-    success(res, { list, count: list.length })
-  } catch (err: unknown) {
-    handleError(res, err, 'getMemoryCacheList')
-  }
-}
-
-export const deleteMemoryCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { hash } = req.params
-    const deleted = memoryCacheService.delete(hash)
-    success(res, { deleted }, deleted ? '内存缓存已删除' : '未找到')
-  } catch (err: unknown) {
-    handleError(res, err, 'deleteMemoryCache')
-  }
-}
-
-export const getMemoryCacheInfo = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { hash } = req.params
-    if (!hash) {
-      error(res, 'Hash参数必填', 400)
-      return
-    }
-    const entry = memoryCacheService.get(hash)
-    if (!entry) {
-      error(res, '内存缓存不存在', 404)
-      return
-    }
-    success(res, { hash, ...entry })
-  } catch (err: unknown) {
-    handleError(res, err, 'getMemoryCacheInfo')
-  }
-}
-
-export const cleanupMemoryCache = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const cleanedCount = memoryCacheService.clear()
-    success(res, { cleanedCount }, `已清理 ${cleanedCount} 条过期内存缓存`)
-  } catch (err: unknown) {
-    handleError(res, err, 'cleanupMemoryCache')
   }
 }
 
@@ -255,10 +186,6 @@ export const cacheController = {
   deleteCache,
   // Page cache management
   getCacheStats,
-  getMemoryCacheList,
-  deleteMemoryCache,
-  getMemoryCacheInfo,
-  cleanupMemoryCache,
   getDatabaseCacheList,
   clearExpiredDatabaseCache,
   deleteDatabaseCache,

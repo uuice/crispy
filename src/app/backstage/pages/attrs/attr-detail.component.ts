@@ -229,7 +229,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
       this.submitting.set(true)
       const formData = this.tagForm.value
       if (this.mode === 'edit' && this.tag) {
-        this.httpService.put<any>(`/api/admin/special-tags/${this.tag.id}`, formData).subscribe({
+        this.httpService.put<any>(`/api/admin/attrs/${this.tag.id}`, formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
@@ -258,7 +258,7 @@ export class AttrDetailComponent implements OnInit, OnChanges {
           }
         })
       } else {
-        this.httpService.post<any>('/api/admin/special-tags', formData).subscribe({
+        this.httpService.post<any>('/api/admin/attrs', formData).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({

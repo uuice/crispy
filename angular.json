@@ -38,7 +38,6 @@
               "bcryptjs",
               "jsonwebtoken",
               "multer",
-              "helmet",
               "express",
               "vditor",
               "mysql2",

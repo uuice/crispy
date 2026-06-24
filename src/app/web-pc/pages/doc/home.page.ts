@@ -1,67 +1,62 @@
 import { Component } from '@angular/core'
 import { CardModule } from 'primeng/card'
-import { TabsModule } from 'primeng/tabs'
 import { ButtonModule } from 'primeng/button'
-import { MessageModule } from 'primeng/message'
 
 @Component({
   selector: 'cs-doc-home',
   standalone: true,
-  imports: [CardModule, TabsModule, ButtonModule, MessageModule],
+  imports: [CardModule, ButtonModule],
   template: `
     <p-card header="Crispy 项目介绍" styleClass="system-card">
-      <div class="flex flex-col gap-4 mb-4">
-        <p-message icon="pi pi-exclamation-triangle" severity="error" variant="outlined">
-          大部分代码是AI生成的(Cursor)，请谨慎使用。
-        </p-message>
-
-        <div class="text-base leading-relaxed" style="color: var(--p-content-color)">
-          <p>
-            <b>Crispy</b> 是一套现代全栈内容管理系统，前端采用 Angular + PrimeNG +
-            Tailwind，后端基于 Node.js/Express，数据库层用 Kysely，支持 SSR、权限、内容建模、API
-            自动文档等。
-          </p>
-        </div>
+      <div class="text-base leading-relaxed space-y-3" style="color: var(--p-content-color)">
+        <p>
+          <b>Crispy</b> 是公司官网内容管理系统（CMS）：前台展示官网页面、新闻、招聘、广告等内容，后台供运营与管理员维护站点结构、文章、分类、标签、链接、广告位及系统配置。
+        </p>
+        <p>
+          技术栈为 Angular + PrimeNG + Tailwind 前端，Bun + Express + Kysely 后端，MariaDB 存储，支持 Angular SSR 与 Swagger 自动 API 文档。
+        </p>
       </div>
     </p-card>
-    <p-card header="架构图" styleClass="system-card">
+    <p-card header="主要功能模块" styleClass="system-card">
+      <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
+        <li>单页与文章：pages、articles（新闻/动态）</li>
+        <li>分类与标签：categories、tags、attrs（置顶/推荐等特殊标记）</li>
+        <li>站点结构：menus、links、configs / site-settings</li>
+        <li>招聘与广告：jobs、ads、ad_items</li>
+        <li>权限与审计：users、roles、rules、operate_logs（仅 Admin API）</li>
+        <li>Content API 访问控制：access_token</li>
+      </ul>
+    </p-card>
+    <p-card header="目录结构" styleClass="system-card">
       <pre
         class="p-4 rounded-xl shadow-inner border border-[var(--p-content-border-color)] overflow-x-auto text-sm"
       >
 crispy/
 ├── src/
-│   ├── app/                  # 前端主应用目录
-│   │   ├── web-pc/           # PC端前台页面
-│   │   │   ├── layouts/      # 页面布局组件
-│   │   │   ├── pages/        # 具体页面（home, about, migration等）
-│   │   │   ├── services/     # 前端服务（如 http、seo 等）
-│   │   │   └── ...
-│   │   ├── backstage/        # 后台管理相关页面
+│   ├── app/
+│   │   ├── web-pc/           # 官网前台与文档页 (/doc)
+│   │   ├── backstage/        # 后台管理 (/backstage)
 │   │   └── ...
-│   ├── server/               # 后端 Node.js 相关代码
-│   │   ├── routes/           # API 路由（admin/content）
-│   │   ├── services/         # 业务服务层（如 userService 等）
-│   │   └── ...
-│   ├── db/                   # 数据库类型定义
-│   └── libs/                 # 公共库/工具
-├── migrations/               # 数据库迁移脚本
-├── public/                   # 静态资源（图片、上传等）
-├── package.json              # 项目依赖与脚本
-├── angular.json              # Angular 配置
-└── ...
-        </pre
-      >
+│   ├── server/               # Express API（admin / content）
+│   │   ├── routes/
+│   │   ├── controller/
+│   │   └── services/
+│   └── db/                   # Kysely 类型 (db.d.ts)
+├── migrations/               # 数据库迁移 (001–011)
+├── public/                   # 静态资源与上传
+└── scripts/                  # swagger 生成等工具脚本
+      </pre>
     </p-card>
     <p-card header="技术栈" styleClass="system-card">
       <ul class="list-disc pl-6 space-y-1 text-[1.05rem]" style="color: var(--p-content-color)">
-        <li>前端：Angular 20、PrimeNG、TailwindCSS</li>
-        <li>后端：<b>Bun + Express</b>、Kysely</li>
+        <li>前端：Angular 21、PrimeNG、TailwindCSS</li>
+        <li>后端：Bun + Express、Kysely</li>
         <li>渲染：Angular SSR</li>
-        <li>数据库：MariaDB</li>
-        <li>API文档：Swagger</li>
+        <li>数据库：MariaDB / MySQL</li>
+        <li>API 文档：Swagger（Admin / Content 两套）</li>
       </ul>
     </p-card>
-    <p-card header="测试入口 & 相关链接" styleClass="system-card">
+    <p-card header="快捷入口" styleClass="system-card">
       <div class="flex flex-wrap gap-4 mb-4">
         <a
           pButton
@@ -75,14 +70,6 @@ crispy/
           pButton
           label="内容前台"
           href="/"
-          target="_blank"
-          class="p-button-outlined home-link-btn"
-          style="color: var(--p-content-color)"
-        ></a>
-        <a
-          pButton
-          label="文档"
-          href="/doc"
           target="_blank"
           class="p-button-outlined home-link-btn"
           style="color: var(--p-content-color)"
@@ -149,9 +136,6 @@ crispy/
         background: var(--p-primary-color) !important;
         color: #fff !important;
         border-color: var(--p-primary-color);
-      }
-      .bg-gradient-to-br {
-        background: var(--p-content-background) !important;
       }
       pre {
         background: var(--p-content-background) !important;

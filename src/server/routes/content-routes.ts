@@ -1,26 +1,16 @@
 import { Request, RequestHandler, Router } from 'express'
-import { userController } from '../controller/users'
 import { adController } from '../controller/ads'
-import { additionController } from '../controller/additions'
 import { adItemController } from '../controller/ad-items'
 import { apiLogController } from '../controller/api-logs'
 import { articleController } from '../controller/articles'
 import { categoryController } from '../controller/categories'
 import { attrController } from '../controller/attrs'
-import { cacheController } from '../controller/caches'
 import { configController } from '../controller/configs'
-import { enumController } from '../controller/enums'
 import { jobController } from '../controller/jobs'
-import { keywordController } from '../controller/keywords'
 import { linkController } from '../controller/links'
 import { menuController } from '../controller/menus'
-import { noticeController } from '../controller/notices'
-import { operateLogController } from '../controller/operate-logs'
 import { pageController } from '../controller/pages'
-import { roleController } from '../controller/roles'
-import { ruleController } from '../controller/rules'
 import { tagController } from '../controller/tags'
-import { userTypeController } from '../controller/user-types'
 import { AccessTokenService } from '../services/accessToken.Service'
 import { accessTokenController } from '../controller/access-token'
 import { error } from '../utils/response'
@@ -102,10 +92,6 @@ const authMiddleware: RequestHandler = async (req: Request, res, next) => {
 // Apply authentication middleware
 router.use(authMiddleware)
 
-// User routes
-router.get('/users', userController.getUsers)
-router.get('/users/:id', userController.getUser)
-
 // Ad routes
 router.get('/ads', adController.getAds)
 router.get('/ads/:id', adController.getAd)
@@ -113,10 +99,6 @@ router.get('/ads/:id', adController.getAd)
 // Ad item routes
 router.get('/ad-items', adItemController.getAdItems)
 router.get('/ad-items/:id', adItemController.getAdItem)
-
-// Addition routes
-router.get('/additions', additionController.getAdditions)
-router.get('/additions/:id', additionController.getAddition)
 
 // API log routes
 router.get('/api-logs', apiLogController.getApiLogs)
@@ -138,27 +120,15 @@ router.get('/categories/alias/:alias', categoryController.getCategoryByAlias)
 router.get('/attrs', attrController.getAttrs)
 router.get('/attrs/:id', attrController.getAttr)
 
-// Caches routes
-router.get('/caches', cacheController.getCaches)
-router.get('/caches/:id', cacheController.getCache)
-
 // Configs routes
 router.get('/configs', configController.getConfigs)
 router.get('/configs/alias/:alias', configController.getConfigByAlias)
 router.get('/configs/site-settings', siteSettingsController.getSiteSettings)
 router.get('/configs/:id', configController.getConfig)
 
-// Enums routes
-router.get('/enums', enumController.getEnums)
-router.get('/enums/:id', enumController.getEnum)
-
 // Job routes
 router.get('/jobs', jobController.getJobs)
 router.get('/jobs/:id', jobController.getJob)
-
-// Keyword routes
-router.get('/keywords', keywordController.getKeywords)
-router.get('/keywords/:id', keywordController.getKeyword)
 
 // Link routes
 router.get('/links', linkController.getLinks)
@@ -168,23 +138,6 @@ router.get('/links/:id', linkController.getLink)
 router.get('/menus', menuController.getMenus)
 router.get('/menus/tree', menuController.getMenuTree)
 router.get('/menus/:id', menuController.getMenu)
-
-// Notice routes
-router.get('/notices', noticeController.getNotices)
-router.get('/notices/:id', noticeController.getNotice)
-
-// Operate log routes
-router.get('/operate-logs', operateLogController.getOperateLogs)
-router.get('/operate-logs/:id', operateLogController.getOperateLog)
-
-// Role routes
-router.get('/roles', roleController.getRoles)
-router.get('/roles/:id', roleController.getRole)
-
-// Rule routes
-router.get('/rules', ruleController.getRules)
-router.get('/rules/tree', ruleController.getRuleTree)
-router.get('/rules/:id', ruleController.getRule)
 
 // Tag routes
 router.get('/tags', tagController.getTags)
@@ -196,10 +149,6 @@ router.get('/pages', pageController.getPages)
 router.get('/pages/:id', pageController.getPage)
 router.get('/pages/url/:url', pageController.getPageByUrl)
 
-// User type routes
-router.get('/user-types', userTypeController.getUserTypes)
-router.get('/user-types/:id', userTypeController.getUserType)
-
 // Register access token routes
 router.get('/access-token', accessTokenController.getAccessTokens)
 router.get('/access-token/:id', accessTokenController.getAccessTokenById)
@@ -207,12 +156,11 @@ router.post('/access-token/check', accessTokenController.checkAccessToken)
 
 router.get('/system/getSystemInfo', systemInfoController.getSystemInfo)
 
-// 全文检索接口
+// Search routes
 router.get('/search/articles', searchController.searchArticles)
 router.get('/search/pages', searchController.searchPages)
-router.get('/search/daily', searchController.searchDaily)
 
-// OpenAI AI 服务接口
+// OpenAI AI service routes
 router.get('/ai/test', openaiController.testConnection)
 router.post('/ai/summary', openaiController.generateSummary)
 router.post('/ai/tags', openaiController.generateTags)

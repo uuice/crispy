@@ -7,26 +7,20 @@
 import './users'
 import './ads'
 import './ad-items'
-import './additions'
 import './api-logs'
 import './articles'
 import './categories'
 import './attrs'
 import './caches'
 import './configs'
-import './enums'
 import './jobs'
-import './keywords'
 import './links'
 import './menus'
-import './notices'
 import './operate-logs'
 import './roles'
 import './rules'
 import './tags'
 import './pages'
-import './user-types'
-import './comments'
 import './access-tokens'
 import './upload'
 import './system'
@@ -39,26 +33,20 @@ export default {}
  * - users.ts
  * - ads.ts
  * - ad-items.ts
- * - additions.ts
  * - api-logs.ts
  * - articles.ts
  * - categories.ts
  * - attrs.ts
  * - caches.ts
  * - configs.ts
- * - enums.ts
  * - jobs.ts
- * - keywords.ts
  * - links.ts
  * - menus.ts
- * - notices.ts
  * - operate-logs.ts
  * - roles.ts
  * - rules.ts
  * - tags.ts
  * - pages.ts
- * - user-types.ts
- * - comments.ts
  * - access-tokens.ts
  * - upload.ts
  * - system.ts
