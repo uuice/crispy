@@ -16,7 +16,6 @@ import './attrs'
 import './caches'
 import './configs'
 import './enums'
-import './holidays'
 import './jobs'
 import './keywords'
 import './links'
@@ -28,8 +27,6 @@ import './rules'
 import './tags'
 import './pages'
 import './usertypes'
-import './votes'
-import './voteitems'
 import './accesstokens'
 import './search'
 
@@ -48,7 +45,6 @@ export default {}
  * - caches.ts: ContentCaches
  * - configs.ts: ContentConfigs
  * - enums.ts: ContentEnums
- * - holidays.ts: ContentHolidays
  * - jobs.ts: ContentJobs
  * - keywords.ts: ContentKeywords
  * - links.ts: ContentLinks
@@ -60,7 +56,5 @@ export default {}
  * - tags.ts: ContentTags
  * - pages.ts: ContentPages
  * - usertypes.ts: ContentUserTypes
- * - votes.ts: ContentVotes
- * - voteitems.ts: ContentVoteItems
  * - accesstokens.ts: ContentAccessTokens
  */

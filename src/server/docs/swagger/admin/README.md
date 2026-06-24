@@ -41,7 +41,6 @@ src/server/docs/swagger/
 | `rules.ts` | Rules | 规则管理 |
 | `tags.ts` | Tags | 标签管理 |
 | `pages.ts` | Pages | 页面管理 |
-| `votes.ts` | Votes, VoteItems | 投票和投票项目管理 |
 
 ## 优势
 

@@ -15,7 +15,6 @@ import './attrs'
 import './caches'
 import './configs'
 import './enums'
-import './holidays'
 import './jobs'
 import './keywords'
 import './links'
@@ -27,8 +26,6 @@ import './rules'
 import './tags'
 import './pages'
 import './user-types'
-import './votes'
-import './vote-items'
 import './comments'
 import './access-tokens'
 import './upload'
@@ -50,7 +47,6 @@ export default {}
  * - caches.ts
  * - configs.ts
  * - enums.ts
- * - holidays.ts
  * - jobs.ts
  * - keywords.ts
  * - links.ts
@@ -62,8 +58,6 @@ export default {}
  * - tags.ts
  * - pages.ts
  * - user-types.ts
- * - votes.ts
- * - vote-items.ts
  * - comments.ts
  * - access-tokens.ts
  * - upload.ts

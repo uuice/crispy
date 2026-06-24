@@ -77,12 +77,6 @@ export const BACKSTAGE_ROUTES: Routes = [
         data: { keepAlive: true }
       },
       {
-        path: 'holidays',
-        loadChildren: () =>
-          import('./pages/holidays/holidays.routes').then((m) => m.HOLIDAYS_ROUTES),
-        data: { keepAlive: true }
-      },
-      {
         path: 'attrs',
         loadChildren: () => import('./pages/attrs/attrs.routes').then((m) => m.ATTRS_ROUTES),
         data: { keepAlive: true }

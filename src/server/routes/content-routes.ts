@@ -10,7 +10,6 @@ import { attrController } from '../controller/attrs'
 import { cacheController } from '../controller/caches'
 import { configController } from '../controller/configs'
 import { enumController } from '../controller/enums'
-import { holidayController } from '../controller/holidays'
 import { jobController } from '../controller/jobs'
 import { keywordController } from '../controller/keywords'
 import { linkController } from '../controller/links'
@@ -22,8 +21,6 @@ import { roleController } from '../controller/roles'
 import { ruleController } from '../controller/rules'
 import { tagController } from '../controller/tags'
 import { userTypeController } from '../controller/user-types'
-import { voteController } from '../controller/votes'
-import { voteItemController } from '../controller/vote-items'
 import { AccessTokenService } from '../services/accessToken.Service'
 import { accessTokenController } from '../controller/access-token'
 import { error } from '../utils/response'
@@ -155,10 +152,6 @@ router.get('/configs/:id', configController.getConfig)
 router.get('/enums', enumController.getEnums)
 router.get('/enums/:id', enumController.getEnum)
 
-// Holidays routes
-router.get('/holidays', holidayController.getHolidays)
-router.get('/holidays/:id', holidayController.getHoliday)
-
 // Job routes
 router.get('/jobs', jobController.getJobs)
 router.get('/jobs/:id', jobController.getJob)
@@ -206,14 +199,6 @@ router.get('/pages/url/:url', pageController.getPageByUrl)
 // User type routes
 router.get('/user-types', userTypeController.getUserTypes)
 router.get('/user-types/:id', userTypeController.getUserType)
-
-// Vote routes
-router.get('/votes', voteController.getVotes)
-router.get('/votes/:id', voteController.getVote)
-
-// Vote item routes
-router.get('/vote-items', voteItemController.getVoteItems)
-router.get('/vote-items/:id', voteItemController.getVoteItem)
 
 // Register access token routes
 router.get('/access-token', accessTokenController.getAccessTokens)

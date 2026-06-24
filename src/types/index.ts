@@ -11,7 +11,6 @@ import {
   Comments,
   Configs,
   Enums,
-  Holidays,
   Jobs,
   Keywords,
   Links,
@@ -23,9 +22,7 @@ import {
   Rules,
   Tags,
   Users,
-  UserTypes,
-  VoteItems,
-  Votes
+  UserTypes
 } from '@src/db/db'
 import { Insertable, Selectable, Updateable } from 'kysely'
 import z from 'zod'
@@ -564,32 +561,6 @@ export const enumFiltersSchema = z
     value: z.string().optional(),
     sort: z.number().optional(),
     status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// Holidays
-export const createHolidaySchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  value: z.string().min(1, '日期不能为空'),
-  sort: z.number().default(0)
-})
-export const updateHolidaySchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  value: z.string().min(1, '日期不能为空'),
-  sort: z.number().optional()
-})
-export type HolidayEntity = Selectable<Holidays>
-export type HolidayFilters = QueryFilter<HolidayEntity>
-export type CreateHoliday = Insertable<Holidays>
-export type UpdateHoliday = Updateable<Holidays>
-
-export const holidayFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    value: z.string().optional(),
-    sort: z.number().optional(),
     is_delete: z.number().optional()
   })
   .extend(commonFiltersSchema.shape)
@@ -1167,68 +1138,6 @@ export const userTypeFiltersSchema = z
     type_name: z.string().optional(),
     alias: z.string().optional(),
     remark: z.string().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// VoteItems
-export const createVoteItemSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  vote_id: z.number(),
-  status: z.number().default(10)
-})
-export const updateVoteItemSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  vote_id: z.number().optional(),
-  status: z.number().optional()
-})
-export type VoteItemEntity = Selectable<VoteItems>
-export type VoteItemFilters = QueryFilter<VoteItemEntity>
-export type CreateVoteItem = Insertable<VoteItems>
-export type UpdateVoteItem = Updateable<VoteItems>
-
-export const voteItemFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    vote_id: z.number().optional(),
-    title: z.string().optional(),
-    status: z.number().optional(),
-    is_delete: z.number().optional()
-  })
-  .extend(commonFiltersSchema.shape)
-
-// Votes
-export const createVoteSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  is_multiple: z.number().default(0),
-  start_time: z.number(),
-  end_time: z.number(),
-  status: z.number().default(10),
-  vote_items: z.string().optional()
-})
-export const updateVoteSchema = z.object({
-  title: z.string().min(1, '标题不能为空'),
-  is_multiple: z.number().optional(),
-  start_time: z.number().optional(),
-  end_time: z.number().optional(),
-  status: z.number().optional(),
-  vote_items: z.string().optional()
-})
-export type VoteEntity = Selectable<Votes>
-export type VoteFilters = QueryFilter<VoteEntity>
-export type CreateVote = Insertable<Votes>
-export type UpdateVote = Updateable<Votes>
-
-export const voteFiltersSchema = z
-  .object({
-    id: z.number().optional(),
-    title: z.string().optional(),
-    is_multiple: z.number().optional(),
-    start_time: z.number().optional(),
-    end_time: z.number().optional(),
-    count: z.number().optional(),
-    vote_items: z.string().optional(),
     status: z.number().optional(),
     is_delete: z.number().optional()
   })

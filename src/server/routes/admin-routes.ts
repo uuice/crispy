@@ -10,7 +10,6 @@ import { attrController } from '../controller/attrs'
 import { cacheController } from '../controller/caches'
 import { configController } from '../controller/configs'
 import { enumController } from '../controller/enums'
-import { holidayController } from '../controller/holidays'
 import { jobController } from '../controller/jobs'
 import { keywordController } from '../controller/keywords'
 import { linkController } from '../controller/links'
@@ -22,8 +21,6 @@ import { roleController } from '../controller/roles'
 import { ruleController } from '../controller/rules'
 import { tagController } from '../controller/tags'
 import { userTypeController } from '../controller/user-types'
-import { voteController } from '../controller/votes'
-import { voteItemController } from '../controller/vote-items'
 import { commentController } from '../controller/comments'
 import { jwtMiddleware } from '@src/server/middleware'
 import { accessTokenController } from '../controller/access-token'
@@ -183,13 +180,6 @@ router.post('/enums', enumController.createEnum)
 router.put('/enums/:id', enumController.updateEnum)
 router.delete('/enums/:id', enumController.deleteEnum)
 
-// Holidays routes
-router.get('/holidays', holidayController.getHolidays)
-router.get('/holidays/:id', holidayController.getHoliday)
-router.post('/holidays', holidayController.createHoliday)
-router.put('/holidays/:id', holidayController.updateHoliday)
-router.delete('/holidays/:id', holidayController.deleteHoliday)
-
 // Job routes
 router.get('/jobs', jobController.getJobs)
 router.get('/jobs/:id', jobController.getJob)
@@ -268,20 +258,6 @@ router.get('/user-types/:id', userTypeController.getUserType)
 router.post('/user-types', userTypeController.createUserType)
 router.put('/user-types/:id', userTypeController.updateUserType)
 router.delete('/user-types/:id', userTypeController.deleteUserType)
-
-// Vote routes
-router.get('/votes', voteController.getVotes)
-router.get('/votes/:id', voteController.getVote)
-router.post('/votes', voteController.createVote)
-router.put('/votes/:id', voteController.updateVote)
-router.delete('/votes/:id', voteController.deleteVote)
-
-// Vote item routes
-router.get('/vote-items', voteItemController.getVoteItems)
-router.get('/vote-items/:id', voteItemController.getVoteItem)
-router.post('/vote-items', voteItemController.createVoteItem)
-router.put('/vote-items/:id', voteItemController.updateVoteItem)
-router.delete('/vote-items/:id', voteItemController.deleteVoteItem)
 
 // Comment routes
 router.get('/comments', commentController.getComments)

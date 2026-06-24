@@ -620,37 +620,6 @@ export interface Enums {
   value: Generated<string>;
 }
 
-export interface Holidays {
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 排序
-   */
-  sort: Generated<number>;
-  /**
-   * 标题
-   */
-  title: string;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 值
-   */
-  value: string;
-}
-
 export interface Jobs {
   /**
    * 工作地址
@@ -1181,65 +1150,6 @@ export interface Tags {
   value: Generated<string>;
 }
 
-export interface Todos {
-  /**
-   * 是否完成
-   */
-  complete: number;
-  /**
-   * 内容
-   */
-  content: string;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 结束时间
-   */
-  end_time: Generated<number>;
-  /**
-   * 发布者id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 发布者id
-   */
-  publish_id: Generated<number>;
-  /**
-   * 备注
-   */
-  remark: Generated<string>;
-  /**
-   * 开始时间
-   */
-  start_time: Generated<number>;
-  /**
-   * 状态
-   */
-  status: number;
-  /**
-   * 标题
-   */
-  title: string;
-  /**
-   * 分类
-   */
-  type_id: Generated<number>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 用户ids
-   */
-  user_ids: string;
-}
-
 export interface Users {
   /**
    * 头像
@@ -1354,84 +1264,6 @@ export interface UserTypes {
   update_time: Generated<number>;
 }
 
-export interface VoteItems {
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 标题
-   */
-  title: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 所属投票id
-   */
-  vote_id: Generated<number>;
-}
-
-export interface Votes {
-  /**
-   * 投票总数
-   */
-  count: Generated<number>;
-  /**
-   * 创建时间
-   */
-  create_time: Generated<number>;
-  /**
-   * 结束时间
-   */
-  end_time: Generated<number>;
-  /**
-   * 自增id
-   */
-  id: Generated<number>;
-  /**
-   * 是否删除
-   */
-  is_delete: Generated<number>;
-  /**
-   * 是否多选 1多选 0单选
-   */
-  is_multiple: Generated<number>;
-  /**
-   * 开始时间
-   */
-  start_time: Generated<number>;
-  /**
-   * 状态
-   */
-  status: Generated<number>;
-  /**
-   * 标题
-   */
-  title: Generated<string>;
-  /**
-   * 更新时间
-   */
-  update_time: Generated<number>;
-  /**
-   * 投票项列表
-   */
-  vote_items: Generated<string>;
-}
-
 export interface DB {
   access_token: AccessToken;
   ad_items: AdItems;
@@ -1446,7 +1278,6 @@ export interface DB {
   comments: Comments;
   configs: Configs;
   enums: Enums;
-  holidays: Holidays;
   jobs: Jobs;
   keywords: Keywords;
   links: Links;
@@ -1457,9 +1288,6 @@ export interface DB {
   roles: Roles;
   rules: Rules;
   tags: Tags;
-  todos: Todos;
   user_types: UserTypes;
   users: Users;
-  vote_items: VoteItems;
-  votes: Votes;
 }
