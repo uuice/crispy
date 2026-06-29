@@ -3,7 +3,13 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { GalleryItems } from './collections/GalleryItems'
+import { ApiAccessLogs } from './collections/ApiAccessLogs'
+import { AdSlots } from './collections/AdSlots'
+import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
+import { Jobs } from './collections/Jobs'
+import { Links } from './collections/Links'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -66,7 +72,7 @@ export default buildConfig({
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: createDatabaseAdapter(),
-  collections: [Pages, Posts, Media, Categories, Tags, Users],
+  collections: [Pages, Posts, Media, Categories, Tags, Links, AdSlots, Ads, Jobs, GalleryItems, ApiAccessLogs, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings],
   plugins,
@@ -76,6 +82,12 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
+    autoRun: [
+      {
+        allQueues: true,
+        cron: '*/5 * * * *',
+      },
+    ],
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
         // Allow logged in users to execute this endpoint (default)

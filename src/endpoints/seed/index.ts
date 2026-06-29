@@ -300,21 +300,42 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Posts',
+              label: '文章',
               url: '/posts',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Archive',
+              label: '归档',
               url: '/archive',
             },
           },
           {
             link: {
+              type: 'custom',
+              label: '图库',
+              url: '/gallery',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: '招聘',
+              url: '/jobs',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: '搜索',
+              url: '/search',
+            },
+          },
+          {
+            link: {
               type: 'reference',
-              label: 'Contact',
+              label: '联系我们',
               reference: {
                 relationTo: 'pages',
                 value: contactPage.id,
@@ -332,14 +353,28 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Admin',
+              label: '管理后台',
               url: '/admin',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'RSS',
+              label: '图库',
+              url: '/gallery',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: '招聘',
+              url: '/jobs',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'RSS 订阅',
               url: '/rss.xml',
             },
           },
@@ -352,6 +387,207 @@ export const seed = async ({
             },
           },
         ],
+      },
+    }),
+  ])
+
+  payload.logger.info(`— Seeding ad slots...`)
+
+  await Promise.all([
+    payload.delete({ collection: 'ads', overrideAccess: true, where: {}, context: seedContext }),
+    payload.delete({ collection: 'ad-slots', overrideAccess: true, where: {}, context: seedContext }),
+    payload.delete({ collection: 'jobs', overrideAccess: true, where: {}, context: seedContext }),
+    payload.delete({ collection: 'gallery-items', overrideAccess: true, where: {}, context: seedContext }),
+  ])
+
+  await Promise.all([
+    payload.create({
+      collection: 'ad-slots',
+      context: seedContext,
+      overrideAccess: true,
+      data: {
+        title: '首页横幅',
+        slug: 'home-banner',
+        description: '首页 Hero 下方',
+        recommendedWidth: 728,
+        recommendedHeight: 90,
+        enabled: true,
+      },
+    }),
+    payload.create({
+      collection: 'ad-slots',
+      context: seedContext,
+      overrideAccess: true,
+      data: {
+        title: '文章列表顶部',
+        slug: 'post-list-top',
+        description: '/posts 列表页标题下方',
+        recommendedWidth: 728,
+        recommendedHeight: 90,
+        enabled: true,
+      },
+    }),
+    payload.create({
+      collection: 'ad-slots',
+      context: seedContext,
+      overrideAccess: true,
+      data: {
+        title: '文章正文下方',
+        slug: 'post-content-bottom',
+        description: '文章详情页正文与相关文章之间',
+        recommendedWidth: 728,
+        recommendedHeight: 90,
+        enabled: true,
+      },
+    }),
+  ])
+
+  payload.logger.info(`— Seeding jobs...`)
+
+  await Promise.all([
+    payload.create({
+      collection: 'jobs',
+      context: { ...seedContext, skipAuditLog: true },
+      overrideAccess: true,
+      data: {
+        title: '全栈工程师',
+        slug: 'full-stack-engineer',
+        department: '研发',
+        location: '上海 / 远程',
+        employmentType: 'full-time',
+        salary: '25k–40k',
+        enabled: true,
+        publishedAt: new Date().toISOString(),
+        description: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'text',
+                    text: '负责 Crispy CMS 前后台功能开发与维护，参与架构设计与代码评审。',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+        requirements: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'text',
+                    text: '熟悉 TypeScript、React、Next.js；有 Payload 或 Headless CMS 经验者优先。',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+      },
+    }),
+    payload.create({
+      collection: 'jobs',
+      context: { ...seedContext, skipAuditLog: true },
+      overrideAccess: true,
+      data: {
+        title: '内容运营',
+        slug: 'content-operator',
+        department: '运营',
+        location: '北京',
+        employmentType: 'full-time',
+        salary: '12k–18k',
+        enabled: true,
+        publishedAt: new Date().toISOString(),
+        description: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'text',
+                    text: '负责站点内容策划、编辑与发布，维护分类标签与友情链接。',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+      },
+    }),
+  ])
+
+  payload.logger.info(`— Seeding gallery items...`)
+
+  await Promise.all([
+    payload.create({
+      collection: 'gallery-items',
+      context: { ...seedContext, skipAuditLog: true },
+      overrideAccess: true,
+      data: {
+        title: '示例图片一',
+        image: image1Doc.id,
+        description: '图库精选展示示例',
+        sort: 0,
+        enabled: true,
+      },
+    }),
+    payload.create({
+      collection: 'gallery-items',
+      context: { ...seedContext, skipAuditLog: true },
+      overrideAccess: true,
+      data: {
+        title: '示例图片二',
+        image: image2Doc.id,
+        description: '图库精选展示示例',
+        sort: 1,
+        enabled: true,
+      },
+    }),
+    payload.create({
+      collection: 'gallery-items',
+      context: { ...seedContext, skipAuditLog: true },
+      overrideAccess: true,
+      data: {
+        title: '示例图片三',
+        image: image3Doc.id,
+        sort: 2,
+        enabled: true,
       },
     }),
   ])
@@ -386,6 +622,11 @@ export const seed = async ({
         pages: { find: true, create: true, update: true, delete: true },
         categories: { find: true, create: true, update: true, delete: true },
         tags: { find: true, create: true, update: true, delete: true },
+        links: { find: true, create: true, update: true, delete: true },
+        'ad-slots': { find: true, create: true, update: true, delete: true },
+        ads: { find: true, create: true, update: true, delete: true },
+        jobs: { find: true, create: true, update: true, delete: true },
+        'gallery-items': { find: true, create: true, update: true, delete: true },
         media: { find: true, create: true, update: true, delete: false },
       },
       overrideAccess: true,

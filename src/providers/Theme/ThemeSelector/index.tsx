@@ -13,6 +13,7 @@ import type { Theme } from './types'
 
 import { useTheme } from '..'
 import { themeLocalStorageKey } from './types'
+import { frontendLabels } from '@/i18n/frontend-labels'
 
 export const ThemeSelector: React.FC = () => {
   const { setTheme } = useTheme()
@@ -36,15 +37,15 @@ export const ThemeSelector: React.FC = () => {
   return (
     <Select onValueChange={onThemeChange} value={value}>
       <SelectTrigger
-        aria-label="Select a theme"
-        className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none"
+        aria-label={frontendLabels.theme.label}
+        className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none text-white/80"
       >
-        <SelectValue placeholder="Theme" />
+        <SelectValue placeholder={frontendLabels.theme.label} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="auto">Auto</SelectItem>
-        <SelectItem value="light">Light</SelectItem>
-        <SelectItem value="dark">Dark</SelectItem>
+        <SelectItem value="auto">{frontendLabels.theme.auto}</SelectItem>
+        <SelectItem value="light">{frontendLabels.theme.light}</SelectItem>
+        <SelectItem value="dark">{frontendLabels.theme.dark}</SelectItem>
       </SelectContent>
     </Select>
   )

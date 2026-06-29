@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
 
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { queryArchiveGroups } from '@/utilities/queryPostsByTaxonomy'
 
@@ -14,13 +15,15 @@ export default async function ArchivePage() {
     <div className="pt-24 pb-24">
       <div className="container mb-12">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>归档</h1>
-          <p>按发布时间浏览全部文章</p>
+          <h1>{frontendLabels.archive.title}</h1>
+          <p>{frontendLabels.archive.description}</p>
         </div>
       </div>
 
       <div className="container space-y-12">
-        {groups.length === 0 && <p className="text-muted-foreground">暂无已发布文章</p>}
+        {groups.length === 0 && (
+          <p className="text-muted-foreground">{frontendLabels.archive.none}</p>
+        )}
 
         {groups.map(({ year, months }) => (
           <section key={year}>
@@ -53,6 +56,6 @@ export default async function ArchivePage() {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `归档 | ${DEFAULT_SITE_NAME}`,
+    title: `${frontendLabels.archive.title} | ${DEFAULT_SITE_NAME}`,
   }
 }

@@ -7,6 +7,7 @@ import React, { Fragment } from 'react'
 import type { Post, Tag } from '@/payload-types'
 
 import { Media } from '@/components/Media'
+import { frontendLabels } from '@/i18n/frontend-labels'
 
 export type CardPostData = Pick<Post, 'slug' | 'categories' | 'tags' | 'meta' | 'title'>
 
@@ -47,7 +48,7 @@ export const Card: React.FC<{
       ref={card.ref}
     >
       <div className="relative w-full ">
-        {!metaImage && <div className="">No image</div>}
+        {!metaImage && <div className="">{frontendLabels.posts.noImage}</div>}
         {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
       </div>
       <div className="p-4">
@@ -56,7 +57,7 @@ export const Card: React.FC<{
             {categories?.map((category, index) => {
               if (typeof category === 'object' && category !== null) {
                 const { title: titleFromCategory, slug: categorySlug } = category
-                const categoryTitle = titleFromCategory || 'Untitled category'
+                const categoryTitle = titleFromCategory || frontendLabels.posts.untitledCategory
                 const isLast = index === categories.length - 1
 
                 return (

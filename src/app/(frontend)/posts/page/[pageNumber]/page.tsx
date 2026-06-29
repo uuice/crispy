@@ -8,6 +8,8 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { frontendLabels } from '@/i18n/frontend-labels'
+import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 
 export const revalidate = 600
 
@@ -38,7 +40,8 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>{frontendLabels.posts.title}</h1>
+          <p>{frontendLabels.posts.description}</p>
         </div>
       </div>
 
@@ -65,7 +68,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
   return {
-    title: `Payload Website Template Posts Page ${pageNumber || ''}`,
+    title: `${frontendLabels.posts.title} - 第 ${pageNumber} 页`,
+    description: `${DEFAULT_SITE_NAME} ${frontendLabels.posts.description}`,
   }
 }
 
@@ -76,7 +80,7 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  const totalPages = Math.ceil(totalDocs / 10)
+  const totalPages = Math.ceil(totalDocs / 12)
 
   const pages: { pageNumber: string }[] = []
 

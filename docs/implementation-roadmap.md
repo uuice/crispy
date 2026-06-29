@@ -64,14 +64,14 @@
 
 **目标**：覆盖 2.x 常见运营模块。
 
-- [ ] `links` collection（友情链接）
-- [ ] `ad-slots` + `ads`（广告位）
-- [ ] `jobs` collection（招聘）
-- [ ] Audit log 插件或自建 `audit-logs` collection
-- [ ] `@payloadcms/plugin-import-export`
-- [ ] `@payloadcms/storage-s3` 生产媒体
-- [ ] API 访问日志 middleware（可选）
-- [ ] 中文 slug 自动生成（pinyin hook）
+- [x] `links` collection（友情链接）
+- [x] `ad-slots` + `ads`（广告位）
+- [x] `jobs` collection（招聘）
+- [x] Audit log 插件或自建 `audit-logs` collection
+- [x] `@payloadcms/plugin-import-export`
+- [x] `@payloadcms/storage-s3` 生产媒体
+- [x] API 访问日志 middleware（可选）
+- [x] 中文 slug 自动生成（pinyin hook）
 
 ---
 

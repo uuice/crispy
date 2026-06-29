@@ -11,9 +11,11 @@ import RichText from '@/components/RichText'
 import type { Post } from '@/payload-types'
 
 import { PostHero } from '@/heros/PostHero'
+import { AdSlot } from '@/components/AdSlot'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { frontendLabels } from '@/i18n/frontend-labels'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -65,10 +67,12 @@ export default async function Post({ params: paramsPromise }: Args) {
       <div className="flex flex-col items-center gap-4 pt-8">
         <div className="container">
           <RichText className="max-w-[48rem] mx-auto" data={post.content} enableGutter={false} />
+          <AdSlot className="max-w-[48rem] mx-auto" slot="post-content-bottom" />
           {post.relatedPosts && post.relatedPosts.length > 0 && (
             <RelatedPosts
               className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
               docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+              title={frontendLabels.posts.related}
             />
           )}
         </div>

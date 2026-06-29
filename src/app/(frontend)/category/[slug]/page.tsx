@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { PostArchiveLayout } from '@/components/PostArchiveLayout'
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { queryPostsByCategorySlug } from '@/utilities/queryPostsByTaxonomy'
 
@@ -23,7 +24,7 @@ export default async function CategoryPage({ params: paramsPromise }: Args) {
     <PostArchiveLayout
       description={null}
       posts={posts}
-      title={`分类：${category.title}`}
+      title={`${frontendLabels.category.titlePrefix}${category.title}`}
     />
   )
 }
@@ -32,7 +33,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug } = await paramsPromise
   const { category } = await queryPostsByCategorySlug(decodeURIComponent(slug))
 
-  if (!category) return { title: '分类不存在' }
+  if (!category) return { title: frontendLabels.category.notFound }
 
   return {
     title: `${category.title} | ${DEFAULT_SITE_NAME}`,

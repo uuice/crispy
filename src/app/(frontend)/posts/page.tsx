@@ -1,12 +1,15 @@
 import type { Metadata } from 'next/types'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { AdSlot } from '@/components/AdSlot'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
+import { frontendLabels } from '@/i18n/frontend-labels'
+import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -33,11 +36,13 @@ export default async function Page() {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>{frontendLabels.posts.title}</h1>
+          <p>{frontendLabels.posts.description}</p>
         </div>
       </div>
 
       <div className="container mb-8">
+        <AdSlot slot="post-list-top" />
         <PageRange
           collection="posts"
           currentPage={posts.page}
@@ -57,11 +62,9 @@ export default async function Page() {
   )
 }
 
-import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
-
 export function generateMetadata(): Metadata {
   return {
-    title: `文章`,
-    description: `${DEFAULT_SITE_NAME} 文章列表`,
+    title: frontendLabels.posts.title,
+    description: `${DEFAULT_SITE_NAME} ${frontendLabels.posts.description}`,
   }
 }

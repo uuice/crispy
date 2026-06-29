@@ -10,26 +10,17 @@ import { useRouter } from 'next/navigation'
 
 import './index.scss'
 
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { getClientSideURL } from '@/utilities/getURL'
 
 const baseClass = 'admin-bar'
 
 const collectionLabels = {
-  pages: {
-    plural: 'Pages',
-    singular: 'Page',
-  },
-  posts: {
-    plural: 'Posts',
-    singular: 'Post',
-  },
-  projects: {
-    plural: 'Projects',
-    singular: 'Project',
-  },
+  pages: frontendLabels.adminBar.pages,
+  posts: frontendLabels.adminBar.posts,
 }
 
-const Title: React.FC = () => <span>Dashboard</span>
+const Title: React.FC = () => <span>{frontendLabels.adminBar.dashboard}</span>
 
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
@@ -65,8 +56,8 @@ export const AdminBar: React.FC<{
           cmsURL={getClientSideURL()}
           collectionSlug={collection}
           collectionLabels={{
-            plural: collectionLabels[collection]?.plural || 'Pages',
-            singular: collectionLabels[collection]?.singular || 'Page',
+            plural: collectionLabels[collection]?.plural || frontendLabels.adminBar.pages.plural,
+            singular: collectionLabels[collection]?.singular || frontendLabels.adminBar.pages.singular,
           }}
           logo={<Title />}
           onAuthChange={onAuthChange}

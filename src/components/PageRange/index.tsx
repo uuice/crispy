@@ -1,14 +1,11 @@
 import React from 'react'
 
-const defaultLabels = {
-  plural: 'Docs',
-  singular: 'Doc',
-}
+import { frontendLabels } from '@/i18n/frontend-labels'
 
 const defaultCollectionLabels = {
   posts: {
-    plural: 'Posts',
-    singular: 'Post',
+    plural: frontendLabels.posts.plural,
+    singular: frontendLabels.posts.singular,
   },
 }
 
@@ -40,18 +37,19 @@ export const PageRange: React.FC<{
 
   const { plural, singular } =
     collectionLabelsFromProps ||
-    (collection ? defaultCollectionLabels[collection] : undefined) ||
-    defaultLabels ||
-    {}
+    (collection ? defaultCollectionLabels[collection] : undefined) || {
+      plural: frontendLabels.posts.plural,
+      singular: frontendLabels.posts.singular,
+    }
+
+  const unit = totalDocs > 1 ? plural : singular
 
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>
-      {(typeof totalDocs === 'undefined' || totalDocs === 0) && 'Search produced no results.'}
+      {(typeof totalDocs === 'undefined' || totalDocs === 0) && frontendLabels.pagination.empty}
       {typeof totalDocs !== 'undefined' &&
         totalDocs > 0 &&
-        `Showing ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} of ${totalDocs} ${
-          totalDocs > 1 ? plural : singular
-        }`}
+        frontendLabels.pagination.range(indexStart, indexEnd, totalDocs, unit)}
     </div>
   )
 }

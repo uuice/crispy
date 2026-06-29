@@ -8,6 +8,8 @@ import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { AdSlot } from '@/components/AdSlot'
+import { SiteExplore } from '@/components/SiteExplore'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
@@ -75,7 +77,9 @@ export default async function Page({ params: paramsPromise }: Args) {
       {draft && <LivePreviewListener />}
 
       <RenderHero {...hero} />
+      {decodedSlug === 'home' && <AdSlot className="container" slot="home-banner" />}
       <RenderBlocks blocks={layout} />
+      {decodedSlug === 'home' && <SiteExplore />}
     </article>
   )
 }

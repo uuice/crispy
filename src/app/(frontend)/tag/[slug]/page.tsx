@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { PostArchiveLayout } from '@/components/PostArchiveLayout'
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { queryPostsByTagSlug } from '@/utilities/queryPostsByTaxonomy'
 
@@ -23,7 +24,7 @@ export default async function TagPage({ params: paramsPromise }: Args) {
     <PostArchiveLayout
       description={tag.description}
       posts={posts}
-      title={`标签：${tag.title}`}
+      title={`${frontendLabels.tag.titlePrefix}${tag.title}`}
     />
   )
 }
@@ -32,7 +33,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug } = await paramsPromise
   const { tag } = await queryPostsByTagSlug(decodeURIComponent(slug))
 
-  if (!tag) return { title: '标签不存在' }
+  if (!tag) return { title: frontendLabels.tag.notFound }
 
   return {
     title: `${tag.title} | ${DEFAULT_SITE_NAME}`,

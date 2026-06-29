@@ -1,9 +1,12 @@
 import { Field } from 'payload'
 
+import { adminLabels } from '@/i18n/admin-labels'
+
 export const searchFields: Field[] = [
   {
     name: 'slug',
     type: 'text',
+    label: adminLabels.slug,
     index: true,
     admin: {
       readOnly: true,
@@ -11,7 +14,7 @@ export const searchFields: Field[] = [
   },
   {
     name: 'meta',
-    label: 'Meta',
+    label: adminLabels.seo,
     type: 'group',
     index: true,
     admin: {
@@ -21,23 +24,23 @@ export const searchFields: Field[] = [
       {
         type: 'text',
         name: 'title',
-        label: 'Title',
+        label: adminLabels.title,
       },
       {
         type: 'text',
         name: 'description',
-        label: 'Description',
+        label: adminLabels.description,
       },
       {
         name: 'image',
-        label: 'Image',
+        label: adminLabels.imageField,
         type: 'upload',
         relationTo: 'media',
       },
     ],
   },
   {
-    label: 'Categories',
+    label: adminLabels.categoriesField,
     name: 'categories',
     type: 'array',
     admin: {

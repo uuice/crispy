@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react'
 import { useDebounce } from '@/utilities/useDebounce'
 import { useRouter } from 'next/navigation'
 
+import { frontendLabels } from '@/i18n/frontend-labels'
+
 export const Search: React.FC = () => {
   const [value, setValue] = useState('')
   const router = useRouter()
@@ -23,17 +25,17 @@ export const Search: React.FC = () => {
         }}
       >
         <Label htmlFor="search" className="sr-only">
-          Search
+          {frontendLabels.search.ariaLabel}
         </Label>
         <Input
           id="search"
           onChange={(event) => {
             setValue(event.target.value)
           }}
-          placeholder="Search"
+          placeholder={frontendLabels.search.placeholder}
         />
         <button type="submit" className="sr-only">
-          submit
+          {frontendLabels.search.title}
         </button>
       </form>
     </div>

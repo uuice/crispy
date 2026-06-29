@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone'
 import { isEditor } from '../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
-import { slugField } from 'payload'
+import { chineseSlugField } from '@/fields/chineseSlugField'
 
 export const Tags: CollectionConfig = {
   slug: 'tags',
@@ -30,7 +30,7 @@ export const Tags: CollectionConfig = {
       type: 'textarea',
       label: adminLabels.description,
     },
-    slugField({
+    chineseSlugField({
       position: undefined,
     }),
   ],

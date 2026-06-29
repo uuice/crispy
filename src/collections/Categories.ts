@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 import { adminLabels } from '@/i18n/admin-labels'
-import { slugField } from 'payload'
+import { chineseSlugField } from '@/fields/chineseSlugField'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -24,7 +24,7 @@ export const Categories: CollectionConfig = {
       label: adminLabels.title,
       required: true,
     },
-    slugField({
+    chineseSlugField({
       position: undefined,
     }),
   ],

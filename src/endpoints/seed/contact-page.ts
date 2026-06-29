@@ -32,7 +32,7 @@ export const contact: (args: ContactArgs) => RequiredDataFromCollectionSlug<'pag
                     format: 0,
                     mode: 'normal',
                     style: '',
-                    text: 'Example contact form:',
+                    text: '联系表单',
                     version: 1,
                   },
                 ],
@@ -51,6 +51,6 @@ export const contact: (args: ContactArgs) => RequiredDataFromCollectionSlug<'pag
         },
       },
     ],
-    title: 'Contact',
+    title: '联系我们',
   }
 }

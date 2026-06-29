@@ -4,6 +4,7 @@ import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import type { CardPostData } from '@/components/Card'
+import { frontendLabels } from '@/i18n/frontend-labels'
 
 type PaginatedPosts = {
   docs: CardPostData[]
@@ -61,7 +62,7 @@ export const PostArchiveLayout: React.FC<Props> = ({
 
       {posts.totalDocs === 0 && (
         <div className="container">
-          <p className="text-muted-foreground">暂无文章</p>
+          <p className="text-muted-foreground">{frontendLabels.posts.none}</p>
         </div>
       )}
     </div>

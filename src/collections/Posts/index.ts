@@ -33,7 +33,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { slugField } from 'payload'
+import { chineseSlugField } from '@/fields/chineseSlugField'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -238,7 +238,7 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
-    slugField(),
+    chineseSlugField(),
   ],
   hooks: {
     beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],

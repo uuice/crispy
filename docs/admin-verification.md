@@ -4,6 +4,7 @@
 
 - [x] Payload 内置中文语言包（`fallbackLanguage: zh`）
 - [x] 自定义 Collection / Global 中文标签
+- [x] 插件翻译补全（重定向、导入导出、MCP 等）
 - [x] 角色、仪表盘、登录页中文文案
 - [x] Live Preview 断点中文（手机 / 平板 / 桌面）
 
