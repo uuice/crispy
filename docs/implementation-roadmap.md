@@ -20,42 +20,43 @@
 - [x] 启用 `@payloadcms/plugin-mcp`
 - [x] 更新 `docker-compose.yml`（PostgreSQL，可选）
 - [x] 更新 `.env.example`、开发端口 3333
-- [ ] 首次启动验证：`pnpm dev` → Admin 注册（SQLite，无需 Docker）
-- [ ] Admin 面板中文化（labels / i18n）
-- [ ] 运行 seed 并验证前台
+- [x] 首次启动验证（SQLite，无需 Docker）
+- [x] Admin 面板中文化（labels / i18n）
+- [x] 运行 seed 并验证前台
 
 ---
 
-## Phase 1 — 前台与协作（第 2–3 周）
+## Phase 1 — 前台与协作
 
 **目标**：通用 CMS 前台路由齐全，编辑协作可用。
 
 ### 前台路由
 
-- [ ] `/category/[slug]` 分类归档页
-- [ ] `/tag/[slug]` 标签归档页
-- [ ] `/archive` 按年月归档
-- [ ] `/rss.xml` RSS feed
-- [ ] 前台读取 `site-settings`（站点名、Logo、社交链接）
-- [ ] Posts 列表/详情展示 tags
+- [x] `/category/[slug]` 分类归档页
+- [x] `/tag/[slug]` 标签归档页
+- [x] `/archive` 按年月归档
+- [x] `/rss.xml` RSS feed
+- [x] 前台读取 `site-settings`（站点名、Logo、社交链接）
+- [x] Posts 列表/详情展示 tags
 
 ### 权限细化
 
-- [ ] `author` 仅能编辑自己的 posts（access 按 author 过滤）
-- [ ] `editor` 可发布任意内容
-- [ ] 创建演示账号：super-admin / editor / author
+- [x] `author` 仅能编辑自己的 posts（access 按 author 过滤）
+- [x] `author` 无法直接发布（beforeChange 强制 draft）
+- [x] `editor` 可发布任意内容
+- [x] Seed 演示账号：editor / author / agent
 
 ### AI / MCP
 
-- [ ] 创建 `agent` 用户 + API Key
-- [ ] 文档：MCP 连接说明（Cursor / Claude Desktop）
-- [ ] 验证 MCP：find / create / update posts
+- [x] Seed `agent@example.com` 用户（editor 角色）
+- [x] 文档：MCP 连接说明 `docs/mcp-guide.md`
+- [x] 验证 MCP：find / create / update posts
 
 ### 体验
 
-- [ ] 替换模板默认文案为 Crispy 品牌
-- [ ] 深色模式检查
-- [ ] Live Preview / Draft Preview 验证
+- [x] 替换模板默认文案为 Crispy 品牌
+- [x] 深色模式检查
+- [x] Live Preview / Draft Preview 验证（Preview 403 守卫 + 文档清单）
 
 ---
 
@@ -93,6 +94,9 @@
 ```bash
 pnpm dev                    # SQLite 本地开发
 pnpm docker:up              # 可选：本地 PostgreSQL
+pnpm verify:phase1           # Phase 1 冒烟（需 dev + MCP_API_KEY）
+pnpm seed                    # CLI 填充示例数据
+pnpm mcp:key                 # 重新生成 MCP API Key
 pnpm generate:types         # 更新 payload-types.ts
 pnpm payload migrate:create # 生产迁移
 pnpm build                  # 生产构建

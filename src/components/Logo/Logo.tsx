@@ -1,29 +1,42 @@
 import clsx from 'clsx'
 import React from 'react'
 
+import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
+
 interface Props {
   className?: string
   loading?: 'lazy' | 'eager'
+  logo?: MediaType | number | null
   priority?: 'auto' | 'high' | 'low'
+  siteName?: string
 }
 
 export const Logo = (props: Props) => {
-  const { loading: loadingFromProps, priority: priorityFromProps, className } = props
+  const {
+    className,
+    loading: loadingFromProps,
+    logo,
+    priority: priorityFromProps,
+    siteName = 'Crispy',
+  } = props
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
 
+  if (logo && typeof logo === 'object' && logo.url) {
+    return (
+      <Media
+        className={clsx('max-w-[9.375rem]', className)}
+        imgClassName="h-[34px] w-auto object-contain"
+        loading={loading}
+        priority={priority}
+        resource={logo}
+      />
+    )
+  }
+
   return (
-    /* eslint-disable @next/next/no-img-element */
-    <img
-      alt="Payload Logo"
-      width={193}
-      height={34}
-      loading={loading}
-      fetchPriority={priority}
-      decoding="async"
-      className={clsx('max-w-[9.375rem] w-full h-[34px]', className)}
-      src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg"
-    />
+    <span className={clsx('text-xl font-semibold tracking-tight', className)}>{siteName}</span>
   )
 }

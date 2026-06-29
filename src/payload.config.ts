@@ -14,6 +14,7 @@ import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { plugins } from './plugins'
+import { i18nConfig } from './i18n'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 
@@ -22,13 +23,17 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    meta: {
+      titleSuffix: '- Crispy CMS',
+    },
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
+      graphics: {
+        Logo: '@/components/AdminLogo',
+        Icon: '@/components/AdminIcon',
+      },
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
       beforeDashboard: ['@/components/BeforeDashboard'],
+      providers: ['@/components/AdminThemeProvider'],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -37,19 +42,19 @@ export default buildConfig({
     livePreview: {
       breakpoints: [
         {
-          label: 'Mobile',
+          label: '手机',
           name: 'mobile',
           width: 375,
           height: 667,
         },
         {
-          label: 'Tablet',
+          label: '平板',
           name: 'tablet',
           width: 768,
           height: 1024,
         },
         {
-          label: 'Desktop',
+          label: '桌面',
           name: 'desktop',
           width: 1440,
           height: 900,
@@ -57,6 +62,7 @@ export default buildConfig({
       ],
     },
   },
+  i18n: i18nConfig,
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: createDatabaseAdapter(),

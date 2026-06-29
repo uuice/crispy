@@ -3,9 +3,9 @@ import type { Access, PayloadRequest } from 'payload'
 export type CrispyRole = 'super-admin' | 'editor' | 'author'
 
 export const CRISPY_ROLES: { label: string; value: CrispyRole }[] = [
-  { label: 'Super Admin', value: 'super-admin' },
-  { label: 'Editor', value: 'editor' },
-  { label: 'Author', value: 'author' },
+  { label: '超级管理员', value: 'super-admin' },
+  { label: '编辑', value: 'editor' },
+  { label: '作者', value: 'author' },
 ]
 
 export function userRoles(user: PayloadRequest['user']): CrispyRole[] {

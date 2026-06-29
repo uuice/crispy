@@ -10,12 +10,14 @@ import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { adminLabels } from '@/i18n/admin-labels'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: adminLabels.media,
   folders: true,
   access: {
     create: authenticated,
@@ -27,11 +29,13 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      label: adminLabels.alt,
       //required: true,
     },
     {
       name: 'caption',
       type: 'richText',
+      label: adminLabels.caption,
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]

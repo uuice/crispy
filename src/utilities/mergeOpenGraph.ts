@@ -1,19 +1,25 @@
 import type { Metadata } from 'next'
+
+import { DEFAULT_SITE_NAME } from './getSiteSettings'
 import { getServerSideURL } from './getURL'
 
-const defaultOpenGraph: Metadata['openGraph'] = {
-  type: 'website',
-  description: 'An open-source website built with Payload and Next.js.',
-  images: [
-    {
-      url: `${getServerSideURL()}/website-template-OG.webp`,
-    },
-  ],
-  siteName: 'Payload Website Template',
-  title: 'Payload Website Template',
-}
+export const mergeOpenGraph = (
+  og?: Metadata['openGraph'],
+  siteName: string = DEFAULT_SITE_NAME,
+  siteDescription?: string | null,
+): Metadata['openGraph'] => {
+  const defaultOpenGraph: Metadata['openGraph'] = {
+    type: 'website',
+    description: siteDescription || 'Crispy — 基于 Payload 的通用 CMS',
+    images: [
+      {
+        url: `${getServerSideURL()}/website-template-OG.webp`,
+      },
+    ],
+    siteName,
+    title: siteName,
+  }
 
-export const mergeOpenGraph = (og?: Metadata['openGraph']): Metadata['openGraph'] => {
   return {
     ...defaultOpenGraph,
     ...og,

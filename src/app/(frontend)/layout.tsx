@@ -10,6 +10,7 @@ import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
+import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
@@ -20,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="zh-CN" suppressHydrationWarning>
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
@@ -43,11 +44,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   )
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
-  openGraph: mergeOpenGraph(),
-  twitter: {
-    card: 'summary_large_image',
-    creator: '@payloadcms',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getCachedSiteSettings()()
+  const siteName = settings.siteName || 'Crispy'
+
+  return {
+    metadataBase: new URL(getServerSideURL()),
+    description: settings.siteDescription || undefined,
+    openGraph: mergeOpenGraph(undefined, siteName, settings.siteDescription),
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+    },
+  }
 }

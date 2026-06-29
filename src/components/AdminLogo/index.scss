@@ -1,0 +1,53 @@
+.crispy-admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__mark {
+    flex-shrink: 0;
+    filter: drop-shadow(0 4px 12px oklch(52% 0.22 var(--crispy-hue) / 0.35));
+
+    #crispy-mark-gradient stop:first-child {
+      stop-color: oklch(68% 0.175 var(--crispy-hue));
+    }
+
+    #crispy-mark-gradient stop:last-child {
+      stop-color: oklch(43% 0.2 var(--crispy-hue));
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+
+  &__wordmark {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--theme-text);
+  }
+
+  &__suffix {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-blue-700);
+  }
+}
+
+html[data-theme='dark'] .crispy-admin-logo__suffix {
+  color: var(--color-blue-300);
+}
+
+.crispy-admin-icon {
+  #crispy-icon-gradient stop:first-child {
+    stop-color: oklch(68% 0.175 var(--crispy-hue));
+  }
+
+  #crispy-icon-gradient stop:last-child {
+    stop-color: oklch(43% 0.2 var(--crispy-hue));
+  }
+}

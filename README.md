@@ -63,6 +63,8 @@ pnpm build && pnpm start
 
 - [架构设计](docs/crispy-v3-architecture.md)
 - [实施路线图](docs/implementation-roadmap.md)
+- [MCP 连接指南](docs/mcp-guide.md)
+- [Admin 验证清单](docs/admin-verification.md)
 
 ## 常用命令
 
@@ -72,7 +74,9 @@ pnpm build && pnpm start
 | `pnpm build` | 生产构建 |
 | `pnpm docker:up` | 启动 PostgreSQL（可选，本地 PG 调试） |
 | `pnpm docker:down` | 停止 PostgreSQL |
-| `pnpm generate:types` | 生成 Payload TypeScript 类型 |
+| `pnpm verify:phase1` | Phase 1 冒烟验证 |
+| `pnpm seed` | CLI 填充示例数据 |
+| `pnpm mcp:key` | 生成 MCP API Key |
 | `pnpm payload migrate:create` | 创建数据库迁移 |
 | `pnpm payload migrate` | 执行迁移（生产） |
 

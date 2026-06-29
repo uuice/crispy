@@ -4,11 +4,11 @@ import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Post } from '@/payload-types'
+import type { Post, Tag } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardPostData = Pick<Post, 'slug' | 'categories' | 'tags' | 'meta' | 'title'>
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -16,15 +16,24 @@ export const Card: React.FC<{
   doc?: CardPostData
   relationTo?: 'posts'
   showCategories?: boolean
+  showTags?: boolean
   title?: string
 }> = (props) => {
   const { card, link } = useClickableCard({})
-  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
+  const {
+    className,
+    doc,
+    relationTo,
+    showCategories,
+    showTags,
+    title: titleFromProps,
+  } = props
 
-  const { slug, categories, meta, title } = doc || {}
+  const { slug, categories, tags, meta, title } = doc || {}
   const { description, image: metaImage } = meta || {}
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
+  const hasTags = tags && Array.isArray(tags) && tags.length > 0
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
   const href = `/${relationTo}/${slug}`
@@ -45,21 +54,44 @@ export const Card: React.FC<{
         {showCategories && hasCategories && (
           <div className="uppercase text-sm mb-4">
             {categories?.map((category, index) => {
-              if (typeof category === 'object') {
-                const { title: titleFromCategory } = category
-
+              if (typeof category === 'object' && category !== null) {
+                const { title: titleFromCategory, slug: categorySlug } = category
                 const categoryTitle = titleFromCategory || 'Untitled category'
-
                 const isLast = index === categories.length - 1
 
                 return (
                   <Fragment key={index}>
-                    {categoryTitle}
+                    {categorySlug ? (
+                      <Link className="hover:underline" href={`/category/${categorySlug}`}>
+                        {categoryTitle}
+                      </Link>
+                    ) : (
+                      categoryTitle
+                    )}
                     {!isLast && <Fragment>, &nbsp;</Fragment>}
                   </Fragment>
                 )
               }
 
+              return null
+            })}
+          </div>
+        )}
+        {showTags && hasTags && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags?.map((tag, index) => {
+              if (typeof tag === 'object' && tag !== null) {
+                const tagDoc = tag as Tag
+                return (
+                  <Link
+                    className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80"
+                    href={`/tag/${tagDoc.slug}`}
+                    key={index}
+                  >
+                    {tagDoc.title}
+                  </Link>
+                )
+              }
               return null
             })}
           </div>

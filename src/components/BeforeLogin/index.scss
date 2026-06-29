@@ -1,0 +1,37 @@
+@import '@payloadcms/ui/scss';
+
+.before-login {
+  margin-bottom: base(1);
+  padding: base(0.75) base(1);
+  border-radius: var(--style-radius-m);
+  border: 1px solid var(--color-blue-200);
+  background: var(--color-base-0);
+  color: var(--theme-text);
+  box-shadow: 0 1px 3px oklch(0% 0 0 / 0.06);
+
+  &__title {
+    margin: 0 0 base(0.25);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-blue-800);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--color-base-600);
+    line-height: 1.5;
+  }
+}
+
+html[data-theme='dark'] .before-login {
+  border-color: oklch(40% 0.1 var(--crispy-hue));
+  background: var(--color-base-900);
+
+  &__title {
+    color: var(--color-blue-200);
+  }
+
+  &__text {
+    color: var(--color-base-250);
+  }
+}

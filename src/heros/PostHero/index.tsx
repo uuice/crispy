@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { formatDateTime } from 'src/utilities/formatDateTime'
 import React from 'react'
 
@@ -9,7 +10,7 @@ import { formatAuthors } from '@/utilities/formatAuthors'
 export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
-  const { categories, heroImage, populatedAuthors, publishedAt, title } = post
+  const { categories, heroImage, populatedAuthors, publishedAt, tags, title } = post
 
   const hasAuthors =
     populatedAuthors && populatedAuthors.length > 0 && formatAuthors(populatedAuthors) !== ''
@@ -21,15 +22,19 @@ export const PostHero: React.FC<{
           <div className="uppercase text-sm mb-6">
             {categories?.map((category, index) => {
               if (typeof category === 'object' && category !== null) {
-                const { title: categoryTitle } = category
-
+                const { title: categoryTitle, slug: categorySlug } = category
                 const titleToUse = categoryTitle || 'Untitled category'
-
                 const isLast = index === categories.length - 1
 
                 return (
                   <React.Fragment key={index}>
-                    {titleToUse}
+                    {categorySlug ? (
+                      <Link className="hover:underline" href={`/category/${categorySlug}`}>
+                        {titleToUse}
+                      </Link>
+                    ) : (
+                      titleToUse
+                    )}
                     {!isLast && <React.Fragment>, &nbsp;</React.Fragment>}
                   </React.Fragment>
                 )
@@ -37,6 +42,25 @@ export const PostHero: React.FC<{
               return null
             })}
           </div>
+
+          {tags && tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {tags.map((tag, index) => {
+                if (typeof tag === 'object' && tag !== null) {
+                  return (
+                    <Link
+                      className="text-xs px-2 py-1 rounded-full bg-white/20 hover:bg-white/30"
+                      href={`/tag/${tag.slug}`}
+                      key={index}
+                    >
+                      {tag.title}
+                    </Link>
+                  )
+                }
+                return null
+              })}
+            </div>
+          )}
 
           <div className="">
             <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title}</h1>

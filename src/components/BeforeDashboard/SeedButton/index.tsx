@@ -7,10 +7,11 @@ import './index.scss'
 
 const SuccessMessage: React.FC = () => (
   <div>
-    Database seeded! You can now{' '}
+    数据库已填充！现在可以{' '}
     <a target="_blank" href="/">
-      visit your website
+      访问前台
     </a>
+    。MCP 密钥请查看终端日志或 Admin → MCP → API Keys。
   </div>
 )
 
@@ -24,15 +25,15 @@ export const SeedButton: React.FC = () => {
       e.preventDefault()
 
       if (seeded) {
-        toast.info('Database already seeded.')
+        toast.info('数据库已填充过。')
         return
       }
       if (loading) {
-        toast.info('Seeding already in progress.')
+        toast.info('正在填充数据，请稍候…')
         return
       }
       if (error) {
-        toast.error(`An error occurred, please refresh and try again.`)
+        toast.error('发生错误，请刷新页面后重试。')
         return
       }
 
@@ -41,46 +42,41 @@ export const SeedButton: React.FC = () => {
       try {
         toast.promise(
           new Promise((resolve, reject) => {
-            try {
-              fetch('/next/seed', { method: 'POST', credentials: 'include' })
-                .then((res) => {
-                  if (res.ok) {
-                    resolve(true)
-                    setSeeded(true)
-                  } else {
-                    reject('An error occurred while seeding.')
-                  }
-                })
-                .catch((error) => {
-                  reject(error)
-                })
-            } catch (error) {
-              reject(error)
-            }
+            fetch('/next/seed', { method: 'POST', credentials: 'include' })
+              .then((res) => {
+                if (res.ok) {
+                  resolve(true)
+                  setSeeded(true)
+                } else {
+                  reject('填充数据失败。')
+                }
+              })
+              .catch(reject)
           }),
           {
-            loading: 'Seeding with data....',
+            loading: '正在填充示例数据…',
             success: <SuccessMessage />,
-            error: 'An error occurred while seeding.',
+            error: '填充数据失败。',
           },
         )
       } catch (err) {
-        const error = err instanceof Error ? err.message : String(err)
-        setError(error)
+        setError(err instanceof Error ? err.message : String(err))
+      } finally {
+        setLoading(false)
       }
     },
     [loading, seeded, error],
   )
 
   let message = ''
-  if (loading) message = ' (seeding...)'
-  if (seeded) message = ' (done!)'
-  if (error) message = ` (error: ${error})`
+  if (loading) message = '（填充中…）'
+  if (seeded) message = '（完成）'
+  if (error) message = `（错误：${error}）`
 
   return (
     <Fragment>
-      <button className="seedButton" onClick={handleClick}>
-        Seed your database
+      <button className="seedButton" onClick={handleClick} type="button">
+        填充示例数据
       </button>
       {message}
     </Fragment>

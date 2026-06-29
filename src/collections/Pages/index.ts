@@ -12,6 +12,7 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { adminLabels } from '@/i18n/admin-labels'
 
 import {
   MetaDescriptionField,
@@ -23,6 +24,7 @@ import {
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
+  labels: adminLabels.pages,
   access: {
     create: authenticated,
     delete: authenticated,
@@ -65,13 +67,14 @@ export const Pages: CollectionConfig<'pages'> = {
       tabs: [
         {
           fields: [hero],
-          label: 'Hero',
+          label: adminLabels.hero,
         },
         {
           fields: [
             {
               name: 'layout',
               type: 'blocks',
+              label: adminLabels.layout,
               blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
               required: true,
               admin: {
@@ -79,11 +82,11 @@ export const Pages: CollectionConfig<'pages'> = {
               },
             },
           ],
-          label: 'Content',
+          label: adminLabels.content,
         },
         {
           name: 'meta',
-          label: 'SEO',
+          label: adminLabels.seo,
           fields: [
             OverviewField({
               titlePath: 'meta.title',

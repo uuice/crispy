@@ -9,14 +9,22 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+
+import {
+  postsCreateAccess,
+  postsDeleteAccess,
+  postsReadAccess,
+  postsUpdateAccess,
+} from '../../access/posts'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { assignAuthorOnCreate } from './hooks/assignAuthorOnCreate'
 import { populateAuthors } from './hooks/populateAuthors'
+import { restrictAuthorPublish } from './hooks/restrictAuthorPublish'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
+import { adminLabels } from '@/i18n/admin-labels'
 
 import {
   MetaDescriptionField,
@@ -29,11 +37,12 @@ import { slugField } from 'payload'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
+  labels: adminLabels.posts,
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: authenticatedOrPublished,
-    update: authenticated,
+    create: postsCreateAccess,
+    delete: postsDeleteAccess,
+    read: postsReadAccess,
+    update: postsUpdateAccess,
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -42,6 +51,7 @@ export const Posts: CollectionConfig<'posts'> = {
     title: true,
     slug: true,
     categories: true,
+    tags: true,
     meta: {
       image: true,
       description: true,
@@ -100,13 +110,14 @@ export const Posts: CollectionConfig<'posts'> = {
               required: true,
             },
           ],
-          label: 'Content',
+          label: adminLabels.content,
         },
         {
           fields: [
             {
               name: 'relatedPosts',
               type: 'relationship',
+              label: adminLabels.relatedPosts,
               admin: {
                 position: 'sidebar',
               },
@@ -123,6 +134,7 @@ export const Posts: CollectionConfig<'posts'> = {
             {
               name: 'categories',
               type: 'relationship',
+              label: adminLabels.categoriesField,
               admin: {
                 position: 'sidebar',
               },
@@ -132,6 +144,7 @@ export const Posts: CollectionConfig<'posts'> = {
             {
               name: 'tags',
               type: 'relationship',
+              label: adminLabels.tagsField,
               admin: {
                 position: 'sidebar',
               },
@@ -139,11 +152,11 @@ export const Posts: CollectionConfig<'posts'> = {
               relationTo: 'tags',
             },
           ],
-          label: 'Meta',
+          label: adminLabels.meta,
         },
         {
           name: 'meta',
-          label: 'SEO',
+          label: adminLabels.seo,
           fields: [
             OverviewField({
               titlePath: 'meta.title',
@@ -173,6 +186,7 @@ export const Posts: CollectionConfig<'posts'> = {
     {
       name: 'publishedAt',
       type: 'date',
+      label: adminLabels.publishedAt,
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
@@ -193,6 +207,7 @@ export const Posts: CollectionConfig<'posts'> = {
     {
       name: 'authors',
       type: 'relationship',
+      label: adminLabels.authors,
       admin: {
         position: 'sidebar',
       },
@@ -226,6 +241,7 @@ export const Posts: CollectionConfig<'posts'> = {
     slugField(),
   ],
   hooks: {
+    beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],

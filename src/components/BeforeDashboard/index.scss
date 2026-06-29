@@ -12,10 +12,22 @@
   &__instructions {
     list-style: decimal;
     margin-bottom: base(0.5);
+    padding-left: base(1.25);
+    line-height: 1.6;
 
     & li {
       width: 100%;
+      margin-bottom: base(0.35);
     }
+  }
+
+  &__hint {
+    margin: 0;
+    padding: base(0.6) base(0.8);
+    border-radius: var(--style-radius-s);
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-600);
+    font-size: 0.92rem;
   }
 
   & a:hover {

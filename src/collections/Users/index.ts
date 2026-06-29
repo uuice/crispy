@@ -2,9 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { CRISPY_ROLES, isSuperAdmin } from '../../access/roles'
+import { adminLabels } from '@/i18n/admin-labels'
 
 export const Users: CollectionConfig = {
   slug: 'users',
+  labels: adminLabels.users,
   access: {
     admin: authenticated,
     create: isSuperAdmin,
@@ -23,6 +25,7 @@ export const Users: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      label: adminLabels.name,
     },
     {
       name: 'roles',
@@ -31,6 +34,7 @@ export const Users: CollectionConfig = {
       saveToJWT: true,
       defaultValue: ['author'],
       required: true,
+      label: adminLabels.roles,
       options: CRISPY_ROLES,
       access: {
         update: isSuperAdmin,

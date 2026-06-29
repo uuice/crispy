@@ -1,7 +1,11 @@
 import type { GlobalAfterChangeHook } from 'payload'
 import { revalidatePath, revalidateTag } from 'next/cache'
 
-export const revalidateSiteSettings: GlobalAfterChangeHook = () => {
+export const revalidateSiteSettings: GlobalAfterChangeHook = ({ context }) => {
+  if (context.disableRevalidate) {
+    return
+  }
+
   revalidateTag('global_site-settings')
   revalidatePath('/', 'layout')
 }

@@ -1,0 +1,100 @@
+// Crispy Admin — OKLCH palette driven by --crispy-hue (overridable from site-settings)
+
+@mixin crispy-brand-colors {
+  --crispy-hue: 41.116deg;
+
+  /* Payload maps interactive UI to --color-blue-* — wider L/C steps for clearer contrast */
+  --color-blue-50: oklch(97.5% 0.028 var(--crispy-hue));
+  --color-blue-100: oklch(94% 0.055 var(--crispy-hue));
+  --color-blue-150: oklch(90% 0.075 var(--crispy-hue));
+  --color-blue-200: oklch(86% 0.095 var(--crispy-hue));
+  --color-blue-250: oklch(81% 0.115 var(--crispy-hue));
+  --color-blue-300: oklch(76% 0.135 var(--crispy-hue));
+  --color-blue-350: oklch(72% 0.155 var(--crispy-hue));
+  --color-blue-400: oklch(68% 0.175 var(--crispy-hue));
+  --color-blue-450: oklch(64% 0.19 var(--crispy-hue));
+  --color-blue-500: oklch(60% 0.21 var(--crispy-hue));
+  --color-blue-550: oklch(56% 0.215 var(--crispy-hue));
+  --color-blue-600: oklch(52% 0.22 var(--crispy-hue));
+  --color-blue-650: oklch(48% 0.215 var(--crispy-hue));
+  --color-blue-700: oklch(43% 0.2 var(--crispy-hue));
+  --color-blue-750: oklch(38% 0.185 var(--crispy-hue));
+  --color-blue-800: oklch(33% 0.17 var(--crispy-hue));
+  --color-blue-850: oklch(28% 0.15 var(--crispy-hue));
+  --color-blue-900: oklch(23% 0.13 var(--crispy-hue));
+  --color-blue-950: oklch(16% 0.09 var(--crispy-hue));
+}
+
+@mixin crispy-warm-light-base {
+  --color-base-0: oklch(100% 0.003 80);
+  --color-base-50: oklch(98% 0.005 80);
+  --color-base-100: oklch(95.5% 0.007 80);
+  --color-base-150: oklch(92% 0.009 80);
+  --color-base-200: oklch(88% 0.011 80);
+  --color-base-250: oklch(82% 0.013 80);
+  --color-base-300: oklch(74% 0.014 80);
+  --color-base-350: oklch(66% 0.014 80);
+  --color-base-400: oklch(58% 0.014 80);
+  --color-base-450: oklch(50% 0.014 80);
+  --color-base-500: oklch(44% 0.013 80);
+  --color-base-550: oklch(38% 0.013 80);
+  --color-base-600: oklch(32% 0.012 80);
+  --color-base-650: oklch(27% 0.012 80);
+  --color-base-700: oklch(23% 0.012 80);
+  --color-base-750: oklch(19% 0.011 80);
+  --color-base-800: oklch(16% 0.011 80);
+  --color-base-850: oklch(13% 0.01 80);
+  --color-base-900: oklch(10% 0.01 80);
+  --color-base-950: oklch(7% 0.009 80);
+  --color-base-1000: oklch(4% 0.008 80);
+}
+
+@mixin crispy-warm-dark-base {
+  --color-base-0: oklch(98% 0.005 80);
+  --color-base-50: oklch(94% 0.007 80);
+  --color-base-100: oklch(88% 0.009 80);
+  --color-base-150: oklch(80% 0.01 80);
+  --color-base-200: oklch(72% 0.011 80);
+  --color-base-250: oklch(64% 0.012 80);
+  --color-base-300: oklch(56% 0.012 80);
+  --color-base-350: oklch(48% 0.012 80);
+  --color-base-400: oklch(42% 0.012 80);
+  --color-base-450: oklch(36% 0.011 80);
+  --color-base-500: oklch(30% 0.011 80);
+  --color-base-550: oklch(26% 0.01 80);
+  --color-base-600: oklch(22% 0.01 80);
+  --color-base-650: oklch(19% 0.009 80);
+  --color-base-700: oklch(16% 0.009 80);
+  --color-base-750: oklch(14% 0.008 80);
+  --color-base-800: oklch(12% 0.008 80);
+  --color-base-850: oklch(10% 0.007 80);
+  --color-base-900: oklch(8.5% 0.007 80);
+  --color-base-950: oklch(7% 0.006 80);
+  --color-base-1000: oklch(5.5% 0.006 80);
+}
+
+@mixin crispy-radius {
+  --style-radius-s: 6px;
+  --style-radius-m: 10px;
+  --style-radius-l: 16px;
+}
+
+@mixin crispy-contrast-tokens-light {
+  --crispy-admin-bg: oklch(91% 0.024 var(--crispy-hue));
+  --crispy-admin-surface: oklch(98.5% 0.01 var(--crispy-hue));
+  --theme-bg: var(--crispy-admin-bg);
+  --theme-input-bg: var(--crispy-admin-surface);
+  --theme-text: var(--color-base-900);
+  --theme-border-color: var(--color-base-250);
+  --theme-elevation-0: var(--crispy-admin-surface);
+}
+
+@mixin crispy-contrast-tokens-dark {
+  --crispy-admin-bg: oklch(9% 0.016 var(--crispy-hue));
+  --crispy-admin-surface: oklch(14% 0.014 var(--crispy-hue));
+  --theme-bg: var(--crispy-admin-bg);
+  --theme-input-bg: oklch(18% 0.012 var(--crispy-hue));
+  --theme-text: var(--color-base-50);
+  --theme-border-color: var(--color-base-650);
+  --theme-elevation-0: var(--crispy-admin-surface);
+}

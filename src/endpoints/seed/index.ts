@@ -1,4 +1,5 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import crypto from 'crypto'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -12,6 +13,7 @@ import { post3 } from './post-3'
 
 const collections: CollectionSlug[] = [
   'categories',
+  'tags',
   'media',
   'pages',
   'posts',
@@ -20,9 +22,11 @@ const collections: CollectionSlug[] = [
   'search',
 ]
 
-const globals: GlobalSlug[] = ['header', 'footer']
+const globals: GlobalSlug[] = ['header', 'footer', 'site-settings']
 
 const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
+
+const tags = ['Payload', 'Next.js', 'CMS', 'TypeScript', 'Open Source']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -37,6 +41,8 @@ export const seed = async ({
 }): Promise<void> => {
   payload.logger.info('Seeding database...')
 
+  const seedContext = { disableRevalidate: true }
+
   // we need to clear the media directory before seeding
   // as well as the collections and globals
   // this is because while `yarn seed` drops the database
@@ -45,18 +51,30 @@ export const seed = async ({
 
   // clear the database
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
+    globals.map((global) => {
+      if (global === 'site-settings') {
+        return payload.updateGlobal({
+          slug: global,
+          data: {
+            siteName: 'Crispy',
+            siteDescription: '基于 Payload 的通用内容管理系统',
+            enableRss: true,
+            adminThemeHue: 41.116,
+          },
+          depth: 0,
+          context: seedContext,
+        })
+      }
+
+      return payload.updateGlobal({
         slug: global,
         data: {
           navItems: [],
         },
         depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
+        context: seedContext,
+      })
+    }),
   )
 
   await Promise.all(
@@ -69,17 +87,29 @@ export const seed = async ({
       .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
   )
 
-  payload.logger.info(`— Seeding demo author and user...`)
+  payload.logger.info(`— Seeding demo users...`)
+
+  const demoUsers = [
+    { name: 'Demo Author', email: 'demo-author@example.com', roles: ['author'] as const },
+    { name: 'Editor', email: 'editor@example.com', roles: ['editor'] as const },
+    { name: 'Author', email: 'author@example.com', roles: ['author'] as const },
+    { name: 'Agent', email: 'agent@example.com', roles: ['editor'] as const },
+  ]
 
   await payload.delete({
-    collection: 'users',
-    depth: 0,
-    where: {
-      email: {
-        equals: 'demo-author@example.com',
-      },
-    },
+    collection: 'payload-mcp-api-keys',
+    overrideAccess: true,
+    where: { label: { equals: '开发 Agent' } },
   })
+
+  for (const user of demoUsers) {
+    await payload.delete({
+      collection: 'users',
+      depth: 0,
+      overrideAccess: true,
+      where: { email: { equals: user.email } },
+    })
+  }
 
   payload.logger.info(`— Seeding media...`)
 
@@ -101,10 +131,12 @@ export const seed = async ({
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'users',
+      overrideAccess: true,
       data: {
-        name: 'Demo Author',
-        email: 'demo-author@example.com',
+        name: demoUsers[0].name,
+        email: demoUsers[0].email,
         password: 'password',
+        roles: [...demoUsers[0].roles],
       },
     }),
     payload.create({
@@ -127,7 +159,25 @@ export const seed = async ({
       data: imageHero1,
       file: hero1Buffer,
     }),
-    categories.map((category) =>
+  ])
+
+  await Promise.all(
+    demoUsers.slice(1).map((user) =>
+      payload.create({
+        collection: 'users',
+        overrideAccess: true,
+        data: {
+          name: user.name,
+          email: user.email,
+          password: 'password',
+          roles: [...user.roles],
+        },
+      }),
+    ),
+  )
+
+  await Promise.all([
+    ...categories.map((category) =>
       payload.create({
         collection: 'categories',
         data: {
@@ -136,7 +186,22 @@ export const seed = async ({
         },
       }),
     ),
+    ...tags.map((tag) =>
+      payload.create({
+        collection: 'tags',
+        data: {
+          title: tag,
+          slug: tag.toLowerCase().replace(/\./g, '-').replace(/\s+/g, '-'),
+        },
+      }),
+    ),
   ])
+
+  const tagDocs = await payload.find({
+    collection: 'tags',
+    limit: 10,
+    pagination: false,
+  })
 
   payload.logger.info(`— Seeding posts...`)
 
@@ -145,34 +210,38 @@ export const seed = async ({
   const post1Doc = await payload.create({
     collection: 'posts',
     depth: 0,
-    context: {
-      disableRevalidate: true,
+    context: seedContext,
+    data: {
+      ...post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
+      tags: tagDocs.docs.slice(0, 2).map((tag) => tag.id),
     },
-    data: post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
   })
 
   const post2Doc = await payload.create({
     collection: 'posts',
     depth: 0,
-    context: {
-      disableRevalidate: true,
+    context: seedContext,
+    data: {
+      ...post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
+      tags: tagDocs.docs.slice(2, 4).map((tag) => tag.id),
     },
-    data: post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
   })
 
   const post3Doc = await payload.create({
     collection: 'posts',
     depth: 0,
-    context: {
-      disableRevalidate: true,
+    context: seedContext,
+    data: {
+      ...post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
+      tags: tagDocs.docs.slice(4, 5).map((tag) => tag.id),
     },
-    data: post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
   })
 
   // update each post with related posts
   await payload.update({
     id: post1Doc.id,
     collection: 'posts',
+    context: seedContext,
     data: {
       relatedPosts: [post2Doc.id, post3Doc.id],
     },
@@ -180,6 +249,7 @@ export const seed = async ({
   await payload.update({
     id: post2Doc.id,
     collection: 'posts',
+    context: seedContext,
     data: {
       relatedPosts: [post1Doc.id, post3Doc.id],
     },
@@ -187,6 +257,7 @@ export const seed = async ({
   await payload.update({
     id: post3Doc.id,
     collection: 'posts',
+    context: seedContext,
     data: {
       relatedPosts: [post1Doc.id, post2Doc.id],
     },
@@ -197,6 +268,7 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
+    context: seedContext,
     data: contactFormData,
   })
 
@@ -206,11 +278,13 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
+      context: seedContext,
       data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
+      context: seedContext,
       data: contactPageData({ contactForm: contactForm }),
     }),
   ])
@@ -220,6 +294,7 @@ export const seed = async ({
   await Promise.all([
     payload.updateGlobal({
       slug: 'header',
+      context: seedContext,
       data: {
         navItems: [
           {
@@ -227,6 +302,13 @@ export const seed = async ({
               type: 'custom',
               label: 'Posts',
               url: '/posts',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Archive',
+              url: '/archive',
             },
           },
           {
@@ -244,6 +326,7 @@ export const seed = async ({
     }),
     payload.updateGlobal({
       slug: 'footer',
+      context: seedContext,
       data: {
         navItems: [
           {
@@ -256,23 +339,62 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/3.x/templates/website',
+              label: 'RSS',
+              url: '/rss.xml',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Payload',
+              label: 'GitHub',
               newTab: true,
-              url: 'https://payloadcms.com/',
+              url: 'https://github.com/uuice/crispy',
             },
           },
         ],
       },
     }),
   ])
+
+  payload.logger.info(`— Seeding MCP API key for agent...`)
+
+  const agentResult = await payload.find({
+    collection: 'users',
+    limit: 1,
+    where: { email: { equals: 'agent@example.com' } },
+  })
+
+  const agent = agentResult.docs[0]
+
+  if (agent) {
+    await payload.delete({
+      collection: 'payload-mcp-api-keys',
+      where: { label: { equals: '开发 Agent' } },
+    })
+
+    const mcpApiKey = crypto.randomBytes(32).toString('hex')
+
+    const mcpKeyDoc = await payload.create({
+      collection: 'payload-mcp-api-keys',
+      data: {
+        label: '开发 Agent',
+        description: '本地开发 / MCP 验证用',
+        user: agent.id,
+        enableAPIKey: true,
+        apiKey: mcpApiKey,
+        posts: { find: true, create: true, update: true, delete: true },
+        pages: { find: true, create: true, update: true, delete: true },
+        categories: { find: true, create: true, update: true, delete: true },
+        tags: { find: true, create: true, update: true, delete: true },
+        media: { find: true, create: true, update: true, delete: false },
+      },
+      overrideAccess: true,
+    })
+
+    if (mcpKeyDoc) {
+      payload.logger.info(`— MCP API Key（写入 MCP_API_KEY 环境变量）: ${mcpApiKey}`)
+    }
+  }
 
   payload.logger.info('Seeded database successfully!')
 }

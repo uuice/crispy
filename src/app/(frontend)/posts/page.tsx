@@ -23,6 +23,7 @@ export default async function Page() {
       title: true,
       slug: true,
       categories: true,
+      tags: true,
       meta: true,
     },
   })
@@ -45,7 +46,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive posts={posts.docs} showTags />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (
@@ -56,8 +57,11 @@ export default async function Page() {
   )
 }
 
+import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
+
 export function generateMetadata(): Metadata {
   return {
-    title: `Payload Website Template Posts`,
+    title: `文章`,
+    description: `${DEFAULT_SITE_NAME} 文章列表`,
   }
 }
