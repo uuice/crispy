@@ -1,0 +1,260 @@
+.swagger-docs {
+  margin-top: base(1);
+
+  &__mount {
+    border-radius: var(--style-radius-m);
+    overflow: hidden;
+  }
+
+  .swagger-ui {
+    font-family: inherit;
+    color: var(--theme-text);
+
+    .info {
+      margin: base(1) 0;
+    }
+
+    .info .title,
+    .info p,
+    .info li,
+    .info table,
+    .opblock-tag,
+    .opblock-tag small,
+    .opblock .opblock-summary-description,
+    .opblock .opblock-summary-path,
+    .opblock-description-wrapper p,
+    .parameter__name,
+    .parameter__type,
+    .response-col_status,
+    .response-col_links,
+    .tab li,
+    label,
+    .model-title,
+    .model {
+      color: var(--theme-text);
+    }
+
+    .opblock-tag-section {
+      border-radius: var(--style-radius-s);
+    }
+
+    .opblock {
+      border-radius: var(--style-radius-s);
+      margin-bottom: base(0.5);
+      box-shadow: none;
+    }
+
+    .opblock .opblock-section-header {
+      background: var(--theme-elevation-100, var(--color-base-100));
+    }
+
+    .opblock-body,
+    .opblock-description-wrapper,
+    .table-container,
+    .model-box,
+    .model-container {
+      background: var(--crispy-admin-surface, var(--theme-elevation-0));
+    }
+
+    .scheme-container {
+      background: var(--crispy-admin-surface, var(--theme-elevation-0));
+      box-shadow: inset 0 1px 0 var(--theme-border-color);
+    }
+
+    table thead tr th,
+    table tbody tr td {
+      border-color: var(--theme-border-color);
+      color: var(--theme-text);
+    }
+
+    table thead tr td,
+    table thead tr th {
+      background: var(--theme-elevation-100, var(--color-base-100));
+    }
+
+    input[type='text'],
+    input[type='password'],
+    input[type='search'],
+    input[type='email'],
+    input[type='url'],
+    textarea,
+    select {
+      background: var(--theme-input-bg) !important;
+      border-color: var(--theme-border-color) !important;
+      color: var(--theme-text) !important;
+      border-radius: var(--style-radius-s);
+    }
+
+    .btn {
+      border-radius: var(--style-radius-s);
+    }
+
+    .btn.execute {
+      background: var(--color-blue-600);
+      border-color: var(--color-blue-650);
+      color: oklch(99% 0.01 var(--crispy-hue, 250));
+
+      &:hover {
+        background: var(--color-blue-550);
+      }
+    }
+
+    .btn.cancel {
+      border-color: var(--theme-border-color);
+      color: var(--theme-text);
+    }
+
+    pre,
+    .microlight,
+    .highlight-code {
+      background: var(--theme-elevation-150, var(--color-base-150)) !important;
+      color: var(--theme-text) !important;
+      border-radius: var(--style-radius-s);
+    }
+
+    .markdown code,
+    .renderedMarkdown code {
+      background: var(--theme-elevation-100, var(--color-base-100));
+      color: var(--theme-text);
+    }
+
+    .model-box-control:focus,
+    .opblock-summary-control:focus {
+      outline: 2px solid var(--color-blue-500, #3b82f6);
+    }
+
+    a {
+      color: var(--color-blue-700);
+
+      &:hover {
+        color: var(--color-blue-800);
+      }
+    }
+
+    .download-url-wrapper .select-label {
+      color: var(--theme-text);
+    }
+  }
+
+  /* Light: soften default white panels to match Admin surfaces */
+  &--light .swagger-ui {
+    .wrapper {
+      background: transparent;
+    }
+
+    .information-container,
+    .opblock-tag-section,
+    .scheme-container {
+      background: var(--crispy-admin-surface, var(--theme-elevation-0));
+    }
+  }
+
+  /* Dark: follow Admin html[data-theme="dark"] tokens */
+  &--dark .swagger-ui {
+    color-scheme: dark;
+
+    .wrapper {
+      background: transparent;
+    }
+
+    .information-container,
+    .opblock-tag-section,
+    .scheme-container,
+    .opblock .opblock-section-header,
+    .opblock-body,
+    .opblock-description-wrapper,
+    .table-container,
+    .model-box,
+    .model-container,
+    section.models {
+      background: var(--crispy-admin-surface);
+      border-color: var(--theme-border-color);
+    }
+
+    .opblock-tag {
+      border-bottom-color: var(--theme-border-color);
+    }
+
+    .opblock .opblock-summary {
+      border-color: var(--theme-border-color);
+    }
+
+    .opblock.opblock-get .opblock-summary {
+      border-color: color-mix(in oklch, #61affe 55%, var(--theme-border-color));
+    }
+
+    .opblock.opblock-post .opblock-summary {
+      border-color: color-mix(in oklch, #49cc90 55%, var(--theme-border-color));
+    }
+
+    .opblock.opblock-put .opblock-summary {
+      border-color: color-mix(in oklch, #fca130 55%, var(--theme-border-color));
+    }
+
+    .opblock.opblock-delete .opblock-summary {
+      border-color: color-mix(in oklch, #f93e3e 55%, var(--theme-border-color));
+    }
+
+    .opblock.opblock-patch .opblock-summary {
+      border-color: color-mix(in oklch, #50e3c2 55%, var(--theme-border-color));
+    }
+
+    table thead tr td,
+    table thead tr th {
+      background: var(--theme-elevation-150, var(--color-base-650));
+    }
+
+    table tbody tr td {
+      background: var(--crispy-admin-surface);
+    }
+
+    pre,
+    .microlight,
+    .highlight-code {
+      background: var(--theme-input-bg) !important;
+    }
+
+    .markdown code,
+    .renderedMarkdown code {
+      background: var(--theme-elevation-150, var(--color-base-650));
+    }
+
+    a {
+      color: var(--color-blue-300);
+
+      &:hover {
+        color: var(--color-blue-200);
+      }
+    }
+
+    .btn.authorize {
+      border-color: var(--theme-border-color);
+      color: var(--theme-text);
+    }
+
+    .dialog-ux .modal-ux {
+      background: var(--crispy-admin-surface);
+      border: 1px solid var(--theme-border-color);
+      color: var(--theme-text);
+    }
+
+    .dialog-ux .modal-ux-header {
+      border-bottom-color: var(--theme-border-color);
+    }
+
+    .auth-container,
+    .auth-wrapper {
+      color: var(--theme-text);
+    }
+  }
+}
+
+html[data-theme='dark'] .swagger-docs .swagger-ui a {
+  color: var(--color-blue-300);
+}
+
+/* Prevent Swagger UI from breaking admin layout width */
+.swagger-docs .swagger-ui .wrapper {
+  max-width: none;
+  padding: 0;
+}

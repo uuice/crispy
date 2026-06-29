@@ -40,12 +40,20 @@ export default buildConfig({
       },
       beforeLogin: ['@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
-      afterNavLinks: ['@/app/(payload)/admin/dev-docs/DevDocsNavLink'],
+      afterNavLinks: [
+        '@/app/(payload)/admin/dev-docs/DevDocsNavLink',
+        '@/app/(payload)/admin/api-docs/SwaggerNavLink',
+      ],
       providers: ['@/components/AdminThemeProvider'],
       views: {
         devDocs: {
           Component: '@/app/(payload)/admin/dev-docs/DevDocsView',
           path: '/dev-docs',
+          exact: true,
+        },
+        apiDocs: {
+          Component: '@/app/(payload)/admin/api-docs/SwaggerView',
+          path: '/api-docs',
           exact: true,
         },
       },

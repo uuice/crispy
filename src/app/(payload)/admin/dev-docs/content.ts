@@ -31,6 +31,9 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['GraphQL', 'http://localhost:3333/api/graphql'],
           ['MCP', 'http://localhost:3333/api/mcp'],
           ['AI 流式', 'POST /api/ai/stream'],
+          ['AI 文档', '/admin/dev-docs#openai-api'],
+          ['Swagger API', '/admin/api-docs'],
+          ['OpenAPI JSON', '/api/openapi.json'],
         ],
       },
     ],
@@ -287,7 +290,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
     blocks: [
       {
         type: 'p',
-        text: '后台 AI 仅 Admin 内使用，基于 DeepSeek Chat Completions（与 OpenAI SDK 兼容的 REST）。配置 DEEPSEEK_API_KEY + Admin → AI 设置。',
+        text: '后台 AI 仅 Admin 内使用，基于 OpenAI Chat Completions 兼容协议（默认 DeepSeek）。完整请求/响应说明见下文「OpenAI 兼容 API 文档」章节。',
       },
       {
         type: 'h3',
@@ -341,6 +344,328 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           '在 collectionProfiles.ts 增加 profile',
           '字段使用 withAiTextField / withAiRewriteFeatures / aiSeoAssistField 等',
           'pnpm generate:importmap',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'openai-api',
+    title: 'OpenAI 兼容 API 文档',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Crispy Admin AI 通过 OpenAI Chat Completions 协议调用上游 LLM（默认 DeepSeek，可切换 OpenAI / Azure / 其他兼容网关）。Admin 前端调用 Crispy 自有 /api/ai/* 路由，服务端再转发至上游。',
+      },
+      {
+        type: 'h3',
+        text: '架构',
+      },
+      {
+        type: 'pre',
+        text: `Admin UI (✨ 弹框)
+    │  Cookie 会话鉴权
+    ▼
+POST /api/ai/stream | /complete | /structured   ← Crispy 内部 API
+    │  assertAiAccess + Prompt 模板渲染
+    ▼
+POST {baseUrl}/v1/chat/completions              ← OpenAI 兼容上游
+    Authorization: Bearer {apiKey}`,
+      },
+      {
+        type: 'h3',
+        text: '上游 LLM 配置（OpenAI 兼容）',
+      },
+      {
+        type: 'table',
+        headers: ['配置项', '环境变量', 'Admin AI 设置', '说明'],
+        rows: [
+          ['API Key', 'DEEPSEEK_API_KEY', '—（仅 .env）', 'Bearer Token，勿提交 Git'],
+          ['Base URL', 'DEEPSEEK_BASE_URL', 'baseUrl 字段', '不含 /v1 后缀，代码自动拼接 /v1/chat/completions'],
+          ['Model', 'DEEPSEEK_MODEL', 'model 字段', '如 deepseek-chat、gpt-4o-mini'],
+          ['Temperature', '—', 'temperature', '0–2，默认 0.7'],
+          ['Max Tokens', '—', 'maxTokens', '默认 2048'],
+          ['总开关', '—', 'enabled', '关闭后所有 AI 路由返回 503'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '切换至 OpenAI 官方',
+      },
+      {
+        type: 'pre',
+        text: `# .env
+DEEPSEEK_API_KEY=sk-...your-openai-key...
+DEEPSEEK_BASE_URL=https://api.openai.com
+DEEPSEEK_MODEL=gpt-4o-mini
+
+# Admin → AI 设置 中 baseUrl / model 会覆盖 .env 默认值
+# Azure OpenAI：baseUrl 设为 https://{resource}.openai.azure.com/openai/deployments/{deployment}`,
+      },
+      {
+        type: 'h3',
+        text: '上游请求格式（OpenAI Chat Completions）',
+      },
+      {
+        type: 'p',
+        text: '实现：src/ai/providers/deepseek.ts、deepseekStream.ts。非流式与流式均 POST 同一端点，流式设 stream: true。',
+      },
+      {
+        type: 'pre',
+        text: `POST {baseUrl}/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {apiKey}
+
+{
+  "model": "deepseek-chat",
+  "messages": [
+    { "role": "system", "content": "..." },
+    { "role": "user", "content": "..." }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 2048,
+  "stream": false,
+  "response_format": { "type": "json_object" }   // 仅 structured / suggest_taxonomy
+}`,
+      },
+      {
+        type: 'h3',
+        text: 'Crispy 内部 API — 鉴权',
+      },
+      {
+        type: 'ul',
+        items: [
+          '须已登录 Admin（Payload 会话 Cookie，与 /admin 相同）',
+          '未登录 → 401 Unauthorized',
+          '无 AI 权限 → 403（作者仅限自己的 posts）',
+          '未配置 API Key 或 AI 关闭 → 503',
+          '前台 / 外部不可匿名调用，无 API Key 对外暴露',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'POST /api/ai/complete — 非流式文本',
+      },
+      {
+        type: 'pre',
+        text: `# Request
+POST /api/ai/complete
+Content-Type: application/json
+Cookie: payload-token=...
+
+{
+  "action": "polish",
+  "collection": "posts",
+  "docId": "1",
+  "fieldPath": "title",
+  "input": "这是一段需要润色的标题",
+  "context": {
+    "title": "文章标题",
+    "contentPlain": "正文纯文本摘要…",
+    "selection": "选区文本（Lexical 改写时）"
+  },
+  "customPrompt": "改为英文",        // action=custom 时必填
+  "templateId": "polish"             // 可选，覆盖默认模板
+}
+
+# Response 200
+{
+  "text": "润色后的文本",
+  "templateId": "polish",
+  "usage": { "total_tokens": 128 }
+}
+
+# Error
+{ "error": "无权使用 AI 功能" }   // 403 / 503 / 500`,
+      },
+      {
+        type: 'h3',
+        text: 'POST /api/ai/stream — SSE 流式（主入口）',
+      },
+      {
+        type: 'pre',
+        text: `# Request body 与 /complete 相同
+
+# Response: text/event-stream
+data: {"text":"你"}
+data: {"text":"好"}
+data: {"done":true,"templateId":"polish"}
+
+# 错误（仍 200 + SSE）
+data: {"error":"AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY"}`,
+      },
+      {
+        type: 'h3',
+        text: 'POST /api/ai/structured — JSON 智能填充',
+      },
+      {
+        type: 'pre',
+        text: `# Request（当前仅支持 suggest_taxonomy）
+POST /api/ai/structured
+{
+  "action": "suggest_taxonomy",
+  "collection": "posts",
+  "docId": "1",
+  "context": {
+    "title": "可选",
+    "contentPlain": "正文纯文本，用于生成标题/SEO/分类建议"
+  }
+}
+
+# Response 200
+{
+  "data": {
+    "title": "建议标题",
+    "summary": "摘要",
+    "categoryTitles": ["已有分类名"],
+    "tagTitles": ["已有标签名"],
+    "seoTitle": "...",
+    "seoDescription": "..."
+  },
+  "categories": [ /* Payload 文档 */ ],
+  "tags": [ /* Payload 文档 */ ]
+}
+
+# 分类/标签只能从已有条目匹配，不会编造新 slug`,
+      },
+      {
+        type: 'h3',
+        text: 'action 枚举（AiAction）',
+      },
+      {
+        type: 'table',
+        headers: ['action', '用途', '接口'],
+        rows: [
+          ['polish', '润色', 'stream / complete'],
+          ['expand', '扩写', 'stream / complete'],
+          ['shorten', '精简', 'stream / complete'],
+          ['custom', '自定义指令（需 customPrompt）', 'stream / complete'],
+          ['rewrite', 'Lexical 选区改写', 'stream / complete'],
+          ['seo_title', '生成 SEO 标题', 'stream / complete'],
+          ['seo_description', '生成 SEO 描述', 'stream / complete'],
+          ['suggest_taxonomy', '智能填充标题/SEO/分类/标签', 'structured only'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Prompt 模板变量',
+      },
+      {
+        type: 'table',
+        headers: ['变量', '来源'],
+        rows: [
+          ['{{field}}', 'request.input 当前字段文本'],
+          ['{{selection}}', 'context.selection 选区'],
+          ['{{instruction}}', 'customPrompt 自定义指令'],
+          ['{{context.*}}', 'title、contentPlain、siteName 等 AiContext'],
+        ],
+      },
+      {
+        type: 'p',
+        text: '默认模板：src/ai/defaultTemplates.ts；可在 Admin → AI 设置 → Prompt 模板 按 id/action 覆盖。',
+      },
+      {
+        type: 'h3',
+        text: 'curl 示例（需先登录 Admin 获取 Cookie）',
+      },
+      {
+        type: 'pre',
+        text: `# 非流式
+curl -s -X POST http://localhost:3333/api/ai/complete \\
+  -H "Content-Type: application/json" \\
+  -b "payload-token=YOUR_SESSION" \\
+  -d '{
+    "action": "polish",
+    "collection": "posts",
+    "docId": "1",
+    "fieldPath": "title",
+    "input": "测试标题"
+  }'
+
+# 流式
+curl -N -X POST http://localhost:3333/api/ai/stream \\
+  -H "Content-Type: application/json" \\
+  -b "payload-token=YOUR_SESSION" \\
+  -d '{"action":"polish","collection":"posts","fieldPath":"title","input":"测试"}'`,
+      },
+      {
+        type: 'h3',
+        text: '验证与调试',
+      },
+      {
+        type: 'ul',
+        items: [
+          'pnpm verify:ai — 检测 API Key、流式 /complete /stream 连通',
+          '代码入口：src/app/(payload)/api/ai/*/route.ts',
+          '类型定义：src/ai/types.ts',
+          'OpenAI 官方文档：https://platform.openai.com/docs/api-reference/chat',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'swagger',
+    title: 'Swagger / OpenAPI',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Crispy 从 Payload 运行时配置自动生成 OpenAPI 3.0 文档，覆盖全部 Collection/Global REST、Auth、AI、MCP、GraphQL 与内部路由。新增 Collection 或插件后无需手写，刷新 Spec 即可同步。',
+      },
+      {
+        type: 'table',
+        headers: ['入口', 'URL'],
+        rows: [
+          ['Swagger UI（Admin）', '/admin/api-docs'],
+          ['OpenAPI JSON（动态）', 'GET /api/openapi.json'],
+          ['静态文件（可选）', 'public/openapi.json（pnpm generate:openapi）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '主题',
+      },
+      {
+        type: 'p',
+        text: 'Swagger UI 自动跟随 Admin 主题（html[data-theme]）：右上角切换浅色/深色时，文档区同步更新，使用与后台一致的 --crispy-admin-surface、--theme-text 等变量。',
+      },
+      {
+        type: 'h3',
+        text: '自动生成范围',
+      },
+      {
+        type: 'ul',
+        items: [
+          '每个 Collection：GET/POST /api/{slug}、GET/PATCH/DELETE /api/{slug}/{id}、GET /api/{slug}/count',
+          '每个 Global：GET/POST /api/globals/{slug}',
+          'Auth：login / logout / me / refresh-token',
+          'AI：/api/ai/complete、/stream、/structured（含 request/response schema）',
+          'MCP：POST /api/mcp（JSON-RPC）',
+          'GraphQL：POST /api/graphql',
+          'Internal：POST /api/internal/access-log',
+          '插件 Collection 随 getPayload().config.collections 自动纳入',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '命令与代码',
+      },
+      {
+        type: 'pre',
+        text: `pnpm generate:openapi    # 写入 public/openapi.json
+# 实现：src/openapi/buildDocument.ts
+# 路由：src/app/(payload)/api/openapi/route.ts`,
+      },
+      {
+        type: 'h3',
+        text: '鉴权方案（components.securitySchemes）',
+      },
+      {
+        type: 'table',
+        headers: ['Scheme', '用途'],
+        rows: [
+          ['cookieAuth', 'Admin 会话 payload-token'],
+          ['usersApiKey', 'Header: Authorization: users API-Key <key>'],
+          ['mcpBearer', 'MCP API Key Bearer'],
+          ['accessLogSecret', 'Header: x-access-log-secret'],
         ],
       },
     ],

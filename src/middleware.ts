@@ -4,7 +4,7 @@ import { after } from 'next/server'
 
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 
-const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file']
+const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
 
 function shouldLogApiRequest(pathname: string): boolean {
   if (!pathname.startsWith('/api/')) return false

@@ -44,6 +44,7 @@ pnpm build && pnpm start
 | REST API   | http://localhost:3333/api         |
 | MCP 端点   | http://localhost:3333/api/mcp     |
 | GraphQL    | http://localhost:3333/api/graphql |
+| Swagger    | http://localhost:3333/admin/api-docs |
 
 首次访问 Admin 会引导创建超级管理员账号。
 
@@ -86,6 +87,7 @@ pnpm build && pnpm start
 | `pnpm migrate`                | 执行数据库迁移（生产）                 |
 | `pnpm migrate:status`         | 查看迁移状态                           |
 | `pnpm ci:check`               | 本地 CI 检查（lint/tsc/test/build）    |
+| `pnpm generate:openapi`       | 生成 OpenAPI JSON（Swagger）           |
 
 ## AI / MCP
 

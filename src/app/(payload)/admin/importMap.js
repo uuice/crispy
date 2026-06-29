@@ -47,11 +47,13 @@ import { RowLabel as RowLabel_1f6ff6ff633e3695d348f4f3c58f1466 } from '@/Footer/
 import { default as default_c1363893506d7ed29a71d1a4da01ddb5 } from '@/components/AdminIcon'
 import { default as default_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { default as default_205cbecefa9bc8639ad2c232a348e914 } from '@/app/(payload)/admin/dev-docs/DevDocsNavLink'
+import { default as default_14c70b4a2d81ebbcd2eac39a7fc1334b } from '@/app/(payload)/admin/api-docs/SwaggerNavLink'
 import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { default as default_a0ee26f07b35ad97f90799ca2f39d8a4 } from '@/components/AdminThemeProvider'
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { default as default_8764214764e609424531b42b54ec237b } from '@/app/(payload)/admin/dev-docs/DevDocsView'
+import { default as default_167468770c8106c49118befba831d642 } from '@/app/(payload)/admin/api-docs/SwaggerView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -105,10 +107,12 @@ export const importMap = {
   "@/components/AdminIcon#default": default_c1363893506d7ed29a71d1a4da01ddb5,
   "@/components/AdminLogo#default": default_aa0a2d19d38a4839dbd373417e210b89,
   "@/app/(payload)/admin/dev-docs/DevDocsNavLink#default": default_205cbecefa9bc8639ad2c232a348e914,
+  "@/app/(payload)/admin/api-docs/SwaggerNavLink#default": default_14c70b4a2d81ebbcd2eac39a7fc1334b,
   "@/components/BeforeDashboard#default": default_1a7510af427896d367a49dbf838d2de6,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@/components/AdminThemeProvider#default": default_a0ee26f07b35ad97f90799ca2f39d8a4,
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
   "@/app/(payload)/admin/dev-docs/DevDocsView#default": default_8764214764e609424531b42b54ec237b,
+  "@/app/(payload)/admin/api-docs/SwaggerView#default": default_167468770c8106c49118befba831d642,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
