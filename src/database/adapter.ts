@@ -12,6 +12,7 @@ const projectRoot = path.resolve(dirname, '../..')
 export type DatabaseDriver = 'sqlite' | 'postgres'
 
 const DEFAULT_SQLITE_PATH = path.join(projectRoot, '.data', 'payload.db')
+const MIGRATIONS_DIR = path.join(projectRoot, 'src/migrations')
 
 /** Resolve libSQL `file:` URL to an absolute filesystem path. */
 export function resolveSqliteFilePath(url: string): string {
@@ -63,6 +64,13 @@ export function resolveDatabaseUrl(driver: DatabaseDriver): string {
   throw new Error('DATABASE_URL is required when using PostgreSQL')
 }
 
+/** Postgres uses explicit migrations in production; never rely on schema push. */
+export function shouldPushPostgresSchema(): boolean {
+  if (process.env.DATABASE_PUSH === 'true') return true
+  if (process.env.DATABASE_PUSH === 'false') return false
+  return process.env.NODE_ENV !== 'production'
+}
+
 export function createDatabaseAdapter() {
   const driver = resolveDatabaseDriver()
   const url = resolveDatabaseUrl(driver)
@@ -76,8 +84,10 @@ export function createDatabaseAdapter() {
   }
 
   return postgresAdapter({
+    migrationDir: MIGRATIONS_DIR,
     pool: {
       connectionString: url,
     },
+    push: shouldPushPostgresSchema(),
   })
 }

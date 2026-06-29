@@ -24,10 +24,14 @@ pnpm dev
 
 ```bash
 DATABASE_URL=postgresql://user:password@host:5432/crispy
+DATABASE_DRIVER=postgres
+DATABASE_PUSH=false         # 生产禁止 schema push
 NODE_ENV=production
-pnpm payload migrate   # 生产必须跑迁移
+pnpm migrate                # 生产必须跑迁移
 pnpm build && pnpm start
 ```
+
+详见 [部署与迁移](docs/deployment.md)。
 
 可选：本地调试 PostgreSQL 时使用 `pnpm docker:up` 并改 `DATABASE_URL`。
 
@@ -66,6 +70,7 @@ pnpm build && pnpm start
 - [Admin AI 助手指南](docs/ai-admin-guide.md)
 - [MCP 连接指南](docs/mcp-guide.md)
 - [Admin 验证清单](docs/admin-verification.md)
+- [部署与迁移](docs/deployment.md)
 
 ## 常用命令
 
@@ -80,8 +85,10 @@ pnpm build && pnpm start
 | `pnpm verify:ai`              | Admin AI（DeepSeek）连通与流式验证    |
 | `pnpm seed`                   | CLI 填充示例数据                      |
 | `pnpm mcp:key`                | 生成 MCP API Key                      |
-| `pnpm payload migrate:create` | 创建数据库迁移                        |
-| `pnpm payload migrate`        | 执行迁移（生产）                      |
+| `pnpm migrate:create:initial` | 首次 Postgres 迁移（Docker + Node 22） |
+| `pnpm migrate`                | 执行数据库迁移（生产）                 |
+| `pnpm migrate:status`         | 查看迁移状态                           |
+| `pnpm ci:check`               | 本地 CI 检查（lint/tsc/test/build）    |
 
 ## AI / MCP
 

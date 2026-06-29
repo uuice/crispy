@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, v3-payload]
+  pull_request:
+    branches: [main, master, v3-payload]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PAYLOAD_SECRET: ci-payload-secret-do-not-use-in-prod
+  PREVIEW_SECRET: ci-preview-secret
+  NEXT_PUBLIC_SERVER_URL: http://localhost:3333
+
+jobs:
+  quality:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Integration tests (SQLite)
+        env:
+          DATABASE_URL: file:./.data/ci-payload.db
+          DATABASE_DRIVER: sqlite
+        run: pnpm test:int
+
+      - name: Build
+        env:
+          DATABASE_URL: file:./.data/ci-payload.db
+          DATABASE_DRIVER: sqlite
+        run: pnpm build
+
+  postgres-migrations:
+    name: PostgreSQL migrations
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crispy
+          POSTGRES_PASSWORD: crispy
+          POSTGRES_DB: crispy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crispy -d crispy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_DRIVER: postgres
+      DATABASE_URL: postgresql://crispy:crispy@localhost:5432/crispy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Ensure migration files exist
+        run: |
+          if ! compgen -G "src/migrations/*.ts" > /dev/null; then
+            echo "::error::No Postgres migrations in src/migrations/. Run: pnpm migrate:create:initial (requires Docker Postgres), then commit."
+            exit 1
+          fi
+
+      - name: Apply migrations
+        run: pnpm migrate
+
+      - name: Migration status
+        run: pnpm migrate:status
+
+      - name: Integration tests (PostgreSQL)
+        run: pnpm test:int

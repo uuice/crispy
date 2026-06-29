@@ -1,21 +1,25 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
+import { createRequire } from 'module'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const require = createRequire(import.meta.url)
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
+const nextCoreWebVitals = require('eslint-config-next/core-web-vitals')
+const nextTypescript = require('eslint-config-next/typescript')
+const reactHooks = require('eslint-plugin-react-hooks')
 
+/** @type {import('eslint').Linter.Config[]} */
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
     rules: {
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -31,7 +35,12 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['.next/', 'src/payload-types.ts', 'src/payload-generated-schema.ts'],
+    ignores: [
+      '.next/',
+      'src/payload-types.ts',
+      'src/payload-generated-schema.ts',
+      'src/migrations/**',
+    ],
   },
 ]
 

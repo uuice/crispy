@@ -83,11 +83,12 @@
 
 **目标**：可部署、可维护。
 
-- [ ] Postgres migrations 流程（`push: false`）
-- [ ] CI：lint + build + test
+- [x] Postgres migrations 流程（`push: false` 生产、`src/migrations/`、`pnpm migrate`）
+- [x] CI：lint + typecheck + test + build（`.github/workflows/ci.yml`）
+- [x] CI：PostgreSQL 迁移 job（migrate + test:int）
 - [ ] `@payloadcms/plugin-sentry`
-- [ ] Dockerfile / 部署文档
-- [ ] 备份与恢复说明
+- [x] Dockerfile / 部署文档（`docs/deployment.md`）
+- [x] 备份与恢复说明（`docs/deployment.md`）
 - [ ] 性能：revalidation 策略审查
 
 ---
@@ -102,8 +103,10 @@ pnpm verify:phase2           # Phase 2 冒烟（图库/招聘/中文前台/acces
 pnpm seed                    # CLI 填充示例数据
 pnpm mcp:key                 # 重新生成 MCP API Key
 pnpm generate:types         # 更新 payload-types.ts
-pnpm payload migrate:create # 生产迁移
-pnpm build                  # 生产构建
+pnpm migrate:create:initial   # 首次 Postgres 迁移（需 Docker + Node 22）
+pnpm migrate                # 执行迁移（生产）
+pnpm migrate:status         # 迁移状态
+pnpm ci:check               # 本地跑 CI 同款检查（SQLite）
 ```
 
 ---
