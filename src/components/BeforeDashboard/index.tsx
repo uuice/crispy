@@ -1,4 +1,5 @@
 import { Banner } from '@payloadcms/ui/elements/Banner'
+import { Link } from '@payloadcms/ui'
 import React from 'react'
 
 import { SeedButton } from './SeedButton'
@@ -21,6 +22,13 @@ const BeforeDashboard: React.FC = () => {
             访问前台
           </a>
           {' 查看效果。'}
+        </li>
+        <li>
+          {'查看 '}
+          <Link href="/admin/dev-docs" prefetch={false}>
+            二次开发文档
+          </Link>
+          {'（技术栈、权限、AI、MCP、部署）。'}
         </li>
         <li>
           {'在 '}

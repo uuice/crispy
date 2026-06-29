@@ -31,7 +31,7 @@ pnpm migrate                # 生产必须跑迁移
 pnpm build && pnpm start
 ```
 
-详见 [部署与迁移](docs/deployment.md)。
+详见 Admin 内 **[二次开发文档](http://localhost:3333/admin/dev-docs)**（部署、迁移、权限、AI、MCP 等完整说明）。
 
 可选：本地调试 PostgreSQL 时使用 `pnpm docker:up` 并改 `DATABASE_URL`。
 
@@ -65,12 +65,9 @@ pnpm build && pnpm start
 
 ## 文档
 
-- [架构设计](docs/crispy-v3-architecture.md)
-- [实施路线图](docs/implementation-roadmap.md)
-- [Admin AI 助手指南](docs/ai-admin-guide.md)
-- [MCP 连接指南](docs/mcp-guide.md)
-- [Admin 验证清单](docs/admin-verification.md)
-- [部署与迁移](docs/deployment.md)
+完整二次开发文档已内置在 Admin：**http://localhost:3333/admin/dev-docs**（侧边栏「二次开发文档」）。
+
+涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Admin AI（DeepSeek）、MCP、部署迁移与 CI。
 
 ## 常用命令
 
@@ -92,7 +89,7 @@ pnpm build && pnpm start
 
 ## AI / MCP
 
-**Admin AI 助手**（DeepSeek，后台润色/SEO/智能填充）：见 [docs/ai-admin-guide.md](docs/ai-admin-guide.md)。
+**Admin AI 助手**（DeepSeek，后台润色/SEO/智能填充）：见 Admin → [二次开发文档](http://localhost:3333/admin/dev-docs) → Admin AI 章节。
 
 **MCP**（外部 Agent 读写内容）：
 
@@ -101,7 +98,7 @@ pnpm build && pnpm start
 3. MCP 客户端连接 `http://localhost:3333/api/mcp`
 4. 鉴权：`Authorization: users API-Key <your-key>`
 
-详见 [架构文档 — AI / MCP 集成](docs/crispy-v3-architecture.md#7-ai--mcp-集成) 与 [MCP 指南](docs/mcp-guide.md)。
+详见 Admin [二次开发文档 — MCP](http://localhost:3333/admin/dev-docs#mcp) 章节。
 
 ## 角色说明
 

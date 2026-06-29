@@ -40,7 +40,15 @@ export default buildConfig({
       },
       beforeLogin: ['@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
+      afterNavLinks: ['@/app/(payload)/admin/dev-docs/DevDocsNavLink'],
       providers: ['@/components/AdminThemeProvider'],
+      views: {
+        devDocs: {
+          Component: '@/app/(payload)/admin/dev-docs/DevDocsView',
+          path: '/dev-docs',
+          exact: true,
+        },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
