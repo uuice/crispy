@@ -22,7 +22,7 @@ const collections: CollectionSlug[] = [
   'search',
 ]
 
-const globals: GlobalSlug[] = ['header', 'footer', 'site-settings']
+const globals = ['header', 'footer', 'site-settings'] as const satisfies readonly GlobalSlug[]
 
 const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
 
@@ -395,9 +395,19 @@ export const seed = async ({
 
   await Promise.all([
     payload.delete({ collection: 'ads', overrideAccess: true, where: {}, context: seedContext }),
-    payload.delete({ collection: 'ad-slots', overrideAccess: true, where: {}, context: seedContext }),
+    payload.delete({
+      collection: 'ad-slots',
+      overrideAccess: true,
+      where: {},
+      context: seedContext,
+    }),
     payload.delete({ collection: 'jobs', overrideAccess: true, where: {}, context: seedContext }),
-    payload.delete({ collection: 'gallery-items', overrideAccess: true, where: {}, context: seedContext }),
+    payload.delete({
+      collection: 'gallery-items',
+      overrideAccess: true,
+      where: {},
+      context: seedContext,
+    }),
   ])
 
   await Promise.all([

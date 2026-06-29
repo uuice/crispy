@@ -19,6 +19,7 @@ import { createDatabaseAdapter } from './database/adapter'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
+import { AiSettings } from './AiSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
 import { defaultLexical } from '@/fields/defaultLexical'
@@ -72,9 +73,22 @@ export default buildConfig({
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: createDatabaseAdapter(),
-  collections: [Pages, Posts, Media, Categories, Tags, Links, AdSlots, Ads, Jobs, GalleryItems, ApiAccessLogs, Users],
+  collections: [
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Tags,
+    Links,
+    AdSlots,
+    Ads,
+    Jobs,
+    GalleryItems,
+    ApiAccessLogs,
+    Users,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SiteSettings],
+  globals: [Header, Footer, SiteSettings, AiSettings],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,

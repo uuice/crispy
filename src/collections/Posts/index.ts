@@ -23,6 +23,7 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { assignAuthorOnCreate } from './hooks/assignAuthorOnCreate'
 import { populateAuthors } from './hooks/populateAuthors'
 import { restrictAuthorPublish } from './hooks/restrictAuthorPublish'
+import { sanitizePostContent } from './hooks/sanitizePostContent'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 import { adminLabels } from '@/i18n/admin-labels'
 
@@ -34,6 +35,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { chineseSlugField } from '@/fields/chineseSlugField'
+import { AiRewriteFeature } from '@/components/AdminAi/lexical/AiRewriteFeature/server'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -80,6 +82,12 @@ export const Posts: CollectionConfig<'posts'> = {
       name: 'title',
       type: 'text',
       required: true,
+      label: adminLabels.title,
+      admin: {
+        components: {
+          Field: '@/components/AdminAi/AiTextField',
+        },
+      },
     },
     {
       type: 'tabs',
@@ -102,6 +110,7 @@ export const Posts: CollectionConfig<'posts'> = {
                     BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
+                    AiRewriteFeature(),
                     HorizontalRuleFeature(),
                   ]
                 },
@@ -114,6 +123,15 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         {
           fields: [
+            {
+              name: 'aiSuggestAssist',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '@/components/AdminAi/AiSuggestPanel',
+                },
+              },
+            },
             {
               name: 'relatedPosts',
               type: 'relationship',
@@ -158,6 +176,15 @@ export const Posts: CollectionConfig<'posts'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
+            {
+              name: 'aiSeoAssist',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '@/components/AdminAi/AiSeoPanel',
+                },
+              },
+            },
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
@@ -241,6 +268,7 @@ export const Posts: CollectionConfig<'posts'> = {
     chineseSlugField(),
   ],
   hooks: {
+    beforeValidate: [sanitizePostContent],
     beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
@@ -249,7 +277,7 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 800,
       },
       schedulePublish: true,
     },

@@ -1,0 +1,43 @@
+import { renderPromptTemplate } from '@/ai/promptRenderer'
+import { deepseekChatCompletionStream } from '@/ai/providers/deepseekStream'
+import { findTemplate, resolveAiSettings } from '@/ai/settings'
+import type { AiCompleteRequest } from '@/ai/types'
+
+export async function* runAiTextCompletionStream(
+  body: AiCompleteRequest,
+): AsyncGenerator<string, { templateId: string }, undefined> {
+  const settings = await resolveAiSettings()
+
+  if (!settings.enabled) {
+    throw new Error('AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY')
+  }
+
+  const template = findTemplate(settings, body.action, body.templateId)
+  if (!template) {
+    throw new Error(`未找到 action=${body.action} 的 Prompt 模板`)
+  }
+
+  if (template.outputFormat === 'json') {
+    throw new Error('该模板需要 structured 接口')
+  }
+
+  const variables = { field: body.input, selection: body.context?.selection, context: body.context }
+
+  const stream = deepseekChatCompletionStream({
+    baseUrl: settings.baseUrl,
+    apiKey: settings.apiKey,
+    model: settings.model,
+    temperature: settings.temperature,
+    maxTokens: settings.maxTokens,
+    messages: [
+      { role: 'system', content: renderPromptTemplate(template.systemPrompt, variables) },
+      { role: 'user', content: renderPromptTemplate(template.userPrompt, variables) },
+    ],
+  })
+
+  for await (const chunk of stream) {
+    yield chunk
+  }
+
+  return { templateId: template.id }
+}

@@ -136,11 +136,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     'site-settings': SiteSetting;
+    'ai-settings': AiSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2596,6 +2598,43 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-settings".
+ */
+export interface AiSetting {
+  id: number;
+  /**
+   * 关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置 DEEPSEEK_API_KEY。
+   */
+  enabled?: boolean | null;
+  /**
+   * 如 deepseek-chat、deepseek-reasoner
+   */
+  model?: string | null;
+  baseUrl?: string | null;
+  temperature?: number | null;
+  maxTokens?: number | null;
+  /**
+   * 留空则使用内置默认模板。id 与 action 需与系统约定一致。
+   */
+  promptTemplates?:
+    | {
+        id: string;
+        label: string;
+        action: 'polish' | 'expand' | 'shorten' | 'seo_title' | 'seo_description' | 'rewrite' | 'suggest_taxonomy';
+        outputFormat?: ('text' | 'json') | null;
+        enabled?: boolean | null;
+        systemPrompt: string;
+        /**
+         * 变量：{{field}} {{selection}} {{title}} {{content_plain}} {{siteName}} {{existing_categories}} {{existing_tags}}
+         */
+        userPrompt: string;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -2658,6 +2697,31 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   analyticsId?: T;
   enableRss?: T;
   adminThemeHue?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-settings_select".
+ */
+export interface AiSettingsSelect<T extends boolean = true> {
+  enabled?: T;
+  model?: T;
+  baseUrl?: T;
+  temperature?: T;
+  maxTokens?: T;
+  promptTemplates?:
+    | T
+    | {
+        id?: T;
+        label?: T;
+        action?: T;
+        outputFormat?: T;
+        enabled?: T;
+        systemPrompt?: T;
+        userPrompt?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
