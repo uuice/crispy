@@ -11,6 +11,8 @@ import { fileURLToPath } from 'url'
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 import { adminLabels } from '@/i18n/admin-labels'
+import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
+import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,21 +27,25 @@ export const Media: CollectionConfig = {
     read: anyone,
     update: authenticated,
   },
+  hooks: {
+    beforeValidate: [createSanitizeLexicalHook(['caption'])],
+  },
   fields: [
-    {
-      name: 'alt',
-      type: 'text',
-      label: adminLabels.alt,
-      //required: true,
-    },
+    withAiTextField(
+      {
+        name: 'alt',
+        type: 'text',
+        label: adminLabels.alt,
+      },
+      { contentFieldPaths: 'caption', titleFieldPath: 'alt' },
+    ),
     {
       name: 'caption',
       type: 'richText',
       label: adminLabels.caption,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
+        features: ({ rootFeatures }) =>
+          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]),
       }),
     },
   ],

@@ -4,38 +4,44 @@ import React, { useCallback, useState } from 'react'
 import { useDocumentInfo, useField, useFormFields } from '@payloadcms/ui'
 import type { UIFieldClientComponent } from 'payload'
 
-import { lexicalToPlainText } from '@/ai/lexical/toPlainText'
+import type { AiAction } from '@/ai/types'
 
-import { AiActionToolbar } from './AiActionToolbar'
-import { AiPreviewPanel } from './AiPreviewPanel'
+import { AiAssistPopup } from './AiAssistPopup'
 import { useAiComplete } from './useAiComplete'
+import { useAiFieldContext } from './useAiFieldContext'
 
-const AiSeoPanel: UIFieldClientComponent = () => {
+const SEO_ACTIONS: { action: AiAction; label: string }[] = [
+  { action: 'seo_title', label: '优化 SEO 标题' },
+  { action: 'seo_description', label: '优化 SEO 描述' },
+]
+
+type SeoTarget = 'meta.title' | 'meta.description'
+
+const AiSeoPanel: UIFieldClientComponent = (props) => {
+  const { field } = props
   const { id, collectionSlug } = useDocumentInfo()
   const { setValue: setMetaTitle } = useField<string>({ path: 'meta.title' })
   const { setValue: setMetaDescription } = useField<string>({ path: 'meta.description' })
   const { runComplete } = useAiComplete()
+  const { title, contentPlain, profile } = useAiFieldContext(field)
   const [error, setError] = useState<string | null>(null)
   const [streaming, setStreaming] = useState(false)
-  const [preview, setPreview] = useState<{
-    field: 'meta.title' | 'meta.description'
-    text: string
-  } | null>(null)
+  const [activeAction, setActiveAction] = useState<AiAction | null>(null)
+  const [activeTarget, setActiveTarget] = useState<SeoTarget | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
 
-  const title = useFormFields(([fields]) => fields.title?.value as string | undefined)
   const metaTitle = useFormFields(([fields]) => fields['meta.title']?.value as string | undefined)
   const metaDescription = useFormFields(
     ([fields]) => fields['meta.description']?.value as string | undefined,
   )
-  const content = useFormFields(([fields]) => fields.content?.value)
-
-  const contentPlain = lexicalToPlainText(content)
 
   const runSeo = useCallback(
-    async (fieldPath: 'meta.title' | 'meta.description', action: 'seo_title' | 'seo_description') => {
+    async (fieldPath: SeoTarget, action: 'seo_title' | 'seo_description') => {
       setError(null)
       setStreaming(true)
-      setPreview({ field: fieldPath, text: '' })
+      setActiveAction(action)
+      setActiveTarget(fieldPath)
+      setPreview('')
 
       const input = fieldPath === 'meta.title' ? (metaTitle ?? '') : (metaDescription ?? '')
 
@@ -54,11 +60,13 @@ const AiSeoPanel: UIFieldClientComponent = () => {
             },
           },
           {
-            onChunk: (_chunk, fullText) => setPreview({ field: fieldPath, text: fullText }),
+            onChunk: (_chunk, fullText) => setPreview(fullText),
           },
         )
       } catch (err) {
         setPreview(null)
+        setActiveAction(null)
+        setActiveTarget(null)
         setError(err instanceof Error ? err.message : 'AI 失败')
       } finally {
         setStreaming(false)
@@ -68,51 +76,66 @@ const AiSeoPanel: UIFieldClientComponent = () => {
   )
 
   const applyPreview = useCallback(() => {
-    if (!preview) return
-    if (preview.field === 'meta.title') {
-      setMetaTitle(preview.text)
+    if (preview === null || !activeTarget) return
+    if (activeTarget === 'meta.title') {
+      setMetaTitle(preview)
     } else {
-      setMetaDescription(preview.text)
+      setMetaDescription(preview)
     }
     setPreview(null)
-  }, [preview, setMetaDescription, setMetaTitle])
+    setActiveAction(null)
+    setActiveTarget(null)
+  }, [activeTarget, preview, setMetaDescription, setMetaTitle])
+
+  const clearPreview = useCallback(() => {
+    setPreview(null)
+    setActiveAction(null)
+    setActiveTarget(null)
+  }, [])
+
+  if (!profile?.seo) return null
+
+  const originalText =
+    activeTarget === 'meta.description' ? (metaDescription ?? '') : (metaTitle ?? '')
 
   return (
     <div
       style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
         marginBottom: '16px',
-        padding: '16px',
-        borderRadius: '4px',
-        border: '1px solid var(--theme-elevation-150)',
-        background: 'var(--theme-elevation-50)',
+        paddingBottom: '12px',
+        borderBottom: '1px solid var(--theme-elevation-150)',
       }}
     >
-      <p style={{ fontWeight: 600, marginBottom: '8px' }}>AI SEO 优化</p>
-      <p style={{ fontSize: '13px', color: 'var(--theme-elevation-800)', marginBottom: '12px' }}>
-        基于文章标题与正文生成 SEO 标题/描述，流式预览后应用。
-      </p>
-      <AiActionToolbar
-        actions={[
-          { action: 'seo_title', label: '优化 SEO 标题' },
-          { action: 'seo_description', label: '优化 SEO 描述' },
-        ]}
+      <div style={{ minWidth: 0 }}>
+        <p style={{ fontWeight: 600, fontSize: '13px', marginBottom: '4px' }}>AI SEO 优化</p>
+        <p style={{ fontSize: '12px', color: 'var(--theme-elevation-700)', margin: 0 }}>
+          基于标题与正文生成 SEO 标题/描述，预览后应用。
+        </p>
+      </div>
+      <AiAssistPopup
+        actions={SEO_ACTIONS}
+        activeAction={activeAction}
+        applyLabel="应用到字段"
         disabled={streaming}
+        error={error}
+        hint="选择要优化的 SEO 字段，生成后可对比预览。"
+        originalText={originalText}
+        preview={preview}
+        showCustomPrompt={false}
+        streaming={streaming}
+        title="AI SEO 优化"
+        triggerTitle="AI SEO 优化"
         onAction={async (action) => {
           if (action === 'seo_title') await runSeo('meta.title', 'seo_title')
           if (action === 'seo_description') await runSeo('meta.description', 'seo_description')
         }}
+        onApply={applyPreview}
+        onCancelPreview={clearPreview}
       />
-      {error && <p style={{ color: 'var(--theme-error-500)', fontSize: '13px', marginTop: '8px' }}>{error}</p>}
-      {preview && (
-        <AiPreviewPanel
-          applyLabel="应用到字段"
-          streaming={streaming}
-          text={preview.text}
-          title={preview.field === 'meta.title' ? 'SEO 标题预览' : 'SEO 描述预览'}
-          onApply={applyPreview}
-          onCancel={() => setPreview(null)}
-        />
-      )}
     </div>
   )
 }

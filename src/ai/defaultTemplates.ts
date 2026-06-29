@@ -31,6 +31,17 @@ export const DEFAULT_AI_TEMPLATES: AiPromptTemplate[] = [
     userPrompt: '请精简以下内容：\n\n{{field}}',
   },
   {
+    id: 'custom',
+    label: '自定义',
+    action: 'custom',
+    outputFormat: 'text',
+    enabled: true,
+    systemPrompt:
+      '你是专业的内容编辑。严格按用户指令处理文本，保持语义准确。只输出结果正文，不要解释、不要加引号或前后缀。',
+    userPrompt:
+      '文章标题：{{title}}\n参考上下文：{{content_plain}}\n\n用户指令：{{instruction}}\n\n待处理文本：\n\n{{field}}',
+  },
+  {
     id: 'seo_title',
     label: 'SEO 标题',
     action: 'seo_title',

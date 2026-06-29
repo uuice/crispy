@@ -1,5 +1,6 @@
 import type { PayloadRequest } from 'payload'
 
+import { isAiEnabledCollection } from '@/ai/collectionProfiles'
 import { hasRole } from '@/access/roles'
 import type { User } from '@/payload-types'
 
@@ -17,10 +18,19 @@ export async function assertAiAccess(
     throw new Error('无权使用 AI 功能')
   }
 
-  if (!docId || collection !== 'posts') return
+  if (!isAiEnabledCollection(collection)) {
+    throw new Error('该内容类型未启用 AI')
+  }
 
   const user = req.user as User
-  if (hasRole(user, ['super-admin', 'editor'])) return
+
+  if (hasRole(user, ['super-admin', 'editor'])) {
+    return
+  }
+
+  if (collection !== 'posts' || !docId) {
+    throw new Error('作者仅可在自己创建的文章上使用 AI')
+  }
 
   const post = await req.payload.findByID({
     collection: 'posts',

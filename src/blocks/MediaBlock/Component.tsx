@@ -20,6 +20,7 @@ type Props = MediaBlockProps & {
 
 export const MediaBlock: React.FC<Props> = (props) => {
   const {
+    caption: blockCaption,
     captionClassName,
     className,
     enableGutter = true,
@@ -29,8 +30,8 @@ export const MediaBlock: React.FC<Props> = (props) => {
     disableInnerContainer,
   } = props
 
-  let caption
-  if (media && typeof media === 'object') caption = media.caption
+  let caption = blockCaption
+  if (!caption && media && typeof media === 'object') caption = media.caption
 
   return (
     <div

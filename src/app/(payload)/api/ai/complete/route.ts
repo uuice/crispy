@@ -27,6 +27,10 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: 'action, fieldPath and input are required' }, { status: 400 })
   }
 
+  if (body.action === 'custom' && !body.customPrompt?.trim()) {
+    return Response.json({ error: 'customPrompt is required for custom action' }, { status: 400 })
+  }
+
   try {
     const req = await createLocalReq({ user }, payload)
     await assertAiAccess(req, body.collection, body.docId)

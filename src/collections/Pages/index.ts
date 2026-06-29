@@ -13,6 +13,12 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { adminLabels } from '@/i18n/admin-labels'
+import {
+  aiSeoAssistField,
+  aiSuggestAssistField,
+  withAiTextField,
+} from '@/fields/ai'
+import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import {
   MetaDescriptionField,
@@ -57,11 +63,11 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       required: true,
-    },
+    }),
     {
       type: 'tabs',
       tabs: [
@@ -71,6 +77,7 @@ export const Pages: CollectionConfig<'pages'> = {
         },
         {
           fields: [
+            aiSuggestAssistField({ contentFieldPaths: 'hero.richText' }),
             {
               name: 'layout',
               type: 'blocks',
@@ -88,6 +95,7 @@ export const Pages: CollectionConfig<'pages'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
+            aiSeoAssistField({ contentFieldPaths: 'hero.richText' }),
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
@@ -125,6 +133,7 @@ export const Pages: CollectionConfig<'pages'> = {
   hooks: {
     afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt],
+    beforeValidate: [createSanitizeLexicalHook(['hero.richText'])],
     afterDelete: [revalidateDelete],
   },
   versions: {

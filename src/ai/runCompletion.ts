@@ -14,6 +14,10 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
     throw new Error('AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY')
   }
 
+  if (body.action === 'custom' && !body.customPrompt?.trim()) {
+    throw new Error('自定义指令不能为空')
+  }
+
   const template = findTemplate(settings, body.action, body.templateId)
   if (!template) {
     throw new Error(`未找到 action=${body.action} 的 Prompt 模板`)
@@ -23,7 +27,12 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
     throw new Error('该模板需要 structured 接口')
   }
 
-  const variables = { field: body.input, selection: body.context?.selection, context: body.context }
+  const variables = {
+    field: body.input,
+    selection: body.context?.selection,
+    instruction: body.customPrompt?.trim() ?? '',
+    context: body.context,
+  }
 
   const result = await deepseekChatCompletion({
     baseUrl: settings.baseUrl,

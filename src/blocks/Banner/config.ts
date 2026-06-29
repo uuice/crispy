@@ -6,6 +6,8 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { withAiRewriteFeatures } from '@/fields/ai'
+
 export const Banner: Block = {
   slug: 'banner',
   fields: [
@@ -25,9 +27,8 @@ export const Banner: Block = {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
+        features: ({ rootFeatures }) =>
+          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]),
       }),
       label: false,
       required: true,

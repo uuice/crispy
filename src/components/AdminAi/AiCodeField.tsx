@@ -1,13 +1,14 @@
 'use client'
 
 import React from 'react'
-import { TextField, useDocumentInfo, useField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import { CodeField, useDocumentInfo, useField } from '@payloadcms/ui'
+import type { CodeFieldClientComponent } from 'payload'
 
 import type { AiAction } from '@/ai/types'
 
 import { AiAssistPopup } from './AiAssistPopup'
 import { AiFieldAssistLayout } from './AiFieldAssistLayout'
+import { CODE_AI_PRESETS } from './AiCustomPromptSection'
 import { useAiFieldAssist } from './useAiFieldAssist'
 import { useAiFieldContext } from './useAiFieldContext'
 
@@ -17,7 +18,7 @@ const DEFAULT_ACTIONS: { action: AiAction; label: string }[] = [
   { action: 'shorten', label: '精简' },
 ]
 
-const AiTextField: TextFieldClientComponent = (props) => {
+const AiCodeField: CodeFieldClientComponent = (props) => {
   const { path, field } = props
   const { value, setValue } = useField<string>({ path })
   const { id, collectionSlug } = useDocumentInfo()
@@ -54,8 +55,11 @@ const AiTextField: TextFieldClientComponent = (props) => {
           disabled={!value?.trim()}
           error={error}
           originalText={value ?? ''}
+          presets={CODE_AI_PRESETS}
           preview={preview}
           streaming={streaming}
+          title="AI 代码助手"
+          triggerTitle="AI 代码助手"
           onAction={handleAction}
           onApply={() => {
             if (preview !== null) setValue(preview)
@@ -66,9 +70,9 @@ const AiTextField: TextFieldClientComponent = (props) => {
         />
       }
     >
-      <TextField {...props} />
+      <CodeField {...props} />
     </AiFieldAssistLayout>
   )
 }
 
-export default AiTextField
+export default AiCodeField

@@ -4,6 +4,7 @@ import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
+import { withAiTextField } from '@/fields/ai'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -18,12 +19,12 @@ export const Categories: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
+    }),
     chineseSlugField({
       position: undefined,
     }),

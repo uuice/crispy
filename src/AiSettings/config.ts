@@ -99,6 +99,7 @@ export const AiSettings: GlobalConfig = {
             { label: '润色', value: 'polish' },
             { label: '扩写', value: 'expand' },
             { label: '精简', value: 'shorten' },
+            { label: '自定义', value: 'custom' },
             { label: 'SEO 标题', value: 'seo_title' },
             { label: 'SEO 描述', value: 'seo_description' },
             { label: '改写', value: 'rewrite' },

@@ -63,6 +63,7 @@ pnpm build && pnpm start
 
 - [架构设计](docs/crispy-v3-architecture.md)
 - [实施路线图](docs/implementation-roadmap.md)
+- [Admin AI 助手指南](docs/ai-admin-guide.md)
 - [MCP 连接指南](docs/mcp-guide.md)
 - [Admin 验证清单](docs/admin-verification.md)
 
@@ -75,6 +76,8 @@ pnpm build && pnpm start
 | `pnpm docker:up` | 启动 PostgreSQL（可选，本地 PG 调试） |
 | `pnpm docker:down` | 停止 PostgreSQL |
 | `pnpm verify:phase1` | Phase 1 冒烟验证 |
+| `pnpm verify:phase2` | Phase 2 冒烟验证 |
+| `pnpm verify:ai` | Admin AI（DeepSeek）连通与流式验证 |
 | `pnpm seed` | CLI 填充示例数据 |
 | `pnpm mcp:key` | 生成 MCP API Key |
 | `pnpm payload migrate:create` | 创建数据库迁移 |
@@ -82,12 +85,16 @@ pnpm build && pnpm start
 
 ## AI / MCP
 
+**Admin AI 助手**（DeepSeek，后台润色/SEO/智能填充）：见 [docs/ai-admin-guide.md](docs/ai-admin-guide.md)。
+
+**MCP**（外部 Agent 读写内容）：
+
 1. Admin 创建用户并分配 `editor` 或 `super-admin` 角色
 2. 为用户生成 API Key（Users 详情 → API Key）
 3. MCP 客户端连接 `http://localhost:3333/api/mcp`
 4. 鉴权：`Authorization: users API-Key <your-key>`
 
-详见 [架构文档 — AI / MCP 集成](docs/crispy-v3-architecture.md#7-ai--mcp-集成)。
+详见 [架构文档 — AI / MCP 集成](docs/crispy-v3-architecture.md#7-ai--mcp-集成) 与 [MCP 指南](docs/mcp-guide.md)。
 
 ## 角色说明
 

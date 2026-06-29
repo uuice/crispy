@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../../access/anyone'
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
+import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { revalidateLinks, revalidateLinksDelete } from './hooks/revalidateLinks'
 
@@ -26,23 +27,27 @@ export const Links: CollectionConfig = {
     afterDelete: [revalidateLinksDelete],
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
+    }),
     {
       name: 'url',
       type: 'text',
       label: adminLabels.url,
       required: true,
     },
-    {
-      name: 'description',
-      type: 'textarea',
-      label: adminLabels.description,
-    },
+    aiSuggestAssistField({ contentFieldPaths: 'description' }),
+    withAiTextareaField(
+      {
+        name: 'description',
+        type: 'textarea',
+        label: adminLabels.description,
+      },
+      { contentFieldPaths: 'description' },
+    ),
     {
       name: 'logo',
       type: 'upload',

@@ -4,6 +4,7 @@ import { anyone } from '../access/anyone'
 import { isEditor } from '../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
+import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 export const Tags: CollectionConfig = {
   slug: 'tags',
@@ -19,17 +20,21 @@ export const Tags: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-      label: adminLabels.description,
-    },
+    }),
+    aiSuggestAssistField({ contentFieldPaths: 'description' }),
+    withAiTextareaField(
+      {
+        name: 'description',
+        type: 'textarea',
+        label: adminLabels.description,
+      },
+      { contentFieldPaths: 'description' },
+    ),
     chineseSlugField({
       position: undefined,
     }),

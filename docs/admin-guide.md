@@ -112,7 +112,11 @@ ACCESS_LOG_SECRET=...          # 可选，默认用 PAYLOAD_SECRET
 2. 终端复制 `MCP_API_KEY`，写入 `.env`
 3. 详见 [mcp-guide.md](./mcp-guide.md)
 
-验证：`pnpm verify:phase1`（MCP + 预览 + RSS）、`pnpm verify:phase2`（图库/招聘/中文前台）。
+### Admin AI 写作助手
+
+基于 DeepSeek 的后台 AI（润色、SEO、智能填充、Lexical 选区等），需配置 `DEEPSEEK_API_KEY`。详见 **[AI 助手指南](./ai-admin-guide.md)**。
+
+验证：`pnpm verify:phase1`（MCP + 预览 + RSS）、`pnpm verify:phase2`（图库/招聘/中文前台）、`pnpm verify:ai`（DeepSeek 连通与流式）。
 
 ---
 
@@ -131,6 +135,7 @@ pnpm seed             # CLI 填充示例数据
 pnpm build            # 生产构建
 pnpm verify:phase1    # Phase 1 冒烟测试
 pnpm verify:phase2    # Phase 2 冒烟测试
+pnpm verify:ai        # Admin AI（DeepSeek）验证
 pnpm mcp:key          # 重新生成 MCP API Key
 pnpm generate:types   # 更新 TypeScript 类型
 ```
@@ -158,4 +163,5 @@ pnpm generate:types   # 更新 TypeScript 类型
 - [架构说明](./crispy-v3-architecture.md)
 - [实施路线图](./implementation-roadmap.md)
 - [Admin 验证清单](./admin-verification.md)
+- [AI 助手指南](./ai-admin-guide.md)
 - [MCP 指南](./mcp-guide.md)

@@ -2,6 +2,7 @@ export type AiAction =
   | 'polish'
   | 'expand'
   | 'shorten'
+  | 'custom'
   | 'seo_title'
   | 'seo_description'
   | 'rewrite'
@@ -32,6 +33,8 @@ export type AiContext = {
 export type AiCompleteRequest = {
   action: AiAction
   templateId?: string
+  /** Required when action is `custom` */
+  customPrompt?: string
   collection: string
   docId?: string | number
   fieldPath: string

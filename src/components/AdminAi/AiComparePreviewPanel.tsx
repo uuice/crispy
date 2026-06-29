@@ -83,6 +83,9 @@ export const LEXICAL_AI_ACTIONS: { action: AiAction; label: string }[] = [
   { action: 'rewrite', label: '改写' },
 ]
 
-export function getAiActionLabel(action: AiAction): string {
+export function getAiActionLabel(action: AiAction, customLabel?: string | null): string {
+  if (action === 'custom') {
+    return customLabel ? `自定义：${customLabel}` : '自定义'
+  }
   return LEXICAL_AI_ACTIONS.find((item) => item.action === action)?.label ?? action
 }

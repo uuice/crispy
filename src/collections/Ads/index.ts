@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../../access/anyone'
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
+import { withAiTextField } from '@/fields/ai'
 
 import { revalidateAds, revalidateAdsDelete } from './hooks/revalidateAds'
 
@@ -26,7 +27,7 @@ export const Ads: CollectionConfig = {
     afterDelete: [revalidateAdsDelete],
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
@@ -34,7 +35,7 @@ export const Ads: CollectionConfig = {
       admin: {
         description: '仅后台管理用，不展示在前台',
       },
-    },
+    }),
     {
       name: 'slot',
       type: 'relationship',
@@ -79,14 +80,17 @@ export const Ads: CollectionConfig = {
         condition: (_, siblingData) => siblingData?.format === 'image',
       },
     },
-    {
-      name: 'alt',
-      type: 'text',
-      label: adminLabels.alt,
-      admin: {
-        condition: (_, siblingData) => siblingData?.format === 'image',
+    withAiTextField(
+      {
+        name: 'alt',
+        type: 'text',
+        label: adminLabels.alt,
+        admin: {
+          condition: (_, siblingData) => siblingData?.format === 'image',
+        },
       },
-    },
+      { contentFieldPaths: 'alt', titleFieldPath: 'title' },
+    ),
     {
       name: 'sort',
       type: 'number',

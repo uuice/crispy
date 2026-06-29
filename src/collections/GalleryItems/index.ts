@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
+import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleryItemsReadAccess } from './access'
 import { revalidateGalleryItems, revalidateGalleryItemsDelete } from './hooks/revalidateGalleryItems'
@@ -27,12 +28,12 @@ export const GalleryItems: CollectionConfig = {
     afterDelete: [revalidateGalleryItemsDelete],
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
+    }),
     {
       name: 'image',
       type: 'upload',
@@ -40,11 +41,15 @@ export const GalleryItems: CollectionConfig = {
       relationTo: 'media',
       required: true,
     },
-    {
-      name: 'description',
-      type: 'textarea',
-      label: adminLabels.description,
-    },
+    aiSuggestAssistField({ contentFieldPaths: 'description' }),
+    withAiTextareaField(
+      {
+        name: 'description',
+        type: 'textarea',
+        label: adminLabels.description,
+      },
+      { contentFieldPaths: 'description' },
+    ),
     {
       name: 'sort',
       type: 'number',

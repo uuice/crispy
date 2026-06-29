@@ -8,6 +8,7 @@ import { consumeAiStream } from './consumeAiStream'
 
 type CompleteOptions = {
   action: AiAction
+  customPrompt?: string
   collection: string
   docId?: string | number
   fieldPath: string

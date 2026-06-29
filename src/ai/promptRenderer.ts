@@ -12,6 +12,7 @@ export function renderPromptTemplate(
   variables: {
     field?: string
     selection?: string
+    instruction?: string
     context?: AiContext
   },
 ): string {
@@ -20,6 +21,7 @@ export function renderPromptTemplate(
   const map: Record<string, string> = {
     field: variables.field ?? '',
     selection: variables.selection ?? variables.field ?? '',
+    instruction: variables.instruction ?? '',
     title: ctx.title ?? '',
     content_plain: ctx.contentPlain ?? '',
     siteName: ctx.siteName ?? 'Crispy',

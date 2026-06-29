@@ -611,6 +611,24 @@ export interface ContentBlock {
  */
 export interface MediaBlock {
   media: number | Media;
+  /**
+   * Optional block caption. Falls back to the media item caption when empty.
+   */
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -1755,6 +1773,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  caption?: T;
   id?: T;
   blockName?: T;
 }
@@ -2620,7 +2639,8 @@ export interface AiSetting {
     | {
         id: string;
         label: string;
-        action: 'polish' | 'expand' | 'shorten' | 'seo_title' | 'seo_description' | 'rewrite' | 'suggest_taxonomy';
+        action:
+          'polish' | 'expand' | 'shorten' | 'custom' | 'seo_title' | 'seo_description' | 'rewrite' | 'suggest_taxonomy';
         outputFormat?: ('text' | 'json') | null;
         enabled?: boolean | null;
         systemPrompt: string;

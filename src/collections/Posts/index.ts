@@ -9,7 +9,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-
 import {
   postsCreateAccess,
   postsDeleteAccess,
@@ -23,9 +22,15 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { assignAuthorOnCreate } from './hooks/assignAuthorOnCreate'
 import { populateAuthors } from './hooks/populateAuthors'
 import { restrictAuthorPublish } from './hooks/restrictAuthorPublish'
-import { sanitizePostContent } from './hooks/sanitizePostContent'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 import { adminLabels } from '@/i18n/admin-labels'
+import {
+  aiSeoAssistField,
+  aiSuggestAssistField,
+  withAiRewriteFeatures,
+  withAiTextField,
+} from '@/fields/ai'
+import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import {
   MetaDescriptionField,
@@ -35,7 +40,6 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { AiRewriteFeature } from '@/components/AdminAi/lexical/AiRewriteFeature/server'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -46,9 +50,6 @@ export const Posts: CollectionConfig<'posts'> = {
     read: postsReadAccess,
     update: postsUpdateAccess,
   },
-  // This config controls what's populated by default when a post is referenced
-  // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'posts'>
   defaultPopulate: {
     title: true,
     slug: true,
@@ -78,17 +79,12 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       required: true,
       label: adminLabels.title,
-      admin: {
-        components: {
-          Field: '@/components/AdminAi/AiTextField',
-        },
-      },
-    },
+    }),
     {
       type: 'tabs',
       tabs: [
@@ -103,17 +99,15 @@ export const Posts: CollectionConfig<'posts'> = {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
+                features: ({ rootFeatures }) =>
+                  withAiRewriteFeatures([
                     ...rootFeatures,
                     HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
                     BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
-                    AiRewriteFeature(),
                     HorizontalRuleFeature(),
-                  ]
-                },
+                  ]),
               }),
               label: false,
               required: true,
@@ -123,15 +117,7 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         {
           fields: [
-            {
-              name: 'aiSuggestAssist',
-              type: 'ui',
-              admin: {
-                components: {
-                  Field: '@/components/AdminAi/AiSuggestPanel',
-                },
-              },
-            },
+            aiSuggestAssistField({ contentFieldPaths: 'content' }),
             {
               name: 'relatedPosts',
               type: 'relationship',
@@ -176,15 +162,7 @@ export const Posts: CollectionConfig<'posts'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
-            {
-              name: 'aiSeoAssist',
-              type: 'ui',
-              admin: {
-                components: {
-                  Field: '@/components/AdminAi/AiSeoPanel',
-                },
-              },
-            },
+            aiSeoAssistField({ contentFieldPaths: 'content' }),
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
@@ -196,13 +174,9 @@ export const Posts: CollectionConfig<'posts'> = {
             MetaImageField({
               relationTo: 'media',
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),
@@ -241,9 +215,6 @@ export const Posts: CollectionConfig<'posts'> = {
       hasMany: true,
       relationTo: 'users',
     },
-    // This field is only used to populate the user data via the `populateAuthors` hook
-    // This is because the `user` collection has access control locked to protect user privacy
-    // GraphQL will also not return mutated user data that differs from the underlying schema
     {
       name: 'populatedAuthors',
       type: 'array',
@@ -268,7 +239,7 @@ export const Posts: CollectionConfig<'posts'> = {
     chineseSlugField(),
   ],
   hooks: {
-    beforeValidate: [sanitizePostContent],
+    beforeValidate: [createSanitizeLexicalHook(['content'])],
     beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],

@@ -67,12 +67,42 @@ PREVIEW_SECRET=preview-dev-secret
   MCP tools: N 个
 ```
 
+## Admin AI 助手
+
+- [x] DeepSeek 流式 API（`/api/ai/stream`）
+- [x] 10 个 Collection + Posts Lexical Block（Banner / Code / Media）AI 接入
+- [x] 统一 ✨ 图标 + 弹框交互
+
+### 环境变量
+
+```bash
+DEEPSEEK_API_KEY=...
+# DEEPSEEK_BASE_URL=https://api.deepseek.com
+# DEEPSEEK_MODEL=deepseek-chat
+```
+
+### 手动验证
+
+1. `pnpm dev`，Admin 登录编辑/管理员账号
+2. 打开文章 → 标题旁 ✨ → 润色/自定义指令
+3. 正文选区 → 浮动工具栏 ✨
+4. SEO / 智能填充标签页 → ✨ 弹框
+
+### 自动验证
+
+```bash
+pnpm verify:ai
+```
+
+详见 [ai-admin-guide.md](./ai-admin-guide.md)。
+
 ## 快捷命令
 
 ```bash
 pnpm dev
 pnpm verify:phase1
 pnpm verify:phase2
+pnpm verify:ai
 pnpm seed
 pnpm mcp:key
 MCP_API_KEY=xxx pnpm verify:phase1

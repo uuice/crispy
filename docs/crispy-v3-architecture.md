@@ -203,6 +203,16 @@ Prisma、Hono、自研 Admin RPC、NextAuth 独立层、MySQL。
 - `media` MCP 禁 delete
 - 细粒度开关：Admin → MCP API Keys
 
+### 7.4 Admin AI 写作助手
+
+后台 DeepSeek 集成（润色、SEO、智能填充、Lexical 选区等），与 MCP 独立：
+
+- 配置：`DEEPSEEK_API_KEY` + Admin → **AI 设置** Global
+- API：`/api/ai/stream`、`/api/ai/complete`、`/api/ai/structured`
+- 代码：`src/ai/`、`src/components/AdminAi/`、`src/fields/ai/`
+
+完整说明见 **[ai-admin-guide.md](./ai-admin-guide.md)**。
+
 ---
 
 ## 8. 前台设计
@@ -243,6 +253,7 @@ const { docs } = await payload.find({
 crispy/
 ├── docs/
 │   ├── crispy-v3-architecture.md    # 本文档
+│   ├── ai-admin-guide.md            # Admin AI 助手
 │   └── implementation-roadmap.md    # 任务清单
 ├── src/
 │   ├── app/

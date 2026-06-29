@@ -10,6 +10,8 @@ import {
 import { isEditor } from '../../access/roles'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { adminLabels } from '@/i18n/admin-labels'
+import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
+import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import { jobsReadAccess } from './access'
 import { revalidateJob, revalidateJobDelete } from './hooks/revalidateJob'
@@ -32,14 +34,15 @@ export const Jobs: CollectionConfig = {
   hooks: {
     afterChange: [revalidateJob],
     afterDelete: [revalidateJobDelete],
+    beforeValidate: [createSanitizeLexicalHook(['description', 'requirements'])],
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
+    }),
     chineseSlugField({
       position: 'sidebar',
     }),
@@ -84,12 +87,13 @@ export const Jobs: CollectionConfig = {
       label: adminLabels.jobDescription,
       required: true,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => [
-          ...rootFeatures,
-          FixedToolbarFeature(),
-          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          InlineToolbarFeature(),
-        ],
+        features: ({ rootFeatures }) =>
+          withAiRewriteFeatures([
+            ...rootFeatures,
+            FixedToolbarFeature(),
+            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+            InlineToolbarFeature(),
+          ]),
       }),
     },
     {
@@ -97,12 +101,13 @@ export const Jobs: CollectionConfig = {
       type: 'richText',
       label: adminLabels.jobRequirements,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => [
-          ...rootFeatures,
-          FixedToolbarFeature(),
-          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          InlineToolbarFeature(),
-        ],
+        features: ({ rootFeatures }) =>
+          withAiRewriteFeatures([
+            ...rootFeatures,
+            FixedToolbarFeature(),
+            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+            InlineToolbarFeature(),
+          ]),
       }),
     },
     {

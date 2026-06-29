@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { withAiCodeField } from '@/fields/ai'
+
 export const Code: Block = {
   slug: 'code',
   interfaceName: 'CodeBlock',
@@ -23,11 +25,11 @@ export const Code: Block = {
         },
       ],
     },
-    {
+    withAiCodeField({
       name: 'code',
       type: 'code',
       label: false,
       required: true,
-    },
+    }),
   ],
 }

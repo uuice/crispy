@@ -4,6 +4,7 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { anyone } from '../../access/anyone'
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
+import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { revalidateAdSlots, revalidateAdSlotsDelete } from './hooks/revalidateAdSlots'
 
@@ -27,23 +28,27 @@ export const AdSlots: CollectionConfig = {
     afterDelete: [revalidateAdSlotsDelete],
   },
   fields: [
-    {
+    withAiTextField({
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    },
+    }),
     chineseSlugField({
       position: undefined,
       admin: {
         description: '前台 AdSlot 组件使用的标识，如 home-banner、post-content-bottom',
       },
     }),
-    {
-      name: 'description',
-      type: 'textarea',
-      label: adminLabels.description,
-    },
+    aiSuggestAssistField({ contentFieldPaths: 'description' }),
+    withAiTextareaField(
+      {
+        name: 'description',
+        type: 'textarea',
+        label: adminLabels.description,
+      },
+      { contentFieldPaths: 'description' },
+    ),
     {
       type: 'row',
       fields: [

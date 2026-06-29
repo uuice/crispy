@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { TextField, useDocumentInfo, useField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import { TextareaField, useDocumentInfo, useField } from '@payloadcms/ui'
+import type { TextareaFieldClientComponent } from 'payload'
 
 import type { AiAction } from '@/ai/types'
 
@@ -17,7 +17,7 @@ const DEFAULT_ACTIONS: { action: AiAction; label: string }[] = [
   { action: 'shorten', label: '精简' },
 ]
 
-const AiTextField: TextFieldClientComponent = (props) => {
+const AiTextareaField: TextareaFieldClientComponent = (props) => {
   const { path, field } = props
   const { value, setValue } = useField<string>({ path })
   const { id, collectionSlug } = useDocumentInfo()
@@ -66,9 +66,9 @@ const AiTextField: TextFieldClientComponent = (props) => {
         />
       }
     >
-      <TextField {...props} />
+      <TextareaField {...props} />
     </AiFieldAssistLayout>
   )
 }
 
-export default AiTextField
+export default AiTextareaField

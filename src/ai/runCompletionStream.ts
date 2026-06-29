@@ -21,7 +21,16 @@ export async function* runAiTextCompletionStream(
     throw new Error('该模板需要 structured 接口')
   }
 
-  const variables = { field: body.input, selection: body.context?.selection, context: body.context }
+  if (body.action === 'custom' && !body.customPrompt?.trim()) {
+    throw new Error('自定义指令不能为空')
+  }
+
+  const variables = {
+    field: body.input,
+    selection: body.context?.selection,
+    instruction: body.customPrompt?.trim() ?? '',
+    context: body.context,
+  }
 
   const stream = deepseekChatCompletionStream({
     baseUrl: settings.baseUrl,

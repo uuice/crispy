@@ -4,18 +4,17 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import { $getSelection, $isRangeSelection, $setSelection } from 'lexical'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
+import { useDocumentInfo } from '@payloadcms/ui'
+import { useEditorConfigContext } from '@payloadcms/richtext-lexical/client'
 import type { ToolbarGroupItem } from '@payloadcms/richtext-lexical'
 
 import type { AiAction } from '@/ai/types'
-import { lexicalToPlainText } from '@/ai/lexical/toPlainText'
 
-import {
-  AiComparePreviewPanel,
-  getAiActionLabel,
-  LEXICAL_AI_ACTIONS,
-} from '../AiComparePreviewPanel'
+import { AiAssistPanelContent, LEXICAL_AI_PRESETS } from '../AiAssistPanelContent'
+import { AiIcon } from '../AiIcon'
+import { LEXICAL_AI_ACTIONS } from '../AiComparePreviewPanel'
 import { useAiComplete } from '../useAiComplete'
+import { useAiFieldContext } from '../useAiFieldContext'
 
 type Props = {
   editor: LexicalEditor
@@ -107,35 +106,22 @@ function computePanelPosition(anchorElem: HTMLElement, panelHeight: number): Rea
   }
 }
 
-function AiIcon() {
-  return (
-    <svg aria-hidden fill="none" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 1.5l1.2 3.6L13 6l-3.8 1.9L8 11.5 6.8 7.9 3 6l3.8-1.9L8 1.5z" fill="currentColor" />
-      <path
-        d="M12.5 9.5l.6 1.8 1.9.9-1.9.9-.6 1.8-.6-1.8-1.9-.9 1.9-.9.6-1.8z"
-        fill="currentColor"
-        opacity="0.85"
-      />
-    </svg>
-  )
-}
-
 export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
   const { id, collectionSlug } = useDocumentInfo()
+  const { fieldProps } = useEditorConfigContext()
   const { runComplete } = useAiComplete()
+  const { title, contentPlain } = useAiFieldContext()
+  const fieldPath = fieldProps.path
   const panelRef = useRef<HTMLDivElement>(null)
   const savedSelectionRef = useRef<BaseSelection | null>(null)
   const [open, setOpen] = useState(false)
   const [selectionText, setSelectionText] = useState('')
   const [activeAction, setActiveAction] = useState<AiAction | null>(null)
+  const [customLabel, setCustomLabel] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [streaming, setStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({})
-
-  const title = useFormFields(([fields]) => fields.title?.value as string | undefined)
-  const content = useFormFields(([fields]) => fields.content?.value)
-  const contentPlain = lexicalToPlainText(content)
 
   const repositionPanel = useCallback(() => {
     if (!panelRef.current) return
@@ -168,23 +154,26 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
     if (!open) return
 
     const handlePointerDown = (event: MouseEvent) => {
+      if (streaming) return
       const target = event.target as Node
       if (panelRef.current?.contains(target)) return
       if (anchorElem.contains(target)) return
       setOpen(false)
       setPreview(null)
       setActiveAction(null)
+      setCustomLabel(null)
       setError(null)
       savedSelectionRef.current = null
     }
 
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
-  }, [anchorElem, open])
+  }, [anchorElem, open, streaming])
 
   const runAction = useCallback(
-    async (action: AiAction, selected: string) => {
+    async (action: AiAction, selected: string, customPrompt?: string) => {
       setActiveAction(action)
+      setCustomLabel(action === 'custom' ? customPrompt?.trim() || '自定义' : null)
       setError(null)
       setPreview('')
       setStreaming(true)
@@ -193,9 +182,10 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
         await runComplete(
           {
             action,
+            customPrompt,
             collection: collectionSlug ?? 'posts',
             docId: id,
-            fieldPath: 'content',
+            fieldPath,
             input: selected,
             context: {
               title,
@@ -210,12 +200,13 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
         )
       } catch (err) {
         setPreview(null)
+        setCustomLabel(null)
         setError(err instanceof Error ? err.message : 'AI 失败')
       } finally {
         setStreaming(false)
       }
     },
-    [collectionSlug, contentPlain, id, runComplete, title],
+    [collectionSlug, contentPlain, fieldPath, id, runComplete, title],
   )
 
   const handleOpen = useCallback(() => {
@@ -226,6 +217,7 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
     setSelectionText(selected)
     setPreview(null)
     setActiveAction(null)
+    setCustomLabel(null)
     setError(null)
     setOpen(true)
   }, [editor])
@@ -247,6 +239,7 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
     setOpen(false)
     setPreview(null)
     setActiveAction(null)
+    setCustomLabel(null)
     setError(null)
     savedSelectionRef.current = null
   }, [editor, preview])
@@ -255,6 +248,7 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
     setOpen(false)
     setPreview(null)
     setActiveAction(null)
+    setCustomLabel(null)
     setError(null)
     savedSelectionRef.current = null
   }, [])
@@ -283,43 +277,23 @@ export function AiRewriteToolbarButton({ editor, anchorElem }: Props) {
                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.18)',
               }}
             >
-              <p style={{ fontWeight: 600, fontSize: '13px', marginBottom: '10px' }}>AI 选区助手</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: preview !== null ? '12px' : 0 }}>
-                {LEXICAL_AI_ACTIONS.map(({ action, label }) => (
-                  <button
-                    className={
-                      activeAction === action
-                        ? 'btn btn--style-primary btn--size-small'
-                        : 'btn btn--style-secondary btn--size-small'
-                    }
-                    disabled={streaming}
-                    key={action}
-                    onClick={() => void runAction(action, selectionText)}
-                    type="button"
-                  >
-                    {streaming && activeAction === action ? '处理中…' : label}
-                  </button>
-                ))}
-              </div>
-              {error && (
-                <p style={{ color: 'var(--theme-error-500)', fontSize: '13px', marginTop: '8px' }}>{error}</p>
-              )}
-              {preview !== null && (
-                <AiComparePreviewPanel
-                  applyLabel="替换选区"
-                  originalText={selectionText}
-                  resultText={preview}
-                  streaming={streaming}
-                  title={activeAction ? `${getAiActionLabel(activeAction)} 对比` : 'AI 对比'}
-                  onApply={applyResult}
-                  onCancel={closePanel}
-                />
-              )}
-              {preview === null && !error && (
-                <p style={{ fontSize: '12px', color: 'var(--theme-elevation-600)', marginTop: '8px' }}>
-                  选择操作：润色、扩写、精简或改写当前选区。
-                </p>
-              )}
+              <AiAssistPanelContent
+                actions={LEXICAL_AI_ACTIONS}
+                activeAction={activeAction}
+                applyLabel="替换选区"
+                customLabel={customLabel}
+                disabled={!selectionText.trim()}
+                error={error}
+                originalText={selectionText}
+                presets={LEXICAL_AI_PRESETS}
+                preview={preview}
+                streaming={streaming}
+                title="AI 选区助手"
+                onAction={(action) => void runAction(action, selectionText)}
+                onApply={applyResult}
+                onCancel={closePanel}
+                onCustomSubmit={(instruction) => runAction('custom', selectionText, instruction)}
+              />
             </div>
           </div>,
           document.body,
