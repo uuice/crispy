@@ -3,10 +3,10 @@ import { revalidateTag } from 'next/cache'
 
 export const revalidateLinks: CollectionAfterChangeHook = ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_links')
+  revalidateTag('collection_links', 'max')
 }
 
 export const revalidateLinksDelete: CollectionAfterDeleteHook = ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_links')
+  revalidateTag('collection_links', 'max')
 }

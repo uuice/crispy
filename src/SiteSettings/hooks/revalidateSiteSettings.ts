@@ -6,6 +6,6 @@ export const revalidateSiteSettings: GlobalAfterChangeHook = ({ context }) => {
     return
   }
 
-  revalidateTag('global_site-settings')
+  revalidateTag('global_site-settings', 'max')
   revalidatePath('/', 'layout')
 }

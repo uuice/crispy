@@ -72,6 +72,7 @@ PREVIEW_SECRET=preview-dev-secret
 ```bash
 pnpm dev
 pnpm verify:phase1
+pnpm verify:phase2
 pnpm seed
 pnpm mcp:key
 MCP_API_KEY=xxx pnpm verify:phase1

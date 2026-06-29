@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
-import { CRISPY_ROLES, isSuperAdmin } from '../../access/roles'
+import { CRISPY_ROLES, hasRole } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 
 export const Users: CollectionConfig = {
@@ -9,8 +9,8 @@ export const Users: CollectionConfig = {
   labels: adminLabels.users,
   access: {
     admin: authenticated,
-    create: isSuperAdmin,
-    delete: isSuperAdmin,
+    create: ({ req: { user } }) => hasRole(user, ['super-admin']),
+    delete: ({ req: { user } }) => hasRole(user, ['super-admin']),
     read: authenticated,
     update: authenticated,
   },
@@ -37,7 +37,7 @@ export const Users: CollectionConfig = {
       label: adminLabels.roles,
       options: CRISPY_ROLES,
       access: {
-        update: isSuperAdmin,
+        update: ({ req: { user } }) => hasRole(user, ['super-admin']),
       },
     },
   ],

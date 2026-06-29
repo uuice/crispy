@@ -23,7 +23,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Explore the untold and overlooked. A magnified view into the corners of the world, where every story deserves its spotlight.',
+                text: '探索那些被忽视的故事。放大世界的角落，让每个叙事都值得被看见。',
                 version: 1,
               },
             ],
@@ -51,7 +51,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                           format: 1,
                           mode: 'normal',
                           style: '',
-                          text: 'Disclaimer:',
+                          text: '声明：',
                           version: 1,
                         },
                         {
@@ -60,7 +60,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: ' This content is fabricated and for demonstration purposes only. To edit this post, ',
+                          text: ' 本文为演示内容。如需编辑，请 ',
                           version: 1,
                         },
                         {
@@ -72,7 +72,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                               format: 0,
                               mode: 'normal',
                               style: '',
-                              text: 'navigate to the admin dashboard.',
+                              text: '进入管理后台',
                               version: 1,
                             },
                           ],
@@ -114,7 +114,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'The Power of Resilience: Stories of Recovery and Hope',
+                text: '韧性的力量：复苏与希望的故事',
                 version: 1,
               },
             ],
@@ -162,7 +162,7 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'From neighbors forming makeshift rescue teams during floods to entire cities rallying to rebuild after economic collapse, the essence of humanity is most evident in these acts of solidarity. As we delve into these narratives, we witness the transformative power of community spirit, where adversity becomes a catalyst for growth, unity, and a brighter, rebuilt future.',
+                text: '从洪灾中自发组队的邻居，到经济冲击后整城重建的社区——人类精神在互助中最闪光。这些叙事告诉我们，逆境可以成为团结、成长与重建的催化剂。',
                 version: 1,
               },
             ],
@@ -222,11 +222,11 @@ export const post2: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
     heroImage: heroImage.id,
     meta: {
       description:
-        'Explore the untold and overlooked. A magnified view into the corners of the world, where every story deserves its spotlight.',
+        '探索那些被忽视的故事。放大世界的角落，让每个叙事都值得被看见。',
       image: heroImage.id,
-      title: 'Global Gaze: Beyond the Headlines',
+      title: '全球视角：头条之外',
     },
     relatedPosts: [], // this is populated by the seed script
-    title: 'Global Gaze: Beyond the Headlines',
+    title: '全球视角：头条之外',
   }
 }

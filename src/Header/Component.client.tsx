@@ -37,7 +37,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, siteSettings }
           <Logo
             loading="eager"
             logo={siteSettings.logo}
-            priority="high"
+            priority
             siteName={siteSettings.siteName || 'Crispy'}
             className="invert dark:invert-0"
           />

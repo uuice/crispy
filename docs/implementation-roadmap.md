@@ -72,6 +72,10 @@
 - [x] `@payloadcms/storage-s3` 生产媒体
 - [x] API 访问日志 middleware（可选）
 - [x] 中文 slug 自动生成（pinyin hook）
+- [x] 前台中文化与站点导览
+- [x] `pnpm verify:phase2` 冒烟脚本
+- [x] Admin 使用指南 `docs/admin-guide.md`
+- [x] Seed 示例文章中文化
 
 ---
 
@@ -84,7 +88,6 @@
 - [ ] `@payloadcms/plugin-sentry`
 - [ ] Dockerfile / 部署文档
 - [ ] 备份与恢复说明
-- [ ] Admin 使用指南 `docs/admin-guide.md`
 - [ ] 性能：revalidation 策略审查
 
 ---
@@ -95,6 +98,7 @@
 pnpm dev                    # SQLite 本地开发
 pnpm docker:up              # 可选：本地 PostgreSQL
 pnpm verify:phase1           # Phase 1 冒烟（需 dev + MCP_API_KEY）
+pnpm verify:phase2           # Phase 2 冒烟（图库/招聘/中文前台/access-log）
 pnpm seed                    # CLI 填充示例数据
 pnpm mcp:key                 # 重新生成 MCP API Key
 pnpm generate:types         # 更新 payload-types.ts

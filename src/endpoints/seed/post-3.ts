@@ -32,7 +32,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                           format: 1,
                           mode: 'normal',
                           style: '',
-                          text: 'Disclaimer: ',
+                          text: '声明：',
                           version: 1,
                         },
                         {
@@ -41,7 +41,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: 'This content is fabricated and for demonstration purposes only. To edit this post, ',
+                          text: '本文为演示内容。如需编辑，请 ',
                           version: 1,
                         },
                         {
@@ -53,7 +53,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                               format: 0,
                               mode: 'normal',
                               style: '',
-                              text: 'navigate to the admin dashboard.',
+                              text: '进入管理后台',
                               version: 1,
                             },
                           ],
@@ -113,7 +113,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Dive deep into its nuances, where strategy meets intuition in the vast sea of finance.',
+                text: '深入金融世界的细微之处——策略与直觉在市场中交织。',
                 version: 1,
               },
             ],
@@ -161,7 +161,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Stock Market Dynamics: Bulls, Bears, and the Uncertain Middle',
+                text: '股市动态：牛市、熊市与不确定的中间地带',
                 version: 1,
               },
             ],
@@ -180,7 +180,7 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'The stock market is a realm of vast opportunity but also poses risks. Discover the forces that drive market trends and the strategies employed by top traders to navigate this complex ecosystem. From market analysis to understanding investor psychology, get a comprehensive insight into the world of stocks.',
+                text: '股市既充满机遇也伴随风险。了解驱动趋势的力量、顶尖交易者的策略，以及市场分析与投资者心理如何共同塑造这一复杂生态。',
                 version: 1,
               },
             ],
@@ -258,11 +258,11 @@ export const post3: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
     },
     heroImage: heroImage.id,
     meta: {
-      description: `Money isn't just currency; it's a language. Dive deep into its nuances, where strategy meets intuition in the vast sea of finance.`,
+      description: '金钱不仅是货币，更是一种语言。深入金融世界的细微之处——策略与直觉在市场中交织。',
       image: heroImage.id,
-      title: 'Dollar and Sense: The Financial Forecast',
+      title: '财智洞见：金融前瞻',
     },
     relatedPosts: [], // this is populated by the seed script
-    title: 'Dollar and Sense: The Financial Forecast',
+    title: '财智洞见：金融前瞻',
   }
 }

@@ -42,14 +42,18 @@ export const PageRange: React.FC<{
       singular: frontendLabels.posts.singular,
     }
 
-  const unit = totalDocs > 1 ? plural : singular
+  const docCount = totalDocs ?? 0
+  const unit =
+    docCount > 1
+      ? (plural ?? frontendLabels.posts.plural)
+      : (singular ?? frontendLabels.posts.singular)
 
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>
-      {(typeof totalDocs === 'undefined' || totalDocs === 0) && frontendLabels.pagination.empty}
+      {(typeof totalDocs === 'undefined' || docCount === 0) && frontendLabels.pagination.empty}
       {typeof totalDocs !== 'undefined' &&
-        totalDocs > 0 &&
-        frontendLabels.pagination.range(indexStart, indexEnd, totalDocs, unit)}
+        docCount > 0 &&
+        frontendLabels.pagination.range(indexStart, indexEnd, docCount, unit)}
     </div>
   )
 }

@@ -8,7 +8,7 @@ interface Props {
   className?: string
   loading?: 'lazy' | 'eager'
   logo?: MediaType | number | null
-  priority?: 'auto' | 'high' | 'low'
+  priority?: boolean
   siteName?: string
 }
 
@@ -22,7 +22,7 @@ export const Logo = (props: Props) => {
   } = props
 
   const loading = loadingFromProps || 'lazy'
-  const priority = priorityFromProps || 'low'
+  const priority = priorityFromProps ?? false
 
   if (logo && typeof logo === 'object' && logo.url) {
     return (
