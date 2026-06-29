@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { isEditor } from '../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField } from '@/fields/ai'
@@ -10,10 +10,10 @@ export const Categories: CollectionConfig = {
   slug: 'categories',
   labels: adminLabels.categories,
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: isEditor,
+    delete: isEditor,
     read: anyone,
-    update: authenticated,
+    update: isEditor,
   },
   admin: {
     useAsTitle: 'title',

@@ -9,7 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { mediaCreateAccess, mediaDeleteAccess, mediaUpdateAccess } from '../access/media'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
@@ -22,10 +22,10 @@ export const Media: CollectionConfig = {
   labels: adminLabels.media,
   folders: true,
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: mediaCreateAccess,
+    delete: mediaDeleteAccess,
     read: anyone,
-    update: authenticated,
+    update: mediaUpdateAccess,
   },
   hooks: {
     beforeValidate: [createSanitizeLexicalHook(['caption'])],

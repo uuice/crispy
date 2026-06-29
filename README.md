@@ -33,26 +33,26 @@ pnpm build && pnpm start
 
 ## 访问地址
 
-| 入口 | URL |
-|------|-----|
-| 前台首页 | http://localhost:3333 |
-| 后台 Admin | http://localhost:3333/admin |
-| REST API | http://localhost:3333/api |
-| MCP 端点 | http://localhost:3333/api/mcp |
-| GraphQL | http://localhost:3333/api/graphql |
+| 入口       | URL                               |
+| ---------- | --------------------------------- |
+| 前台首页   | http://localhost:3333             |
+| 后台 Admin | http://localhost:3333/admin       |
+| REST API   | http://localhost:3333/api         |
+| MCP 端点   | http://localhost:3333/api/mcp     |
+| GraphQL    | http://localhost:3333/api/graphql |
 
 首次访问 Admin 会引导创建超级管理员账号。
 
 ## 技术栈
 
-| 层 | 技术 |
-|----|------|
-| CMS | Payload 3.85 |
-| 框架 | Next.js 16 App Router |
+| 层             | 技术                         |
+| -------------- | ---------------------------- |
+| CMS            | Payload 3.85                 |
+| 框架           | Next.js 16 App Router        |
 | 数据库（本地） | SQLite（`.data/payload.db`） |
-| 数据库（生产） | PostgreSQL |
-| 编辑器 | Lexical |
-| UI | Tailwind 4 + shadcn/ui |
+| 数据库（生产） | PostgreSQL                   |
+| 编辑器         | Lexical                      |
+| UI             | Tailwind 4 + shadcn/ui       |
 
 ## 官方插件（已启用）
 
@@ -69,19 +69,19 @@ pnpm build && pnpm start
 
 ## 常用命令
 
-| 命令 | 说明 |
-|------|------|
-| `pnpm dev` | 开发服务器（端口 3333） |
-| `pnpm build` | 生产构建 |
-| `pnpm docker:up` | 启动 PostgreSQL（可选，本地 PG 调试） |
-| `pnpm docker:down` | 停止 PostgreSQL |
-| `pnpm verify:phase1` | Phase 1 冒烟验证 |
-| `pnpm verify:phase2` | Phase 2 冒烟验证 |
-| `pnpm verify:ai` | Admin AI（DeepSeek）连通与流式验证 |
-| `pnpm seed` | CLI 填充示例数据 |
-| `pnpm mcp:key` | 生成 MCP API Key |
-| `pnpm payload migrate:create` | 创建数据库迁移 |
-| `pnpm payload migrate` | 执行迁移（生产） |
+| 命令                          | 说明                                  |
+| ----------------------------- | ------------------------------------- |
+| `pnpm dev`                    | 开发服务器（端口 3333）               |
+| `pnpm build`                  | 生产构建                              |
+| `pnpm docker:up`              | 启动 PostgreSQL（可选，本地 PG 调试） |
+| `pnpm docker:down`            | 停止 PostgreSQL                       |
+| `pnpm verify:phase1`          | Phase 1 冒烟验证                      |
+| `pnpm verify:phase2`          | Phase 2 冒烟验证                      |
+| `pnpm verify:ai`              | Admin AI（DeepSeek）连通与流式验证    |
+| `pnpm seed`                   | CLI 填充示例数据                      |
+| `pnpm mcp:key`                | 生成 MCP API Key                      |
+| `pnpm payload migrate:create` | 创建数据库迁移                        |
+| `pnpm payload migrate`        | 执行迁移（生产）                      |
 
 ## AI / MCP
 
@@ -98,11 +98,11 @@ pnpm build && pnpm start
 
 ## 角色说明
 
-| 角色 | 权限 |
-|------|------|
-| `super-admin` | 全部权限 + 用户管理 |
-| `editor` | 内容 CRUD、发布、站点配置 |
-| `author` | 创建/编辑文章（默认） |
+| 角色          | 权限                                                                    |
+| ------------- | ----------------------------------------------------------------------- |
+| `super-admin` | 全部权限 + 用户管理                                                     |
+| `editor`      | 内容 CRUD、发布、站点/导航/运营模块                                     |
+| `author`      | 创建/编辑自己的文章（草稿）；上传媒体；不可改单页、分类、导航、删除媒体 |
 
 ## 与 2.x 的关系
 
