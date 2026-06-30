@@ -1,10 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -45,7 +41,7 @@ export const Media: CollectionConfig = {
       label: adminLabels.caption,
       editor: lexicalEditor({
         features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]),
+          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature()]),
       }),
     },
   ],

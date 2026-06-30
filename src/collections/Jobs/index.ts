@@ -1,11 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { isEditor } from '../../access/roles'
 import { chineseSlugField } from '@/fields/chineseSlugField'
@@ -92,7 +87,6 @@ export const Jobs: CollectionConfig = {
             ...rootFeatures,
             FixedToolbarFeature(),
             HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-            InlineToolbarFeature(),
           ]),
       }),
     },
@@ -106,7 +100,6 @@ export const Jobs: CollectionConfig = {
             ...rootFeatures,
             FixedToolbarFeature(),
             HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-            InlineToolbarFeature(),
           ]),
       }),
     },

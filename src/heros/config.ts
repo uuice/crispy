@@ -1,11 +1,6 @@
 import type { Field } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { linkGroup } from '@/fields/linkGroup'
 import { withAiRewriteFeatures } from '@/fields/ai'
@@ -48,7 +43,6 @@ export const hero: Field = {
             ...rootFeatures,
             HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
             FixedToolbarFeature(),
-            InlineToolbarFeature(),
           ]),
       }),
       label: false,

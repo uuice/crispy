@@ -1,10 +1,6 @@
 import type { Block } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { withAiRewriteFeatures } from '@/fields/ai'
 
@@ -27,7 +23,7 @@ export const MediaBlock: Block = {
       },
       editor: lexicalEditor({
         features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]),
+          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature()]),
       }),
     },
   ],
