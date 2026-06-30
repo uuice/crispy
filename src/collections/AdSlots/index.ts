@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 
-import { anyone } from '../../access/anyone'
+import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
@@ -14,7 +14,7 @@ export const AdSlots: CollectionConfig = {
   access: {
     create: isEditor,
     delete: isEditor,
-    read: anyone,
+    read: enabledPublicReadAccess,
     update: isEditor,
   },
   admin: {

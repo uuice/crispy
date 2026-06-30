@@ -7,10 +7,10 @@ import 'swagger-ui-dist/swagger-ui.css'
 import './swagger-ui.scss'
 
 type Props = {
-  specUrl: string
+  spec: Record<string, unknown>
 }
 
-export function SwaggerUIView({ specUrl }: Props) {
+export function SwaggerUIView({ spec }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const theme = useAdminTheme()
 
@@ -29,13 +29,17 @@ export function SwaggerUIView({ specUrl }: Props) {
       // BaseLayout (apis preset only) — no StandaloneLayout / standalone-preset bundle needed.
       ui = SwaggerUIBundle({
         domNode: container,
-        url: specUrl,
+        spec,
         docExpansion: 'list',
         defaultModelsExpandDepth: 1,
         persistAuthorization: true,
         tryItOutEnabled: true,
         presets: [SwaggerUIBundle.presets.apis],
-      })
+        requestInterceptor: (request: { credentials?: string }) => {
+          request.credentials = 'include'
+          return request
+        },
+      } as Parameters<typeof SwaggerUIBundle>[0])
     })
 
     return () => {
@@ -43,7 +47,7 @@ export function SwaggerUIView({ specUrl }: Props) {
       ui?.destroy?.()
       container.replaceChildren()
     }
-  }, [specUrl])
+  }, [spec])
 
   return (
     <div

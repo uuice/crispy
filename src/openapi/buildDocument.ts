@@ -364,6 +364,30 @@ function buildCustomPaths(): Record<string, unknown> {
         security: [{ accessLogSecret: [] }],
       },
     },
+    '/api/openapi.json': {
+      get: {
+        tags: ['Internal'],
+        summary: 'OpenAPI 3.0 specification (auto-generated)',
+        description: 'Requires Admin session cookie. Used by /admin/api-docs Swagger UI.',
+        responses: {
+          '200': jsonResponse('OpenAPI document'),
+          '401': jsonResponse('Unauthorized'),
+        },
+        security: [{ cookieAuth: [] }],
+      },
+    },
+    '/api/graphql-playground': {
+      get: {
+        tags: ['GraphQL'],
+        summary: 'GraphQL Playground UI',
+        description: 'Requires Admin session cookie. Interactive GraphQL IDE for logged-in staff only.',
+        responses: {
+          '200': { description: 'GraphQL Playground HTML' },
+          '401': jsonResponse('Unauthorized'),
+        },
+        security: [{ cookieAuth: [] }],
+      },
+    },
   }
 }
 
@@ -556,7 +580,7 @@ export async function buildOpenApiDocument(
       title: 'Crispy CMS API',
       version: '3.0.0',
       description:
-        'Auto-generated from Payload config at runtime. Includes REST collections/globals, Admin AI, MCP, GraphQL, and internal routes. Regenerate: GET /api/openapi.json or pnpm generate:openapi.',
+        'Auto-generated from Payload config at runtime. Includes REST collections/globals, Admin AI, MCP, GraphQL, and internal routes. Requires Admin login for GET /api/openapi.json. Regenerate: pnpm generate:openapi (writes public/openapi.json for local use only).',
     },
     servers: [{ url: serverUrl, description: 'Current server' }],
     tags: buildTags(collections, globals),

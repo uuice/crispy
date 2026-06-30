@@ -26,7 +26,7 @@ export const isAuthorOrAbove: Access = ({ req: { user } }) =>
   hasRole(user, ['super-admin', 'editor', 'author'])
 
 /**
- * RBAC summary (see also src/access/posts.ts, pages.ts, media.ts):
+ * RBAC summary (see also src/access/posts.ts, pages.ts, media.ts, enabledPublicRead.ts):
  * - super-admin / editor: operational collections + globals + publish
  * - author: own posts (draft only), upload/update media, read published pages
  * - author cannot: pages CUD, categories/tags ops, delete media, site/header/footer globals

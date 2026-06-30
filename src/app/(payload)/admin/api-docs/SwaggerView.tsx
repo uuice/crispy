@@ -4,8 +4,9 @@ import { Gutter, Link } from '@payloadcms/ui'
 import React from 'react'
 
 import { SwaggerUIView } from './SwaggerUIView'
+import { getOpenApiDocumentJson } from '@/openapi/getDocument'
 
-export function SwaggerView({
+export async function SwaggerView({
   initPageResult,
   params,
   searchParams,
@@ -20,6 +21,8 @@ export function SwaggerView({
       </Gutter>
     )
   }
+
+  const spec = JSON.parse(await getOpenApiDocumentJson()) as Record<string, unknown>
 
   return (
     <DefaultTemplate
@@ -39,7 +42,7 @@ export function SwaggerView({
           </h1>
           <p style={{ margin: 0, color: 'var(--theme-elevation-600)', lineHeight: 1.5 }}>
             根据 Payload 配置<strong>自动生成</strong>，包含全部 Collection / Global REST、AI、MCP、GraphQL
-            等路由。OpenAPI JSON：
+            等路由。OpenAPI JSON（需登录）：
             <Link href="/api/openapi.json" prefetch={false} style={{ marginLeft: '0.25rem' }}>
               /api/openapi.json
             </Link>
@@ -49,7 +52,7 @@ export function SwaggerView({
             主题随 Admin 浅色/深色自动切换
           </p>
         </header>
-        <SwaggerUIView specUrl="/api/openapi.json" />
+        <SwaggerUIView spec={spec} />
       </Gutter>
     </DefaultTemplate>
   )

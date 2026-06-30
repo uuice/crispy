@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../../access/anyone'
+import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField } from '@/fields/ai'
@@ -13,7 +13,7 @@ export const Ads: CollectionConfig = {
   access: {
     create: isEditor,
     delete: isEditor,
-    read: anyone,
+    read: enabledPublicReadAccess,
     update: isEditor,
   },
   admin: {

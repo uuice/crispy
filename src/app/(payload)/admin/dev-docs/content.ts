@@ -28,12 +28,13 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['前台', 'http://localhost:3333'],
           ['Admin', 'http://localhost:3333/admin'],
           ['REST API', 'http://localhost:3333/api'],
-          ['GraphQL', 'http://localhost:3333/api/graphql'],
+          ['GraphQL API', 'POST /api/graphql（按 Collection access）'],
+          ['GraphQL Playground', '/api/graphql-playground（需 Admin 登录）'],
           ['MCP', 'http://localhost:3333/api/mcp'],
-          ['AI 流式', 'POST /api/ai/stream'],
+          ['AI 流式', 'POST /api/ai/stream（需 Admin 登录）'],
           ['AI 文档', '/admin/dev-docs#openai-api'],
-          ['Swagger API', '/admin/api-docs'],
-          ['OpenAPI JSON', '/api/openapi.json'],
+          ['Swagger API', '/admin/api-docs（需 Admin 登录）'],
+          ['OpenAPI JSON', 'GET /api/openapi.json（需 Admin 登录）'],
         ],
       },
     ],
@@ -258,12 +259,34 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
         type: 'table',
         headers: ['资源', 'create', 'read', 'update', 'delete'],
         rows: [
-          ['posts', 'author+', '已发布公开 / 登录见草稿规则', 'editor 全部；author 仅自己的', 'editor+'],
+          ['posts', 'author+', '已发布公开 / 登录见全部', 'editor 全部；author 仅自己的', 'editor+'],
           ['pages', 'editor+', 'editor 全部；author/访客仅 published', 'editor+', 'editor+'],
-          ['categories / tags / 运营模块', 'editor+', '多数公开读', 'editor+', 'editor+'],
-          ['media', 'author+', 'authenticated', 'author+', 'editor+'],
+          ['categories / tags', 'editor+', '公开读', 'editor+', 'editor+'],
+          ['links / ads / ad-slots', 'editor+', '公开仅 enabled；editor 见全部', 'editor+', 'editor+'],
+          ['jobs / gallery-items', 'editor+', '公开仅 enabled；editor 见全部', 'editor+', 'editor+'],
+          ['media', 'author+', '公开读（前台需 URL）', 'author+', 'editor+'],
           ['users', 'super-admin', 'authenticated', 'authenticated（roles 仅 super-admin 改）', 'super-admin'],
           ['api-access-logs / audit-logs', '—', 'super-admin', '—', '—'],
+          ['forms / form-submissions（插件）', 'editor+ / 匿名 create', 'editor+', 'editor+ / —', 'editor+'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'API 路由鉴权',
+      },
+      {
+        type: 'table',
+        headers: ['路由', '鉴权', '说明'],
+        rows: [
+          ['GET /api/openapi.json', 'Admin Cookie', 'Swagger Spec；未登录 401'],
+          ['GET /api/graphql-playground', 'Admin Cookie', 'GraphQL Playground；未登录 401'],
+          ['POST /api/graphql', '按 Collection access', 'Cookie / users API-Key；权限与 REST 一致'],
+          ['POST /api/ai/*', 'Admin Cookie + RBAC', 'super-admin/editor 全量；author 仅自己的 posts'],
+          ['POST /api/mcp', 'MCP Bearer / users API-Key', '生产必须配置 MCP API Key'],
+          ['POST /api/internal/access-log', 'x-access-log-secret', '仅 middleware 内部调用'],
+          ['POST /api/users/login', '无', '获取 payload-token'],
+          ['POST /api/form-submissions', '无（插件默认）', '联系表单；建议加 CAPTCHA / 限流'],
+          ['GET /api/{collection}', '按 Collection read', '见上表；写操作均需登录 + 角色'],
         ],
       },
       {
@@ -280,7 +303,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
       },
       {
         type: 'p',
-        text: '实现位置：src/access/roles.ts、posts.ts、pages.ts、media.ts 及各 Collection config。作者发布限制：restrictAuthorPublish hook 强制 draft。',
+        text: '实现位置：src/access/roles.ts、enabledPublicRead.ts、posts.ts、pages.ts、media.ts；OpenAPI / GraphQL Playground 鉴权：src/utilities/requireAdminSession.ts。作者发布限制：restrictAuthorPublish hook 强制 draft。',
       },
     ],
   },
@@ -608,15 +631,15 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
     blocks: [
       {
         type: 'p',
-        text: 'Crispy 从 Payload 运行时配置自动生成 OpenAPI 3.0 文档，覆盖全部 Collection/Global REST、Auth、AI、MCP、GraphQL 与内部路由。新增 Collection 或插件后无需手写，刷新 Spec 即可同步。',
+        text: 'Crispy 从 Payload 运行时配置自动生成 OpenAPI 3.0 文档，覆盖全部 Collection/Global REST、Auth、AI、MCP、GraphQL 与内部路由。新增 Collection 或插件后无需手写，刷新 Spec 即可同步。**OpenAPI JSON 需 Admin 登录**，与 Swagger UI 一致。',
       },
       {
         type: 'table',
         headers: ['入口', 'URL'],
         rows: [
           ['Swagger UI（Admin）', '/admin/api-docs'],
-          ['OpenAPI JSON（动态）', 'GET /api/openapi.json'],
-          ['静态文件（可选）', 'public/openapi.json（pnpm generate:openapi）'],
+          ['OpenAPI JSON（动态）', 'GET /api/openapi.json（需 Admin Cookie）'],
+          ['静态文件（本地可选）', 'public/openapi.json（pnpm generate:openapi；勿在生产公开托管）'],
         ],
       },
       {
@@ -639,7 +662,8 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
           'Auth：login / logout / me / refresh-token',
           'AI：/api/ai/complete、/stream、/structured（含 request/response schema）',
           'MCP：POST /api/mcp（JSON-RPC）',
-          'GraphQL：POST /api/graphql',
+          'GraphQL：POST /api/graphql（按 Collection access）',
+          'GraphQL Playground：GET /api/graphql-playground（需 Admin 登录）',
           'Internal：POST /api/internal/access-log',
           '插件 Collection 随 getPayload().config.collections 自动纳入',
         ],
@@ -650,9 +674,9 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'pre',
-        text: `pnpm generate:openapi    # 写入 public/openapi.json
+        text: `pnpm generate:openapi    # 写入 public/openapi.json（本地备份，生产勿公开）
 # 实现：src/openapi/buildDocument.ts
-# 路由：src/app/(payload)/api/openapi/route.ts`,
+# 路由：src/app/(payload)/api/openapi/route.ts（requireAdminSession）`,
       },
       {
         type: 'h3',
