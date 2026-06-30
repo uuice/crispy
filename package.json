@@ -19,6 +19,7 @@
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation eslint . --fix",
     "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
     "migrate:status": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:status",
+    "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
     "migrate:create:initial": "bash scripts/bootstrap-postgres-migration.sh",
     "ci:check": "pnpm lint && pnpm exec tsc --noEmit && cross-env DATABASE_URL=file:./.data/ci-payload.db DATABASE_DRIVER=sqlite pnpm test:int && cross-env DATABASE_URL=file:./.data/ci-payload.db DATABASE_DRIVER=sqlite pnpm build",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",

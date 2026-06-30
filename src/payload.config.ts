@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
+import { AiChatSessions } from './collections/AiChatSessions'
 import { AdSlots } from './collections/AdSlots'
 import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
@@ -43,8 +44,9 @@ export default buildConfig({
       afterNavLinks: [
         '@/app/(payload)/admin/dev-docs/DevDocsNavLink',
         '@/app/(payload)/admin/api-docs/SwaggerNavLink',
+        '@/app/(payload)/admin/ai-agent/AiAgentNavLink',
       ],
-      providers: ['@/components/AdminThemeProvider'],
+      providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
         devDocs: {
           Component: '@/app/(payload)/admin/dev-docs/DevDocsView',
@@ -54,6 +56,11 @@ export default buildConfig({
         apiDocs: {
           Component: '@/app/(payload)/admin/api-docs/SwaggerView',
           path: '/api-docs',
+          exact: true,
+        },
+        aiAgent: {
+          Component: '@/app/(payload)/admin/ai-agent/AiAgentView',
+          path: '/ai-agent',
           exact: true,
         },
       },
@@ -101,6 +108,7 @@ export default buildConfig({
     Jobs,
     GalleryItems,
     ApiAccessLogs,
+    AiChatSessions,
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),

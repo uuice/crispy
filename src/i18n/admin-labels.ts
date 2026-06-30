@@ -108,4 +108,9 @@ export const adminLabels = {
   aiSystemPrompt: 'System Prompt',
   aiUserPrompt: 'User Prompt',
   aiAssist: 'AI 助手',
+  aiChatSessions: { singular: 'AI 会话', plural: 'AI 会话历史' },
+  aiChatSessionTitle: '会话标题',
+  aiChatSessionUser: '用户',
+  aiChatSessionLastMessageAt: '最后消息时间',
+  aiChatSessionMessages: '消息记录',
 } as const

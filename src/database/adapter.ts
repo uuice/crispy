@@ -64,12 +64,15 @@ export function resolveDatabaseUrl(driver: DatabaseDriver): string {
   throw new Error('DATABASE_URL is required when using PostgreSQL')
 }
 
-/** Postgres uses explicit migrations in production; never rely on schema push. */
-export function shouldPushPostgresSchema(): boolean {
+/** When false, skip Drizzle schema push (use after local SQLite drift or with `pnpm migrate` on Postgres). */
+export function shouldPushDatabaseSchema(): boolean {
   if (process.env.DATABASE_PUSH === 'true') return true
   if (process.env.DATABASE_PUSH === 'false') return false
   return process.env.NODE_ENV !== 'production'
 }
+
+/** @deprecated Use shouldPushDatabaseSchema */
+export const shouldPushPostgresSchema = shouldPushDatabaseSchema
 
 export function createDatabaseAdapter() {
   const driver = resolveDatabaseDriver()
@@ -80,6 +83,7 @@ export function createDatabaseAdapter() {
       client: {
         url,
       },
+      push: shouldPushDatabaseSchema(),
     })
   }
 
@@ -88,6 +92,6 @@ export function createDatabaseAdapter() {
     pool: {
       connectionString: url,
     },
-    push: shouldPushPostgresSchema(),
+    push: shouldPushDatabaseSchema(),
   })
 }

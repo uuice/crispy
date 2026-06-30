@@ -5967,6 +5967,138 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.ai_chat_sessions": {
+      "name": "ai_chat_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_message_at": {
+          "name": "last_message_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "messages": {
+          "name": "messages",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ai_chat_sessions_user_idx": {
+          "name": "ai_chat_sessions_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_chat_sessions_last_message_at_idx": {
+          "name": "ai_chat_sessions_last_message_at_idx",
+          "columns": [
+            {
+              "expression": "last_message_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_chat_sessions_updated_at_idx": {
+          "name": "ai_chat_sessions_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_chat_sessions_created_at_idx": {
+          "name": "ai_chat_sessions_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ai_chat_sessions_user_id_users_id_fk": {
+          "name": "ai_chat_sessions_user_id_users_id_fk",
+          "tableFrom": "ai_chat_sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.users_roles": {
       "name": "users_roles",
       "schema": "",
@@ -10429,6 +10561,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "ai_chat_sessions_id": {
+          "name": "ai_chat_sessions_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "users_id": {
           "name": "users_id",
           "type": "integer",
@@ -10679,6 +10817,21 @@
           "columns": [
             {
               "expression": "api_access_logs_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "payload_locked_documents_rels_ai_chat_sessions_id_idx": {
+          "name": "payload_locked_documents_rels_ai_chat_sessions_id_idx",
+          "columns": [
+            {
+              "expression": "ai_chat_sessions_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -10960,6 +11113,19 @@
           "tableTo": "api_access_logs",
           "columnsFrom": [
             "api_access_logs_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_ai_chat_sessions_fk": {
+          "name": "payload_locked_documents_rels_ai_chat_sessions_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "ai_chat_sessions",
+          "columnsFrom": [
+            "ai_chat_sessions_id"
           ],
           "columnsTo": [
             "id"
@@ -12778,6 +12944,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "d38efd75-4012-4472-9282-95d72266acd9",
+  "id": "c7d48d2d-bbc2-4e91-9f8a-681bd9725327",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

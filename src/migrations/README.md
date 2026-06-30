@@ -36,9 +36,31 @@ pnpm migrate:status
 
 ## After schema changes
 
+Requires **PostgreSQL** (`DATABASE_DRIVER=postgres` + `DATABASE_URL`). SQLite local dev uses schema push instead (see `.env` `DATABASE_PUSH`).
+
 ```bash
+export DATABASE_DRIVER=postgres
+export DATABASE_URL=postgresql://crispy:crispy@127.0.0.1:5432/crispy
+
 pnpm migrate:create my_change_name
 pnpm migrate
 ```
 
 Commit new files under `src/migrations/`.
+
+## Reset remote database (empty schema + re-migrate)
+
+When the remote DB was created via dev push or needs a clean slate:
+
+```sql
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO public;
+```
+
+Then:
+
+```bash
+pnpm migrate
+pnpm migrate:status
+```

@@ -1,0 +1,313 @@
+import type { CollectionSlug, PayloadRequest, Where } from 'payload'
+
+import {
+  assertAgentCollectionAccess,
+  assertAgentGlobalAccess,
+} from '@/ai/agent/access'
+import {
+  AGENT_COLLECTIONS,
+  AGENT_GLOBALS,
+  isAgentCollection,
+  isAgentGlobal,
+} from '@/ai/agent/resources'
+import type { AgentToolCall } from '@/ai/agent/types'
+
+const MAX_RESULT_CHARS = 12_000
+
+export type AgentToolDefinition = {
+  type: 'function'
+  function: {
+    name: string
+    description: string
+    parameters: Record<string, unknown>
+  }
+}
+
+export const AGENT_TOOLS: AgentToolDefinition[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'list_resources',
+      description: '列出 AI 助手可管理的所有内容类型（Collections）和全局配置（Globals）',
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'find_documents',
+      description: '查询/搜索某个内容类型下的文档列表',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug，如 posts、pages' },
+          where: {
+            type: 'object',
+            description: 'Payload where 查询条件（JSON 对象），可选',
+          },
+          limit: { type: 'number', description: '返回条数，默认 10，最大 25' },
+          page: { type: 'number', description: '页码，默认 1' },
+          sort: { type: 'string', description: '排序字段，如 -createdAt' },
+        },
+        required: ['collection'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_document',
+      description: '根据 ID 获取单个文档详情',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug' },
+          id: { type: ['string', 'number'], description: '文档 ID' },
+          depth: { type: 'number', description: '关联深度，默认 1' },
+        },
+        required: ['collection', 'id'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_document',
+      description: '在某个内容类型下新建文档',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug' },
+          data: { type: 'object', description: '文档字段数据（JSON 对象）' },
+        },
+        required: ['collection', 'data'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_document',
+      description: '更新已有文档的部分或全部字段',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug' },
+          id: { type: ['string', 'number'], description: '文档 ID' },
+          data: { type: 'object', description: '要更新的字段（JSON 对象）' },
+        },
+        required: ['collection', 'id', 'data'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'delete_document',
+      description: '删除指定文档（media 不可删除）',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug' },
+          id: { type: ['string', 'number'], description: '文档 ID' },
+        },
+        required: ['collection', 'id'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_global',
+      description: '读取全局配置（header、footer、site-settings）',
+      parameters: {
+        type: 'object',
+        properties: {
+          slug: { type: 'string', description: 'Global slug' },
+          depth: { type: 'number', description: '关联深度，默认 1' },
+        },
+        required: ['slug'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_global',
+      description: '更新全局配置',
+      parameters: {
+        type: 'object',
+        properties: {
+          slug: { type: 'string', description: 'Global slug' },
+          data: { type: 'object', description: '要更新的字段（JSON 对象）' },
+        },
+        required: ['slug', 'data'],
+      },
+    },
+  },
+]
+
+function truncateResult(value: unknown): unknown {
+  const json = JSON.stringify(value)
+  if (json.length <= MAX_RESULT_CHARS) return value
+
+  return {
+    truncated: true,
+    preview: json.slice(0, MAX_RESULT_CHARS),
+    message: `结果过长已截断（共 ${json.length} 字符）`,
+  }
+}
+
+function parseToolArgs(raw: string): Record<string, unknown> {
+  try {
+    return JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    throw new Error('工具参数 JSON 解析失败')
+  }
+}
+
+export async function executeAgentTool(
+  req: PayloadRequest,
+  toolCall: AgentToolCall,
+): Promise<{ content: string; summary: unknown }> {
+  const args = parseToolArgs(toolCall.arguments)
+  let result: unknown
+
+  switch (toolCall.name) {
+    case 'list_resources':
+      result = { collections: AGENT_COLLECTIONS, globals: AGENT_GLOBALS }
+      break
+
+    case 'find_documents': {
+      const collection = String(args.collection ?? '')
+      await assertAgentCollectionAccess(req, collection, 'read')
+      const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25)
+      const page = Math.max(Number(args.page) || 1, 1)
+      const docs = await req.payload.find({
+        collection: collection as CollectionSlug,
+        where: args.where as Where | undefined,
+        limit,
+        page,
+        sort: (args.sort as string) || '-updatedAt',
+        depth: 1,
+        overrideAccess: false,
+        user: req.user,
+      })
+      result = {
+        totalDocs: docs.totalDocs,
+        page: docs.page,
+        totalPages: docs.totalPages,
+        docs: docs.docs,
+      }
+      break
+    }
+
+    case 'get_document': {
+      const collection = String(args.collection ?? '')
+      const id = args.id as string | number
+      await assertAgentCollectionAccess(req, collection, 'read', id)
+      result = await req.payload.findByID({
+        collection: collection as CollectionSlug,
+        id,
+        depth: Math.min(Number(args.depth) || 1, 2),
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    case 'create_document': {
+      const collection = String(args.collection ?? '')
+      await assertAgentCollectionAccess(req, collection, 'create')
+      if (!args.data || typeof args.data !== 'object') {
+        throw new Error('data 必须是对象')
+      }
+      result = await req.payload.create({
+        collection: collection as CollectionSlug,
+        // Dynamic data shape from AI tool arguments
+        data: args.data as never,
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    case 'update_document': {
+      const collection = String(args.collection ?? '')
+      const id = args.id as string | number
+      await assertAgentCollectionAccess(req, collection, 'update', id)
+      if (!args.data || typeof args.data !== 'object') {
+        throw new Error('data 必须是对象')
+      }
+      result = await req.payload.update({
+        collection: collection as CollectionSlug,
+        id,
+        data: args.data as never,
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    case 'delete_document': {
+      const collection = String(args.collection ?? '')
+      const id = args.id as string | number
+      await assertAgentCollectionAccess(req, collection, 'delete', id)
+      result = await req.payload.delete({
+        collection: collection as CollectionSlug,
+        id,
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    case 'get_global': {
+      const slug = String(args.slug ?? '')
+      await assertAgentGlobalAccess(req)
+      if (!isAgentGlobal(slug)) {
+        throw new Error(`不支持的全局配置：${slug}`)
+      }
+      result = await req.payload.findGlobal({
+        slug: slug as 'header',
+        depth: Math.min(Number(args.depth) || 1, 2),
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    case 'update_global': {
+      const slug = String(args.slug ?? '')
+      await assertAgentGlobalAccess(req)
+      if (!isAgentGlobal(slug)) {
+        throw new Error(`不支持的全局配置：${slug}`)
+      }
+      if (!args.data || typeof args.data !== 'object') {
+        throw new Error('data 必须是对象')
+      }
+      result = await req.payload.updateGlobal({
+        slug: slug as 'header',
+        data: args.data as Record<string, unknown>,
+        overrideAccess: false,
+        user: req.user,
+      })
+      break
+    }
+
+    default:
+      throw new Error(`未知工具：${toolCall.name}`)
+  }
+
+  const truncated = truncateResult(result)
+  return {
+    content: JSON.stringify(truncated),
+    summary: truncated,
+  }
+}
+
+export function validateToolCollection(slug: string): void {
+  if (!isAgentCollection(slug)) {
+    throw new Error(`不支持的内容类型：${slug}。请先用 list_resources 查看可用类型。`)
+  }
+}

@@ -79,6 +79,7 @@ export interface Config {
     jobs: Job;
     'gallery-items': GalleryItem;
     'api-access-logs': ApiAccessLog;
+    'ai-chat-sessions': AiChatSession;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -112,6 +113,7 @@ export interface Config {
     jobs: JobsSelect<false> | JobsSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
+    'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -1034,6 +1036,32 @@ export interface ApiAccessLog {
   createdAt: string;
 }
 /**
+ * AI 内容助手完整会话历史，由聊天 API 自动写入。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-chat-sessions".
+ */
+export interface AiChatSession {
+  id: number;
+  title: string;
+  user: number | User;
+  lastMessageAt: string;
+  /**
+   * 完整对话记录（用户消息、AI 回复、工具调用摘要）。
+   */
+  messages:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -1583,6 +1611,10 @@ export interface PayloadLockedDocument {
         value: number | ApiAccessLog;
       } | null)
     | ({
+        relationTo: 'ai-chat-sessions';
+        value: number | AiChatSession;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -2055,6 +2087,18 @@ export interface ApiAccessLogsSelect<T extends boolean = true> {
   userAgent?: T;
   referer?: T;
   authType?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-chat-sessions_select".
+ */
+export interface AiChatSessionsSelect<T extends boolean = true> {
+  title?: T;
+  user?: T;
+  lastMessageAt?: T;
+  messages?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2777,6 +2821,7 @@ export interface TaskCreateCollectionExport {
       | 'jobs'
       | 'gallery-items'
       | 'api-access-logs'
+      | 'ai-chat-sessions'
       | 'users'
       | 'redirects'
       | 'forms'

@@ -535,6 +535,16 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
+  CREATE TABLE "ai_chat_sessions" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"title" varchar NOT NULL,
+  	"user_id" integer NOT NULL,
+  	"last_message_at" timestamp(3) with time zone NOT NULL,
+  	"messages" jsonb NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  );
+  
   CREATE TABLE "users_roles" (
   	"order" integer NOT NULL,
   	"parent_id" integer NOT NULL,
@@ -965,6 +975,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"jobs_id" integer,
   	"gallery_items_id" integer,
   	"api_access_logs_id" integer,
+  	"ai_chat_sessions_id" integer,
   	"users_id" integer,
   	"redirects_id" integer,
   	"forms_id" integer,
@@ -1151,6 +1162,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "ads" ADD CONSTRAINT "ads_slot_id_ad_slots_id_fk" FOREIGN KEY ("slot_id") REFERENCES "public"."ad_slots"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "ads" ADD CONSTRAINT "ads_image_id_media_id_fk" FOREIGN KEY ("image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "gallery_items" ADD CONSTRAINT "gallery_items_image_id_media_id_fk" FOREIGN KEY ("image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "ai_chat_sessions" ADD CONSTRAINT "ai_chat_sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "users_roles" ADD CONSTRAINT "users_roles_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "users_sessions" ADD CONSTRAINT "users_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "redirects_rels" ADD CONSTRAINT "redirects_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."redirects"("id") ON DELETE cascade ON UPDATE no action;
@@ -1192,6 +1204,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_jobs_fk" FOREIGN KEY ("jobs_id") REFERENCES "public"."jobs"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_gallery_items_fk" FOREIGN KEY ("gallery_items_id") REFERENCES "public"."gallery_items"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_api_access_logs_fk" FOREIGN KEY ("api_access_logs_id") REFERENCES "public"."api_access_logs"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_ai_chat_sessions_fk" FOREIGN KEY ("ai_chat_sessions_id") REFERENCES "public"."ai_chat_sessions"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_redirects_fk" FOREIGN KEY ("redirects_id") REFERENCES "public"."redirects"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_forms_fk" FOREIGN KEY ("forms_id") REFERENCES "public"."forms"("id") ON DELETE cascade ON UPDATE no action;
@@ -1367,6 +1380,10 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "api_access_logs_auth_type_idx" ON "api_access_logs" USING btree ("auth_type");
   CREATE INDEX "api_access_logs_updated_at_idx" ON "api_access_logs" USING btree ("updated_at");
   CREATE INDEX "api_access_logs_created_at_idx" ON "api_access_logs" USING btree ("created_at");
+  CREATE INDEX "ai_chat_sessions_user_idx" ON "ai_chat_sessions" USING btree ("user_id");
+  CREATE INDEX "ai_chat_sessions_last_message_at_idx" ON "ai_chat_sessions" USING btree ("last_message_at");
+  CREATE INDEX "ai_chat_sessions_updated_at_idx" ON "ai_chat_sessions" USING btree ("updated_at");
+  CREATE INDEX "ai_chat_sessions_created_at_idx" ON "ai_chat_sessions" USING btree ("created_at");
   CREATE INDEX "users_roles_order_idx" ON "users_roles" USING btree ("order");
   CREATE INDEX "users_roles_parent_idx" ON "users_roles" USING btree ("parent_id");
   CREATE INDEX "users_sessions_order_idx" ON "users_sessions" USING btree ("_order");
@@ -1482,6 +1499,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_jobs_id_idx" ON "payload_locked_documents_rels" USING btree ("jobs_id");
   CREATE INDEX "payload_locked_documents_rels_gallery_items_id_idx" ON "payload_locked_documents_rels" USING btree ("gallery_items_id");
   CREATE INDEX "payload_locked_documents_rels_api_access_logs_id_idx" ON "payload_locked_documents_rels" USING btree ("api_access_logs_id");
+  CREATE INDEX "payload_locked_documents_rels_ai_chat_sessions_id_idx" ON "payload_locked_documents_rels" USING btree ("ai_chat_sessions_id");
   CREATE INDEX "payload_locked_documents_rels_users_id_idx" ON "payload_locked_documents_rels" USING btree ("users_id");
   CREATE INDEX "payload_locked_documents_rels_redirects_id_idx" ON "payload_locked_documents_rels" USING btree ("redirects_id");
   CREATE INDEX "payload_locked_documents_rels_forms_id_idx" ON "payload_locked_documents_rels" USING btree ("forms_id");
@@ -1559,6 +1577,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "jobs" CASCADE;
   DROP TABLE "gallery_items" CASCADE;
   DROP TABLE "api_access_logs" CASCADE;
+  DROP TABLE "ai_chat_sessions" CASCADE;
   DROP TABLE "users_roles" CASCADE;
   DROP TABLE "users_sessions" CASCADE;
   DROP TABLE "users" CASCADE;
