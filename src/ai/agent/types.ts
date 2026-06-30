@@ -23,8 +23,8 @@ export type AgentChatRequest = {
 
 export type AgentStreamEvent =
   | { type: 'text'; text: string }
-  | { type: 'tool_start'; name: string; args: Record<string, unknown> }
-  | { type: 'tool_result'; name: string; result: unknown }
+  | { type: 'tool_start'; id: string; name: string; args: Record<string, unknown> }
+  | { type: 'tool_result'; id: string; name: string; result: unknown }
   | { type: 'session'; sessionId: string | number }
   | { type: 'error'; error: string }
   | { type: 'done' }

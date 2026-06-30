@@ -4,8 +4,8 @@ import type { AgentStreamEvent } from '@/ai/agent/types'
 
 export type AgentStreamCallbacks = {
   onText?: (chunk: string, fullText: string) => void
-  onToolStart?: (name: string, args: Record<string, unknown>) => void
-  onToolResult?: (name: string, result: unknown) => void
+  onToolStart?: (id: string, name: string, args: Record<string, unknown>) => void
+  onToolResult?: (id: string, name: string, result: unknown) => void
   onSession?: (sessionId: string | number) => void
 }
 
@@ -71,11 +71,11 @@ export async function consumeAgentStream(
         }
 
         if (event.type === 'tool_start') {
-          callbacks?.onToolStart?.(event.name, event.args)
+          callbacks?.onToolStart?.(event.id, event.name, event.args)
         }
 
         if (event.type === 'tool_result') {
-          callbacks?.onToolResult?.(event.name, event.result)
+          callbacks?.onToolResult?.(event.id, event.name, event.result)
         }
       }
     }

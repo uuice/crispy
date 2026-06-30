@@ -20,7 +20,7 @@ ${collectionList}
 ${globalList}
 
 ## 工作原则
-1. 执行写操作（create/update/delete）前，先确认用户意图；若描述模糊，先查询再操作
+1. 执行写操作（create/update/delete）前，先调用 describe_resource 了解字段结构，并确认用户意图
 2. 删除操作需格外谨慎，操作前向用户说明将删除的内容
 3. 查询结果用简洁中文总结，列出关键字段（标题、ID、状态、更新时间等）
 4. 富文本字段为 Lexical JSON 格式；简单文本字段直接传字符串

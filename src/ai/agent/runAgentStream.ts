@@ -1,10 +1,11 @@
 import type { PayloadRequest } from 'payload'
 
 import { buildAgentSystemPrompt } from '@/ai/agent/systemPrompt'
+import { trimAgentMessages } from '@/ai/agent/trimMessages'
 import { AGENT_TOOLS, executeAgentTool } from '@/ai/agent/tools'
 import type { AgentChatMessage, AgentStreamEvent } from '@/ai/agent/types'
 import {
-  openAiChatCompletionWithTools,
+  openAiChatCompletionWithToolsStream,
   toOpenAiToolMessages,
 } from '@/ai/providers/openaiCompatible'
 import { getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
@@ -32,11 +33,15 @@ export async function* runAiAgentStream(
 
   const conversation: AgentChatMessage[] = [
     { role: 'system', content: buildAgentSystemPrompt() },
-    ...userMessages.filter((m) => m.role === 'user' || m.role === 'assistant'),
+    ...trimAgentMessages(userMessages),
   ]
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
-    const result = await openAiChatCompletionWithTools({
+    let resultContent: string | null = null
+    let resultToolCalls: AgentChatMessage['toolCalls'] = []
+    let finishReason: string | null = null
+
+    for await (const event of openAiChatCompletionWithToolsStream({
       baseUrl: settings.baseUrl,
       apiKey: settings.apiKey,
       model: settings.model,
@@ -44,22 +49,32 @@ export async function* runAiAgentStream(
       tools: AGENT_TOOLS,
       temperature: settings.temperature,
       maxTokens: settings.maxTokens,
-    })
+    })) {
+      if (event.kind === 'text') {
+        yield { type: 'text', text: event.text }
+      }
 
-    if (result.toolCalls.length > 0) {
+      if (event.kind === 'complete') {
+        resultContent = event.content
+        resultToolCalls = event.toolCalls
+        finishReason = event.finishReason
+      }
+    }
+
+    if (resultToolCalls && resultToolCalls.length > 0) {
       conversation.push({
         role: 'assistant',
-        content: result.content ?? '',
-        toolCalls: result.toolCalls,
+        content: resultContent ?? '',
+        toolCalls: resultToolCalls,
       })
 
-      for (const toolCall of result.toolCalls) {
+      for (const toolCall of resultToolCalls) {
         const args = parseToolArgs(toolCall.arguments)
-        yield { type: 'tool_start', name: toolCall.name, args }
+        yield { type: 'tool_start', id: toolCall.id, name: toolCall.name, args }
 
         try {
           const { content, summary } = await executeAgentTool(req, toolCall)
-          yield { type: 'tool_result', name: toolCall.name, result: summary }
+          yield { type: 'tool_result', id: toolCall.id, name: toolCall.name, result: summary }
 
           conversation.push({
             role: 'tool',
@@ -69,7 +84,7 @@ export async function* runAiAgentStream(
           })
         } catch (error) {
           const message = error instanceof Error ? error.message : '工具执行失败'
-          yield { type: 'tool_result', name: toolCall.name, result: { error: message } }
+          yield { type: 'tool_result', id: toolCall.id, name: toolCall.name, result: { error: message } }
           conversation.push({
             role: 'tool',
             content: JSON.stringify({ error: message }),
@@ -82,9 +97,13 @@ export async function* runAiAgentStream(
       continue
     }
 
-    if (result.content?.trim()) {
-      yield { type: 'text', text: result.content }
+    if (resultContent?.trim()) {
       yield { type: 'done' }
+      return
+    }
+
+    if (finishReason === 'stop') {
+      yield { type: 'error', error: 'AI 未返回内容' }
       return
     }
 

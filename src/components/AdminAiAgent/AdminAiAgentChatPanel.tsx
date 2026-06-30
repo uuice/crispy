@@ -10,6 +10,7 @@ import './admin-ai-agent.scss'
 
 const TOOL_LABELS: Record<string, string> = {
   list_resources: '列出资源',
+  describe_resource: '查看字段结构',
   find_documents: '查询文档',
   get_document: '获取详情',
   create_document: '新建文档',
@@ -220,9 +221,9 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
     <div className={`admin-ai-agent__message admin-ai-agent__message--${message.role}`}>
       {message.tools && message.tools.length > 0 && (
         <div className="admin-ai-agent__tools">
-          {message.tools.map((tool, i) => (
+          {message.tools.map((tool) => (
             <div
-              key={`${tool.name}-${i}`}
+              key={tool.id ?? `${tool.name}-${tool.status}`}
               className={`admin-ai-agent__tool admin-ai-agent__tool--${tool.status}`}
             >
               <span className="admin-ai-agent__tool-icon">

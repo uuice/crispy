@@ -5,12 +5,19 @@ import {
   assertAgentGlobalAccess,
 } from '@/ai/agent/access'
 import {
+  describeCollectionSchema,
+  describeGlobalSchema,
+} from '@/ai/agent/describeResource'
+import {
   AGENT_COLLECTIONS,
   AGENT_GLOBALS,
   isAgentCollection,
   isAgentGlobal,
 } from '@/ai/agent/resources'
+import type { Config } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
+
+type AgentGlobalSlug = keyof Config['globals']
 
 const MAX_RESULT_CHARS = 12_000
 
@@ -30,6 +37,26 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
       name: 'list_resources',
       description: '列出 AI 助手可管理的所有内容类型（Collections）和全局配置（Globals）',
       parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'describe_resource',
+      description:
+        '查看某个内容类型（collection）或全局配置（global）的字段结构，create/update 前应先调用',
+      parameters: {
+        type: 'object',
+        properties: {
+          kind: {
+            type: 'string',
+            enum: ['collection', 'global'],
+            description: '资源种类',
+          },
+          slug: { type: 'string', description: 'collection 或 global 的 slug' },
+        },
+        required: ['kind', 'slug'],
+      },
     },
   },
   {
@@ -178,6 +205,21 @@ export async function executeAgentTool(
       result = { collections: AGENT_COLLECTIONS, globals: AGENT_GLOBALS }
       break
 
+    case 'describe_resource': {
+      const kind = String(args.kind ?? '')
+      const slug = String(args.slug ?? '')
+      if (kind === 'collection') {
+        await assertAgentCollectionAccess(req, slug, 'read')
+        result = describeCollectionSchema(req, slug)
+      } else if (kind === 'global') {
+        await assertAgentGlobalAccess(req)
+        result = describeGlobalSchema(req, slug)
+      } else {
+        throw new Error('kind 必须是 collection 或 global')
+      }
+      break
+    }
+
     case 'find_documents': {
       const collection = String(args.collection ?? '')
       await assertAgentCollectionAccess(req, collection, 'read')
@@ -269,7 +311,7 @@ export async function executeAgentTool(
         throw new Error(`不支持的全局配置：${slug}`)
       }
       result = await req.payload.findGlobal({
-        slug: slug as 'header',
+        slug: slug as AgentGlobalSlug,
         depth: Math.min(Number(args.depth) || 1, 2),
         overrideAccess: false,
         user: req.user,
@@ -287,7 +329,7 @@ export async function executeAgentTool(
         throw new Error('data 必须是对象')
       }
       result = await req.payload.updateGlobal({
-        slug: slug as 'header',
+        slug: slug as AgentGlobalSlug,
         data: args.data as Record<string, unknown>,
         overrideAccess: false,
         user: req.user,
@@ -303,11 +345,5 @@ export async function executeAgentTool(
   return {
     content: JSON.stringify(truncated),
     summary: truncated,
-  }
-}
-
-export function validateToolCollection(slug: string): void {
-  if (!isAgentCollection(slug)) {
-    throw new Error(`不支持的内容类型：${slug}。请先用 list_resources 查看可用类型。`)
   }
 }

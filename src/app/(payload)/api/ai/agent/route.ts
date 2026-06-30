@@ -9,6 +9,7 @@ import {
   createAiChatSession,
 } from '@/ai/agent/sessionStore'
 import type { StoredAgentToolActivity } from '@/ai/agent/sessionTypes'
+import { trimAgentMessages } from '@/ai/agent/trimMessages'
 import type { AgentChatMessage, AgentChatRequest } from '@/ai/agent/types'
 import { canUseAiAgent } from '@/ai/agent/access'
 
@@ -41,9 +42,11 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: '最后一条消息必须是用户消息' }, { status: 400 })
   }
 
-  const sanitizedMessages: AgentChatMessage[] = body.messages
-    .filter((m) => (m.role === 'user' || m.role === 'assistant') && m.content?.trim())
-    .map((m) => ({ role: m.role, content: m.content.trim() }))
+  const sanitizedMessages: AgentChatMessage[] = trimAgentMessages(
+    body.messages
+      .filter((m) => (m.role === 'user' || m.role === 'assistant') && m.content?.trim())
+      .map((m) => ({ role: m.role, content: m.content.trim() })),
+  )
 
   const req = await createLocalReq({ user }, payload)
   const encoder = new TextEncoder()
@@ -83,13 +86,11 @@ export async function POST(request: Request): Promise<Response> {
           }
 
           if (event.type === 'tool_start') {
-            tools.push({ name: event.name, status: 'running', args: event.args })
+            tools.push({ id: event.id, name: event.name, status: 'running', args: event.args })
           }
 
           if (event.type === 'tool_result') {
-            const idx = tools.findIndex(
-              (t) => t.name === event.name && t.status === 'running',
-            )
+            const idx = tools.findIndex((t) => t.id === event.id && t.status === 'running')
             const hasError = Boolean(
               event.result &&
                 typeof event.result === 'object' &&
@@ -103,6 +104,7 @@ export async function POST(request: Request): Promise<Response> {
               }
             } else {
               tools.push({
+                id: event.id,
                 name: event.name,
                 status: hasError ? 'error' : 'done',
                 result: event.result,

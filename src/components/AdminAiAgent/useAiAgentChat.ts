@@ -9,6 +9,7 @@ import { storedMessageToDisplay } from '@/ai/agent/sessionTypes'
 import { consumeAgentStream } from './consumeAgentStream'
 
 export type AgentToolActivity = {
+  id: string
   name: string
   status: 'running' | 'done' | 'error'
   args?: Record<string, unknown>
@@ -161,21 +162,21 @@ export function useAiAgentChat() {
               ),
             )
           },
-          onToolStart: (name, args) => {
+          onToolStart: (id, name, args) => {
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== assistantId) return m
-                const tools = [...(m.tools ?? []), { name, status: 'running' as const, args }]
+                const tools = [...(m.tools ?? []), { id, name, status: 'running' as const, args }]
                 return { ...m, tools, loading: true }
               }),
             )
           },
-          onToolResult: (name, result) => {
+          onToolResult: (id, name, result) => {
             setMessages((prev) =>
               prev.map((m) => {
                 if (m.id !== assistantId) return m
                 const tools = (m.tools ?? []).map((t) =>
-                  t.name === name && t.status === 'running'
+                  t.id === id && t.status === 'running'
                     ? {
                         ...t,
                         status: (result as { error?: string })?.error
