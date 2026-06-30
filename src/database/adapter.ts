@@ -89,6 +89,7 @@ export function createDatabaseAdapter() {
 
   return postgresAdapter({
     migrationDir: MIGRATIONS_DIR,
+    extensions: ['vector'],
     pool: {
       connectionString: url,
     },

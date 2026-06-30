@@ -16,6 +16,10 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import {
+  createRemoveContentEmbeddingHook,
+  createSyncContentEmbeddingHook,
+} from '@/hooks/syncContentEmbeddingHook'
 import { adminLabels } from '@/i18n/admin-labels'
 import {
   aiSeoAssistField,
@@ -135,10 +139,10 @@ export const Pages: CollectionConfig<'pages'> = {
     chineseSlugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [revalidatePage, createSyncContentEmbeddingHook('pages')],
     beforeChange: [populatePublishedAt],
     beforeValidate: [createSanitizeLexicalHook(['hero.richText'])],
-    afterDelete: [revalidateDelete],
+    afterDelete: [revalidateDelete, createRemoveContentEmbeddingHook('pages')],
   },
   versions: {
     drafts: {

@@ -16,6 +16,7 @@ import {
 } from '@/ai/agent/resources'
 import type { Config } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
+import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -56,6 +57,31 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
           slug: { type: 'string', description: 'collection 或 global 的 slug' },
         },
         required: ['kind', 'slug'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'semantic_search',
+      description:
+        '按语义相似度搜索 posts/pages 内容（需 PostgreSQL pgvector）。适合自然语言查找相关文章或页面。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: '自然语言搜索词' },
+          collections: {
+            type: 'array',
+            items: { type: 'string', enum: ['posts', 'pages'] },
+            description: '限定内容类型，默认 posts + pages',
+          },
+          limit: { type: 'number', description: '返回条数，默认 8，最大 25' },
+          status: {
+            type: 'string',
+            description: '可选：published / draft，默认不过滤',
+          },
+        },
+        required: ['query'],
       },
     },
   },
@@ -217,6 +243,25 @@ export async function executeAgentTool(
       } else {
         throw new Error('kind 必须是 collection 或 global')
       }
+      break
+    }
+
+    case 'semantic_search': {
+      const query = String(args.query ?? '')
+      const collections = Array.isArray(args.collections)
+        ? (args.collections.filter((c) => c === 'posts' || c === 'pages') as (
+            | 'posts'
+            | 'pages'
+          )[])
+        : undefined
+      const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)
+      const status = args.status != null ? String(args.status) : undefined
+
+      result = await runSemanticContentSearch(req, query, {
+        collections,
+        limit,
+        status,
+      })
       break
     }
 

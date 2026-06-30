@@ -23,6 +23,10 @@ import { assignAuthorOnCreate } from './hooks/assignAuthorOnCreate'
 import { populateAuthors } from './hooks/populateAuthors'
 import { restrictAuthorPublish } from './hooks/restrictAuthorPublish'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
+import {
+  createRemoveContentEmbeddingHook,
+  createSyncContentEmbeddingHook,
+} from '@/hooks/syncContentEmbeddingHook'
 import { adminLabels } from '@/i18n/admin-labels'
 import {
   aiSeoAssistField,
@@ -241,9 +245,9 @@ export const Posts: CollectionConfig<'posts'> = {
   hooks: {
     beforeValidate: [createSanitizeLexicalHook(['content'])],
     beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],
-    afterChange: [revalidatePost],
+    afterChange: [revalidatePost, createSyncContentEmbeddingHook('posts')],
     afterRead: [populateAuthors],
-    afterDelete: [revalidateDelete],
+    afterDelete: [revalidateDelete, createRemoveContentEmbeddingHook('posts')],
   },
   versions: {
     drafts: {

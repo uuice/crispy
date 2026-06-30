@@ -11,6 +11,7 @@ import './admin-ai-agent.scss'
 const TOOL_LABELS: Record<string, string> = {
   list_resources: '列出资源',
   describe_resource: '查看字段结构',
+  semantic_search: '语义搜索',
   find_documents: '查询文档',
   get_document: '获取详情',
   create_document: '新建文档',
