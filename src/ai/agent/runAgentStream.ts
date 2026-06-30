@@ -4,10 +4,10 @@ import { buildAgentSystemPrompt } from '@/ai/agent/systemPrompt'
 import { AGENT_TOOLS, executeAgentTool } from '@/ai/agent/tools'
 import type { AgentChatMessage, AgentStreamEvent } from '@/ai/agent/types'
 import {
-  deepseekChatCompletionWithTools,
-  toDeepseekMessages,
-} from '@/ai/providers/deepseekTools'
-import { resolveAiSettings } from '@/ai/settings'
+  openAiChatCompletionWithTools,
+  toOpenAiToolMessages,
+} from '@/ai/providers/openaiCompatible'
+import { getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
 
 const MAX_TOOL_ITERATIONS = 8
 
@@ -26,7 +26,7 @@ export async function* runAiAgentStream(
   const settings = await resolveAiSettings()
 
   if (!settings.enabled) {
-    yield { type: 'error', error: 'AI 功能未启用，请在 AI 设置中配置 API Key' }
+    yield { type: 'error', error: getAiDisabledMessage(settings.provider) }
     return
   }
 
@@ -36,11 +36,11 @@ export async function* runAiAgentStream(
   ]
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
-    const result = await deepseekChatCompletionWithTools({
+    const result = await openAiChatCompletionWithTools({
       baseUrl: settings.baseUrl,
       apiKey: settings.apiKey,
       model: settings.model,
-      messages: toDeepseekMessages(conversation),
+      messages: toOpenAiToolMessages(conversation),
       tools: AGENT_TOOLS,
       temperature: settings.temperature,
       maxTokens: settings.maxTokens,

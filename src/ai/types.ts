@@ -58,8 +58,12 @@ export type AiSuggestTaxonomyResult = {
   seoDescription?: string
 }
 
+import type { AiProvider } from '@/ai/providers/presets'
+
 export type ResolvedAiSettings = {
   enabled: boolean
+  provider: AiProvider
+  providerLabel: string
   baseUrl: string
   apiKey: string
   model: string

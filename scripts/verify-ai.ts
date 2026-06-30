@@ -1,38 +1,38 @@
 /**
- * AI smoke check (DeepSeek). Loads .env and tests API key + connectivity.
+ * AI smoke check (OpenAI-compatible LLM). Loads .env and tests API key + connectivity.
  *
  * Usage: pnpm verify:ai
  */
 import 'dotenv/config'
 
-import { deepseekChatCompletion, normalizeDeepseekBaseUrl } from '../src/ai/providers/deepseek'
+import { openAiChatCompletion } from '../src/ai/providers/openaiCompatible'
+import { resolveAiSettings } from '../src/ai/settings'
 
 const BASE = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3333'
-const API_KEY = process.env.DEEPSEEK_API_KEY?.trim()
-const BASE_URL = normalizeDeepseekBaseUrl(
-  process.env.DEEPSEEK_BASE_URL?.trim() || 'https://api.deepseek.com',
-)
-const MODEL = process.env.DEEPSEEK_MODEL?.trim() || 'deepseek-chat'
 
 async function main() {
   console.log(`\nCrispy AI 验证 → ${BASE}\n`)
 
-  if (!API_KEY) {
-    console.error('✗ 未读取到 DEEPSEEK_API_KEY')
-    console.error('  请确认 .env 中已配置，且从项目根目录运行 pnpm verify:ai')
+  const settings = await resolveAiSettings()
+
+  if (!settings.apiKey) {
+    console.error(`✗ 未读取到 API Key（${settings.provider}）`)
+    console.error('  请确认 .env 中已配置 LLM_API_KEY 或对应提供商的环境变量')
     process.exit(1)
   }
 
-  console.log(`• 环境变量 DEEPSEEK_API_KEY … ✓ (${API_KEY.slice(0, 7)}…)`)
-  console.log(`• API 地址 ${BASE_URL}/v1/chat/completions`)
+  console.log(`• 提供商 ${settings.providerLabel} (${settings.provider}) … ✓`)
+  console.log(`• API Key … ✓ (${settings.apiKey.slice(0, 7)}…)`)
+  console.log(`• 模型 ${settings.model}`)
+  console.log(`• API 地址 ${settings.baseUrl}/v1/chat/completions`)
 
-  process.stdout.write('• DeepSeek 直连润色 … ')
+  process.stdout.write('• LLM 直连润色 … ')
   try {
-    const result = await deepseekChatCompletion({
-      baseUrl: BASE_URL,
-      apiKey: API_KEY,
-      model: MODEL,
-      temperature: 0.7,
+    const result = await openAiChatCompletion({
+      baseUrl: settings.baseUrl,
+      apiKey: settings.apiKey,
+      model: settings.model,
+      temperature: settings.temperature,
       maxTokens: 256,
       messages: [
         { role: 'system', content: '你是中文编辑，只输出润色后的文本。' },

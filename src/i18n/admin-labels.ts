@@ -98,6 +98,7 @@ export const adminLabels = {
   caption: '说明',
   aiSettings: 'AI 设置',
   aiEnabled: '启用 AI 助手',
+  aiProvider: 'LLM 提供商',
   aiModel: '模型',
   aiBaseUrl: 'API 地址',
   aiTemperature: '温度',

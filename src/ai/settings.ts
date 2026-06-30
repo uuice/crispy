@@ -2,10 +2,14 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 
 import { DEFAULT_AI_TEMPLATES } from '@/ai/defaultTemplates'
+import {
+  AI_PROVIDER_PRESETS,
+  aiDisabledMessage,
+  parseAiProvider,
+  resolveApiKeyForProvider,
+  type AiProvider,
+} from '@/ai/providers/presets'
 import type { AiPromptTemplate, ResolvedAiSettings } from '@/ai/types'
-
-const DEFAULT_BASE_URL = 'https://api.deepseek.com'
-const DEFAULT_MODEL = 'deepseek-chat'
 
 function mergeTemplates(stored?: AiPromptTemplate[] | null): AiPromptTemplate[] {
   if (!stored?.length) return DEFAULT_AI_TEMPLATES
@@ -39,26 +43,36 @@ export async function resolveAiSettings(): Promise<ResolvedAiSettings> {
     globalSettings = null
   }
 
-  const apiKey = process.env.DEEPSEEK_API_KEY?.trim() ?? ''
+  const provider = parseAiProvider(globalSettings?.provider)
+  const preset = AI_PROVIDER_PRESETS[provider]
+  const apiKey = resolveApiKeyForProvider(provider)
   const enabled = globalSettings?.enabled !== false && Boolean(apiKey)
 
   return {
     enabled,
+    provider,
+    providerLabel: preset.label,
     apiKey,
     baseUrl:
       (globalSettings?.baseUrl as string | undefined)?.trim() ||
+      process.env.LLM_BASE_URL?.trim() ||
       process.env.DEEPSEEK_BASE_URL?.trim() ||
-      DEFAULT_BASE_URL,
+      preset.baseUrl,
     model:
       (globalSettings?.model as string | undefined)?.trim() ||
+      process.env.LLM_MODEL?.trim() ||
       process.env.DEEPSEEK_MODEL?.trim() ||
-      DEFAULT_MODEL,
+      preset.model,
     temperature: (globalSettings?.temperature as number | undefined) ?? 0.7,
     maxTokens: (globalSettings?.maxTokens as number | undefined) ?? 2048,
     templates: mergeTemplates(
       globalSettings?.promptTemplates as AiPromptTemplate[] | null | undefined,
     ),
   }
+}
+
+export function getAiDisabledMessage(provider: AiProvider = 'deepseek'): string {
+  return aiDisabledMessage(provider)
 }
 
 export function findTemplate(

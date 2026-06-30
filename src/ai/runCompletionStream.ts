@@ -1,6 +1,6 @@
 import { renderPromptTemplate } from '@/ai/promptRenderer'
-import { deepseekChatCompletionStream } from '@/ai/providers/deepseekStream'
-import { findTemplate, resolveAiSettings } from '@/ai/settings'
+import { openAiChatCompletionStream } from '@/ai/providers/openaiCompatible'
+import { findTemplate, getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
 import type { AiCompleteRequest } from '@/ai/types'
 
 export async function* runAiTextCompletionStream(
@@ -9,7 +9,7 @@ export async function* runAiTextCompletionStream(
   const settings = await resolveAiSettings()
 
   if (!settings.enabled) {
-    throw new Error('AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY')
+    throw new Error(getAiDisabledMessage(settings.provider))
   }
 
   const template = findTemplate(settings, body.action, body.templateId)
@@ -32,7 +32,7 @@ export async function* runAiTextCompletionStream(
     context: body.context,
   }
 
-  const stream = deepseekChatCompletionStream({
+  const stream = openAiChatCompletionStream({
     baseUrl: settings.baseUrl,
     apiKey: settings.apiKey,
     model: settings.model,

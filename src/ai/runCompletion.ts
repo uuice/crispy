@@ -1,6 +1,6 @@
 import { renderPromptTemplate } from '@/ai/promptRenderer'
-import { deepseekChatCompletion } from '@/ai/providers/deepseek'
-import { findTemplate, resolveAiSettings } from '@/ai/settings'
+import { openAiChatCompletion } from '@/ai/providers/openaiCompatible'
+import { findTemplate, getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
 import type { AiCompleteRequest, AiContext, AiSuggestTaxonomyResult } from '@/ai/types'
 
 export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
@@ -11,7 +11,7 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
   const settings = await resolveAiSettings()
 
   if (!settings.enabled) {
-    throw new Error('AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY')
+    throw new Error(getAiDisabledMessage(settings.provider))
   }
 
   if (body.action === 'custom' && !body.customPrompt?.trim()) {
@@ -34,7 +34,7 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
     context: body.context,
   }
 
-  const result = await deepseekChatCompletion({
+  const result = await openAiChatCompletion({
     baseUrl: settings.baseUrl,
     apiKey: settings.apiKey,
     model: settings.model,
@@ -57,7 +57,7 @@ export async function runAiSuggestTaxonomy(context: AiContext): Promise<AiSugges
   const settings = await resolveAiSettings()
 
   if (!settings.enabled) {
-    throw new Error('AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY')
+    throw new Error(getAiDisabledMessage(settings.provider))
   }
 
   const template = findTemplate(settings, 'suggest_taxonomy')
@@ -67,7 +67,7 @@ export async function runAiSuggestTaxonomy(context: AiContext): Promise<AiSugges
 
   const variables = { field: context.contentPlain ?? '', context }
 
-  const result = await deepseekChatCompletion({
+  const result = await openAiChatCompletion({
     baseUrl: settings.baseUrl,
     apiKey: settings.apiKey,
     model: settings.model,

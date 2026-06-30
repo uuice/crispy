@@ -2,7 +2,18 @@ import type { GlobalConfig } from 'payload'
 
 import { isEditor, isSuperAdmin } from '@/access/roles'
 import { DEFAULT_AI_TEMPLATES } from '@/ai/defaultTemplates'
+import {
+  AI_PROVIDER_OPTIONS,
+  AI_PROVIDER_PRESETS,
+  parseAiProvider,
+  type AiProvider,
+} from '@/ai/providers/presets'
 import { adminLabels } from '@/i18n/admin-labels'
+
+function applyProviderPreset(provider: AiProvider): { model: string; baseUrl: string } {
+  const preset = AI_PROVIDER_PRESETS[provider]
+  return { model: preset.model, baseUrl: preset.baseUrl }
+}
 
 export const AiSettings: GlobalConfig = {
   slug: 'ai-settings',
@@ -14,6 +25,22 @@ export const AiSettings: GlobalConfig = {
   admin: {
     group: adminLabels.systemGroup,
   },
+  hooks: {
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        const nextProvider = parseAiProvider(data?.provider ?? originalDoc?.provider)
+        const prevProvider = parseAiProvider(originalDoc?.provider)
+
+        if (nextProvider !== prevProvider) {
+          const preset = applyProviderPreset(nextProvider)
+          data.model = preset.model
+          data.baseUrl = preset.baseUrl
+        }
+
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'enabled',
@@ -21,7 +48,18 @@ export const AiSettings: GlobalConfig = {
       label: adminLabels.aiEnabled,
       defaultValue: true,
       admin: {
-        description: '关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置 DEEPSEEK_API_KEY。',
+        description:
+          '关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置：DeepSeek 用 DEEPSEEK_API_KEY，OpenAI 用 OPENAI_API_KEY，或通用 LLM_API_KEY。',
+      },
+    },
+    {
+      name: 'provider',
+      type: 'select',
+      label: adminLabels.aiProvider,
+      defaultValue: 'deepseek',
+      options: AI_PROVIDER_OPTIONS,
+      admin: {
+        description: '选择上游 LLM 提供商；切换后会自动填充默认模型与 API 地址，可按需修改。',
       },
     },
     {
@@ -34,7 +72,7 @@ export const AiSettings: GlobalConfig = {
           defaultValue: 'deepseek-chat',
           admin: {
             width: '50%',
-            description: '如 deepseek-chat、deepseek-reasoner',
+            description: '模型名称，取决于所选提供商',
           },
         },
         {
@@ -42,7 +80,10 @@ export const AiSettings: GlobalConfig = {
           type: 'text',
           label: adminLabels.aiBaseUrl,
           defaultValue: 'https://api.deepseek.com',
-          admin: { width: '50%' },
+          admin: {
+            width: '50%',
+            description: 'OpenAI 兼容 API 根地址，不含 /v1 后缀',
+          },
         },
       ],
     },

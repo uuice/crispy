@@ -2666,13 +2666,20 @@ export interface SiteSetting {
 export interface AiSetting {
   id: number;
   /**
-   * 关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置 DEEPSEEK_API_KEY。
+   * 关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置：DeepSeek 用 DEEPSEEK_API_KEY，OpenAI 用 OPENAI_API_KEY，或通用 LLM_API_KEY。
    */
   enabled?: boolean | null;
   /**
-   * 如 deepseek-chat、deepseek-reasoner
+   * 选择上游 LLM 提供商；切换后会自动填充默认模型与 API 地址，可按需修改。
+   */
+  provider?: ('deepseek' | 'openai' | 'custom') | null;
+  /**
+   * 模型名称，取决于所选提供商
    */
   model?: string | null;
+  /**
+   * OpenAI 兼容 API 根地址，不含 /v1 后缀
+   */
   baseUrl?: string | null;
   temperature?: number | null;
   maxTokens?: number | null;
@@ -2771,6 +2778,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
  */
 export interface AiSettingsSelect<T extends boolean = true> {
   enabled?: T;
+  provider?: T;
   model?: T;
   baseUrl?: T;
   temperature?: T;
