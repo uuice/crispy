@@ -275,6 +275,7 @@ export interface Page {
   slug: string;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -326,6 +327,7 @@ export interface Post {
   slug: string;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -353,6 +355,7 @@ export interface Media {
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -470,6 +473,7 @@ export interface Category {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -486,6 +490,7 @@ export interface Tag {
   slug: string;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -497,6 +502,7 @@ export interface User {
   roles: ('super-admin' | 'editor' | 'author')[];
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
@@ -876,6 +882,7 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -895,6 +902,7 @@ export interface Link {
   openInNewTab?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -914,6 +922,7 @@ export interface AdSlot {
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -944,6 +953,7 @@ export interface Ad {
   openInNewTab?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -998,6 +1008,7 @@ export interface Job {
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Curated images shown on the public /gallery page. Media library items are not listed until added here.
@@ -1020,6 +1031,7 @@ export interface GalleryItem {
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * 键值型应用配置，供运行时通过 src/config/resolve.ts 读取。
@@ -1047,6 +1059,7 @@ export interface AppConfig {
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * 文章与单页的用户评论，支持嵌套回复与审核。
@@ -1074,6 +1087,7 @@ export interface Comment {
   ipAddress?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * REST / GraphQL API request history (written by middleware).
@@ -1096,6 +1110,7 @@ export interface ApiAccessLog {
   authType?: ('none' | 'session' | 'api-key' | 'bearer') | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * AI 内容助手完整会话历史，由聊天 API 自动写入。
@@ -1122,6 +1137,7 @@ export interface AiChatSession {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1148,6 +1164,7 @@ export interface Redirect {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1165,6 +1182,7 @@ export interface FormSubmission {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
@@ -1201,6 +1219,7 @@ export interface Search {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1229,6 +1248,7 @@ export interface Export {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -1266,6 +1286,7 @@ export interface Import {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -1302,6 +1323,7 @@ export interface AuditLog {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
@@ -1908,6 +1930,7 @@ export interface PagesSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -2025,6 +2048,7 @@ export interface PostsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -2037,6 +2061,7 @@ export interface MediaSelect<T extends boolean = true> {
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -2140,6 +2165,7 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2152,6 +2178,7 @@ export interface TagsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2167,6 +2194,7 @@ export interface LinksSelect<T extends boolean = true> {
   openInNewTab?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2182,6 +2210,7 @@ export interface AdSlotsSelect<T extends boolean = true> {
   enabled?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2202,6 +2231,7 @@ export interface AdsSelect<T extends boolean = true> {
   openInNewTab?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2221,6 +2251,7 @@ export interface JobsSelect<T extends boolean = true> {
   enabled?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2234,6 +2265,7 @@ export interface GalleryItemsSelect<T extends boolean = true> {
   enabled?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2252,6 +2284,7 @@ export interface AppConfigsSelect<T extends boolean = true> {
   enabled?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2270,6 +2303,7 @@ export interface CommentsSelect<T extends boolean = true> {
   ipAddress?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2286,6 +2320,7 @@ export interface ApiAccessLogsSelect<T extends boolean = true> {
   authType?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2298,6 +2333,7 @@ export interface AiChatSessionsSelect<T extends boolean = true> {
   messages?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2308,6 +2344,7 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
@@ -2341,6 +2378,7 @@ export interface RedirectsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2474,6 +2512,7 @@ export interface FormsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2490,6 +2529,7 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2517,6 +2557,7 @@ export interface SearchSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2536,6 +2577,7 @@ export interface ExportsSelect<T extends boolean = true> {
   where?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -2566,6 +2608,7 @@ export interface ImportsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -2588,6 +2631,7 @@ export interface AuditLogsSelect<T extends boolean = true> {
   changes?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

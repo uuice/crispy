@@ -19,6 +19,11 @@ export async function syncContentEmbedding(
   const docId = Number(doc.id)
   if (!Number.isFinite(docId)) return
 
+  if (doc.deletedAt) {
+    await deleteContentEmbedding(req.payload, collection, docId)
+    return
+  }
+
   const text = buildEmbeddableContentText(collection, doc)
   if (!text) {
     await deleteContentEmbedding(req.payload, collection, docId)
