@@ -32,6 +32,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['GraphQL Playground', '/api/graphql-playground（需 Admin 登录）'],
           ['MCP', 'http://localhost:3333/api/mcp'],
           ['AI 流式', 'POST /api/ai/stream（需 Admin 登录）'],
+          ['AI 助手（对话）', '/admin/ai-agent（需 Admin 登录）'],
           ['AI 文档', '/admin/dev-docs#openai-api'],
           ['Swagger API', '/admin/api-docs（需 Admin 登录）'],
           ['OpenAPI JSON', 'GET /api/openapi.json（需 Admin 登录）'],
@@ -75,6 +76,21 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
       },
       {
         type: 'h3',
+        text: 'Crispy 自建插件（src/plugins/）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'auditLogPlugin — 写操作审计（audit-logs collection）',
+          'enableTrashAndVersionsPlugin — 全业务 Collection 软删除 + 版本历史',
+          'enableQueryPresetsPlugin — 列表 Query Presets（保存筛选/排序）',
+          'enableListRefreshButtonPlugin — 列表页刷新按钮',
+          'localizePluginCollectionsPlugin — 插件 Collection 中文 labels / 分组',
+          'localizeFieldLabelsPlugin — 通用字段（folder/slug/url）中文 label',
+        ],
+      },
+      {
+        type: 'h3',
         text: '明确不使用',
       },
       {
@@ -98,12 +114,15 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
 │   │       ├── admin/dev-docs/    # 本文档页面
 │   │       └── api/               # Payload REST + AI 路由
 │   ├── collections/             # Posts, Pages, Media, Tags…
+│   ├── collections/defaults.ts  # trash/versions 默认值、内部 Collection 判定
 │   ├── Header/ Footer/ SiteSettings/ AiSettings/  # Globals
 │   ├── access/                  # RBAC helpers
-│   ├── ai/                      # DeepSeek provider、模板、权限
-│   ├── components/AdminAi/      # AI 弹框、Lexical Feature
+│   ├── ai/                      # DeepSeek provider、Agent、embedding
+│   ├── components/AdminAi/      # 字段 AI 弹框、Lexical Feature
+│   ├── components/AdminAiAgent/ # 对话式 AI 助手
 │   ├── fields/ai/               # withAiTextField 等
-│   ├── plugins/                 # 插件聚合
+│   ├── plugins/                 # 官方 + 自建插件聚合
+│   ├── utilities/               # trashOrDeleteDocument 等横切工具
 │   ├── database/adapter.ts      # SQLite / Postgres 双驱动
 │   ├── migrations/              # Postgres 迁移（生产）
 │   └── payload.config.ts
@@ -188,7 +207,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
     blocks: [
       {
         type: 'p',
-        text: '以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys 等表。',
+        text: '以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys、payload-query-presets 等表。除 posts/pages 保留 drafts 外，其余业务 Collection 由 enableTrashAndVersionsPlugin 统一启用 trash（软删除）与 versions（每文档最多 50 条历史）。',
       },
       {
         type: 'table',
@@ -205,8 +224,25 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['ads', '广告', 'title, slot, format, image/html, link, enabled, schedule'],
           ['jobs', '招聘', 'title, slug, department, location, employmentType, salary, description, requirements, enabled'],
           ['gallery-items', '图库', 'title, image, description, enabled, order'],
+          ['comments', '评论', 'content, status, post/page, parent, author, guestInfo'],
+          ['app-configs', '应用配置', 'key, valueType, value（KV 配置，Agent 只读除 super-admin）'],
+          ['ai-chat-sessions', 'AI 对话会话', 'title, messages[], user（Agent 侧栏历史）'],
           ['api-access-logs', 'API 访问日志', 'method, path, status, authType, user, duration'],
           ['audit-logs', '审计日志', 'action, collection, docId, user, summary（只读）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '回收站与版本历史',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Admin 列表右上角可切换「回收站」视图，恢复或永久删除',
+          '文档编辑页可查看版本历史并还原（posts/pages 含 draft 工作流）',
+          '软删除时 embedding 同步清理（src/ai/embeddings/syncContentEmbedding.ts）',
+          'Postgres 生产需迁移：20260701_061651_add_trash_and_versions',
+          'payload-* 系统 Collection 不启用 trash/versions',
         ],
       },
       {
@@ -220,6 +256,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['header', '主导航', 'navItems[]（link 组）'],
           ['footer', '页脚', 'navItems[]'],
           ['site-settings', '站点设置', 'siteName, description, logo, socialLinks[], rssEnabled, theme'],
+          ['comment-settings', '评论设置', 'enabled, moderation, guestComments, nesting, posts/pages 开关'],
           ['ai-settings', 'AI 设置', 'enabled, baseUrl, model, temperature, maxTokens, promptTemplates[]'],
         ],
       },
@@ -282,6 +319,8 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['GET /api/graphql-playground', 'Admin Cookie', 'GraphQL Playground；未登录 401'],
           ['POST /api/graphql', '按 Collection access', 'Cookie / users API-Key；权限与 REST 一致'],
           ['POST /api/ai/*', 'Admin Cookie + RBAC', 'super-admin/editor 全量；author 仅自己的 posts'],
+          ['POST /api/ai/agent', 'Admin Cookie + RBAC', '对话式 AI 助手 SSE 流式'],
+          ['GET/DELETE /api/ai/agent/sessions', 'Admin Cookie', '会话列表 / 删除（软删除）'],
           ['POST /api/mcp', 'MCP Bearer / users API-Key', '生产必须配置 MCP API Key'],
           ['POST /api/internal/access-log', 'x-access-log-secret', '仅 middleware 内部调用'],
           ['POST /api/users/login', '无', '获取 payload-token'],
@@ -851,8 +890,162 @@ docker run -p 3333:3333 \\
         items: [
           '中文化：i18n zh + 自定义 labels',
           'Draft / Live Preview：PREVIEW_SECRET + verify:phase1',
+          '回收站 / 版本历史：列表切换回收站、编辑页版本面板',
+          '列表刷新：各 Collection 列表右上角「刷新」按钮',
+          'Query Presets：保存列表筛选与排序',
           '深色模式：Admin 主题 + 前台 ThemeSelector',
           'AI：DEEPSEEK_API_KEY + verify:ai',
+          'AI 助手：/admin/ai-agent 对话 CRUD + semantic_search',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'architecture',
+    title: 'Payload 扩展架构',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Crispy 在 Payload 能力边界内做产品化二次开发：不 fork 核心、不改 node_modules，通过 Plugin、Custom View、薄 wrapper 注入横切行为；差异化能力（AI Agent、审计、OpenAPI、embedding）放在自有模块。',
+      },
+      {
+        type: 'pre',
+        text: `┌─────────────────────────────────────────┐
+│  Crispy 产品层                           │
+│  AI Agent · 审计 · OpenAPI · embedding   │
+├─────────────────────────────────────────┤
+│  横切 Plugin（src/plugins/）             │
+│  trash/versions · query presets · 刷新   │
+├─────────────────────────────────────────┤
+│  Payload 3 原生                          │
+│  Collections · Access · Admin · REST/MCP │
+└─────────────────────────────────────────┘`,
+      },
+      {
+        type: 'h3',
+        text: '扩展原则',
+      },
+      {
+        type: 'ul',
+        items: [
+          '横切逻辑 → Plugin 统一注入（新增 Collection 自动继承）',
+          'payload-* 系统 Collection → isInternalCollectionSlug 排除',
+          'Payload 语义不足 → utilities 薄封装（如 trashOrDeleteDocument）',
+          'Admin UI 定制 → admin.components + generate:importmap',
+          '避免大面积 override DefaultListView，仅在必要时包一层',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '软删除约定',
+      },
+      {
+        type: 'p',
+        text: 'Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才能移入回收站。Crispy 统一通过 src/utilities/trashOrDeleteDocument.ts 处理，AI Agent 的 delete_document 工具已接入。',
+      },
+    ],
+  },
+  {
+    id: 'payload-plugins',
+    title: '自建 Plugin 说明',
+    blocks: [
+      {
+        type: 'table',
+        headers: ['Plugin', '作用', '代码'],
+        rows: [
+          ['enableTrashAndVersionsPlugin', '业务 Collection 默认 trash + versions（maxPerDoc: 50）', 'src/plugins/enableTrashAndVersions.ts'],
+          ['enableQueryPresetsPlugin', 'enableQueryPresets: true', 'src/plugins/enableQueryPresets.ts'],
+          ['enableListRefreshButtonPlugin', '列表页注入 AdminListView + 刷新按钮', 'src/plugins/enableListRefreshButton.ts'],
+          ['auditLogPlugin', 'create/update/delete 写 audit-logs', 'src/plugins/auditLog.ts'],
+          ['localizePluginCollectionsPlugin', '插件 Collection 中文化', 'src/plugins/localizePluginCollections.ts'],
+          ['localizeFieldLabelsPlugin', 'folder/slug/url 字段中文 label', 'src/plugins/localizeFieldLabels.ts'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '注册顺序',
+      },
+      {
+        type: 'p',
+        text: '全部在 src/plugins/index.ts 末尾注册；auditLog 需在业务 hooks 之前生效，trash/versions 与 list refresh 在 collection 定义之后 merge。',
+      },
+      {
+        type: 'h3',
+        text: '新增横切能力',
+      },
+      {
+        type: 'ol',
+        items: [
+          '新建 src/plugins/enableXxx.ts，map collections 或改 config',
+          '在 src/plugins/index.ts 注册',
+          '若改 Admin 组件：pnpm generate:importmap',
+          '若改 schema：pnpm payload migrate:create <name> 并 commit 迁移',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ai-agent',
+    title: 'Admin AI 助手（对话）',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读写 CMS 内容，与字段级 AI（润色/SEO）互补。需 DEEPSEEK_API_KEY 且 AI 总开关开启。',
+      },
+      {
+        type: 'table',
+        headers: ['入口', '说明'],
+        rows: [
+          ['Admin 页面', '/admin/ai-agent'],
+          ['右下角浮窗', '任意 Admin 页可唤起（AdminAiAgentWidget）'],
+          ['POST /api/ai/agent', 'SSE 流式对话（含 tool call 结果）'],
+          ['GET /api/ai/agent/sessions', '当前用户会话列表'],
+          ['GET /api/ai/agent/sessions/:id', '会话详情与消息历史'],
+          ['DELETE /api/ai/agent/sessions/:id', '删除会话（软删除）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '工具（Function Calling）',
+      },
+      {
+        type: 'table',
+        headers: ['工具', '说明'],
+        rows: [
+          ['list_resources', '列出可管理的 Collections / Globals'],
+          ['describe_resource', '查看字段结构（create/update 前应先调用）'],
+          ['semantic_search', 'posts/pages 语义搜索（需 Postgres pgvector）'],
+          ['find_documents / get_document', '列表查询 / 单条详情'],
+          ['create_document / update_document', '新建 / 更新文档'],
+          ['delete_document', '移入回收站（软删除；media 不可删）'],
+          ['get_global / update_global', '读取 / 更新 Global 配置'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '权限',
+      },
+      {
+        type: 'ul',
+        items: [
+          'super-admin / editor：AGENT_COLLECTIONS 内全部（media 不可 delete）',
+          'author：仅 posts，且必须是文档 authors 之一',
+          'app-configs：仅 super-admin 可 create/update/delete',
+          'Globals：header/footer/site-settings/comment-settings（与 editor+ 对齐）',
+          '代码：src/ai/agent/、src/components/AdminAiAgent/',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '与 MCP 的区别',
+      },
+      {
+        type: 'ul',
+        items: [
+          'AI 助手：Admin 内对话，Cookie 鉴权，适合运营人员',
+          'MCP：外部 Agent（Cursor 等），Bearer / API-Key，JSON-RPC',
+          '两者 Collection 范围大致对齐（见 src/ai/agent/resources.ts 与 plugins/index.ts mcpPlugin）',
+          'AI 助手 delete 走软删除；MCP delete 行为取决于 Payload MCP 插件实现',
         ],
       },
     ],
@@ -867,6 +1060,8 @@ docker run -p 3333:3333 \\
           '新增 Collection：src/collections/ → 注册 payload.config.ts → generate:types',
           'Postgres 生产：migrate:create → commit src/migrations/',
           'Admin 组件：admin.components → generate:importmap',
+          '横切行为：优先写 Plugin（参考 enableTrashAndVersionsPlugin）',
+          '软删除调用：trashOrDeleteDocument，勿直接 payload.delete()',
           '前台路由：src/app/(frontend)/',
           'Revalidation：Collection afterChange hooks（如 revalidatePost）',
           '中文 Slug：chineseSlugField + pinyin-pro hook',

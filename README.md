@@ -45,6 +45,7 @@ pnpm build && pnpm start
 | MCP 端点   | http://localhost:3333/api/mcp     |
 | GraphQL    | http://localhost:3333/api/graphql |
 | Swagger    | http://localhost:3333/admin/api-docs |
+| AI 助手    | http://localhost:3333/admin/ai-agent |
 
 首次访问 Admin 会引导创建超级管理员账号。
 
@@ -62,13 +63,21 @@ pnpm build && pnpm start
 ## 官方插件（已启用）
 
 - SEO、Search、Redirects、Nested Docs、Form Builder
-- **MCP** — AI Agent 读写内容
+- **MCP** — 外部 AI Agent 读写内容
+- Import/Export、Audit Log、Query Presets
+
+## Crispy 自建能力
+
+- **软删除 + 版本历史** — 全业务 Collection 回收站与版本面板
+- **Admin AI 助手** — 对话式内容管理（`/admin/ai-agent`）
+- **字段 AI** — 润色、SEO、智能填充（DeepSeek）
+- **OpenAPI / Swagger** — 自动生成 REST 文档
 
 ## 文档
 
 完整二次开发文档已内置在 Admin：**http://localhost:3333/admin/dev-docs**（侧边栏「二次开发文档」）。
 
-涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Admin AI（DeepSeek）、MCP、部署迁移与 CI。
+涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Payload 扩展架构、自建 Plugin、Admin AI（字段 + 对话助手）、MCP、部署迁移与 CI。
 
 ## 常用命令
 
@@ -91,7 +100,9 @@ pnpm build && pnpm start
 
 ## AI / MCP
 
-**Admin AI 助手**（DeepSeek，后台润色/SEO/智能填充）：见 Admin → [二次开发文档](http://localhost:3333/admin/dev-docs) → Admin AI 章节。
+**Admin AI 助手**（对话式，CRUD + 语义搜索）：`/admin/ai-agent` 或 Admin 右下角浮窗。详见 [二次开发文档 — AI 助手](http://localhost:3333/admin/dev-docs#ai-agent)。
+
+**字段 AI**（润色/SEO/智能填充，DeepSeek）：见 [二次开发文档 — Admin AI](http://localhost:3333/admin/dev-docs#ai)。
 
 **MCP**（外部 Agent 读写内容）：
 
