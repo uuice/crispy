@@ -70,6 +70,7 @@ export const adminLabels = {
   siteSettings: '站点设置',
   title: '标题',
   slug: '别名',
+  folder: '文件夹',
   description: '描述',
   content: '内容',
   meta: '关联信息',

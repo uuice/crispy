@@ -26,6 +26,7 @@ import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
+import { adminLabels } from './i18n/admin-labels'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 
@@ -96,6 +97,30 @@ export default buildConfig({
     },
   },
   i18n: i18nConfig,
+  queryPresets: {
+    access: {},
+    constraints: {},
+    labels: {
+      singular: '查询预设',
+      plural: '查询预设',
+    },
+  },
+  folders: {
+    collectionOverrides: [
+      ({ collection }) => ({
+        ...collection,
+        fields: collection.fields.map((field) => {
+          if ('name' in field && field.name === 'folder') {
+            return { ...field, label: adminLabels.folder }
+          }
+          if ('name' in field && field.name === 'name' && !field.label) {
+            return { ...field, label: adminLabels.title }
+          }
+          return field
+        }),
+      }),
+    ],
+  },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: createDatabaseAdapter(),

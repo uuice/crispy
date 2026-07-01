@@ -29,13 +29,17 @@
   border: 1px solid var(--theme-elevation-150);
   border-radius: var(--style-radius-s);
   background: var(--theme-input-bg);
+  box-shadow: var(--crispy-shadow-xs, none);
   color: var(--theme-text);
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
+  transition:
+    border-color var(--crispy-transition, 0.15s ease),
+    box-shadow var(--crispy-transition, 0.15s ease);
 
   &:focus {
     outline: none;
     border-color: var(--color-blue-500);
-    box-shadow: 0 0 0 2px oklch(68% 0.175 var(--crispy-hue) / 0.28);
+    box-shadow: 0 0 0 3px oklch(68% 0.175 var(--crispy-hue) / 0.18);
   }
 }

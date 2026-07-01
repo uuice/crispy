@@ -24,8 +24,7 @@
 }
 
 html[data-theme='dark'] .before-login {
-  border-color: oklch(40% 0.1 var(--crispy-hue));
-  background: var(--color-base-900);
+  background: transparent;
 
   &__title {
     color: var(--color-blue-200);

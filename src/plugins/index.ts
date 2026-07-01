@@ -13,6 +13,8 @@ import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { adminLabels } from '@/i18n/admin-labels'
 import { auditLogPlugin } from '@/plugins/auditLog'
+import { enableQueryPresetsPlugin } from '@/plugins/enableQueryPresets'
+import { localizeFieldLabelsPlugin } from '@/plugins/localizeFieldLabels'
 import { localizePluginCollectionsPlugin } from '@/plugins/localizePluginCollections'
 import { createS3StoragePlugin } from '@/storage/s3'
 
@@ -185,5 +187,7 @@ export const plugins: Plugin[] = [
   }),
   auditLogPlugin(),
   localizePluginCollectionsPlugin(),
+  enableQueryPresetsPlugin(),
+  localizeFieldLabelsPlugin(),
   ...(s3StoragePlugin ? [s3StoragePlugin] : []),
 ]
