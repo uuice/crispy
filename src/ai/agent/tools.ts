@@ -17,6 +17,7 @@ import {
 import type { Config } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
+import { trashOrDeleteDocument } from '@/utilities/trashOrDeleteDocument'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -157,7 +158,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'delete_document',
-      description: '删除指定文档（media 不可删除）',
+      description: '将指定文档移入回收站（软删除，可恢复；media 不可删除）',
       parameters: {
         type: 'object',
         properties: {
@@ -340,11 +341,10 @@ export async function executeAgentTool(
       const collection = String(args.collection ?? '')
       const id = args.id as string | number
       await assertAgentCollectionAccess(req, collection, 'delete', id)
-      result = await req.payload.delete({
+      result = await trashOrDeleteDocument({
+        req,
         collection: collection as CollectionSlug,
         id,
-        overrideAccess: false,
-        user: req.user,
       })
       break
     }

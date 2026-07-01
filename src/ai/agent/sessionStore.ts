@@ -1,6 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { AI_CHAT_SESSION_SLUG } from '@/collections/AiChatSessions'
+import { trashOrDeleteDocument } from '@/utilities/trashOrDeleteDocument'
 import type {
   AiChatSessionDetail,
   AiChatSessionSummary,
@@ -182,11 +183,10 @@ export async function deleteAiChatSession(
   const existing = await getAiChatSession(req, sessionId)
   if (!existing) return false
 
-  await req.payload.delete({
+  await trashOrDeleteDocument({
+    req,
     collection: AI_CHAT_SESSION_SLUG,
     id: sessionId,
-    overrideAccess: false,
-    user: req.user,
   })
 
   return true
