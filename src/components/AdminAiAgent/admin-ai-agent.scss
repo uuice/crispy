@@ -1,41 +1,85 @@
-.admin-ai-agent-fab {
+.admin-ai-agent-rail {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  top: 50%;
+  right: 0;
   z-index: 9999;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 12px 10px;
   border: 1px solid var(--theme-elevation-150);
-  border-radius: 999px;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
   background: var(--theme-elevation-0);
   color: var(--theme-text);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: box-shadow 0.15s, transform 0.15s;
+  font-size: 12px;
+  font-weight: 600;
+  transform: translateY(-50%);
+  transition: box-shadow 0.15s, padding 0.15s;
 
   &:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-    transform: translateY(-1px);
+    box-shadow: -6px 0 24px rgba(0, 0, 0, 0.14);
+    padding-right: 14px;
   }
 
   svg {
     color: var(--theme-success-500, #22c55e);
+    flex-shrink: 0;
+  }
+
+  &__label {
+    writing-mode: vertical-rl;
+    letter-spacing: 0.04em;
   }
 }
 
-.admin-ai-agent-widget {
+.admin-ai-agent-backdrop {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  inset: 0;
+  z-index: 9999;
+  border: none;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+}
+
+.admin-ai-agent-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10000;
-  width: min(720px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  display: flex;
-  flex-direction: column;
+  width: min(720px, 100vw);
+  transform: translateX(100%);
+  transition: transform 0.24s ease;
+  pointer-events: none;
+  visibility: hidden;
+
+  &--open {
+    transform: translateX(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .admin-ai-agent-layout--widget {
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    border-left: 1px solid var(--theme-elevation-150);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.admin-ai-agent-fab {
+  display: none;
+}
+
+.admin-ai-agent-widget {
+  display: none;
 }
 
 .admin-ai-agent-layout {
@@ -57,6 +101,14 @@
     overflow: hidden;
     height: 560px;
     max-height: calc(100vh - 48px);
+
+    .admin-ai-agent-drawer & {
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+    }
   }
 
   &--widget .admin-ai-agent {

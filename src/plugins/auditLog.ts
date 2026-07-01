@@ -20,6 +20,8 @@ const DEFAULT_AUDITED_COLLECTIONS: CollectionSlug[] = [
   'ads',
   'jobs',
   'gallery-items',
+  'app-configs',
+  'comments',
   'users',
 ]
 

@@ -172,7 +172,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'get_global',
-      description: '读取全局配置（header、footer、site-settings）',
+      description: '读取全局配置（header、footer、site-settings、comment-settings）',
       parameters: {
         type: 'object',
         properties: {
@@ -238,7 +238,7 @@ export async function executeAgentTool(
         await assertAgentCollectionAccess(req, slug, 'read')
         result = describeCollectionSchema(req, slug)
       } else if (kind === 'global') {
-        await assertAgentGlobalAccess(req)
+        await assertAgentGlobalAccess(req, slug, 'read')
         result = describeGlobalSchema(req, slug)
       } else {
         throw new Error('kind 必须是 collection 或 global')
@@ -351,7 +351,7 @@ export async function executeAgentTool(
 
     case 'get_global': {
       const slug = String(args.slug ?? '')
-      await assertAgentGlobalAccess(req)
+      await assertAgentGlobalAccess(req, slug, 'read')
       if (!isAgentGlobal(slug)) {
         throw new Error(`不支持的全局配置：${slug}`)
       }
@@ -366,7 +366,7 @@ export async function executeAgentTool(
 
     case 'update_global': {
       const slug = String(args.slug ?? '')
-      await assertAgentGlobalAccess(req)
+      await assertAgentGlobalAccess(req, slug, 'update')
       if (!isAgentGlobal(slug)) {
         throw new Error(`不支持的全局配置：${slug}`)
       }

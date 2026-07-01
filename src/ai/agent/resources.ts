@@ -11,6 +11,16 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
   { slug: 'ads', label: '广告', description: '广告素材' },
   { slug: 'jobs', label: '招聘', description: '招聘职位' },
   { slug: 'gallery-items', label: '图库', description: '图库条目' },
+  {
+    slug: 'app-configs',
+    label: '应用配置',
+    description: '键值型应用配置（string/number/boolean/json），按 key 读取',
+  },
+  {
+    slug: 'comments',
+    label: '评论',
+    description: '文章与单页评论，含审核状态、嵌套回复、访客信息',
+  },
   { slug: 'media', label: '媒体', description: '图片与文件（不可删除）' },
 ]
 
@@ -18,6 +28,11 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
   { slug: 'header', label: '页头', description: '站点导航与页头配置' },
   { slug: 'footer', label: '页脚', description: '页脚链接与版权信息' },
   { slug: 'site-settings', label: '站点设置', description: '站点名称、Logo、RSS 等全局配置' },
+  {
+    slug: 'comment-settings',
+    label: '评论设置',
+    description: '评论开关、审核策略、访客评论、嵌套层级、文章/单页是否可评',
+  },
 ]
 
 export const AGENT_COLLECTION_SLUGS = new Set(AGENT_COLLECTIONS.map((c) => c.slug))

@@ -38,13 +38,15 @@ pnpm migrate:status
 
 Requires **PostgreSQL** (`DATABASE_DRIVER=postgres` + `DATABASE_URL`). SQLite local dev uses schema push instead (see `.env` `DATABASE_PUSH`).
 
-```bash
-export DATABASE_DRIVER=postgres
-export DATABASE_URL=postgresql://crispy:crispy@127.0.0.1:5432/crispy
+**Do not run `pnpm migrate:create` with SQLite** — it reads the Postgres snapshot in `src/migrations/*.json` and will fail with Zod validation errors.
 
+```bash
+pnpm docker:up
 pnpm migrate:create my_change_name
 pnpm migrate
 ```
+
+The `migrate:create` script auto-sets Postgres env, starts Docker if needed, and prefers Node 22.
 
 Commit new files under `src/migrations/`.
 

@@ -29,6 +29,15 @@ export async function assertAgentCollectionAccess(
 
   const user = req.user as User
 
+  if (
+    collection === 'app-configs' &&
+    (operation === 'create' || operation === 'update' || operation === 'delete')
+  ) {
+    if (!hasRole(user, ['super-admin'])) {
+      throw new Error('应用配置仅超级管理员可通过 AI 助手修改')
+    }
+  }
+
   if (hasRole(user, ['super-admin', 'editor'])) {
     return
   }
@@ -60,12 +69,20 @@ export async function assertAgentCollectionAccess(
   }
 }
 
-export async function assertAgentGlobalAccess(req: PayloadRequest): Promise<void> {
+export async function assertAgentGlobalAccess(
+  req: PayloadRequest,
+  slug?: string,
+  operation: 'read' | 'update' = 'read',
+): Promise<void> {
   if (!canUseAiAgent(req.user)) {
     throw new Error('无权使用 AI 助手')
   }
 
   if (!hasRole(req.user, ['super-admin', 'editor'])) {
     throw new Error('仅管理员和编辑可通过 AI 助手修改全局配置')
+  }
+
+  if (slug === 'comment-settings' && operation === 'update' && !hasRole(req.user, ['super-admin'])) {
+    throw new Error('评论设置仅超级管理员可通过 AI 助手修改')
   }
 }

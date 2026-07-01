@@ -2,15 +2,16 @@
 
 import React from 'react'
 
+import { AdminAiAgentContextProvider } from './AdminAiAgentContext'
 import { AdminAiAgentWidget } from './AdminAiAgentWidget'
 
 /** Global floating AI chat widget injected into every admin page. */
 export function AdminAiAgentProvider({ children }: { children?: React.ReactNode }) {
   return (
-    <>
+    <AdminAiAgentContextProvider>
       {children}
       <AdminAiAgentWidget />
-    </>
+    </AdminAiAgentContextProvider>
   )
 }
 

@@ -9,6 +9,7 @@ import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { AdSlot } from '@/components/AdSlot'
+import { CommentsSection } from '@/components/Comments'
 import { SiteExplore } from '@/components/SiteExplore'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
@@ -79,6 +80,11 @@ export default async function Page({ params: paramsPromise }: Args) {
       <RenderHero {...hero} />
       {decodedSlug === 'home' && <AdSlot className="container" slot="home-banner" />}
       <RenderBlocks blocks={layout} />
+      {typeof page.id === 'number' && (
+        <div className="container">
+          <CommentsSection targetType="page" targetId={page.id} />
+        </div>
+      )}
       {decodedSlug === 'home' && <SiteExplore />}
     </article>
   )

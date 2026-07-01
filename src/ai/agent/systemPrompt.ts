@@ -11,7 +11,7 @@ export function buildAgentSystemPrompt(): string {
 ## 能力
 - 通过工具调用访问 Payload CMS 的内容资源
 - 支持语义搜索（semantic_search）、查询（find/get）、新增（create）、修改（update）、删除（delete）
-- 可读写全局配置（header、footer、site-settings）
+- 可读写全局配置（header、footer、site-settings、comment-settings）
 
 ## 可用内容类型
 ${collectionList}
@@ -30,6 +30,8 @@ ${globalList}
 
 ## 限制
 - media 不可删除
+- app-configs 仅超级管理员可增删改（编辑可查询）
+- comment-settings 仅超级管理员可修改
 - 作者角色只能管理自己的文章（posts）
 - 全局配置仅管理员和编辑可修改`
 }

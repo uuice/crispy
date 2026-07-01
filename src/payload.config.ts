@@ -3,6 +3,8 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { AppConfigs } from './collections/AppConfigs'
+import { Comments } from './collections/Comments'
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
@@ -21,6 +23,7 @@ import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
+import { CommentSettings } from './CommentSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
 import { defaultLexical } from '@/fields/defaultLexical'
@@ -107,12 +110,14 @@ export default buildConfig({
     Ads,
     Jobs,
     GalleryItems,
+    AppConfigs,
+    Comments,
     ApiAccessLogs,
     AiChatSessions,
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SiteSettings, AiSettings],
+  globals: [Header, Footer, SiteSettings, AiSettings, CommentSettings],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,

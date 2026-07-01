@@ -138,6 +138,22 @@ export const plugins: Plugin[] = [
       ads: { enabled: true },
       jobs: { enabled: true },
       'gallery-items': { enabled: true },
+      'app-configs': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      comments: {
+        enabled: {
+          create: true,
+          delete: false,
+          find: true,
+          update: true,
+        },
+      },
       media: {
         enabled: {
           create: true,

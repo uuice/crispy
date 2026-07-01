@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { AiIcon } from '@/components/AdminAi/AiIcon'
 
 import type { AgentDisplayMessage } from './useAiAgentChat'
-import { useAiAgentChat } from './useAiAgentChat'
+import { useAdminAiAgent } from './AdminAiAgentContext'
 import './admin-ai-agent.scss'
 
 const TOOL_LABELS: Record<string, string> = {
@@ -42,7 +42,7 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
     startNewSession,
     deleteSession,
     formatSessionTime,
-  } = useAiAgentChat()
+  } = useAdminAiAgent()
   const [input, setInput] = useState('')
   const [showHistory, setShowHistory] = useState(variant === 'page')
   const listRef = useRef<HTMLDivElement>(null)
@@ -166,7 +166,7 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
               <button
                 className="admin-ai-agent__action-btn"
                 onClick={onClose}
-                title="关闭"
+                title="关闭面板（保留当前对话）"
                 type="button"
               >
                 ✕

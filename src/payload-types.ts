@@ -78,6 +78,8 @@ export interface Config {
     ads: Ad;
     jobs: Job;
     'gallery-items': GalleryItem;
+    'app-configs': AppConfig;
+    comments: Comment;
     'api-access-logs': ApiAccessLog;
     'ai-chat-sessions': AiChatSession;
     users: User;
@@ -112,6 +114,8 @@ export interface Config {
     ads: AdsSelect<false> | AdsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
+    'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
     'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -139,12 +143,14 @@ export interface Config {
     footer: Footer;
     'site-settings': SiteSetting;
     'ai-settings': AiSetting;
+    'comment-settings': CommentSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
+    'comment-settings': CommentSettingsSelect<false> | CommentSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1014,6 +1020,60 @@ export interface GalleryItem {
   createdAt: string;
 }
 /**
+ * 键值型应用配置，供运行时通过 src/config/resolve.ts 读取。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "app-configs".
+ */
+export interface AppConfig {
+  id: number;
+  /**
+   * 唯一标识，如 comments.pageSize
+   */
+  key: string;
+  label: string;
+  category: 'general' | 'comments' | 'features' | 'integrations' | 'other';
+  description?: string | null;
+  valueType: 'string' | 'number' | 'boolean' | 'json';
+  valueString?: string | null;
+  valueNumber?: number | null;
+  valueBoolean?: boolean | null;
+  /**
+   * 合法 JSON 字符串，如 {"foo": "bar"} 或 ["a","b"]
+   */
+  valueJson?: string | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 文章与单页的用户评论，支持嵌套回复与审核。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  content: string;
+  targetType: 'post' | 'page';
+  post?: (number | null) | Post;
+  page?: (number | null) | Page;
+  /**
+   * 留空表示顶级评论。
+   */
+  parent?: (number | null) | Comment;
+  status: 'pending' | 'approved' | 'rejected' | 'spam';
+  author?: (number | null) | User;
+  guestName?: string | null;
+  /**
+   * 仅管理员可见，不会在前台展示。
+   */
+  guestEmail?: string | null;
+  ipAddress?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * REST / GraphQL API request history (written by middleware).
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1423,6 +1483,26 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  appConfigs?: {
+    /**
+     * Allow clients to find app-configs.
+     */
+    find?: boolean | null;
+  };
+  comments?: {
+    /**
+     * Allow clients to find comments.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create comments.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update comments.
+     */
+    update?: boolean | null;
+  };
   media?: {
     /**
      * Allow clients to find media.
@@ -1605,6 +1685,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'gallery-items';
         value: number | GalleryItem;
+      } | null)
+    | ({
+        relationTo: 'app-configs';
+        value: number | AppConfig;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
       } | null)
     | ({
         relationTo: 'api-access-logs';
@@ -2076,6 +2164,42 @@ export interface GalleryItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "app-configs_select".
+ */
+export interface AppConfigsSelect<T extends boolean = true> {
+  key?: T;
+  label?: T;
+  category?: T;
+  description?: T;
+  valueType?: T;
+  valueString?: T;
+  valueNumber?: T;
+  valueBoolean?: T;
+  valueJson?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  content?: T;
+  targetType?: T;
+  post?: T;
+  page?: T;
+  parent?: T;
+  status?: T;
+  author?: T;
+  guestName?: T;
+  guestEmail?: T;
+  ipAddress?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "api-access-logs_select".
  */
 export interface ApiAccessLogsSelect<T extends boolean = true> {
@@ -2472,6 +2596,18 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
         delete?: T;
       };
+  appConfigs?:
+    | T
+    | {
+        find?: T;
+      };
+  comments?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
   media?:
     | T
     | {
@@ -2705,6 +2841,32 @@ export interface AiSetting {
   createdAt?: string | null;
 }
 /**
+ * 评论功能的全局开关与审核策略。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comment-settings".
+ */
+export interface CommentSetting {
+  id: number;
+  /**
+   * 关闭后前台与 API 均不可创建新评论。
+   */
+  enabled?: boolean | null;
+  /**
+   * 开启后新评论默认为「待审核」，需编辑审核后才公开显示。
+   */
+  requireModeration?: boolean | null;
+  allowGuestComments?: boolean | null;
+  /**
+   * 嵌套回复的最大层级。
+   */
+  maxDepth?: number | null;
+  allowOnPosts?: boolean | null;
+  allowOnPages?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -2800,6 +2962,21 @@ export interface AiSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comment-settings_select".
+ */
+export interface CommentSettingsSelect<T extends boolean = true> {
+  enabled?: T;
+  requireModeration?: T;
+  allowGuestComments?: T;
+  maxDepth?: T;
+  allowOnPosts?: T;
+  allowOnPages?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -2828,6 +3005,8 @@ export interface TaskCreateCollectionExport {
       | 'ads'
       | 'jobs'
       | 'gallery-items'
+      | 'app-configs'
+      | 'comments'
       | 'api-access-logs'
       | 'ai-chat-sessions'
       | 'users'
