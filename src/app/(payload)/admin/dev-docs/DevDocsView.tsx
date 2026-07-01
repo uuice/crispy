@@ -4,6 +4,7 @@ import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
 import { DevDocsContent } from './DevDocsContent'
+import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 export function DevDocsView({
   initPageResult,
@@ -32,6 +33,7 @@ export function DevDocsView({
       user={user}
       visibleEntities={visibleEntities}
     >
+      <AdminCustomViewStepNav label="二次开发文档" viewPath="/dev-docs" />
       <Gutter>
         <DevDocsContent />
       </Gutter>

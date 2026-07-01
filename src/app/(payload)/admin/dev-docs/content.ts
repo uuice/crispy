@@ -943,6 +943,104 @@ docker run -p 3333:3333 \\
         type: 'p',
         text: 'Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才能移入回收站。Crispy 统一通过 src/utilities/trashOrDeleteDocument.ts 处理，AI Agent 的 delete_document 工具已接入。',
       },
+      {
+        type: 'h3',
+        text: '推荐扩展模式',
+      },
+      {
+        type: 'table',
+        headers: ['模式', '适用场景', '示例'],
+        rows: [
+          ['Plugin 注入 config', '全 Collection 横切行为', 'enableTrashAndVersionsPlugin'],
+          ['Collection hooks / access', '单 Collection 业务规则', 'restrictAuthorPublish、revalidatePost'],
+          ['Custom Field 组件', '字段级 UI（AI 按钮等）', 'withAiTextField、AiCodeField'],
+          ['Custom View（admin.views）', '独立 Admin 页面', 'dev-docs、api-docs、ai-agent'],
+          ['utilities 薄封装', 'Payload API 语义不足', 'trashOrDeleteDocument'],
+          ['独立 API 路由', '非 CRUD 能力', '/api/ai/*、/api/openapi.json'],
+          ['前台 Next.js', '访客站点与 ISR', 'src/app/(frontend)/'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '禁止 / 慎用',
+      },
+      {
+        type: 'table',
+        headers: ['做法', '风险', '替代方案'],
+        rows: [
+          ['修改 node_modules / fork Payload', '升级灾难、安全补丁无法合并', 'Plugin + Custom 组件'],
+          ['每个 Collection 复制横切配置', '遗漏、不一致、升级要改 N 处', 'Plugin 统一注入'],
+          ['大面积 override DefaultListView / Edit', 'Payload minor 升级易 breakage', '仅包一层注入 beforeActions；复杂流程用 Custom View'],
+          ['直接 payload.delete()（已开 trash）', '永久删除，与回收站语义不符', 'trashOrDeleteDocument'],
+          ['在 Plugin 里写重业务逻辑', 'config merge 难测、职责混乱', 'hooks 放 Collection，Plugin 只改 config'],
+          ['深度定制 payload-* 系统 Collection', '与上游插件冲突', 'isInternalCollectionSlug 排除'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '常见限制与应对',
+      },
+      {
+        type: 'table',
+        headers: ['限制', '应对'],
+        rows: [
+          ['delete() ≠ 软删除', '统一走 trashOrDeleteDocument'],
+          ['Admin 列表/编辑 UI 难深度改造', '接受 Payload 交互；极特殊流程外置 Custom View 或独立服务'],
+          ['importMap 随 Admin 组件变更', '改组件后执行 pnpm generate:importmap'],
+          ['插件 Collection 英文 labels', 'localizePluginCollectionsPlugin 集中中文化'],
+          ['Media 文件夹视图无列表刷新', '已知缺口；需单独 Folder 视图扩展时再评估'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '性能注意',
+      },
+      {
+        type: 'ul',
+        items: [
+          '前台 (frontend) 不加载 Admin bundle，性能取决于 Next.js ISR/revalidate 与 DB 查询，与 Payload Admin 体积无关',
+          'Admin 列表避免 populate 大字段（Lexical 正文）；详情页再提高 depth',
+          '语义搜索 / embedding 走 Postgres pgvector + 独立 API，不经 Admin 渲染链',
+          '生产媒体用 S3（S3_*），避免本机磁盘成为瓶颈',
+          'Local API 查询可显式 select 字段、控制 limit/depth',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Payload 升级 Checklist',
+      },
+      {
+        type: 'p',
+        text: '升级前：@payloadcms/* 全家桶保持同版本（见 package.json）；大版本单独分支，不与功能开发混发。小版本建议隔 1–2 个 minor 跟进，避免 lag 过久。',
+      },
+      {
+        type: 'ol',
+        items: [
+          'pnpm update @payloadcms/* payload（或按 release note 指定版本），确保所有 @payloadcms 包版本一致',
+          '阅读 Payload changelog / breaking changes；重点看 Plugin API、Admin 组件、DB adapter',
+          'pnpm install && pnpm generate:importmap',
+          '若 schema 有变：pnpm payload migrate:create <name> → 审阅 src/migrations/ → pnpm migrate',
+          'pnpm migrate:status && pnpm ci:check（lint + tsc + test + build）',
+          'Admin 冒烟：登录、Collection 列表、编辑保存、回收站切换、版本历史还原',
+          'Plugin 相关：Query Presets 保存/加载、列表「刷新」按钮',
+          'AI：pnpm verify:ai；/admin/ai-agent 对话 + delete_document 软删除',
+          'MCP / Preview：pnpm verify:phase1',
+          'Postgres 环境再跑一遍 migrate + test:int（与 CI postgres-migrations job 一致）',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '何时评估离开 Payload',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Admin 需完全不同于 CMS 的复杂业务 UI（审批流、看板、实时协作）',
+          '多租户 SaaS 且 Payload 数据隔离模型 fit 不好',
+          '核心瓶颈在 API 极致性能且 Local API 无法满足（应优先优化先独立读服务，而非整体重写 Admin）',
+          'override Admin 核心视图数量持续增加 — 这是预警信号，应回退到 Custom View 或外置服务',
+        ],
+      },
     ],
   },
   {
@@ -1062,6 +1160,7 @@ docker run -p 3333:3333 \\
           'Admin 组件：admin.components → generate:importmap',
           '横切行为：优先写 Plugin（参考 enableTrashAndVersionsPlugin）',
           '软删除调用：trashOrDeleteDocument，勿直接 payload.delete()',
+          '扩展红线与 Payload 升级：见本文档 #architecture 章节',
           '前台路由：src/app/(frontend)/',
           'Revalidation：Collection afterChange hooks（如 revalidatePost）',
           '中文 Slug：chineseSlugField + pinyin-pro hook',

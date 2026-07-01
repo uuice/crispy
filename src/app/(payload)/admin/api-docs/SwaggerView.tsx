@@ -5,6 +5,7 @@ import React from 'react'
 
 import { SwaggerUIView } from './SwaggerUIView'
 import { getOpenApiDocumentJson } from '@/openapi/getDocument'
+import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 export async function SwaggerView({
   initPageResult,
@@ -35,6 +36,7 @@ export async function SwaggerView({
       user={user}
       visibleEntities={visibleEntities}
     >
+      <AdminCustomViewStepNav label="Swagger API 文档" viewPath="/api-docs" />
       <Gutter>
         <header style={{ marginBottom: '1rem' }}>
           <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem', fontWeight: 700 }}>

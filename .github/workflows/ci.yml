@@ -1,10 +1,12 @@
 name: CI
 
+# Temporarily disabled — remove workflow_dispatch-only to re-enable automatic CI.
 on:
-  push:
-    branches: [main, master, v3-payload]
-  pull_request:
-    branches: [main, master, v3-payload]
+  workflow_dispatch:
+  # push:
+  #   branches: [main, master, v3-payload]
+  # pull_request:
+  #   branches: [main, master, v3-payload]
 
 concurrency:
   group: ci-${{ github.ref }}

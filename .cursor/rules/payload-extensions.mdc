@@ -1,0 +1,52 @@
+---
+description: Payload 二次开发 — Plugin、软删除、横切能力
+globs: src/plugins/**/*.ts,src/payload.config.ts,src/collections/**/*.ts,src/utilities/**/*.ts
+alwaysApply: false
+---
+
+# Payload Extensions
+
+## 扩展分层
+
+```
+产品层（AI / 审计 / OpenAPI / stats）→ 自有 src/ 模块
+横切 Plugin                          → src/plugins/enableXxx.ts
+Payload 原生                         → Collections / Access / Admin
+```
+
+## 推荐
+
+| 场景 | 做法 |
+|------|------|
+| 全 Collection 横切 | Plugin map `config.collections` |
+| 单 Collection 业务 | hooks / access 写在 Collection 文件 |
+| Payload API 语义不足 | 薄 utility（如 `trashOrDeleteDocument`） |
+| 排除系统表 | `isInternalCollectionSlug()`（`payload-*` 前缀） |
+
+## 禁止 / 慎用
+
+- ❌ 修改 `node_modules` / fork Payload
+- ❌ 每个 Collection 复制横切配置（trash、query presets 等）
+- ❌ 已开 `trash` 时用 `payload.delete()`（硬删）
+- ❌ 大面积 override `DefaultListView` / Edit 核心视图
+- ❌ 在 Plugin 里堆重业务逻辑
+
+## 软删除
+
+```typescript
+// ✅ 统一入口
+import { trashOrDeleteDocument } from '@/utilities/trashOrDeleteDocument'
+await trashOrDeleteDocument({ req, collection, id })
+
+// ❌ trash 启用时永久删除
+await req.payload.delete({ collection, id })
+```
+
+AI Agent `delete_document`、会话删除须走 `trashOrDeleteDocument`。
+
+## 新增 Plugin 清单
+
+1. 新建 `src/plugins/enableXxx.ts`
+2. 注册到 `src/plugins/index.ts`
+3. Admin 组件变更 → `pnpm generate:importmap`
+4. Schema 变更 → `pnpm payload migrate:create <name>` 并 commit 迁移

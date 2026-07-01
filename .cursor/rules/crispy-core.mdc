@@ -1,0 +1,37 @@
+---
+description: Crispy 3 项目基础约定（栈、目录、命令、通用原则）
+alwaysApply: true
+---
+
+# Crispy 3 Core
+
+Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，分支 `v3-payload`，greenfield 重写，与 2.x 无代码继承。
+
+## Stack
+
+- CMS: Payload 3.85+（`@payloadcms/*` 版本须一致）
+- DB: 本地 SQLite（`.data/payload.db`），生产 PostgreSQL + `pnpm migrate`
+- 包管理: pnpm；端口 3333
+- 生产: `DATABASE_PUSH=false`，禁止 schema push
+
+## 目录要点
+
+- `src/collections/` — 业务 Collection
+- `src/plugins/` — 官方 + 自建 Plugin 聚合（`index.ts`）
+- `src/ai/` — 字段 AI + 对话 Agent + embedding
+- `src/app/(payload)/admin/` — Admin Custom Views
+- `src/app/(frontend)/` — 前台 SSR/RSC
+- `src/admin-stats/`、`src/openapi/` — 产品层模块
+- 内置文档: `/admin/dev-docs`
+
+## 通用原则
+
+- **最小 diff**：只改任务相关文件，不顺手重构
+- **不 fork Payload**，不改 `node_modules`
+- **不自动 git commit**，除非用户明确要求
+- **代码注释用英语**；与用户沟通用中文
+- 新增 Collection → `payload.config.ts` → `pnpm generate:types`；Postgres schema 变更 → `pnpm payload migrate:create <name>`
+
+## 常用命令
+
+`pnpm dev` · `pnpm ci:check` · `pnpm migrate` · `pnpm generate:importmap` · `pnpm generate:types` · `pnpm verify:phase1` · `pnpm verify:ai`

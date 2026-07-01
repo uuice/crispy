@@ -1,0 +1,43 @@
+---
+description: Admin Custom View、面包屑、UI 定制
+globs: src/app/(payload)/admin/**/*.tsx,src/components/Admin*/**,src/app/(payload)/custom.scss
+alwaysApply: false
+---
+
+# Admin Custom Views
+
+## 何时用 Custom View
+
+- ✅ 工作流、统计、对话、文档、Swagger 等非标准 CRUD
+- ✅ Payload 列表/编辑 UI fit 不好的交互
+- ❌ 标准内容文档 CRUD → 用 Collection + 必要时 Custom Field
+
+## 新建 Custom View 步骤
+
+1. `src/app/(payload)/admin/<name>/<Name>View.tsx` — 包 `DefaultTemplate` + `Gutter`
+2. `payload.config.ts` → `admin.components.views` 注册 `path` + `Component`
+3. 可选: `afterNavLinks` 加 `*NavLink.tsx`
+4. **`AdminCustomViewStepNav`** — Custom View 必须加，否则面包屑不更新
+
+```tsx
+import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
+
+<DefaultTemplate {...props}>
+  <AdminCustomViewStepNav label="页面标题" viewPath="/your-path" />
+  <Gutter>{/* content */}</Gutter>
+</DefaultTemplate>
+```
+
+5. `pnpm generate:importmap`
+
+## 列表页轻量定制
+
+仅注入按钮等 → 包一层 `DefaultListView`（参考 `AdminListView` + `enableListRefreshButtonPlugin`），不要重写列表逻辑。
+
+## 权限
+
+Custom View 内自行校验角色（如 `hasRole(user, ['super-admin', 'editor'])`）；API 路由用 `requireAdminSession`。Collection 统计/查询用 `overrideAccess: false` 尊重 read access。
+
+## 样式
+
+Admin 定制 SCSS 放组件旁或 `src/app/(payload)/custom.scss`；使用 Payload CSS 变量（`--theme-text`、`--theme-border-color` 等）。

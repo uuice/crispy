@@ -4,6 +4,7 @@ import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
 import { AdminAiAgentChatPanel } from '@/components/AdminAiAgent/AdminAiAgentChatPanel'
+import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 export function AiAgentView({
   initPageResult,
@@ -32,6 +33,7 @@ export function AiAgentView({
       user={user}
       visibleEntities={visibleEntities}
     >
+      <AdminCustomViewStepNav label="AI 内容助手" viewPath="/ai-agent" />
       <Gutter>
         <div className="admin-ai-agent-page">
           <h1 style={{ marginBottom: 8 }}>AI 内容助手</h1>

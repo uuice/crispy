@@ -1,0 +1,27 @@
+---
+description: Payload 版本升级回归清单
+globs: package.json,src/migrations/**,src/app/(payload)/admin/importMap.js
+alwaysApply: false
+---
+
+# Payload Upgrade Checklist
+
+升级前：`@payloadcms/*` 与 `payload` **同版本**；大版本单独分支。
+
+1. 读 changelog / breaking changes（Plugin API、Admin 组件、DB adapter）
+2. `pnpm install` → `pnpm generate:importmap`
+3. Schema 变更 → `pnpm payload migrate:create <name>` → `pnpm migrate`
+4. `pnpm ci:check`
+5. Admin 冒烟: 登录、列表、编辑、回收站、版本还原
+6. Plugin: Query Presets、列表刷新按钮
+7. `pnpm verify:ai` + Agent 软删除
+8. `pnpm verify:phase1`（MCP / Preview）
+9. Postgres 环境再跑 migrate + test:int
+
+## 升级风险信号
+
+- 新增多个 `DefaultListView` / Edit override → 应改 Custom View 或 Plugin
+- importMap 频繁手动改 → 应用 `generate:importmap`
+- 自定义组件直接依赖 `@payloadcms/ui` 内部非导出 API
+
+完整架构说明见 Admin `/admin/dev-docs#architecture`。

@@ -49,6 +49,7 @@ export default buildConfig({
         '@/app/(payload)/admin/dev-docs/DevDocsNavLink',
         '@/app/(payload)/admin/api-docs/SwaggerNavLink',
         '@/app/(payload)/admin/ai-agent/AiAgentNavLink',
+        '@/app/(payload)/admin/stats/StatsNavLink',
       ],
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
@@ -65,6 +66,11 @@ export default buildConfig({
         aiAgent: {
           Component: '@/app/(payload)/admin/ai-agent/AiAgentView',
           path: '/ai-agent',
+          exact: true,
+        },
+        stats: {
+          Component: '@/app/(payload)/admin/stats/StatsView',
+          path: '/stats',
           exact: true,
         },
       },
