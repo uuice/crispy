@@ -49,4 +49,58 @@ describe('AI agent', () => {
       /不允许通过 AI 助手删除/,
     )
   })
+
+  it('list_resources includes cache-settings and query presets', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+    const result = (await executeAgentTool(req, {
+      id: 'call-list',
+      name: 'list_resources',
+      arguments: '{}',
+    })) as { summary: { globals: { slug: string }[]; collections: { slug: string }[] } }
+
+    expect(result.summary.globals.some((g) => g.slug === 'cache-settings')).toBe(true)
+    expect(result.summary.globals.some((g) => g.slug === 'ai-settings')).toBe(true)
+    expect(result.summary.collections.some((c) => c.slug === 'payload-query-presets')).toBe(true)
+  })
+
+  it('get_cache_settings returns normalized cache config', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+    const result = (await executeAgentTool(req, {
+      id: 'call-cache',
+      name: 'get_cache_settings',
+      arguments: '{}',
+    })) as { summary: { cachingEnabled: boolean; pageRevalidateSeconds: number } }
+
+    expect(typeof result.summary.cachingEnabled).toBe('boolean')
+    expect(typeof result.summary.pageRevalidateSeconds).toBe('number')
+  })
+
+  it('list_query_presets returns preset list', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+    const result = (await executeAgentTool(req, {
+      id: 'call-presets',
+      name: 'list_query_presets',
+      arguments: '{}',
+    })) as { summary: { docs: unknown[]; totalDocs: number } }
+
+    expect(Array.isArray(result.summary.docs)).toBe(true)
+    expect(typeof result.summary.totalDocs).toBe('number')
+  })
+
+  it('list_frontend_cache returns registry entries and stats', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+    const result = (await executeAgentTool(req, {
+      id: 'call-cache-list',
+      name: 'list_frontend_cache',
+      arguments: '{}',
+    })) as {
+      summary: {
+        dbStats: { total: number }
+        entries: { id: string; status: { active: boolean } }[]
+      }
+    }
+
+    expect(result.summary.entries.length).toBeGreaterThan(0)
+    expect(typeof result.summary.dbStats.total).toBe('number')
+  })
 })

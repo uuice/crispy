@@ -38,6 +38,15 @@ export async function assertAgentCollectionAccess(
     }
   }
 
+  if (
+    collection === 'payload-query-presets' &&
+    (operation === 'create' || operation === 'update' || operation === 'delete')
+  ) {
+    if (!hasRole(user, ['super-admin', 'editor'])) {
+      throw new Error('查询预设仅管理员和编辑可通过 AI 助手修改')
+    }
+  }
+
   if (hasRole(user, ['super-admin', 'editor'])) {
     return
   }
@@ -84,5 +93,20 @@ export async function assertAgentGlobalAccess(
 
   if (slug === 'comment-settings' && operation === 'update' && !hasRole(req.user, ['super-admin'])) {
     throw new Error('评论设置仅超级管理员可通过 AI 助手修改')
+  }
+
+  if (slug === 'ai-settings' && operation === 'update' && !hasRole(req.user, ['super-admin'])) {
+    throw new Error('AI 设置仅超级管理员可通过 AI 助手修改')
+  }
+}
+
+/** Frontend cache registry purge — same roles as /admin/cache (editor+). */
+export function assertAgentCacheAccess(req: PayloadRequest): void {
+  if (!canUseAiAgent(req.user)) {
+    throw new Error('无权使用 AI 助手')
+  }
+
+  if (!hasRole(req.user, ['super-admin', 'editor'])) {
+    throw new Error('仅管理员和编辑可通过 AI 助手管理前台缓存')
   }
 }

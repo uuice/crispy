@@ -21,6 +21,12 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     label: '评论',
     description: '文章与单页评论，含审核状态、嵌套回复、访客信息',
   },
+  {
+    slug: 'payload-query-presets',
+    label: '查询预设',
+    description:
+      '后台列表保存的筛选条件（where/columns/groupBy），按 relatedCollection 关联到具体 Collection',
+  },
   { slug: 'media', label: '媒体', description: '图片与文件（不可删除）' },
 ]
 
@@ -32,6 +38,16 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
     slug: 'comment-settings',
     label: '评论设置',
     description: '评论开关、审核策略、访客评论、嵌套层级、文章/单页是否可评',
+  },
+  {
+    slug: 'cache-settings',
+    label: '缓存设置',
+    description: '前台缓存开关、路由/数据 TTL（秒）、是否输出缓存调试 Header',
+  },
+  {
+    slug: 'ai-settings',
+    label: 'AI 设置',
+    description: 'AI 助手开关、LLM 提供商/模型/温度、字段 AI Prompt 模板（API Key 在环境变量）',
   },
 ]
 

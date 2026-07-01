@@ -1,6 +1,7 @@
 import type { CollectionSlug, PayloadRequest, Where } from 'payload'
 
 import {
+  assertAgentCacheAccess,
   assertAgentCollectionAccess,
   assertAgentGlobalAccess,
 } from '@/ai/agent/access'
@@ -14,14 +15,63 @@ import {
   isAgentCollection,
   isAgentGlobal,
 } from '@/ai/agent/resources'
-import type { Config } from '@/payload-types'
+import type { Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
+import { getDbCacheStats, getRegistryCacheStatuses } from '@/frontend-cache/dbCache'
+import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
+import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
+import {
+  FRONTEND_CACHE_GROUP_LABELS,
+  FRONTEND_CACHE_REGISTRY,
+  type FrontendCacheGroup,
+  resolveCacheEntries,
+} from '@/frontend-cache/registry'
 import { trashOrDeleteDocument } from '@/utilities/trashOrDeleteDocument'
 
 type AgentGlobalSlug = keyof Config['globals']
 
 const MAX_RESULT_CHARS = 12_000
+
+function sanitizeGlobalResult(slug: string, data: Record<string, unknown>): Record<string, unknown> {
+  if (slug !== 'ai-settings') {
+    return data
+  }
+
+  const templates = Array.isArray(data.promptTemplates) ? data.promptTemplates : []
+
+  return {
+    ...data,
+    promptTemplates: templates.map((item) => {
+      if (!item || typeof item !== 'object') {
+        return item
+      }
+
+      const template = item as Record<string, unknown>
+      return {
+        id: template.id,
+        label: template.label,
+        action: template.action,
+        outputFormat: template.outputFormat,
+        enabled: template.enabled,
+        note: '完整 systemPrompt/userPrompt 请用 describe_resource(kind=global, slug=ai-settings) 查看',
+      }
+    }),
+    apiKeyNote: 'API Key 仅通过环境变量配置，不在 Global 中存储',
+  }
+}
+
+function summarizeQueryPreset(preset: PayloadQueryPreset) {
+  return {
+    id: preset.id,
+    title: preset.title,
+    relatedCollection: preset.relatedCollection,
+    isShared: preset.isShared,
+    where: preset.where,
+    columns: preset.columns,
+    groupBy: preset.groupBy,
+  }
+}
 
 export type AgentToolDefinition = {
   type: 'function'
@@ -172,8 +222,79 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
   {
     type: 'function',
     function: {
+      name: 'list_frontend_cache',
+      description:
+        '查询前台缓存：可清除的缓存条目列表、每项是否 active、DB 条数统计与 cache-settings 配置（对应后台「缓存管理」）',
+      parameters: {
+        type: 'object',
+        properties: {
+          group: {
+            type: 'string',
+            enum: ['global', 'collection', 'page', 'route', 'sitemap', 'data'],
+            description: '可选，按分组过滤（global/collection/page/route/sitemap/data）',
+          },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'purge_frontend_cache',
+      description:
+        '删除/清除前台数据库缓存。可传 ids（list_frontend_cache 返回的 id）或 all: true 清空全部；操作前应向用户确认',
+      parameters: {
+        type: 'object',
+        properties: {
+          ids: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '要清除的缓存条目 id，如 collection-posts、path-home',
+          },
+          all: {
+            type: 'boolean',
+            description: '为 true 时清空全部已注册的前台缓存',
+          },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_cache_settings',
+      description:
+        '读取前台缓存设置（cache-settings）：是否启用缓存、路由 TTL、数据 TTL、是否输出调试 Header',
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'list_query_presets',
+      description:
+        '列出后台保存的查询预设（payload-query-presets），可按 relatedCollection 过滤；可将 where 复用到 find_documents',
+      parameters: {
+        type: 'object',
+        properties: {
+          relatedCollection: {
+            type: 'string',
+            description: '可选，限定关联的 collection slug，如 posts、pages',
+          },
+          limit: { type: 'number', description: '返回条数，默认 25，最大 50' },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'get_global',
-      description: '读取全局配置（header、footer、site-settings、comment-settings）',
+      description:
+        '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings）',
       parameters: {
         type: 'object',
         properties: {
@@ -349,18 +470,124 @@ export async function executeAgentTool(
       break
     }
 
+    case 'get_cache_settings': {
+      assertAgentCacheAccess(req)
+      result = await getResolvedCacheSettings()
+      break
+    }
+
+    case 'list_frontend_cache': {
+      assertAgentCacheAccess(req)
+      const group = args.group ? String(args.group) : undefined
+      const entries = group
+        ? FRONTEND_CACHE_REGISTRY.filter((entry) => entry.group === group)
+        : FRONTEND_CACHE_REGISTRY
+
+      if (group && entries.length === 0) {
+        throw new Error(`未知的缓存分组：${group}`)
+      }
+
+      const [settings, dbStats, entryStatuses] = await Promise.all([
+        getResolvedCacheSettings(),
+        getDbCacheStats(),
+        getRegistryCacheStatuses(entries),
+      ])
+
+      result = {
+        settings,
+        dbStats,
+        groupLabels: FRONTEND_CACHE_GROUP_LABELS,
+        entries: entries.map((entry) => ({
+          id: entry.id,
+          label: entry.label,
+          description: entry.description,
+          group: entry.group,
+          groupLabel: FRONTEND_CACHE_GROUP_LABELS[entry.group as FrontendCacheGroup],
+          kind: entry.kind,
+          target: entry.target,
+          status: entryStatuses[entry.id] ?? { active: false, count: 0 },
+        })),
+      }
+      break
+    }
+
+    case 'purge_frontend_cache': {
+      assertAgentCacheAccess(req)
+
+      if (args.all === true) {
+        const deleted = await purgeAllRegisteredCache()
+        result = {
+          ok: true,
+          purged: deleted,
+          failed: 0,
+          scope: 'all',
+        }
+        break
+      }
+
+      const ids = Array.isArray(args.ids) ? args.ids.map(String) : []
+      if (ids.length === 0) {
+        throw new Error('请提供 ids 或设置 all: true')
+      }
+
+      const cacheEntries = resolveCacheEntries(ids)
+      if (cacheEntries.length === 0) {
+        throw new Error('未找到有效的缓存条目 id')
+      }
+
+      const results = await purgeCacheEntries(cacheEntries)
+      const purged = results.filter((item) => item.success).length
+      const failed = results.filter((item) => !item.success).length
+      const deleted = results.reduce((sum, item) => sum + (item.deleted ?? 0), 0)
+
+      result = {
+        ok: failed === 0,
+        purged,
+        failed,
+        deleted,
+        results,
+      }
+      break
+    }
+
+    case 'list_query_presets': {
+      await assertAgentCollectionAccess(req, 'payload-query-presets', 'read')
+      const relatedCollection = args.relatedCollection ? String(args.relatedCollection) : undefined
+      const limit = Math.min(Math.max(Number(args.limit) || 25, 1), 50)
+      const where = relatedCollection
+        ? ({ relatedCollection: { equals: relatedCollection } } satisfies Where)
+        : undefined
+
+      const presets = await req.payload.find({
+        collection: 'payload-query-presets',
+        where,
+        limit,
+        sort: '-updatedAt',
+        depth: 0,
+        overrideAccess: false,
+        user: req.user,
+      })
+
+      result = {
+        totalDocs: presets.totalDocs,
+        docs: presets.docs.map((doc) => summarizeQueryPreset(doc as PayloadQueryPreset)),
+      }
+      break
+    }
+
     case 'get_global': {
       const slug = String(args.slug ?? '')
       await assertAgentGlobalAccess(req, slug, 'read')
       if (!isAgentGlobal(slug)) {
         throw new Error(`不支持的全局配置：${slug}`)
       }
-      result = await req.payload.findGlobal({
+      const globalDoc = await req.payload.findGlobal({
         slug: slug as AgentGlobalSlug,
         depth: Math.min(Number(args.depth) || 1, 2),
         overrideAccess: false,
         user: req.user,
       })
+      result = sanitizeGlobalResult(slug, globalDoc as unknown as Record<string, unknown>)
       break
     }
 
