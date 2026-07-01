@@ -47,13 +47,7 @@ export default buildConfig({
       },
       beforeLogin: ['@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
-      afterNavLinks: [
-        '@/app/(payload)/admin/dev-docs/DevDocsNavLink',
-        '@/app/(payload)/admin/api-docs/SwaggerNavLink',
-        '@/app/(payload)/admin/ai-agent/AiAgentNavLink',
-        '@/app/(payload)/admin/stats/StatsNavLink',
-        '@/app/(payload)/admin/cache/CacheNavLink',
-      ],
+      Nav: '@/components/AdminNav',
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
         devDocs: {
