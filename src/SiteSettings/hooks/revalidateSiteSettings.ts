@@ -1,11 +1,12 @@
 import type { GlobalAfterChangeHook } from 'payload'
-import { revalidatePath, revalidateTag } from 'next/cache'
 
-export const revalidateSiteSettings: GlobalAfterChangeHook = ({ context }) => {
+import { invalidateCachePath, invalidateCacheTag } from '@/frontend-cache/invalidateCache'
+
+export const revalidateSiteSettings: GlobalAfterChangeHook = async ({ context }) => {
   if (context.disableRevalidate) {
     return
   }
 
-  revalidateTag('global_site-settings', 'max')
-  revalidatePath('/', 'layout')
+  await invalidateCacheTag('global_site-settings')
+  await invalidateCachePath('/')
 }

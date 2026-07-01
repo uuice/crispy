@@ -1,6 +1,12 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import {
+  resolveDataCacheStatus,
+  runWithDataCacheProbeAsync,
+} from '@/frontend-cache/dataCacheProbe'
+import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
+import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -14,34 +20,35 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const settings = await getCachedSiteSettings()()
+  return runWithDataCacheProbeAsync(async () => {
+    const settings = await getCachedSiteSettings()()
 
-  if (settings.enableRss === false) {
-    return new Response('RSS disabled', { status: 404 })
-  }
+    if (settings.enableRss === false) {
+      return new Response('RSS disabled', { status: 404 })
+    }
 
-  const payload = await getPayload({ config: configPromise })
-  const siteUrl = getServerSideURL()
-  const siteName = settings.siteName || 'Crispy'
-  const siteDescription = settings.siteDescription || ''
+    const payload = await getPayload({ config: configPromise })
+    const siteUrl = getServerSideURL()
+    const siteName = settings.siteName || 'Crispy'
+    const siteDescription = settings.siteDescription || ''
 
-  const { docs } = await payload.find({
-    collection: 'posts',
-    depth: 1,
-    limit: 50,
-    overrideAccess: false,
-    pagination: false,
-    sort: '-publishedAt',
-    where: { _status: { equals: 'published' } },
-  })
+    const { docs } = await payload.find({
+      collection: 'posts',
+      depth: 1,
+      limit: 50,
+      overrideAccess: false,
+      pagination: false,
+      sort: '-publishedAt',
+      where: { _status: { equals: 'published' } },
+    })
 
-  const items = docs
-    .map((post) => {
-      const link = `${siteUrl}/posts/${post.slug}`
-      const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
-      const description = post.meta?.description || ''
+    const items = docs
+      .map((post) => {
+        const link = `${siteUrl}/posts/${post.slug}`
+        const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
+        const description = post.meta?.description || ''
 
-      return `
+        return `
     <item>
       <title>${escapeXml(post.title)}</title>
       <link>${escapeXml(link)}</link>
@@ -49,10 +56,10 @@ export async function GET() {
       ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ''}
       ${description ? `<description>${escapeXml(description)}</description>` : ''}
     </item>`
-    })
-    .join('')
+      })
+      .join('')
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${escapeXml(siteName)}</title>
@@ -62,12 +69,16 @@ export async function GET() {
   </channel>
 </rss>`
 
-  return new Response(xml.trim(), {
-    headers: {
-      'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
-      'Content-Type': 'application/rss+xml; charset=utf-8',
-    },
+    const dataStatus = resolveDataCacheStatus()
+    const response = new Response(xml.trim(), {
+      headers: {
+        'Cache-Control': `public, s-maxage=${PAGE_REVALIDATE_SECONDS}, stale-while-revalidate=${PAGE_REVALIDATE_SECONDS * 6}`,
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+      },
+    })
+
+    return withRouteCacheHeaders(response, dataStatus)
   })
 }
 
-export const revalidate = 600
+export const revalidate = PAGE_REVALIDATE_SECONDS

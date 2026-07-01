@@ -1,27 +1,23 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { invalidateCachePath, invalidateCacheTag } from '@/frontend-cache/invalidateCache'
 
-export const revalidateJob: CollectionAfterChangeHook = ({ doc, req: { context } }) => {
-  if (context.disableRevalidate) return doc
+import type { Job } from '../../../payload-types'
 
-  revalidateTag('collection_jobs', 'max')
-  revalidatePath('/jobs')
+export const revalidateJob: CollectionAfterChangeHook<Job> = async ({ doc, context }) => {
+  if (context.disableRevalidate) return
+  await invalidateCacheTag('collection_jobs')
+  await invalidateCachePath('/jobs')
   if (doc.slug) {
-    revalidatePath(`/jobs/${doc.slug}`)
+    await invalidateCachePath(`/jobs/${doc.slug}`)
   }
-
-  return doc
 }
 
-export const revalidateJobDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
-  if (context.disableRevalidate) return doc
-
-  revalidateTag('collection_jobs', 'max')
-  revalidatePath('/jobs')
-  if (doc?.slug) {
-    revalidatePath(`/jobs/${doc.slug}`)
+export const revalidateJobDelete: CollectionAfterDeleteHook<Job> = async ({ doc, context }) => {
+  if (context.disableRevalidate) return
+  await invalidateCacheTag('collection_jobs')
+  await invalidateCachePath('/jobs')
+  if (doc.slug) {
+    await invalidateCachePath(`/jobs/${doc.slug}`)
   }
-
-  return doc
 }

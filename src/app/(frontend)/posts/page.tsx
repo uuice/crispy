@@ -11,8 +11,10 @@ import PageClient from './page.client'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 
+import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
+
 export const dynamic = 'force-static'
-export const revalidate = 600
+export const revalidate = PAGE_REVALIDATE_SECONDS
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })

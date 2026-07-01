@@ -1,9 +1,15 @@
 import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { unstable_cache } from 'next/cache'
 
-const getPagesSitemap = unstable_cache(
+import {
+  resolveDataCacheStatus,
+  runWithDataCacheProbeAsync,
+} from '@/frontend-cache/dataCacheProbe'
+import { unstableCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
+import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
+
+const getPagesSitemap = unstableCacheWithProbe(
   async () => {
     const payload = await getPayload({ config })
     const SITE_URL =
@@ -56,13 +62,14 @@ const getPagesSitemap = unstable_cache(
     return [...defaultSitemap, ...sitemap]
   },
   ['pages-sitemap'],
-  {
-    tags: ['pages-sitemap'],
-  },
+  ['pages-sitemap'],
 )
 
 export async function GET() {
-  const sitemap = await getPagesSitemap()
-
-  return getServerSideSitemap(sitemap)
+  return runWithDataCacheProbeAsync(async () => {
+    const sitemap = await getPagesSitemap()
+    const dataStatus = resolveDataCacheStatus()
+    const response = await getServerSideSitemap(sitemap)
+    return withRouteCacheHeaders(response, dataStatus)
+  })
 }

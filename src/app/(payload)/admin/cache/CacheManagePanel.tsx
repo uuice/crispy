@@ -1,0 +1,298 @@
+'use client'
+
+import { Button, Link, toast } from '@payloadcms/ui'
+import React, { useCallback, useMemo, useState } from 'react'
+
+import type { FrontendCacheEntry, FrontendCacheGroup } from '@/frontend-cache/registry'
+import type { ResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
+import type { DbCacheStats, RegistryCacheStatus } from '@/frontend-cache/dbCache'
+
+import './cache.scss'
+
+type CacheApiPayload = {
+  settings: ResolvedCacheSettings
+  dbStats: DbCacheStats
+  entryStatuses: Record<string, RegistryCacheStatus>
+  entries: FrontendCacheEntry[]
+  groupLabels: Record<FrontendCacheGroup, string>
+}
+
+type PurgeResponse = {
+  ok: boolean
+  purged: number
+  failed: number
+}
+
+type CacheManagePanelProps = {
+  initial: CacheApiPayload
+}
+
+export function CacheManagePanel({ initial }: CacheManagePanelProps) {
+  const [settings] = useState(initial.settings)
+  const [dbStats, setDbStats] = useState(initial.dbStats)
+  const [entryStatuses, setEntryStatuses] = useState(initial.entryStatuses)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [purging, setPurging] = useState(false)
+  const [refreshingStats, setRefreshingStats] = useState(false)
+
+  const refreshDbStats = useCallback(async () => {
+    setRefreshingStats(true)
+    try {
+      const response = await fetch('/api/admin/cache')
+      if (!response.ok) return
+      const data = (await response.json()) as CacheApiPayload
+      setDbStats(data.dbStats)
+      setEntryStatuses(data.entryStatuses)
+    } finally {
+      setRefreshingStats(false)
+    }
+  }, [])
+
+  const grouped = useMemo(() => {
+    const map = new Map<FrontendCacheGroup, FrontendCacheEntry[]>()
+    for (const entry of initial.entries) {
+      const list = map.get(entry.group) ?? []
+      list.push(entry)
+      map.set(entry.group, list)
+    }
+    return map
+  }, [initial.entries])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const toggleGroup = useCallback(
+    (group: FrontendCacheGroup, checked: boolean) => {
+      const ids = initial.entries.filter((entry) => entry.group === group).map((entry) => entry.id)
+      setSelected((prev) => {
+        const next = new Set(prev)
+        for (const id of ids) {
+          if (checked) next.add(id)
+          else next.delete(id)
+        }
+        return next
+      })
+    },
+    [initial.entries],
+  )
+
+  const purge = useCallback(async (ids: string[]) => {
+    if (!ids.length || purging) return
+
+    setPurging(true)
+    try {
+      const response = await fetch('/api/admin/cache/purge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+
+      const data = (await response.json()) as PurgeResponse & { error?: string }
+
+      if (!response.ok) {
+        throw new Error(data.error || '清除失败')
+      }
+
+      toast.success(`已清除 ${data.purged} 项缓存${data.failed ? `，${data.failed} 项失败` : ''}`)
+      setSelected(new Set())
+      await refreshDbStats()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '清除失败')
+    } finally {
+      setPurging(false)
+    }
+  }, [purging, refreshDbStats])
+
+  const purgeAll = useCallback(async () => {
+    if (purging) return
+    if (!window.confirm('确定清除全部已注册的前台缓存？')) return
+
+    setPurging(true)
+    try {
+      const response = await fetch('/api/admin/cache/purge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ all: true }),
+      })
+
+      const data = (await response.json()) as PurgeResponse & { error?: string }
+
+      if (!response.ok) {
+        throw new Error(data.error || '清除失败')
+      }
+
+      toast.success(`已清除全部 ${data.purged} 项缓存`)
+      setSelected(new Set())
+      await refreshDbStats()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '清除失败')
+    } finally {
+      setPurging(false)
+    }
+  }, [purging, refreshDbStats])
+
+  return (
+    <div className="admin-cache">
+      <header className="admin-cache__header">
+        <div>
+          <h1 className="admin-cache__title">前台缓存管理</h1>
+          <p className="admin-cache__subtitle">
+            清除数据库中的前台缓存条目（`frontend-cache-entries`）。内容变更后 hooks 会自动刷新相关项；也可在此手动清除。
+          </p>
+        </div>
+        <div className="admin-cache__header-actions">
+          <Link href="/admin/globals/cache-settings" prefetch={false}>
+            缓存配置
+          </Link>
+          <Button buttonStyle="secondary" disabled={purging} onClick={purgeAll} size="small">
+            清除全部
+          </Button>
+          <Button
+            buttonStyle="primary"
+            disabled={purging || selected.size === 0}
+            onClick={() => purge([...selected])}
+            size="small"
+          >
+            清除选中 ({selected.size})
+          </Button>
+        </div>
+      </header>
+
+      <div className="admin-cache__settings">
+        <div className="admin-cache__settings-item">
+          <span>缓存开关</span>
+          <strong>{settings.cachingEnabled ? '开启' : '关闭'}</strong>
+        </div>
+        <div className="admin-cache__settings-item">
+          <span>路由缓存 TTL（秒）</span>
+          <strong>{settings.pageRevalidateSeconds}</strong>
+        </div>
+        <div className="admin-cache__settings-item">
+          <span>数据缓存（秒）</span>
+          <strong>{settings.dataCacheRevalidateSeconds}</strong>
+        </div>
+        <div className="admin-cache__settings-item admin-cache__settings-item--stats">
+          <span>
+            DB 条目总数
+            <button
+              className="admin-cache__link-btn admin-cache__refresh-btn"
+              disabled={purging || refreshingStats}
+              onClick={() => refreshDbStats()}
+              type="button"
+            >
+              {refreshingStats ? '刷新中…' : '刷新'}
+            </button>
+          </span>
+          <strong>{dbStats.total}</strong>
+        </div>
+        <div className="admin-cache__settings-item">
+          <span>数据缓存条目</span>
+          <strong>{dbStats.data}</strong>
+        </div>
+        <div className="admin-cache__settings-item">
+          <span>路由缓存条目</span>
+          <strong>{dbStats.route}</strong>
+        </div>
+      </div>
+
+      <p className="admin-cache__note">
+        Next.js 页面段 <code>export const revalidate</code>（constants.ts）为生产环境可选的第二层缓存，与上方 DB
+        路由 TTL 独立；修改 Global 不会自动同步代码常量。
+      </p>
+
+      {[...grouped.entries()].map(([group, entries]) => (
+        <section key={group} className="admin-cache__group">
+          <div className="admin-cache__group-header">
+            <h2>{initial.groupLabels[group]}</h2>
+            <div className="admin-cache__group-actions">
+              <button
+                className="admin-cache__link-btn"
+                disabled={purging}
+                onClick={() => toggleGroup(group, true)}
+                type="button"
+              >
+                全选
+              </button>
+              <button
+                className="admin-cache__link-btn"
+                disabled={purging}
+                onClick={() => toggleGroup(group, false)}
+                type="button"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-cache__table-wrap">
+            <table className="admin-cache__table">
+              <thead>
+                <tr>
+                  <th aria-label="选择" />
+                  <th>名称</th>
+                  <th>类型</th>
+                  <th>目标</th>
+                  <th>DB 缓存</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>
+                      <input
+                        checked={selected.has(entry.id)}
+                        disabled={purging}
+                        onChange={() => toggleOne(entry.id)}
+                        type="checkbox"
+                      />
+                    </td>
+                    <td>
+                      <div className="admin-cache__label">{entry.label}</div>
+                      {entry.description ? (
+                        <div className="admin-cache__desc">{entry.description}</div>
+                      ) : null}
+                    </td>
+                    <td>{entry.kind === 'tag' ? 'Tag' : 'Path'}</td>
+                    <td>
+                      <code className="admin-cache__target">{entry.target}</code>
+                    </td>
+                    <td>
+                      {(() => {
+                        const status = entryStatuses[entry.id]
+                        if (!status?.active) {
+                          return <span className="admin-cache__badge admin-cache__badge--empty">无</span>
+                        }
+                        return (
+                          <span className="admin-cache__badge admin-cache__badge--active">
+                            有 ({status.count})
+                          </span>
+                        )
+                      })()}
+                    </td>
+                    <td>
+                      <button
+                        className="admin-cache__link-btn"
+                        disabled={purging}
+                        onClick={() => purge([entry.id])}
+                        type="button"
+                      >
+                        清除
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
+    </div>
+  )
+}

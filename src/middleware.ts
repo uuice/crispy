@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { after } from 'next/server'
 
+import { applyCrispyCacheHeaders } from '@/frontend-cache/headers'
+import {
+  getMiddlewareCacheSettings,
+  isFrontendDocumentRequest,
+  shouldBypassFrontendCache,
+} from '@/frontend-cache/middlewareCache'
+import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
@@ -19,14 +26,69 @@ function resolveClientIp(request: NextRequest): string | null {
   )
 }
 
-export function middleware(request: NextRequest) {
-  if (process.env.API_ACCESS_LOG_ENABLED === 'false') {
+async function touchRouteCacheViaApi(
+  request: NextRequest,
+  settings: {
+    pageRevalidateSeconds: number
+    cachingEnabled: boolean
+  },
+  bypass: boolean,
+): Promise<CrispyCacheStatus> {
+  try {
+    const url = new URL('/api/internal/route-cache-touch', request.url)
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        routePath: request.nextUrl.pathname,
+        ttlSeconds: settings.pageRevalidateSeconds,
+        cachingEnabled: settings.cachingEnabled,
+        bypass,
+      }),
+      cache: 'no-store',
+    })
+
+    if (!response.ok) return 'BYPASS'
+
+    const data = (await response.json()) as { status?: CrispyCacheStatus }
+    return data.status ?? 'BYPASS'
+  } catch {
+    return 'BYPASS'
+  }
+}
+
+async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResponse | null> {
+  if (!isFrontendDocumentRequest(request)) {
+    return null
+  }
+
+  const settings = await getMiddlewareCacheSettings(request.url)
+  if (!settings.exposeCacheHeaders) {
     return NextResponse.next()
+  }
+
+  const bypass = shouldBypassFrontendCache(request)
+  const pageStatus = await touchRouteCacheViaApi(request, settings, bypass)
+
+  const response = NextResponse.next()
+  applyCrispyCacheHeaders(response.headers, {
+    pageStatus,
+    dataStatus: pageStatus,
+    ttlSeconds: settings.pageRevalidateSeconds,
+    cachingEnabled: settings.cachingEnabled,
+  })
+
+  return response
+}
+
+function handleApiAccessLog(request: NextRequest): NextResponse | null {
+  if (process.env.API_ACCESS_LOG_ENABLED === 'false') {
+    return null
   }
 
   const { pathname, search } = request.nextUrl
   if (!shouldLogApiRequest(pathname)) {
-    return NextResponse.next()
+    return null
   }
 
   const startedAt = Date.now()
@@ -64,6 +126,20 @@ export function middleware(request: NextRequest) {
   return response
 }
 
+export async function middleware(request: NextRequest) {
+  const frontendResponse = await applyFrontendCacheHeaders(request)
+  if (frontendResponse) {
+    return frontendResponse
+  }
+
+  const apiResponse = handleApiAccessLog(request)
+  if (apiResponse) {
+    return apiResponse
+  }
+
+  return NextResponse.next()
+}
+
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: ['/api/:path*', '/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }

@@ -1,7 +1,8 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Link } from '@/payload-types'
-import { unstable_cache } from 'next/cache'
+
+import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
 
 export async function getFriendLinks(): Promise<Link[]> {
   const payload = await getPayload({ config })
@@ -20,6 +21,8 @@ export async function getFriendLinks(): Promise<Link[]> {
   return result.docs
 }
 
-export const getCachedFriendLinks = unstable_cache(getFriendLinks, ['friend-links'], {
-  tags: ['collection_links'],
-})
+export const getCachedFriendLinks = dbCacheWithProbe(
+  getFriendLinks,
+  ['friend-links'],
+  ['friend-links', 'collection_links'],
+)

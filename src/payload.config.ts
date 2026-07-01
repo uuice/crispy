@@ -3,6 +3,7 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { FrontendCacheEntries } from './collections/FrontendCacheEntries'
 import { AppConfigs } from './collections/AppConfigs'
 import { Comments } from './collections/Comments'
 import { GalleryItems } from './collections/GalleryItems'
@@ -24,6 +25,7 @@ import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
+import { CacheSettings } from './CacheSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
 import { adminLabels } from './i18n/admin-labels'
@@ -50,6 +52,7 @@ export default buildConfig({
         '@/app/(payload)/admin/api-docs/SwaggerNavLink',
         '@/app/(payload)/admin/ai-agent/AiAgentNavLink',
         '@/app/(payload)/admin/stats/StatsNavLink',
+        '@/app/(payload)/admin/cache/CacheNavLink',
       ],
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
@@ -71,6 +74,11 @@ export default buildConfig({
         stats: {
           Component: '@/app/(payload)/admin/stats/StatsView',
           path: '/stats',
+          exact: true,
+        },
+        cache: {
+          Component: '@/app/(payload)/admin/cache/CacheView',
+          path: '/cache',
           exact: true,
         },
       },
@@ -144,11 +152,12 @@ export default buildConfig({
     AppConfigs,
     Comments,
     ApiAccessLogs,
+    FrontendCacheEntries,
     AiChatSessions,
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SiteSettings, AiSettings, CommentSettings],
+  globals: [Header, Footer, SiteSettings, AiSettings, CommentSettings, CacheSettings],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,

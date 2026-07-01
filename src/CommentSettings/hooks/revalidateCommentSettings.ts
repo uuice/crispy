@@ -1,7 +1,8 @@
 import type { GlobalAfterChangeHook } from 'payload'
-import { revalidateTag } from 'next/cache'
 
-export const revalidateCommentSettings: GlobalAfterChangeHook = ({ context }) => {
+import { invalidateCacheTag } from '@/frontend-cache/invalidateCache'
+
+export const revalidateCommentSettings: GlobalAfterChangeHook = async ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('global_comment-settings', 'max')
+  await invalidateCacheTag('global_comment-settings')
 }

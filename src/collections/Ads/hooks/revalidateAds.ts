@@ -1,12 +1,13 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
-import { revalidateTag } from 'next/cache'
 
-export const revalidateAds: CollectionAfterChangeHook = ({ context }) => {
+import { invalidateCacheTag } from '@/frontend-cache/invalidateCache'
+
+export const revalidateAds: CollectionAfterChangeHook = async ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_ads', 'max')
+  await invalidateCacheTag('collection_ads')
 }
 
-export const revalidateAdsDelete: CollectionAfterDeleteHook = ({ context }) => {
+export const revalidateAdsDelete: CollectionAfterDeleteHook = async ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_ads', 'max')
+  await invalidateCacheTag('collection_ads')
 }

@@ -7,9 +7,10 @@ import React from 'react'
 
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { frontendLabels } from '@/i18n/frontend-labels'
+import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
 export const dynamic = 'force-static'
-export const revalidate = 600
+export const revalidate = PAGE_REVALIDATE_SECONDS
 
 const employmentLabels: Record<string, string> = {
   'full-time': '全职',

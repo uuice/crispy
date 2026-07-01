@@ -1,12 +1,13 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
-import { revalidateTag } from 'next/cache'
 
-export const revalidateLinks: CollectionAfterChangeHook = ({ context }) => {
+import { invalidateCacheTag } from '@/frontend-cache/invalidateCache'
+
+export const revalidateLinks: CollectionAfterChangeHook = async ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_links', 'max')
+  await invalidateCacheTag('collection_links')
 }
 
-export const revalidateLinksDelete: CollectionAfterDeleteHook = ({ context }) => {
+export const revalidateLinksDelete: CollectionAfterDeleteHook = async ({ context }) => {
   if (context.disableRevalidate) return
-  revalidateTag('collection_links', 'max')
+  await invalidateCacheTag('collection_links')
 }

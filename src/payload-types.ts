@@ -81,6 +81,7 @@ export interface Config {
     'app-configs': AppConfig;
     comments: Comment;
     'api-access-logs': ApiAccessLog;
+    'frontend-cache-entries': FrontendCacheEntry;
     'ai-chat-sessions': AiChatSession;
     users: User;
     redirects: Redirect;
@@ -118,6 +119,7 @@ export interface Config {
     'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
+    'frontend-cache-entries': FrontendCacheEntriesSelect<false> | FrontendCacheEntriesSelect<true>;
     'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -146,6 +148,7 @@ export interface Config {
     'site-settings': SiteSetting;
     'ai-settings': AiSetting;
     'comment-settings': CommentSetting;
+    'cache-settings': CacheSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -153,6 +156,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
     'comment-settings': CommentSettingsSelect<false> | CommentSettingsSelect<true>;
+    'cache-settings': CacheSettingsSelect<false> | CacheSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1110,7 +1114,36 @@ export interface ApiAccessLog {
   authType?: ('none' | 'session' | 'api-key' | 'bearer') | null;
   updatedAt: string;
   createdAt: string;
-  deletedAt?: string | null;
+}
+/**
+ * Database-backed frontend cache entries (managed by the cache system).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontend-cache-entries".
+ */
+export interface FrontendCacheEntry {
+  id: number;
+  cacheKey: string;
+  kind: 'data' | 'route';
+  routePath?: string | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  cachedValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * AI 内容助手完整会话历史，由聊天 API 自动写入。
@@ -1723,6 +1756,10 @@ export interface PayloadLockedDocument {
         value: number | ApiAccessLog;
       } | null)
     | ({
+        relationTo: 'frontend-cache-entries';
+        value: number | FrontendCacheEntry;
+      } | null)
+    | ({
         relationTo: 'ai-chat-sessions';
         value: number | AiChatSession;
       } | null)
@@ -1865,6 +1902,7 @@ export interface PayloadQueryPreset {
     | 'app-configs'
     | 'comments'
     | 'api-access-logs'
+    | 'frontend-cache-entries'
     | 'ai-chat-sessions'
     | 'users'
     | 'redirects'
@@ -2320,7 +2358,25 @@ export interface ApiAccessLogsSelect<T extends boolean = true> {
   authType?: T;
   updatedAt?: T;
   createdAt?: T;
-  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontend-cache-entries_select".
+ */
+export interface FrontendCacheEntriesSelect<T extends boolean = true> {
+  cacheKey?: T;
+  kind?: T;
+  routePath?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  cachedValue?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3019,6 +3075,31 @@ export interface CommentSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cache-settings".
+ */
+export interface CacheSetting {
+  id: number;
+  /**
+   * 关闭后仍可通过「缓存管理」手动刷新；数据层建议在发布后执行缓存清除。
+   */
+  cachingEnabled?: boolean | null;
+  /**
+   * DB 路由缓存 TTL（秒），用于 middleware X-Crispy-Page-Cache 与 route 条目过期。与代码中 export const revalidate 无关，后者为 Next.js 生产环境可选第二层。
+   */
+  pageRevalidateSeconds?: number | null;
+  /**
+   * 数据查询结果缓存过期时间（秒），保存在数据库。
+   */
+  dataCacheRevalidateSeconds?: number | null;
+  /**
+   * 在 HTTP 响应中输出 X-Crispy-Page-Cache / X-Crispy-Data-Cache 等调试头（HIT/MISS/STALE/BYPASS）。
+   */
+  exposeCacheHeaders?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -3128,6 +3209,19 @@ export interface CommentSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cache-settings_select".
+ */
+export interface CacheSettingsSelect<T extends boolean = true> {
+  cachingEnabled?: T;
+  pageRevalidateSeconds?: T;
+  dataCacheRevalidateSeconds?: T;
+  exposeCacheHeaders?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3159,6 +3253,7 @@ export interface TaskCreateCollectionExport {
       | 'app-configs'
       | 'comments'
       | 'api-access-logs'
+      | 'frontend-cache-entries'
       | 'ai-chat-sessions'
       | 'users'
       | 'redirects'

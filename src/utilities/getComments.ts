@@ -1,6 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { unstable_cache } from 'next/cache'
+
+import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
 
 import type { CommentTargetType } from '@/comments/types'
 import type { Comment } from '@/payload-types'
@@ -82,24 +83,24 @@ export function getCachedComments(options: GetCommentsOptions) {
   const { targetType, targetId, page = 1, limit = 20, depth = 1 } = options
   const cacheKey = `comments_${targetType}_${targetId}_${page}_${limit}_${depth}`
 
-  return unstable_cache(async () => fetchApprovedComments(options), [cacheKey], {
-    tags: [`comments_${targetType}_${targetId}`, 'collection_comments'],
-  })
+  return dbCacheWithProbe(
+    async () => fetchApprovedComments(options),
+    [cacheKey],
+    [`comments_${targetType}_${targetId}`, 'collection_comments'],
+  )
 }
 
 export function getCachedCommentTree(options: GetCommentTreeOptions) {
   const { targetType, targetId, maxDepth = 3, limit = 200 } = options
   const cacheKey = `comments_tree_${targetType}_${targetId}_${maxDepth}_${limit}`
 
-  return unstable_cache(
+  return dbCacheWithProbe(
     async () => {
       const comments = await fetchAllApprovedComments({ targetType, targetId, limit })
       return buildCommentTree(comments, maxDepth)
     },
     [cacheKey],
-    {
-      tags: [`comments_${targetType}_${targetId}`, 'collection_comments'],
-    },
+    [`comments_${targetType}_${targetId}`, 'collection_comments'],
   )
 }
 
