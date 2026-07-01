@@ -77,6 +77,7 @@ import { default as default_167468770c8106c49118befba831d642 } from '@/app/(payl
 import { default as default_d9568c1ed1cbf811dc1b4af3a8debb56 } from '@/app/(payload)/admin/ai-agent/AiAgentView'
 import { default as default_0450ff08bccdd65acb0af19d12ceca89 } from '@/app/(payload)/admin/stats/StatsView'
 import { default as default_713a7babd883a9dc56f463857f761995 } from '@/app/(payload)/admin/cache/CacheView'
+import { default as default_20177520ae52785e614fad0cc35e0b8c } from '@/components/AdminCollectionCards'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -160,5 +161,6 @@ export const importMap = {
   "@/app/(payload)/admin/ai-agent/AiAgentView#default": default_d9568c1ed1cbf811dc1b4af3a8debb56,
   "@/app/(payload)/admin/stats/StatsView#default": default_0450ff08bccdd65acb0af19d12ceca89,
   "@/app/(payload)/admin/cache/CacheView#default": default_713a7babd883a9dc56f463857f761995,
+  "@/components/AdminCollectionCards#default": default_20177520ae52785e614fad0cc35e0b8c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

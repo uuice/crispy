@@ -77,6 +77,15 @@ export default buildConfig({
         },
       },
     },
+    dashboard: {
+      widgets: [
+        {
+          slug: 'collections',
+          Component: '@/components/AdminCollectionCards',
+          minWidth: 'full',
+        },
+      ],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

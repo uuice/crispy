@@ -6,6 +6,7 @@ export const adminLabels = {
   galleryItems: { singular: '图库条目', plural: '图库' },
   galleryImage: '图片',
   imageField: '图片',
+  adminHome: '后台首页',
   contentGroup: '内容',
   sort: '排序',
   enabled: '启用',

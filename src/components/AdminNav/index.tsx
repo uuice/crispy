@@ -8,6 +8,7 @@ import React from 'react'
 import { getNavPrefs } from '@/admin-nav/getNavPrefs'
 import { mergeCustomNavIntoGroups } from '@/admin-nav/mergeCustomNavIntoGroups'
 
+import { AdminHomeLink } from './AdminHomeLink'
 import { AdminNavClient } from './NavClient'
 
 const baseClass = 'nav'
@@ -145,6 +146,7 @@ export async function AdminNav(props: AdminNavProps) {
       <nav className={`${baseClass}__wrap`}>
         {RenderedBeforeNavLinks}
         <AdminNavClient groups={groups} navPreferences={navPreferences} />
+        <AdminHomeLink />
         <div className={`${baseClass}__controls`}>{LogoutComponent}</div>
       </nav>
       {RenderedAfterNav}
