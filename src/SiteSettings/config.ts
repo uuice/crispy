@@ -73,26 +73,13 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: true,
     },
     {
-      type: 'collapsible',
-      label: adminLabels.adminAppearance,
+      name: 'adminThemeHue',
+      type: 'number',
+      label: adminLabels.adminThemeHue,
+      defaultValue: DEFAULT_ADMIN_THEME_HUE,
       admin: {
-        initCollapsed: false,
+        hidden: true,
       },
-      fields: [
-        {
-          name: 'adminThemeHue',
-          type: 'number',
-          label: adminLabels.adminThemeHue,
-          defaultValue: DEFAULT_ADMIN_THEME_HUE,
-          min: 0,
-          max: 360,
-          admin: {
-            description:
-              'OKLCH 色相 (0–360)。默认 41 为 Crispy 暖橙；保存后刷新 Admin 即可生效。例：0 红、120 绿、240 蓝。',
-            step: 1,
-          },
-        },
-      ],
     },
   ],
   hooks: {

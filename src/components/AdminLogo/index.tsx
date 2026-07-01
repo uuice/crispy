@@ -1,15 +1,22 @@
+import type { Payload } from 'payload'
 import React from 'react'
 
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
 import './index.scss'
+
+type Props = {
+  payload?: Payload
+}
 
 const Mark: React.FC = () => (
   <svg
     aria-hidden
     className="crispy-admin-logo__mark"
     fill="none"
-    height="40"
+    height="36"
     viewBox="0 0 40 40"
-    width="40"
+    width="36"
     xmlns="http://www.w3.org/2000/svg"
   >
     <rect fill="url(#crispy-mark-gradient)" height="40" rx="12" width="40" />
@@ -30,16 +37,43 @@ const Mark: React.FC = () => (
   </svg>
 )
 
-const AdminLogo: React.FC = () => {
-  return (
-    <div className="crispy-admin-logo">
-      <Mark />
-      <div className="crispy-admin-logo__text">
-        <span className="crispy-admin-logo__wordmark">Crispy</span>
-        <span className="crispy-admin-logo__suffix">CMS</span>
-      </div>
+const DefaultLogo: React.FC = () => (
+  <div className="crispy-admin-logo">
+    <Mark />
+    <div className="crispy-admin-logo__text">
+      <span className="crispy-admin-logo__wordmark">Crispy</span>
+      <span className="crispy-admin-logo__suffix">CMS</span>
     </div>
-  )
+  </div>
+)
+
+const AdminLogo = async ({ payload }: Props) => {
+  if (payload) {
+    try {
+      const settings = await payload.findGlobal({
+        slug: 'site-settings',
+        depth: 1,
+      })
+
+      const logo = settings.logo
+
+      if (logo && typeof logo === 'object' && logo.url) {
+        return (
+          <div className="crispy-admin-logo crispy-admin-logo--media">
+            <img
+              alt={settings.siteName ?? 'Logo'}
+              className="crispy-admin-logo__image"
+              src={getMediaUrl(logo.url)}
+            />
+          </div>
+        )
+      }
+    } catch {
+      // fall through to default mark
+    }
+  }
+
+  return <DefaultLogo />
 }
 
 export default AdminLogo

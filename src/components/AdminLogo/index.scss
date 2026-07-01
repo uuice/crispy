@@ -1,11 +1,28 @@
 .crispy-admin-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  max-width: 100%;
+  overflow: visible;
+
+  &--media {
+    justify-content: center;
+    width: 100%;
+  }
+
+  &__image {
+    display: block;
+    max-height: 44px;
+    max-width: min(320px, 100%);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
 
   &__mark {
     flex-shrink: 0;
-    filter: drop-shadow(0 4px 12px oklch(52% 0.22 var(--crispy-hue) / 0.35));
+    overflow: visible;
+    filter: drop-shadow(0 2px 8px oklch(52% 0.22 var(--crispy-hue) / 0.28));
 
     #crispy-mark-gradient stop:first-child {
       stop-color: oklch(68% 0.175 var(--crispy-hue));
@@ -23,18 +40,28 @@
   }
 
   &__wordmark {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--theme-text);
+    white-space: nowrap;
   }
 
   &__suffix {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-blue-700);
+    white-space: nowrap;
+  }
+}
+
+.login__brand {
+  overflow: visible;
+
+  .crispy-admin-logo {
+    justify-content: center;
   }
 }
 
@@ -43,6 +70,10 @@ html[data-theme='dark'] .crispy-admin-logo__suffix {
 }
 
 .crispy-admin-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+
   #crispy-icon-gradient stop:first-child {
     stop-color: oklch(68% 0.175 var(--crispy-hue));
   }

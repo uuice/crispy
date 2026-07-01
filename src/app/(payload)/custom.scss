@@ -54,6 +54,8 @@ a,
 }
 
 html[data-theme='dark'] {
+  --crispy-module-border: var(--color-base-650);
+
   a,
   .link {
     color: var(--color-blue-300);
@@ -64,10 +66,14 @@ html[data-theme='dark'] {
   }
 }
 
+html[data-theme='light'] {
+  --crispy-module-border: var(--color-base-200);
+}
+
 /* Sidebar vs main content */
 .nav {
   background: var(--crispy-admin-surface);
-  border-right: 1px solid var(--color-base-200);
+  border-right: 1px solid var(--crispy-module-border, var(--color-base-200));
   box-shadow: 1px 0 0 oklch(0% 0 0 / 0.04);
 
   &__link {
@@ -93,20 +99,99 @@ html[data-theme='dark'] .nav {
   border-right-color: var(--color-base-700);
   box-shadow: 1px 0 0 oklch(0% 0 0 / 0.35);
 
-  &__link {
-    color: var(--color-base-200);
+  .nav__link {
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 400;
+    color: var(--color-base-100);
 
     &.active {
       background: oklch(22% 0.07 var(--crispy-hue));
-      color: var(--color-blue-100);
+      color: var(--color-base-0);
+      font-weight: 500;
       box-shadow: inset 3px 0 0 var(--color-blue-400);
     }
 
     &:hover:not(.active) {
       background: var(--color-base-800);
+      color: var(--color-base-0);
+    }
+  }
+
+  .nav-group__toggle {
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--color-base-200);
+
+    &:hover,
+    &:focus-visible {
       color: var(--color-base-50);
     }
   }
+
+  .nav__label {
+    font-size: 12px;
+    color: var(--color-base-200);
+  }
+}
+
+/* Module borders — separate nav groups, panels, tables, field blocks */
+.nav-group + .nav-group {
+  margin-top: base(0.5);
+  padding-top: base(0.75);
+  border-top: 1px solid var(--crispy-module-border);
+}
+
+.nav__controls {
+  margin-top: base(0.5);
+  padding-top: base(0.75);
+  border-top: 1px solid var(--crispy-module-border);
+}
+
+.doc-header {
+  border-bottom: 1px solid var(--crispy-module-border);
+}
+
+.list-controls,
+.table-wrap {
+  border: 1px solid var(--crispy-module-border);
+}
+
+.table {
+  border: 1px solid var(--crispy-module-border);
+  border-radius: var(--style-radius-m);
+  overflow: hidden;
+
+  thead th {
+    border-bottom: 1px solid var(--crispy-module-border);
+  }
+
+  tbody td {
+    border-bottom: 1px solid var(--crispy-module-border);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.render-fields > .field-type.group-field,
+.collapsible,
+.card {
+  border-color: var(--crispy-module-border);
+}
+
+.render-fields > .field-type.group-field + .field-type.group-field {
+  margin-top: base(0.5);
+}
+
+.tabs-field__tabs {
+  border-bottom-color: var(--crispy-module-border);
+}
+
+.payload-settings::before,
+.payload-settings::after {
+  background: var(--crispy-module-border);
 }
 
 /* Surfaces — white cards on tinted page bg */
@@ -120,7 +205,7 @@ html[data-theme='dark'] .nav {
 .modal__content,
 .doc-drawer__content {
   border-radius: var(--style-radius-m);
-  border: 1px solid var(--theme-border-color);
+  border: 1px solid var(--crispy-module-border, var(--theme-border-color));
 }
 
 .field-type:not(.group-field) {
@@ -186,13 +271,33 @@ textarea,
 
 /* App header strip */
 .app-header {
-  border-bottom: 1px solid var(--theme-border-color);
+  border-bottom: 1px solid var(--crispy-module-border, var(--theme-border-color));
   background: var(--crispy-admin-surface);
 }
 
 html[data-theme='dark'] .app-header {
   background: var(--crispy-admin-surface);
   border-bottom-color: var(--color-base-700);
+}
+
+/* Step nav home icon — Payload constrains __home to 18px; icon must scale inside it */
+.step-nav__home {
+  overflow: visible;
+  flex-shrink: 0;
+
+  > span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .graphic-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 /* Login page */

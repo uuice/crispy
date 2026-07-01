@@ -80,8 +80,8 @@
 }
 
 @mixin crispy-contrast-tokens-light {
-  --crispy-admin-bg: oklch(91% 0.024 var(--crispy-hue));
-  --crispy-admin-surface: oklch(98.5% 0.01 var(--crispy-hue));
+  --crispy-admin-bg: oklch(100% 0 0);
+  --crispy-admin-surface: oklch(100% 0 0);
   --theme-bg: var(--crispy-admin-bg);
   --theme-input-bg: var(--crispy-admin-surface);
   --theme-text: var(--color-base-900);

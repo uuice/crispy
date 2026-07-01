@@ -2788,9 +2788,6 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
-  /**
-   * OKLCH 色相 (0–360)。默认 41 为 Crispy 暖橙；保存后刷新 Admin 即可生效。例：0 红、120 绿、240 蓝。
-   */
   adminThemeHue?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;

@@ -2,6 +2,8 @@ import React from 'react'
 import type { Payload } from 'payload'
 
 import { adminThemeHueCss, normalizeAdminThemeHue } from '@/brand/admin-theme'
+import { AdminAccountThemeHueInjector } from '@/components/AdminAccountSettings/AdminAccountThemeHueInjector'
+import '@/components/AdminAccountSettings/index.scss'
 
 type Props = {
   children?: React.ReactNode
@@ -21,6 +23,7 @@ const AdminThemeProvider = async ({ children, payload }: Props) => {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: adminThemeHueCss(hue) }} />
+      <AdminAccountThemeHueInjector />
       {children}
     </>
   )

@@ -32,6 +32,8 @@ const BeforeDashboard: React.FC = () => {
         </li>
         <li>
           {'在 '}
+          <strong>账户</strong>
+          {' → Payload 设置中切换语言、主题与主题色相；在 '}
           <strong>站点设置</strong>
           {' 中配置站点名称、Logo 与 RSS；在 '}
           <strong>MCP → API Keys</strong>

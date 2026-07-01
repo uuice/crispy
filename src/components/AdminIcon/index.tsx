@@ -7,9 +7,9 @@ const AdminIcon: React.FC = () => (
     aria-hidden
     className="crispy-admin-icon graphic-icon"
     fill="none"
-    height="25"
+    height="100%"
     viewBox="0 0 25 25"
-    width="25"
+    width="100%"
     xmlns="http://www.w3.org/2000/svg"
   >
     <rect fill="url(#crispy-icon-gradient)" height="25" rx="7" width="25" />
