@@ -1,16 +1,12 @@
 import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
 import { PayloadRequest, CollectionSlug } from 'payload'
 
+import { getPagePath, getPostPath } from '@/utilities/frontendPaths'
+
 type Props = {
   collection: CollectionSlug
   slug: string
   req: PayloadRequest
-}
-
-function pagePreviewPath(slug: string): string {
-  if (slug === 'home') return '/'
-  if (slug === 'about') return '/about'
-  return `/pages/${slug}`
 }
 
 export const generatePreviewPath = ({ collection, slug }: Props) => {
@@ -20,7 +16,9 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
 
   const encodedSlug = encodeURIComponent(slug)
   const path =
-    collection === 'posts' ? `/archives/${encodedSlug}` : pagePreviewPath(decodeURIComponent(encodedSlug))
+    collection === 'posts'
+      ? getPostPath(decodeURIComponent(encodedSlug))
+      : getPagePath(decodeURIComponent(encodedSlug))
 
   const encodedParams = new URLSearchParams({
     path,

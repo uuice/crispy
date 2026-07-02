@@ -1,17 +1,18 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { queryBlogSidebarData } from '@/utilities/queryBlogData'
+import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
+import { querySidebarData } from '@/utilities/queryFrontendData'
 
 const defaultMenu: { title: string; url: string; target?: string }[] = [
   { title: '首页', url: '/' },
-  { title: '归档', url: '/archives' },
+  { title: '文章', url: getPostsListPath() },
   { title: '友链', url: '/links' },
-  { title: '关于', url: '/about' },
+  { title: '关于', url: getPagePath('about') },
 ]
 
 export default async function NotFound() {
-  const sidebar = await queryBlogSidebarData()
+  const sidebar = await querySidebarData()
   const menu = sidebar.menu.length > 0 ? sidebar.menu : defaultMenu
 
   return (

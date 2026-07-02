@@ -2,7 +2,15 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import { getServerSideURL } from '@/utilities/getURL'
-import { slugifyAuthorName } from '@/utilities/queryBlogData'
+import {
+  getGalleryItemsPath,
+  getJobsPath,
+  getPagePath,
+  getPostPath,
+  getPostsListPath,
+  getUserPath,
+  slugifyUserName,
+} from '@/utilities/frontendPaths'
 
 export type SitemapUrlEntry = {
   loc: string
@@ -19,9 +27,7 @@ function toDateOnly(value: string | Date | null | undefined, fallback: string): 
 }
 
 function pageLoc(siteUrl: string, slug: string): string {
-  if (slug === 'home') return `${siteUrl}/`
-  if (slug === 'about') return `${siteUrl}/about`
-  return `${siteUrl}/pages/${slug}`
+  return `${siteUrl}${getPagePath(slug)}`
 }
 
 export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
@@ -81,9 +87,10 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
 
   const urls: SitemapUrlEntry[] = [
     { loc: `${siteUrl}/`, lastmod: today, changefreq: 'daily', priority: '1.0' },
-    { loc: `${siteUrl}/archives`, lastmod: today, changefreq: 'daily', priority: '0.9' },
+    { loc: `${siteUrl}${getPostsListPath()}`, lastmod: today, changefreq: 'daily', priority: '0.9' },
     { loc: `${siteUrl}/links`, lastmod: today, changefreq: 'monthly', priority: '0.5' },
-    { loc: `${siteUrl}/about`, lastmod: today, changefreq: 'monthly', priority: '0.6' },
+    { loc: `${siteUrl}${getGalleryItemsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
+    { loc: `${siteUrl}${getJobsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}/navigations`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
     { loc: `${siteUrl}/games`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
     { loc: `${siteUrl}/games/math`, lastmod: today, changefreq: 'monthly', priority: '0.45' },
@@ -92,7 +99,7 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
   for (const post of postsResult.docs) {
     if (!post.slug) continue
     urls.push({
-      loc: `${siteUrl}/archives/${post.slug}`,
+      loc: `${siteUrl}${getPostPath(post.slug)}`,
       lastmod: toDateOnly(post.updatedAt || post.publishedAt, today),
       changefreq: 'weekly',
       priority: '0.8',
@@ -109,17 +116,17 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
     })
   }
 
-  const authorSlugs = new Set<string>()
+  const userSlugs = new Set<string>()
   for (const post of postsForAuthors.docs) {
     for (const author of post.populatedAuthors || []) {
       if (author?.name) {
-        authorSlugs.add(slugifyAuthorName(author.name, author.id || author.name))
+        userSlugs.add(slugifyUserName(author.name, author.id || author.name))
       }
     }
   }
-  for (const slug of authorSlugs) {
+  for (const slug of userSlugs) {
     urls.push({
-      loc: `${siteUrl}/authors/${slug}`,
+      loc: `${siteUrl}${getUserPath(slug)}`,
       lastmod: today,
       changefreq: 'monthly',
       priority: '0.55',

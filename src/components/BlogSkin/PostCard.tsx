@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { BlogPostCard } from '@/utilities/queryBlogData'
+import type { PostListItem } from '@/utilities/queryFrontendData'
 
-type Props = BlogPostCard
+type Props = PostListItem
 
 export function PostCard({ title, url, excerpt = '', pubDate, categories = [], tags = [] }: Props) {
   const dateStr = new Date(pubDate).toLocaleDateString('zh-CN', {

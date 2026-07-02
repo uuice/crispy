@@ -6,7 +6,8 @@ import React from 'react'
 import { ArticleCopyright } from '@/components/BlogSkin/ArticleCopyright'
 import { BlogArticleBody } from '@/components/BlogSkin/BlogArticleBody'
 import { CommentsSection } from '@/components/Comments'
-import { postArchiveUrl, queryBlogPostBySlug } from '@/utilities/queryBlogData'
+import { getPostPath, getPostsListPath } from '@/utilities/frontendPaths'
+import { queryPostBySlug } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
@@ -14,10 +15,10 @@ type Args = {
   params: Promise<{ slug: string }>
 }
 
-export default async function ArchivePostPage({ params: paramsPromise }: Args) {
+export default async function PostPage({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
   const decodedSlug = decodeURIComponent(slug)
-  const post = await queryBlogPostBySlug(decodedSlug)
+  const post = await queryPostBySlug(decodedSlug)
 
   if (!post) notFound()
 
@@ -37,17 +38,17 @@ export default async function ArchivePostPage({ params: paramsPromise }: Args) {
     .map((t) => (typeof t === 'object' && t?.title ? t.title : null))
     .filter(Boolean) as string[]
 
-  const articleUrl = postArchiveUrl(decodedSlug)
+  const articleUrl = getPostPath(decodedSlug)
 
   return (
     <>
       <p className="mb-4 animate-in animate-in-delay-1">
         <Link
           className="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium transition-colors hover:bg-(--card-border)"
-          href="/archives"
+          href={getPostsListPath()}
           style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
         >
-          ← 返回归档
+          ← 返回文章列表
         </Link>
       </p>
       <article className="section-card animate-in animate-in-delay-2">
@@ -108,7 +109,7 @@ export default async function ArchivePostPage({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
-  const post = await queryBlogPostBySlug(decodeURIComponent(slug))
+  const post = await queryPostBySlug(decodeURIComponent(slug))
   if (!post) return { title: '文章不存在' }
   return {
     title: post.title,

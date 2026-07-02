@@ -308,7 +308,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '归档',
-              url: '/archives',
+              url: '/posts',
             },
           },
           {
@@ -322,7 +322,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '关于',
-              url: '/about',
+              url: '/pages/about',
             },
           },
           {
@@ -368,7 +368,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '归档',
-              url: '/archives',
+              url: '/posts',
             },
           },
           {
@@ -382,7 +382,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '关于',
-              url: '/about',
+              url: '/pages/about',
             },
           },
           {

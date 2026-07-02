@@ -1,11 +1,11 @@
 import React from 'react'
 
-import type { BlogPostCard } from '@/utilities/queryBlogData'
+import type { PostListItem } from '@/utilities/queryFrontendData'
 
 import { PostCard } from './PostCard'
 
 type Props = {
-  posts: BlogPostCard[]
+  posts: PostListItem[]
   emptyMessage?: string
 }
 

@@ -4,7 +4,7 @@ import React from 'react'
 
 import { Banner } from '@/components/BlogSkin/Banner'
 import { PostList } from '@/components/BlogSkin/PostList'
-import { queryBlogPostsByCategorySlug } from '@/utilities/queryBlogData'
+import { queryPostsByCategorySlug } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
@@ -14,7 +14,7 @@ type Args = {
 
 export default async function CategoryPage({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
-  const { category, posts } = await queryBlogPostsByCategorySlug(decodeURIComponent(slug))
+  const { category, posts } = await queryPostsByCategorySlug(decodeURIComponent(slug))
 
   if (!category) notFound()
 
@@ -39,7 +39,7 @@ export default async function CategoryPage({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
-  const { category } = await queryBlogPostsByCategorySlug(decodeURIComponent(slug))
+  const { category } = await queryPostsByCategorySlug(decodeURIComponent(slug))
   if (!category) return { title: '分类不存在' }
   return { title: `分类: ${category.title}` }
 }

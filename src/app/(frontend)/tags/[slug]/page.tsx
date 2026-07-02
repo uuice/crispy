@@ -4,7 +4,7 @@ import React from 'react'
 
 import { Banner } from '@/components/BlogSkin/Banner'
 import { PostList } from '@/components/BlogSkin/PostList'
-import { queryBlogPostsByTagSlug } from '@/utilities/queryBlogData'
+import { queryPostsByTagSlug } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
@@ -14,7 +14,7 @@ type Args = {
 
 export default async function TagPage({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
-  const { tag, posts } = await queryBlogPostsByTagSlug(decodeURIComponent(slug))
+  const { tag, posts } = await queryPostsByTagSlug(decodeURIComponent(slug))
 
   if (!tag) notFound()
 
@@ -36,7 +36,7 @@ export default async function TagPage({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
-  const { tag } = await queryBlogPostsByTagSlug(decodeURIComponent(slug))
+  const { tag } = await queryPostsByTagSlug(decodeURIComponent(slug))
   if (!tag) return { title: '标签不存在' }
   return { title: `标签: ${tag.title}` }
 }

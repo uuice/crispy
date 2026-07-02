@@ -4,6 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import type { Page, Post } from '@/payload-types'
+import { getPagePath, getPostPath } from '@/utilities/frontendPaths'
 
 type CMSLinkType = {
   appearance?: 'inline' | ButtonProps['variant']
@@ -36,12 +37,8 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
       ? reference.relationTo === 'posts'
-        ? `/archives/${reference.value.slug}`
-        : reference.value.slug === 'home'
-          ? '/'
-          : reference.value.slug === 'about'
-            ? '/about'
-            : `/pages/${reference.value.slug}`
+        ? getPostPath(reference.value.slug)
+        : getPagePath(reference.value.slug)
       : url
 
   if (!href) return null

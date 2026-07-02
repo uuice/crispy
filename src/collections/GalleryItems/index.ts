@@ -19,7 +19,7 @@ export const GalleryItems: CollectionConfig = {
     defaultColumns: ['title', 'image', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
-    description: 'Curated images shown on the public /gallery page. Media library items are not listed until added here.',
+    description: 'Curated images shown on the public /gallery-items page. Media library items are not listed until added here.',
   },
   defaultSort: 'sort',
   fields: [

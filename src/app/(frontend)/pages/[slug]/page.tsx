@@ -5,7 +5,7 @@ import React from 'react'
 import { Banner } from '@/components/BlogSkin/Banner'
 import { BlogRenderBlocks } from '@/components/BlogSkin/BlogRenderBlocks'
 import { CommentsSection } from '@/components/Comments'
-import { queryBlogPageBySlug } from '@/utilities/queryBlogData'
+import { queryPageBySlug } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
@@ -15,7 +15,7 @@ type Args = {
 
 export default async function CmsPage({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
-  const page = await queryBlogPageBySlug(decodeURIComponent(slug))
+  const page = await queryPageBySlug(decodeURIComponent(slug))
 
   if (!page) notFound()
 
@@ -52,7 +52,7 @@ export default async function CmsPage({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
-  const page = await queryBlogPageBySlug(decodeURIComponent(slug))
+  const page = await queryPageBySlug(decodeURIComponent(slug))
   if (!page) return { title: '页面不存在' }
   return {
     title: page.title,

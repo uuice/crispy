@@ -4,10 +4,10 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { BlogNavItem } from '@/utilities/queryBlogData'
+import type { NavItem } from '@/utilities/queryFrontendData'
 
 type Props = {
-  menu: BlogNavItem[]
+  menu: NavItem[]
 }
 
 export function MobileNav({ menu }: Props) {

@@ -9,6 +9,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { cn } from '@/utilities/ui'
+import { getPostsListPath } from '@/utilities/frontendPaths'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
@@ -20,7 +21,7 @@ export const Pagination: React.FC<{
 }> = (props) => {
   const router = useRouter()
 
-  const { basePath = '/archives', className, page, totalPages } = props
+  const { basePath = getPostsListPath(), className, page, totalPages } = props
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1
 

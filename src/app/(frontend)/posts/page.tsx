@@ -3,16 +3,17 @@ import React from 'react'
 
 import { Banner } from '@/components/BlogSkin/Banner'
 import { PostCard } from '@/components/BlogSkin/PostCard'
-import { queryBlogArchiveGroups, queryBlogPosts } from '@/utilities/queryBlogData'
+import { frontendLabels } from '@/i18n/frontend-labels'
+import { queryPostArchiveGroups, queryPosts } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
-export default async function ArchivesPage() {
-  const [posts, groups] = await Promise.all([queryBlogPosts(), queryBlogArchiveGroups()])
+export default async function PostsPage() {
+  const [posts, groups] = await Promise.all([queryPosts(), queryPostArchiveGroups()])
 
   return (
     <>
-      <Banner subtitle="按时间查看文章" title="归档" />
+      <Banner subtitle={frontendLabels.posts.description} title={frontendLabels.posts.title} />
       <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
           共 <strong>{posts.length}</strong> 篇文章
@@ -42,5 +43,5 @@ export default async function ArchivesPage() {
 }
 
 export const metadata: Metadata = {
-  title: '归档',
+  title: frontendLabels.posts.title,
 }

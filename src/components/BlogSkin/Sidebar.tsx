@@ -2,17 +2,17 @@ import Link from 'next/link'
 import React from 'react'
 
 import holidayData from '@/data/holiday.json'
-import type { BlogSidebarAuthor, BlogSidebarCategory, BlogSidebarTag } from '@/utilities/queryBlogData'
+import type { SidebarCategory, SidebarTag, SidebarUser } from '@/utilities/queryFrontendData'
 
 import { SidebarCountdown } from './SidebarCountdown'
 
 type Props = {
-  categories: BlogSidebarCategory[]
-  tags: BlogSidebarTag[]
-  author?: BlogSidebarAuthor
+  categories: SidebarCategory[]
+  tags: SidebarTag[]
+  user?: SidebarUser
 }
 
-export function Sidebar({ categories, tags, author }: Props) {
+export function Sidebar({ categories, tags, user }: Props) {
   return (
     <aside className="space-y-6">
       <SidebarCountdown holidays={holidayData.holidays} />
@@ -56,20 +56,20 @@ export function Sidebar({ categories, tags, author }: Props) {
         </div>
       )}
 
-      {author && (
+      {user && (
         <div className="section-card p-4 overflow-hidden" style={{ borderRadius: 'var(--radius)' }}>
           <h3 className="section-title">作者</h3>
           <p className="font-medium mt-1" style={{ color: 'var(--text)', fontSize: 'var(--text-sm)' }}>
-            {author.title}
+            {user.title}
           </p>
-          {author.excerpt ? (
+          {user.excerpt ? (
             <p className="mt-1 line-clamp-2" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
-              {author.excerpt}
+              {user.excerpt}
             </p>
           ) : null}
           <Link
             className="mt-3 inline-flex items-center gap-1 font-medium rounded px-2 py-1 text-sm transition-colors hover:bg-(--card-border)"
-            href={author.url}
+            href={user.url}
             style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
           >
             查看详情 →

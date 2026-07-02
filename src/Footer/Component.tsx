@@ -10,6 +10,7 @@ import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
 import { Media } from '@/components/Media'
 import { frontendLabels, socialPlatformLabel } from '@/i18n/frontend-labels'
+import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
 import type { Media as MediaType } from '@/payload-types'
 
 export async function Footer() {
@@ -43,16 +44,13 @@ export async function Footer() {
             {navItems.map(({ link }, i) => (
               <CMSLink className="text-white/80 hover:text-white text-sm" key={i} {...link} />
             ))}
-            <Link className="text-white/80 hover:text-white text-sm" href="/archives">
+            <Link className="text-white/80 hover:text-white text-sm" href={getPostsListPath()}>
               {frontendLabels.site.posts}
-            </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/archives">
-              {frontendLabels.site.archive}
             </Link>
             <Link className="text-white/80 hover:text-white text-sm" href="/links">
               {frontendLabels.links.title}
             </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/about">
+            <Link className="text-white/80 hover:text-white text-sm" href={getPagePath('about')}>
               关于
             </Link>
             <Link className="text-white/80 hover:text-white text-sm" href="/navigations">

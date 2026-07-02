@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import React from 'react'
 
 import { Banner } from '@/components/BlogSkin/Banner'
-import { queryBlogFriendLinks } from '@/utilities/queryBlogData'
+import { queryFriendLinks } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
 export default async function LinksPage() {
-  const links = await queryBlogFriendLinks()
+  const links = await queryFriendLinks()
 
   return (
     <>

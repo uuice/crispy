@@ -919,7 +919,7 @@ docker run -p 3333:3333 \\
           ['cacheKey', '唯一键 route:{pathname}'],
           ['kind', 'route（仅 HTML 页面缓存）'],
           ['cachedValue', '{ html, contentType, statusCode }'],
-          ['routePath', 'URL 路径，如 /、/archives/foo'],
+          ['routePath', 'URL 路径，如 /、/posts/foo'],
           ['expiresAt', '绝对过期时间（写入时 = now + TTL）'],
           ['updatedAt', 'HIT/MISS/STALE 判定依据（与 TTL 比较）'],
         ],

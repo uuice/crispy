@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { after } from 'next/server'
 
 import { applyCrispyCacheHeaders } from '@/frontend-cache/headers'
+import { resolveLegacyFrontendRedirect } from '@/frontend-cache/legacyFrontendRedirects'
 import {
   CRISPY_CACHE_INTERNAL_HEADER,
   getCrispyCacheInternalSecret,
@@ -162,6 +163,15 @@ function scheduleRouteHtmlCapture(
   })
 }
 
+function handleLegacyFrontendRedirect(request: NextRequest): NextResponse | null {
+  const destination = resolveLegacyFrontendRedirect(request.nextUrl.pathname)
+  if (!destination) return null
+
+  const url = request.nextUrl.clone()
+  url.pathname = destination
+  return NextResponse.redirect(url, 301)
+}
+
 async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResponse | null> {
   if (!isFrontendDocumentRequest(request)) {
     return null
@@ -253,6 +263,11 @@ function handleApiAccessLog(request: NextRequest): NextResponse | null {
 }
 
 export async function middleware(request: NextRequest) {
+  const legacyRedirect = handleLegacyFrontendRedirect(request)
+  if (legacyRedirect) {
+    return legacyRedirect
+  }
+
   const frontendResponse = await applyFrontendCacheHeaders(request)
   if (frontendResponse) {
     return frontendResponse

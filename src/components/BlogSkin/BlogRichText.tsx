@@ -22,6 +22,7 @@ import type {
   MediaBlock as MediaBlockProps,
 } from '@/payload-types'
 import { cn } from '@/utilities/ui'
+import { getPagePath, getPostPath } from '@/utilities/frontendPaths'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -32,11 +33,9 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
   if (typeof value !== 'object') {
     throw new Error('Expected value to be an object')
   }
-  const slug = value.slug
-  if (relationTo === 'posts') return `/archives/${slug}`
-  if (slug === 'home') return '/'
-  if (slug === 'about') return '/about'
-  return `/pages/${slug}`
+  const slug = String(value.slug)
+  if (relationTo === 'posts') return getPostPath(slug)
+  return getPagePath(slug)
 }
 
 function createBlogConverters(headings: LexicalHeading[]): JSXConvertersFunction<NodeTypes> {

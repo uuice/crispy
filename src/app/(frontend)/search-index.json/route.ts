@@ -1,9 +1,9 @@
-import { queryBlogPosts } from '@/utilities/queryBlogData'
+import { queryPosts } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
 export async function GET() {
-  const posts = await queryBlogPosts()
+  const posts = await queryPosts()
 
   const index = posts.map((p) => ({
     id: p.url,

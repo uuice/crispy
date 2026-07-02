@@ -1018,7 +1018,7 @@ export interface Job {
   deletedAt?: string | null;
 }
 /**
- * Curated images shown on the public /gallery page. Media library items are not listed until added here.
+ * Curated images shown on the public /gallery-items page. Media library items are not listed until added here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-items".

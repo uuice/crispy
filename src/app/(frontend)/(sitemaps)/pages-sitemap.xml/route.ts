@@ -4,11 +4,10 @@ import config from '@payload-config'
 
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
+import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
 
 function pageSitemapLoc(siteUrl: string, slug: string): string {
-  if (slug === 'home') return `${siteUrl}/`
-  if (slug === 'about') return `${siteUrl}/about`
-  return `${siteUrl}/pages/${slug}`
+  return `${siteUrl}${getPagePath(slug)}`
 }
 
 async function getPagesSitemap() {
@@ -39,7 +38,7 @@ async function getPagesSitemap() {
   const dateFallback = new Date().toISOString()
 
   const staticPages = [
-    { loc: `${SITE_URL}/archives`, lastmod: dateFallback },
+    { loc: `${SITE_URL}${getPostsListPath()}`, lastmod: dateFallback },
     { loc: `${SITE_URL}/links`, lastmod: dateFallback },
     { loc: `${SITE_URL}/navigations`, lastmod: dateFallback },
     { loc: `${SITE_URL}/games`, lastmod: dateFallback },

@@ -4,12 +4,12 @@ import React from 'react'
 import { Banner } from '@/components/BlogSkin/Banner'
 import { PostList } from '@/components/BlogSkin/PostList'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
-import { queryBlogPosts } from '@/utilities/queryBlogData'
+import { queryPosts } from '@/utilities/queryFrontendData'
 
 export const revalidate = false
 
 export default async function HomePage() {
-  const [settings, posts] = await Promise.all([getCachedSiteSettings()(), queryBlogPosts()])
+  const [settings, posts] = await Promise.all([getCachedSiteSettings()(), queryPosts()])
 
   const siteName = settings.siteName || '博客'
 

@@ -35,7 +35,7 @@ async function postsPageIsChinese(): Promise<boolean> {
 }
 
 async function galleryPageIsChinese(): Promise<boolean> {
-  const html = await getHtml('/gallery')
+  const html = await getHtml('/gallery-items')
   return html.includes('图库')
 }
 
@@ -45,14 +45,14 @@ async function jobsPageIsChinese(): Promise<boolean> {
 }
 
 async function tagPageWorks(): Promise<boolean> {
-  const res = await fetch(`${BASE}/tag/next-js`)
+  const res = await fetch(`${BASE}/tags/next-js`)
   if (!res.ok) return false
   const html = await res.text()
   return html.includes('标签') && !html.includes('singular is not defined')
 }
 
 async function categoryPageWorks(): Promise<boolean> {
-  const res = await fetch(`${BASE}/category/engineering`)
+  const res = await fetch(`${BASE}/categories/engineering`)
   return res.ok
 }
 
@@ -101,10 +101,10 @@ async function searchPageIsChinese(): Promise<boolean> {
 }
 
 const checks: Check[] = [
-  { name: '图库页 /gallery', run: () => getOk('/gallery') },
+  { name: '图库页 /gallery-items', run: () => getOk('/gallery-items') },
   { name: '招聘页 /jobs', run: () => getOk('/jobs') },
-  { name: '分类页 /category/engineering', run: categoryPageWorks },
-  { name: '标签页 /tag/next-js', run: tagPageWorks },
+  { name: '分类页 /categories/engineering', run: categoryPageWorks },
+  { name: '标签页 /tags/next-js', run: tagPageWorks },
   { name: '搜索页 /search', run: () => getOk('/search') },
   { name: '首页站点导览（中文）', run: frontendHasChineseExplore },
   { name: '文章列表中文标题', run: postsPageIsChinese },

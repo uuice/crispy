@@ -1,5 +1,7 @@
 /** Chinese copy for the public frontend. */
 
+import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
+
 export const frontendLabels = {
   site: {
     home: '首页',
@@ -131,9 +133,9 @@ export const frontendLabels = {
 
 export const defaultHeaderNav = [
   { label: frontendLabels.site.home, url: '/' },
-  { label: frontendLabels.site.archive, url: '/archives' },
+  { label: frontendLabels.site.posts, url: getPostsListPath() },
   { label: '友链', url: '/links' },
-  { label: '关于', url: '/about' },
+  { label: '关于', url: getPagePath('about') },
   { label: '导航', url: '/navigations' },
   { label: '小游戏', url: '/games' },
 ] as const

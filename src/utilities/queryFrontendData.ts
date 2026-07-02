@@ -5,8 +5,15 @@ import { cache } from 'react'
 import type { Category, Tag } from '@/payload-types'
 
 import { getCachedFriendLinks } from '@/utilities/getFriendLinks'
+import {
+  getCategoryPath,
+  getPostPath,
+  getTagPath,
+  getUserPath,
+  slugifyUserName,
+} from '@/utilities/frontendPaths'
 
-export type BlogPostCard = {
+export type PostListItem = {
   title: string
   url: string
   excerpt?: string
@@ -15,27 +22,27 @@ export type BlogPostCard = {
   tags: string[]
 }
 
-export type BlogSidebarCategory = {
+export type SidebarCategory = {
   id: string
   title: string
   url: string
   count: number
 }
 
-export type BlogSidebarTag = {
+export type SidebarTag = {
   id: string
   title: string
   url: string
   count: number
 }
 
-export type BlogNavItem = {
+export type NavItem = {
   title: string
   url: string
   target?: string | null
 }
 
-export type BlogSidebarAuthor = {
+export type SidebarUser = {
   title: string
   excerpt?: string
   url: string
@@ -50,18 +57,14 @@ const POST_CARD_SELECT = {
   tags: true,
 } as const
 
-function postArchiveUrl(slug: string): string {
-  return `/archives/${slug}`
-}
-
-function formatPostCard(post: {
+function formatPostListItem(post: {
   slug?: string | null
   title: string
   meta?: { description?: string | null } | null
   publishedAt?: string | null
   categories?: (number | Category)[] | null
   tags?: (number | Tag)[] | null
-}): BlogPostCard | null {
+}): PostListItem | null {
   if (!post.slug || !post.title || !post.publishedAt) return null
 
   const categories = (post.categories || [])
@@ -74,7 +77,7 @@ function formatPostCard(post: {
 
   return {
     title: post.title,
-    url: postArchiveUrl(post.slug),
+    url: getPostPath(post.slug),
     excerpt: post.meta?.description || undefined,
     pubDate: post.publishedAt,
     categories,
@@ -82,7 +85,7 @@ function formatPostCard(post: {
   }
 }
 
-export const queryBlogPosts = cache(async (limit = 1000): Promise<BlogPostCard[]> => {
+export const queryPosts = cache(async (limit = 1000): Promise<PostListItem[]> => {
   const payload = await getPayload({ config: configPromise })
 
   const { docs } = await payload.find({
@@ -97,11 +100,11 @@ export const queryBlogPosts = cache(async (limit = 1000): Promise<BlogPostCard[]
   })
 
   return docs
-    .map(formatPostCard)
-    .filter((post): post is BlogPostCard => post !== null)
+    .map(formatPostListItem)
+    .filter((post): post is PostListItem => post !== null)
 })
 
-export const queryBlogPostBySlug = cache(async (slug: string) => {
+export const queryPostBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
@@ -117,7 +120,7 @@ export const queryBlogPostBySlug = cache(async (slug: string) => {
   return result.docs[0] ?? null
 })
 
-export const queryBlogPostsByCategorySlug = cache(async (slug: string) => {
+export const queryPostsByCategorySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
   const categoryResult = await payload.find({
@@ -129,7 +132,7 @@ export const queryBlogPostsByCategorySlug = cache(async (slug: string) => {
   })
 
   const category = categoryResult.docs[0]
-  if (!category) return { category: null, posts: [] as BlogPostCard[] }
+  if (!category) return { category: null, posts: [] as PostListItem[] }
 
   const { docs } = await payload.find({
     collection: 'posts',
@@ -147,11 +150,11 @@ export const queryBlogPostsByCategorySlug = cache(async (slug: string) => {
 
   return {
     category,
-    posts: docs.map(formatPostCard).filter((p): p is BlogPostCard => p !== null),
+    posts: docs.map(formatPostListItem).filter((p): p is PostListItem => p !== null),
   }
 })
 
-export const queryBlogPostsByTagSlug = cache(async (slug: string) => {
+export const queryPostsByTagSlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
   const tagResult = await payload.find({
@@ -163,7 +166,7 @@ export const queryBlogPostsByTagSlug = cache(async (slug: string) => {
   })
 
   const tag = tagResult.docs[0]
-  if (!tag) return { tag: null, posts: [] as BlogPostCard[] }
+  if (!tag) return { tag: null, posts: [] as PostListItem[] }
 
   const { docs } = await payload.find({
     collection: 'posts',
@@ -181,11 +184,11 @@ export const queryBlogPostsByTagSlug = cache(async (slug: string) => {
 
   return {
     tag,
-    posts: docs.map(formatPostCard).filter((p): p is BlogPostCard => p !== null),
+    posts: docs.map(formatPostListItem).filter((p): p is PostListItem => p !== null),
   }
 })
 
-export const queryBlogSidebarData = cache(async () => {
+export const querySidebarData = cache(async () => {
   const payload = await getPayload({ config: configPromise })
 
   const [categoriesResult, tagsResult, postsResult, headerData] = await Promise.all([
@@ -235,25 +238,25 @@ export const queryBlogSidebarData = cache(async () => {
     }
   }
 
-  const categories: BlogSidebarCategory[] = categoriesResult.docs
+  const categories: SidebarCategory[] = categoriesResult.docs
     .filter((c): c is Category & { slug: string } => Boolean(c.slug))
     .map((c) => ({
       id: String(c.id),
       title: c.title,
-      url: `/categories/${c.slug}`,
+      url: getCategoryPath(c.slug),
       count: categoryCounts.get(String(c.id)) || 0,
     }))
 
-  const tags: BlogSidebarTag[] = tagsResult.docs
+  const tags: SidebarTag[] = tagsResult.docs
     .filter((t): t is Tag & { slug: string } => Boolean(t.slug))
     .map((t) => ({
       id: String(t.id),
       title: t.title,
-      url: `/tags/${t.slug}`,
+      url: getTagPath(t.slug),
       count: tagCounts.get(String(t.id)) || 0,
     }))
 
-  const menu: BlogNavItem[] = (headerData?.navItems || [])
+  const menu: NavItem[] = (headerData?.navItems || [])
     .map((item) => ({
       title: item.link?.label || '',
       url: item.link?.url || '/',
@@ -261,7 +264,7 @@ export const queryBlogSidebarData = cache(async () => {
     }))
     .filter((item) => item.title && item.url)
 
-  const defaultAuthorPost = await payload.find({
+  const defaultUserPost = await payload.find({
     collection: 'posts',
     depth: 0,
     limit: 1,
@@ -272,20 +275,20 @@ export const queryBlogSidebarData = cache(async () => {
     where: { _status: { equals: 'published' } },
   })
 
-  const firstAuthor = defaultAuthorPost.docs[0]?.populatedAuthors?.[0]
-  const author: BlogSidebarAuthor | undefined = firstAuthor?.name
+  const firstUser = defaultUserPost.docs[0]?.populatedAuthors?.[0]
+  const user: SidebarUser | undefined = firstUser?.name
     ? {
-        title: firstAuthor.name,
-        url: `/authors/${slugifyAuthorName(firstAuthor.name, firstAuthor.id || 'author')}`,
+        title: firstUser.name,
+        url: getUserPath(slugifyUserName(firstUser.name, firstUser.id || 'user')),
       }
     : undefined
 
-  return { categories, tags, menu, author }
+  return { categories, tags, menu, user }
 })
 
-export const queryBlogArchiveGroups = cache(async () => {
-  const posts = await queryBlogPosts()
-  const byYearMonth = new Map<string, BlogPostCard[]>()
+export const queryPostArchiveGroups = cache(async () => {
+  const posts = await queryPosts()
+  const byYearMonth = new Map<string, PostListItem[]>()
 
   for (const post of posts) {
     const d = new Date(post.pubDate)
@@ -297,7 +300,7 @@ export const queryBlogArchiveGroups = cache(async () => {
   return Array.from(byYearMonth.entries()).sort((a, b) => b[0].localeCompare(a[0]))
 })
 
-export const queryBlogPageBySlug = cache(async (slug: string) => {
+export const queryPageBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
@@ -313,7 +316,7 @@ export const queryBlogPageBySlug = cache(async (slug: string) => {
   return result.docs[0] ?? null
 })
 
-export const queryBlogAuthorBySlug = cache(async (slug: string) => {
+export const queryUserBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
   const { docs } = await payload.find({
@@ -327,9 +330,9 @@ export const queryBlogAuthorBySlug = cache(async (slug: string) => {
   })
 
   for (const post of docs) {
-    for (const author of post.populatedAuthors || []) {
-      if (author?.name && slugifyAuthorName(author.name, author.id || author.name) === slug) {
-        return author
+    for (const user of post.populatedAuthors || []) {
+      if (user?.name && slugifyUserName(user.name, user.id || user.name) === slug) {
+        return user
       }
     }
   }
@@ -337,9 +340,9 @@ export const queryBlogAuthorBySlug = cache(async (slug: string) => {
   return null
 })
 
-export const queryBlogAuthorPage = cache(async (slug: string) => {
-  const author = await queryBlogAuthorBySlug(slug)
-  if (!author?.name) return null
+export const queryUserPage = cache(async (slug: string) => {
+  const user = await queryUserBySlug(slug)
+  if (!user?.name) return null
 
   const payload = await getPayload({ config: configPromise })
 
@@ -357,27 +360,38 @@ export const queryBlogAuthorPage = cache(async (slug: string) => {
   const posts = docs
     .filter((post) =>
       (post.populatedAuthors || []).some(
-        (entry) =>
-          entry?.name && slugifyAuthorName(entry.name, entry.id || entry.name) === slug,
+        (entry) => entry?.name && slugifyUserName(entry.name, entry.id || entry.name) === slug,
       ),
     )
-    .map(formatPostCard)
-    .filter((post): post is BlogPostCard => post !== null)
+    .map(formatPostListItem)
+    .filter((post): post is PostListItem => post !== null)
 
-  return { author, posts }
+  return { user, posts }
 })
 
-/** Friend links for blog pages. */
-export const queryBlogFriendLinks = getCachedFriendLinks
+export const queryFriendLinks = getCachedFriendLinks
 
-function slugifyAuthorName(name: string | null | undefined, id: number | string): string {
-  if (!name) return String(id)
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\u4e00-\u9fff-]/g, '')
-  return slug || String(id)
-}
+export const queryJobs = cache(async () => {
+  const payload = await getPayload({ config: configPromise })
 
-export { postArchiveUrl, slugifyAuthorName }
+  const result = await payload.find({
+    collection: 'jobs',
+    depth: 0,
+    limit: 100,
+    overrideAccess: false,
+    pagination: false,
+    sort: '-publishedAt',
+    where: { enabled: { equals: true } },
+    select: {
+      title: true,
+      slug: true,
+      department: true,
+      location: true,
+      employmentType: true,
+      salary: true,
+      publishedAt: true,
+    },
+  })
+
+  return result.docs
+})

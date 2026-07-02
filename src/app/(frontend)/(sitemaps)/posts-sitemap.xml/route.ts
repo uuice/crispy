@@ -4,6 +4,7 @@ import config from '@payload-config'
 
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
+import { getPostPath } from '@/utilities/frontendPaths'
 
 async function getPostsSitemap() {
   const payload = await getPayload({ config })
@@ -36,7 +37,7 @@ async function getPostsSitemap() {
     ? results.docs
         .filter((post) => Boolean(post?.slug))
         .map((post) => ({
-          loc: `${SITE_URL}/archives/${post?.slug}`,
+          loc: `${SITE_URL}${getPostPath(post?.slug || '')}`,
           lastmod: post.updatedAt || dateFallback,
         }))
     : []

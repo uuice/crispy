@@ -8,6 +8,7 @@ import type { Post, Tag } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { frontendLabels } from '@/i18n/frontend-labels'
+import { getPagePath, getPostPath } from '@/utilities/frontendPaths'
 
 export type CardPostData = Pick<Post, 'slug' | 'categories' | 'tags' | 'meta' | 'title'>
 
@@ -37,7 +38,7 @@ export const Card: React.FC<{
   const hasTags = tags && Array.isArray(tags) && tags.length > 0
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = relationTo === 'posts' ? `/archives/${slug}` : `/pages/${slug}`
+  const href = relationTo === 'posts' ? getPostPath(slug || '') : getPagePath(slug || '')
 
   return (
     <article

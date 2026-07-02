@@ -2,7 +2,8 @@ import Link from 'next/link'
 import React from 'react'
 
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
-import { queryBlogSidebarData, type BlogNavItem } from '@/utilities/queryBlogData'
+import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
+import { querySidebarData, type NavItem } from '@/utilities/queryFrontendData'
 
 import { BackToTop, FooterBackToTop } from './BackToTop'
 import { BlogSearch } from './BlogSearch'
@@ -12,11 +13,11 @@ import { Sidebar } from './Sidebar'
 import { SiteCuteDecor } from './SiteCuteDecor'
 import { ThemeColor } from './ThemeColor'
 
-const defaultMenu: BlogNavItem[] = [
+const defaultMenu: NavItem[] = [
   { title: '首页', url: '/', target: '_self' },
-  { title: '归档', url: '/archives', target: '_self' },
+  { title: '文章', url: getPostsListPath(), target: '_self' },
   { title: '友链', url: '/links', target: '_self' },
-  { title: '关于', url: '/about', target: '_self' },
+  { title: '关于', url: getPagePath('about'), target: '_self' },
   { title: '导航', url: '/navigations', target: '_self' },
   { title: '小游戏', url: '/games', target: '_self' },
 ]
@@ -26,7 +27,7 @@ type Props = {
 }
 
 export async function BlogLayout({ children }: Props) {
-  const [settings, sidebar] = await Promise.all([getCachedSiteSettings()(), queryBlogSidebarData()])
+  const [settings, sidebar] = await Promise.all([getCachedSiteSettings()(), querySidebarData()])
 
   const siteName = settings.siteName || '博客'
   const menu = sidebar.menu.length > 0 ? sidebar.menu : defaultMenu
@@ -108,14 +109,14 @@ export async function BlogLayout({ children }: Props) {
           <div className="w-64 shrink-0 hidden lg:block">
             <div className="sticky top-24">
               <Sidebar
-                author={sidebar.author}
+                user={sidebar.user}
                 categories={sidebar.categories}
                 tags={sidebar.tags}
               />
             </div>
           </div>
           <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
-            <Sidebar author={sidebar.author} categories={sidebar.categories} tags={sidebar.tags} />
+            <Sidebar user={sidebar.user} categories={sidebar.categories} tags={sidebar.tags} />
           </div>
         </div>
 

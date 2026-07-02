@@ -2,12 +2,8 @@ import Link from 'next/link'
 import React from 'react'
 
 import { frontendLabels } from '@/i18n/frontend-labels'
+import { getCategoryPath, getPagePath, getPostPath, getPostsListPath, getTagPath } from '@/utilities/frontendPaths'
 import { getCachedSiteExploreData } from '@/utilities/getSiteExploreData'
-
-function pageHref(slug: string): string {
-  if (slug === 'about') return '/about'
-  return `/pages/${slug}`
-}
 
 export async function SiteExplore() {
   const data = await getCachedSiteExploreData()
@@ -31,7 +27,7 @@ export async function SiteExplore() {
         <div>
           <div className="mb-4 flex items-center justify-between gap-4">
             <h3 className="text-xl font-semibold">{frontendLabels.posts.latest}</h3>
-            <Link className="text-sm text-primary hover:underline" href="/archives">
+            <Link className="text-sm text-primary hover:underline" href={getPostsListPath()}>
               {frontendLabels.posts.viewAll}
             </Link>
           </div>
@@ -40,7 +36,7 @@ export async function SiteExplore() {
               <li key={post.id}>
                 <Link
                   className="block rounded-lg border border-border p-4 hover:bg-muted/40 transition-colors"
-                  href={`/archives/${post.slug}`}
+                  href={getPostPath(post.slug || '')}
                 >
                   <span className="font-medium">{post.title}</span>
                 </Link>
@@ -59,7 +55,7 @@ export async function SiteExplore() {
                 <Link
                   key={cat.id}
                   className="rounded-full border border-border px-3 py-1 text-sm hover:bg-muted/40"
-                  href={`/categories/${cat.slug}`}
+                  href={getCategoryPath(cat.slug || '')}
                 >
                   {cat.title}
                 </Link>
@@ -76,7 +72,7 @@ export async function SiteExplore() {
                 <Link
                   key={tag.id}
                   className="rounded-full bg-muted px-3 py-1 text-sm hover:bg-muted/80"
-                  href={`/tags/${tag.slug}`}
+                  href={getTagPath(tag.slug || '')}
                 >
                   #{tag.title}
                 </Link>
@@ -92,7 +88,7 @@ export async function SiteExplore() {
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {data.pages.map((page) => (
               <li key={page.id}>
-                <Link className="text-primary hover:underline" href={pageHref(page.slug)}>
+                <Link className="text-primary hover:underline" href={getPagePath(page.slug || '')}>
                   {page.title}
                 </Link>
               </li>
@@ -106,9 +102,9 @@ export async function SiteExplore() {
         <div className="flex flex-wrap gap-3">
           {[
             { href: '/', label: frontendLabels.site.home },
-            { href: '/archives', label: frontendLabels.site.archive },
+            { href: getPostsListPath(), label: frontendLabels.site.posts },
             { href: '/links', label: frontendLabels.links.title },
-            { href: '/about', label: '关于' },
+            { href: getPagePath('about'), label: '关于' },
             { href: '/navigations', label: '导航' },
             { href: '/games', label: '小游戏' },
             { href: '/rss.xml', label: frontendLabels.site.rss },

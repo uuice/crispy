@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { Post } from '@/payload-types'
+import { getPostPath } from '@/utilities/frontendPaths'
 import { getServerSideURL } from '@/utilities/getURL'
 
 function escapeXml(value: string): string {
@@ -44,7 +45,7 @@ export async function buildBlogRssXml(options?: { feedPath?: string; limit?: num
 
   const items = docs
     .map((post: Post) => {
-      const link = `${siteUrl}/archives/${post.slug}`
+      const link = `${siteUrl}${getPostPath(post.slug || '')}`
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
       const description = post.meta?.description || post.title || ''
       const categories = (post.categories || [])
