@@ -47,6 +47,10 @@ export async function assertAgentCollectionAccess(
     }
   }
 
+  if (collection === 'form-submissions' && (operation === 'create' || operation === 'update')) {
+    throw new Error('表单提交记录不可通过 AI 助手创建或修改')
+  }
+
   if (hasRole(user, ['super-admin', 'editor'])) {
     return
   }
@@ -108,5 +112,27 @@ export function assertAgentCacheAccess(req: PayloadRequest): void {
 
   if (!hasRole(req.user, ['super-admin', 'editor'])) {
     throw new Error('仅管理员和编辑可通过 AI 助手管理前台缓存')
+  }
+}
+
+/** Collection stats — same roles as /admin/stats (editor+). */
+export function assertAgentStatsAccess(req: PayloadRequest): void {
+  if (!canUseAiAgent(req.user)) {
+    throw new Error('无权使用 AI 助手')
+  }
+
+  if (!hasRole(req.user, ['super-admin', 'editor'])) {
+    throw new Error('仅管理员和编辑可通过 AI 助手查看内容统计')
+  }
+}
+
+/** Audit logs — read-only, super-admin only. */
+export function assertAgentAuditLogAccess(req: PayloadRequest): void {
+  if (!canUseAiAgent(req.user)) {
+    throw new Error('无权使用 AI 助手')
+  }
+
+  if (!hasRole(req.user, ['super-admin'])) {
+    throw new Error('审计日志仅超级管理员可通过 AI 助手查看')
   }
 }

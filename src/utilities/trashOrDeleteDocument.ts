@@ -38,3 +38,28 @@ export async function trashOrDeleteDocument({
     user: req.user,
   })
 }
+
+/** Restore a soft-deleted document by clearing deletedAt. */
+export async function restoreTrashedDocument({
+  req,
+  collection,
+  id,
+  overrideAccess = false,
+}: TrashOrDeleteDocumentArgs) {
+  const collectionConfig = req.payload.collections[collection]?.config
+
+  if (!collectionConfig?.trash) {
+    throw new Error('该内容类型未启用回收站，无法恢复')
+  }
+
+  return req.payload.update({
+    collection,
+    id,
+    data: {
+      deletedAt: null,
+    },
+    trash: true,
+    overrideAccess,
+    user: req.user,
+  })
+}

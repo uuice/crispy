@@ -27,7 +27,22 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     description:
       '后台列表保存的筛选条件（where/columns/groupBy），按 relatedCollection 关联到具体 Collection',
   },
-  { slug: 'media', label: '媒体', description: '图片与文件（不可删除）' },
+  {
+    slug: 'redirects',
+    label: '重定向',
+    description: 'URL 重定向规则（from → to），关联 pages/posts 或自定义 URL',
+  },
+  {
+    slug: 'forms',
+    label: '表单',
+    description: 'Form Builder 表单定义（字段、确认消息、邮件通知等）',
+  },
+  {
+    slug: 'form-submissions',
+    label: '表单提交',
+    description: '前台提交的表单记录（只读查询与删除，不可通过助手创建或修改）',
+  },
+  { slug: 'media', label: '媒体', description: '图片与文件（不可删除；无法上传新文件，仅查改元数据）' },
 ]
 
 export const AGENT_GLOBALS: AgentManagedGlobal[] = [

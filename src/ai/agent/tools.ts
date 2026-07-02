@@ -1,9 +1,11 @@
 import type { CollectionSlug, PayloadRequest, Where } from 'payload'
 
 import {
+  assertAgentAuditLogAccess,
   assertAgentCacheAccess,
   assertAgentCollectionAccess,
   assertAgentGlobalAccess,
+  assertAgentStatsAccess,
 } from '@/ai/agent/access'
 import {
   describeCollectionSchema,
@@ -17,9 +19,16 @@ import {
 } from '@/ai/agent/resources'
 import type { Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
+import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
-import { getDbCacheStats, getRegistryCacheStatuses } from '@/frontend-cache/dbCache'
-import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
+import {
+  getDbCacheStats,
+  getDynamicRouteCacheEntries,
+  getRegistryCacheStatuses,
+  purgeDbCacheByRoutePaths,
+  purgeExpiredCacheEntries,
+} from '@/frontend-cache/dbCache'
+import { getResolvedCacheSettings, normalizeCacheSettings, resetResolvedCacheSettingsCache } from '@/frontend-cache/getCacheSettings'
 import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
 import {
   FRONTEND_CACHE_GROUP_LABELS,
@@ -27,7 +36,7 @@ import {
   type FrontendCacheGroup,
   resolveCacheEntries,
 } from '@/frontend-cache/registry'
-import { trashOrDeleteDocument } from '@/utilities/trashOrDeleteDocument'
+import { trashOrDeleteDocument, restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -70,6 +79,36 @@ function summarizeQueryPreset(preset: PayloadQueryPreset) {
     where: preset.where,
     columns: preset.columns,
     groupBy: preset.groupBy,
+  }
+}
+
+function summarizeAuditLog(doc: Record<string, unknown>) {
+  const changes = doc.changes
+  let changesPreview: string | null = null
+
+  if (changes !== undefined && changes !== null) {
+    const json = JSON.stringify(changes)
+    changesPreview =
+      json.length > 200 ? `${json.slice(0, 200)}…（共 ${json.length} 字符）` : json
+  }
+
+  const user = doc.user
+  const userSummary =
+    user && typeof user === 'object'
+      ? {
+          id: (user as { id?: unknown }).id,
+          email: (user as { email?: unknown }).email,
+        }
+      : user
+
+  return {
+    id: doc.id,
+    collection: doc.collection,
+    action: doc.action,
+    documentId: doc.documentId,
+    user: userSummary,
+    createdAt: doc.createdAt,
+    changesPreview,
   }
 }
 
@@ -140,7 +179,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'find_documents',
-      description: '查询/搜索某个内容类型下的文档列表',
+      description: '查询/搜索某个内容类型下的文档列表；查回收站时设 trash: true',
       parameters: {
         type: 'object',
         properties: {
@@ -148,6 +187,10 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
           where: {
             type: 'object',
             description: 'Payload where 查询条件（JSON 对象），可选',
+          },
+          trash: {
+            type: 'boolean',
+            description: '为 true 时仅查回收站（软删除）文档',
           },
           limit: { type: 'number', description: '返回条数，默认 10，最大 25' },
           page: { type: 'number', description: '页码，默认 1' },
@@ -208,7 +251,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'delete_document',
-      description: '将指定文档移入回收站（软删除，可恢复；media 不可删除）',
+      description: '将指定文档移入回收站（软删除，可用 restore_document 恢复；media 不可删）',
       parameters: {
         type: 'object',
         properties: {
@@ -222,16 +265,67 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
   {
     type: 'function',
     function: {
+      name: 'restore_document',
+      description: '从回收站恢复软删除的文档（clear deletedAt）',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '内容类型 slug' },
+          id: { type: ['string', 'number'], description: '文档 ID' },
+        },
+        required: ['collection', 'id'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_site_stats',
+      description:
+        '读取各 Collection 内容统计（总数、回收站、草稿/已发布数），对应后台 /admin/stats',
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'list_audit_logs',
+      description:
+        '查询审计日志（只读，自动记录的内容变更历史）。仅 super-admin；可按 collection/action/documentId 过滤',
+      parameters: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: '可选，内容类型 slug，如 posts' },
+          action: {
+            type: 'string',
+            enum: ['create', 'update', 'delete'],
+            description: '可选，操作类型',
+          },
+          documentId: { type: 'string', description: '可选，文档 ID' },
+          limit: { type: 'number', description: '返回条数，默认 10，最大 25' },
+          page: { type: 'number', description: '页码，默认 1' },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'list_frontend_cache',
       description:
-        '查询前台缓存：可清除的缓存条目列表、每项是否 active、DB 条数统计与 cache-settings 配置（对应后台「缓存管理」）',
+        '查询前台缓存：可清除的缓存条目列表、每项是否 active、DB 条数统计、动态路由缓存明细与 cache-settings 配置（对应后台「缓存管理」）',
       parameters: {
         type: 'object',
         properties: {
           group: {
             type: 'string',
-            enum: ['global', 'collection', 'page', 'route', 'sitemap', 'data'],
-            description: '可选，按分组过滤（global/collection/page/route/sitemap/data）',
+            enum: ['global', 'collection', 'page', 'route', 'sitemap', 'data', 'dynamic'],
+            description: '可选，按分组过滤（含 dynamic 动态路由 pattern 条目）',
+          },
+          dynamicLimit: {
+            type: 'number',
+            description: '动态路由明细条数上限，默认 100，最大 500（group 为 dynamic 或未指定时返回）',
           },
         },
         required: [],
@@ -243,18 +337,27 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'purge_frontend_cache',
       description:
-        '删除/清除前台数据库缓存。可传 ids（list_frontend_cache 返回的 id）或 all: true 清空全部；操作前应向用户确认',
+        '删除/清除前台数据库缓存。支持 ids（registry id）、routePaths（动态路由实际 path）、expired: true（仅删过期）、或 all: true；操作前应向用户确认',
       parameters: {
         type: 'object',
         properties: {
           ids: {
             type: 'array',
             items: { type: 'string' },
-            description: '要清除的缓存条目 id，如 collection-posts、path-home',
+            description: '要清除的缓存条目 id，如 path-home、pattern-posts-slug',
+          },
+          routePaths: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '要清除的具体路由 path，如 /posts/hello-world（来自 dynamicRoutes）',
+          },
+          expired: {
+            type: 'boolean',
+            description: '为 true 时仅删除 expiresAt 已过的过期条目（等同后台「清除过期」）',
           },
           all: {
             type: 'boolean',
-            description: '为 true 时清空全部已注册的前台缓存',
+            description: '为 true 时清空全部 DB 前台缓存',
           },
         },
         required: [],
@@ -268,6 +371,36 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
       description:
         '读取前台缓存设置（cache-settings）：是否启用缓存、路由 TTL、数据 TTL、是否输出调试 Header',
       parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_cache_settings',
+      description:
+        '更新前台缓存设置（cache-settings）。修改 TTL 或开关前向用户确认；至少传一个字段',
+      parameters: {
+        type: 'object',
+        properties: {
+          cachingEnabled: {
+            type: 'boolean',
+            description: '是否启用前台缓存',
+          },
+          pageRevalidateSeconds: {
+            type: 'number',
+            description: '页面 HTML 缓存 TTL（秒），≥0',
+          },
+          dataCacheRevalidateSeconds: {
+            type: 'number',
+            description: '数据查询缓存 TTL（秒），≥0',
+          },
+          exposeCacheHeaders: {
+            type: 'boolean',
+            description: '是否输出 X-Crispy-* 缓存调试 Header',
+          },
+        },
+        required: [],
+      },
     },
   },
   {
@@ -341,6 +474,53 @@ function parseToolArgs(raw: string): Record<string, unknown> {
   }
 }
 
+const CACHE_SETTINGS_FIELDS = [
+  'cachingEnabled',
+  'pageRevalidateSeconds',
+  'dataCacheRevalidateSeconds',
+  'exposeCacheHeaders',
+] as const
+
+type CacheSettingsField = (typeof CACHE_SETTINGS_FIELDS)[number]
+
+function parseCacheSettingsUpdate(args: Record<string, unknown>): {
+  cachingEnabled?: boolean
+  pageRevalidateSeconds?: number
+  dataCacheRevalidateSeconds?: number
+  exposeCacheHeaders?: boolean
+} {
+  const data: {
+    cachingEnabled?: boolean
+    pageRevalidateSeconds?: number
+    dataCacheRevalidateSeconds?: number
+    exposeCacheHeaders?: boolean
+  } = {}
+
+  for (const field of CACHE_SETTINGS_FIELDS) {
+    if (args[field] === undefined) continue
+
+    if (field === 'cachingEnabled' || field === 'exposeCacheHeaders') {
+      if (typeof args[field] !== 'boolean') {
+        throw new Error(`${field} 必须是布尔值`)
+      }
+      data[field] = args[field]
+      continue
+    }
+
+    const value = Number(args[field])
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(`${field} 必须是非负数字`)
+    }
+    data[field] = value
+  }
+
+  if (Object.keys(data).length === 0) {
+    throw new Error('至少提供一个 cache-settings 字段')
+  }
+
+  return data
+}
+
 export async function executeAgentTool(
   req: PayloadRequest,
   toolCall: AgentToolCall,
@@ -392,6 +572,7 @@ export async function executeAgentTool(
       await assertAgentCollectionAccess(req, collection, 'read')
       const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25)
       const page = Math.max(Number(args.page) || 1, 1)
+      const trash = args.trash === true
       const docs = await req.payload.find({
         collection: collection as CollectionSlug,
         where: args.where as Where | undefined,
@@ -399,6 +580,7 @@ export async function executeAgentTool(
         page,
         sort: (args.sort as string) || '-updatedAt',
         depth: 1,
+        trash,
         overrideAccess: false,
         user: req.user,
       })
@@ -406,6 +588,7 @@ export async function executeAgentTool(
         totalDocs: docs.totalDocs,
         page: docs.page,
         totalPages: docs.totalPages,
+        trash,
         docs: docs.docs,
       }
       break
@@ -470,9 +653,85 @@ export async function executeAgentTool(
       break
     }
 
+    case 'restore_document': {
+      const collection = String(args.collection ?? '')
+      const id = args.id as string | number
+      await assertAgentCollectionAccess(req, collection, 'update', id)
+      result = await restoreTrashedDocument({
+        req,
+        collection: collection as CollectionSlug,
+        id,
+      })
+      break
+    }
+
+    case 'get_site_stats': {
+      assertAgentStatsAccess(req)
+      result = await collectCollectionStats(req.payload, req)
+      break
+    }
+
+    case 'list_audit_logs': {
+      assertAgentAuditLogAccess(req)
+      const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25)
+      const page = Math.max(Number(args.page) || 1, 1)
+      const filters: Where[] = []
+
+      if (args.collection) {
+        filters.push({ collection: { equals: String(args.collection) } })
+      }
+      if (args.action) {
+        filters.push({ action: { equals: String(args.action) } })
+      }
+      if (args.documentId) {
+        filters.push({ documentId: { equals: String(args.documentId) } })
+      }
+
+      const where = filters.length > 0 ? ({ and: filters } satisfies Where) : undefined
+
+      const logs = await req.payload.find({
+        collection: 'audit-logs',
+        where,
+        limit,
+        page,
+        sort: '-createdAt',
+        depth: 1,
+        overrideAccess: false,
+        user: req.user,
+      })
+
+      result = {
+        totalDocs: logs.totalDocs,
+        page: logs.page,
+        totalPages: logs.totalPages,
+        docs: logs.docs.map((doc) => summarizeAuditLog(doc as Record<string, unknown>)),
+      }
+      break
+    }
+
     case 'get_cache_settings': {
       assertAgentCacheAccess(req)
       result = await getResolvedCacheSettings()
+      break
+    }
+
+    case 'update_cache_settings': {
+      assertAgentCacheAccess(req)
+      await assertAgentGlobalAccess(req, 'cache-settings', 'update')
+      const data = parseCacheSettingsUpdate(args)
+      const updated = await req.payload.updateGlobal({
+        slug: 'cache-settings',
+        data,
+        overrideAccess: false,
+        user: req.user,
+      })
+      resetResolvedCacheSettingsCache()
+      result = normalizeCacheSettings({
+        cachingEnabled: updated.cachingEnabled ?? undefined,
+        pageRevalidateSeconds: updated.pageRevalidateSeconds ?? undefined,
+        dataCacheRevalidateSeconds: updated.dataCacheRevalidateSeconds ?? undefined,
+        exposeCacheHeaders: updated.exposeCacheHeaders ?? undefined,
+      })
       break
     }
 
@@ -487,10 +746,16 @@ export async function executeAgentTool(
         throw new Error(`未知的缓存分组：${group}`)
       }
 
-      const [settings, dbStats, entryStatuses] = await Promise.all([
+      const includeDynamicRoutes = !group || group === 'dynamic'
+      const dynamicLimit = includeDynamicRoutes
+        ? Math.min(Math.max(Number(args.dynamicLimit) || 100, 1), 500)
+        : 0
+
+      const [settings, dbStats, entryStatuses, dynamicRoutes] = await Promise.all([
         getResolvedCacheSettings(),
         getDbCacheStats(),
         getRegistryCacheStatuses(entries),
+        includeDynamicRoutes ? getDynamicRouteCacheEntries(dynamicLimit) : Promise.resolve([]),
       ])
 
       result = {
@@ -505,8 +770,16 @@ export async function executeAgentTool(
           groupLabel: FRONTEND_CACHE_GROUP_LABELS[entry.group as FrontendCacheGroup],
           kind: entry.kind,
           target: entry.target,
+          pathMatch: entry.pathMatch,
           status: entryStatuses[entry.id] ?? { active: false, count: 0 },
         })),
+        ...(includeDynamicRoutes
+          ? {
+              dynamicRoutes,
+              dynamicRoutesNote:
+                '单条动态路由可用 purge_frontend_cache(routePaths=[...]) 清除；pattern 聚合可用 ids 如 pattern-posts-slug',
+            }
+          : {}),
       }
       break
     }
@@ -525,9 +798,35 @@ export async function executeAgentTool(
         break
       }
 
+      if (args.expired === true) {
+        const deleted = await purgeExpiredCacheEntries()
+        result = {
+          ok: true,
+          deleted,
+          scope: 'expired',
+        }
+        break
+      }
+
+      const routePaths = Array.isArray(args.routePaths)
+        ? args.routePaths.map(String).filter(Boolean)
+        : []
+      if (routePaths.length > 0) {
+        const deleted = await purgeDbCacheByRoutePaths(routePaths)
+        result = {
+          ok: true,
+          purged: routePaths.length,
+          failed: 0,
+          deleted,
+          scope: 'routePaths',
+          routePaths,
+        }
+        break
+      }
+
       const ids = Array.isArray(args.ids) ? args.ids.map(String) : []
       if (ids.length === 0) {
-        throw new Error('请提供 ids 或设置 all: true')
+        throw new Error('请提供 ids、routePaths、expired: true 或 all: true')
       }
 
       const cacheEntries = resolveCacheEntries(ids)

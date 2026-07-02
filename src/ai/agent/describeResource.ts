@@ -132,7 +132,9 @@ export function describeCollectionSchema(req: PayloadRequest, slug: string): unk
     hints: [
       'relationship/upload 字段传 ID 或 ID 数组',
       'richText 为 Lexical JSON',
-      'status 常见值：draft、published',
+      'posts/pages 草稿发布：_status 设为 published',
+      'comments 审核：status 为 pending/approved/rejected/spam',
+      '查回收站：find_documents(trash: true)；恢复：restore_document',
     ],
   }
 }
