@@ -37,6 +37,10 @@ import {
   resolveCacheEntries,
 } from '@/frontend-cache/registry'
 import { trashOrDeleteDocument, restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
+import {
+  importStockImageForAgent,
+  searchStockImagesForAgent,
+} from '@/ai/agent/stockImages'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -419,6 +423,61 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
           limit: { type: 'number', description: '返回条数，默认 25，最大 50' },
         },
         required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'search_stock_images',
+      description:
+        '从 Unsplash 检索可导入 media 媒体库的图片（需 UNSPLASH_ACCESS_KEY）。返回 photoId、缩略图与 downloadLocation。展示结果后须询问用户要导入哪些；用户确认后再 import_stock_image，或让用户点击聊天中的「加入图库」按钮。',
+      parameters: {
+        type: 'object',
+        properties: {
+          keyword: { type: 'string', description: '可选，额外搜索关键词' },
+          topic: {
+            type: 'string',
+            description:
+              '主题：all、nature、business、people、technology、food、architecture、abstract',
+          },
+          style: {
+            type: 'string',
+            description:
+              '风格：all、anime、manga、illustration、cartoon、watercolor、minimalist、vintage、cyberpunk、pixel、sketch、3d',
+          },
+          orientation: {
+            type: 'string',
+            enum: ['landscape', 'portrait', 'squarish'],
+            description: '可选，图片比例',
+          },
+          page: { type: 'number', description: '页码，默认 1' },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'import_stock_image',
+      description:
+        '在用户明确同意将某张 Unsplash 图片加入 media 媒体库后，下载并创建 media 文档。userConfirmed 必须为 true。',
+      parameters: {
+        type: 'object',
+        properties: {
+          photoId: { type: 'string', description: 'search_stock_images 返回的 photoId' },
+          downloadLocation: {
+            type: 'string',
+            description: 'search_stock_images 返回的 downloadLocation',
+          },
+          alt: { type: 'string', description: '可选，media 的 alt 文本' },
+          userConfirmed: {
+            type: 'boolean',
+            description: '必须为 true，表示用户已明确确认导入',
+          },
+        },
+        required: ['photoId', 'downloadLocation', 'userConfirmed'],
       },
     },
   },
@@ -907,6 +966,14 @@ export async function executeAgentTool(
       })
       break
     }
+
+    case 'search_stock_images':
+      result = await searchStockImagesForAgent(req, args)
+      break
+
+    case 'import_stock_image':
+      result = await importStockImageForAgent(req, args)
+      break
 
     default:
       throw new Error(`未知工具：${toolCall.name}`)

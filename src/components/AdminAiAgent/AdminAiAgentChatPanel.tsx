@@ -6,6 +6,8 @@ import { AiIcon } from '@/components/AdminAi/AiIcon'
 
 import type { AgentDisplayMessage } from './useAiAgentChat'
 import { useAdminAiAgent } from './AdminAiAgentContext'
+import { AgentStockImageResults } from './AgentStockImageResults'
+import type { AgentStockImage } from '@/ai/agent/stockImages'
 import './admin-ai-agent.scss'
 
 const TOOL_LABELS: Record<string, string> = {
@@ -17,6 +19,8 @@ const TOOL_LABELS: Record<string, string> = {
   create_document: '新建文档',
   update_document: '更新文档',
   delete_document: '删除文档',
+  search_stock_images: '检索图片',
+  import_stock_image: '导入图片',
   get_global: '读取全局配置',
   update_global: '更新全局配置',
 }
@@ -185,6 +189,7 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
                 <li>把某篇文章的标题改为「…」</li>
                 <li>新建一个标签「前端」</li>
                 <li>查看站点设置中的站点名称</li>
+                <li>帮我找 5 张赛博朋克风格的横图，我看中了再加到媒体</li>
               </ul>
             </div>
           )}
@@ -235,6 +240,29 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
           ))}
         </div>
       )}
+      {message.tools?.map((tool) => {
+        if (tool.name !== 'search_stock_images' || tool.status !== 'done' || !tool.result) {
+          return null
+        }
+
+        const result = tool.result as {
+          photos?: AgentStockImage[]
+          query?: string
+          error?: string
+        }
+
+        if (result.error || !result.photos?.length) {
+          return null
+        }
+
+        return (
+          <AgentStockImageResults
+            key={`stock-${tool.id}`}
+            photos={result.photos}
+            query={result.query}
+          />
+        )
+      })}
       {message.content && (
         <div className="admin-ai-agent__bubble">
           {message.content.split('\n').map((line, i, arr) => (

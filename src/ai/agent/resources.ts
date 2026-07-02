@@ -42,7 +42,7 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     label: '表单提交',
     description: '前台提交的表单记录（只读查询与删除，不可通过助手创建或修改）',
   },
-  { slug: 'media', label: '媒体', description: '图片与文件（不可删除；无法上传新文件，仅查改元数据）' },
+  { slug: 'media', label: '媒体', description: '图片与文件（不可删除；可通过 search_stock_images + import_stock_image 从 Unsplash 导入）' },
 ]
 
 export const AGENT_GLOBALS: AgentManagedGlobal[] = [
