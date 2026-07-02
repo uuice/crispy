@@ -1,6 +1,7 @@
 export type UnsplashSearchRequest = {
   query: string
   page: number
+  limit?: number
   orientation?: UnsplashOrientation
 }
 
@@ -18,6 +19,7 @@ export type UnsplashPhoto = {
 export type UnsplashSearchResponse = {
   photos: UnsplashPhoto[]
   page: number
+  limit: number
   totalPages: number
   total: number
 }

@@ -21,6 +21,7 @@ const TOOL_LABELS: Record<string, string> = {
   delete_document: '删除文档',
   search_stock_images: '检索图片',
   import_stock_image: '导入图片',
+  import_stock_images: '批量导入图片',
   get_global: '读取全局配置',
   update_global: '更新全局配置',
 }
@@ -248,6 +249,7 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
         const result = tool.result as {
           photos?: AgentStockImage[]
           query?: string
+          limit?: number
           error?: string
         }
 
@@ -258,6 +260,7 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
         return (
           <AgentStockImageResults
             key={`stock-${tool.id}`}
+            limit={result.limit}
             photos={result.photos}
             query={result.query}
           />

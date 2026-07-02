@@ -1,4 +1,5 @@
 import { getUnsplashAccessKey } from '@/unsplash/isEnabled'
+import { parseUnsplashLimit } from '@/unsplash/parseLimit'
 import type { UnsplashPhoto, UnsplashSearchRequest, UnsplashSearchResponse } from '@/unsplash/types'
 
 type UnsplashApiPhoto = {
@@ -31,13 +32,15 @@ function formatPhoto(photo: UnsplashApiPhoto): UnsplashPhoto {
 export async function searchUnsplashPhotos({
   query,
   page,
+  limit,
   orientation,
 }: UnsplashSearchRequest): Promise<UnsplashSearchResponse> {
   const accessKey = getUnsplashAccessKey()
+  const perPage = parseUnsplashLimit(limit)
   const params = new URLSearchParams({
     query: query.trim(),
     page: String(page),
-    per_page: '20',
+    per_page: String(perPage),
   })
 
   if (orientation) {
@@ -57,6 +60,7 @@ export async function searchUnsplashPhotos({
   return {
     photos: data.results.map(formatPhoto),
     page,
+    limit: perPage,
     totalPages: Math.min(data.total_pages, 100),
     total: data.total,
   }

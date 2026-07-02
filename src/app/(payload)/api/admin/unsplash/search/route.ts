@@ -5,6 +5,7 @@ import {
   parseUnsplashOrientation,
 } from '@/unsplash/categories'
 import { isUnsplashEnabled } from '@/unsplash/isEnabled'
+import { parseUnsplashLimit } from '@/unsplash/parseLimit'
 import { searchUnsplashPhotos } from '@/unsplash/server/searchPhotos'
 import { requireAuthorSession } from '@/utilities/requireAuthorSession'
 
@@ -21,6 +22,7 @@ export async function GET(request: Request): Promise<Response> {
   const topicParam = searchParams.get('topic')?.trim() ?? searchParams.get('category')?.trim() ?? 'all'
   const styleParam = searchParams.get('style')?.trim() ?? 'all'
   const page = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1)
+  const limit = parseUnsplashLimit(searchParams.get('limit'))
   const orientation = parseUnsplashOrientation(searchParams.get('orientation'))
 
   if (!isUnsplashTopicId(topicParam)) {
@@ -37,7 +39,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
-    const data = await searchUnsplashPhotos({ query, page, orientation })
+    const data = await searchUnsplashPhotos({ query, page, limit, orientation })
     return Response.json(data)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unsplash search failed'
