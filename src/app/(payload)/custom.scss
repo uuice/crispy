@@ -217,16 +217,38 @@ html[data-theme='dark'] .nav {
   border-bottom: 1px solid var(--crispy-module-border);
 }
 
-.list-controls,
-.table-wrap {
+/* List controls + table — one outer frame on wrap/controls; inner .table stays borderless */
+.list-controls {
   border: 1px solid var(--crispy-module-border);
+  border-radius: var(--style-radius-m);
+  background: var(--crispy-admin-surface);
+  box-shadow: var(--crispy-shadow-xs);
+}
+
+.table-wrap {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--crispy-module-border);
+  border-radius: var(--style-radius-m);
+  background: var(--crispy-admin-surface);
+  box-shadow: var(--crispy-shadow-xs);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
-  border: 1px solid var(--crispy-module-border);
-  border-radius: var(--style-radius-m);
-  box-shadow: var(--crispy-shadow-xs);
-  overflow: hidden;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+
+  table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+  }
 
   thead th {
     border-bottom: 1px solid var(--crispy-module-border);
@@ -259,6 +281,19 @@ html[data-theme='dark'] .table tbody tr:hover td {
   background: oklch(18% 0.01 var(--crispy-hue));
 }
 
+.collection-list {
+  width: 100%;
+
+  &__wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  &__tables {
+    width: 100%;
+  }
+}
+
 .render-fields > .field-type.group-field,
 .collapsible,
 .card {
@@ -282,8 +317,6 @@ html[data-theme='dark'] .table tbody tr:hover td {
 .card,
 .field-type.group-field,
 .collapsible,
-.table-wrap,
-.list-controls,
 .doc-controls,
 .popup,
 .modal__content,
@@ -299,8 +332,6 @@ html[data-theme='dark'] .table tbody tr:hover td {
 html[data-theme='light'] {
   .card,
   .collapsible,
-  .table,
-  .list-controls,
   .render-fields > .field-type.group-field {
     background: var(--crispy-admin-surface);
     box-shadow: var(--crispy-shadow-xs);
@@ -328,8 +359,6 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
   .card,
   .collapsible,
-  .table,
-  .list-controls,
   .render-fields > .field-type.group-field {
     background: var(--crispy-admin-surface);
     box-shadow: var(--crispy-shadow-xs);
