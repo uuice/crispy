@@ -57,7 +57,7 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
   {
     slug: 'cache-settings',
     label: '缓存设置',
-    description: '前台缓存开关、路由/数据 TTL（秒）、是否输出缓存调试 Header',
+    description: '前台 HTML 缓存开关、pageRevalidateSeconds（秒）、是否输出缓存调试 Header',
   },
   {
     slug: 'ai-settings',

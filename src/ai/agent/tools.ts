@@ -320,7 +320,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'list_frontend_cache',
       description:
-        '查询前台缓存：可清除的缓存条目列表、每项是否 active、DB 条数统计、动态路由缓存明细与 cache-settings 配置（对应后台「缓存管理」）',
+        '查询前台 HTML 缓存：自动发现的 registry 路径列表（page.tsx/route.ts）、每项 DB 状态与过期状态（expiryStatus）、动态路由明细、dbStats 与 cache-settings（对应后台「缓存管理」）',
       parameters: {
         type: 'object',
         properties: {
@@ -343,14 +343,14 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'purge_frontend_cache',
       description:
-        '删除/清除前台数据库缓存。支持 ids（registry id）、routePaths（动态路由实际 path）、expired: true（仅删过期）、或 all: true；操作前应向用户确认',
+        '清除前台 DB 中的页面 HTML 缓存（内容变更不会自动失效，需手动清除）。支持 ids（registry id）、routePaths（具体 path）、expired: true（仅删过期）、或 all: true；操作前应向用户确认',
       parameters: {
         type: 'object',
         properties: {
           ids: {
             type: 'array',
             items: { type: 'string' },
-            description: '要清除的缓存条目 id，如 path-home、pattern-posts-slug',
+            description: '要清除的 registry 条目 id，如 auto-（首页）、auto-about、auto-s-slug（动态 pattern）',
           },
           routePaths: {
             type: 'array',
@@ -375,7 +375,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'get_cache_settings',
       description:
-        '读取前台缓存设置（cache-settings）：是否启用缓存、路由 TTL、数据 TTL、是否输出调试 Header',
+        '读取前台缓存设置（cache-settings）：是否启用 HTML 缓存、pageRevalidateSeconds（TTL 秒）、是否输出调试 Header',
       parameters: { type: 'object', properties: {}, required: [] },
     },
   },
@@ -872,7 +872,7 @@ export async function executeAgentTool(
           ? {
               dynamicRoutes,
               dynamicRoutesNote:
-                '单条动态路由可用 purge_frontend_cache(routePaths=[...]) 清除；pattern 聚合可用 ids 如 pattern-posts-slug',
+                '内容发布后缓存不会自动清除。单条动态 path 用 purge_frontend_cache(routePaths=[...])；按 pattern 聚合清除用 ids（如 auto-s-slug）；registry 每项 status 含 expiryStatus（valid/expiringSoon/expired/none）',
             }
           : {}),
       }
