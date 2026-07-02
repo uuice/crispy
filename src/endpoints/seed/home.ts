@@ -21,7 +21,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
             type: 'custom',
             appearance: 'default',
             label: '全部文章',
-            url: '/posts',
+            url: '/archives',
           },
         },
         {
@@ -578,7 +578,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
               type: 'custom',
               appearance: 'default',
               label: '全部文章',
-              url: '/posts',
+              url: '/archives',
             },
           },
         ],

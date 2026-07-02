@@ -5,8 +5,6 @@ import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
-import { revalidateLinks, revalidateLinksDelete } from './hooks/revalidateLinks'
-
 export const Links: CollectionConfig = {
   slug: 'links',
   labels: adminLabels.links,
@@ -22,10 +20,6 @@ export const Links: CollectionConfig = {
     group: adminLabels.contentGroup,
   },
   defaultSort: 'sort',
-  hooks: {
-    afterChange: [revalidateLinks],
-    afterDelete: [revalidateLinksDelete],
-  },
   fields: [
     withAiTextField({
       name: 'title',

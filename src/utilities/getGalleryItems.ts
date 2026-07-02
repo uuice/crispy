@@ -1,8 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
-
 import type { GalleryItem } from '@/payload-types'
 
 export async function getGalleryItems(): Promise<GalleryItem[]> {
@@ -25,8 +23,4 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
   return result.docs
 }
 
-export const getCachedGalleryItems = dbCacheWithProbe(
-  getGalleryItems,
-  ['gallery-items'],
-  ['gallery-items', 'collection_gallery-items'],
-)
+export const getCachedGalleryItems = getGalleryItems

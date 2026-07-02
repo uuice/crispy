@@ -209,7 +209,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  body:not(.blog-skin) {
     @apply bg-background text-foreground min-h-[100vh] flex flex-col;
   }
 }
@@ -222,3 +222,5 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+@import '../../styles/blog-skin.css';

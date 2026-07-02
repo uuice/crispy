@@ -43,20 +43,23 @@ export async function Footer() {
             {navItems.map(({ link }, i) => (
               <CMSLink className="text-white/80 hover:text-white text-sm" key={i} {...link} />
             ))}
-            <Link className="text-white/80 hover:text-white text-sm" href="/posts">
+            <Link className="text-white/80 hover:text-white text-sm" href="/archives">
               {frontendLabels.site.posts}
             </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/archive">
+            <Link className="text-white/80 hover:text-white text-sm" href="/archives">
               {frontendLabels.site.archive}
             </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/gallery">
-              {frontendLabels.site.gallery}
+            <Link className="text-white/80 hover:text-white text-sm" href="/links">
+              {frontendLabels.links.title}
             </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/jobs">
-              {frontendLabels.site.jobs}
+            <Link className="text-white/80 hover:text-white text-sm" href="/about">
+              关于
             </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/search">
-              {frontendLabels.site.search}
+            <Link className="text-white/80 hover:text-white text-sm" href="/navigations">
+              导航
+            </Link>
+            <Link className="text-white/80 hover:text-white text-sm" href="/games">
+              小游戏
             </Link>
             {showRss && (
               <Link className="text-white/80 hover:text-white text-sm" href="/rss.xml">
@@ -78,7 +81,7 @@ export async function Footer() {
                   {explore.categories.slice(0, 12).map((cat) => (
                     <Link
                       className="text-sm text-white/80 hover:text-white"
-                      href={`/category/${cat.slug}`}
+                      href={`/categories/${cat.slug}`}
                       key={cat.id}
                     >
                       {cat.title}
@@ -94,7 +97,7 @@ export async function Footer() {
                   {explore.tags.slice(0, 16).map((tag) => (
                     <Link
                       className="text-sm text-white/80 hover:text-white"
-                      href={`/tag/${tag.slug}`}
+                      href={`/tags/${tag.slug}`}
                       key={tag.id}
                     >
                       #{tag.title}

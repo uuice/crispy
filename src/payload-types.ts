@@ -1119,7 +1119,7 @@ export interface ApiAccessLog {
   createdAt: string;
 }
 /**
- * Database-backed frontend cache entries (managed by the cache system).
+ * Database-backed frontend HTML cache (managed by /admin/cache).
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "frontend-cache-entries".
@@ -1127,16 +1127,10 @@ export interface ApiAccessLog {
 export interface FrontendCacheEntry {
   id: number;
   cacheKey: string;
-  kind: 'data' | 'route';
+  kind: 'route';
   routePath?: string | null;
-  tags?:
-    | {
-        tag: string;
-        id?: string | null;
-      }[]
-    | null;
   /**
-   * Data cache JSON payload, or route HTML metadata (html, contentType, statusCode).
+   * Route HTML payload: { html, contentType, statusCode }.
    */
   cachedValue?:
     | {
@@ -2389,12 +2383,6 @@ export interface FrontendCacheEntriesSelect<T extends boolean = true> {
   cacheKey?: T;
   kind?: T;
   routePath?: T;
-  tags?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
   cachedValue?: T;
   expiresAt?: T;
   updatedAt?: T;
@@ -3103,19 +3091,15 @@ export interface CommentSetting {
 export interface CacheSetting {
   id: number;
   /**
-   * 关闭后仍可通过「缓存管理」手动刷新；数据层建议在发布后执行缓存清除。
+   * 关闭后 middleware 不再从 DB 直出 HTML；仍可通过「缓存管理」手动清除。
    */
   cachingEnabled?: boolean | null;
   /**
-   * 页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。唯一页面层 TTL，不依赖 Next.js ISR。
+   * 前台页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。
    */
   pageRevalidateSeconds?: number | null;
   /**
-   * 数据查询结果缓存过期时间（秒），保存在数据库。
-   */
-  dataCacheRevalidateSeconds?: number | null;
-  /**
-   * 在 HTTP 响应中输出 X-Crispy-Page-Cache / X-Crispy-Data-Cache 等调试头（HIT/MISS/STALE/BYPASS）。
+   * 在 HTTP 响应中输出 X-Crispy-Page-Cache 等调试头（HIT/MISS/STALE/BYPASS）。
    */
   exposeCacheHeaders?: boolean | null;
   updatedAt?: string | null;
@@ -3255,7 +3239,6 @@ export interface CommentSettingsSelect<T extends boolean = true> {
 export interface CacheSettingsSelect<T extends boolean = true> {
   cachingEnabled?: T;
   pageRevalidateSeconds?: T;
-  dataCacheRevalidateSeconds?: T;
   exposeCacheHeaders?: T;
   updatedAt?: T;
   createdAt?: T;

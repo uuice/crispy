@@ -5,8 +5,6 @@ import { isEditor } from '../../access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField } from '@/fields/ai'
 
-import { revalidateAds, revalidateAdsDelete } from './hooks/revalidateAds'
-
 export const Ads: CollectionConfig = {
   slug: 'ads',
   labels: adminLabels.ads,
@@ -22,10 +20,6 @@ export const Ads: CollectionConfig = {
     group: adminLabels.operationsGroup,
   },
   defaultSort: 'sort',
-  hooks: {
-    afterChange: [revalidateAds],
-    afterDelete: [revalidateAdsDelete],
-  },
   fields: [
     withAiTextField({
       name: 'title',

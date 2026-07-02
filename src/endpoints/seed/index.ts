@@ -300,36 +300,43 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: '文章',
-              url: '/posts',
+              label: '首页',
+              url: '/',
             },
           },
           {
             link: {
               type: 'custom',
               label: '归档',
-              url: '/archive',
+              url: '/archives',
             },
           },
           {
             link: {
               type: 'custom',
-              label: '图库',
-              url: '/gallery',
+              label: '友链',
+              url: '/links',
             },
           },
           {
             link: {
               type: 'custom',
-              label: '招聘',
-              url: '/jobs',
+              label: '关于',
+              url: '/about',
             },
           },
           {
             link: {
               type: 'custom',
-              label: '搜索',
-              url: '/search',
+              label: '导航',
+              url: '/navigations',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: '小游戏',
+              url: '/games',
             },
           },
           {
@@ -360,15 +367,22 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: '图库',
-              url: '/gallery',
+              label: '归档',
+              url: '/archives',
             },
           },
           {
             link: {
               type: 'custom',
-              label: '招聘',
-              url: '/jobs',
+              label: '友链',
+              url: '/links',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: '关于',
+              url: '/about',
             },
           },
           {

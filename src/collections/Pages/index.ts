@@ -15,7 +15,6 @@ import { hero } from '@/heros/config'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
-import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import {
   createRemoveContentEmbeddingHook,
   createSyncContentEmbeddingHook,
@@ -139,10 +138,10 @@ export const Pages: CollectionConfig<'pages'> = {
     chineseSlugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage, createSyncContentEmbeddingHook('pages')],
+    afterChange: [createSyncContentEmbeddingHook('pages')],
     beforeChange: [populatePublishedAt],
     beforeValidate: [createSanitizeLexicalHook(['hero.richText'])],
-    afterDelete: [revalidateDelete, createRemoveContentEmbeddingHook('pages')],
+    afterDelete: [createRemoveContentEmbeddingHook('pages')],
   },
   versions: {
     drafts: {

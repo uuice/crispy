@@ -3,8 +3,6 @@ import type { GlobalConfig } from 'payload'
 import { isEditor, isSuperAdmin } from '@/access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 
-import { revalidateCommentSettings } from './hooks/revalidateCommentSettings'
-
 export const CommentSettings: GlobalConfig = {
   slug: 'comment-settings',
   label: adminLabels.commentSettings,
@@ -15,9 +13,6 @@ export const CommentSettings: GlobalConfig = {
   admin: {
     group: adminLabels.systemGroup,
     description: '评论功能的全局开关与审核策略。',
-  },
-  hooks: {
-    afterChange: [revalidateCommentSettings],
   },
   fields: [
     {

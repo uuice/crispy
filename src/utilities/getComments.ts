@@ -1,8 +1,6 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
-
 import type { CommentTargetType } from '@/comments/types'
 import type { Comment } from '@/payload-types'
 import { buildCommentTree, type CommentTreeNode } from '@/utilities/buildCommentTree'
@@ -79,37 +77,24 @@ async function fetchAllApprovedComments({
   return result.docs as Comment[]
 }
 
-export function getCachedComments(options: GetCommentsOptions) {
-  const { targetType, targetId, page = 1, limit = 20, depth = 1 } = options
-  const cacheKey = `comments_${targetType}_${targetId}_${page}_${limit}_${depth}`
-
-  return dbCacheWithProbe(
-    async () => fetchApprovedComments(options),
-    [cacheKey],
-    [`comments_${targetType}_${targetId}`, 'collection_comments'],
-  )
-}
-
-export function getCachedCommentTree(options: GetCommentTreeOptions) {
-  const { targetType, targetId, maxDepth = 3, limit = 200 } = options
-  const cacheKey = `comments_tree_${targetType}_${targetId}_${maxDepth}_${limit}`
-
-  return dbCacheWithProbe(
-    async () => {
-      const comments = await fetchAllApprovedComments({ targetType, targetId, limit })
-      return buildCommentTree(comments, maxDepth)
-    },
-    [cacheKey],
-    [`comments_${targetType}_${targetId}`, 'collection_comments'],
-  )
-}
-
 export async function getApprovedComments(options: GetCommentsOptions) {
-  return getCachedComments(options)()
+  return fetchApprovedComments(options)
 }
 
 export async function getApprovedCommentTree(
   options: GetCommentTreeOptions,
 ): Promise<CommentTreeNode[]> {
-  return getCachedCommentTree(options)()
+  const { targetType, targetId, maxDepth = 3, limit = 200 } = options
+  const comments = await fetchAllApprovedComments({ targetType, targetId, limit })
+  return buildCommentTree(comments, maxDepth)
+}
+
+/** @deprecated Use getApprovedComments */
+export function getCachedComments(options: GetCommentsOptions) {
+  return () => getApprovedComments(options)
+}
+
+/** @deprecated Use getApprovedCommentTree */
+export function getCachedCommentTree(options: GetCommentTreeOptions) {
+  return () => getApprovedCommentTree(options)
 }

@@ -2,8 +2,6 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Ad } from '@/payload-types'
 
-import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
-
 function isAdActive(ad: Ad, now: number): boolean {
   if (!ad.enabled) return false
   if (ad.startAt && new Date(ad.startAt).getTime() > now) return false
@@ -42,9 +40,5 @@ export async function getAdForSlot(slotKey: string): Promise<Ad | null> {
 }
 
 export function getCachedAdForSlot(slotKey: string) {
-  return dbCacheWithProbe(
-    () => getAdForSlot(slotKey),
-    [`ad-slot-${slotKey}`],
-    ['collection_ads', 'collection_ad-slots'],
-  )
+  return () => getAdForSlot(slotKey)
 }

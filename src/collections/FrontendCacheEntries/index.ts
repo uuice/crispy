@@ -15,10 +15,10 @@ export const FrontendCacheEntries: CollectionConfig = {
     update: () => false,
   },
   admin: {
-    defaultColumns: ['cacheKey', 'kind', 'routePath', 'updatedAt', 'expiresAt'],
+    defaultColumns: ['cacheKey', 'routePath', 'updatedAt', 'expiresAt'],
     useAsTitle: 'cacheKey',
     group: adminLabels.systemGroup,
-    description: 'Database-backed frontend cache entries (managed by the cache system).',
+    description: 'Database-backed frontend HTML cache (managed by /admin/cache).',
     hidden: true,
   },
   defaultSort: '-updatedAt',
@@ -37,40 +37,25 @@ export const FrontendCacheEntries: CollectionConfig = {
       type: 'select',
       label: adminLabels.cacheKind,
       required: true,
-      options: [
-        { label: adminLabels.cacheKindData, value: 'data' },
-        { label: adminLabels.cacheKindRoute, value: 'route' },
-      ],
-      defaultValue: 'data',
+      options: [{ label: adminLabels.cacheKindRoute, value: 'route' }],
+      defaultValue: 'route',
       index: true,
+      admin: {
+        readOnly: true,
+      },
     },
     {
       name: 'routePath',
       type: 'text',
       label: adminLabels.cacheRoutePath,
       index: true,
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind === 'route',
-      },
-    },
-    {
-      name: 'tags',
-      type: 'array',
-      label: adminLabels.cacheTags,
-      fields: [
-        {
-          name: 'tag',
-          type: 'text',
-          required: true,
-        },
-      ],
     },
     {
       name: 'cachedValue',
       type: 'json',
       label: adminLabels.cachePayload,
       admin: {
-        description: 'Data cache JSON payload, or route HTML metadata (html, contentType, statusCode).',
+        description: 'Route HTML payload: { html, contentType, statusCode }.',
       },
     },
     {

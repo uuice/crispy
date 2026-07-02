@@ -5,7 +5,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import type { FrontendCacheEntry, FrontendCacheGroup } from '@/frontend-cache/registry'
 import type { ResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
-import type { DbCacheStats, DynamicRouteCacheRow, RegistryCacheStatus } from '@/frontend-cache/dbCache'
+import type { DbCacheStats, DynamicRouteCacheRow, RegistryCacheStatus, RouteCacheExpiryStatus } from '@/frontend-cache/dbCache'
 
 import './cache.scss'
 
@@ -45,15 +45,29 @@ function formatDateTime(value: string | null): string {
   return new Date(value).toLocaleString()
 }
 
-function expiryStatusLabel(status: DynamicRouteCacheRow['expiryStatus']): string {
+function expiryStatusLabel(status: RouteCacheExpiryStatus | 'none'): string {
   switch (status) {
     case 'expired':
       return '已过期（待清理）'
     case 'expiringSoon':
       return '即将过期'
-    default:
+    case 'valid':
       return '有效'
+    default:
+      return '—'
   }
+}
+
+function renderExpiryBadge(status: RouteCacheExpiryStatus | 'none') {
+  if (status === 'none') {
+    return <span className="admin-cache__badge admin-cache__badge--empty">—</span>
+  }
+
+  return (
+    <span className={`admin-cache__badge admin-cache__badge--${status}`}>
+      {expiryStatusLabel(status)}
+    </span>
+  )
 }
 
 export function CacheManagePanel({ initial }: CacheManagePanelProps) {
@@ -227,8 +241,7 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
         <div>
           <h1 className="admin-cache__title">前台缓存管理</h1>
           <p className="admin-cache__subtitle">
-            管理 `frontend-cache-entries`：数据查询 JSON 与页面 HTML 均存于数据库。Middleware 在 HIT 时直接返回 HTML；内容变更后
-            hooks 会自动失效相关项，过期条目由定时任务每小时清理。
+            管理前台页面 HTML 缓存（`frontend-cache-entries`）。Middleware 在 HIT 时直接返回 HTML；内容变更后需在此手动清除缓存，过期条目由定时任务每小时清理。
           </p>
         </div>
         <div className="admin-cache__header-actions">
@@ -266,10 +279,6 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
           <span>页面 HTML 缓存 TTL（秒）</span>
           <strong>{settings.pageRevalidateSeconds}</strong>
         </div>
-        <div className="admin-cache__settings-item">
-          <span>数据缓存 JSON（秒）</span>
-          <strong>{settings.dataCacheRevalidateSeconds}</strong>
-        </div>
         <div className="admin-cache__settings-item admin-cache__settings-item--stats">
           <span>
             DB 条目总数
@@ -283,10 +292,6 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
             </button>
           </span>
           <strong>{dbStats.total}</strong>
-        </div>
-        <div className="admin-cache__settings-item">
-          <span>数据 JSON 条目</span>
-          <strong>{dbStats.data}</strong>
         </div>
         <div className="admin-cache__settings-item">
           <span>含 HTML 的路由条目</span>
@@ -311,8 +316,7 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
       </div>
 
       <p className="admin-cache__note">
-        页面 HTML 由 Middleware 从 DB 读取并直出，TTL 仅在「缓存配置」Global 中设置（`pageRevalidateSeconds`），前台页面已关闭
-        Next.js ISR。注册表 Path 为固定路径或动态模式，Tag 为数据 JSON。「已缓存动态路径」列出 DB 中实际 slug 路径。
+        页面 HTML 由 Middleware 从 DB 读取并直出，TTL 在「缓存配置」Global 中设置（`pageRevalidateSeconds`）。注册表列出可清除的前台路径；「已缓存动态路径」列出 DB 中实际 slug 路径。
       </p>
 
       {[...grouped.entries()].map(([group, entries]) => (
@@ -348,6 +352,7 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
                   <th>类型</th>
                   <th>目标</th>
                   <th>DB 缓存</th>
+                  <th>状态</th>
                   <th>操作</th>
                 </tr>
               </thead>
@@ -369,11 +374,7 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
                       ) : null}
                     </td>
                     <td>
-                      {entry.kind === 'tag'
-                        ? 'Tag'
-                        : entry.pathMatch === 'pattern'
-                          ? 'Pattern'
-                          : 'Path'}
+                      {entry.pathMatch === 'pattern' ? 'Pattern' : 'Path'}
                     </td>
                     <td>
                       <code className="admin-cache__target">{entry.target}</code>
@@ -390,6 +391,9 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
                           </span>
                         )
                       })()}
+                    </td>
+                    <td>
+                      {renderExpiryBadge(entryStatuses[entry.id]?.expiryStatus ?? 'none')}
                     </td>
                     <td>
                       <button
@@ -445,13 +449,7 @@ export function CacheManagePanel({ initial }: CacheManagePanelProps) {
                     </td>
                     <td>{formatHtmlBytes(row.htmlBytes)}</td>
                     <td>{formatDateTime(row.expiresAt)}</td>
-                    <td>
-                      <span
-                        className={`admin-cache__badge admin-cache__badge--${row.expiryStatus}`}
-                      >
-                        {expiryStatusLabel(row.expiryStatus)}
-                      </span>
-                    </td>
+                    <td>{renderExpiryBadge(row.expiryStatus)}</td>
                     <td>
                       <button
                         className="admin-cache__link-btn"

@@ -26,7 +26,7 @@ ${globalList}
 ## 工作原则
 1. 查找内容时优先用 semantic_search（自然语言），需要精确条件时再用 find_documents
 2. 需要复用后台列表筛选时，先 list_query_presets 查看 where，再传给 find_documents
-3. 询问或修改前台缓存 TTL、开关时，用 get_cache_settings / update_cache_settings；查看各页面/数据缓存是否命中、DB 条数、动态路由明细时用 list_frontend_cache（含 dynamicRoutes、dbStats.expiredPending）
+3. 询问或修改前台缓存 TTL、开关时，用 get_cache_settings / update_cache_settings；查看页面 HTML 缓存是否命中、DB 条数、动态路由明细时用 list_frontend_cache（含 dynamicRoutes、dbStats.expiredPending）
 4. 用户要求刷新或清空前台缓存时，先 list_frontend_cache 确认 id 或 dynamicRoutes.routePath；purge_frontend_cache 支持 ids（registry）、routePaths（单条动态路由）、expired: true（仅删过期）、all: true（全部）；操作前经用户确认
 5. 执行写操作（create/update/delete）前，先调用 describe_resource 了解字段结构，并确认用户意图
 6. 删除操作会将文档移入回收站（软删除）；恢复用 restore_document；查回收站用 find_documents(trash: true)

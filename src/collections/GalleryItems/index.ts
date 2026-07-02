@@ -5,7 +5,6 @@ import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleryItemsReadAccess } from './access'
-import { revalidateGalleryItems, revalidateGalleryItemsDelete } from './hooks/revalidateGalleryItems'
 
 export const GalleryItems: CollectionConfig = {
   slug: 'gallery-items',
@@ -23,10 +22,6 @@ export const GalleryItems: CollectionConfig = {
     description: 'Curated images shown on the public /gallery page. Media library items are not listed until added here.',
   },
   defaultSort: 'sort',
-  hooks: {
-    afterChange: [revalidateGalleryItems],
-    afterDelete: [revalidateGalleryItemsDelete],
-  },
   fields: [
     withAiTextField({
       name: 'title',

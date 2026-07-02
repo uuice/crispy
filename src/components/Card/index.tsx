@@ -37,7 +37,7 @@ export const Card: React.FC<{
   const hasTags = tags && Array.isArray(tags) && tags.length > 0
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = `/${relationTo}/${slug}`
+  const href = relationTo === 'posts' ? `/archives/${slug}` : `/pages/${slug}`
 
   return (
     <article
@@ -63,7 +63,7 @@ export const Card: React.FC<{
                 return (
                   <Fragment key={index}>
                     {categorySlug ? (
-                      <Link className="hover:underline" href={`/category/${categorySlug}`}>
+                      <Link className="hover:underline" href={`/categories/${categorySlug}`}>
                         {categoryTitle}
                       </Link>
                     ) : (
@@ -86,7 +86,7 @@ export const Card: React.FC<{
                 return (
                   <Link
                     className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80"
-                    href={`/tag/${tagDoc.slug}`}
+                    href={`/tags/${tagDoc.slug}`}
                     key={index}
                   >
                     {tagDoc.title}

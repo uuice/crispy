@@ -32,7 +32,7 @@ import { getResolvedCacheSettings, normalizeCacheSettings, resetResolvedCacheSet
 import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
 import {
   FRONTEND_CACHE_GROUP_LABELS,
-  FRONTEND_CACHE_REGISTRY,
+  getFrontendCacheRegistry,
   type FrontendCacheGroup,
   resolveCacheEntries,
 } from '@/frontend-cache/registry'
@@ -326,7 +326,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
         properties: {
           group: {
             type: 'string',
-            enum: ['global', 'collection', 'page', 'route', 'sitemap', 'data', 'dynamic'],
+            enum: ['page', 'route', 'dynamic'],
             description: '可选，按分组过滤（含 dynamic 动态路由 pattern 条目）',
           },
           dynamicLimit: {
@@ -395,10 +395,6 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
           pageRevalidateSeconds: {
             type: 'number',
             description: '页面 HTML 缓存 TTL（秒），≥0',
-          },
-          dataCacheRevalidateSeconds: {
-            type: 'number',
-            description: '数据查询缓存 TTL（秒），≥0',
           },
           exposeCacheHeaders: {
             type: 'boolean',
@@ -573,7 +569,6 @@ function parseToolArgs(raw: string): Record<string, unknown> {
 const CACHE_SETTINGS_FIELDS = [
   'cachingEnabled',
   'pageRevalidateSeconds',
-  'dataCacheRevalidateSeconds',
   'exposeCacheHeaders',
 ] as const
 
@@ -582,13 +577,11 @@ type CacheSettingsField = (typeof CACHE_SETTINGS_FIELDS)[number]
 function parseCacheSettingsUpdate(args: Record<string, unknown>): {
   cachingEnabled?: boolean
   pageRevalidateSeconds?: number
-  dataCacheRevalidateSeconds?: number
   exposeCacheHeaders?: boolean
 } {
   const data: {
     cachingEnabled?: boolean
     pageRevalidateSeconds?: number
-    dataCacheRevalidateSeconds?: number
     exposeCacheHeaders?: boolean
   } = {}
 
@@ -825,7 +818,6 @@ export async function executeAgentTool(
       result = normalizeCacheSettings({
         cachingEnabled: updated.cachingEnabled ?? undefined,
         pageRevalidateSeconds: updated.pageRevalidateSeconds ?? undefined,
-        dataCacheRevalidateSeconds: updated.dataCacheRevalidateSeconds ?? undefined,
         exposeCacheHeaders: updated.exposeCacheHeaders ?? undefined,
       })
       break
@@ -834,9 +826,10 @@ export async function executeAgentTool(
     case 'list_frontend_cache': {
       assertAgentCacheAccess(req)
       const group = args.group ? String(args.group) : undefined
+      const registry = getFrontendCacheRegistry()
       const entries = group
-        ? FRONTEND_CACHE_REGISTRY.filter((entry) => entry.group === group)
-        : FRONTEND_CACHE_REGISTRY
+        ? registry.filter((entry) => entry.group === group)
+        : registry
 
       if (group && entries.length === 0) {
         throw new Error(`未知的缓存分组：${group}`)
@@ -867,7 +860,13 @@ export async function executeAgentTool(
           kind: entry.kind,
           target: entry.target,
           pathMatch: entry.pathMatch,
-          status: entryStatuses[entry.id] ?? { active: false, count: 0 },
+          status: entryStatuses[entry.id] ?? {
+            active: false,
+            count: 0,
+            expiryStatus: 'none',
+            expiringSoonCount: 0,
+            expiredCount: 0,
+          },
         })),
         ...(includeDynamicRoutes
           ? {

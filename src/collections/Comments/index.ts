@@ -9,7 +9,6 @@ import {
   commentsUpdateAccess,
 } from './access'
 import { assignCommentDefaults, validateCommentDepth } from './hooks/assignCommentDefaults'
-import { revalidateComments, revalidateCommentsDelete } from './hooks/revalidateComments'
 
 export const Comments: CollectionConfig = {
   slug: 'comments',
@@ -29,8 +28,6 @@ export const Comments: CollectionConfig = {
   defaultSort: '-createdAt',
   hooks: {
     beforeValidate: [assignCommentDefaults, validateCommentDepth],
-    afterChange: [revalidateComments],
-    afterDelete: [revalidateCommentsDelete],
   },
   fields: [
     {

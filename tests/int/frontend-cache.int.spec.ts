@@ -97,7 +97,7 @@ describe('frontend cache', () => {
 
     const stats = await getDbCacheStats()
     expect(stats.routeWithHtml).toBeGreaterThanOrEqual(1)
-    expect(stats.data).toBeGreaterThanOrEqual(0)
+    expect(stats.total).toBeGreaterThanOrEqual(1)
   })
 
   it('lists dynamic route cache rows', async () => {

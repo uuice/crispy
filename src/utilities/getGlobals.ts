@@ -1,9 +1,8 @@
 import type { Config } from 'src/payload-types'
 
 import configPromise from '@payload-config'
+import { cache } from 'react'
 import { type DataFromGlobalSlug, getPayload } from 'payload'
-
-import { unstableCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
 
 type Global = keyof Config['globals']
 
@@ -18,8 +17,11 @@ async function getGlobal<T extends Global>(slug: T, depth = 0): Promise<DataFrom
   return global
 }
 
-/**
- * Returns a DB-cached function mapped with the cache tag for the slug.
- */
+const getGlobalCached = cache(
+  async (slug: string, depth: number) => getGlobal(slug as Global, depth),
+)
+
+/** Request-scoped dedupe for global reads (page HTML cache handles cross-request caching). */
 export const getCachedGlobal = <T extends Global>(slug: T, depth = 0) =>
-  unstableCacheWithProbe(async () => getGlobal<T>(slug, depth), [slug], [`global_${slug}`])
+  async (): Promise<DataFromGlobalSlug<T>> =>
+    getGlobalCached(slug, depth) as Promise<DataFromGlobalSlug<T>>

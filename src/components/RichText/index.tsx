@@ -32,7 +32,10 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
     throw new Error('Expected value to be an object')
   }
   const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+  if (relationTo === 'posts') return `/archives/${slug}`
+  if (slug === 'home') return '/'
+  if (slug === 'about') return '/about'
+  return `/pages/${slug}`
 }
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({

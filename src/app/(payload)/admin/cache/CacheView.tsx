@@ -6,7 +6,7 @@ import React from 'react'
 import { hasRole } from '@/access/roles'
 import {
   FRONTEND_CACHE_GROUP_LABELS,
-  FRONTEND_CACHE_REGISTRY,
+  getFrontendCacheRegistry,
 } from '@/frontend-cache/registry'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { getDbCacheStats, getDynamicRouteCacheEntries, getRegistryCacheStatuses } from '@/frontend-cache/dbCache'
@@ -51,9 +51,10 @@ export async function CacheView({
   }
 
   const settings = await getResolvedCacheSettings()
+  const registry = getFrontendCacheRegistry()
   const [dbStats, entryStatuses, dynamicRoutes] = await Promise.all([
     getDbCacheStats(),
-    getRegistryCacheStatuses(FRONTEND_CACHE_REGISTRY),
+    getRegistryCacheStatuses(registry),
     getDynamicRouteCacheEntries(),
   ])
 
@@ -76,7 +77,7 @@ export async function CacheView({
             dbStats,
             entryStatuses,
             dynamicRoutes,
-            entries: FRONTEND_CACHE_REGISTRY,
+            entries: registry,
             groupLabels: FRONTEND_CACHE_GROUP_LABELS,
           }}
         />

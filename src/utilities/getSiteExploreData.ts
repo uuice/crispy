@@ -1,8 +1,6 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
-
 export async function getSiteExploreData() {
   const payload = await getPayload({ config })
 
@@ -80,16 +78,4 @@ export async function getSiteExploreData() {
   }
 }
 
-export const getCachedSiteExploreData = dbCacheWithProbe(
-  getSiteExploreData,
-  ['site-explore'],
-  [
-    'site-explore',
-    'collection_posts',
-    'collection_categories',
-    'collection_tags',
-    'collection_jobs',
-    'collection_gallery-items',
-    'collection_pages',
-  ],
-)
+export const getCachedSiteExploreData = getSiteExploreData

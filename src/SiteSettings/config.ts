@@ -4,7 +4,6 @@ import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { isEditor } from '@/access/roles'
 import { anyone } from '@/access/anyone'
 import { adminLabels } from '@/i18n/admin-labels'
-import { revalidateSiteSettings } from './hooks/revalidateSiteSettings'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
@@ -82,7 +81,4 @@ export const SiteSettings: GlobalConfig = {
       },
     },
   ],
-  hooks: {
-    afterChange: [revalidateSiteSettings],
-  },
 }

@@ -1,6 +1,6 @@
 import {
   FRONTEND_CACHE_GROUP_LABELS,
-  FRONTEND_CACHE_REGISTRY,
+  getFrontendCacheRegistry,
 } from '@/frontend-cache/registry'
 import {
   getDbCacheStats,
@@ -14,10 +14,11 @@ export async function GET(): Promise<Response> {
   const auth = await requireEditorSession()
   if (!auth.ok) return auth.response
 
+  const registry = getFrontendCacheRegistry()
   const [settings, dbStats, entryStatuses, dynamicRoutes] = await Promise.all([
     getResolvedCacheSettings(),
     getDbCacheStats(),
-    getRegistryCacheStatuses(FRONTEND_CACHE_REGISTRY),
+    getRegistryCacheStatuses(registry),
     getDynamicRouteCacheEntries(),
   ])
 
@@ -26,7 +27,7 @@ export async function GET(): Promise<Response> {
     dbStats,
     entryStatuses,
     dynamicRoutes,
-    entries: FRONTEND_CACHE_REGISTRY,
+    entries: registry,
     groupLabels: FRONTEND_CACHE_GROUP_LABELS,
   })
 }

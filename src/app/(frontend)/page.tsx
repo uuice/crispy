@@ -1,6 +1,38 @@
-import PageTemplate, { generateMetadata } from './[slug]/page'
+import type { Metadata } from 'next'
+import React from 'react'
 
-export default PageTemplate
+import { Banner } from '@/components/BlogSkin/Banner'
+import { PostList } from '@/components/BlogSkin/PostList'
+import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
+import { queryBlogPosts } from '@/utilities/queryBlogData'
 
-export { generateMetadata }
 export const revalidate = false
+
+export default async function HomePage() {
+  const [settings, posts] = await Promise.all([getCachedSiteSettings()(), queryBlogPosts()])
+
+  const siteName = settings.siteName || '博客'
+
+  return (
+    <>
+      <Banner subtitle={settings.siteDescription || undefined} title={siteName} />
+      <div className="intro-bubble intro-bubble-cute animate-in animate-in-delay-1">
+        <p className="m-0 code-label">
+          共 <strong>{posts.length}</strong> 篇文章
+        </p>
+      </div>
+      <section className="space-y-5">
+        <h2 className="section-title animate-in animate-in-delay-2">最新文章</h2>
+        <PostList posts={posts} />
+      </section>
+    </>
+  )
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getCachedSiteSettings()()
+  return {
+    title: settings.siteName || '博客',
+    description: settings.siteDescription || undefined,
+  }
+}

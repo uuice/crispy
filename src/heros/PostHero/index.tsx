@@ -29,7 +29,7 @@ export const PostHero: React.FC<{
                 return (
                   <React.Fragment key={index}>
                     {categorySlug ? (
-                      <Link className="hover:underline" href={`/category/${categorySlug}`}>
+                      <Link className="hover:underline" href={`/categories/${categorySlug}`}>
                         {titleToUse}
                       </Link>
                     ) : (
@@ -50,7 +50,7 @@ export const PostHero: React.FC<{
                   return (
                     <Link
                       className="text-xs px-2 py-1 rounded-full bg-white/20 hover:bg-white/30"
-                      href={`/tag/${tag.slug}`}
+                      href={`/tags/${tag.slug}`}
                       key={index}
                     >
                       {tag.title}

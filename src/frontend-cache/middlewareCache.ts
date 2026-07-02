@@ -30,8 +30,6 @@ export async function getMiddlewareCacheSettings(
       cachingEnabled: data.cachingEnabled ?? DEFAULT_CACHE_SETTINGS.cachingEnabled,
       pageRevalidateSeconds:
         data.pageRevalidateSeconds ?? DEFAULT_CACHE_SETTINGS.pageRevalidateSeconds,
-      dataCacheRevalidateSeconds:
-        data.dataCacheRevalidateSeconds ?? DEFAULT_CACHE_SETTINGS.dataCacheRevalidateSeconds,
       exposeCacheHeaders: data.exposeCacheHeaders ?? true,
     }
     cachedAt = Date.now()

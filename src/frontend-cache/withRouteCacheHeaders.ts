@@ -1,15 +1,9 @@
-import {
-  appendCrispyCacheHeadersToResponse,
-  type CrispyCacheStatus,
-} from '@/frontend-cache/headers'
-import {
-  getResolvedCacheSettings,
-  type ResolvedCacheSettings,
-} from '@/frontend-cache/getCacheSettings'
+import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
+import { appendCrispyCacheHeadersToResponse } from '@/frontend-cache/headers'
+import type { ResolvedCacheSettings } from '@/frontend-cache/settings'
 
 export async function withRouteCacheHeaders(
   response: Response,
-  dataStatus: CrispyCacheStatus,
   settings?: ResolvedCacheSettings,
 ): Promise<Response> {
   const resolved = settings ?? (await getResolvedCacheSettings())
@@ -20,7 +14,7 @@ export async function withRouteCacheHeaders(
 
   return appendCrispyCacheHeadersToResponse(response, {
     pageStatus: 'BYPASS',
-    dataStatus,
+    dataStatus: 'BYPASS',
     ttlSeconds: resolved.pageRevalidateSeconds,
     cachingEnabled: resolved.cachingEnabled,
   })

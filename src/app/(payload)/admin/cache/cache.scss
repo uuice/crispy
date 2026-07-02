@@ -164,7 +164,8 @@
     font-weight: 600;
     white-space: nowrap;
 
-    &--active {
+    &--active,
+    &--valid {
       color: var(--theme-success-800);
       background: var(--theme-success-150);
     }

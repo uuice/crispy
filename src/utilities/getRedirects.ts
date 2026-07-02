@@ -1,8 +1,6 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { dbCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
-
 export async function getRedirects(depth = 1) {
   const payload = await getPayload({ config: configPromise })
 
@@ -16,8 +14,4 @@ export async function getRedirects(depth = 1) {
   return redirects
 }
 
-/**
- * Cache all redirects together to avoid multiple fetches.
- */
-export const getCachedRedirects = () =>
-  dbCacheWithProbe(async () => getRedirects(), ['redirects'], ['redirects'])
+export const getCachedRedirects = () => getRedirects

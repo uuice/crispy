@@ -3,10 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { anyone } from '@/access/anyone'
 import { isEditor } from '@/access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
-import {
-  DEFAULT_DATA_CACHE_REVALIDATE,
-  DEFAULT_PAGE_REVALIDATE,
-} from '@/frontend-cache/constants'
+import { DEFAULT_PAGE_REVALIDATE } from '@/frontend-cache/constants'
 
 import { revalidateCacheSettings } from './hooks/revalidateCacheSettings'
 
@@ -27,7 +24,7 @@ export const CacheSettings: GlobalConfig = {
       label: adminLabels.cacheEnabled,
       defaultValue: true,
       admin: {
-        description: '关闭后仍可通过「缓存管理」手动刷新；数据层建议在发布后执行缓存清除。',
+        description: '关闭后 middleware 不再从 DB 直出 HTML；仍可通过「缓存管理」手动清除。',
       },
     },
     {
@@ -38,17 +35,7 @@ export const CacheSettings: GlobalConfig = {
       min: 0,
       admin: {
         description:
-          '页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。唯一页面层 TTL，不依赖 Next.js ISR。',
-      },
-    },
-    {
-      name: 'dataCacheRevalidateSeconds',
-      type: 'number',
-      label: adminLabels.dataCacheRevalidateSeconds,
-      defaultValue: DEFAULT_DATA_CACHE_REVALIDATE,
-      min: 0,
-      admin: {
-        description: '数据查询结果缓存过期时间（秒），保存在数据库。',
+          '前台页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。',
       },
     },
     {
@@ -58,7 +45,7 @@ export const CacheSettings: GlobalConfig = {
       defaultValue: true,
       admin: {
         description:
-          '在 HTTP 响应中输出 X-Crispy-Page-Cache / X-Crispy-Data-Cache 等调试头（HIT/MISS/STALE/BYPASS）。',
+          '在 HTTP 响应中输出 X-Crispy-Page-Cache 等调试头（HIT/MISS/STALE/BYPASS）。',
       },
     },
   ],

@@ -9,7 +9,6 @@ import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import { jobsReadAccess } from './access'
-import { revalidateJob, revalidateJobDelete } from './hooks/revalidateJob'
 
 export const Jobs: CollectionConfig = {
   slug: 'jobs',
@@ -27,8 +26,6 @@ export const Jobs: CollectionConfig = {
   },
   defaultSort: '-publishedAt',
   hooks: {
-    afterChange: [revalidateJob],
-    afterDelete: [revalidateJobDelete],
     beforeValidate: [createSanitizeLexicalHook(['description', 'requirements'])],
   },
   fields: [

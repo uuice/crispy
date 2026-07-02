@@ -1,81 +1,16 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-
-import {
-  resolveDataCacheStatus,
-  runWithDataCacheProbeAsync,
-} from '@/frontend-cache/dataCacheProbe'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
-import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
-import { getServerSideURL } from '@/utilities/getURL'
+import { buildBlogRssXml } from '@/utilities/buildBlogRss'
 
 export const revalidate = false
 
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
-}
+async function rssResponse(feedPath: string) {
+  const cacheSettings = await getResolvedCacheSettings()
 
-export async function GET() {
-  return runWithDataCacheProbeAsync(async () => {
-    const [settings, cacheSettings] = await Promise.all([
-      getCachedSiteSettings()(),
-      getResolvedCacheSettings(),
-    ])
-
-    if (settings.enableRss === false) {
-      return new Response('RSS disabled', { status: 404 })
-    }
-
-    const payload = await getPayload({ config: configPromise })
-    const siteUrl = getServerSideURL()
-    const siteName = settings.siteName || 'Crispy'
-    const siteDescription = settings.siteDescription || ''
+  try {
+    const xml = await buildBlogRssXml({ feedPath })
     const ttlSeconds = cacheSettings.pageRevalidateSeconds
 
-    const { docs } = await payload.find({
-      collection: 'posts',
-      depth: 1,
-      limit: 50,
-      overrideAccess: false,
-      pagination: false,
-      sort: '-publishedAt',
-      where: { _status: { equals: 'published' } },
-    })
-
-    const items = docs
-      .map((post) => {
-        const link = `${siteUrl}/posts/${post.slug}`
-        const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
-        const description = post.meta?.description || ''
-
-        return `
-    <item>
-      <title>${escapeXml(post.title)}</title>
-      <link>${escapeXml(link)}</link>
-      <guid isPermaLink="true">${escapeXml(link)}</guid>
-      ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ''}
-      ${description ? `<description>${escapeXml(description)}</description>` : ''}
-    </item>`
-      })
-      .join('')
-
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>${escapeXml(siteName)}</title>
-    <link>${escapeXml(siteUrl)}</link>
-    <description>${escapeXml(siteDescription)}</description>
-    <language>zh-CN</language>${items}
-  </channel>
-</rss>`
-
-    const dataStatus = resolveDataCacheStatus()
     const response = new Response(xml.trim(), {
       headers: {
         'Cache-Control': `public, s-maxage=${ttlSeconds}, stale-while-revalidate=${ttlSeconds * 6}`,
@@ -83,6 +18,15 @@ export async function GET() {
       },
     })
 
-    return withRouteCacheHeaders(response, dataStatus, cacheSettings)
-  })
+    return withRouteCacheHeaders(response, cacheSettings)
+  } catch (error) {
+    if (error instanceof Error && error.message === 'RSS disabled') {
+      return new Response('RSS disabled', { status: 404 })
+    }
+    throw error
+  }
+}
+
+export async function GET() {
+  return rssResponse('/rss.xml')
 }

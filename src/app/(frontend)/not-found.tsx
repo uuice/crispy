@@ -1,19 +1,43 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { Button } from '@/components/ui/button'
-import { frontendLabels } from '@/i18n/frontend-labels'
+import { queryBlogSidebarData } from '@/utilities/queryBlogData'
 
-export default function NotFound() {
+const defaultMenu: { title: string; url: string; target?: string }[] = [
+  { title: '首页', url: '/' },
+  { title: '归档', url: '/archives' },
+  { title: '友链', url: '/links' },
+  { title: '关于', url: '/about' },
+]
+
+export default async function NotFound() {
+  const sidebar = await queryBlogSidebarData()
+  const menu = sidebar.menu.length > 0 ? sidebar.menu : defaultMenu
+
   return (
-    <div className="container py-28">
-      <div className="prose max-w-none dark:prose-invert">
-        <h1 style={{ marginBottom: 0 }}>{frontendLabels.notFound.title}</h1>
-        <p className="mb-4">{frontendLabels.notFound.message}</p>
+    <article className="section-card error-page px-4 sm:px-6 py-6 sm:py-8">
+      <div className="error-page-intro">
+        <p className="code-label">页面未找到</p>
+        <p>你访问的页面不存在或已被移除。</p>
       </div>
-      <Button asChild variant="default">
-        <Link href="/">{frontendLabels.notFound.home}</Link>
-      </Button>
-    </div>
+      <h1 className="error-page-title">404 Not Found</h1>
+      <p className="error-page-desc">当前路径不存在，可能已被移除或输入有误。</p>
+      <div className="error-page-nav">
+        <p className="code-label">你可以访问以下页面</p>
+        <p className="error-page-nav-caption">可去的目录：</p>
+        <ul className="error-page-nav-list">
+          {menu.map((item) => (
+            <li key={item.url + item.title}>
+              <Link href={item.url} target={item.target || '_self'}>
+                {item.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="error-page-back">
+        <Link href="/">← 返回首页</Link>
+      </p>
+    </article>
   )
 }

@@ -232,7 +232,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['app-configs', '应用配置', 'key, valueType, value（KV 配置，Agent 只读除 super-admin）'],
           ['ai-chat-sessions', 'AI 对话会话', 'title, messages[], user（Agent 侧栏历史）'],
           ['api-access-logs', 'API 访问日志', 'method, path, status, authType, user, duration'],
-          ['frontend-cache-entries', '前台缓存条目（系统）', 'cacheKey, kind(data|route), tags[], cachedValue(JSON), routePath, expiresAt'],
+          ['frontend-cache-entries', '前台缓存条目（系统）', 'cacheKey, kind(route), cachedValue(JSON), routePath, expiresAt'],
           ['audit-logs', '审计日志', 'action, collection, docId, user, summary（只读）'],
         ],
       },
@@ -263,7 +263,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['site-settings', '站点设置', 'siteName, description, logo, socialLinks[], rssEnabled, theme'],
           ['comment-settings', '评论设置', 'enabled, moderation, guestComments, nesting, posts/pages 开关'],
           ['ai-settings', 'AI 设置', 'enabled, baseUrl, model, temperature, maxTokens, promptTemplates[]'],
-          ['cache-settings', '缓存设置', 'cachingEnabled, pageRevalidateSeconds, dataCacheRevalidateSeconds, exposeCacheHeaders'],
+          ['cache-settings', '缓存设置', 'cachingEnabled, pageRevalidateSeconds, exposeCacheHeaders'],
         ],
       },
       {
@@ -882,7 +882,7 @@ docker run -p 3333:3333 \\
     blocks: [
       {
         type: 'p',
-        text: 'Crispy 前台缓存以 Payload 数据库为唯一持久化层（Collection frontend-cache-entries），开发/生产均读取 Admin Global cache-settings。页面 HTML 由 middleware 在 HIT 时从 DB 直出；数据查询结果（JSON）走 withDbCache。前台 page 段已关闭 Next.js ISR（revalidate=false），页面 TTL 仅认 cache-settings.pageRevalidateSeconds。',
+        text: 'Crispy 前台缓存仅持久化页面 HTML（Collection frontend-cache-entries，kind=route）。Middleware 在 HIT 时从 DB 直出 HTML；RSC 渲染时直接查 Payload，不再单独缓存 JSON 数据。TTL 由 cache-settings.pageRevalidateSeconds 控制。',
       },
       {
         type: 'h3',
@@ -899,15 +899,14 @@ docker run -p 3333:3333 \\
 ┌───────────────────────────▼─────────────────────────────────┐
 │  PostgreSQL / SQLite                                         │
 │  frontend_cache_entries (+ _tags)                            │
-│  kind=data  → cachedValue (JSON)                             │
 │  kind=route → routePath + cachedValue { html, ... }          │
 └───────────────────────────▲─────────────────────────────────┘
                             │
      ┌──────────────────────┼──────────────────────┐
      │                      │                      │
-  数据层 withDbCache    middleware 路由层      内容 hooks 失效
-  dbCacheWithProbe      route-cache-touch      invalidateCache*
-  getCachedGlobal 等    cache-settings API`,
+  RSC 直查 Payload    middleware 路由层      Admin 手动清除
+  getCachedGlobal 等  route-cache-touch      /admin/cache
+                      cache-settings API`,
       },
       {
         type: 'h3',
@@ -917,11 +916,10 @@ docker run -p 3333:3333 \\
         type: 'table',
         headers: ['字段', '说明'],
         rows: [
-          ['cacheKey', '唯一键。数据：keyParts.join(":")；路由：route:{pathname}'],
-          ['kind', 'data | route'],
-          ['cachedValue', 'kind=data 时存 JSON；kind=route 时存 { html, contentType, statusCode }'],
-          ['routePath', 'kind=route 时的 URL 路径，如 /、/posts/foo'],
-          ['tags[]', '失效标签，purge 时按 tags.tag in (...) 删除'],
+          ['cacheKey', '唯一键 route:{pathname}'],
+          ['kind', 'route（仅 HTML 页面缓存）'],
+          ['cachedValue', '{ html, contentType, statusCode }'],
+          ['routePath', 'URL 路径，如 /、/archives/foo'],
           ['expiresAt', '绝对过期时间（写入时 = now + TTL）'],
           ['updatedAt', 'HIT/MISS/STALE 判定依据（与 TTL 比较）'],
         ],
@@ -935,7 +933,6 @@ docker run -p 3333:3333 \\
         headers: ['配置', '作用', '是否必需'],
         rows: [
           ['cache-settings.pageRevalidateSeconds', 'DB HTML 缓存 TTL + middleware Header + route 条目过期', '必需'],
-          ['cache-settings.dataCacheRevalidateSeconds', 'DB 数据条目 TTL', '必需'],
           ['各 page export const revalidate = false', '关闭 Next.js 页面 ISR，避免与 DB HTML 双轨', '必需'],
         ],
       },
@@ -949,7 +946,6 @@ docker run -p 3333:3333 \\
         rows: [
           ['cachingEnabled', 'true', 'false 时所有读写走 BYPASS，不写入 DB'],
           ['pageRevalidateSeconds', '600', '路由缓存 TTL（秒）；middleware Header 用'],
-          ['dataCacheRevalidateSeconds', '600', '数据缓存 TTL（秒）；withDbCache 用'],
           ['exposeCacheHeaders', 'true', 'false 时 middleware 不注入 X-Crispy-* Header'],
         ],
       },
@@ -975,26 +971,6 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
       },
       {
         type: 'h3',
-        text: '数据缓存层',
-      },
-      {
-        type: 'p',
-        text: '入口 dbCacheWithProbe(fn, keyParts, tags, ttl?) → withDbCache。命中时 recordDataCacheHit，未命中执行 fn 后 upsert 并 recordDataCacheMiss（dataCacheProbe 供 Route Handler 输出 Header）。',
-      },
-      {
-        type: 'table',
-        headers: ['模块', 'cacheKey 示例', 'tags 示例'],
-        rows: [
-          ['getCachedGlobal("footer")', 'footer', 'global_footer'],
-          ['getCachedFriendLinks', 'friend-links', 'friend-links, collection_links'],
-          ['getCachedDocument("posts", slug)', 'posts:my-slug', 'posts_my-slug'],
-          ['getCachedComments(...)', 'comments_post_1_1_20_1', 'comments_post_1, collection_comments'],
-          ['getCachedSiteExploreData', 'site-explore', 'site-explore, collection_posts, …'],
-          ['getCachedRedirects', 'redirects', 'redirects'],
-        ],
-      },
-      {
-        type: 'h3',
         text: '路由 HTML 缓存层（middleware）',
       },
       {
@@ -1010,7 +986,7 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
         headers: ['Header', '值'],
         rows: [
           ['X-Crispy-Page-Cache', 'HIT | MISS | STALE | BYPASS'],
-          ['X-Crispy-Data-Cache', 'Route Handler 用 probe；middleware 页面请求与 Page 相同'],
+          ['X-Crispy-Data-Cache', '固定 BYPASS（已无独立数据缓存层）'],
           ['X-Crispy-Cache-TTL', 'pageRevalidateSeconds'],
           ['X-Crispy-Cache-Enabled', 'true | false'],
           ['X-Crispy-Cache-Mode', 'database | disabled'],
@@ -1024,20 +1000,19 @@ curl -I http://localhost:3333/
       },
       {
         type: 'h3',
-        text: '失效（invalidateCache）',
+        text: '手动清除（/admin/cache）',
       },
       {
         type: 'p',
-        text: '内容变更 hooks 调用 invalidateCacheTag / invalidateCachePath，删除 DB 中 tags 或 routePath 匹配的条目。不再使用 next/cache 的 revalidateTag/revalidatePath。',
+        text: '缓存清除仅通过 /admin/cache 手动执行（按路径、清除全部、清理过期）。内容变更不会自动删除 HTML 缓存。',
       },
       {
         type: 'table',
         headers: ['API', '行为'],
         rows: [
-          ['invalidateCacheTag(tag)', 'DELETE WHERE tags.tag IN (tag)'],
-          ['invalidateCachePath(path)', 'DELETE WHERE routePath=path OR cacheKey=route:{path}'],
-          ['purgeCacheEntries(registry)', 'Admin 按注册表项批量清除'],
-          ['purgeAllRegisteredCache()', 'DELETE 全部 frontend-cache-entries'],
+          ['purgeCacheEntries(registry)', 'Admin 按注册表 path 批量清除'],
+          ['purgeAllRegisteredCache()', 'DELETE 全部 frontend-cache-entries（含历史遗留行）'],
+          ['purgeExpiredCacheEntries()', 'DELETE expiresAt 已过期条目（cron 每小时）'],
         ],
       },
       {
@@ -1046,7 +1021,7 @@ curl -I http://localhost:3333/
       },
       {
         type: 'p',
-        text: 'FRONTEND_CACHE_REGISTRY 定义 Admin /admin/cache 可手动清除的逻辑项（tag 或 path），与 DB 中 tags/routePath 对应。内容 hooks 失效范围应与此 tag 命名保持一致（如 global_header、collection_posts、pages-sitemap）。',
+        text: '注册表由 discoverFrontendRoutes 自动扫描 app/(frontend) 的 page.tsx / route.ts 路径，供 Admin /admin/cache 按 path 手动清除。',
       },
       {
         type: 'h3',
@@ -1056,14 +1031,13 @@ curl -I http://localhost:3333/
         type: 'table',
         headers: ['路径', '职责'],
         rows: [
-          ['src/frontend-cache/dbCache.ts', 'withDbCache、resolveRouteCacheFromDb、storeRouteHtmlCache、purge、getDbCacheStats'],
+          ['src/frontend-cache/dbCache.ts', 'resolveRouteCacheFromDb、storeRouteHtmlCache、purge、getDbCacheStats'],
           ['src/frontend-cache/constants.ts', 'DEFAULT_PAGE_REVALIDATE 等 Global 默认值'],
           ['src/frontend-cache/getCacheSettings.ts', '读 cache-settings Global（防循环）'],
           ['src/frontend-cache/middlewareCache.ts', 'Edge 安全 settings 类型 + internal API fetch'],
           ['src/frontend-cache/registry.ts', 'Admin 可清除项注册表'],
-          ['src/frontend-cache/invalidateCache.ts', 'hooks 失效入口'],
+          ['src/frontend-cache/purge.ts', 'Admin purge 入口（按 path / 全部）'],
           ['src/frontend-cache/headers.ts', 'X-Crispy-* Header 常量与写入'],
-          ['src/frontend-cache/dataCacheProbe.ts', 'Route Handler 单次请求 data HIT/MISS 探测'],
           ['src/middleware.ts', '前台 HTML Header + API access log'],
           ['src/collections/FrontendCacheEntries/', 'DB Collection 定义（hidden，系统写入）'],
           ['src/app/(payload)/admin/cache/', 'Custom View 缓存管理 UI'],
@@ -1077,7 +1051,7 @@ curl -I http://localhost:3333/
         type: 'ul',
         items: [
           'middleware 不得 import @payload-config / getPayload（Edge 兼容）；仅 fetch internal API',
-          'cache-settings 不可被 withDbCache 包裹，否则 stack overflow',
+          'cache-settings 直接 findGlobal，带 60s 进程内缓存',
           'JSON 字段必须叫 cachedValue，不可用 payload（Payload 保留语义）',
           'cachedValue 写入前 JSON.parse(JSON.stringify) 保证可序列化',
           'frontend-cache-entries 在 SYSTEM_COLLECTION_SLUGS 中，无 trash/versions',
@@ -1088,16 +1062,11 @@ curl -I http://localhost:3333/
       },
       {
         type: 'h3',
-        text: '扩展新数据缓存',
+        text: '内容变更失效',
       },
       {
-        type: 'ol',
-        items: [
-          '数据 fetch 函数用 dbCacheWithProbe(fn, [keyParts...], [tags...]) 包装',
-          '在 registry.ts 增加对应 tag 项（供 Admin 手动清除）',
-          'Collection/Global afterChange hook 中 await invalidateCacheTag("your_tag")',
-          'tag 命名建议：global_{slug}、collection_{slug}、{collection}_{docSlug}',
-        ],
+        type: 'p',
+        text: '发布/修改内容后，到 /admin/cache 手动清除相关路径或「清除全部」，否则访客可能继续看到旧 HTML（直到 TTL 过期）。',
       },
     ],
   },
@@ -1188,7 +1157,7 @@ curl -I http://localhost:3333/
         headers: ['模式', '适用场景', '示例'],
         rows: [
           ['Plugin 注入 config', '全 Collection 横切行为', 'enableTrashAndVersionsPlugin'],
-          ['Collection hooks / access', '单 Collection 业务规则', 'restrictAuthorPublish、revalidatePost + invalidateCache'],
+          ['Collection hooks / access', '单 Collection 业务规则', 'restrictAuthorPublish、syncContentEmbedding 等'],
           ['Custom Field 组件', '字段级 UI（AI 按钮等）', 'withAiTextField、AiCodeField'],
           ['Custom View（admin.views）', '独立 Admin 页面', 'dev-docs、api-docs、ai-agent'],
           ['utilities 薄封装', 'Payload API 语义不足', 'trashOrDeleteDocument'],
@@ -1234,7 +1203,7 @@ curl -I http://localhost:3333/
       {
         type: 'ul',
         items: [
-          '前台 (frontend) 不加载 Admin bundle；数据查询走 DB 缓存（见 #frontend-cache），页面 HTML 走 DB + middleware（revalidate=false）',
+          '前台 (frontend) 不加载 Admin bundle；RSC 直查 Payload，页面 HTML 走 DB + middleware（revalidate=false）',
           'Admin 列表避免 populate 大字段（Lexical 正文）；详情页再提高 depth',
           '语义搜索 / embedding 走 Postgres pgvector + 独立 API，不经 Admin 渲染链',
           '生产媒体用 S3（S3_*），避免本机磁盘成为瓶颈',
@@ -1408,7 +1377,7 @@ curl -I http://localhost:3333/
           '软删除调用：trashOrDeleteDocument，勿直接 payload.delete()',
           '扩展红线与 Payload 升级：见本文档 #architecture 章节',
           '前台路由：src/app/(frontend)/',
-          'Revalidation：Collection afterChange hooks 调用 invalidateCacheTag / invalidateCachePath（见 #frontend-cache）',
+          'Revalidation：内容变更后不自动清缓存；在 /admin/cache 手动清除（见 #frontend-cache）',
           '中文 Slug：chineseSlugField + pinyin-pro hook',
         ],
       },

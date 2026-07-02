@@ -2,74 +2,64 @@ import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-import {
-  resolveDataCacheStatus,
-  runWithDataCacheProbeAsync,
-} from '@/frontend-cache/dataCacheProbe'
-import { unstableCacheWithProbe } from '@/frontend-cache/unstableCacheWithProbe'
+import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 
-const getPagesSitemap = unstableCacheWithProbe(
-  async () => {
-    const payload = await getPayload({ config })
-    const SITE_URL =
-      process.env.NEXT_PUBLIC_SERVER_URL ||
-      process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-      'https://example.com'
+function pageSitemapLoc(siteUrl: string, slug: string): string {
+  if (slug === 'home') return `${siteUrl}/`
+  if (slug === 'about') return `${siteUrl}/about`
+  return `${siteUrl}/pages/${slug}`
+}
 
-    const results = await payload.find({
-      collection: 'pages',
-      overrideAccess: false,
-      draft: false,
-      depth: 0,
-      limit: 1000,
-      pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
-        },
+async function getPagesSitemap() {
+  const payload = await getPayload({ config })
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    'https://example.com'
+
+  const results = await payload.find({
+    collection: 'pages',
+    overrideAccess: false,
+    draft: false,
+    depth: 0,
+    limit: 1000,
+    pagination: false,
+    where: {
+      _status: {
+        equals: 'published',
       },
-      select: {
-        slug: true,
-        updatedAt: true,
-      },
-    })
+    },
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+  })
 
-    const dateFallback = new Date().toISOString()
+  const dateFallback = new Date().toISOString()
 
-    const defaultSitemap = [
-      {
-        loc: `${SITE_URL}/search`,
-        lastmod: dateFallback,
-      },
-      {
-        loc: `${SITE_URL}/posts`,
-        lastmod: dateFallback,
-      },
-    ]
+  const staticPages = [
+    { loc: `${SITE_URL}/archives`, lastmod: dateFallback },
+    { loc: `${SITE_URL}/links`, lastmod: dateFallback },
+    { loc: `${SITE_URL}/navigations`, lastmod: dateFallback },
+    { loc: `${SITE_URL}/games`, lastmod: dateFallback },
+  ]
 
-    const sitemap = results.docs
-      ? results.docs
-          .filter((page) => Boolean(page?.slug))
-          .map((page) => {
-            return {
-              loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
-              lastmod: page.updatedAt || dateFallback,
-            }
-          })
-      : []
+  const sitemap = results.docs
+    ? results.docs
+        .filter((page) => Boolean(page?.slug))
+        .map((page) => ({
+          loc: pageSitemapLoc(SITE_URL, page.slug),
+          lastmod: page.updatedAt || dateFallback,
+        }))
+    : []
 
-    return [...defaultSitemap, ...sitemap]
-  },
-  ['pages-sitemap'],
-  ['pages-sitemap'],
-)
+  return [...staticPages, ...sitemap]
+}
 
 export async function GET() {
-  return runWithDataCacheProbeAsync(async () => {
-    const sitemap = await getPagesSitemap()
-    const dataStatus = resolveDataCacheStatus()
-    const response = await getServerSideSitemap(sitemap)
-    return withRouteCacheHeaders(response, dataStatus)
-  })
+  const cacheSettings = await getResolvedCacheSettings()
+  const sitemap = await getPagesSitemap()
+  const response = await getServerSideSitemap(sitemap)
+  return withRouteCacheHeaders(response, cacheSettings)
 }

@@ -5,14 +5,13 @@ import { FRONTEND_CACHE_ENTRIES_SLUG } from '@/collections/FrontendCacheEntries'
 import type { FrontendCacheEntry as RegistryCacheEntry } from '@/frontend-cache/registry'
 import { getExactRegistryRoutePaths } from '@/frontend-cache/registry'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
-import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import {
   CACHE_EXPIRING_SOON_MS,
   isDynamicRoutePath,
   matchRoutePattern,
 } from '@/frontend-cache/routePatterns'
 
-type CacheKind = 'data' | 'route'
+type CacheKind = 'route'
 
 export type RouteCachedValue = {
   html: string
@@ -32,7 +31,6 @@ type FrontendCacheEntryDoc = {
   cacheKey: string
   kind: CacheKind
   routePath?: string | null
-  tags?: { tag: string; id?: string | null }[] | null
   cachedValue?: unknown
   expiresAt?: string | null
   updatedAt: string
@@ -46,10 +44,6 @@ function resolveCacheStatus(cachedAtMs: number, ttlSeconds: number): CrispyCache
   if (ageSeconds < ttlSeconds) return 'HIT'
   if (ageSeconds < ttlSeconds * 2) return 'STALE'
   return 'MISS'
-}
-
-function toTagRows(tags: string[]) {
-  return [...new Set(tags.filter(Boolean))].map((tag) => ({ tag }))
 }
 
 function routeCacheKey(routePath: string): string {
@@ -99,7 +93,6 @@ async function deleteEntryById(id: number | string): Promise<void> {
 async function upsertCacheEntry(input: {
   cacheKey: string
   kind: CacheKind
-  tags: string[]
   cachedValue?: unknown
   routePath?: string
   ttlSeconds: number
@@ -109,7 +102,6 @@ async function upsertCacheEntry(input: {
   const data = {
     cacheKey: input.cacheKey,
     kind: input.kind,
-    tags: toTagRows(input.tags),
     cachedValue:
       input.cachedValue !== undefined ? serializeCachedValue(input.cachedValue) : null,
     routePath: input.routePath ?? null,
@@ -214,7 +206,6 @@ export async function storeRouteHtmlCache(options: {
   await upsertCacheEntry({
     cacheKey: routeCacheKey(options.routePath),
     kind: 'route',
-    tags: [`route:${options.routePath}`],
     routePath: options.routePath,
     ttlSeconds: options.ttlSeconds,
     cachedValue: {
@@ -235,64 +226,6 @@ export async function purgeExpiredCacheEntries(): Promise<number> {
     where: {
       expiresAt: {
         less_than: now,
-      },
-    },
-  })
-
-  return result.docs.length
-}
-
-export async function withDbCache<T>(options: {
-  cacheKey: string
-  tags: string[]
-  ttlSeconds?: number
-  fn: () => Promise<T>
-}): Promise<{ value: T; status: CrispyCacheStatus }> {
-  const settings = await getResolvedCacheSettings()
-  const ttlSeconds = options.ttlSeconds ?? settings.dataCacheRevalidateSeconds
-
-  if (!settings.cachingEnabled || ttlSeconds <= 0) {
-    return { value: await options.fn(), status: 'BYPASS' }
-  }
-
-  const existing = await findEntryByCacheKey(options.cacheKey)
-
-  if (existing?.cachedValue !== undefined && existing.cachedValue !== null) {
-    const status = resolveCacheStatus(new Date(existing.updatedAt).getTime(), ttlSeconds)
-
-    if (status === 'HIT' || status === 'STALE') {
-      if (status === 'STALE') {
-        await touchEntryTimestamp(existing, ttlSeconds)
-      }
-      return { value: existing.cachedValue as T, status }
-    }
-  }
-
-  const value = await options.fn()
-
-  await upsertCacheEntry({
-    cacheKey: options.cacheKey,
-    kind: 'data',
-    tags: options.tags,
-    cachedValue: value,
-    ttlSeconds,
-  })
-
-  return { value, status: 'MISS' }
-}
-
-export async function purgeDbCacheByTags(tags: string[]): Promise<number> {
-  if (tags.length === 0) return 0
-
-  const payload = await getPayload({ config: configPromise })
-  const uniqueTags = [...new Set(tags.filter(Boolean))]
-
-  const result = await payload.delete({
-    collection: FRONTEND_CACHE_ENTRIES_SLUG,
-    overrideAccess: true,
-    where: {
-      'tags.tag': {
-        in: uniqueTags,
       },
     },
   })
@@ -357,6 +290,21 @@ export async function purgeDbCacheByRoutePattern(pattern: string): Promise<numbe
   return deleted.docs.length
 }
 
+/** Delete all cached frontend HTML pages (kind=route). */
+export async function purgeAllRouteCache(): Promise<number> {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.delete({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    overrideAccess: true,
+    where: {
+      kind: { equals: 'route' },
+    },
+  })
+
+  return result.docs.length
+}
+
 export async function purgeDbCacheByRoutePaths(routePaths: string[]): Promise<number> {
   if (routePaths.length === 0) return 0
 
@@ -367,7 +315,8 @@ export async function purgeDbCacheByRoutePaths(routePaths: string[]): Promise<nu
   return deleted
 }
 
-export async function purgeAllDbCache(): Promise<number> {
+/** Delete all frontend cache entries (route HTML + any legacy rows). */
+export async function purgeAllFrontendCacheEntries(): Promise<number> {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.delete({
@@ -385,15 +334,16 @@ export async function purgeAllDbCache(): Promise<number> {
 
 export type DbCacheStats = {
   total: number
-  data: number
-  route: number
   routeWithHtml: number
   routeMetadataOnly: number
   expiredPending: number
   expiringSoon: number
 }
 
-export type DynamicRouteCacheExpiryStatus = 'valid' | 'expiringSoon' | 'expired'
+export type RouteCacheExpiryStatus = 'valid' | 'expiringSoon' | 'expired'
+
+/** @deprecated Use RouteCacheExpiryStatus */
+export type DynamicRouteCacheExpiryStatus = RouteCacheExpiryStatus
 
 export type DynamicRouteCacheRow = {
   id: number | string
@@ -402,10 +352,10 @@ export type DynamicRouteCacheRow = {
   htmlBytes: number | null
   expiresAt: string | null
   updatedAt: string
-  expiryStatus: DynamicRouteCacheExpiryStatus
+  expiryStatus: RouteCacheExpiryStatus
 }
 
-function resolveExpiryStatus(expiresAt: string | null | undefined, nowMs: number): DynamicRouteCacheExpiryStatus {
+function resolveExpiryStatus(expiresAt: string | null | undefined, nowMs: number): RouteCacheExpiryStatus {
   if (!expiresAt) return 'valid'
   const expiresMs = new Date(expiresAt).getTime()
   if (expiresMs <= nowMs) return 'expired'
@@ -437,20 +387,10 @@ export async function getDbCacheStats(): Promise<DbCacheStats> {
   const nowIso = new Date(nowMs).toISOString()
   const soonIso = new Date(nowMs + CACHE_EXPIRING_SOON_MS).toISOString()
 
-  const [total, data, route, expiredPending, expiringSoon, routeDocsResult] = await Promise.all([
+  const [total, expiredPending, expiringSoon, routeDocsResult] = await Promise.all([
     payload.count({
       collection: FRONTEND_CACHE_ENTRIES_SLUG,
       overrideAccess: true,
-    }),
-    payload.count({
-      collection: FRONTEND_CACHE_ENTRIES_SLUG,
-      overrideAccess: true,
-      where: { kind: { equals: 'data' } },
-    }),
-    payload.count({
-      collection: FRONTEND_CACHE_ENTRIES_SLUG,
-      overrideAccess: true,
-      where: { kind: { equals: 'route' } },
     }),
     payload.count({
       collection: FRONTEND_CACHE_ENTRIES_SLUG,
@@ -496,8 +436,6 @@ export async function getDbCacheStats(): Promise<DbCacheStats> {
 
   return {
     total: total.totalDocs,
-    data: data.totalDocs,
-    route: route.totalDocs,
     routeWithHtml,
     routeMetadataOnly,
     expiredPending: expiredPending.totalDocs,
@@ -554,6 +492,21 @@ export async function getDynamicRouteCacheEntries(limit = 500): Promise<DynamicR
 export type RegistryCacheStatus = {
   active: boolean
   count: number
+  /** Aggregate expiry across all DB rows matching this registry entry. */
+  expiryStatus: RouteCacheExpiryStatus | 'none'
+  expiringSoonCount: number
+  expiredCount: number
+}
+
+function resolveRegistryExpiryStatus(counts: {
+  count: number
+  expiringSoonCount: number
+  expiredCount: number
+}): RouteCacheExpiryStatus | 'none' {
+  if (counts.count === 0) return 'none'
+  if (counts.expiredCount > 0) return 'expired'
+  if (counts.expiringSoonCount > 0) return 'expiringSoon'
+  return 'valid'
 }
 
 function entryMatchesRegistryDoc(
@@ -561,14 +514,9 @@ function entryMatchesRegistryDoc(
   doc: {
     cacheKey?: string | null
     routePath?: string | null
-    tags?: { tag?: string | null }[] | null
   },
   exactRegistryPaths: ReadonlySet<string>,
 ): boolean {
-  if (entry.kind === 'tag') {
-    return doc.tags?.some((row) => row.tag === entry.target) ?? false
-  }
-
   const routePath = doc.routePath
   if (!routePath) {
     return doc.cacheKey === routeCacheKey(entry.target)
@@ -587,6 +535,7 @@ export async function getRegistryCacheStatuses(
   entries: RegistryCacheEntry[],
 ): Promise<Record<string, RegistryCacheStatus>> {
   const payload = await getPayload({ config: configPromise })
+  const nowMs = Date.now()
 
   const result = await payload.find({
     collection: FRONTEND_CACHE_ENTRIES_SLUG,
@@ -594,17 +543,29 @@ export async function getRegistryCacheStatuses(
     pagination: false,
     limit: 2000,
     depth: 0,
+    where: {
+      kind: { equals: 'route' },
+    },
     select: {
       cacheKey: true,
       routePath: true,
-      tags: true,
+      expiresAt: true,
     },
   })
 
   const exactRegistryPaths = getExactRegistryRoutePaths()
 
   const statuses: Record<string, RegistryCacheStatus> = Object.fromEntries(
-    entries.map((entry) => [entry.id, { active: false, count: 0 }]),
+    entries.map((entry) => [
+      entry.id,
+      {
+        active: false,
+        count: 0,
+        expiryStatus: 'none' as const,
+        expiringSoonCount: 0,
+        expiredCount: 0,
+      },
+    ]),
   )
 
   for (const doc of result.docs) {
@@ -612,9 +573,21 @@ export async function getRegistryCacheStatuses(
       if (!entryMatchesRegistryDoc(entry, doc, exactRegistryPaths)) continue
       const current = statuses[entry.id]
       if (!current) continue
+
       current.count += 1
       current.active = true
+
+      const docExpiry = resolveExpiryStatus(doc.expiresAt, nowMs)
+      if (docExpiry === 'expired') {
+        current.expiredCount += 1
+      } else if (docExpiry === 'expiringSoon') {
+        current.expiringSoonCount += 1
+      }
     }
+  }
+
+  for (const current of Object.values(statuses)) {
+    current.expiryStatus = resolveRegistryExpiryStatus(current)
   }
 
   return statuses

@@ -20,7 +20,6 @@ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { assignAuthorOnCreate } from './hooks/assignAuthorOnCreate'
 import { populateAuthors } from './hooks/populateAuthors'
 import { restrictAuthorPublish } from './hooks/restrictAuthorPublish'
-import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 import {
   createRemoveContentEmbeddingHook,
   createSyncContentEmbeddingHook,
@@ -241,9 +240,9 @@ export const Posts: CollectionConfig<'posts'> = {
   hooks: {
     beforeValidate: [createSanitizeLexicalHook(['content'])],
     beforeChange: [assignAuthorOnCreate, restrictAuthorPublish],
-    afterChange: [revalidatePost, createSyncContentEmbeddingHook('posts')],
+    afterChange: [createSyncContentEmbeddingHook('posts')],
     afterRead: [populateAuthors],
-    afterDelete: [revalidateDelete, createRemoveContentEmbeddingHook('posts')],
+    afterDelete: [createRemoveContentEmbeddingHook('posts')],
   },
   versions: {
     drafts: {

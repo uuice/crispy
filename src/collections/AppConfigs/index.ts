@@ -3,8 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { isEditor, isSuperAdmin } from '@/access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 
-import { revalidateAppConfigs, revalidateAppConfigsDelete } from './hooks/revalidateAppConfigs'
-
 export const AppConfigs: CollectionConfig = {
   slug: 'app-configs',
   labels: adminLabels.appConfigs,
@@ -21,10 +19,6 @@ export const AppConfigs: CollectionConfig = {
     description: '键值型应用配置，供运行时通过 src/config/resolve.ts 读取。',
   },
   defaultSort: 'category',
-  hooks: {
-    afterChange: [revalidateAppConfigs],
-    afterDelete: [revalidateAppConfigsDelete],
-  },
   fields: [
     {
       type: 'row',

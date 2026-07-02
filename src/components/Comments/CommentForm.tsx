@@ -3,10 +3,6 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import type { ResolvedCommentSettings } from '@/comments/types'
 import type { CommentTargetType } from '@/comments/types'
@@ -17,6 +13,7 @@ type CommentFormProps = {
   targetType: CommentTargetType
   targetId: number
   parentId?: number | null
+  replyToName?: string | null
   settings: ResolvedCommentSettings
   currentUser?: User | null
   onCancel?: () => void
@@ -27,6 +24,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   targetType,
   targetId,
   parentId,
+  replyToName,
   settings,
   currentUser,
   onCancel,
@@ -41,6 +39,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const showGuestFields = !currentUser && settings.allowGuestComments
+  const contentId = parentId ? `comment-content-${parentId}` : 'comment-content'
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -110,75 +109,76 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={compact ? 'mt-3 space-y-3' : 'space-y-4 rounded-lg border border-border bg-card p-4 md:p-5'}
-    >
-      {!compact && (
-        <p className="text-sm text-muted-foreground">
-          {currentUser ? frontendLabels.comments.loginHint : frontendLabels.comments.guestHint}
+    <form className={compact ? 'comment-form mt-2' : 'comment-form'} onSubmit={handleSubmit}>
+      {success ? <p className="comment-pending">{success}</p> : null}
+      {error ? <p className="comment-error">{error}</p> : null}
+      {replyToName ? (
+        <p className="comment-replying">
+          回复 {replyToName}
+          {onCancel ? (
+            <button className="comment-cancel-reply" onClick={onCancel} type="button">
+              取消
+            </button>
+          ) : null}
         </p>
-      )}
+      ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor={parentId ? `comment-content-${parentId}` : 'comment-content'}>
-          {frontendLabels.comments.content}
-        </Label>
-        <Textarea
-          id={parentId ? `comment-content-${parentId}` : 'comment-content'}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder={frontendLabels.comments.contentPlaceholder}
-          rows={compact ? 3 : 4}
+      {showGuestFields ? (
+        <>
+          <div className="comment-form-row">
+            <label className="comment-label" htmlFor={parentId ? `guest-name-${parentId}` : 'guest-name'}>
+              昵称
+            </label>
+            <input
+              className="comment-input"
+              disabled={isSubmitting}
+              id={parentId ? `guest-name-${parentId}` : 'guest-name'}
+              maxLength={100}
+              onChange={(e) => setGuestName(e.target.value)}
+              placeholder="必填"
+              required
+              type="text"
+              value={guestName}
+            />
+          </div>
+          <div className="comment-form-row">
+            <label className="comment-label" htmlFor={parentId ? `guest-email-${parentId}` : 'guest-email'}>
+              邮箱
+            </label>
+            <input
+              className="comment-input"
+              disabled={isSubmitting}
+              id={parentId ? `guest-email-${parentId}` : 'guest-email'}
+              maxLength={200}
+              onChange={(e) => setGuestEmail(e.target.value)}
+              placeholder="选填"
+              type="email"
+              value={guestEmail}
+            />
+          </div>
+        </>
+      ) : null}
+
+      <div className="comment-form-row">
+        <label className="comment-label" htmlFor={contentId}>
+          内容
+        </label>
+        <textarea
+          className="comment-textarea"
           disabled={isSubmitting}
+          id={contentId}
+          maxLength={2000}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="必填"
           required
+          rows={compact ? 3 : 3}
+          value={content}
         />
       </div>
 
-      {showGuestFields && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor={parentId ? `guest-name-${parentId}` : 'guest-name'}>
-              {frontendLabels.comments.guestName}
-            </Label>
-            <Input
-              id={parentId ? `guest-name-${parentId}` : 'guest-name'}
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder={frontendLabels.comments.guestNamePlaceholder}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={parentId ? `guest-email-${parentId}` : 'guest-email'}>
-              {frontendLabels.comments.guestEmail}
-            </Label>
-            <Input
-              id={parentId ? `guest-email-${parentId}` : 'guest-email'}
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              placeholder={frontendLabels.comments.guestEmailPlaceholder}
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-      )}
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {success && <p className="text-sm text-green-600 dark:text-green-400">{success}</p>}
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" size="sm" disabled={isSubmitting}>
-          {isSubmitting ? frontendLabels.comments.submitting : frontendLabels.comments.submit}
-        </Button>
-        {onCancel && (
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={isSubmitting}>
-            {frontendLabels.comments.cancelReply}
-          </Button>
-        )}
-      </div>
+      <button className="comment-submit" disabled={isSubmitting} type="submit">
+        {isSubmitting ? frontendLabels.comments.submitting : frontendLabels.comments.submit}
+      </button>
     </form>
   )
 }

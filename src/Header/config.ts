@@ -3,7 +3,6 @@ import type { GlobalConfig } from 'payload'
 import { link } from '@/fields/link'
 import { isEditor } from '@/access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
-import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: GlobalConfig = {
   slug: 'header',
@@ -31,7 +30,4 @@ export const Header: GlobalConfig = {
       },
     },
   ],
-  hooks: {
-    afterChange: [revalidateHeader],
-  },
 }

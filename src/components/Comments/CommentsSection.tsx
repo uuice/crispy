@@ -33,30 +33,23 @@ export async function CommentsSection({ targetType, targetId }: CommentsSectionP
   if (!canSubmit && comments.length === 0) return null
 
   return (
-    <section
-      className="mt-12 max-w-[48rem] mx-auto border-t border-border pt-10"
-      aria-label={frontendLabels.comments.title}
-    >
-      <h2 className="mb-6 text-xl font-semibold tracking-tight">{frontendLabels.comments.title}</h2>
-
-      <div className="mb-8">
-        <CommentList
-          comments={comments}
-          targetType={targetType}
-          targetId={targetId}
-          settings={settings}
-          currentUser={currentUser}
-        />
-      </div>
-
-      {canSubmit && (
+    <div aria-label={frontendLabels.comments.title} className="comment-block">
+      <div className="comment-block-title">{frontendLabels.comments.title}</div>
+      <CommentList
+        comments={comments}
+        currentUser={currentUser}
+        settings={settings}
+        targetId={targetId}
+        targetType={targetType}
+      />
+      {canSubmit ? (
         <CommentForm
-          targetType={targetType}
-          targetId={targetId}
-          settings={settings}
           currentUser={currentUser}
+          settings={settings}
+          targetId={targetId}
+          targetType={targetType}
         />
-      )}
-    </section>
+      ) : null}
+    </div>
   )
 }

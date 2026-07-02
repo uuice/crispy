@@ -130,11 +130,12 @@ export const frontendLabels = {
 } as const
 
 export const defaultHeaderNav = [
-  { label: frontendLabels.site.posts, url: '/posts' },
-  { label: frontendLabels.site.archive, url: '/archive' },
-  { label: frontendLabels.site.gallery, url: '/gallery' },
-  { label: frontendLabels.site.jobs, url: '/jobs' },
-  { label: frontendLabels.site.search, url: '/search' },
+  { label: frontendLabels.site.home, url: '/' },
+  { label: frontendLabels.site.archive, url: '/archives' },
+  { label: '友链', url: '/links' },
+  { label: '关于', url: '/about' },
+  { label: '导航', url: '/navigations' },
+  { label: '小游戏', url: '/games' },
 ] as const
 
 export function socialPlatformLabel(platform: string | null | undefined): string {
