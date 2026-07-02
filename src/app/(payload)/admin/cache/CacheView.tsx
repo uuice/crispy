@@ -9,7 +9,7 @@ import {
   FRONTEND_CACHE_REGISTRY,
 } from '@/frontend-cache/registry'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
-import { getDbCacheStats, getRegistryCacheStatuses } from '@/frontend-cache/dbCache'
+import { getDbCacheStats, getDynamicRouteCacheEntries, getRegistryCacheStatuses } from '@/frontend-cache/dbCache'
 import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 import { CacheManagePanel } from './CacheManagePanel'
@@ -51,8 +51,11 @@ export async function CacheView({
   }
 
   const settings = await getResolvedCacheSettings()
-  const dbStats = await getDbCacheStats()
-  const entryStatuses = await getRegistryCacheStatuses(FRONTEND_CACHE_REGISTRY)
+  const [dbStats, entryStatuses, dynamicRoutes] = await Promise.all([
+    getDbCacheStats(),
+    getRegistryCacheStatuses(FRONTEND_CACHE_REGISTRY),
+    getDynamicRouteCacheEntries(),
+  ])
 
   return (
     <DefaultTemplate
@@ -72,6 +75,7 @@ export async function CacheView({
             settings,
             dbStats,
             entryStatuses,
+            dynamicRoutes,
             entries: FRONTEND_CACHE_REGISTRY,
             groupLabels: FRONTEND_CACHE_GROUP_LABELS,
           }}

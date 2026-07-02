@@ -5,10 +5,12 @@ import {
   resolveDataCacheStatus,
   runWithDataCacheProbeAsync,
 } from '@/frontend-cache/dataCacheProbe'
+import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { getServerSideURL } from '@/utilities/getURL'
+
+export const revalidate = false
 
 function escapeXml(value: string): string {
   return value
@@ -21,7 +23,10 @@ function escapeXml(value: string): string {
 
 export async function GET() {
   return runWithDataCacheProbeAsync(async () => {
-    const settings = await getCachedSiteSettings()()
+    const [settings, cacheSettings] = await Promise.all([
+      getCachedSiteSettings()(),
+      getResolvedCacheSettings(),
+    ])
 
     if (settings.enableRss === false) {
       return new Response('RSS disabled', { status: 404 })
@@ -31,6 +36,7 @@ export async function GET() {
     const siteUrl = getServerSideURL()
     const siteName = settings.siteName || 'Crispy'
     const siteDescription = settings.siteDescription || ''
+    const ttlSeconds = cacheSettings.pageRevalidateSeconds
 
     const { docs } = await payload.find({
       collection: 'posts',
@@ -72,13 +78,11 @@ export async function GET() {
     const dataStatus = resolveDataCacheStatus()
     const response = new Response(xml.trim(), {
       headers: {
-        'Cache-Control': `public, s-maxage=${PAGE_REVALIDATE_SECONDS}, stale-while-revalidate=${PAGE_REVALIDATE_SECONDS * 6}`,
+        'Cache-Control': `public, s-maxage=${ttlSeconds}, stale-while-revalidate=${ttlSeconds * 6}`,
         'Content-Type': 'application/rss+xml; charset=utf-8',
       },
     })
 
-    return withRouteCacheHeaders(response, dataStatus)
+    return withRouteCacheHeaders(response, dataStatus, cacheSettings)
   })
 }
-
-export const revalidate = PAGE_REVALIDATE_SECONDS

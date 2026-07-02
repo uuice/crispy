@@ -18,6 +18,8 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { frontendLabels } from '@/i18n/frontend-labels'
 
+export const revalidate = false
+
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({

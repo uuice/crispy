@@ -38,7 +38,7 @@ export const CacheSettings: GlobalConfig = {
       min: 0,
       admin: {
         description:
-          'DB 路由缓存 TTL（秒），用于 middleware X-Crispy-Page-Cache 与 route 条目过期。与代码中 export const revalidate 无关，后者为 Next.js 生产环境可选第二层。',
+          '页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。唯一页面层 TTL，不依赖 Next.js ISR。',
       },
     },
     {

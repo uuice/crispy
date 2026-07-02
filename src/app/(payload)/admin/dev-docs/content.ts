@@ -882,7 +882,7 @@ docker run -p 3333:3333 \\
     blocks: [
       {
         type: 'p',
-        text: 'Crispy 前台缓存以 Payload 数据库为唯一持久化层（Collection frontend-cache-entries），开发/生产均读取 Admin Global cache-settings，不依赖 Next.js unstable_cache 或进程内 Map。页面 HTML 仍由 Next.js 渲染；缓存的是数据查询结果（JSON）与路由访问状态（用于调试 Header）。',
+        text: 'Crispy 前台缓存以 Payload 数据库为唯一持久化层（Collection frontend-cache-entries），开发/生产均读取 Admin Global cache-settings。页面 HTML 由 middleware 在 HIT 时从 DB 直出；数据查询结果（JSON）走 withDbCache。前台 page 段已关闭 Next.js ISR（revalidate=false），页面 TTL 仅认 cache-settings.pageRevalidateSeconds。',
       },
       {
         type: 'h3',
@@ -900,7 +900,7 @@ docker run -p 3333:3333 \\
 │  PostgreSQL / SQLite                                         │
 │  frontend_cache_entries (+ _tags)                            │
 │  kind=data  → cachedValue (JSON)                             │
-│  kind=route → routePath + updatedAt（路由 HIT/MISS 记录）     │
+│  kind=route → routePath + cachedValue { html, ... }          │
 └───────────────────────────▲─────────────────────────────────┘
                             │
      ┌──────────────────────┼──────────────────────┐
@@ -919,7 +919,7 @@ docker run -p 3333:3333 \\
         rows: [
           ['cacheKey', '唯一键。数据：keyParts.join(":")；路由：route:{pathname}'],
           ['kind', 'data | route'],
-          ['cachedValue', 'kind=data 时存 JSON 序列化结果；禁止用字段名 payload（与 Payload API 冲突）'],
+          ['cachedValue', 'kind=data 时存 JSON；kind=route 时存 { html, contentType, statusCode }'],
           ['routePath', 'kind=route 时的 URL 路径，如 /、/posts/foo'],
           ['tags[]', '失效标签，purge 时按 tags.tag in (...) 删除'],
           ['expiresAt', '绝对过期时间（写入时 = now + TTL）'],
@@ -928,20 +928,20 @@ docker run -p 3333:3333 \\
       },
       {
         type: 'h3',
-        text: 'Next.js ISR（export const revalidate）是否还需要？',
+        text: '页面 TTL（单一来源）',
       },
       {
         type: 'table',
         headers: ['配置', '作用', '是否必需'],
         rows: [
-          ['cache-settings.pageRevalidateSeconds', 'DB 路由条目 TTL + middleware Header', '必需（DB 缓存核心）'],
+          ['cache-settings.pageRevalidateSeconds', 'DB HTML 缓存 TTL + middleware Header + route 条目过期', '必需'],
           ['cache-settings.dataCacheRevalidateSeconds', 'DB 数据条目 TTL', '必需'],
-          ['constants PAGE_REVALIDATE_SECONDS + 各 page export const revalidate', 'Next.js 生产环境页面段 Full Route Cache', '可选；dev 不生效；改 Global 不会自动同步'],
+          ['各 page export const revalidate = false', '关闭 Next.js 页面 ISR，避免与 DB HTML 双轨', '必需'],
         ],
       },
       {
         type: 'p',
-        text: '若只依赖 DB 缓存：可保留 revalidate 作为 pnpm start 下的额外加速层，或统一设为 false/0 关闭 Next 层。Admin /admin/cache 列表「DB 缓存」列显示该注册项在 frontend-cache-entries 中是否有匹配行。',
+        text: '前台各 page.tsx 须在本文件内写 export const revalidate = false（Next 不支持 re-export）。RSS 等 Route Handler 的 Cache-Control s-maxage 运行时读取 getResolvedCacheSettings().pageRevalidateSeconds。',
       },
       {
         type: 'table',
@@ -955,7 +955,7 @@ docker run -p 3333:3333 \\
       },
       {
         type: 'p',
-        text: 'getResolvedCacheSettings() 直接 findGlobal("cache-settings")，带 60s 进程内缓存，且不经过 DB 缓存层（避免循环依赖）。constants.ts 中 PAGE_REVALIDATE_SECONDS 与 Global 默认值应对齐，供页面 export const revalidate 使用。',
+        text: 'getResolvedCacheSettings() 直接 findGlobal("cache-settings")，带 60s 进程内缓存，且不经过 DB 缓存层（避免循环依赖）。constants.ts 中 DEFAULT_PAGE_REVALIDATE 仅作为 Global 字段默认值，与运行时 TTL 对齐。',
       },
       {
         type: 'h3',
@@ -995,11 +995,11 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
       },
       {
         type: 'h3',
-        text: '路由缓存层（仅状态 + Header）',
+        text: '路由 HTML 缓存层（middleware）',
       },
       {
         type: 'p',
-        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → touchRouteCacheEntry 读写 DB → 注入 X-Crispy-Page-Cache。不存储页面 HTML。',
+        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。预览 Cookie / ?nocache → BYPASS。',
       },
       {
         type: 'h3',
@@ -1056,7 +1056,8 @@ curl -I http://localhost:3333/
         type: 'table',
         headers: ['路径', '职责'],
         rows: [
-          ['src/frontend-cache/dbCache.ts', 'withDbCache、touchRouteCacheEntry、purge、getDbCacheStats'],
+          ['src/frontend-cache/dbCache.ts', 'withDbCache、resolveRouteCacheFromDb、storeRouteHtmlCache、purge、getDbCacheStats'],
+          ['src/frontend-cache/constants.ts', 'DEFAULT_PAGE_REVALIDATE 等 Global 默认值'],
           ['src/frontend-cache/getCacheSettings.ts', '读 cache-settings Global（防循环）'],
           ['src/frontend-cache/middlewareCache.ts', 'Edge 安全 settings 类型 + internal API fetch'],
           ['src/frontend-cache/registry.ts', 'Admin 可清除项注册表'],
@@ -1082,7 +1083,7 @@ curl -I http://localhost:3333/
           'frontend-cache-entries 在 SYSTEM_COLLECTION_SLUGS 中，无 trash/versions',
           'SQLite dev：schema push 新增表时选 create table，勿 rename 到 _xxx_v 版本表',
           'Postgres 生产：Collection 变更需 pnpm migrate:create + migrate',
-          '当前不缓存整页 HTML；Next.js export const revalidate 仍控制页面段 ISR，与 DB 缓存并行',
+          '页面 HTML 由 DB + middleware 负责；Next.js 页面段 revalidate=false，勿再叠加 ISR',
         ],
       },
       {
@@ -1192,7 +1193,7 @@ curl -I http://localhost:3333/
           ['Custom View（admin.views）', '独立 Admin 页面', 'dev-docs、api-docs、ai-agent'],
           ['utilities 薄封装', 'Payload API 语义不足', 'trashOrDeleteDocument'],
           ['独立 API 路由', '非 CRUD 能力', '/api/ai/*、/api/openapi.json'],
-          ['前台 Next.js', '访客站点与 ISR', 'src/app/(frontend)/'],
+          ['前台 Next.js', '访客站点（DB HTML 缓存）', 'src/app/(frontend)/'],
         ],
       },
       {
@@ -1233,7 +1234,7 @@ curl -I http://localhost:3333/
       {
         type: 'ul',
         items: [
-          '前台 (frontend) 不加载 Admin bundle；数据查询走 DB 缓存（见 #frontend-cache），页面段仍可用 Next.js revalidate',
+          '前台 (frontend) 不加载 Admin bundle；数据查询走 DB 缓存（见 #frontend-cache），页面 HTML 走 DB + middleware（revalidate=false）',
           'Admin 列表避免 populate 大字段（Lexical 正文）；详情页再提高 depth',
           '语义搜索 / embedding 走 Postgres pgvector + 独立 API，不经 Admin 渲染链',
           '生产媒体用 S3（S3_*），避免本机磁盘成为瓶颈',

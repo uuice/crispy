@@ -10,9 +10,8 @@ import PageClient from './page.client'
 import { notFound } from 'next/navigation'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
-export const revalidate = PAGE_REVALIDATE_SECONDS
+export const revalidate = false
 
 type Args = {
   params: Promise<{

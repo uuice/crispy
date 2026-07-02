@@ -1,10 +1,12 @@
 import { resolveCacheEntries } from '@/frontend-cache/registry'
+import { purgeDbCacheByRoutePaths } from '@/frontend-cache/dbCache'
 import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
 import { requireEditorSession } from '@/utilities/requireEditorSession'
 
 type PurgeRequestBody = {
   ids?: string[]
   all?: boolean
+  routePaths?: string[]
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -29,10 +31,24 @@ export async function POST(request: Request): Promise<Response> {
     })
   }
 
+  const routePaths = body.routePaths?.filter(Boolean)
+
+  if (routePaths?.length) {
+    const deleted = await purgeDbCacheByRoutePaths(routePaths)
+
+    return Response.json({
+      ok: true,
+      purged: routePaths.length,
+      failed: 0,
+      deleted,
+      results: [],
+    })
+  }
+
   const ids = body.ids
 
   if (!ids?.length) {
-    return Response.json({ error: 'Provide ids or set all: true' }, { status: 400 })
+    return Response.json({ error: 'Provide ids, routePaths, or set all: true' }, { status: 400 })
   }
 
   const entries = resolveCacheEntries(ids)

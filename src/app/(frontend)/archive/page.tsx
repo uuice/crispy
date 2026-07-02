@@ -5,9 +5,8 @@ import React from 'react'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { queryArchiveGroups } from '@/utilities/queryPostsByTaxonomy'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
-export const revalidate = PAGE_REVALIDATE_SECONDS
+export const revalidate = false
 
 export default async function ArchivePage() {
   const groups = await queryArchiveGroups()

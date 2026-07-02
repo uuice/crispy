@@ -12,6 +12,8 @@ import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { searchContentBySemantics } from '@/search/semanticSearch'
 import type { Search as SearchDoc } from '@/payload-types'
 
+export const revalidate = false
+
 type Args = {
   searchParams: Promise<{
     q: string

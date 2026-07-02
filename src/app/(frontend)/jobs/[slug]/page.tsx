@@ -7,10 +7,8 @@ import React, { cache } from 'react'
 import RichText from '@/components/RichText'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { DEFAULT_SITE_NAME, getSiteName } from '@/utilities/getSiteSettings'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
-export const dynamic = 'force-static'
-export const revalidate = PAGE_REVALIDATE_SECONDS
+export const revalidate = false
 
 const employmentLabels: Record<string, string> = {
   'full-time': '全职',

@@ -149,6 +149,7 @@ export interface Config {
     'ai-settings': AiSetting;
     'comment-settings': CommentSetting;
     'cache-settings': CacheSetting;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -157,6 +158,7 @@ export interface Config {
     'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
     'comment-settings': CommentSettingsSelect<false> | CommentSettingsSelect<true>;
     'cache-settings': CacheSettingsSelect<false> | CacheSettingsSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -165,6 +167,7 @@ export interface Config {
   user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
+      purgeExpiredFrontendCache: TaskPurgeExpiredFrontendCache;
       createCollectionExport: TaskCreateCollectionExport;
       createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
@@ -1132,6 +1135,9 @@ export interface FrontendCacheEntry {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Data cache JSON payload, or route HTML metadata (html, contentType, statusCode).
+   */
   cachedValue?:
     | {
         [k: string]: unknown;
@@ -1656,7 +1662,12 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'purgeExpiredFrontendCache'
+          | 'createCollectionExport'
+          | 'createCollectionImport'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1689,10 +1700,21 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish') | null;
+  taskSlug?:
+    | ('inline' | 'purgeExpiredFrontendCache' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish')
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2835,6 +2857,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3084,7 +3107,7 @@ export interface CacheSetting {
    */
   cachingEnabled?: boolean | null;
   /**
-   * DB 路由缓存 TTL（秒），用于 middleware X-Crispy-Page-Cache 与 route 条目过期。与代码中 export const revalidate 无关，后者为 Next.js 生产环境可选第二层。
+   * 页面 HTML 缓存 TTL（秒）：middleware DB 直出、route 条目过期与定时清理均使用此值。唯一页面层 TTL，不依赖 Next.js ISR。
    */
   pageRevalidateSeconds?: number | null;
   /**
@@ -3095,6 +3118,24 @@ export interface CacheSetting {
    * 在 HTTP 响应中输出 X-Crispy-Page-Cache / X-Crispy-Data-Cache 等调试头（HIT/MISS/STALE/BYPASS）。
    */
   exposeCacheHeaders?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3222,6 +3263,16 @@ export interface CacheSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3229,6 +3280,16 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgeExpiredFrontendCache".
+ */
+export interface TaskPurgeExpiredFrontendCache {
+  input?: unknown;
+  output: {
+    deleted: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

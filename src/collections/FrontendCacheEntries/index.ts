@@ -70,7 +70,7 @@ export const FrontendCacheEntries: CollectionConfig = {
       type: 'json',
       label: adminLabels.cachePayload,
       admin: {
-        condition: (_, siblingData) => siblingData?.kind === 'data',
+        description: 'Data cache JSON payload, or route HTML metadata (html, contentType, statusCode).',
       },
     },
     {

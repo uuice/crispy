@@ -3,10 +3,29 @@ import { getPayload } from 'payload'
 
 import { FRONTEND_CACHE_ENTRIES_SLUG } from '@/collections/FrontendCacheEntries'
 import type { FrontendCacheEntry as RegistryCacheEntry } from '@/frontend-cache/registry'
+import { getExactRegistryRoutePaths } from '@/frontend-cache/registry'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
+import {
+  CACHE_EXPIRING_SOON_MS,
+  isDynamicRoutePath,
+  matchRoutePattern,
+} from '@/frontend-cache/routePatterns'
 
 type CacheKind = 'data' | 'route'
+
+export type RouteCachedValue = {
+  html: string
+  contentType?: string
+  statusCode?: number
+}
+
+export type RouteCacheLookupResult = {
+  status: CrispyCacheStatus
+  html?: string
+  contentType?: string
+  statusCode?: number
+}
 
 type FrontendCacheEntryDoc = {
   id: number | string
@@ -57,6 +76,26 @@ function serializeCachedValue(value: unknown): Record<string, unknown> | unknown
   return JSON.parse(JSON.stringify(value)) as Record<string, unknown> | unknown[] | string | number | boolean | null
 }
 
+function parseRouteCachedValue(value: unknown): RouteCachedValue | null {
+  if (!value || typeof value !== 'object') return null
+  const record = value as Record<string, unknown>
+  if (typeof record.html !== 'string' || record.html.length === 0) return null
+  return {
+    html: record.html,
+    contentType: typeof record.contentType === 'string' ? record.contentType : undefined,
+    statusCode: typeof record.statusCode === 'number' ? record.statusCode : undefined,
+  }
+}
+
+async function deleteEntryById(id: number | string): Promise<void> {
+  const payload = await getPayload({ config: configPromise })
+  await payload.delete({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    id,
+    overrideAccess: true,
+  })
+}
+
 async function upsertCacheEntry(input: {
   cacheKey: string
   kind: CacheKind
@@ -71,7 +110,8 @@ async function upsertCacheEntry(input: {
     cacheKey: input.cacheKey,
     kind: input.kind,
     tags: toTagRows(input.tags),
-    cachedValue: input.kind === 'data' ? serializeCachedValue(input.cachedValue) : null,
+    cachedValue:
+      input.cachedValue !== undefined ? serializeCachedValue(input.cachedValue) : null,
     routePath: input.routePath ?? null,
     expiresAt,
   }
@@ -107,48 +147,99 @@ async function touchEntryTimestamp(entry: FrontendCacheEntryDoc, ttlSeconds: num
   })
 }
 
-export async function touchRouteCacheEntry(options: {
+export async function resolveRouteCacheFromDb(options: {
   routePath: string
   ttlSeconds: number
   cachingEnabled: boolean
   bypass: boolean
-}): Promise<CrispyCacheStatus> {
+}): Promise<RouteCacheLookupResult> {
   if (options.bypass || !options.cachingEnabled || options.ttlSeconds <= 0) {
-    return 'BYPASS'
+    return { status: 'BYPASS' }
   }
 
   const cacheKey = routeCacheKey(options.routePath)
   const existing = await findEntryByCacheKey(cacheKey)
 
   if (!existing) {
-    await upsertCacheEntry({
-      cacheKey,
-      kind: 'route',
-      tags: [`route:${options.routePath}`],
-      routePath: options.routePath,
-      ttlSeconds: options.ttlSeconds,
-    })
-    return 'MISS'
+    return { status: 'MISS' }
   }
 
   const status = resolveCacheStatus(new Date(existing.updatedAt).getTime(), options.ttlSeconds)
 
   if (status === 'MISS') {
-    await upsertCacheEntry({
-      cacheKey,
-      kind: 'route',
-      tags: [`route:${options.routePath}`],
-      routePath: options.routePath,
-      ttlSeconds: options.ttlSeconds,
-    })
-    return 'MISS'
+    await deleteEntryById(existing.id)
+    return { status: 'MISS' }
   }
 
   if (status === 'STALE') {
     await touchEntryTimestamp(existing, options.ttlSeconds)
   }
 
-  return status
+  const cached = parseRouteCachedValue(existing.cachedValue)
+  if (!cached) {
+    return { status: 'MISS' }
+  }
+
+  return {
+    status,
+    html: cached.html,
+    contentType: cached.contentType ?? 'text/html; charset=utf-8',
+    statusCode: cached.statusCode ?? 200,
+  }
+}
+
+/** @deprecated Use resolveRouteCacheFromDb */
+export async function touchRouteCacheEntry(options: {
+  routePath: string
+  ttlSeconds: number
+  cachingEnabled: boolean
+  bypass: boolean
+}): Promise<CrispyCacheStatus> {
+  const result = await resolveRouteCacheFromDb(options)
+  return result.status
+}
+
+export async function storeRouteHtmlCache(options: {
+  routePath: string
+  html: string
+  contentType?: string
+  statusCode?: number
+  ttlSeconds: number
+  cachingEnabled: boolean
+}): Promise<void> {
+  if (!options.cachingEnabled || options.ttlSeconds <= 0) return
+  if (options.html.length === 0) return
+  if (options.statusCode !== undefined && options.statusCode !== 200) return
+
+  await upsertCacheEntry({
+    cacheKey: routeCacheKey(options.routePath),
+    kind: 'route',
+    tags: [`route:${options.routePath}`],
+    routePath: options.routePath,
+    ttlSeconds: options.ttlSeconds,
+    cachedValue: {
+      html: options.html,
+      contentType: options.contentType ?? 'text/html; charset=utf-8',
+      statusCode: options.statusCode ?? 200,
+    },
+  })
+}
+
+export async function purgeExpiredCacheEntries(): Promise<number> {
+  const payload = await getPayload({ config: configPromise })
+  const now = new Date().toISOString()
+
+  const result = await payload.delete({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    overrideAccess: true,
+    where: {
+      expiresAt: {
+        less_than: now,
+      },
+    },
+  })
+
+  return result.docs.length
 }
 
 export async function withDbCache<T>(options: {
@@ -226,6 +317,56 @@ export async function purgeDbCacheByRoutePath(routePath: string): Promise<number
   return result.docs.length
 }
 
+export async function purgeDbCacheByRoutePattern(pattern: string): Promise<number> {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    overrideAccess: true,
+    pagination: false,
+    limit: 5000,
+    depth: 0,
+    where: {
+      kind: { equals: 'route' },
+    },
+    select: {
+      id: true,
+      routePath: true,
+    },
+  })
+
+  const ids = result.docs
+    .filter((doc) => {
+      const routePath = (doc as { routePath?: string | null }).routePath
+      return routePath ? matchRoutePattern(pattern, routePath) : false
+    })
+    .map((doc) => doc.id)
+
+  if (ids.length === 0) return 0
+
+  const deleted = await payload.delete({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    overrideAccess: true,
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  })
+
+  return deleted.docs.length
+}
+
+export async function purgeDbCacheByRoutePaths(routePaths: string[]): Promise<number> {
+  if (routePaths.length === 0) return 0
+
+  let deleted = 0
+  for (const routePath of [...new Set(routePaths.filter(Boolean))]) {
+    deleted += await purgeDbCacheByRoutePath(routePath)
+  }
+  return deleted
+}
+
 export async function purgeAllDbCache(): Promise<number> {
   const payload = await getPayload({ config: configPromise })
 
@@ -246,12 +387,57 @@ export type DbCacheStats = {
   total: number
   data: number
   route: number
+  routeWithHtml: number
+  routeMetadataOnly: number
+  expiredPending: number
+  expiringSoon: number
+}
+
+export type DynamicRouteCacheExpiryStatus = 'valid' | 'expiringSoon' | 'expired'
+
+export type DynamicRouteCacheRow = {
+  id: number | string
+  routePath: string
+  hasHtml: boolean
+  htmlBytes: number | null
+  expiresAt: string | null
+  updatedAt: string
+  expiryStatus: DynamicRouteCacheExpiryStatus
+}
+
+function resolveExpiryStatus(expiresAt: string | null | undefined, nowMs: number): DynamicRouteCacheExpiryStatus {
+  if (!expiresAt) return 'valid'
+  const expiresMs = new Date(expiresAt).getTime()
+  if (expiresMs <= nowMs) return 'expired'
+  if (expiresMs <= nowMs + CACHE_EXPIRING_SOON_MS) return 'expiringSoon'
+  return 'valid'
+}
+
+function countRouteHtmlFromDocs(docs: { cachedValue?: unknown }[]): {
+  routeWithHtml: number
+  routeMetadataOnly: number
+} {
+  let routeWithHtml = 0
+
+  for (const doc of docs) {
+    if (parseRouteCachedValue(doc.cachedValue)) {
+      routeWithHtml += 1
+    }
+  }
+
+  return {
+    routeWithHtml,
+    routeMetadataOnly: docs.length - routeWithHtml,
+  }
 }
 
 export async function getDbCacheStats(): Promise<DbCacheStats> {
   const payload = await getPayload({ config: configPromise })
+  const nowMs = Date.now()
+  const nowIso = new Date(nowMs).toISOString()
+  const soonIso = new Date(nowMs + CACHE_EXPIRING_SOON_MS).toISOString()
 
-  const [total, data, route] = await Promise.all([
+  const [total, data, route, expiredPending, expiringSoon, routeDocsResult] = await Promise.all([
     payload.count({
       collection: FRONTEND_CACHE_ENTRIES_SLUG,
       overrideAccess: true,
@@ -266,13 +452,103 @@ export async function getDbCacheStats(): Promise<DbCacheStats> {
       overrideAccess: true,
       where: { kind: { equals: 'route' } },
     }),
+    payload.count({
+      collection: FRONTEND_CACHE_ENTRIES_SLUG,
+      overrideAccess: true,
+      where: {
+        expiresAt: {
+          less_than: nowIso,
+        },
+      },
+    }),
+    payload.count({
+      collection: FRONTEND_CACHE_ENTRIES_SLUG,
+      overrideAccess: true,
+      where: {
+        and: [
+          {
+            expiresAt: {
+              greater_than_equal: nowIso,
+            },
+          },
+          {
+            expiresAt: {
+              less_than_equal: soonIso,
+            },
+          },
+        ],
+      },
+    }),
+    payload.find({
+      collection: FRONTEND_CACHE_ENTRIES_SLUG,
+      overrideAccess: true,
+      pagination: false,
+      limit: 5000,
+      depth: 0,
+      where: { kind: { equals: 'route' } },
+      select: {
+        cachedValue: true,
+      },
+    }),
   ])
+
+  const { routeWithHtml, routeMetadataOnly } = countRouteHtmlFromDocs(routeDocsResult.docs)
 
   return {
     total: total.totalDocs,
     data: data.totalDocs,
     route: route.totalDocs,
+    routeWithHtml,
+    routeMetadataOnly,
+    expiredPending: expiredPending.totalDocs,
+    expiringSoon: expiringSoon.totalDocs,
   }
+}
+
+export async function getDynamicRouteCacheEntries(limit = 500): Promise<DynamicRouteCacheRow[]> {
+  const payload = await getPayload({ config: configPromise })
+  const exactRegistryPaths = getExactRegistryRoutePaths()
+  const nowMs = Date.now()
+
+  const result = await payload.find({
+    collection: FRONTEND_CACHE_ENTRIES_SLUG,
+    overrideAccess: true,
+    pagination: false,
+    limit,
+    depth: 0,
+    sort: '-updatedAt',
+    where: {
+      kind: { equals: 'route' },
+    },
+    select: {
+      routePath: true,
+      cachedValue: true,
+      expiresAt: true,
+      updatedAt: true,
+    },
+  })
+
+  const rows: DynamicRouteCacheRow[] = []
+
+  for (const doc of result.docs) {
+    const entry = doc as FrontendCacheEntryDoc
+    const routePath = entry.routePath
+    if (!routePath || !isDynamicRoutePath(routePath, exactRegistryPaths)) continue
+
+    const cached = parseRouteCachedValue(entry.cachedValue)
+
+    rows.push({
+      id: entry.id,
+      routePath,
+      hasHtml: Boolean(cached),
+      htmlBytes: cached ? new TextEncoder().encode(cached.html).length : null,
+      expiresAt: entry.expiresAt ?? null,
+      updatedAt: entry.updatedAt,
+      expiryStatus: resolveExpiryStatus(entry.expiresAt, nowMs),
+    })
+  }
+
+  return rows
 }
 
 export type RegistryCacheStatus = {
@@ -287,12 +563,23 @@ function entryMatchesRegistryDoc(
     routePath?: string | null
     tags?: { tag?: string | null }[] | null
   },
+  exactRegistryPaths: ReadonlySet<string>,
 ): boolean {
   if (entry.kind === 'tag') {
     return doc.tags?.some((row) => row.tag === entry.target) ?? false
   }
 
-  return doc.routePath === entry.target || doc.cacheKey === routeCacheKey(entry.target)
+  const routePath = doc.routePath
+  if (!routePath) {
+    return doc.cacheKey === routeCacheKey(entry.target)
+  }
+
+  if ((entry.pathMatch ?? 'exact') === 'pattern') {
+    if (exactRegistryPaths.has(routePath)) return false
+    return matchRoutePattern(entry.target, routePath)
+  }
+
+  return routePath === entry.target || doc.cacheKey === routeCacheKey(entry.target)
 }
 
 /** Map registry entry id → whether matching DB rows exist (single query). */
@@ -314,13 +601,15 @@ export async function getRegistryCacheStatuses(
     },
   })
 
+  const exactRegistryPaths = getExactRegistryRoutePaths()
+
   const statuses: Record<string, RegistryCacheStatus> = Object.fromEntries(
     entries.map((entry) => [entry.id, { active: false, count: 0 }]),
   )
 
   for (const doc of result.docs) {
     for (const entry of entries) {
-      if (!entryMatchesRegistryDoc(entry, doc)) continue
+      if (!entryMatchesRegistryDoc(entry, doc, exactRegistryPaths)) continue
       const current = statuses[entry.id]
       if (!current) continue
       current.count += 1

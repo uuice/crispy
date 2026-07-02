@@ -1,6 +1,7 @@
 import {
   purgeAllDbCache,
   purgeDbCacheByRoutePath,
+  purgeDbCacheByRoutePattern,
   purgeDbCacheByTags,
 } from '@/frontend-cache/dbCache'
 import type { FrontendCacheEntry } from '@/frontend-cache/registry'
@@ -16,10 +17,15 @@ export type PurgeCacheResult = {
 
 export async function purgeCacheEntry(entry: FrontendCacheEntry): Promise<PurgeCacheResult> {
   try {
-    const deleted =
-      entry.kind === 'tag'
-        ? await purgeDbCacheByTags([entry.target])
-        : await purgeDbCacheByRoutePath(entry.target)
+    let deleted = 0
+
+    if (entry.kind === 'tag') {
+      deleted = await purgeDbCacheByTags([entry.target])
+    } else if (entry.pathMatch === 'pattern') {
+      deleted = await purgeDbCacheByRoutePattern(entry.target)
+    } else {
+      deleted = await purgeDbCacheByRoutePath(entry.target)
+    }
 
     return {
       id: entry.id,

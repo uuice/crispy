@@ -1,6 +1,8 @@
 export type FrontendCacheKind = 'tag' | 'path'
 
-export type FrontendCacheGroup = 'global' | 'collection' | 'page' | 'route' | 'sitemap' | 'data'
+export type FrontendCachePathMatch = 'exact' | 'pattern'
+
+export type FrontendCacheGroup = 'global' | 'collection' | 'page' | 'route' | 'sitemap' | 'data' | 'dynamic'
 
 export type FrontendCacheEntry = {
   id: string
@@ -12,6 +14,8 @@ export type FrontendCacheEntry = {
   target: string
   /** Tag name or URL path for purge */
   pathType?: 'page' | 'layout'
+  /** Path registry match mode; defaults to exact for path entries. */
+  pathMatch?: FrontendCachePathMatch
 }
 
 export const FRONTEND_CACHE_REGISTRY: FrontendCacheEntry[] = [
@@ -205,6 +209,56 @@ export const FRONTEND_CACHE_REGISTRY: FrontendCacheEntry[] = [
     kind: 'path',
     target: '/rss.xml',
   },
+  // Dynamic route patterns (aggregate purge + status counts)
+  {
+    id: 'pattern-posts-slug',
+    label: '文章详情',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/posts/[slug]',
+    pathMatch: 'pattern',
+  },
+  {
+    id: 'pattern-posts-page',
+    label: '文章分页',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/posts/page/[pageNumber]',
+    pathMatch: 'pattern',
+  },
+  {
+    id: 'pattern-page-slug',
+    label: '自定义页面',
+    description: '根路径 Pages Collection（如 /about）',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/[slug]',
+    pathMatch: 'pattern',
+  },
+  {
+    id: 'pattern-category-slug',
+    label: '分类归档',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/category/[slug]',
+    pathMatch: 'pattern',
+  },
+  {
+    id: 'pattern-tag-slug',
+    label: '标签归档',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/tag/[slug]',
+    pathMatch: 'pattern',
+  },
+  {
+    id: 'pattern-jobs-slug',
+    label: '招聘详情',
+    group: 'dynamic',
+    kind: 'path',
+    target: '/jobs/[slug]',
+    pathMatch: 'pattern',
+  },
 ]
 
 const registryById = new Map(FRONTEND_CACHE_REGISTRY.map((entry) => [entry.id, entry]))
@@ -227,4 +281,13 @@ export const FRONTEND_CACHE_GROUP_LABELS: Record<FrontendCacheGroup, string> = {
   route: '路由',
   sitemap: 'Sitemap',
   data: '数据缓存',
+  dynamic: '动态路由',
+}
+
+export function getExactRegistryRoutePaths(): Set<string> {
+  return new Set(
+    FRONTEND_CACHE_REGISTRY.filter(
+      (entry) => entry.kind === 'path' && (entry.pathMatch ?? 'exact') === 'exact',
+    ).map((entry) => entry.target),
+  )
 }

@@ -6,9 +6,8 @@ import { PostArchiveLayout } from '@/components/PostArchiveLayout'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { queryPostsByTagSlug } from '@/utilities/queryPostsByTaxonomy'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
-export const revalidate = PAGE_REVALIDATE_SECONDS
+export const revalidate = false
 
 type Args = {
   params: Promise<{ slug: string }>

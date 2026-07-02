@@ -6,10 +6,8 @@ import { GalleryGrid } from '@/components/Gallery/GalleryGrid'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { DEFAULT_SITE_NAME } from '@/utilities/getSiteSettings'
 import { getCachedGalleryItems } from '@/utilities/getGalleryItems'
-import { PAGE_REVALIDATE_SECONDS } from '@/frontend-cache/constants'
 
-export const dynamic = 'force-static'
-export const revalidate = PAGE_REVALIDATE_SECONDS
+export const revalidate = false
 
 export default async function GalleryPage() {
   const items = await getCachedGalleryItems()

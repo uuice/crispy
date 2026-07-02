@@ -1,5 +1,4 @@
-import { touchRouteCacheEntry } from '@/frontend-cache/dbCache'
-import type { CrispyCacheStatus } from '@/frontend-cache/headers'
+import { resolveRouteCacheFromDb, type RouteCacheLookupResult } from '@/frontend-cache/dbCache'
 
 export type RouteCacheTouchRequest = {
   routePath: string
@@ -8,8 +7,8 @@ export type RouteCacheTouchRequest = {
   bypass: boolean
 }
 
-export async function resolveRouteCacheStatusFromDb(
+export async function resolveRouteCacheFromDbRequest(
   request: RouteCacheTouchRequest,
-): Promise<CrispyCacheStatus> {
-  return touchRouteCacheEntry(request)
+): Promise<RouteCacheLookupResult> {
+  return resolveRouteCacheFromDb(request)
 }

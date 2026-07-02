@@ -31,6 +31,7 @@ import { i18nConfig } from './i18n'
 import { adminLabels } from './i18n/admin-labels'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { purgeExpiredFrontendCacheTask } from './jobs/purgeExpiredFrontendCache'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -189,6 +190,6 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    tasks: [purgeExpiredFrontendCacheTask],
   },
 })
