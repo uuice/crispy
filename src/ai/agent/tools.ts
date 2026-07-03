@@ -17,7 +17,7 @@ import {
   isAgentCollection,
   isAgentGlobal,
 } from '@/ai/agent/resources'
-import type { Config, PayloadQueryPreset } from '@/payload-types'
+import type { AuditLog, Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
@@ -88,7 +88,7 @@ function summarizeQueryPreset(preset: PayloadQueryPreset) {
   }
 }
 
-function summarizeAuditLog(doc: Record<string, unknown>) {
+function summarizeAuditLog(doc: AuditLog) {
   const changes = doc.changes
   let changesPreview: string | null = null
 
@@ -793,7 +793,7 @@ export async function executeAgentTool(
         totalDocs: logs.totalDocs,
         page: logs.page,
         totalPages: logs.totalPages,
-        docs: logs.docs.map((doc) => summarizeAuditLog(doc as Record<string, unknown>)),
+        docs: logs.docs.map((doc) => summarizeAuditLog(doc)),
       }
       break
     }
