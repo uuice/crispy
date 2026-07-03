@@ -6,6 +6,7 @@ import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
+import { FrontendAiAssistant } from '@/components/FrontendAiAssistant'
 import { ThemePreviewBanner } from '@/components/ThemePreviewBanner'
 import { ThemePreviewShell } from '@/components/ThemePreview/ThemePreviewShell'
 import { Providers } from '@/providers'
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             ) : null}
             <ThemePreviewBanner />
             <ThemeLayout layoutData={layoutData}>{children}</ThemeLayout>
+            <FrontendAiAssistant />
           </ThemePreviewShell>
         </Providers>
       </body>

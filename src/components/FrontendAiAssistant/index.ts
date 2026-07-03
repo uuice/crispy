@@ -1,0 +1,1 @@
+export { FrontendAiAssistant } from './FrontendAiAssistant'
