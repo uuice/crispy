@@ -1,4 +1,4 @@
-import { getPagePath, getPostPath, getPostsListPath, getUserPath } from '@/utilities/frontendPaths'
+import { getPagePath, getPostPath, getPostsListPath, getUserPath } from '../utilities/frontendPaths'
 
 /** Permanent redirects from legacy public URLs to collection-aligned routes. */
 export function resolveLegacyFrontendRedirect(pathname: string): string | null {
