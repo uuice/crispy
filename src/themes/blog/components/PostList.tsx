@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { PostListItem } from '@/utilities/queryFrontendData'
+import type { PostListItem } from '../data/types'
 
 import { PostCard } from './PostCard'
 

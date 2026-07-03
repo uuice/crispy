@@ -1,9 +1,10 @@
 import type { GlobalConfig } from 'payload'
 
-import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
-import { isEditor } from '@/access/roles'
 import { anyone } from '@/access/anyone'
+import { isEditor } from '@/access/roles'
+import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
+import { getFrontendThemeSelectOptions } from '@/themes/definitions'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
@@ -70,6 +71,17 @@ export const SiteSettings: GlobalConfig = {
       type: 'checkbox',
       label: adminLabels.enableRss,
       defaultValue: true,
+    },
+    {
+      name: 'frontendTheme',
+      type: 'select',
+      label: adminLabels.frontendTheme,
+      defaultValue: 'blog',
+      options: getFrontendThemeSelectOptions(),
+      admin: {
+        position: 'sidebar',
+        description: '切换主题后请在「缓存管理」清除前台 HTML 缓存。',
+      },
     },
     {
       name: 'adminThemeHue',

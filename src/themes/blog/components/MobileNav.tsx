@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { NavItem } from '@/utilities/queryFrontendData'
+import type { NavItem } from '../data/types'
 
 type Props = {
   menu: NavItem[]

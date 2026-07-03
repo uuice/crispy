@@ -2,7 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import holidayData from '@/data/holiday.json'
-import type { SidebarCategory, SidebarTag, SidebarUser } from '@/utilities/queryFrontendData'
+import type { SidebarCategory, SidebarTag, SidebarUser } from '../data/types'
 
 import { SidebarCountdown } from './SidebarCountdown'
 

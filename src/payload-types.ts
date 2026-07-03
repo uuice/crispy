@@ -3009,6 +3009,10 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
+  /**
+   * 切换主题后请在「缓存管理」清除前台 HTML 缓存。
+   */
+  frontendTheme?: 'blog' | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -3186,6 +3190,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
       };
   analyticsId?: T;
   enableRss?: T;
+  frontendTheme?: T;
   adminThemeHue?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import type { Category, Tag } from '@/payload-types'
+import type { Category, GalleryItem, Tag } from '@/payload-types'
 
 import { getCachedFriendLinks } from '@/utilities/getFriendLinks'
 import {
@@ -13,40 +13,17 @@ import {
   slugifyUserName,
 } from '@/utilities/frontendPaths'
 
-export type PostListItem = {
-  title: string
-  url: string
-  excerpt?: string
-  pubDate: string
-  categories: string[]
-  tags: string[]
-}
+import type { NavItem, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
+import { resolveBlogMenu } from './constants'
 
-export type SidebarCategory = {
-  id: string
-  title: string
-  url: string
-  count: number
-}
-
-export type SidebarTag = {
-  id: string
-  title: string
-  url: string
-  count: number
-}
-
-export type NavItem = {
-  title: string
-  url: string
-  target?: string | null
-}
-
-export type SidebarUser = {
-  title: string
-  excerpt?: string
-  url: string
-}
+export type {
+  NavItem,
+  PostListItem,
+  SidebarCategory,
+  SidebarData,
+  SidebarTag,
+  SidebarUser,
+} from './types'
 
 const POST_CARD_SELECT = {
   title: true,
@@ -394,4 +371,25 @@ export const queryJobs = cache(async () => {
   })
 
   return result.docs
+})
+
+export const queryGalleryItems = cache(async (): Promise<GalleryItem[]> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'gallery-items',
+    depth: 1,
+    limit: 100,
+    overrideAccess: false,
+    pagination: false,
+    sort: 'sort',
+    where: { enabled: { equals: true } },
+  })
+
+  return result.docs
+})
+
+export const queryBlogNavMenu = cache(async (): Promise<NavItem[]> => {
+  const sidebar = await querySidebarData()
+  return resolveBlogMenu(sidebar.menu)
 })

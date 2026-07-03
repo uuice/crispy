@@ -99,6 +99,7 @@ export const adminLabels = {
   url: '链接',
   analyticsId: '统计 ID',
   enableRss: '启用 RSS',
+  frontendTheme: '前台主题',
   adminAppearance: 'Admin 外观',
   adminThemeHue: '主题色相 (OKLCH)',
   navItems: '导航项',

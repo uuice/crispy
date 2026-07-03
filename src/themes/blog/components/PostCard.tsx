@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { PostListItem } from '@/utilities/queryFrontendData'
+import type { PostListItem } from '../data/types'
 
 type Props = PostListItem
 

@@ -12,7 +12,7 @@ type Props = {
 
 export function GalleryGrid({ items }: Props) {
   return (
-    <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+    <ul className="gallery-grid">
       {items.map((item) => {
         const image = item.image
         const resource = image && typeof image === 'object' ? (image as MediaType) : null
@@ -22,20 +22,20 @@ export function GalleryGrid({ items }: Props) {
         }
 
         return (
-          <li key={item.id} className="group">
-            <figure className="flex flex-col gap-2">
-              <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted">
+          <li key={item.id} className="gallery-grid-item group">
+            <figure className="gallery-grid-figure">
+              <div className="gallery-grid-media">
                 <Media
                   fill
-                  imgClassName="object-cover transition-transform duration-300 group-hover:scale-105"
+                  imgClassName="gallery-grid-image"
                   resource={resource}
                 />
               </div>
               <figcaption>
-                <p className="text-sm font-medium leading-tight">{item.title}</p>
-                {item.description && (
-                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
-                )}
+                <p className="gallery-grid-title">{item.title}</p>
+                {item.description ? (
+                  <p className="gallery-grid-description">{item.description}</p>
+                ) : null}
               </figcaption>
             </figure>
           </li>

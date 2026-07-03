@@ -2,35 +2,35 @@ import Link from 'next/link'
 import React from 'react'
 
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
-import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
-import { querySidebarData, type NavItem } from '@/utilities/queryFrontendData'
 
-import { BackToTop, FooterBackToTop } from './BackToTop'
-import { BlogSearch } from './BlogSearch'
-import { DarkModeToggle } from './DarkModeToggle'
-import { MobileNav } from './MobileNav'
-import { Sidebar } from './Sidebar'
-import { SiteCuteDecor } from './SiteCuteDecor'
-import { ThemeColor } from './ThemeColor'
+import { resolveBlogMenu } from './data/constants'
+import type { SidebarData } from './data/types'
 
-const defaultMenu: NavItem[] = [
-  { title: '首页', url: '/', target: '_self' },
-  { title: '文章', url: getPostsListPath(), target: '_self' },
-  { title: '友链', url: '/links', target: '_self' },
-  { title: '关于', url: getPagePath('about'), target: '_self' },
-  { title: '导航', url: '/navigations', target: '_self' },
-  { title: '小游戏', url: '/games', target: '_self' },
-]
+import { BackToTop, FooterBackToTop } from './components/BackToTop'
+import { BlogSearch } from './components/BlogSearch'
+import { DarkModeToggle } from './components/DarkModeToggle'
+import { MobileNav } from './components/MobileNav'
+import { Sidebar } from './components/Sidebar'
+import { SiteCuteDecor } from './components/SiteCuteDecor'
+import { ThemeColor } from './components/ThemeColor'
 
 type Props = {
   children: React.ReactNode
+  layoutData?: unknown
 }
 
-export async function BlogLayout({ children }: Props) {
-  const [settings, sidebar] = await Promise.all([getCachedSiteSettings()(), querySidebarData()])
+const emptySidebar: SidebarData = {
+  categories: [],
+  tags: [],
+  menu: [],
+}
+
+export async function Layout({ children, layoutData }: Props) {
+  const settings = await getCachedSiteSettings()()
+  const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
-  const menu = sidebar.menu.length > 0 ? sidebar.menu : defaultMenu
+  const menu = resolveBlogMenu(sidebar.menu)
   const recordInfo = (settings as { recordSettings?: {
     showRecord?: boolean
     icpNumber?: string

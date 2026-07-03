@@ -6,9 +6,8 @@ import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
-import { BlogLayout } from '@/components/BlogSkin/BlogLayout'
-import { InitBlogTheme } from '@/components/BlogSkin/InitBlogTheme'
 import { Providers } from '@/providers'
+import { getActiveFrontendTheme } from '@/themes/registry'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
@@ -17,16 +16,19 @@ import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = await draftMode()
+  const [{ isEnabled }, theme] = await Promise.all([draftMode(), getActiveFrontendTheme()])
+  const ThemeLayout = theme.Layout
+  const ThemeInit = theme.InitTheme
+  const layoutData = theme.loadLayoutData ? await theme.loadLayoutData() : undefined
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="zh-CN" suppressHydrationWarning>
       <head>
-        <InitBlogTheme />
+        {ThemeInit ? <ThemeInit /> : null}
         <link href="/favicon.svg" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body className="blog-skin min-h-screen flex flex-col antialiased">
+      <body className={cn(theme.bodyClassName, 'min-h-screen flex flex-col antialiased')}>
         <Providers>
           {isEnabled ? (
             <AdminBar
@@ -35,7 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               }}
             />
           ) : null}
-          <BlogLayout>{children}</BlogLayout>
+          <ThemeLayout layoutData={layoutData}>{children}</ThemeLayout>
         </Providers>
       </body>
     </html>
