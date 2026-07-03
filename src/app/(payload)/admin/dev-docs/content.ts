@@ -32,7 +32,9 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['GraphQL Playground', '/api/graphql-playground（需 Admin 登录）'],
           ['MCP', 'http://localhost:3333/api/mcp'],
           ['AI 流式', 'POST /api/ai/stream（需 Admin 登录）'],
-          ['AI 助手（对话）', '/admin/ai-agent（需 Admin 登录）'],
+          ['AI 助手（后台）', '/admin/ai-agent（需 Admin 登录）'],
+          ['AI 助手（前台）', '右下角浮窗 + POST /api/ai/assistant（公开只读）'],
+          ['前台主题预览', '?theme_preview=blog|cms|kb（editor+ Cookie）'],
           ['AI 文档', '/admin/dev-docs#openai-api'],
           ['Swagger API', '/admin/api-docs（需 Admin 登录）'],
           ['OpenAPI JSON', 'GET /api/openapi.json（需 Admin 登录）'],
@@ -111,19 +113,26 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
 ├── src/
 │   ├── app/
 │   │   ├── (frontend)/          # 前台 SSR/RSC
+│   │   │   ├── api/ai/assistant # 公开只读 AI 助手 SSE
+│   │   │   └── next/exit-theme-preview
 │   │   └── (payload)/             # Admin + API + 二次开发文档
 │   │       ├── admin/[[...segments]]/
 │   │       ├── admin/dev-docs/    # 本文档页面
-│   │       └── api/               # Payload REST + AI 路由
+│   │       └── api/               # Payload REST + Admin AI 路由
 │   ├── collections/             # Posts, Pages, Media, Tags…
 │   ├── collections/defaults.ts  # trash/versions 默认值、内部 Collection 判定
 │   ├── Header/ Footer/ SiteSettings/ AiSettings/ CacheSettings/  # Globals
+│   ├── themes/                  # 前台可插拔主题（blog / cms / kb）
 │   ├── frontend-cache/          # 前台 DB 缓存（数据 + 路由状态）
 │   ├── CacheSettings/           # cache-settings Global 配置
 │   ├── access/                  # RBAC helpers
-│   ├── ai/                      # DeepSeek provider、Agent、embedding
+│   ├── ai/                      # LLM provider、Admin Agent、embedding
+│   │   ├── agent/               # 后台对话助手（CRUD 工具）
+│   │   └── frontend-assistant/  # 前台只读检索助手
 │   ├── components/AdminAi/      # 字段 AI 弹框、Lexical Feature
-│   ├── components/AdminAiAgent/ # 对话式 AI 助手
+│   ├── components/AdminAiAgent/ # 后台对话式 AI 助手
+│   ├── components/FrontendAiAssistant/  # 前台 AI 浮窗
+│   ├── components/FrontendThemePreview/ # 站点设置主题卡片
 │   ├── fields/ai/               # withAiTextField 等
 │   ├── plugins/                 # 官方 + 自建插件聚合
 │   ├── utilities/               # trashOrDeleteDocument 等横切工具
@@ -156,9 +165,10 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['PREVIEW_SECRET', '草稿 / Live Preview 鉴权'],
           ['CRON_SECRET', '定时发布 Jobs 鉴权'],
           ['MCP_API_KEY', '本地 verify 用，来自 seed 或 Admin MCP Keys'],
-          ['DEEPSEEK_API_KEY', 'Admin AI 助手（OpenAI 兼容）'],
+          ['DEEPSEEK_API_KEY', 'LLM API Key（Admin 字段 AI + 双端对话助手共用）'],
           ['DEEPSEEK_BASE_URL', '默认 https://api.deepseek.com（勿带 /v1 后缀）'],
           ['DEEPSEEK_MODEL', '默认 deepseek-chat'],
+          ['FRONTEND_THEME', '可选：blog | cms | kb，覆盖 site-settings.frontendTheme'],
           ['S3_*', '生产媒体存储（bucket、密钥、region 等）'],
           ['API_ACCESS_LOG_ENABLED', 'API 访问日志 middleware'],
         ],
@@ -260,7 +270,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
         rows: [
           ['header', '主导航', 'navItems[]（link 组）'],
           ['footer', '页脚', 'navItems[]'],
-          ['site-settings', '站点设置', 'siteName, description, logo, socialLinks[], rssEnabled, theme'],
+          ['site-settings', '站点设置', 'siteName, description, logo, socialLinks[], enableRss, frontendTheme, adminThemeHue'],
           ['comment-settings', '评论设置', 'enabled, moderation, guestComments, nesting, posts/pages 开关'],
           ['ai-settings', 'AI 设置', 'enabled, baseUrl, model, temperature, maxTokens, promptTemplates[]'],
           ['cache-settings', '缓存设置', 'cachingEnabled, pageRevalidateSeconds, exposeCacheHeaders'],
@@ -324,9 +334,10 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['GET /api/openapi.json', 'Admin Cookie', 'Swagger Spec；未登录 401'],
           ['GET /api/graphql-playground', 'Admin Cookie', 'GraphQL Playground；未登录 401'],
           ['POST /api/graphql', '按 Collection access', 'Cookie / users API-Key；权限与 REST 一致'],
-          ['POST /api/ai/*', 'Admin Cookie + RBAC', 'super-admin/editor 全量；author 仅自己的 posts'],
-          ['POST /api/ai/agent', 'Admin Cookie + RBAC', '对话式 AI 助手 SSE 流式'],
-          ['GET/DELETE /api/ai/agent/sessions', 'Admin Cookie', '会话列表 / 删除（软删除）'],
+          ['POST /api/ai/complete|stream|structured', 'Admin Cookie + RBAC', '字段 AI；author 仅自己的 posts'],
+          ['POST /api/ai/agent', 'Admin Cookie + RBAC', '后台对话助手 SSE；会话持久化'],
+          ['GET/DELETE /api/ai/agent/sessions', 'Admin Cookie', '后台助手会话列表 / 删除（软删除）'],
+          ['GET/POST /api/ai/assistant', '无（公开）', '前台只读助手；GET 返回 available；POST SSE 检索'],
           ['POST /api/mcp', 'MCP Bearer / users API-Key', '生产必须配置 MCP API Key'],
           ['POST /api/internal/access-log', 'x-access-log-secret', '仅 middleware 内部调用'],
           ['GET /api/internal/cache-settings', '无（Edge 可读）', 'middleware 读取缓存开关/TTL，60s 内存缓存'],
@@ -362,7 +373,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
     blocks: [
       {
         type: 'p',
-        text: '后台 AI 仅 Admin 内使用，基于 OpenAI Chat Completions 兼容协议（默认 DeepSeek）。完整请求/响应说明见下文「OpenAI 兼容 API 文档」章节。',
+        text: '后台字段 AI 仅 Admin 内使用，基于 OpenAI Chat Completions 兼容协议（默认 DeepSeek）。与前台公开 AI 助手（#frontend-ai-assistant）共用 ai-settings 与 LLM 配置，但 API、工具集、鉴权完全分离。完整请求/响应说明见下文「OpenAI 兼容 API 文档」章节。',
       },
       {
         type: 'h3',
@@ -709,7 +720,8 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
           '每个 Collection：GET/POST /api/{slug}、GET/PATCH/DELETE /api/{slug}/{id}、GET /api/{slug}/count',
           '每个 Global：GET/POST /api/globals/{slug}',
           'Auth：login / logout / me / refresh-token',
-          'AI：/api/ai/complete、/stream、/structured（含 request/response schema）',
+          'AI：/api/ai/complete、/stream、/structured、/agent（含 request/response schema）',
+          '前台 AI：GET/POST /api/ai/assistant（公开只读）',
           'MCP：POST /api/mcp（JSON-RPC）',
           'GraphQL：POST /api/graphql（按 Collection access）',
           'GraphQL Playground：GET /api/graphql-playground（需 Admin 登录）',
@@ -1071,6 +1083,67 @@ curl -I http://localhost:3333/
     ],
   },
   {
+    id: 'frontend-themes',
+    title: '前台主题（可插拔）',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Crispy 前台通过 src/themes/ 注册多套皮肤，由 site-settings.frontendTheme 或环境变量 FRONTEND_THEME 决定当前主题。App Router 页面统一调用 renderThemePage()，各主题实现自己的 Layout 与页面 View。',
+      },
+      {
+        type: 'table',
+        headers: ['ID', '名称', '适用场景'],
+        rows: [
+          ['blog', '博客皮肤', '侧栏导航、卡片列表，适合个人博客'],
+          ['cms', '通用 CMS', '深色顶栏、杂志式内容区，适合品牌官网'],
+          ['kb', '知识库', '左侧分类导航、文档 TOC、站内搜索，适合帮助中心'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '配置与预览',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Admin → Globals → 站点设置 → 前台主题：卡片选择 + 新窗口预览',
+          '保存后全站生效；切换主题会自动 purge 全部前台 HTML 缓存（purgeCacheOnFrontendThemeChange）',
+          '预览：/?theme_preview=blog|cms|kb，仅 super-admin / editor Cookie 有效',
+          '预览 Cookie：crispy_theme_preview（1h）；预览站内链接自动附带 theme_preview 参数',
+          '退出预览：GET /next/exit-theme-preview；预览模式 robots noindex',
+          '回退顺序：预览 Header → site-settings → FRONTEND_THEME 环境变量 → 默认 blog',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '主题结构',
+      },
+      {
+        type: 'pre',
+        text: `src/themes/
+├── definitions.ts      # FRONTEND_THEME_DEFINITIONS（id + 中文名）
+├── registry.ts           # frontendThemes、getActiveFrontendTheme*
+├── render.tsx            # renderThemePage / generateThemeMetadata
+├── types.ts              # FrontendTheme、ThemePageName
+├── blog/ | cms/ | kb/    # 各主题 Layout、pages、views、styles
+└── shared/data/queries.ts  # 跨主题共享数据查询`,
+      },
+      {
+        type: 'h3',
+        text: '新增主题步骤',
+      },
+      {
+        type: 'ol',
+        items: [
+          '在 definitions.ts 注册 id 与 label',
+          '新建 src/themes/<id>/（参考 kb/ 或 cms/），实现全部 ThemePageName 页面',
+          '在 registry.ts 与 adminMeta.ts 注册；更新 FrontendThemeField 预览 mock',
+          'pnpm generate:types（site-settings.frontendTheme 联合类型）',
+        ],
+      },
+    ],
+  },
+  {
     id: 'ci',
     title: 'CI 与验证',
     blocks: [
@@ -1097,9 +1170,11 @@ curl -I http://localhost:3333/
           '回收站 / 版本历史：列表切换回收站、编辑页版本面板',
           '列表刷新：各 Collection 列表右上角「刷新」按钮',
           'Query Presets：保存列表筛选与排序',
-          '深色模式：Admin 主题 + 前台 ThemeSelector',
+          '深色模式：Admin 主题色相 + 各前台皮肤自带 ThemeToggle',
+          '前台主题：站点设置切换 blog / cms / kb；editor 可 ?theme_preview= 预览',
           'AI：DEEPSEEK_API_KEY + verify:ai',
-          'AI 助手：/admin/ai-agent 对话 CRUD + semantic_search',
+          '后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search',
+          '前台 AI 助手：右下角浮窗，公开检索文章/分类/友链等（ai-settings.enabled 开启时）',
           '前台缓存：/admin/cache DB 条目统计；curl -I 查看 X-Crispy-Page-Cache HIT/MISS',
         ],
       },
@@ -1117,7 +1192,7 @@ curl -I http://localhost:3333/
         type: 'pre',
         text: `┌─────────────────────────────────────────┐
 │  Crispy 产品层                           │
-│  AI Agent · 审计 · OpenAPI · embedding   │
+│  AI Agent · 前台助手 · 主题 · 审计 · OpenAPI   │
 ├─────────────────────────────────────────┤
 │  横切 Plugin（src/plugins/）             │
 │  trash/versions · query presets · 刷新   │
@@ -1161,8 +1236,8 @@ curl -I http://localhost:3333/
           ['Custom Field 组件', '字段级 UI（AI 按钮等）', 'withAiTextField、AiCodeField'],
           ['Custom View（admin.views）', '独立 Admin 页面', 'dev-docs、api-docs、ai-agent'],
           ['utilities 薄封装', 'Payload API 语义不足', 'trashOrDeleteDocument'],
-          ['独立 API 路由', '非 CRUD 能力', '/api/ai/*、/api/openapi.json'],
-          ['前台 Next.js', '访客站点（DB HTML 缓存）', 'src/app/(frontend)/'],
+          ['独立 API 路由', '非 CRUD 能力', '/api/ai/*（Admin）、/api/ai/assistant（前台）、/api/openapi.json'],
+          ['前台 Next.js + themes/', '访客站点（可插拔皮肤 + DB HTML 缓存）', 'src/app/(frontend)/、src/themes/'],
         ],
       },
       {
@@ -1329,6 +1404,8 @@ curl -I http://localhost:3333/
           ['list_query_presets', '列出后台保存的查询预设（可复用到 find_documents）'],
           ['get_site_stats', '各 Collection 数量统计（/admin/stats，editor+）'],
           ['list_audit_logs', '审计日志只读查询（super-admin）'],
+          ['search_stock_images', 'Unsplash 图片检索（editor+）'],
+          ['import_stock_image / import_stock_images', '导入图片到 media（editor+）'],
         ],
       },
       {
@@ -1364,6 +1441,83 @@ curl -I http://localhost:3333/
     ],
   },
   {
+    id: 'frontend-ai-assistant',
+    title: '前台 AI 助手（公开只读）',
+    blocks: [
+      {
+        type: 'p',
+        text: '访客可在任意前台主题右下角唤起 AI 助手，无需登录。与后台 /admin/ai-agent 完全分离：独立 API、独立工具集、无会话持久化、仅检索公开数据。共用 ai-settings 的 LLM 配置（enabled / model / baseUrl），关闭 AI 总开关后前台浮窗不显示。',
+      },
+      {
+        type: 'table',
+        headers: ['入口', '说明'],
+        rows: [
+          ['前台浮窗', 'src/components/FrontendAiAssistant（layout.tsx 全局挂载）'],
+          ['GET /api/ai/assistant', '返回 { available, semanticSearch }，用于控制浮窗显隐'],
+          ['POST /api/ai/assistant', 'SSE 流式对话（无 session 事件）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '与后台 AI 助手的区别',
+      },
+      {
+        type: 'table',
+        headers: ['', '前台助手', '后台助手'],
+        rows: [
+          ['API', '/api/ai/assistant', '/api/ai/agent'],
+          ['鉴权', '无', 'Admin Cookie + canUseAiAgent'],
+          ['会话', '仅浏览器内存', 'ai-chat-sessions Collection'],
+          ['能力', '只读检索', 'CRUD + 缓存 + 审计 + Unsplash 等'],
+          ['代码', 'src/ai/frontend-assistant/', 'src/ai/agent/'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '工具（Function Calling）',
+      },
+      {
+        type: 'table',
+        headers: ['工具', '说明'],
+        rows: [
+          ['search_content', '关键词搜索全站公开内容（可按 type 过滤）'],
+          ['list_content', '按类型浏览目录（分类、标签、友链等）'],
+          ['get_content', '按 type + slug 获取单条详情'],
+          ['semantic_search', 'posts/pages 语义搜索（需 Postgres pgvector；仅 published）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '可检索公开类型',
+      },
+      {
+        type: 'ul',
+        items: [
+          'post / page — 已发布文章与单页',
+          'category / tag — 分类与标签（含文章计数）',
+          'link — 已启用友链',
+          'job / gallery-item — 已启用招聘与图库条目',
+          'navigation — 类库导航 JSON 中的外部站点',
+          'section — 站点栏目入口（/posts、/links、/jobs 等）',
+          '数据查询均 overrideAccess: false，遵守 Collection read access',
+          '索引实现：src/ai/frontend-assistant/publicContent.ts',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '代码位置',
+      },
+      {
+        type: 'ul',
+        items: [
+          '路由：src/app/(frontend)/api/ai/assistant/route.ts',
+          '流式推理：src/ai/frontend-assistant/runStream.ts',
+          'SSE 消费复用：src/components/AdminAiAgent/consumeAgentStream.ts',
+        ],
+      },
+    ],
+  },
+  {
     id: 'extend',
     title: '二次开发指引',
     blocks: [
@@ -1377,7 +1531,9 @@ curl -I http://localhost:3333/
           '软删除调用：trashOrDeleteDocument，勿直接 payload.delete()',
           '扩展红线与 Payload 升级：见本文档 #architecture 章节',
           '前台路由：src/app/(frontend)/',
-          'Revalidation：内容变更后不自动清缓存；在 /admin/cache 手动清除（见 #frontend-cache）',
+          '前台主题：src/themes/（见 #frontend-themes）',
+          '前台 AI：src/ai/frontend-assistant/（见 #frontend-ai-assistant）',
+          'Revalidation：内容变更后不自动清缓存；切换前台主题或手动 /admin/cache 清除（见 #frontend-cache）',
           '中文 Slug：chineseSlugField + pinyin-pro hook',
         ],
       },

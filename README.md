@@ -45,7 +45,8 @@ pnpm build && pnpm start
 | MCP 端点   | http://localhost:3333/api/mcp     |
 | GraphQL    | http://localhost:3333/api/graphql |
 | Swagger    | http://localhost:3333/admin/api-docs |
-| AI 助手    | http://localhost:3333/admin/ai-agent |
+| AI 助手（后台） | http://localhost:3333/admin/ai-agent |
+| 二次开发文档   | http://localhost:3333/admin/dev-docs |
 
 首次访问 Admin 会引导创建超级管理员账号。
 
@@ -69,7 +70,9 @@ pnpm build && pnpm start
 ## Crispy 自建能力
 
 - **软删除 + 版本历史** — 全业务 Collection 回收站与版本面板
+- **前台可插拔主题** — 博客 / CMS / 知识库三套皮肤，站点设置切换与预览
 - **Admin AI 助手** — 对话式内容管理（`/admin/ai-agent`）
+- **前台 AI 助手** — 访客公开只读检索（右下角浮窗，无需登录）
 - **字段 AI** — 润色、SEO、智能填充（DeepSeek）
 - **OpenAPI / Swagger** — 自动生成 REST 文档
 
@@ -77,7 +80,7 @@ pnpm build && pnpm start
 
 完整二次开发文档已内置在 Admin：**http://localhost:3333/admin/dev-docs**（侧边栏「二次开发文档」）。
 
-涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Payload 扩展架构、自建 Plugin、Admin AI（字段 + 对话助手）、MCP、部署迁移与 CI。
+涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Payload 扩展架构、自建 Plugin、前台主题、Admin AI（字段 + 对话助手）、前台 AI 助手、MCP、部署迁移与 CI。
 
 ## 常用命令
 
@@ -100,9 +103,13 @@ pnpm build && pnpm start
 
 ## AI / MCP
 
-**Admin AI 助手**（对话式，CRUD + 语义搜索）：`/admin/ai-agent` 或 Admin 右下角浮窗。详见 [二次开发文档 — AI 助手](http://localhost:3333/admin/dev-docs#ai-agent)。
+**Admin AI 助手**（对话式，CRUD + 语义搜索）：`/admin/ai-agent` 或 Admin 右下角浮窗。详见 [二次开发文档 — Admin AI 助手](http://localhost:3333/admin/dev-docs#ai-agent)。
+
+**前台 AI 助手**（公开只读检索，无需登录）：前台任意页面右下角浮窗；`GET/POST /api/ai/assistant`。可检索文章、页面、分类、标签、友链、招聘、图库与导航。详见 [二次开发文档 — 前台 AI 助手](http://localhost:3333/admin/dev-docs#frontend-ai-assistant)。
 
 **字段 AI**（润色/SEO/智能填充，DeepSeek）：见 [二次开发文档 — Admin AI](http://localhost:3333/admin/dev-docs#ai)。
+
+**前台主题**（blog / cms / kb）：站点设置切换，`?theme_preview=` 预览。详见 [二次开发文档 — 前台主题](http://localhost:3333/admin/dev-docs#frontend-themes)。
 
 **MCP**（外部 Agent 读写内容）：
 

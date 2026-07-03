@@ -1,19 +1,20 @@
 ---
-description: Admin AI（字段 AI + 对话 Agent）开发约定
-globs: src/ai/**/*.ts,src/components/AdminAi*/**,src/app/(payload)/api/ai/**
+description: Admin AI（字段 AI + 对话 Agent）与前台只读助手开发约定
+globs: src/ai/**/*.ts,src/components/AdminAi*/**,src/components/FrontendAiAssistant/**,src/app/(payload)/api/ai/**,src/app/(frontend)/api/ai/**
 alwaysApply: false
 ---
 
 # AI & Agent
 
-## 两套 AI
+## 三套 AI
 
 | 类型 | 入口 | 用途 |
 |------|------|------|
-| 字段 AI | `AdminAi/*`、`/api/ai/stream\|complete\|structured` | 润色、SEO、Lexical 选区 |
-| 对话 Agent | `/admin/ai-agent`、`/api/ai/agent` | Function Calling CRUD |
+| 字段 AI | `AdminAi/*`、`/api/ai/stream\|complete\|structured` | 润色、SEO、Lexical 选区（Admin） |
+| 后台 Agent | `/admin/ai-agent`、`/api/ai/agent` | Function Calling CRUD（需登录） |
+| 前台助手 | `FrontendAiAssistant`、`/api/ai/assistant` | 公开只读检索（无需登录） |
 
-## Agent 约定
+## 后台 Agent 约定
 
 - 可管理范围: `src/ai/agent/resources.ts`（与 MCP 大致对齐）
 - 写操作前: 工具 `describe_resource` 了解字段结构
@@ -21,11 +22,17 @@ alwaysApply: false
 - `app-configs` 写操作: 仅 super-admin
 - author: 仅自己的 posts
 
-## 扩展 Agent 工具
+## 扩展后台 Agent 工具
 
 1. 在 `src/ai/agent/tools.ts` 增加定义 + handler
 2. 更新 `systemPrompt.ts` 说明
 3. 检查 `src/ai/agent/access.ts` 权限
+
+## 扩展前台助手工具
+
+1. 在 `src/ai/frontend-assistant/tools.ts` 增加定义 + handler
+2. 更新 `systemPrompt.ts` 与 `publicContent.ts`（仅公开可读数据）
+3. 勿复用后台 Agent 写操作工具；查询须 `overrideAccess: false`
 
 ## 扩展字段 AI
 
