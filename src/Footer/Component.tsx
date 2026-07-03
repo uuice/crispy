@@ -60,7 +60,7 @@ export async function Footer() {
               小游戏
             </Link>
             {showRss && (
-              <Link className="text-white/80 hover:text-white text-sm" href="/rss.xml">
+              <Link className="text-white/80 hover:text-white text-sm" href="/rss">
                 {frontendLabels.site.rss}
               </Link>
             )}

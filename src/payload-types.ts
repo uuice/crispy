@@ -2931,11 +2931,16 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * 控制前台顶栏导航（blog / cms 主题均读取此配置）。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
   id: number;
+  /**
+   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/games、/rss。推荐使用「内部链接」关联页面或文章。
+   */
   navItems?:
     | {
         link: {
@@ -2960,11 +2965,16 @@ export interface Header {
   createdAt?: string | null;
 }
 /**
+ * 控制前台页脚导航链接（blog / cms 主题均读取此配置）。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
  */
 export interface Footer {
   id: number;
+  /**
+   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/games、/rss。推荐使用「内部链接」关联页面或文章。
+   */
   navItems?:
     | {
         link: {
@@ -3009,9 +3019,6 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
-  /**
-   * 切换主题后请在「缓存管理」清除前台 HTML 缓存。
-   */
   frontendTheme?: ('blog' | 'cms') | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;

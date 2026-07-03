@@ -4,7 +4,8 @@ import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { blogTheme } from './blog'
 import { cmsTheme } from './cms'
-import { FRONTEND_THEME_IDS } from './definitions'
+import { getThemePreviewIdFromHeaders } from './preview.server'
+import { isFrontendThemeId as isThemePreviewId } from './preview.shared'
 import type { FrontendTheme, FrontendThemeId } from './types'
 
 export const frontendThemes = {
@@ -13,7 +14,7 @@ export const frontendThemes = {
 } as const satisfies Record<FrontendThemeId, FrontendTheme>
 
 export function isFrontendThemeId(value: string | null | undefined): value is FrontendThemeId {
-  return value != null && (FRONTEND_THEME_IDS as readonly string[]).includes(value)
+  return isThemePreviewId(value)
 }
 
 export function getFrontendThemeOptions(): { label: string; value: FrontendThemeId }[] {
@@ -24,6 +25,11 @@ export function getFrontendThemeOptions(): { label: string; value: FrontendTheme
 }
 
 export async function getActiveFrontendThemeId(): Promise<FrontendThemeId> {
+  const previewThemeId = await getThemePreviewIdFromHeaders()
+  if (previewThemeId) {
+    return previewThemeId
+  }
+
   const settings = await getCachedSiteSettings()()
   if (isFrontendThemeId(settings.frontendTheme)) {
     return settings.frontendTheme

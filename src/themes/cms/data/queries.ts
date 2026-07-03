@@ -14,6 +14,9 @@ export const queryCmsNavMenu = cache(async (): Promise<NavItem[]> => {
 })
 
 export async function loadCmsLayoutData() {
-  const menu = await queryCmsNavMenu()
-  return { menu }
+  const sidebar = await querySidebarData()
+  return {
+    menu: resolveCmsMenu(sidebar.menu),
+    footerMenu: sidebar.footerMenu,
+  }
 }

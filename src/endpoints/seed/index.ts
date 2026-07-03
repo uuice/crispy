@@ -3,6 +3,7 @@ import crypto from 'crypto'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
+import { about as aboutPageData } from './about-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
@@ -10,6 +11,7 @@ import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
+import { getPagePath } from '@/utilities/frontendPaths'
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -274,7 +276,7 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding pages...`)
 
-  const [_, contactPage] = await Promise.all([
+  const [_, contactPage, aboutPage] = await Promise.all([
     payload.create({
       collection: 'pages',
       depth: 0,
@@ -286,6 +288,12 @@ export const seed = async ({
       depth: 0,
       context: seedContext,
       data: contactPageData({ contactForm: contactForm }),
+    }),
+    payload.create({
+      collection: 'pages',
+      depth: 0,
+      context: seedContext,
+      data: aboutPageData(),
     }),
   ])
 
@@ -322,7 +330,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '关于',
-              url: '/pages/about',
+              url: getPagePath('about'),
             },
           },
           {
@@ -382,14 +390,14 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: '关于',
-              url: '/pages/about',
+              url: getPagePath('about'),
             },
           },
           {
             link: {
               type: 'custom',
               label: 'RSS 订阅',
-              url: '/rss.xml',
+              url: '/rss',
             },
           },
           {

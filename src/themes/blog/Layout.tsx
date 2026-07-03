@@ -23,6 +23,7 @@ const emptySidebar: SidebarData = {
   categories: [],
   tags: [],
   menu: [],
+  footerMenu: [],
 }
 
 export async function Layout({ children, layoutData }: Props) {
@@ -31,6 +32,7 @@ export async function Layout({ children, layoutData }: Props) {
 
   const siteName = settings.siteName || '博客'
   const menu = resolveBlogMenu(sidebar.menu)
+  const footerMenu = sidebar.footerMenu
   const recordInfo = (settings as { recordSettings?: {
     showRecord?: boolean
     icpNumber?: string
@@ -146,6 +148,24 @@ export async function Layout({ children, layoutData }: Props) {
                 © {new Date().getFullYear()} {siteName}
               </span>
             </p>
+            {footerMenu.length > 0 ? (
+              <nav
+                aria-label="页脚导航"
+                className="pt-2 flex flex-wrap items-center gap-x-2 gap-y-1"
+              >
+                {footerMenu.map((item) => (
+                  <Link
+                    key={item.url + item.title}
+                    className="hover:opacity-80"
+                    href={item.url}
+                    style={{ color: 'var(--accent)' }}
+                    target={item.target || '_self'}
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
             <p className="pt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
               网站基于{' '}
               <a

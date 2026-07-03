@@ -4,6 +4,7 @@ import type { NavItem } from './types'
 
 export type CmsLayoutData = {
   menu: NavItem[]
+  footerMenu: NavItem[]
 }
 
 export const defaultCmsMenu: NavItem[] = [

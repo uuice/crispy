@@ -6,6 +6,8 @@ import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
 import { getFrontendThemeSelectOptions } from '@/themes/definitions'
 
+import { purgeCacheOnFrontendThemeChange } from './hooks/purgeCacheOnFrontendThemeChange'
+
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: adminLabels.siteSettings,
@@ -79,8 +81,17 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: 'blog',
       options: getFrontendThemeSelectOptions(),
       admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'frontendThemePicker',
+      type: 'ui',
+      admin: {
         position: 'sidebar',
-        description: '切换主题后请在「缓存管理」清除前台 HTML 缓存。',
+        components: {
+          Field: '@/components/FrontendThemePreview/FrontendThemeField',
+        },
       },
     },
     {
@@ -93,4 +104,7 @@ export const SiteSettings: GlobalConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [purgeCacheOnFrontendThemeChange],
+  },
 }

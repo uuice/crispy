@@ -13,7 +13,7 @@ type Props = {
   layoutData?: unknown
 }
 
-const emptyLayoutData: CmsLayoutData = { menu: [] }
+const emptyLayoutData: CmsLayoutData = { menu: [], footerMenu: [] }
 
 export async function Layout({ children, layoutData }: Props) {
   const settings = await getCachedSiteSettings()()
@@ -21,6 +21,7 @@ export async function Layout({ children, layoutData }: Props) {
   const siteName = settings.siteName || 'Crispy'
   const siteDescription = settings.siteDescription || '企业级内容管理平台'
   const menu = resolveCmsMenu(data.menu)
+  const footerMenu = data.footerMenu
   const recordInfo = (settings as { recordSettings?: {
     showRecord?: boolean
     icpNumber?: string
@@ -69,15 +70,23 @@ export async function Layout({ children, layoutData }: Props) {
             <p className="cms-footer-tagline">{siteDescription}</p>
           </div>
           <div className="cms-footer-col">
-            <p className="cms-footer-heading">导航</p>
+            <p className="cms-footer-heading">页脚导航</p>
             <ul className="cms-footer-links">
-              {menu.slice(0, 6).map((item) => (
-                <li key={item.url + item.title}>
-                  <Link href={item.url} target={item.target || '_self'}>
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
+              {footerMenu.length > 0
+                ? footerMenu.slice(0, 8).map((item) => (
+                    <li key={item.url + item.title}>
+                      <Link href={item.url} target={item.target || '_self'}>
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))
+                : menu.slice(0, 6).map((item) => (
+                    <li key={item.url + item.title}>
+                      <Link href={item.url} target={item.target || '_self'}>
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
             </ul>
           </div>
           <div className="cms-footer-col">

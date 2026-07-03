@@ -12,6 +12,7 @@ import {
   getUserPath,
   slugifyUserName,
 } from '@/utilities/frontendPaths'
+import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
 
 import type { NavItem, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
 
@@ -167,7 +168,7 @@ export const queryPostsByTagSlug = cache(async (slug: string) => {
 export const querySidebarData = cache(async () => {
   const payload = await getPayload({ config: configPromise })
 
-  const [categoriesResult, tagsResult, postsResult, headerData] = await Promise.all([
+  const [categoriesResult, tagsResult, postsResult, headerData, footerData] = await Promise.all([
     payload.find({
       collection: 'categories',
       depth: 0,
@@ -196,6 +197,7 @@ export const querySidebarData = cache(async () => {
       where: { _status: { equals: 'published' } },
     }),
     payload.findGlobal({ slug: 'header', depth: 1 }),
+    payload.findGlobal({ slug: 'footer', depth: 1 }),
   ])
 
   const categoryCounts = new Map<string, number>()
@@ -232,13 +234,8 @@ export const querySidebarData = cache(async () => {
       count: tagCounts.get(String(t.id)) || 0,
     }))
 
-  const menu: NavItem[] = (headerData?.navItems || [])
-    .map((item) => ({
-      title: item.link?.label || '',
-      url: item.link?.url || '/',
-      target: item.link?.newTab ? '_blank' : '_self',
-    }))
-    .filter((item) => item.title && item.url)
+  const menu = mapGlobalNavItems(headerData?.navItems)
+  const footerMenu = mapGlobalNavItems(footerData?.navItems)
 
   const defaultUserPost = await payload.find({
     collection: 'posts',
@@ -259,7 +256,7 @@ export const querySidebarData = cache(async () => {
       }
     : undefined
 
-  return { categories, tags, menu, user }
+  return { categories, tags, menu, footerMenu, user }
 })
 
 export const queryPostArchiveGroups = cache(async () => {

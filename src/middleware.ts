@@ -15,9 +15,140 @@ import {
   shouldBypassFrontendCache,
 } from '@/frontend-cache/middlewareCache'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
+import {
+  getThemePreviewCookieValue,
+  getThemePreviewQueryValue,
+  hasThemePreviewQuery,
+  isEditorUser,
+  isFrontendThemeId,
+  THEME_PREVIEW_COOKIE,
+  THEME_PREVIEW_COOKIE_MAX_AGE,
+  THEME_PREVIEW_QUERY_PARAM,
+  THEME_PREVIEW_REQUEST_HEADER,
+} from '@/themes/preview.shared'
+import type { FrontendThemeId } from '@/themes/definitions'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
+
+type ThemePreviewContext = {
+  themeId: FrontendThemeId
+  requestHeaders: Headers
+  persistCookie: boolean
+}
+
+async function isEditorRequest(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get('payload-token')?.value
+  if (!token) {
+    return false
+  }
+
+  try {
+    const response = await fetch(new URL('/api/users/me', request.url), {
+      headers: { Authorization: `JWT ${token}` },
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      return false
+    }
+
+    const data = (await response.json()) as { user?: { roles?: string[] | null } | null }
+    return isEditorUser(data.user)
+  } catch {
+    return false
+  }
+}
+
+async function resolveThemePreviewContext(request: NextRequest): Promise<ThemePreviewContext | null> {
+  const queryTheme = getThemePreviewQueryValue(request)
+  const cookieTheme = getThemePreviewCookieValue(request)
+
+  let themeId: FrontendThemeId | null = null
+  let persistCookie = false
+
+  if (isFrontendThemeId(queryTheme)) {
+    if (!(await isEditorRequest(request))) {
+      return null
+    }
+
+    themeId = queryTheme
+    persistCookie = true
+  } else if (cookieTheme) {
+    if (!(await isEditorRequest(request))) {
+      return null
+    }
+
+    themeId = cookieTheme
+  }
+
+  if (!themeId) {
+    return null
+  }
+
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(THEME_PREVIEW_REQUEST_HEADER, themeId)
+
+  return { themeId, requestHeaders, persistCookie }
+}
+
+function withThemePreview(
+  response: NextResponse,
+  themePreview: ThemePreviewContext | null,
+): NextResponse {
+  if (!themePreview) {
+    return response
+  }
+
+  if (themePreview.persistCookie) {
+    response.cookies.set(THEME_PREVIEW_COOKIE, themePreview.themeId, {
+      httpOnly: true,
+      maxAge: THEME_PREVIEW_COOKIE_MAX_AGE,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    })
+  }
+
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  return response
+}
+
+function isBrowserDocumentNavigation(request: NextRequest): boolean {
+  const fetchDest = request.headers.get('Sec-Fetch-Dest')
+  if (fetchDest === 'document') {
+    return true
+  }
+
+  const accept = request.headers.get('Accept') || ''
+  return accept.includes('text/html') && !accept.includes('text/x-component')
+}
+
+function maybeRedirectToPreviewQuery(
+  request: NextRequest,
+  themePreview: ThemePreviewContext | null,
+): NextResponse | null {
+  if (!themePreview || hasThemePreviewQuery(request)) {
+    return null
+  }
+
+  if (!isFrontendDocumentRequest(request) || !isBrowserDocumentNavigation(request)) {
+    return null
+  }
+
+  const url = request.nextUrl.clone()
+  url.searchParams.set(THEME_PREVIEW_QUERY_PARAM, themePreview.themeId)
+
+  return withThemePreview(NextResponse.redirect(url), themePreview)
+}
+
+function nextWithRequestHeaders(request: NextRequest, requestHeaders: Headers): NextResponse {
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+}
 
 type RouteCacheLookupResult = {
   status: CrispyCacheStatus
@@ -172,18 +303,23 @@ function handleLegacyFrontendRedirect(request: NextRequest): NextResponse | null
   return NextResponse.redirect(url, 301)
 }
 
-async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResponse | null> {
+async function applyFrontendCacheHeaders(
+  request: NextRequest,
+  themePreview: ThemePreviewContext | null,
+): Promise<NextResponse | null> {
   if (!isFrontendDocumentRequest(request)) {
     return null
   }
 
   if (isInternalCacheCaptureRequest(request)) {
-    return NextResponse.next()
+    return themePreview ? nextWithRequestHeaders(request, themePreview.requestHeaders) : NextResponse.next()
   }
 
   const settings = await getMiddlewareCacheSettings(request.url)
   if (!settings.exposeCacheHeaders) {
-    return NextResponse.next()
+    return themePreview
+      ? nextWithRequestHeaders(request, themePreview.requestHeaders)
+      : NextResponse.next()
   }
 
   const bypass = shouldBypassFrontendCache(request)
@@ -197,7 +333,9 @@ async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResp
     return buildCachedHtmlResponse(request, lookup, settings)
   }
 
-  const response = NextResponse.next()
+  const response = themePreview
+    ? nextWithRequestHeaders(request, themePreview.requestHeaders)
+    : NextResponse.next()
   applyCrispyCacheHeaders(response.headers, {
     pageStatus: lookup.status,
     dataStatus: lookup.status,
@@ -268,17 +406,24 @@ export async function middleware(request: NextRequest) {
     return legacyRedirect
   }
 
-  const frontendResponse = await applyFrontendCacheHeaders(request)
+  const themePreview = await resolveThemePreviewContext(request)
+
+  const previewQueryRedirect = maybeRedirectToPreviewQuery(request, themePreview)
+  if (previewQueryRedirect) {
+    return previewQueryRedirect
+  }
+
+  const frontendResponse = await applyFrontendCacheHeaders(request, themePreview)
   if (frontendResponse) {
-    return frontendResponse
+    return withThemePreview(frontendResponse, themePreview)
   }
 
   const apiResponse = handleApiAccessLog(request)
   if (apiResponse) {
-    return apiResponse
+    return withThemePreview(apiResponse, themePreview)
   }
 
-  return NextResponse.next()
+  return withThemePreview(NextResponse.next(), themePreview)
 }
 
 export const config = {

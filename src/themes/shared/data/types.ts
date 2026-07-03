@@ -37,5 +37,6 @@ export type SidebarData = {
   categories: SidebarCategory[]
   tags: SidebarTag[]
   menu: NavItem[]
+  footerMenu: NavItem[]
   user?: SidebarUser
 }

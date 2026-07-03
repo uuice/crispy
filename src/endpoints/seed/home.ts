@@ -1,6 +1,8 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Media } from '@/payload-types'
 
+import { getPagePath } from '@/utilities/frontendPaths'
+
 type HomeArgs = {
   heroImage: Media
   metaImage: Media
@@ -29,7 +31,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
             type: 'custom',
             appearance: 'outline',
             label: '联系我们',
-            url: '/contact',
+            url: getPagePath('contact'),
           },
         },
       ],

@@ -4,6 +4,7 @@ import {
   DEFAULT_CACHE_SETTINGS,
   type ResolvedCacheSettings,
 } from '@/frontend-cache/settings'
+import { hasThemePreviewCookie, hasThemePreviewQuery } from '@/themes/preview.shared'
 
 type MiddlewareCacheSettings = ResolvedCacheSettings & {
   exposeCacheHeaders: boolean
@@ -44,6 +45,8 @@ export async function getMiddlewareCacheSettings(
 
 export function shouldBypassFrontendCache(request: NextRequest): boolean {
   if (request.nextUrl.searchParams.has('nocache')) return true
+  if (hasThemePreviewQuery(request)) return true
+  if (hasThemePreviewCookie(request)) return true
   if (request.cookies.has('__prerender_bypass')) return true
   if (request.cookies.has('__next_preview_data')) return true
   return false
