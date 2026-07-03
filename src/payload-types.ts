@@ -3012,7 +3012,7 @@ export interface SiteSetting {
   /**
    * 切换主题后请在「缓存管理」清除前台 HTML 缓存。
    */
-  frontendTheme?: 'blog' | null;
+  frontendTheme?: ('blog' | 'cms') | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;

@@ -3,11 +3,13 @@ import { cache } from 'react'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { blogTheme } from './blog'
+import { cmsTheme } from './cms'
 import { FRONTEND_THEME_IDS } from './definitions'
 import type { FrontendTheme, FrontendThemeId } from './types'
 
 export const frontendThemes = {
   blog: blogTheme,
+  cms: cmsTheme,
 } as const satisfies Record<FrontendThemeId, FrontendTheme>
 
 export function isFrontendThemeId(value: string | null | undefined): value is FrontendThemeId {
