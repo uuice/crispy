@@ -1,6 +1,7 @@
 export const FRONTEND_THEME_DEFINITIONS = [
   { id: 'blog', label: '博客皮肤' },
   { id: 'cms', label: '通用 CMS' },
+  { id: 'kb', label: '知识库' },
 ] as const
 
 export type FrontendThemeId = (typeof FRONTEND_THEME_DEFINITIONS)[number]['id']

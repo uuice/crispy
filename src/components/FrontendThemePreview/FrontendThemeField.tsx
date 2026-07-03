@@ -13,7 +13,7 @@ import { getClientSideURL } from '@/utilities/getURL'
 
 import './index.scss'
 
-function ThemeMock({ variant }: { variant: 'blog' | 'cms' }) {
+function ThemeMock({ variant }: { variant: 'blog' | 'cms' | 'kb' }) {
   if (variant === 'cms') {
     return (
       <div aria-hidden className="frontend-theme-field__mock frontend-theme-field__mock--cms">
@@ -21,6 +21,18 @@ function ThemeMock({ variant }: { variant: 'blog' | 'cms' }) {
         <div className="frontend-theme-field__mock-body">
           <div className="frontend-theme-field__mock-block frontend-theme-field__mock-block--hero" />
           <div className="frontend-theme-field__mock-block" />
+          <div className="frontend-theme-field__mock-block" />
+        </div>
+      </div>
+    )
+  }
+
+  if (variant === 'kb') {
+    return (
+      <div aria-hidden className="frontend-theme-field__mock frontend-theme-field__mock--kb">
+        <div className="frontend-theme-field__mock-sidebar" />
+        <div className="frontend-theme-field__mock-main">
+          <div className="frontend-theme-field__mock-block frontend-theme-field__mock-block--hero" />
           <div className="frontend-theme-field__mock-block" />
         </div>
       </div>

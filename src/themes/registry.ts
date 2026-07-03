@@ -4,6 +4,7 @@ import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { blogTheme } from './blog'
 import { cmsTheme } from './cms'
+import { kbTheme } from './kb'
 import { getThemePreviewIdFromHeaders } from './preview.server'
 import { isFrontendThemeId as isThemePreviewId } from './preview.shared'
 import type { FrontendTheme, FrontendThemeId } from './types'
@@ -11,6 +12,7 @@ import type { FrontendTheme, FrontendThemeId } from './types'
 export const frontendThemes = {
   blog: blogTheme,
   cms: cmsTheme,
+  kb: kbTheme,
 } as const satisfies Record<FrontendThemeId, FrontendTheme>
 
 export function isFrontendThemeId(value: string | null | undefined): value is FrontendThemeId {

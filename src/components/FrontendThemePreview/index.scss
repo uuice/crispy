@@ -129,6 +129,38 @@
   }
 }
 
+.frontend-theme-field__mock--kb {
+  display: flex;
+  background: oklch(0.98 0.006 195);
+
+  .frontend-theme-field__mock-sidebar {
+    width: 28%;
+    background: oklch(0.95 0.015 195);
+    border-right: 1px solid oklch(0.9 0.02 195);
+  }
+
+  .frontend-theme-field__mock-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .frontend-theme-field__mock-block {
+    height: 1.1rem;
+    border-radius: 2px;
+    background: oklch(1 0 0);
+    border: 1px solid oklch(0.9 0.015 195);
+  }
+
+  .frontend-theme-field__mock-block--hero {
+    height: 0.75rem;
+    background: oklch(0.94 0.03 195);
+    border-color: oklch(0.86 0.05 195);
+  }
+}
+
 .frontend-theme-field__card-head {
   display: flex;
   align-items: center;

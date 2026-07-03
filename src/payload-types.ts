@@ -3019,7 +3019,7 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
-  frontendTheme?: ('blog' | 'cms') | null;
+  frontendTheme?: ('blog' | 'cms' | 'kb') | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
