@@ -14,6 +14,7 @@ const kbDefinition = getFrontendThemeDefinition('kb')
 export const kbTheme: FrontendTheme = {
   id: 'kb',
   label: kbDefinition.label,
+  rootClassName: 'kb-skin',
   bodyClassName: 'kb-skin',
   Layout,
   InitTheme,

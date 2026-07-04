@@ -14,6 +14,7 @@ const cmsDefinition = getFrontendThemeDefinition('cms')
 export const cmsTheme: FrontendTheme = {
   id: 'cms',
   label: cmsDefinition.label,
+  rootClassName: 'cms-skin',
   bodyClassName: 'cms-skin',
   Layout,
   InitTheme,

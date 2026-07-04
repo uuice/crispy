@@ -30,25 +30,31 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const layoutData = theme.loadLayoutData ? await theme.loadLayoutData() : undefined
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="zh-CN" suppressHydrationWarning>
+    <html
+      className={cn(theme.rootClassName, GeistSans.variable, GeistMono.variable)}
+      lang="zh-CN"
+      suppressHydrationWarning
+    >
       <head>
         {ThemeInit ? <ThemeInit /> : null}
         <link href="/favicon.svg" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body className={cn(theme.bodyClassName, 'min-h-screen flex flex-col antialiased')}>
+      <body>
         <Providers>
           <ThemePreviewShell themeId={previewThemeId}>
-            {isEnabled ? (
-              <AdminBar
-                adminBarProps={{
-                  preview: isEnabled,
-                }}
-              />
-            ) : null}
-            <ThemePreviewBanner />
+            <div className="crispy-chrome">
+              {isEnabled ? (
+                <AdminBar
+                  adminBarProps={{
+                    preview: isEnabled,
+                  }}
+                />
+              ) : null}
+              <ThemePreviewBanner />
+              <FrontendAiAssistant />
+            </div>
             <ThemeLayout layoutData={layoutData}>{children}</ThemeLayout>
-            <FrontendAiAssistant />
           </ThemePreviewShell>
         </Providers>
       </body>

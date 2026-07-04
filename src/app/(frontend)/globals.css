@@ -11,12 +11,12 @@
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
 
 @layer base {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  .crispy-chrome h1,
+  .crispy-chrome h2,
+  .crispy-chrome h3,
+  .crispy-chrome h4,
+  .crispy-chrome h5,
+  .crispy-chrome h6 {
     font-weight: unset;
     font-size: unset;
   }
@@ -35,39 +35,39 @@
 }
 
 @layer utilities {
-  .container {
+  .crispy-chrome .container {
     width: 100%;
     margin-inline: auto;
     padding-inline: 1rem;
   }
 
   @variant sm {
-    .container {
+    .crispy-chrome .container {
       max-width: var(--breakpoint-sm);
     }
   }
 
   @variant md {
-    .container {
+    .crispy-chrome .container {
       max-width: var(--breakpoint-md);
       padding-inline: 2rem;
     }
   }
 
   @variant lg {
-    .container {
+    .crispy-chrome .container {
       max-width: var(--breakpoint-lg);
     }
   }
 
   @variant xl {
-    .container {
+    .crispy-chrome .container {
       max-width: var(--breakpoint-xl);
     }
   }
 
   @variant 2xl {
-    .container {
+    .crispy-chrome .container {
       max-width: var(--breakpoint-2xl);
     }
   }

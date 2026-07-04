@@ -33,6 +33,7 @@
     "verify:phase1": "tsx scripts/verify-phase1.ts",
     "verify:phase2": "tsx scripts/verify-phase2.ts",
     "verify:ai": "tsx scripts/verify-ai.ts",
+    "scope:theme-css": "node scripts/scope-theme-css.mjs all",
     "backfill:embeddings": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/backfill-embeddings.ts",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/run-seed.ts",
     "mcp:key": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/create-mcp-key.ts"

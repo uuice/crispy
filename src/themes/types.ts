@@ -58,6 +58,9 @@ export type FrontendThemeLayoutProps = {
 export type FrontendTheme = {
   id: FrontendThemeId
   label: string
+  /** Root class on `<html>` — scopes all theme CSS (e.g. blog-skin). */
+  rootClassName: string
+  /** @deprecated Use rootClassName — kept for compatibility. */
   bodyClassName: string
   Layout: React.ComponentType<FrontendThemeLayoutProps>
   InitTheme?: React.ComponentType

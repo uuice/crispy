@@ -14,6 +14,7 @@ const blogDefinition = getFrontendThemeDefinition('blog')
 export const blogTheme: FrontendTheme = {
   id: 'blog',
   label: blogDefinition.label,
+  rootClassName: 'blog-skin',
   bodyClassName: 'blog-skin',
   Layout,
   InitTheme,
