@@ -13,7 +13,7 @@ cp .env.example .env
 pnpm install
 
 # 3. 开发（默认 SQLite，无需 Docker）
-pnpm dev
+pnpm cli dev:dev
 ```
 
 本地默认使用 **SQLite**（`.data/payload.db`），首次启动自动建表。
@@ -27,13 +27,13 @@ DATABASE_URL=postgresql://user:password@host:5432/crispy
 DATABASE_DRIVER=postgres
 DATABASE_PUSH=false         # 生产禁止 schema push
 NODE_ENV=production
-pnpm migrate                # 生产必须跑迁移
-pnpm build && pnpm start
+pnpm cli db:migrate     # 生产必须跑迁移
+pnpm cli dev:build && pnpm cli dev:start
 ```
 
 详见 Admin 内 **[二次开发文档](http://localhost:3333/admin/dev-docs)**（部署、迁移、权限、AI、MCP 等完整说明）。
 
-可选：本地调试 PostgreSQL 时使用 `pnpm docker:up` 并改 `DATABASE_URL`。
+可选：本地调试 PostgreSQL 时使用 `pnpm cli db:docker-up` 并改 `DATABASE_URL`。
 
 ## 访问地址
 
@@ -84,22 +84,18 @@ pnpm build && pnpm start
 
 ## 常用命令
 
-| 命令                          | 说明                                  |
-| ----------------------------- | ------------------------------------- |
-| `pnpm dev`                    | 开发服务器（端口 3333）               |
-| `pnpm build`                  | 生产构建                              |
-| `pnpm docker:up`              | 启动 PostgreSQL（可选，本地 PG 调试） |
-| `pnpm docker:down`            | 停止 PostgreSQL                       |
-| `pnpm verify:phase1`          | Phase 1 冒烟验证                      |
-| `pnpm verify:phase2`          | Phase 2 冒烟验证                      |
-| `pnpm verify:ai`              | Admin AI（DeepSeek）连通与流式验证    |
-| `pnpm seed`                   | CLI 填充示例数据                      |
-| `pnpm mcp:key`                | 生成 MCP API Key                      |
-| `pnpm migrate:create:initial` | 首次 Postgres 迁移（Docker + Node 22） |
-| `pnpm migrate`                | 执行数据库迁移（生产）                 |
-| `pnpm migrate:status`         | 查看迁移状态                           |
-| `pnpm ci:check`               | 本地 CI 检查（lint/tsc/test/build）    |
-| `pnpm generate:openapi`       | 生成 OpenAPI JSON（Swagger）           |
+所有命令通过 **`pnpm cli`** 统一入口；`pnpm cli help` 查看全部分组与备注。
+
+| 命令 | 说明 |
+| ---- | ---- |
+| `pnpm cli dev:dev` | 开发服务器（端口 3333） |
+| `pnpm cli dev:build` | 生产构建（含主题 CSS + sitemap） |
+| `pnpm cli db:docker-up` | 启动 PostgreSQL（可选） |
+| `pnpm cli verify:all` | 完整冒烟 |
+| `pnpm cli db:seed` | 填充示例数据 |
+| `pnpm cli db:bootstrap` | 首次 Postgres 迁移 |
+| `pnpm cli db:migrate` | 执行数据库迁移（生产） |
+| `pnpm cli quality:ci` | 本地 CI（lint/tsc/test/build） |
 
 ## AI / MCP
 

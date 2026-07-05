@@ -1,7 +1,7 @@
 /**
  * Regenerate MCP API key for the seeded agent user.
  *
- * Usage: pnpm mcp:key
+ * Usage: pnpm cli mcp:key
  */
 import 'dotenv/config'
 import crypto from 'crypto'
@@ -19,7 +19,7 @@ async function main() {
 
   const agent = agentResult.docs[0]
   if (!agent) {
-    console.error('agent@example.com not found. Run pnpm seed first.')
+    console.error('agent@example.com not found. Run pnpm cli db:seed first.')
     process.exit(1)
   }
 

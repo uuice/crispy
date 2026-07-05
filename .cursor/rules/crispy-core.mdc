@@ -10,7 +10,7 @@ Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，分支 `v3-payload`，g
 ## Stack
 
 - CMS: Payload 3.85+（`@payloadcms/*` 版本须一致）
-- DB: 本地 SQLite（`.data/payload.db`），生产 PostgreSQL + `pnpm migrate`
+- DB: 本地 SQLite（`.data/payload.db`），生产 PostgreSQL + `pnpm cli db:migrate`
 - 包管理: pnpm；端口 3333
 - 生产: `DATABASE_PUSH=false`，禁止 schema push
 
@@ -31,8 +31,8 @@ Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，分支 `v3-payload`，g
 - **不 fork Payload**，不改 `node_modules`
 - **不自动 git commit**，除非用户明确要求
 - **代码注释用英语**；与用户沟通用中文
-- 新增 Collection → `payload.config.ts` → `pnpm generate:types`；Postgres schema 变更 → `pnpm payload migrate:create <name>`
+- 新增 Collection → `payload.config.ts` → `pnpm cli generate:types`；Postgres schema 变更 → `pnpm cli db:create <name>`
 
 ## 常用命令
 
-`pnpm dev` · `pnpm ci:check` · `pnpm migrate` · `pnpm generate:importmap` · `pnpm generate:types` · `pnpm verify:phase1` · `pnpm verify:ai`
+`pnpm cli` · `pnpm cli dev:dev` · `pnpm cli quality:ci` · `pnpm cli db:migrate` · `pnpm cli generate:types` · `pnpm cli generate:importmap` · `pnpm cli verify:phase1` · `pnpm cli verify:ai`

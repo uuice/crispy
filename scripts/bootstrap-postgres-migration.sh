@@ -19,15 +19,15 @@ docker compose up -d --wait
 
 echo "→ Creating migration (initial if none exist)…"
 if compgen -G "src/migrations/*.ts" > /dev/null; then
-  echo "   Migrations already exist; run: pnpm payload migrate:create <name>"
+  echo "   Migrations already exist; run: pnpm cli db:create <name>"
 else
-  pnpm payload migrate:create initial
+  node "$ROOT/scripts/cli.mjs" util:payload migrate:create initial
 fi
 
 echo "→ Applying migrations…"
-pnpm payload migrate
+node "$ROOT/scripts/cli.mjs" db:migrate
 
 echo "→ Status:"
-pnpm payload migrate:status
+node "$ROOT/scripts/cli.mjs" db:status
 
 echo "Done. Commit src/migrations/ if new files were created."

@@ -28,7 +28,7 @@ import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 </DefaultTemplate>
 ```
 
-5. `pnpm generate:importmap`
+5. `pnpm cli generate:importmap`
 
 ## 列表页轻量定制
 

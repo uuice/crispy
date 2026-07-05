@@ -1,7 +1,7 @@
 /**
  * Run database seed from CLI (uses first admin user for Local API context).
  *
- * Usage: pnpm seed
+ * Usage: pnpm cli db:seed
  */
 import 'dotenv/config'
 import { createLocalReq, getPayload } from 'payload'

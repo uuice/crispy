@@ -37,22 +37,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm cli quality:lint
 
       - name: Typecheck
-        run: pnpm exec tsc --noEmit
+        run: pnpm cli quality:tsc
 
       - name: Integration tests (SQLite)
         env:
           DATABASE_URL: file:./.data/ci-payload.db
           DATABASE_DRIVER: sqlite
-        run: pnpm test:int
+        run: pnpm cli quality:test int
 
       - name: Build
         env:
           DATABASE_URL: file:./.data/ci-payload.db
           DATABASE_DRIVER: sqlite
-        run: pnpm build
+        run: pnpm cli dev:build
 
   postgres-migrations:
     name: PostgreSQL migrations
@@ -94,15 +94,15 @@ jobs:
       - name: Ensure migration files exist
         run: |
           if ! compgen -G "src/migrations/*.ts" > /dev/null; then
-            echo "::error::No Postgres migrations in src/migrations/. Run: pnpm migrate:create:initial (requires Docker Postgres), then commit."
+            echo "::error::No Postgres migrations in src/migrations/. Run: pnpm cli db:bootstrap (requires Docker Postgres), then commit."
             exit 1
           fi
 
       - name: Apply migrations
-        run: pnpm migrate
+        run: pnpm cli db:migrate
 
       - name: Migration status
-        run: pnpm migrate:status
+        run: pnpm cli db:status
 
       - name: Integration tests (PostgreSQL)
-        run: pnpm test:int
+        run: pnpm cli quality:test int

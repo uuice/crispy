@@ -193,24 +193,23 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
     title: '常用命令',
     blocks: [
       {
+        type: 'p',
+        text: '统一入口 pnpm cli — 全部开发与运维命令；pnpm cli help 查看分组，pnpm cli help <命令> 查看单条备注。',
+      },
+      {
         type: 'table',
         headers: ['命令', '说明'],
         rows: [
-          ['pnpm dev', '开发服务器（端口 3333，SQLite）'],
-          ['pnpm build / pnpm start', '生产构建与启动'],
-          ['pnpm docker:up / docker:down', '本地 PostgreSQL（可选）'],
-          ['pnpm migrate', '执行 Postgres 迁移（生产必跑）'],
-          ['pnpm migrate:status', '迁移状态'],
-          ['pnpm migrate:create:initial', '首次迁移（Docker + Node 22）'],
-          ['pnpm ci:check', '本地 CI：lint + tsc + test + build'],
-          ['pnpm seed', 'CLI 填充示例数据'],
-          ['pnpm mcp:key', '重新生成 MCP API Key'],
-          ['pnpm verify:phase1', 'MCP + Preview + RSS 冒烟'],
-          ['pnpm verify:phase2', '图库/招聘/中文前台/access-log'],
-          ['pnpm verify:ai', 'DeepSeek 连通与流式'],
-          ['pnpm generate:types', '更新 payload-types.ts'],
-          ['pnpm generate:importmap', 'Admin 自定义组件 import map'],
-          ['pnpm payload migrate:create <name>', 'Schema 变更后新建迁移'],
+          ['pnpm cli dev:dev', '开发服务器（3333，SQLite）'],
+          ['pnpm cli dev:build / dev:start', '生产构建与启动'],
+          ['pnpm cli db:docker-up|down', '本地 PostgreSQL（可选）'],
+          ['pnpm cli db:migrate / db:status', 'Postgres 迁移与状态'],
+          ['pnpm cli db:bootstrap', '首次迁移（Docker + Node 22）'],
+          ['pnpm cli db:create <name>', 'Schema 变更后新建迁移'],
+          ['pnpm cli quality:ci', '本地 CI：lint + tsc + test + build'],
+          ['pnpm cli verify:all', '完整冒烟 phase1+2+ai'],
+          ['pnpm cli db:seed / mcp:key', '示例数据 / MCP Key'],
+          ['pnpm cli generate:types|importmap|openapi', '类型 / import map / OpenAPI'],
         ],
       },
     ],
@@ -426,7 +425,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
         items: [
           '在 collectionProfiles.ts 增加 profile',
           '字段使用 withAiTextField / withAiRewriteFeatures / aiSeoAssistField 等',
-          'pnpm generate:importmap',
+          'pnpm cli generate:importmap',
         ],
       },
     ],
@@ -677,7 +676,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       {
         type: 'ul',
         items: [
-          'pnpm verify:ai — 检测 API Key、流式 /complete /stream 连通',
+          'pnpm cli verify:ai — 检测 API Key、流式 /complete /stream 连通',
           '代码入口：src/app/(payload)/api/ai/*/route.ts',
           '类型定义：src/ai/types.ts',
           'OpenAI 官方文档：https://platform.openai.com/docs/api-reference/chat',
@@ -699,7 +698,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
         rows: [
           ['Swagger UI（Admin）', '/admin/api-docs'],
           ['OpenAPI JSON（动态）', 'GET /api/openapi.json（需 Admin Cookie）'],
-          ['静态文件（本地可选）', 'public/openapi.json（pnpm generate:openapi；勿在生产公开托管）'],
+          ['静态文件（本地可选）', 'public/openapi.json（pnpm cli generate:openapi；勿在生产公开托管）'],
         ],
       },
       {
@@ -735,7 +734,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'pre',
-        text: `pnpm generate:openapi    # 写入 public/openapi.json（本地备份，生产勿公开）
+        text: `pnpm cli generate:openapi    # 写入 public/openapi.json（本地备份，生产勿公开）
 # 实现：src/openapi/buildDocument.ts
 # 路由：src/app/(payload)/api/openapi/route.ts（requireAdminSession）`,
       },
@@ -776,9 +775,9 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       {
         type: 'ul',
         items: [
-          'pnpm seed 或 Admin 仪表盘「填充示例数据」→ 终端 MCP_API_KEY',
+          'pnpm cli db:seed 或 Admin 仪表盘「填充示例数据」→ 终端 MCP_API_KEY',
           'Admin → MCP → API Keys → 关联 editor 用户（如 agent@example.com）',
-          'pnpm mcp:key 单独轮换',
+          'pnpm cli mcp:key 单独轮换',
         ],
       },
       {
@@ -813,7 +812,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'p',
-        text: '验证：MCP_API_KEY=xxx pnpm verify:phase1',
+        text: '验证：MCP_API_KEY=xxx pnpm cli verify:phase1',
       },
     ],
   },
@@ -842,8 +841,8 @@ CRON_SECRET=...`,
       {
         type: 'ol',
         items: [
-          'pnpm migrate && pnpm migrate:status',
-          'pnpm build && pnpm start（或 Docker standalone，端口 3333）',
+          'pnpm cli db:migrate && pnpm cli db:status',
+          'pnpm cli dev:build && pnpm cli dev:start（或 Docker standalone，端口 3333）',
           '可选：配置 S3_*、DEEPSEEK_API_KEY',
         ],
       },
@@ -855,7 +854,7 @@ CRON_SECRET=...`,
         type: 'table',
         headers: ['环境', 'push', '说明'],
         rows: [
-          ['生产 NODE_ENV=production', '关闭', '仅 pnpm migrate'],
+          ['生产 NODE_ENV=production', '关闭', '仅 pnpm cli db:migrate'],
           ['开发 Postgres', '默认开启', 'DATABASE_PUSH=false 强制迁移'],
           ['SQLite 本地', 'N/A', '自动建表，不用 src/migrations/'],
         ],
@@ -872,7 +871,7 @@ docker run -p 3333:3333 \\
   -e PAYLOAD_SECRET=... \\
   -e NEXT_PUBLIC_SERVER_URL=http://localhost:3333 \\
   crispy
-# 启动前需在 entrypoint 或 init 容器执行 pnpm migrate`,
+# 启动前需在 entrypoint 或 init 容器执行 pnpm cli db:migrate`,
       },
       {
         type: 'h3',
@@ -1068,7 +1067,7 @@ curl -I http://localhost:3333/
           'cachedValue 写入前 JSON.parse(JSON.stringify) 保证可序列化',
           'frontend-cache-entries 在 SYSTEM_COLLECTION_SLUGS 中，无 trash/versions',
           'SQLite dev：schema push 新增表时选 create table，勿 rename 到 _xxx_v 版本表',
-          'Postgres 生产：Collection 变更需 pnpm migrate:create + migrate',
+          'Postgres 生产：Collection 变更需 pnpm cli db:create + db:migrate',
           '页面 HTML 由 DB + middleware 负责；Next.js 页面段 revalidate=false，勿再叠加 ISR',
         ],
       },
@@ -1122,7 +1121,7 @@ curl -I http://localhost:3333/
         items: [
           '代码：blog / cms / kb 各自独立目录；仅 registry → loadTheme 动态 import 进入主题模块',
           '主题 CSS：styles.css 原生嵌套写在 html.{theme}-skin { } 内',
-          '主题 CSS：pnpm build:theme-css 编译到 public/theme-assets/{id}.css；layout 仅 <link> 当前主题，dev/prod 均只请求一个文件',
+          '主题 CSS：pnpm cli theme:build 编译到 public/theme-assets/{id}.css；layout 仅 <link> 当前主题，dev/prod 均只请求一个文件',
           '主题 Tailwind：含在各主题 tailwind.css 内，与 styles.css 一并编译进 theme-assets',
           '共享 Tailwind：globals.css 含 preflight / @theme / .crispy-chrome',
           'Admin / AI 浮窗包在 .crispy-chrome，不受主题 CSS 影响',
@@ -1132,7 +1131,7 @@ curl -I http://localhost:3333/
       {
         type: 'pre',
         text: `src/app/(frontend)/globals.css        # preflight + chrome Tailwind
-public/theme-assets/{blog,cms,kb}.css  # pnpm build:theme-css 产出
+public/theme-assets/{blog,cms,kb}.css  # pnpm cli theme:build 产出
 src/themes/blog/tailwind.css           # Tailwind + @source + styles.css（编译输入）
 src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂 link`,
       },
@@ -1162,7 +1161,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           '新建 src/themes/<id>/（参考 kb/ 或 cms/），实现全部 ThemePageName 页面',
           '在 loadTheme.ts 的 themeLoaders 注册 dynamic import',
           '在 adminMeta.ts 注册；更新 FrontendThemeField 预览 mock',
-          'pnpm generate:types（site-settings.frontendTheme 联合类型）',
+          'pnpm cli generate:types（site-settings.frontendTheme 联合类型）',
         ],
       },
     ],
@@ -1290,7 +1289,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         rows: [
           ['delete() ≠ 软删除', '统一走 trashOrDeleteDocument'],
           ['Admin 列表/编辑 UI 难深度改造', '接受 Payload 交互；极特殊流程外置 Custom View 或独立服务'],
-          ['importMap 随 Admin 组件变更', '改组件后执行 pnpm generate:importmap'],
+          ['importMap 随 Admin 组件变更', '改组件后执行 pnpm cli generate:importmap'],
           ['插件 Collection 英文 labels', 'localizePluginCollectionsPlugin 集中中文化'],
           ['Media 文件夹视图无列表刷新', '已知缺口；需单独 Folder 视图扩展时再评估'],
         ],
@@ -1322,13 +1321,13 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         items: [
           'pnpm update @payloadcms/* payload（或按 release note 指定版本），确保所有 @payloadcms 包版本一致',
           '阅读 Payload changelog / breaking changes；重点看 Plugin API、Admin 组件、DB adapter',
-          'pnpm install && pnpm generate:importmap',
-          '若 schema 有变：pnpm payload migrate:create <name> → 审阅 src/migrations/ → pnpm migrate',
-          'pnpm migrate:status && pnpm ci:check（lint + tsc + test + build）',
+          'pnpm install && pnpm cli generate:importmap',
+          '若 schema 有变：pnpm cli db:create <name> → 审阅 src/migrations/ → pnpm cli db:migrate',
+          'pnpm cli db:status && pnpm cli quality:ci（lint + tsc + test + build）',
           'Admin 冒烟：登录、Collection 列表、编辑保存、回收站切换、版本历史还原',
           'Plugin 相关：Query Presets 保存/加载、列表「刷新」按钮',
-          'AI：pnpm verify:ai；/admin/ai-agent 对话 + delete_document 软删除',
-          'MCP / Preview：pnpm verify:phase1',
+          'AI：pnpm cli verify:ai；/admin/ai-agent 对话 + delete_document 软删除',
+          'MCP / Preview：pnpm cli verify:phase1',
           'Postgres 环境再跑一遍 migrate + test:int（与 CI postgres-migrations job 一致）',
         ],
       },
@@ -1380,8 +1379,8 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         items: [
           '新建 src/plugins/enableXxx.ts，map collections 或改 config',
           '在 src/plugins/index.ts 注册',
-          '若改 Admin 组件：pnpm generate:importmap',
-          '若改 schema：pnpm payload migrate:create <name> 并 commit 迁移',
+          '若改 Admin 组件：pnpm cli generate:importmap',
+          '若改 schema：pnpm cli db:create <name> 并 commit 迁移',
         ],
       },
     ],

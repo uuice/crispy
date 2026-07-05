@@ -48,5 +48,5 @@ AI Agent `delete_document`、会话删除须走 `trashOrDeleteDocument`。
 
 1. 新建 `src/plugins/enableXxx.ts`
 2. 注册到 `src/plugins/index.ts`
-3. Admin 组件变更 → `pnpm generate:importmap`
-4. Schema 变更 → `pnpm payload migrate:create <name>` 并 commit 迁移
+3. Admin 组件变更 → `pnpm cli generate:importmap`
+4. Schema 变更 → `pnpm cli db:create <name>` 并 commit 迁移

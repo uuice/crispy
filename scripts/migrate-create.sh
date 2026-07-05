@@ -15,7 +15,7 @@ if [[ ! "$DATABASE_URL" =~ ^postgres(ql)?:// ]]; then
   echo "  Example:" >&2
   echo "    export DATABASE_DRIVER=postgres" >&2
   echo "    export DATABASE_URL=postgresql://crispy:crispy@127.0.0.1:5432/crispy" >&2
-  echo "    pnpm migrate:create my_change_name" >&2
+  echo "    pnpm cli db:create my_change_name" >&2
   exit 1
 fi
 

@@ -2,8 +2,8 @@
  * Phase 1 smoke checks: MCP endpoint, preview guard, RSS, archive routes.
  *
  * Usage:
- *   pnpm dev   # in another terminal
- *   MCP_API_KEY=xxx pnpm verify:phase1
+ *   pnpm cli dev:dev   # in another terminal
+ *   MCP_API_KEY=xxx pnpm cli verify:phase1
  */
 
 const BASE = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3333'
@@ -61,7 +61,7 @@ async function mcpRequest(method: string, params: Record<string, unknown>, id: n
 
 async function mcpInitialize(): Promise<boolean> {
   if (!MCP_API_KEY) {
-    console.log('  ⏭  跳过 MCP（未设置 MCP_API_KEY，运行 pnpm mcp:key 获取）')
+    console.log('  ⏭  跳过 MCP（未设置 MCP_API_KEY，运行 pnpm cli mcp:key 获取）')
     return true
   }
 

@@ -1,7 +1,7 @@
 /**
  * AI smoke check (OpenAI-compatible LLM). Loads .env and tests API key + connectivity.
  *
- * Usage: pnpm verify:ai
+ * Usage: pnpm cli verify:ai
  */
 import 'dotenv/config'
 
@@ -91,7 +91,7 @@ async function main() {
     } catch (err) {
       console.log('✗')
       console.error(' ', err instanceof Error ? err.message : err)
-      console.error('  请确认 pnpm dev 正在运行')
+      console.error('  请确认 pnpm cli dev:dev 正在运行')
       process.exit(1)
     }
   }

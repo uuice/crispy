@@ -38,7 +38,7 @@ alwaysApply: false
 
 1. `src/ai/collectionProfiles.ts` 增加 profile
 2. 字段用 `withAiTextField` 等 wrapper
-3. `pnpm generate:importmap`
+3. `pnpm cli generate:importmap`
 
 ## 环境
 

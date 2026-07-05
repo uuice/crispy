@@ -49,7 +49,7 @@ export async function SwaggerView({
               /api/openapi.json
             </Link>
             {' · '}
-            更新静态文件：<code>pnpm generate:openapi</code>
+            更新静态文件：<code>pnpm cli generate:openapi</code>
             {' · '}
             主题随 Admin 浅色/深色自动切换
           </p>

@@ -2,8 +2,8 @@
  * Phase 2 smoke checks: gallery, jobs, taxonomy pages, Chinese UI, access log API.
  *
  * Usage:
- *   pnpm dev   # in another terminal
- *   pnpm verify:phase2
+ *   pnpm cli dev:dev   # in another terminal
+ *   pnpm cli verify:phase2
  */
 
 const BASE = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3333'

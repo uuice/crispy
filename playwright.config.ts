@@ -31,7 +31,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: 'pnpm cli dev:dev',
     reuseExistingServer: !process.env.CI,
     url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3333',
   },

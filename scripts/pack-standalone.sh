@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pack Next.js standalone output for self-hosted deployment.
-# Requires `pnpm build` first (or use `pnpm pack:standalone` which builds automatically).
+# Requires `pnpm cli dev:build` first (or use `pnpm cli dev:pack` which builds automatically).
 
 set -euo pipefail
 
@@ -13,7 +13,7 @@ PUBLIC_DIR="public"
 OUT_DIR="dist"
 
 if [[ ! -f "$STANDALONE_DIR/server.js" ]]; then
-  echo "error: $STANDALONE_DIR/server.js not found. Run 'pnpm build' first." >&2
+  echo "error: $STANDALONE_DIR/server.js not found. Run 'pnpm cli dev:build' first." >&2
   exit 1
 fi
 
@@ -148,7 +148,7 @@ Crispy standalone deployment bundle
    # Set DATABASE_URL, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL, etc.
 
 3. Run database migrations (from a machine with the full repo, before first start):
-   DATABASE_PUSH=false pnpm migrate
+   DATABASE_PUSH=false pnpm cli db:migrate
 
 4. Start the app:
 
