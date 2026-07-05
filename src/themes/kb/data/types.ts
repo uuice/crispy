@@ -1,8 +1,1 @@
-export type {
-  NavItem,
-  PostListItem,
-  SidebarCategory,
-  SidebarData,
-  SidebarTag,
-  SidebarUser,
-} from '../../shared/data/types'
+export * from '../../shared/data/types'

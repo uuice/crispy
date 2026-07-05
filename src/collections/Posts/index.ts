@@ -233,6 +233,10 @@ export const Posts: CollectionConfig<'posts'> = {
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'bio',
+          type: 'text',
+        },
       ],
     },
     chineseSlugField(),

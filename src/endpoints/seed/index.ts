@@ -1,5 +1,8 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
 import crypto from 'crypto'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -11,17 +14,25 @@ import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
+import { demoAuthorBio, demoAuthorBioDetail } from './demo-author-profile'
 import { getPagePath } from '@/utilities/frontendPaths'
 
-const collections: CollectionSlug[] = [
+/** Delete order respects FK constraints (e.g. gallery-items → media). */
+const collectionsToClear: CollectionSlug[] = [
+  'form-submissions',
+  'search',
+  'comments',
+  'posts',
+  'pages',
+  'forms',
+  'gallery-items',
+  'jobs',
+  'links',
+  'ads',
+  'ad-slots',
   'categories',
   'tags',
   'media',
-  'pages',
-  'posts',
-  'forms',
-  'form-submissions',
-  'search',
 ]
 
 const globals = ['header', 'footer', 'site-settings'] as const satisfies readonly GlobalSlug[]
@@ -79,15 +90,17 @@ export const seed = async ({
     }),
   )
 
-  await Promise.all(
-    collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
+  const versionedCollections = collectionsToClear.filter(
+    (collection) => payload.collections[collection].config.versions,
   )
 
-  await Promise.all(
-    collections
-      .filter((collection) => Boolean(payload.collections[collection].config.versions))
-      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
-  )
+  for (const collection of versionedCollections) {
+    await payload.db.deleteVersions({ collection, req, where: {} })
+  }
+
+  for (const collection of collectionsToClear) {
+    await payload.db.deleteMany({ collection, req, where: {} })
+  }
 
   payload.logger.info(`— Seeding demo users...`)
 
@@ -116,18 +129,10 @@ export const seed = async ({
   payload.logger.info(`— Seeding media...`)
 
   const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-post1.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-post2.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-post3.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp',
-    ),
+    loadSeedImageFile('anime-bg.jpg', 'image-post1.jpg'),
+    loadSeedImageFile('comic/12.jpg', 'image-post2.jpg'),
+    loadSeedImageFile('anime-bg.jpg', 'image-post3.jpg'),
+    loadSeedImageFile('comic/12.jpg', 'image-hero1.jpg'),
   ])
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
@@ -139,6 +144,8 @@ export const seed = async ({
         email: demoUsers[0].email,
         password: 'password',
         roles: [...demoUsers[0].roles],
+        bio: demoAuthorBio,
+        bioDetail: demoAuthorBioDetail,
       },
     }),
     payload.create({
@@ -322,21 +329,14 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: '友链',
+              label: '友情链接',
               url: '/links',
             },
           },
           {
             link: {
               type: 'custom',
-              label: '关于',
-              url: getPagePath('about'),
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: '导航',
+              label: '类库导航',
               url: '/navigations',
             },
           },
@@ -349,12 +349,9 @@ export const seed = async ({
           },
           {
             link: {
-              type: 'reference',
-              label: '联系我们',
-              reference: {
-                relationTo: 'pages',
-                value: contactPage.id,
-              },
+              type: 'custom',
+              label: '关于',
+              url: getPagePath('about'),
             },
           },
         ],
@@ -382,7 +379,7 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: '友链',
+              label: '友情链接',
               url: '/links',
             },
           },
@@ -672,22 +669,16 @@ export const seed = async ({
   payload.logger.info('Seeded database successfully!')
 }
 
-async function fetchFileByURL(url: string): Promise<File> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    method: 'GET',
-  })
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`)
-  }
-
-  const data = await res.arrayBuffer()
+async function loadSeedImageFile(relativePath: string, name: string): Promise<File> {
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
+  const filePath = path.join(rootDir, 'public/images', relativePath)
+  const data = fs.readFileSync(filePath)
+  const ext = path.extname(relativePath).slice(1).toLowerCase()
 
   return {
-    name: url.split('/').pop() || `file-${Date.now()}`,
-    data: Buffer.from(data),
-    mimetype: `image/${url.split('.').pop()}`,
-    size: data.byteLength,
+    name,
+    data,
+    mimetype: ext === 'jpg' ? 'image/jpeg' : `image/${ext}`,
+    size: data.length,
   }
 }

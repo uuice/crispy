@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.svg" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body>
+      <body className={cn(theme.bodyClassName, 'min-h-screen antialiased')}>
         <Providers>
           <ThemePreviewShell themeId={previewThemeId}>
             <div className="crispy-chrome">

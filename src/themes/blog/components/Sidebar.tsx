@@ -15,7 +15,6 @@ type Props = {
 export function Sidebar({ categories, tags, user }: Props) {
   return (
     <aside className="space-y-6">
-      <SidebarCountdown holidays={holidayData.holidays} />
       {categories.length > 0 && (
         <div className="section-card p-4 overflow-hidden" style={{ borderRadius: 'var(--radius)' }}>
           <h3 className="section-title">分类</h3>
@@ -76,6 +75,8 @@ export function Sidebar({ categories, tags, user }: Props) {
           </Link>
         </div>
       )}
+
+      <SidebarCountdown holidays={holidayData.holidays} />
     </aside>
   )
 }

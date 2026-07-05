@@ -1,9 +1,19 @@
-import { getPagePath, getPostPath, getPostsListPath, getUserPath } from '../utilities/frontendPaths'
+import {
+  getGalleryItemsPath,
+  getPagePath,
+  getPostPath,
+  getPostsListPath,
+  getUserPath,
+} from '../utilities/frontendPaths'
 
 /** Permanent redirects from legacy public URLs to collection-aligned routes. */
 export function resolveLegacyFrontendRedirect(pathname: string): string | null {
-  if (pathname === '/archives') {
+  if (pathname === '/archives' || pathname === '/archive') {
     return getPostsListPath()
+  }
+
+  if (pathname === '/gallery') {
+    return getGalleryItemsPath()
   }
 
   if (pathname === '/about') {
@@ -25,7 +35,9 @@ export function resolveLegacyFrontendRedirect(pathname: string): string | null {
 
 export const legacyFrontendRedirectRules = [
   { source: '/archives', destination: getPostsListPath() },
+  { source: '/archive', destination: getPostsListPath() },
   { source: '/archives/:slug', destination: '/posts/:slug' },
   { source: '/authors/:slug', destination: '/users/:slug' },
   { source: '/about', destination: getPagePath('about') },
+  { source: '/gallery', destination: getGalleryItemsPath() },
 ] as const

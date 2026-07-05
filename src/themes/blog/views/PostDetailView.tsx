@@ -23,7 +23,7 @@ export function PostDetailView({ data }: Props) {
           href={getPostsListPath()}
           style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
         >
-          ← 返回文章列表
+          ← 返回归档
         </Link>
       </p>
       <article className="section-card animate-in animate-in-delay-2">

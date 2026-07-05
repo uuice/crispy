@@ -325,6 +325,7 @@ export interface Post {
     | {
         id?: string | null;
         name?: string | null;
+        bio?: string | null;
       }[]
     | null;
   /**
@@ -506,6 +507,28 @@ export interface Tag {
 export interface User {
   id: number;
   name?: string | null;
+  /**
+   * 短简介，用于侧栏与作者页 Banner；留空则不展示。
+   */
+  bio?: string | null;
+  /**
+   * 作者详情页正文，编辑器与文章一致；留空则不展示。
+   */
+  bioDetail?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   roles: ('super-admin' | 'editor' | 'author')[];
   updatedAt: string;
   createdAt: string;
@@ -2097,6 +2120,7 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         id?: T;
         name?: T;
+        bio?: T;
       };
   generateSlug?: T;
   slug?: T;
@@ -2407,6 +2431,8 @@ export interface AiChatSessionsSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  bio?: T;
+  bioDetail?: T;
   roles?: T;
   updatedAt?: T;
   createdAt?: T;

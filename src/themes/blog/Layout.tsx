@@ -3,7 +3,7 @@ import React from 'react'
 
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
-import { resolveBlogMenu } from './data/constants'
+import { defaultBlogMenu } from './data/constants'
 import type { SidebarData } from './data/types'
 
 import { BackToTop, FooterBackToTop } from './components/BackToTop'
@@ -31,7 +31,7 @@ export async function Layout({ children, layoutData }: Props) {
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
-  const menu = resolveBlogMenu(sidebar.menu)
+  const menu = defaultBlogMenu
   const footerMenu = sidebar.footerMenu
   const recordInfo = (settings as { recordSettings?: {
     showRecord?: boolean

@@ -15,6 +15,7 @@ import {
 import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
 
 import type { NavItem, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
+import { pickPublicAuthorBio } from './types'
 
 export type {
   NavItem,
@@ -244,15 +245,17 @@ export const querySidebarData = cache(async () => {
     overrideAccess: false,
     pagination: false,
     sort: '-publishedAt',
-    select: { populatedAuthors: true },
+    select: { authors: true, populatedAuthors: true },
     where: { _status: { equals: 'published' } },
   })
 
   const firstUser = defaultUserPost.docs[0]?.populatedAuthors?.[0]
+  const firstUserBio = pickPublicAuthorBio(firstUser)
   const user: SidebarUser | undefined = firstUser?.name
     ? {
         title: firstUser.name,
         url: getUserPath(slugifyUserName(firstUser.name, firstUser.id || 'user')),
+        ...(firstUserBio ? { excerpt: firstUserBio } : {}),
       }
     : undefined
 
@@ -298,19 +301,37 @@ export const queryUserBySlug = cache(async (slug: string) => {
     limit: 200,
     overrideAccess: false,
     pagination: false,
-    select: { populatedAuthors: true },
+    select: { authors: true, populatedAuthors: true },
     where: { _status: { equals: 'published' } },
   })
+
+  let matchedId: string | number | null = null
 
   for (const post of docs) {
     for (const user of post.populatedAuthors || []) {
       if (user?.name && slugifyUserName(user.name, user.id || user.name) === slug) {
-        return user
+        matchedId = user.id ?? null
+        break
       }
     }
+    if (matchedId) break
   }
 
-  return null
+  if (!matchedId) return null
+
+  const profile = await payload.findByID({
+    collection: 'users',
+    id: matchedId,
+    depth: 0,
+    overrideAccess: true,
+    select: {
+      name: true,
+      bio: true,
+      bioDetail: true,
+    },
+  })
+
+  return profile?.name ? profile : null
 })
 
 export const queryUserPage = cache(async (slug: string) => {
@@ -325,7 +346,7 @@ export const queryUserPage = cache(async (slug: string) => {
     limit: 1000,
     overrideAccess: false,
     pagination: false,
-    select: { ...POST_CARD_SELECT, populatedAuthors: true },
+    select: { ...POST_CARD_SELECT, authors: true, populatedAuthors: true },
     sort: '-publishedAt',
     where: { _status: { equals: 'published' } },
   })

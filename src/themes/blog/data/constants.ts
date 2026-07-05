@@ -1,16 +1,40 @@
-import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
+import {
+  getGalleryItemsPath,
+  getPagePath,
+  getPostsListPath,
+} from '@/utilities/frontendPaths'
 
 import type { NavItem } from './types'
 
+/** Matches astro-learn menu.json order and labels. */
 export const defaultBlogMenu: NavItem[] = [
   { title: '首页', url: '/', target: '_self' },
-  { title: '文章', url: getPostsListPath(), target: '_self' },
-  { title: '友链', url: '/links', target: '_self' },
-  { title: '关于', url: getPagePath('about'), target: '_self' },
-  { title: '导航', url: '/navigations', target: '_self' },
+  { title: '归档', url: getPostsListPath(), target: '_self' },
+  { title: '友情链接', url: '/links', target: '_self' },
+  { title: '类库导航', url: '/navigations', target: '_self' },
   { title: '小游戏', url: '/games', target: '_self' },
+  { title: '关于', url: getPagePath('about'), target: '_self' },
 ]
 
+const NAV_URL_ALIASES: Record<string, string> = {
+  '/archive': getPostsListPath(),
+  '/archives': getPostsListPath(),
+  '/gallery': getGalleryItemsPath(),
+  '/about': getPagePath('about'),
+}
+
+/** Normalize CMS nav URLs that still use legacy or shorthand paths. */
+export function normalizeBlogNavUrl(url: string): string {
+  return NAV_URL_ALIASES[url] ?? url
+}
+
 export function resolveBlogMenu(menu: NavItem[]): NavItem[] {
-  return menu.length > 0 ? menu : defaultBlogMenu
+  const source = menu.length > 0 ? menu : defaultBlogMenu
+
+  return source
+    .map((item) => ({
+      ...item,
+      url: normalizeBlogNavUrl(item.url),
+    }))
+    .filter((item) => item.url !== '/search')
 }

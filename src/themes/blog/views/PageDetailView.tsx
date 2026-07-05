@@ -17,7 +17,7 @@ export function PageDetailView({ data }: Props) {
     <>
       <Banner subtitle={page.meta?.description || undefined} title={page.title} />
       {dateStr ? (
-        <div className="intro-bubble">
+        <div className="intro-bubble animate-in animate-in-delay-1">
           <p className="doc-detail-meta flex flex-wrap items-center gap-x-4 gap-y-1">
             <span>
               <span aria-label="日期" className="doc-detail-meta-label">
@@ -28,7 +28,7 @@ export function PageDetailView({ data }: Props) {
           </p>
         </div>
       ) : null}
-      <article className="section-card p-6 md:p-10 markdown-body">
+      <article className="section-card p-6 md:p-10 prose max-w-none prose-headings:font-semibold prose-img:rounded-xl markdown-body animate-in animate-in-delay-2">
         <BlogRenderBlocks blocks={page.layout || []} />
         <CommentsSection targetId={page.id} targetType="page" />
       </article>

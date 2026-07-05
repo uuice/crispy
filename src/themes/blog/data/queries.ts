@@ -4,11 +4,9 @@ export * from '../../shared/data/types'
 import { cache } from 'react'
 
 import type { NavItem } from '../../shared/data/types'
-import { querySidebarData } from '../../shared/data/queries'
 
-import { resolveBlogMenu } from './constants'
+import { defaultBlogMenu } from './constants'
 
 export const queryBlogNavMenu = cache(async (): Promise<NavItem[]> => {
-  const sidebar = await querySidebarData()
-  return resolveBlogMenu(sidebar.menu)
+  return defaultBlogMenu
 })
