@@ -16,14 +16,9 @@ import {
 } from '@/frontend-cache/middlewareCache'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import {
-  getThemePreviewCookieValue,
   getThemePreviewQueryValue,
-  hasThemePreviewQuery,
   isEditorUser,
   isFrontendThemeId,
-  THEME_PREVIEW_COOKIE,
-  THEME_PREVIEW_COOKIE_MAX_AGE,
-  THEME_PREVIEW_QUERY_PARAM,
   THEME_PREVIEW_REQUEST_HEADER,
 } from '@/themes/preview.shared'
 import type { FrontendThemeId } from '@/themes/definitions'
@@ -34,7 +29,6 @@ const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file'
 type ThemePreviewContext = {
   themeId: FrontendThemeId
   requestHeaders: Headers
-  persistCookie: boolean
 }
 
 async function isEditorRequest(request: NextRequest): Promise<boolean> {
@@ -62,34 +56,15 @@ async function isEditorRequest(request: NextRequest): Promise<boolean> {
 
 async function resolveThemePreviewContext(request: NextRequest): Promise<ThemePreviewContext | null> {
   const queryTheme = getThemePreviewQueryValue(request)
-  const cookieTheme = getThemePreviewCookieValue(request)
 
-  let themeId: FrontendThemeId | null = null
-  let persistCookie = false
-
-  if (isFrontendThemeId(queryTheme)) {
-    if (!(await isEditorRequest(request))) {
-      return null
-    }
-
-    themeId = queryTheme
-    persistCookie = true
-  } else if (cookieTheme) {
-    if (!(await isEditorRequest(request))) {
-      return null
-    }
-
-    themeId = cookieTheme
-  }
-
-  if (!themeId) {
+  if (!isFrontendThemeId(queryTheme) || !(await isEditorRequest(request))) {
     return null
   }
 
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set(THEME_PREVIEW_REQUEST_HEADER, themeId)
+  requestHeaders.set(THEME_PREVIEW_REQUEST_HEADER, queryTheme)
 
-  return { themeId, requestHeaders, persistCookie }
+  return { themeId: queryTheme, requestHeaders }
 }
 
 function withThemePreview(
@@ -100,46 +75,8 @@ function withThemePreview(
     return response
   }
 
-  if (themePreview.persistCookie) {
-    response.cookies.set(THEME_PREVIEW_COOKIE, themePreview.themeId, {
-      httpOnly: true,
-      maxAge: THEME_PREVIEW_COOKIE_MAX_AGE,
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    })
-  }
-
   response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   return response
-}
-
-function isBrowserDocumentNavigation(request: NextRequest): boolean {
-  const fetchDest = request.headers.get('Sec-Fetch-Dest')
-  if (fetchDest === 'document') {
-    return true
-  }
-
-  const accept = request.headers.get('Accept') || ''
-  return accept.includes('text/html') && !accept.includes('text/x-component')
-}
-
-function maybeRedirectToPreviewQuery(
-  request: NextRequest,
-  themePreview: ThemePreviewContext | null,
-): NextResponse | null {
-  if (!themePreview || hasThemePreviewQuery(request)) {
-    return null
-  }
-
-  if (!isFrontendDocumentRequest(request) || !isBrowserDocumentNavigation(request)) {
-    return null
-  }
-
-  const url = request.nextUrl.clone()
-  url.searchParams.set(THEME_PREVIEW_QUERY_PARAM, themePreview.themeId)
-
-  return withThemePreview(NextResponse.redirect(url), themePreview)
 }
 
 function nextWithRequestHeaders(request: NextRequest, requestHeaders: Headers): NextResponse {
@@ -407,11 +344,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const themePreview = await resolveThemePreviewContext(request)
-
-  const previewQueryRedirect = maybeRedirectToPreviewQuery(request, themePreview)
-  if (previewQueryRedirect) {
-    return previewQueryRedirect
-  }
 
   const frontendResponse = await applyFrontendCacheHeaders(request, themePreview)
   if (frontendResponse) {

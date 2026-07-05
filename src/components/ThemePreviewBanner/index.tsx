@@ -1,8 +1,9 @@
-import Link from 'next/link'
 import React from 'react'
 
 import { getFrontendThemeDefinition } from '@/themes/definitions'
 import { getThemePreviewIdFromHeaders } from '@/themes/preview.server'
+
+import { ExitThemePreviewLink } from './ExitThemePreviewLink'
 
 export async function ThemePreviewBanner() {
   const previewId = await getThemePreviewIdFromHeaders()
@@ -17,9 +18,9 @@ export async function ThemePreviewBanner() {
     >
       正在预览「{label}」主题，保存站点设置前不会替换线上主题。
       {' · '}
-      <Link className="font-medium underline underline-offset-2 hover:opacity-80" href="/next/exit-theme-preview">
+      <ExitThemePreviewLink className="font-medium underline underline-offset-2 hover:opacity-80">
         退出预览
-      </Link>
+      </ExitThemePreviewLink>
     </div>
   )
 }

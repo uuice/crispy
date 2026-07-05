@@ -29,7 +29,7 @@ export function hasThemePreviewCookie(request: NextRequest): boolean {
 }
 
 export function isThemePreviewActive(request: NextRequest): boolean {
-  return hasThemePreviewQuery(request) || hasThemePreviewCookie(request)
+  return hasThemePreviewQuery(request)
 }
 
 export function buildThemePreviewUrl(themeId: FrontendThemeId, baseUrl: string): string {

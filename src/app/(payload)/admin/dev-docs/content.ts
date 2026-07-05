@@ -34,7 +34,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['AI 流式', 'POST /api/ai/stream（需 Admin 登录）'],
           ['AI 助手（后台）', '/admin/ai-agent（需 Admin 登录）'],
           ['AI 助手（前台）', '右下角浮窗 + POST /api/ai/assistant（公开只读）'],
-          ['前台主题预览', '?theme_preview=blog|cms|kb（editor+ Cookie）'],
+          ['前台主题预览', '?theme_preview=blog|cms|kb（editor+，仅 URL 参数）'],
           ['AI 文档', '/admin/dev-docs#openai-api'],
           ['Swagger API', '/admin/api-docs（需 Admin 登录）'],
           ['OpenAPI JSON', 'GET /api/openapi.json（需 Admin 登录）'],
@@ -987,7 +987,7 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
       },
       {
         type: 'p',
-        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。预览 Cookie / ?nocache → BYPASS。',
+        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?theme_preview / ?nocache → BYPASS。',
       },
       {
         type: 'h3',
@@ -1108,10 +1108,9 @@ curl -I http://localhost:3333/
         items: [
           'Admin → Globals → 站点设置 → 前台主题：卡片选择 + 新窗口预览',
           '保存后全站生效；切换主题会自动 purge 全部前台 HTML 缓存（purgeCacheOnFrontendThemeChange）',
-          '预览：/?theme_preview=blog|cms|kb，仅 super-admin / editor Cookie 有效',
-          '预览 Cookie：crispy_theme_preview（1h）；预览站内链接自动附带 theme_preview 参数',
-          '退出预览：GET /next/exit-theme-preview；预览模式 robots noindex',
-          '回退顺序：预览 Header → site-settings → FRONTEND_THEME 环境变量 → 默认 blog',
+          '预览：/?theme_preview=blog|cms|kb，仅 super-admin / editor 有效；站内链接自动附带 theme_preview',
+          '退出预览：/next/exit-theme-preview 清除参数并回到当前页；预览模式 robots noindex',
+          '回退顺序：预览 URL 参数 → site-settings → FRONTEND_THEME 环境变量 → 默认 blog',
         ],
       },
       {

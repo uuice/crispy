@@ -13,6 +13,7 @@ export async function GET(request: Request): Promise<Response> {
   destination.searchParams.delete(THEME_PREVIEW_QUERY_PARAM)
 
   const response = NextResponse.redirect(destination)
+  // Clear legacy preview cookie from older builds
   response.cookies.delete(THEME_PREVIEW_COOKIE)
 
   return response
