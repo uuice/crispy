@@ -1,14 +1,19 @@
-@import 'tailwindcss';
+@import 'tailwindcss/theme' layer(theme);
+@import 'tailwindcss/preflight' layer(base);
+@import 'tailwindcss/utilities' layer(utilities);
 @import 'tw-animate-css';
 
 @config '../../../tailwind.config.mjs';
 
-@custom-variant dark (&:is([data-theme='dark'] *));
-@custom-variant sm (@media (width >= theme(--breakpoint-sm)));
-@custom-variant md (@media (width >= theme(--breakpoint-md)));
-@custom-variant lg (@media (width >= theme(--breakpoint-lg)));
-@custom-variant xl (@media (width >= theme(--breakpoint-xl)));
-@custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
+@import '../../themes/shared/tailwind-theme.css';
+@import '../../themes/shared/tailwind-variants.css';
+
+@plugin "@tailwindcss/typography";
+
+/* Crispy chrome only — theme Tailwind utilities load via loadTheme() */
+@source '../../../components/AdminBar/**/*.{ts,tsx}';
+@source '../../../components/ThemePreviewBanner/**/*.{ts,tsx}';
+@source '../../../components/ThemePreview/**/*.{ts,tsx}';
 
 @layer base {
   .crispy-chrome h1,
@@ -20,18 +25,6 @@
     font-weight: unset;
     font-size: unset;
   }
-}
-
-@plugin "@tailwindcss/typography";
-
-@theme {
-  --breakpoint-sm: 40rem;
-  --breakpoint-md: 48rem;
-  --breakpoint-lg: 64rem;
-  --breakpoint-xl: 80rem;
-  --breakpoint-2xl: 86rem;
-  --font-mono: var(--font-geist-mono);
-  --font-sans: var(--font-geist-sans);
 }
 
 @layer utilities {

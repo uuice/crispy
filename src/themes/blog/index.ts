@@ -7,8 +7,6 @@ import { Layout } from './Layout'
 import { blogPages } from './pages'
 import { loadBlogSearchIndex } from './searchIndex'
 
-import './styles.css'
-
 const blogDefinition = getFrontendThemeDefinition('blog')
 
 export const blogTheme: FrontendTheme = {

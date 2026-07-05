@@ -1,29 +1,21 @@
+import 'server-only'
+
 import { cache } from 'react'
 
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
-import { blogTheme } from './blog'
-import { cmsTheme } from './cms'
-import { kbTheme } from './kb'
+import { getFrontendThemeSelectOptions } from './definitions'
+import { loadFrontendTheme } from './loadTheme'
 import { getThemePreviewIdFromHeaders } from './preview.server'
 import { isFrontendThemeId as isThemePreviewId } from './preview.shared'
 import type { FrontendTheme, FrontendThemeId } from './types'
-
-export const frontendThemes = {
-  blog: blogTheme,
-  cms: cmsTheme,
-  kb: kbTheme,
-} as const satisfies Record<FrontendThemeId, FrontendTheme>
 
 export function isFrontendThemeId(value: string | null | undefined): value is FrontendThemeId {
   return isThemePreviewId(value)
 }
 
 export function getFrontendThemeOptions(): { label: string; value: FrontendThemeId }[] {
-  return Object.values(frontendThemes).map((theme) => ({
-    label: theme.label,
-    value: theme.id,
-  }))
+  return getFrontendThemeSelectOptions()
 }
 
 export async function getActiveFrontendThemeId(): Promise<FrontendThemeId> {
@@ -50,5 +42,5 @@ export async function getActiveFrontendTheme(): Promise<FrontendTheme> {
 
 const getActiveFrontendThemeCached = cache(async (): Promise<FrontendTheme> => {
   const id = await getActiveFrontendThemeId()
-  return frontendThemes[id]
+  return loadFrontendTheme(id)
 })

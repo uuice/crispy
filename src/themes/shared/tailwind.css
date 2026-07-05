@@ -1,0 +1,8 @@
+@import 'tailwindcss/utilities';
+@import 'tw-animate-css';
+
+@import './tailwind-theme.css';
+@import './tailwind-variants.css';
+@import './frontend-tailwind-sources.css';
+
+@plugin "@tailwindcss/typography";

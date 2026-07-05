@@ -1088,7 +1088,7 @@ curl -I http://localhost:3333/
     blocks: [
       {
         type: 'p',
-        text: 'Crispy 前台通过 src/themes/ 注册多套皮肤，由 site-settings.frontendTheme 或环境变量 FRONTEND_THEME 决定当前主题。App Router 页面统一调用 renderThemePage()，各主题实现自己的 Layout 与页面 View。',
+        text: 'Crispy 前台通过 src/themes/ 注册多套皮肤，由 site-settings.frontendTheme 或环境变量 FRONTEND_THEME 决定当前主题。App Router 页面统一调用 renderThemePage()，各主题实现自己的 Layout 与页面 View。运行时通过 loadTheme.ts 的 dynamic import 只加载当前主题 chunk（含 styles.css），三套之间禁止互相 import。',
       },
       {
         type: 'table',
@@ -1116,17 +1116,41 @@ curl -I http://localhost:3333/
       },
       {
         type: 'h3',
+        text: '代码与样式隔离',
+      },
+      {
+        type: 'ul',
+        items: [
+          '代码：blog / cms / kb 各自独立目录；仅 registry → loadTheme 动态 import 进入主题模块',
+          '主题 CSS：styles.css 原生嵌套写在 html.{theme}-skin { } 内',
+          '主题 CSS：pnpm build:theme-css 编译到 public/theme-assets/{id}.css；layout 仅 <link> 当前主题，dev/prod 均只请求一个文件',
+          '主题 Tailwind：含在各主题 tailwind.css 内，与 styles.css 一并编译进 theme-assets',
+          '共享 Tailwind：globals.css 含 preflight / @theme / .crispy-chrome',
+          'Admin / AI 浮窗包在 .crispy-chrome，不受主题 CSS 影响',
+          '共享数据查询放 src/themes/shared/，主题内组件不得 cross-import 其他主题',
+        ],
+      },
+      {
+        type: 'pre',
+        text: `src/app/(frontend)/globals.css        # preflight + chrome Tailwind
+public/theme-assets/{blog,cms,kb}.css  # pnpm build:theme-css 产出
+src/themes/blog/tailwind.css           # Tailwind + @source + styles.css（编译输入）
+src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂 link`,
+      },
+      {
+        type: 'h3',
         text: '主题结构',
       },
       {
         type: 'pre',
         text: `src/themes/
 ├── definitions.ts      # FRONTEND_THEME_DEFINITIONS（id + 中文名）
-├── registry.ts           # frontendThemes、getActiveFrontendTheme*
-├── render.tsx            # renderThemePage / generateThemeMetadata
-├── types.ts              # FrontendTheme、ThemePageName
-├── blog/ | cms/ | kb/    # 各主题 Layout、pages、views、styles
-└── shared/data/queries.ts  # 跨主题共享数据查询`,
+├── loadTheme.ts        # dynamic import，按 id 加载单主题 chunk + CSS
+├── registry.ts         # getActiveFrontendThemeId / getActiveFrontendTheme
+├── render.tsx          # renderThemePage / generateThemeMetadata
+├── types.ts            # FrontendTheme、ThemePageName
+├── blog/ | cms/ | kb/  # tailwind.css + styles.css + Layout/pages/views
+└── shared/             # data/ + tailwind-theme|variants|sources.css`,
       },
       {
         type: 'h3',
@@ -1137,7 +1161,8 @@ curl -I http://localhost:3333/
         items: [
           '在 definitions.ts 注册 id 与 label',
           '新建 src/themes/<id>/（参考 kb/ 或 cms/），实现全部 ThemePageName 页面',
-          '在 registry.ts 与 adminMeta.ts 注册；更新 FrontendThemeField 预览 mock',
+          '在 loadTheme.ts 的 themeLoaders 注册 dynamic import',
+          '在 adminMeta.ts 注册；更新 FrontendThemeField 预览 mock',
           'pnpm generate:types（site-settings.frontendTheme 联合类型）',
         ],
       },

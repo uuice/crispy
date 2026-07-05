@@ -7,8 +7,6 @@ import { Layout } from './Layout'
 import { kbPages } from './pages'
 import { loadKbSearchIndex } from './searchIndex'
 
-import './styles.css'
-
 const kbDefinition = getFrontendThemeDefinition('kb')
 
 export const kbTheme: FrontendTheme = {

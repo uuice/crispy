@@ -10,7 +10,7 @@ import { FrontendAiAssistant } from '@/components/FrontendAiAssistant'
 import { ThemePreviewBanner } from '@/components/ThemePreviewBanner'
 import { ThemePreviewShell } from '@/components/ThemePreview/ThemePreviewShell'
 import { Providers } from '@/providers'
-import { getActiveFrontendTheme } from '@/themes/registry'
+import { getActiveFrontendTheme, getActiveFrontendThemeId } from '@/themes/registry'
 import { getThemePreviewIdFromHeaders } from '@/themes/preview.server'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
@@ -20,10 +20,11 @@ import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [{ isEnabled }, theme, previewThemeId] = await Promise.all([
+  const [{ isEnabled }, theme, previewThemeId, themeId] = await Promise.all([
     draftMode(),
     getActiveFrontendTheme(),
     getThemePreviewIdFromHeaders(),
+    getActiveFrontendThemeId(),
   ])
   const ThemeLayout = theme.Layout
   const ThemeInit = theme.InitTheme
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         {ThemeInit ? <ThemeInit /> : null}
+        <link href={`/theme-assets/${themeId}.css`} rel="stylesheet" />
         <link href="/favicon.svg" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>

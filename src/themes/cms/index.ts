@@ -7,8 +7,6 @@ import { Layout } from './Layout'
 import { cmsPages } from './pages'
 import { loadCmsSearchIndex } from './searchIndex'
 
-import './styles.css'
-
 const cmsDefinition = getFrontendThemeDefinition('cms')
 
 export const cmsTheme: FrontendTheme = {
