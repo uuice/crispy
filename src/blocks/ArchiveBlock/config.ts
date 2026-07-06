@@ -2,6 +2,8 @@ import type { Block } from 'payload'
 
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
+import { withAiRewriteFeatures } from '@/fields/ai'
+
 export const Archive: Block = {
   slug: 'archive',
   interfaceName: 'ArchiveBlock',
@@ -10,13 +12,12 @@ export const Archive: Block = {
       name: 'introContent',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
+        features: ({ rootFeatures }) =>
+          withAiRewriteFeatures([
             ...rootFeatures,
             HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
             FixedToolbarFeature(),
-          ]
-        },
+          ]),
       }),
       label: '引导内容',
     },

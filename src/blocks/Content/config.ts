@@ -3,6 +3,7 @@ import type { Block, Field } from 'payload'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { link } from '@/fields/link'
+import { withAiRewriteFeatures } from '@/fields/ai'
 
 const columnFields: Field[] = [
   {
@@ -32,13 +33,12 @@ const columnFields: Field[] = [
     name: 'richText',
     type: 'richText',
     editor: lexicalEditor({
-      features: ({ rootFeatures }) => {
-        return [
+      features: ({ rootFeatures }) =>
+        withAiRewriteFeatures([
           ...rootFeatures,
           HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
           FixedToolbarFeature(),
-        ]
-      },
+        ]),
     }),
     label: false,
   },
