@@ -8,10 +8,10 @@ type SeedContext = {
   disableRevalidate: boolean
 }
 
-type CategoryMap = Map<string, number | string>
-type TagMap = Map<string, number | string>
-type PostMap = Map<string, number | string>
-type CommentMap = Map<string, number | string>
+type CategoryMap = Map<string, number>
+type TagMap = Map<string, number>
+type PostMap = Map<string, number>
+type CommentMap = Map<string, number>
 
 export async function seedFromAstroLearn({
   payload,
@@ -21,7 +21,7 @@ export async function seedFromAstroLearn({
 }: {
   payload: Payload
   req: PayloadRequest
-  authorId: number | string
+  authorId: number
   seedContext: SeedContext
 }): Promise<void> {
   const manifest = loadMigratedManifest()
@@ -114,7 +114,7 @@ async function seedPosts(
   payload: Payload,
   req: PayloadRequest,
   manifest: MigratedManifest,
-  authorId: number | string,
+  authorId: number,
   categoryMap: CategoryMap,
   tagMap: TagMap,
   seedContext: SeedContext,
@@ -138,8 +138,8 @@ async function seedPosts(
         authors: [authorId],
         categories: post.categories
           .map((title) => categoryMap.get(title))
-          .filter((id): id is number | string => id != null),
-        tags: post.tags.map((title) => tagMap.get(title)).filter((id): id is number | string => id != null),
+          .filter((id): id is number => id != null),
+        tags: post.tags.map((title) => tagMap.get(title)).filter((id): id is number => id != null),
         content: markdownToLexical(post.body),
         meta: post.excerpt
           ? {
@@ -311,10 +311,10 @@ async function seedComments(
 
 async function clampCommentParent(
   payload: Payload,
-  parentId: number | string,
+  parentId: number,
   maxDepth: number,
-): Promise<number | string> {
-  const chain: Array<number | string> = [parentId]
+): Promise<number> {
+  const chain: number[] = [parentId]
 
   while (chain.length < maxDepth) {
     const current = chain[chain.length - 1]
@@ -326,7 +326,7 @@ async function clampCommentParent(
     })
 
     if (!parent?.parent) break
-    chain.push(parent.parent as number | string)
+    chain.push(parent.parent as number)
   }
 
   return chain[Math.min(chain.length, maxDepth - 1) - 1] ?? parentId

@@ -299,5 +299,5 @@ export function markdownToLexical(markdown: string): DefaultTypedEditorState {
       indent: 0,
       version: 1,
     },
-  }
+  } as DefaultTypedEditorState
 }

@@ -124,8 +124,8 @@ function parseComments(sourceRoot: string, posts: MigratedPost[]): MigratedComme
   if (!fs.existsSync(commentsPath)) return []
 
   const payload = readJsonFile<{ comments?: Array<Record<string, unknown>> }>(commentsPath)
-  const slugByArchivePath = new Map(
-    posts.map((post) => [`/archives/${post.slug}`, post.slug] as const),
+  const slugByArchivePath = new Map<string, string>(
+    posts.map((post) => [`/archives/${post.slug}`, post.slug]),
   )
 
   return (payload.comments ?? []).map((comment) => {

@@ -65,7 +65,7 @@ function listNode(items: string[]) {
 export const demoAuthorBio =
   'Vue · Angular · Node.js · 前端开发；习惯把工作中的问题与解决方案记录下来，方便复盘与分享。'
 
-export const demoAuthorBioDetail: DefaultTypedEditorState = {
+export const demoAuthorBioDetail = {
   root: {
     type: 'root',
     children: [
@@ -93,4 +93,4 @@ export const demoAuthorBioDetail: DefaultTypedEditorState = {
     indent: 0,
     version: 1,
   },
-}
+} as DefaultTypedEditorState
