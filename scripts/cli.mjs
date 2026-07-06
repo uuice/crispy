@@ -145,6 +145,12 @@ const GROUPS = {
         run: () => tsxScript('run-seed.ts'),
       },
       {
+        id: 'import-astro-learn',
+        summary: '从 astro-learn 导入迁移 manifest',
+        note: '默认读取 ../astro-learn；可设 ASTRO_LEARN_PATH。seed 前须先执行。',
+        run: () => tsxScript('import-astro-learn.ts'),
+      },
+      {
         id: 'push-schema',
         summary: '一次性 dev schema push（SQLite 漂移修复）',
         note: '需 DATABASE_PUSH=true；慎用，生产禁止 push。',

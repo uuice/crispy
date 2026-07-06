@@ -6,7 +6,7 @@ import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
 import { getFrontendThemeSelectOptions } from '@/themes/definitions'
 
-import { purgeCacheOnFrontendThemeChange } from './hooks/purgeCacheOnFrontendThemeChange'
+import { purgeCacheOnSiteSettingsChange } from './hooks/purgeCacheOnSiteSettingsChange'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
@@ -75,6 +75,48 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: true,
     },
     {
+      name: 'recordSettings',
+      type: 'group',
+      label: adminLabels.recordSettings,
+      fields: [
+        {
+          name: 'icpNumber',
+          type: 'text',
+          label: adminLabels.icpNumber,
+          admin: {
+            description: '如：浙ICP备13002567号-4',
+          },
+        },
+        {
+          name: 'icpLink',
+          type: 'text',
+          label: adminLabels.icpLink,
+          defaultValue: 'https://beian.miit.gov.cn/',
+        },
+        {
+          name: 'policeNumber',
+          type: 'text',
+          label: adminLabels.policeNumber,
+        },
+        {
+          name: 'policeLink',
+          type: 'text',
+          label: adminLabels.policeLink,
+        },
+        {
+          name: 'recordText',
+          type: 'text',
+          label: adminLabels.recordText,
+        },
+        {
+          name: 'showRecord',
+          type: 'checkbox',
+          label: adminLabels.showRecord,
+          defaultValue: true,
+        },
+      ],
+    },
+    {
       name: 'frontendTheme',
       type: 'select',
       label: adminLabels.frontendTheme,
@@ -105,6 +147,6 @@ export const SiteSettings: GlobalConfig = {
     },
   ],
   hooks: {
-    afterChange: [purgeCacheOnFrontendThemeChange],
+    afterChange: [purgeCacheOnSiteSettingsChange],
   },
 }

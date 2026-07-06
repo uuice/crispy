@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
+import type { SiteSetting } from '@/payload-types'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { defaultBlogMenu } from './data/constants'
@@ -27,19 +28,13 @@ const emptySidebar: SidebarData = {
 }
 
 export async function Layout({ children, layoutData }: Props) {
-  const settings = await getCachedSiteSettings()()
+  const settings = (await getCachedSiteSettings()()) as SiteSetting
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
   const menu = defaultBlogMenu
   const footerMenu = sidebar.footerMenu
-  const recordInfo = (settings as { recordSettings?: {
-    showRecord?: boolean
-    icpNumber?: string
-    icpLink?: string
-    policeNumber?: string
-    policeLink?: string
-  } }).recordSettings
+  const recordInfo = settings.recordSettings
   const showRecord =
     recordInfo?.showRecord !== false && (recordInfo?.icpNumber || recordInfo?.policeNumber)
 

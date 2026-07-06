@@ -3045,6 +3045,17 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
+  recordSettings?: {
+    /**
+     * 如：浙ICP备13002567号-4
+     */
+    icpNumber?: string | null;
+    icpLink?: string | null;
+    policeNumber?: string | null;
+    policeLink?: string | null;
+    recordText?: string | null;
+    showRecord?: boolean | null;
+  };
   frontendTheme?: ('blog' | 'cms' | 'kb') | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;
@@ -3223,6 +3234,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
       };
   analyticsId?: T;
   enableRss?: T;
+  recordSettings?:
+    | T
+    | {
+        icpNumber?: T;
+        icpLink?: T;
+        policeNumber?: T;
+        policeLink?: T;
+        recordText?: T;
+        showRecord?: T;
+      };
   frontendTheme?: T;
   adminThemeHue?: T;
   updatedAt?: T;

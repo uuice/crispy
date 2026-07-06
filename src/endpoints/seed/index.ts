@@ -6,15 +6,11 @@ import { fileURLToPath } from 'url'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
-import { about as aboutPageData } from './about-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
-import { post1 } from './post-1'
-import { post2 } from './post-2'
-import { post3 } from './post-3'
-import { demoAuthorBio, demoAuthorBioDetail } from './demo-author-profile'
+import { getMigratedAuthorProfile, seedFromAstroLearn } from './astro-learn/seedFromAstroLearn'
 import { getPagePath } from '@/utilities/frontendPaths'
 
 /** Delete order respects FK constraints (e.g. gallery-items → media). */
@@ -36,10 +32,6 @@ const collectionsToClear: CollectionSlug[] = [
 ]
 
 const globals = ['header', 'footer', 'site-settings'] as const satisfies readonly GlobalSlug[]
-
-const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
-
-const tags = ['Payload', 'Next.js', 'CMS', 'TypeScript', 'Open Source']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -105,7 +97,7 @@ export const seed = async ({
   payload.logger.info(`— Seeding demo users...`)
 
   const demoUsers = [
-    { name: 'Demo Author', email: 'demo-author@example.com', roles: ['author'] as const },
+    { name: 'uuice', email: 'demo-author@example.com', roles: ['author'] as const },
     { name: 'Editor', email: 'editor@example.com', roles: ['editor'] as const },
     { name: 'Author', email: 'author@example.com', roles: ['author'] as const },
     { name: 'Agent', email: 'agent@example.com', roles: ['editor'] as const },
@@ -135,6 +127,8 @@ export const seed = async ({
     loadSeedImageFile('comic/12.jpg', 'image-hero1.jpg'),
   ])
 
+  const authorProfile = getMigratedAuthorProfile()
+
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -144,8 +138,8 @@ export const seed = async ({
         email: demoUsers[0].email,
         password: 'password',
         roles: [...demoUsers[0].roles],
-        bio: demoAuthorBio,
-        bioDetail: demoAuthorBioDetail,
+        bio: authorProfile.bio,
+        bioDetail: authorProfile.bioDetail,
       },
     }),
     payload.create({
@@ -185,91 +179,11 @@ export const seed = async ({
     ),
   )
 
-  await Promise.all([
-    ...categories.map((category) =>
-      payload.create({
-        collection: 'categories',
-        data: {
-          title: category,
-          slug: category,
-        },
-      }),
-    ),
-    ...tags.map((tag) =>
-      payload.create({
-        collection: 'tags',
-        data: {
-          title: tag,
-          slug: tag.toLowerCase().replace(/\./g, '-').replace(/\s+/g, '-'),
-        },
-      }),
-    ),
-  ])
-
-  const tagDocs = await payload.find({
-    collection: 'tags',
-    limit: 10,
-    pagination: false,
-  })
-
-  payload.logger.info(`— Seeding posts...`)
-
-  // Do not create posts with `Promise.all` because we want the posts to be created in order
-  // This way we can sort them by `createdAt` or `publishedAt` and they will be in the expected order
-  const post1Doc = await payload.create({
-    collection: 'posts',
-    depth: 0,
-    context: seedContext,
-    data: {
-      ...post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
-      tags: tagDocs.docs.slice(0, 2).map((tag) => tag.id),
-    },
-  })
-
-  const post2Doc = await payload.create({
-    collection: 'posts',
-    depth: 0,
-    context: seedContext,
-    data: {
-      ...post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
-      tags: tagDocs.docs.slice(2, 4).map((tag) => tag.id),
-    },
-  })
-
-  const post3Doc = await payload.create({
-    collection: 'posts',
-    depth: 0,
-    context: seedContext,
-    data: {
-      ...post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
-      tags: tagDocs.docs.slice(4, 5).map((tag) => tag.id),
-    },
-  })
-
-  // update each post with related posts
-  await payload.update({
-    id: post1Doc.id,
-    collection: 'posts',
-    context: seedContext,
-    data: {
-      relatedPosts: [post2Doc.id, post3Doc.id],
-    },
-  })
-  await payload.update({
-    id: post2Doc.id,
-    collection: 'posts',
-    context: seedContext,
-    data: {
-      relatedPosts: [post1Doc.id, post3Doc.id],
-    },
-  })
-  await payload.update({
-    id: post3Doc.id,
-    collection: 'posts',
-    context: seedContext,
-    data: {
-      relatedPosts: [post1Doc.id, post2Doc.id],
-    },
+  await seedFromAstroLearn({
+    payload,
+    req,
+    authorId: demoAuthor.id,
+    seedContext,
   })
 
   payload.logger.info(`— Seeding contact form...`)
@@ -283,7 +197,7 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding pages...`)
 
-  const [_, contactPage, aboutPage] = await Promise.all([
+  const [_, contactPage] = await Promise.all([
     payload.create({
       collection: 'pages',
       depth: 0,
@@ -295,12 +209,6 @@ export const seed = async ({
       depth: 0,
       context: seedContext,
       data: contactPageData({ contactForm: contactForm }),
-    }),
-    payload.create({
-      collection: 'pages',
-      depth: 0,
-      context: seedContext,
-      data: aboutPageData(),
     }),
   ])
 
