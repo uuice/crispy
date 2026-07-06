@@ -1,14 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 export default function ErrorPage({
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    console.error('[frontend] route error boundary', error)
+  }, [error])
   return (
     <article className="section-card error-page px-4 sm:px-6 py-6 sm:py-8">
       <div className="error-page-intro">

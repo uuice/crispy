@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { MathPixiGame } from '../components/MathPixiGame'
+import { MathPixiGame } from '../components/MathPixiGameShell'
 import { PageHeader } from '../components/PageHeader'
 import type { GamesMathPageData } from '../pages/gamesMath'
 

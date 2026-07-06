@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import React from 'react'
 
+import { MathPixiGame } from '../components/MathPixiGameShell'
 import type { GamesMathPageData } from '../pages/gamesMath'
-import { MathPixiGame } from '../components/MathPixiGame'
 
 type Props = {
   data: GamesMathPageData

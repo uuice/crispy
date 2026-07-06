@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation'
 
 import type { SlugPageProps } from '@/themes/types'
 
-import type { PostListItem } from '../data/types'
-import { pickPublicAuthorBio, pickPublicAuthorBioDetail } from '../data/types'
+import type { PostListItem } from '@/themes/shared/data/types'
+import { pickPublicAuthorBio, pickPublicAuthorBioDetail } from '@/themes/shared/data/types'
 import { queryUserPage } from '../data/queries'
 import { UserDetailView } from '../views/UserDetailView'
 

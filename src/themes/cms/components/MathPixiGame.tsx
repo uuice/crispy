@@ -195,6 +195,17 @@ function buildChoices(answer: number): number[] {
   return shuffle([...set])
 }
 
+function safeDestroyApp(app: Application, hostEl?: HTMLDivElement | null) {
+  try {
+    if (!app.renderer) return
+    app.destroy(true, { children: true })
+    if (hostEl && app.canvas?.parentNode === hostEl)
+      hostEl.removeChild(app.canvas as HTMLCanvasElement)
+  } catch {
+    // Pixi destroy can throw if init/cleanup race in Strict Mode
+  }
+}
+
 export function MathPixiGame() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const shellRef = useRef<HTMLDivElement>(null)
@@ -222,11 +233,13 @@ export function MathPixiGame() {
 
     const app = new Application()
     let destroyed = false
+    let initialized = false
     let roundTimer: number | undefined
     let stageObserver: ResizeObserver | null = null
     let fsResizeHandler: (() => void) | null = null
 
     const run = async () => {
+      try {
       const COL = buildPixiPalette(readCssHue())
       await app.init({
         width: W,
@@ -239,8 +252,9 @@ export function MathPixiGame() {
             : 1,
         autoDensity: true,
       })
+      initialized = true
       if (destroyed) {
-        app.destroy(true)
+        safeDestroyApp(app, host)
         return
       }
       host.appendChild(app.canvas as HTMLCanvasElement)
@@ -951,9 +965,12 @@ export function MathPixiGame() {
       stageObserver.observe(host)
       fsResizeHandler = () => requestAnimationFrame(() => fitStage())
       document.addEventListener('fullscreenchange', fsResizeHandler)
+      } catch (error) {
+        console.error('[MathPixiGame] failed to initialize', error)
+      }
     }
 
-    run()
+    void run()
 
     return () => {
       destroyed = true
@@ -961,10 +978,7 @@ export function MathPixiGame() {
       if (fsResizeHandler)
         document.removeEventListener('fullscreenchange', fsResizeHandler)
       stageObserver?.disconnect()
-      const hostEl = wrapRef.current
-      app.destroy(true, { children: true })
-      if (hostEl && app.canvas?.parentNode === hostEl)
-        hostEl.removeChild(app.canvas as HTMLCanvasElement)
+      if (initialized) safeDestroyApp(app, wrapRef.current)
     }
   }, [])
 
