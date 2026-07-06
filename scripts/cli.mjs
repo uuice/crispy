@@ -64,6 +64,22 @@ const GROUPS = {
         },
       },
       {
+        id: 'pack-linux',
+        summary: 'build + 打包 Linux standalone（无需 Docker）',
+        note: '本地 build 后替换 sharp 为 linux/x64 二进制（npm 约 8MB）；输出 dist/crispy-*-linux-x64-standalone-*.tar.gz。',
+        run: async () => {
+          const build = lookup.get('dev:build')
+          await build.def.run([])
+          bashScript('pack-linux-standalone.sh')
+        },
+      },
+      {
+        id: 'pack-linux-standalone',
+        summary: '仅打包 Linux standalone（需已 build）',
+        note: '不重新 build；通过 npm 下载 linux sharp，无需 Docker。',
+        run: () => bashScript('pack-linux-standalone.sh'),
+      },
+      {
         id: 'pack-standalone',
         summary: '仅打包 standalone（需已 build）',
         note: '不重新 build；缺少 .next/standalone 会报错。',
@@ -155,6 +171,12 @@ const GROUPS = {
         summary: '一次性 dev schema push（SQLite 漂移修复）',
         note: '需 DATABASE_PUSH=true；慎用，生产禁止 push。',
         run: () => tsxScript('push-dev-schema.ts'),
+      },
+      {
+        id: 'docker-build',
+        summary: '构建 linux/amd64 生产 Docker 镜像',
+        note: '默认经 docker.1panel.live 拉取 node 基础镜像；输出 crispy:<version>。',
+        run: () => bashScript('docker-build.sh'),
       },
       {
         id: 'docker-up',

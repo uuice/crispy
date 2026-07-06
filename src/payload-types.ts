@@ -75,6 +75,7 @@ export interface Config {
     tags: Tag;
     links: Link;
     'link-groups': LinkGroup;
+    'short-links': ShortLink;
     'ad-slots': AdSlot;
     ads: Ad;
     jobs: Job;
@@ -114,6 +115,7 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     links: LinksSelect<false> | LinksSelect<true>;
     'link-groups': LinkGroupsSelect<false> | LinkGroupsSelect<true>;
+    'short-links': ShortLinksSelect<false> | ShortLinksSelect<true>;
     'ad-slots': AdSlotsSelect<false> | AdSlotsSelect<true>;
     ads: AdsSelect<false> | AdsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
@@ -949,6 +951,26 @@ export interface LinkGroup {
    * Lower numbers appear first.
    */
   sort?: number | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "short-links".
+ */
+export interface ShortLink {
+  id: number;
+  title: string;
+  /**
+   * 短链接路径，如 gh 对应 /s/gh
+   */
+  slug: string;
+  /**
+   * 跳转目标，支持 https:// 外链或 /posts 等站内路径
+   */
+  targetUrl: string;
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1809,6 +1831,10 @@ export interface PayloadLockedDocument {
         value: number | LinkGroup;
       } | null)
     | ({
+        relationTo: 'short-links';
+        value: number | ShortLink;
+      } | null)
+    | ({
         relationTo: 'ad-slots';
         value: number | AdSlot;
       } | null)
@@ -1977,6 +2003,7 @@ export interface PayloadQueryPreset {
     | 'tags'
     | 'links'
     | 'link-groups'
+    | 'short-links'
     | 'ad-slots'
     | 'ads'
     | 'jobs'
@@ -2326,6 +2353,19 @@ export interface LinkGroupsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   sort?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "short-links_select".
+ */
+export interface ShortLinksSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  targetUrl?: T;
   enabled?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3415,6 +3455,7 @@ export interface TaskCreateCollectionExport {
       | 'tags'
       | 'links'
       | 'link-groups'
+      | 'short-links'
       | 'ad-slots'
       | 'ads'
       | 'jobs'

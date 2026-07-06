@@ -15,6 +15,7 @@ import { Categories } from './collections/Categories'
 import { Jobs } from './collections/Jobs'
 import { Links } from './collections/Links'
 import { LinkGroups } from './collections/LinkGroups'
+import { ShortLinks } from './collections/ShortLinks'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -151,6 +152,7 @@ export default buildConfig({
     Tags,
     Links,
     LinkGroups,
+    ShortLinks,
     AdSlots,
     Ads,
     Jobs,

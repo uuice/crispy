@@ -19,8 +19,13 @@ fi
 
 VERSION="$(node -p "require('./package.json').version")"
 TIMESTAMP="$(date -u +%Y%m%d%H%M%S)"
+LINUX_ARCH="${LINUX_ARCH:-x64}"
 STAGING_DIR="$OUT_DIR/crispy-standalone-$VERSION"
-ARCHIVE_NAME="crispy-$VERSION-standalone-$TIMESTAMP.tar.gz"
+if [[ "${PACK_LINUX:-}" == "1" ]]; then
+  ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-standalone-${TIMESTAMP}.tar.gz"
+else
+  ARCHIVE_NAME="crispy-${VERSION}-standalone-${TIMESTAMP}.tar.gz"
+fi
 ARCHIVE_PATH="$OUT_DIR/$ARCHIVE_NAME"
 
 rm -rf "$STAGING_DIR"
@@ -43,7 +48,34 @@ if [[ -f ".env.example" ]]; then
   cp ".env.example" "$STAGING_DIR/.env.example"
 fi
 
-cat > "$STAGING_DIR/start.sh" <<'EOF'
+if [[ "${PACK_LINUX:-}" == "1" ]]; then
+  echo "→ Patching native modules for linux/${LINUX_ARCH}..."
+  node scripts/patch-standalone-linux-native.mjs "$STAGING_DIR"
+  cat > "$STAGING_DIR/start.sh" <<'EOF'
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")"
+
+if [ ! -f .env ]; then
+  echo "warning: .env not found. Copy .env.example to .env and configure it." >&2
+fi
+
+export NODE_ENV="${NODE_ENV:-production}"
+export HOSTNAME="${HOSTNAME:-0.0.0.0}"
+export PORT="${PORT:-3333}"
+
+# Fallback for sharp libvips if rpath symlinks are missing
+for libdir in node_modules/.pnpm/@img+sharp-libvips-linux-*/node_modules/@img/sharp-libvips-linux-*/lib; do
+  if [ -d "$libdir" ]; then
+    export LD_LIBRARY_PATH="${libdir}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  fi
+done
+
+exec node server.js
+EOF
+else
+  cat > "$STAGING_DIR/start.sh" <<'EOF'
 #!/usr/bin/env sh
 set -eu
 
@@ -59,9 +91,40 @@ export PORT="${PORT:-3333}"
 
 exec node server.js
 EOF
+fi
 chmod +x "$STAGING_DIR/start.sh"
 
-cat > "$STAGING_DIR/ecosystem.config.cjs" <<'EOF'
+if [[ "${PACK_LINUX:-}" == "1" ]]; then
+  cat > "$STAGING_DIR/ecosystem.config.cjs" <<'EOF'
+/** @type {import('pm2').StartOptions} */
+module.exports = {
+  apps: [
+    {
+      name: 'crispy',
+      script: './start.sh',
+      interpreter: '/bin/sh',
+      cwd: __dirname,
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      env_file: '.env',
+      env: {
+        NODE_ENV: 'production',
+        HOSTNAME: '0.0.0.0',
+        PORT: 3333,
+      },
+      error_file: './logs/pm2-error.log',
+      out_file: './logs/pm2-out.log',
+      merge_logs: true,
+      time: true,
+    },
+  ],
+}
+EOF
+else
+  cat > "$STAGING_DIR/ecosystem.config.cjs" <<'EOF'
 /** @type {import('pm2').StartOptions} */
 module.exports = {
   apps: [
@@ -88,6 +151,7 @@ module.exports = {
   ],
 }
 EOF
+fi
 
 cat > "$STAGING_DIR/pm2.sh" <<'EOF'
 #!/usr/bin/env sh
@@ -136,7 +200,39 @@ esac
 EOF
 chmod +x "$STAGING_DIR/pm2.sh"
 
-cat > "$STAGING_DIR/DEPLOY.txt" <<'EOF'
+if [[ "${PACK_LINUX:-}" == "1" ]]; then
+  cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
+Crispy standalone deployment bundle (linux/${LINUX_ARCH})
+
+1. Upload and extract on the server:
+   tar -xzf crispy-*-linux-${LINUX_ARCH}-standalone-*.tar.gz -C /opt/crispy
+   cd /opt/crispy
+
+2. Install Node.js 22+ on the server (no Docker required).
+
+3. Configure environment:
+   cp .env.example .env
+   # Set DATABASE_URL, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL, etc.
+
+4. Run database migrations (from a machine with the full repo, before first start):
+   DATABASE_PUSH=false pnpm cli db:migrate
+
+5. Start the app:
+
+   Option A — PM2 (recommended for production):
+   npm i -g pm2
+   ./pm2.sh start
+
+   Option B — foreground:
+   ./start.sh
+
+Notes:
+- Built on macOS/Windows with linux/${LINUX_ARCH} sharp binaries patched in.
+- For Alpine/musl use LINUX_LIBC=musl when packing.
+- PostgreSQL is required in production; set DATABASE_DRIVER=postgres.
+EOF
+else
+  cat > "$STAGING_DIR/DEPLOY.txt" <<'EOF'
 Crispy standalone deployment bundle
 
 1. Upload and extract on the server:
@@ -173,6 +269,7 @@ Notes:
 - Static files are included under .next/static and public/.
 - PM2 logs are written to ./logs/
 EOF
+fi
 
 echo "→ Creating archive..."
 tar -czf "$ARCHIVE_PATH" -C "$STAGING_DIR" .

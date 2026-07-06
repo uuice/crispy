@@ -1,4 +1,15 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { markdownToLexical } from './astro-learn/markdownToLexical'
+
+const seedDir = path.dirname(fileURLToPath(import.meta.url))
+
+function loadAboutPageBody(): string {
+  return fs.readFileSync(path.join(seedDir, 'about-content.md'), 'utf-8')
+}
 
 export const about: () => RequiredDataFromCollectionSlug<'pages'> = () => {
   return {
@@ -13,62 +24,14 @@ export const about: () => RequiredDataFromCollectionSlug<'pages'> = () => {
         columns: [
           {
             size: 'full',
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: '关于本站',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h2',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Crispy 是基于 Payload CMS 与 Next.js 构建的内容站点示例。你可以在后台编辑页面、文章、导航与主题。',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: markdownToLexical(loadAboutPageBody()),
           },
         ],
       },
     ],
     title: '关于',
     meta: {
-      description: '关于 Crispy 内容站点',
+      description: 'Crispy 3.0 技术架构、内容与功能说明',
     },
   }
 }

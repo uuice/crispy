@@ -1,8 +1,17 @@
 import type { Payload, PayloadRequest } from 'payload'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { markdownToLexical } from './markdownToLexical'
 import { loadMigratedManifest, slugifyTag } from './importContent'
 import type { MigratedComment, MigratedManifest } from './types'
+
+const seedDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+
+function loadAboutPageBody(): string {
+  return fs.readFileSync(path.join(seedDir, 'about-content.md'), 'utf-8')
+}
 
 type SeedContext = {
   disableRevalidate: boolean
@@ -171,6 +180,9 @@ async function seedPages(
   for (const page of manifest.pages) {
     if (!page.published) continue
 
+    const isAboutPage = page.slug === 'about'
+    const body = isAboutPage ? loadAboutPageBody() : page.body
+
     const doc = await payload.create({
       collection: 'pages',
       req,
@@ -178,7 +190,7 @@ async function seedPages(
       context: seedContext,
       overrideAccess: true,
       data: {
-        title: page.title === 'about' ? '关于' : page.title,
+        title: isAboutPage ? '关于' : page.title,
         slug: page.slug,
         _status: 'published',
         publishedAt: page.publishedAt,
@@ -191,16 +203,18 @@ async function seedPages(
             columns: [
               {
                 size: 'full',
-                richText: markdownToLexical(page.body),
+                richText: markdownToLexical(body),
               },
             ],
           },
         ],
-        meta: page.excerpt
-          ? {
-              description: page.excerpt,
-            }
-          : undefined,
+        meta: isAboutPage
+          ? { description: 'Crispy 3.0 技术架构、内容与功能说明' }
+          : page.excerpt
+            ? {
+                description: page.excerpt,
+              }
+            : undefined,
       },
     })
 

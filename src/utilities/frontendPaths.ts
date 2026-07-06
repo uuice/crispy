@@ -41,6 +41,10 @@ export function getLinksPath(): string {
   return `/${frontendCollectionRoutes.links}`
 }
 
+export function getShortLinkPath(slug: string): string {
+  return `/s/${encodeURIComponent(slug)}`
+}
+
 export function getGalleryItemsPath(): string {
   return `/${frontendCollectionRoutes['gallery-items']}`
 }

@@ -25,6 +25,7 @@ const collectionsToClear: CollectionSlug[] = [
   'jobs',
   'links',
   'link-groups',
+  'short-links',
   'ads',
   'ad-slots',
   'categories',
@@ -322,6 +323,12 @@ export const seed = async ({
   payload.logger.info(`— Seeding ad slots...`)
 
   await Promise.all([
+    payload.delete({
+      collection: 'short-links',
+      overrideAccess: true,
+      where: {},
+      context: seedContext,
+    }),
     payload.delete({ collection: 'ads', overrideAccess: true, where: {}, context: seedContext }),
     payload.delete({
       collection: 'ad-slots',
@@ -375,6 +382,33 @@ export const seed = async ({
         description: '文章详情页正文与相关文章之间',
         recommendedWidth: 728,
         recommendedHeight: 90,
+        enabled: true,
+      },
+    }),
+  ])
+
+  payload.logger.info(`— Seeding short links...`)
+
+  await Promise.all([
+    payload.create({
+      collection: 'short-links',
+      context: seedContext,
+      overrideAccess: true,
+      data: {
+        title: 'GitHub 仓库',
+        slug: 'gh',
+        targetUrl: 'https://github.com/uuice/crispy',
+        enabled: true,
+      },
+    }),
+    payload.create({
+      collection: 'short-links',
+      context: seedContext,
+      overrideAccess: true,
+      data: {
+        title: '管理后台',
+        slug: 'admin',
+        targetUrl: '/admin',
         enabled: true,
       },
     }),
