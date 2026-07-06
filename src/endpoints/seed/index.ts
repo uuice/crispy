@@ -47,7 +47,7 @@ export const seed = async ({
 }): Promise<void> => {
   payload.logger.info('Seeding database...')
 
-  const seedContext = { disableRevalidate: true }
+  const seedContext = { disableRevalidate: true, skipEmbeddingSync: true }
 
   // we need to clear the media directory before seeding
   // as well as the collections and globals

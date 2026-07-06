@@ -7,6 +7,8 @@ export function createSyncContentEmbeddingHook(
   collection: EmbeddableCollection,
 ): CollectionAfterChangeHook {
   return async ({ doc, req }) => {
+    if (req.context?.skipEmbeddingSync) return doc
+
     try {
       await syncContentEmbedding(req, collection, doc as Record<string, unknown>)
     } catch (error) {
@@ -23,6 +25,8 @@ export function createRemoveContentEmbeddingHook(
   collection: EmbeddableCollection,
 ): CollectionAfterDeleteHook {
   return async ({ doc, req }) => {
+    if (req.context?.skipEmbeddingSync) return doc
+
     try {
       await removeContentEmbedding(req, collection, doc.id)
     } catch (error) {

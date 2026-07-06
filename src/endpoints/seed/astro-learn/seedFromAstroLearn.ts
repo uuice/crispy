@@ -6,6 +6,7 @@ import type { MigratedComment, MigratedManifest } from './types'
 
 type SeedContext = {
   disableRevalidate: boolean
+  skipEmbeddingSync: boolean
 }
 
 type CategoryMap = Map<string, number>
