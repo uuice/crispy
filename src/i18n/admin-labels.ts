@@ -3,6 +3,8 @@
 export const adminLabels = {
   categories: { singular: '分类', plural: '分类' },
   links: { singular: '友情链接', plural: '友情链接' },
+  linkGroups: { singular: '友链分组', plural: '友链分组' },
+  linkGroup: '分组',
   galleryItems: { singular: '图库条目', plural: '图库' },
   galleryImage: '图片',
   imageField: '图片',

@@ -16,6 +16,7 @@ const DEFAULT_AUDITED_COLLECTIONS: CollectionSlug[] = [
   'categories',
   'tags',
   'links',
+  'link-groups',
   'ad-slots',
   'ads',
   'jobs',

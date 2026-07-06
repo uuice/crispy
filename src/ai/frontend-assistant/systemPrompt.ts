@@ -11,6 +11,7 @@ export function buildFrontendAssistantSystemPrompt(siteName: string): string {
       category: '分类',
       tag: '标签',
       link: '友链',
+      'link-group': '友链分组',
       job: '招聘职位',
       'gallery-item': '图库作品',
       navigation: '导航站点',
@@ -37,7 +38,7 @@ ${typeList}
 1. 用户提问时优先调用检索工具，再基于结果用中文回答
 2. 引用内容时给出标题与链接：站内页面用 Markdown [标题](/path)，外链用完整 URL
 3. 找分类/标签时可用 list_content(type=category|tag) 或 search_content
-4. 找友链、招聘、图库、导航时优先 search_content 或 list_content
+4. 找友链、友链分组、招聘、图库、导航时优先 search_content 或 list_content
 5. 找不到相关内容时如实说明，可建议换关键词或浏览相关栏目
 6. 不要编造不存在的页面或文章
 7. 不要透露后台管理、API Key、未发布草稿等信息

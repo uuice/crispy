@@ -74,6 +74,7 @@ export interface Config {
     categories: Category;
     tags: Tag;
     links: Link;
+    'link-groups': LinkGroup;
     'ad-slots': AdSlot;
     ads: Ad;
     jobs: Job;
@@ -112,6 +113,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     links: LinksSelect<false> | LinksSelect<true>;
+    'link-groups': LinkGroupsSelect<false> | LinkGroupsSelect<true>;
     'ad-slots': AdSlotsSelect<false> | AdSlotsSelect<true>;
     ads: AdsSelect<false> | AdsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
@@ -923,6 +925,7 @@ export interface Link {
   title: string;
   url: string;
   description?: string | null;
+  group?: (number | null) | LinkGroup;
   logo?: (number | null) | Media;
   /**
    * Lower numbers appear first.
@@ -930,6 +933,23 @@ export interface Link {
   sort?: number | null;
   enabled?: boolean | null;
   openInNewTab?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "link-groups".
+ */
+export interface LinkGroup {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  sort?: number | null;
+  enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1491,6 +1511,24 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  linkGroups?: {
+    /**
+     * Allow clients to find link-groups.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create link-groups.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update link-groups.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete link-groups.
+     */
+    delete?: boolean | null;
+  };
   adSlots?: {
     /**
      * Allow clients to find ad-slots.
@@ -1767,6 +1805,10 @@ export interface PayloadLockedDocument {
         value: number | Link;
       } | null)
     | ({
+        relationTo: 'link-groups';
+        value: number | LinkGroup;
+      } | null)
+    | ({
         relationTo: 'ad-slots';
         value: number | AdSlot;
       } | null)
@@ -1934,6 +1976,7 @@ export interface PayloadQueryPreset {
     | 'categories'
     | 'tags'
     | 'links'
+    | 'link-groups'
     | 'ad-slots'
     | 'ads'
     | 'jobs'
@@ -2266,10 +2309,24 @@ export interface LinksSelect<T extends boolean = true> {
   title?: T;
   url?: T;
   description?: T;
+  group?: T;
   logo?: T;
   sort?: T;
   enabled?: T;
   openInNewTab?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "link-groups_select".
+ */
+export interface LinkGroupsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  sort?: T;
+  enabled?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -2766,6 +2823,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         delete?: T;
       };
   links?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  linkGroups?:
     | T
     | {
         find?: T;
@@ -3349,6 +3414,7 @@ export interface TaskCreateCollectionExport {
       | 'categories'
       | 'tags'
       | 'links'
+      | 'link-groups'
       | 'ad-slots'
       | 'ads'
       | 'jobs'

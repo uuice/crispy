@@ -15,7 +15,7 @@ export const Links: CollectionConfig = {
     update: isEditor,
   },
   admin: {
-    defaultColumns: ['title', 'url', 'sort', 'enabled', 'updatedAt'],
+    defaultColumns: ['title', 'group', 'url', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
   },
@@ -42,6 +42,15 @@ export const Links: CollectionConfig = {
       },
       { contentFieldPaths: 'description' },
     ),
+    {
+      name: 'group',
+      type: 'relationship',
+      label: adminLabels.linkGroup,
+      relationTo: 'link-groups',
+      admin: {
+        position: 'sidebar',
+      },
+    },
     {
       name: 'logo',
       type: 'upload',

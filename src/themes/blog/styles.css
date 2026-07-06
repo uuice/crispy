@@ -1950,6 +1950,29 @@ body::after {
 .terminal-list .post-card-cute a, .terminal-list .terminal-item a {
   display: block;
   }
+.friend-link-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-decoration: none;
+  }
+.friend-link-item-title {
+  font-weight: 600;
+  color: var(--text);
+  line-height: var(--line-height-mono);
+  }
+.friend-link-item-desc {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  }
+.friend-link-item-url {
+  color: var(--accent);
+  font-size: var(--text-xs);
+  word-break: break-all;
+  opacity: 0.88;
+  margin-top: 0.15rem;
+  }
 .terminal-export-line {
   color: var(--text-muted);
   font-size: var(--text-xs);

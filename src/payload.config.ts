@@ -14,6 +14,7 @@ import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
 import { Jobs } from './collections/Jobs'
 import { Links } from './collections/Links'
+import { LinkGroups } from './collections/LinkGroups'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -149,6 +150,7 @@ export default buildConfig({
     Categories,
     Tags,
     Links,
+    LinkGroups,
     AdSlots,
     Ads,
     Jobs,

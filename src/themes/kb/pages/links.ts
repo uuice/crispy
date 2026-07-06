@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
 
-import type { Link } from '@/payload-types'
+import type { FriendLinkSection } from '@/utilities/getFriendLinks'
 
-import { queryFriendLinks } from '../data/queries'
+import { queryFriendLinkSections } from '../data/queries'
 import { LinksView } from '../views/LinksView'
 
 export type LinksPageData = {
-  links: Link[]
+  sections: FriendLinkSection[]
+  totalCount: number
 }
 
 export async function loadLinksPageData(): Promise<LinksPageData> {
-  const links = await queryFriendLinks()
-  return { links }
+  const sections = await queryFriendLinkSections()
+  const totalCount = sections.reduce((sum, section) => sum + section.links.length, 0)
+  return { sections, totalCount }
 }
 
 export function linksPageMetadata(): Metadata {

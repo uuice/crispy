@@ -648,13 +648,20 @@ html.cms-skin {
   color: var(--cms-text)
   }
 
-.cms-link-card-desc, .cms-link-card-url {
+.cms-link-card-desc {
   font-size: 0.85rem;
   color: var(--cms-muted);
-  line-height: 1.5
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   }
 
 .cms-link-card-url {
+  font-size: 0.85rem;
+  color: var(--cms-muted);
+  line-height: 1.5;
   word-break: break-all;
   margin-top: auto
   }

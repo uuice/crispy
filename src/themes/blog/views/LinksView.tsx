@@ -1,5 +1,7 @@
 import React from 'react'
 
+import type { Link } from '@/payload-types'
+
 import type { LinksPageData } from '../pages/links'
 import { Banner } from '../components/Banner'
 
@@ -7,44 +9,65 @@ type Props = {
   data: LinksPageData
 }
 
+function LinkTarget({ entry }: { entry: Link }) {
+  const target = entry.openInNewTab === false ? '_self' : '_blank'
+  const rel = target === '_blank' ? 'noopener noreferrer' : undefined
+
+  return (
+    <a
+      className="terminal-item friend-link-item block py-3 px-3 transition-colors hover:bg-(--page-bg)"
+      href={entry.url}
+      rel={rel}
+      style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}
+      target={target}
+    >
+      <span className="friend-link-item-title">{entry.title}</span>
+      {entry.description ? (
+        <span className="friend-link-item-desc">{entry.description}</span>
+      ) : null}
+      <span className="friend-link-item-url">{entry.url}</span>
+    </a>
+  )
+}
+
 export function LinksView({ data }: Props) {
-  const { links } = data
+  const { sections, totalCount } = data
 
   return (
     <>
       <Banner subtitle="交换链接、友链" title="友情链接" />
       <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
-          共 <strong>{links.length}</strong> 个链接
+          共 <strong>{totalCount}</strong> 个链接
+          {sections.length > 1 ? (
+            <>
+              {' '}
+              · <strong>{sections.length}</strong> 个分组
+            </>
+          ) : null}
         </p>
       </div>
-      <section className="space-y-5">
-        <h2 className="section-title animate-in animate-in-delay-2">友链列表</h2>
-        <p className="code-label mb-3">{links.length} 个链接</p>
-        <div className="section-card border-0! bg-transparent! overflow-hidden animate-in animate-in-delay-3">
-          <ul className="post-list terminal-list">
-            {links.map((entry) => (
-              <li key={entry.id}>
-                <a
-                  className="terminal-item block py-2 px-3 transition-colors hover:bg-(--page-bg)"
-                  href={entry.url}
-                  rel="noopener noreferrer"
-                  style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}
-                  target="_blank"
-                >
-                  <div className="terminal-meta-line">
-                    <span className="font-medium">{entry.title}</span>
-                    {entry.description ? (
-                      <span className="meta-from"> type=&quot;{entry.description}&quot;</span>
-                    ) : null}
-                    <span className="meta-desc"> → {entry.url}</span>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      <div className="space-y-8">
+        {sections.map((section, index) => (
+          <section className="space-y-5" key={section.id ?? `ungrouped-${index}`}>
+            <div className="animate-in" style={{ animationDelay: `${0.15 + index * 0.05}s` }}>
+              <h2 className="section-title mb-1">{section.title}</h2>
+              {section.description ? (
+                <p className="code-label m-0">{section.description}</p>
+              ) : null}
+            </div>
+            <div className="section-card border-0! bg-transparent! overflow-hidden animate-in animate-in-delay-3">
+              <ul className="post-list terminal-list m-0">
+                {section.links.map((entry) => (
+                  <li key={entry.id}>
+                    <LinkTarget entry={entry} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ))}
+      </div>
     </>
   )
 }

@@ -217,6 +217,20 @@ async function seedLinks(
   manifest: MigratedManifest,
   seedContext: SeedContext,
 ): Promise<void> {
+  const defaultGroup = await payload.create({
+    collection: 'link-groups',
+    req,
+    depth: 0,
+    context: seedContext,
+    overrideAccess: true,
+    data: {
+      title: '友链',
+      description: '站点友情链接',
+      sort: 0,
+      enabled: true,
+    },
+  })
+
   await Promise.all(
     manifest.links.map((link, index) =>
       payload.create({
@@ -229,6 +243,7 @@ async function seedLinks(
           title: link.title,
           url: link.url,
           description: link.description,
+          group: defaultGroup.id,
           sort: index,
           enabled: true,
           openInNewTab: true,

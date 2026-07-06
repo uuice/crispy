@@ -4,7 +4,7 @@ import { cache } from 'react'
 
 import type { Category, GalleryItem, Tag } from '@/payload-types'
 
-import { getCachedFriendLinks } from '@/utilities/getFriendLinks'
+import { getCachedFriendLinkSections, getCachedFriendLinks } from '@/utilities/getFriendLinks'
 import {
   getCategoryPath,
   getPostPath,
@@ -364,6 +364,7 @@ export const queryUserPage = cache(async (slug: string) => {
 })
 
 export const queryFriendLinks = getCachedFriendLinks
+export const queryFriendLinkSections = getCachedFriendLinkSections
 
 export const queryJobs = cache(async () => {
   const payload = await getPayload({ config: configPromise })

@@ -19,7 +19,7 @@ import {
   getPostsListPath,
   getTagPath,
 } from '@/utilities/frontendPaths'
-import { getCachedFriendLinks } from '@/utilities/getFriendLinks'
+import { getCachedFriendLinkGroups, getCachedFriendLinks } from '@/utilities/getFriendLinks'
 
 export const PUBLIC_CONTENT_TYPES = [
   'post',
@@ -27,6 +27,7 @@ export const PUBLIC_CONTENT_TYPES = [
   'category',
   'tag',
   'link',
+  'link-group',
   'job',
   'gallery-item',
   'navigation',
@@ -50,6 +51,7 @@ const TYPE_LABELS: Record<PublicContentType, string> = {
   category: '分类',
   tag: '标签',
   link: '友链',
+  'link-group': '友链分组',
   job: '招聘',
   'gallery-item': '图库',
   navigation: '导航站点',
@@ -110,7 +112,7 @@ const SECTION_PAGES: PublicContentHit[] = [
 export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]> => {
   const payload = await getPayload({ config: configPromise })
 
-  const [posts, pagesResult, sidebar, links, jobs, galleryItems] = await Promise.all([
+  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleryItems] = await Promise.all([
     queryPosts(),
     payload.find({
       collection: 'pages',
@@ -124,6 +126,7 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     }),
     querySidebarData(),
     getCachedFriendLinks(),
+    getCachedFriendLinkGroups(),
     queryJobs(),
     queryGalleryItems(),
   ])
@@ -174,14 +177,29 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     })
   }
 
+  for (const group of linkGroups) {
+    records.push({
+      type: 'link-group',
+      title: group.title,
+      url: getLinksPath(),
+      slug: String(group.id),
+      excerpt: group.description || undefined,
+      keywords: ['友链', '分组', '链接'],
+    })
+  }
+
   for (const link of links) {
+    const groupTitle =
+      typeof link.group === 'object' && link.group && 'title' in link.group
+        ? String(link.group.title)
+        : undefined
     records.push({
       type: 'link',
       title: link.title,
       url: link.url,
       slug: String(link.id),
       excerpt: link.description || undefined,
-      keywords: ['友链', '外链'],
+      keywords: ['友链', '外链', ...(groupTitle ? [groupTitle] : [])],
     })
   }
 

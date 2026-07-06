@@ -42,6 +42,10 @@ export const COLLECTION_AI_PROFILES: Record<string, CollectionAiProfile> = {
     contentFields: ['description'],
     suggest: { descriptionPath: 'description' },
   },
+  'link-groups': {
+    contentFields: ['description'],
+    suggest: { descriptionPath: 'description' },
+  },
   ads: {
     contentFields: ['alt'],
   },

@@ -32,7 +32,7 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     function: {
       name: 'search_content',
       description:
-        '按关键词搜索站内所有公开内容：文章、页面、分类、标签、友链、招聘、图库、导航站点与站点栏目。',
+        '按关键词搜索站内所有公开内容：文章、页面、分类、标签、友链、友链分组、招聘、图库、导航站点与站点栏目。',
       parameters: {
         type: 'object',
         properties: {
@@ -52,7 +52,7 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     type: 'function',
     function: {
       name: 'list_content',
-      description: '列出某一类型的公开内容目录，可按关键词过滤。适合浏览全部分类、标签或友链等。',
+      description: '列出某一类型的公开内容目录，可按关键词过滤。适合浏览全部分类、标签、友链分组或友链等。',
       parameters: {
         type: 'object',
         properties: {
@@ -78,7 +78,7 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
         properties: {
           type: {
             type: 'string',
-            enum: ['post', 'page', 'category', 'tag', 'link', 'job', 'gallery-item', 'navigation'],
+            enum: ['post', 'page', 'category', 'tag', 'link', 'link-group', 'job', 'gallery-item', 'navigation'],
             description: '内容类型',
           },
           slug: { type: 'string', description: 'slug 或唯一标识' },
