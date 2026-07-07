@@ -35,6 +35,18 @@ describe('AI agent', () => {
     expect(schema.fields.some((f) => f.name === 'title')).toBe(true)
   })
 
+  it('describeCollectionSchema returns fields for novels', async () => {
+    const req = await createLocalReq({}, payload)
+    const schema = describeCollectionSchema(req, 'novels') as {
+      slug: string
+      fields: { name: string }[]
+    }
+
+    expect(schema.slug).toBe('novels')
+    expect(schema.fields.some((f) => f.name === 'plotOutline')).toBe(true)
+    expect(schema.fields.some((f) => f.name === 'currentProgress')).toBe(true)
+  })
+
   it('executeAgentTool rejects unsupported collections', async () => {
     const req = await createLocalReq({ user: mockSuperAdmin }, payload)
 
@@ -45,6 +57,53 @@ describe('AI agent', () => {
         arguments: JSON.stringify({ collection: 'users' }),
       }),
     ).rejects.toThrow(/不支持的内容类型/)
+  })
+
+  it('find_documents omits post content from list results', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+    const slug = `agent-list-${Date.now()}`
+
+    const created = await payload.create({
+      collection: 'posts',
+      data: {
+        title: slug,
+        slug,
+        _status: 'draft',
+        content: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [{ type: 'text', text: 'agent list select test', version: 1 }],
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+      },
+      overrideAccess: true,
+    })
+
+    const result = (await executeAgentTool(req, {
+      id: 'call-find-posts',
+      name: 'find_documents',
+      arguments: JSON.stringify({
+        collection: 'posts',
+        where: { slug: { equals: slug } },
+      }),
+    })) as { summary: { docs: Record<string, unknown>[] } }
+
+    const doc = result.summary.docs.find((item) => item.id === created.id)
+    expect(doc).toBeDefined()
+    expect(doc?.content).toBeUndefined()
+    expect(doc?.title).toBe(slug)
+
+    await payload.delete({ collection: 'posts', id: created.id, overrideAccess: true })
   })
 
   it('assertAgentCollectionAccess blocks media delete', async () => {
@@ -65,6 +124,7 @@ describe('AI agent', () => {
 
     expect(result.summary.globals.some((g) => g.slug === 'cache-settings')).toBe(true)
     expect(result.summary.globals.some((g) => g.slug === 'ai-settings')).toBe(true)
+    expect(result.summary.collections.some((c) => c.slug === 'novels')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'payload-query-presets')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'redirects')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'forms')).toBe(true)

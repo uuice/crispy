@@ -37,6 +37,7 @@ import {
   resolveCacheEntries,
 } from '@/frontend-cache/registry'
 import { trashOrDeleteDocument, restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
+import { resolveAgentListSelect } from '@/ai/agent/listSelect'
 import {
   formatStockSearchForAgentLlm,
   importStockImageForAgent,
@@ -46,7 +47,8 @@ import {
 
 type AgentGlobalSlug = keyof Config['globals']
 
-const MAX_RESULT_CHARS = 12_000
+/** Max JSON chars returned to the LLM per tool call (safety net after field pruning). */
+export const MAX_RESULT_CHARS = 128_000
 
 function sanitizeGlobalResult(slug: string, data: Record<string, unknown>): Record<string, unknown> {
   if (slug !== 'ai-settings') {
@@ -185,7 +187,8 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'find_documents',
-      description: '查询/搜索某个内容类型下的文档列表；查回收站时设 trash: true',
+      description:
+        '查询/搜索某个内容类型下的文档列表（不含正文等大字段，详情用 get_document）；查回收站时设 trash: true',
       parameters: {
         type: 'object',
         properties: {
@@ -662,6 +665,7 @@ export async function executeAgentTool(
       const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25)
       const page = Math.max(Number(args.page) || 1, 1)
       const trash = args.trash === true
+      const listSelect = resolveAgentListSelect(collection)
       const docs = await req.payload.find({
         collection: collection as CollectionSlug,
         where: args.where as Where | undefined,
@@ -672,6 +676,7 @@ export async function executeAgentTool(
         trash,
         overrideAccess: false,
         user: req.user,
+        ...(listSelect ? { select: listSelect } : {}),
       })
       result = {
         totalDocs: docs.totalDocs,

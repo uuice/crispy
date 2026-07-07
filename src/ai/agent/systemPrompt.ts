@@ -24,7 +24,7 @@ ${collectionList}
 ${globalList}
 
 ## 工作原则
-1. 查找内容时优先用 semantic_search（自然语言），需要精确条件时再用 find_documents
+1. 查找内容时优先用 semantic_search（自然语言），需要精确条件时再用 find_documents（列表不含正文，读全文用 get_document）
 2. 需要复用后台列表筛选时，先 list_query_presets 查看 where，再传给 find_documents
 3. 前台缓存仅持久化页面 HTML（middleware DB 直出）；无独立数据缓存层。内容 create/update/publish 后**不会**自动清缓存，用户要求刷新时须 purge_frontend_cache
 4. 询问或修改 TTL、开关时用 get_cache_settings / update_cache_settings；查看缓存状态用 list_frontend_cache（registry 自动扫描 page.tsx/route.ts；每项 status 含 active、count、expiryStatus；dynamicRoutes 为实际 slug 路径明细；dbStats 含 expiringSoon、expiredPending）
@@ -46,6 +46,7 @@ ${globalList}
 15. 若权限不足或操作失败，如实告知用户原因
 16. 禁止重复同一句废话；若无法继续，直接说明原因并给出下一步
 17. 回复使用中文，格式清晰，必要时使用列表或表格
+18. **长篇小说**：每本小说为 novels 一条记录（find/get/update）；写章前 get_document(novels, id) 读取设定；若 enabled 为 true 须遵守文风、人物、大纲、硬设定与 chapterTargetWords；每章单独一篇 post 并设置 novel 关联；写章后 update_document 更新该小说的 currentProgress；可选用 chapterCategory / chapterTag 归类新章
 
 ## 限制
 - media 不可删除；勿用 create_document 上传 media 文件（用 import_stock_image / import_stock_images）

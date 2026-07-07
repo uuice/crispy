@@ -79,6 +79,7 @@ export interface Config {
     'ad-slots': AdSlot;
     ads: Ad;
     jobs: Job;
+    novels: Novel;
     'gallery-items': GalleryItem;
     'app-configs': AppConfig;
     comments: Comment;
@@ -119,6 +120,7 @@ export interface Config {
     'ad-slots': AdSlotsSelect<false> | AdSlotsSelect<true>;
     ads: AdsSelect<false> | AdsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
+    novels: NovelsSelect<false> | NovelsSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
     'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
@@ -312,6 +314,7 @@ export interface Post {
     };
     [k: string]: unknown;
   };
+  novel?: (number | null) | Novel;
   relatedPosts?: (number | Post)[] | null;
   categories?: (number | Category)[] | null;
   tags?: (number | Tag)[] | null;
@@ -461,6 +464,71 @@ export interface FolderInterface {
   folderType?: 'media'[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * 长篇小说项目设定，一本一条记录；章节通过 posts.novel 关联。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novels".
+ */
+export interface Novel {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * 关闭后 AI Agent 写章时可忽略本书设定。
+   */
+  enabled?: boolean | null;
+  /**
+   * 如玄幻、科幻、言情、悬疑
+   */
+  genre?: string | null;
+  /**
+   * 全书梗概，一两段即可。
+   */
+  synopsis?: string | null;
+  /**
+   * 人称、文风、参考作品、对话风格等。
+   */
+  writingStyle?: string | null;
+  worldBuilding?: string | null;
+  /**
+   * 不可违反的硬设定、禁忌、避讳。
+   */
+  constraints?: string | null;
+  characters?:
+    | {
+        name: string;
+        role?: string | null;
+        personality?: string | null;
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 卷/章级别大纲，可随创作更新。
+   */
+  plotOutline?: string | null;
+  /**
+   * 当前写到第几章、上章结尾、下一章要点。写章后由人工或 Agent 更新。
+   */
+  currentProgress?: string | null;
+  chapterTargetWords?: number | null;
+  /**
+   * 新章节 post 默认归入的分类（可选）。
+   */
+  chapterCategory?: (number | null) | Category;
+  /**
+   * 新章节 post 默认标签（可选），如卷名。
+   */
+  chapterTag?: (number | null) | Tag;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1847,6 +1915,10 @@ export interface PayloadLockedDocument {
         value: number | Job;
       } | null)
     | ({
+        relationTo: 'novels';
+        value: number | Novel;
+      } | null)
+    | ({
         relationTo: 'gallery-items';
         value: number | GalleryItem;
       } | null)
@@ -2007,6 +2079,7 @@ export interface PayloadQueryPreset {
     | 'ad-slots'
     | 'ads'
     | 'jobs'
+    | 'novels'
     | 'gallery-items'
     | 'app-configs'
     | 'comments'
@@ -2173,6 +2246,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   content?: T;
+  novel?: T;
   relatedPosts?: T;
   categories?: T;
   tags?: T;
@@ -2424,6 +2498,38 @@ export interface JobsSelect<T extends boolean = true> {
   requirements?: T;
   publishedAt?: T;
   enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novels_select".
+ */
+export interface NovelsSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  enabled?: T;
+  genre?: T;
+  synopsis?: T;
+  writingStyle?: T;
+  worldBuilding?: T;
+  constraints?: T;
+  characters?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        personality?: T;
+        notes?: T;
+        id?: T;
+      };
+  plotOutline?: T;
+  currentProgress?: T;
+  chapterTargetWords?: T;
+  chapterCategory?: T;
+  chapterTag?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3459,6 +3565,7 @@ export interface TaskCreateCollectionExport {
       | 'ad-slots'
       | 'ads'
       | 'jobs'
+      | 'novels'
       | 'gallery-items'
       | 'app-configs'
       | 'comments'

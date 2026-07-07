@@ -27,6 +27,7 @@ import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
+import { Novels } from './collections/Novels'
 import { CacheSettings } from './CacheSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
@@ -156,6 +157,7 @@ export default buildConfig({
     AdSlots,
     Ads,
     Jobs,
+    Novels,
     GalleryItems,
     AppConfigs,
     Comments,

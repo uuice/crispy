@@ -2,7 +2,7 @@ import type { AgentManagedCollection, AgentManagedGlobal } from '@/ai/agent/type
 
 /** Collections the AI agent may query and mutate (aligned with MCP plugin scope). */
 export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
-  { slug: 'posts', label: '文章', description: '博客文章，含标题、正文、分类、标签、SEO' },
+  { slug: 'posts', label: '文章', description: '博客文章，含标题、正文、分类、标签、SEO；长篇小说章节可关联 novels' },
   { slug: 'pages', label: '页面', description: '静态页面，含 Hero 区块与 SEO' },
   { slug: 'categories', label: '分类', description: '文章分类（支持嵌套）' },
   { slug: 'tags', label: '标签', description: '文章标签' },
@@ -12,6 +12,12 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
   { slug: 'ads', label: '广告', description: '广告素材' },
   { slug: 'jobs', label: '招聘', description: '招聘职位' },
   { slug: 'gallery-items', label: '图库', description: '图库条目' },
+  {
+    slug: 'novels',
+    label: '小说',
+    description:
+      '长篇小说项目（一本一条）：书名、梗概、人物、大纲、当前进度、单章目标字数；章节通过 posts.novel 关联',
+  },
   {
     slug: 'app-configs',
     label: '应用配置',

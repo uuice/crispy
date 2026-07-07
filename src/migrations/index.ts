@@ -5,6 +5,8 @@ import * as migration_20260706_112800_site_record_settings from './20260706_1128
 import * as migration_20260706_114900_link_groups from './20260706_114900_link_groups';
 import * as migration_20260706_133157 from './20260706_133157';
 import * as migration_20260706_143634_short_links from './20260706_143634_short_links';
+import * as migration_20260707_155700_novel_settings from './20260707_155700_novel_settings';
+import * as migration_20260707_161100_novels_system_rels from './20260707_161100_novels_system_rels';
 
 export const migrations = [
   {
@@ -41,5 +43,15 @@ export const migrations = [
     up: migration_20260706_143634_short_links.up,
     down: migration_20260706_143634_short_links.down,
     name: '20260706_143634_short_links'
+  },
+  {
+    up: migration_20260707_155700_novel_settings.up,
+    down: migration_20260707_155700_novel_settings.down,
+    name: '20260707_155700_novel_settings',
+  },
+  {
+    up: migration_20260707_161100_novels_system_rels.up,
+    down: migration_20260707_161100_novels_system_rels.down,
+    name: '20260707_161100_novels_system_rels',
   },
 ];
