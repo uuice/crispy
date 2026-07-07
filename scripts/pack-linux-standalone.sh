@@ -10,7 +10,7 @@
 #   Effects (in pack-standalone.sh + patch-standalone-linux-native.mjs):
 #     - Exclude public/media uploads from the tarball
 #     - Replace darwin native modules with Linux binaries (sharp, libsql)
-#     - Prune non-target platforms and dev-only packages (typescript, playwright…)
+#     - Prune non-target platforms and dev-only packages (playwright, vitest…)
 #
 # LINUX_ARCH (default: x64)
 #   Target CPU architecture on the server.

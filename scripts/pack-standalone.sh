@@ -66,7 +66,7 @@ fi
 
 if [[ "${PACK_LINUX:-}" == "1" ]]; then
   echo "→ Patching native modules for linux/${LINUX_ARCH} (${LINUX_LIBC})..."
-  node scripts/patch-standalone-linux-native.mjs "$STAGING_DIR"
+  PATCH_SOURCE_NEXT_MODULES="$ROOT_DIR/.next/node_modules" node scripts/patch-standalone-linux-native.mjs "$STAGING_DIR"
   cat > "$STAGING_DIR/start.sh" <<'EOF'
 #!/usr/bin/env sh
 set -eu

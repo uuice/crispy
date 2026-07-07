@@ -54,7 +54,6 @@ const keepLibsqlPrefix = `@libsql+${libsqlTarget}@`
 
 /** Dev-only packages that should not ship in a Linux production tarball. */
 const DEV_PNPM_PREFIXES = [
-  'typescript@',
   '@playwright+test@',
   'playwright-core@',
   'playwright@',
@@ -218,6 +217,56 @@ function shouldKeepLibsqlEntry(entry) {
   return false
 }
 
+function installUnscopedPackage(name, version, pnpmRoot) {
+  const folder = `${name}@${version}`
+  const dest = path.join(pnpmRoot, folder, 'node_modules', name)
+  if (fs.existsSync(dest)) return dest
+
+  console.log(`  → ${name}@${version}`)
+  const tgz = npmPack(name, version)
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  extractPackage(tgz, dest)
+  return dest
+}
+
+function resolveDrizzleKitVersion(stagingDir) {
+  const pnpmRoot = path.join(stagingDir, 'node_modules', '.pnpm')
+  const hit = fs.readdirSync(pnpmRoot).find((e) => e.startsWith('@payloadcms+db-postgres@'))
+  if (!hit) return null
+
+  const pkgPath = path.join(pnpmRoot, hit, 'node_modules', '@payloadcms/db-postgres', 'package.json')
+  if (!fs.existsSync(pkgPath)) return null
+
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+  return pkg.dependencies?.['drizzle-kit'] ?? null
+}
+
+/** withPayload excludes drizzle-kit from standalone trace but Turbopack still requires it at runtime. */
+function patchTurbopackExternals(stagingDir) {
+  const sourceNextModules = process.env.PATCH_SOURCE_NEXT_MODULES
+  if (!sourceNextModules || !fs.existsSync(sourceNextModules)) return
+
+  const drizzleVersion = resolveDrizzleKitVersion(stagingDir)
+  if (drizzleVersion) {
+    console.log('→ Ensuring drizzle-kit for Turbopack runtime externals...')
+    installUnscopedPackage('drizzle-kit', drizzleVersion, pnpmDir)
+  }
+
+  const stagingNextModules = path.join(stagingDir, '.next', 'node_modules')
+  fs.mkdirSync(stagingNextModules, { recursive: true })
+
+  for (const entry of fs.readdirSync(sourceNextModules)) {
+    if (!entry.startsWith('drizzle-kit-')) continue
+
+    const dest = path.join(stagingNextModules, entry)
+    if (fs.existsSync(dest)) continue
+
+    const target = fs.readlinkSync(path.join(sourceNextModules, entry))
+    fs.symlinkSync(target, dest)
+    console.log(`  → linked .next/node_modules/${entry}`)
+  }
+}
+
 function pruneStandaloneBundle(pnpmRoot) {
   console.log('→ Pruning non-target native platforms and dev dependencies...')
   let removedEntries = 0
@@ -271,6 +320,7 @@ removePnpmEntries(pnpmDir, '@img+sharp-darwin')
 removePnpmEntries(pnpmDir, '@img+sharp-libvips-darwin')
 removePnpmEntries(pnpmDir, '@libsql+darwin')
 
+patchTurbopackExternals(stagingDir)
 pruneStandaloneBundle(pnpmDir)
 
 console.log('→ Linux native patch and prune complete')

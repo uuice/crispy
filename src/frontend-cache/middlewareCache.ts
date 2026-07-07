@@ -4,6 +4,7 @@ import {
   DEFAULT_CACHE_SETTINGS,
   type ResolvedCacheSettings,
 } from '@/frontend-cache/settings'
+import { internalApiUrl, withForwardedPublicHost } from '@/frontend-cache/internalFetch'
 import { hasThemePreviewQuery } from '@/themes/preview.shared'
 
 type MiddlewareCacheSettings = ResolvedCacheSettings & {
@@ -23,8 +24,8 @@ export async function getMiddlewareCacheSettings(
   }
 
   try {
-    const url = new URL('/api/internal/cache-settings', requestUrl)
-    const response = await fetch(url, { cache: 'no-store' })
+    const url = internalApiUrl('/api/internal/cache-settings', requestUrl)
+    const response = await fetch(url, withForwardedPublicHost(requestUrl, { cache: 'no-store' }))
     if (!response.ok) throw new Error('cache settings fetch failed')
     const data = (await response.json()) as MiddlewareCacheSettings
     cachedSettings = {

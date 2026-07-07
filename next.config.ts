@@ -47,9 +47,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   // Keep standalone server bundles lean on Linux production deploys.
+  // Do not exclude typescript — Payload/Turbopack SSR still external-requires it at runtime.
   outputFileTracingExcludes: {
     '*': [
-      './node_modules/typescript/**',
       './node_modules/@playwright/**',
       './node_modules/playwright/**',
       './node_modules/playwright-core/**',

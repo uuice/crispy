@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { after } from 'next/server'
 
 import { applyCrispyCacheHeaders } from '@/frontend-cache/headers'
+import { internalApiUrl, withForwardedPublicHost } from '@/frontend-cache/internalFetch'
 import { resolveLegacyFrontendRedirect } from '@/frontend-cache/legacyFrontendRedirects'
 import {
   CRISPY_CACHE_INTERNAL_HEADER,
@@ -120,18 +121,21 @@ async function resolveRouteCacheViaApi(
   bypass: boolean,
 ): Promise<RouteCacheLookupResult> {
   try {
-    const url = new URL('/api/internal/route-cache-touch', request.url)
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        routePath: request.nextUrl.pathname,
-        ttlSeconds: settings.pageRevalidateSeconds,
-        cachingEnabled: settings.cachingEnabled,
-        bypass,
+    const url = internalApiUrl('/api/internal/route-cache-touch', request.url)
+    const response = await fetch(
+      url,
+      withForwardedPublicHost(request.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          routePath: request.nextUrl.pathname,
+          ttlSeconds: settings.pageRevalidateSeconds,
+          cachingEnabled: settings.cachingEnabled,
+          bypass,
+        }),
+        cache: 'no-store',
       }),
-      cache: 'no-store',
-    })
+    )
 
     if (!response.ok) return { status: 'BYPASS' }
 
@@ -162,7 +166,7 @@ function buildCachedHtmlResponse(
 
   applyCrispyCacheHeaders(response.headers, {
     pageStatus: lookup.status,
-    dataStatus: lookup.status,
+    dataStatus: 'BYPASS',
     ttlSeconds: settings.pageRevalidateSeconds,
     cachingEnabled: settings.cachingEnabled,
   })
@@ -182,38 +186,47 @@ async function captureAndStoreRouteHtml(
     return
   }
 
-  const captureUrl = new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, request.url)
+  const captureUrl = internalApiUrl(
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    request.url,
+  )
 
   try {
-    const pageResponse = await fetch(captureUrl, {
-      headers: {
-        [CRISPY_CACHE_INTERNAL_HEADER]: secret,
-        Accept: 'text/html',
-      },
-      cache: 'no-store',
-    })
+    const pageResponse = await fetch(
+      captureUrl,
+      withForwardedPublicHost(request.url, {
+        headers: {
+          [CRISPY_CACHE_INTERNAL_HEADER]: secret,
+          Accept: 'text/html',
+        },
+        cache: 'no-store',
+      }),
+    )
 
     if (!pageResponse.ok) return
 
     const html = await pageResponse.text()
-    const storeUrl = new URL('/api/internal/route-cache-store', request.url)
+    const storeUrl = internalApiUrl('/api/internal/route-cache-store', request.url)
 
-    await fetch(storeUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        [CRISPY_CACHE_INTERNAL_HEADER]: secret,
-      },
-      body: JSON.stringify({
-        routePath: request.nextUrl.pathname,
-        html,
-        contentType: pageResponse.headers.get('content-type') ?? 'text/html; charset=utf-8',
-        statusCode: pageResponse.status,
-        ttlSeconds: settings.pageRevalidateSeconds,
-        cachingEnabled: settings.cachingEnabled,
+    await fetch(
+      storeUrl,
+      withForwardedPublicHost(request.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [CRISPY_CACHE_INTERNAL_HEADER]: secret,
+        },
+        body: JSON.stringify({
+          routePath: request.nextUrl.pathname,
+          html,
+          contentType: pageResponse.headers.get('content-type') ?? 'text/html; charset=utf-8',
+          statusCode: pageResponse.status,
+          ttlSeconds: settings.pageRevalidateSeconds,
+          cachingEnabled: settings.cachingEnabled,
+        }),
+        cache: 'no-store',
       }),
-      cache: 'no-store',
-    })
+    )
   } catch {
     // Best-effort cache population; never block page responses.
   }
@@ -275,7 +288,7 @@ async function applyFrontendCacheHeaders(
     : NextResponse.next()
   applyCrispyCacheHeaders(response.headers, {
     pageStatus: lookup.status,
-    dataStatus: lookup.status,
+    dataStatus: 'BYPASS',
     ttlSeconds: settings.pageRevalidateSeconds,
     cachingEnabled: settings.cachingEnabled,
   })
