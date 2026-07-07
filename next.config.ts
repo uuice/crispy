@@ -46,6 +46,19 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   output: 'standalone',
+  // Keep standalone server bundles lean on Linux production deploys.
+  outputFileTracingExcludes: {
+    '*': [
+      './node_modules/typescript/**',
+      './node_modules/@playwright/**',
+      './node_modules/playwright/**',
+      './node_modules/playwright-core/**',
+      './node_modules/vitest/**',
+      './node_modules/jsdom/**',
+      './node_modules/eslint/**',
+      './node_modules/@testing-library/**',
+    ],
+  },
   redirects,
   turbopack: {
     root: path.resolve(dirname),

@@ -66,7 +66,8 @@ const GROUPS = {
       {
         id: 'pack-linux',
         summary: 'build + 打包 Linux standalone（无需 Docker）',
-        note: '本地 build 后替换 sharp 为 linux/x64 二进制（npm 约 8MB）；输出 dist/crispy-*-linux-x64-standalone-*.tar.gz。',
+        note:
+          'PACK_LINUX=1（自动）。目标平台：LINUX_ARCH=x64|arm64（默认 x64），LINUX_LIBC=glibc|musl（默认 glibc，Alpine 用 musl）。排除 public/media，替换 sharp/libsql 原生包并 prune。例：LINUX_ARCH=arm64 pnpm cli dev:pack-linux',
         run: async () => {
           const build = lookup.get('dev:build')
           await build.def.run([])
@@ -76,7 +77,8 @@ const GROUPS = {
       {
         id: 'pack-linux-standalone',
         summary: '仅打包 Linux standalone（需已 build）',
-        note: '不重新 build；通过 npm 下载 linux sharp，无需 Docker。',
+        note:
+          '不重新 build。环境变量同 dev:pack-linux：LINUX_ARCH、LINUX_LIBC。详见 scripts/pack-linux-standalone.sh',
         run: () => bashScript('pack-linux-standalone.sh'),
       },
       {

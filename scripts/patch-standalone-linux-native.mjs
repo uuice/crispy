@@ -1,9 +1,23 @@
 /**
- * Replace darwin native bindings with linux binaries in a standalone bundle.
- * Patches sharp and libsql via npm pack — no Docker required.
+ * Replace darwin native bindings with Linux binaries in a standalone bundle,
+ * then prune non-target platforms and dev-only packages.
  *
  * Usage: node scripts/patch-standalone-linux-native.mjs <staging-dir>
- * Env:   LINUX_ARCH=x64|arm64 (default x64), LINUX_LIBC=glibc|musl (default glibc)
+ *
+ * Environment (set by pack-linux-standalone.sh, or override manually):
+ *
+ *   PACK_LINUX=1
+ *     Enables Linux deploy mode in pack-standalone.sh (this script is only called when set).
+ *
+ *   LINUX_ARCH — default: x64
+ *     Target server CPU: x64 (amd64) | arm64
+ *
+ *   LINUX_LIBC — default: glibc
+ *     Target C library: glibc (Ubuntu/Debian/CentOS) | musl (Alpine)
+ *
+ * Examples:
+ *   LINUX_ARCH=arm64 pnpm cli dev:pack-linux
+ *   LINUX_LIBC=musl pnpm cli dev:pack-linux
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -33,6 +47,22 @@ const sharpPlatformSuffix =
 
 const libsqlTarget =
   linuxLibc === 'musl' ? `linux-${linuxArch}-musl` : `linux-${linuxArch}-gnu`
+
+const keepSharpPlatformPrefix = `@img+sharp-${sharpPlatformSuffix}@`
+const keepLibvipsPrefix = `@img+sharp-libvips-${sharpPlatformSuffix}@`
+const keepLibsqlPrefix = `@libsql+${libsqlTarget}@`
+
+/** Dev-only packages that should not ship in a Linux production tarball. */
+const DEV_PNPM_PREFIXES = [
+  'typescript@',
+  '@playwright+test@',
+  'playwright-core@',
+  'playwright@',
+  'vitest@',
+  'jsdom@',
+  '@testing-library+react@',
+  'eslint@',
+]
 
 function npmPack(name, version) {
   const spec = version ? `${name}@${version}` : name
@@ -85,21 +115,42 @@ function linkScopedPackage(scopeDir, scopePath, version, pnpmRoot) {
 }
 
 function removePnpmEntries(pnpmRoot, prefix) {
+  let removed = 0
   for (const entry of fs.readdirSync(pnpmRoot)) {
     if (entry.startsWith(prefix)) {
       fs.rmSync(path.join(pnpmRoot, entry), { force: true, recursive: true })
+      removed++
+    }
+  }
+  return removed
+}
+
+function cleanSharpScopeSymlinks(pnpmRoot) {
+  const keepSharpName = `sharp-${sharpPlatformSuffix}`
+  const keepLibvipsName = `sharp-libvips-${sharpPlatformSuffix}`
+
+  for (const entry of fs.readdirSync(pnpmRoot)) {
+    if (!entry.startsWith('sharp@')) continue
+    const imgDir = path.join(pnpmRoot, entry, 'node_modules', '@img')
+    if (!fs.existsSync(imgDir)) continue
+    for (const name of fs.readdirSync(imgDir)) {
+      if (name === keepSharpName || name === keepLibvipsName) continue
+      if (name.startsWith('sharp-') || name.startsWith('sharp-libvips-')) {
+        fs.rmSync(path.join(imgDir, name), { force: true })
+      }
     }
   }
 }
 
-function removeScopeSymlinks(pnpmRoot, parentPrefix, scopeFolder, platformPattern) {
+function cleanLibsqlScopeSymlinks(pnpmRoot) {
   for (const entry of fs.readdirSync(pnpmRoot)) {
-    if (!entry.startsWith(parentPrefix)) continue
-    const scopeDir = path.join(pnpmRoot, entry, 'node_modules', scopeFolder)
-    if (!fs.existsSync(scopeDir)) continue
-    for (const name of fs.readdirSync(scopeDir)) {
-      if (platformPattern.test(name)) {
-        fs.rmSync(path.join(scopeDir, name), { force: true })
+    if (!entry.startsWith('libsql@')) continue
+    const libsqlScopeDir = path.join(pnpmRoot, entry, 'node_modules', '@libsql')
+    if (!fs.existsSync(libsqlScopeDir)) continue
+    for (const name of fs.readdirSync(libsqlScopeDir)) {
+      if (name === libsqlTarget) continue
+      if (name.startsWith('linux-') || name.startsWith('darwin') || name.startsWith('win32')) {
+        fs.rmSync(path.join(libsqlScopeDir, name), { force: true })
       }
     }
   }
@@ -153,6 +204,47 @@ function patchLibsql(libsqlVersion, pnpmRoot) {
   linkScopedPackage(libsqlScopeDir, platformPkg, platformVer, pnpmRoot)
 }
 
+function shouldKeepSharpEntry(entry) {
+  if (entry.startsWith(keepLibvipsPrefix)) return true
+  if (entry.startsWith(keepSharpPlatformPrefix)) return true
+  if (entry.startsWith('@img+sharp-wasm32') || entry.startsWith('@img+colour')) return true
+  return false
+}
+
+function shouldKeepLibsqlEntry(entry) {
+  if (entry.startsWith(keepLibsqlPrefix)) return true
+  if (entry.startsWith('@libsql+core@') || entry.startsWith('@libsql+client@')) return true
+  if (entry.startsWith('@libsql+hrana-client@') || entry.startsWith('@libsql+isomorphic-')) return true
+  return false
+}
+
+function pruneStandaloneBundle(pnpmRoot) {
+  console.log('→ Pruning non-target native platforms and dev dependencies...')
+  let removedEntries = 0
+
+  for (const entry of fs.readdirSync(pnpmRoot)) {
+    let shouldRemove = false
+
+    if (entry.startsWith('@img+sharp-') && !shouldKeepSharpEntry(entry)) {
+      shouldRemove = true
+    } else if (entry.startsWith('@libsql+') && !shouldKeepLibsqlEntry(entry)) {
+      shouldRemove = true
+    } else if (DEV_PNPM_PREFIXES.some((prefix) => entry.startsWith(prefix))) {
+      shouldRemove = true
+    }
+
+    if (shouldRemove) {
+      fs.rmSync(path.join(pnpmRoot, entry), { force: true, recursive: true })
+      removedEntries++
+    }
+  }
+
+  cleanSharpScopeSymlinks(pnpmRoot)
+  cleanLibsqlScopeSymlinks(pnpmRoot)
+
+  console.log(`→ Removed ${removedEntries} pnpm entries from bundle`)
+}
+
 console.log(`→ Patching native modules for linux/${linuxArch} (${linuxLibc})`)
 
 const sharpVersions = fs
@@ -178,7 +270,7 @@ for (const version of libsqlVersions) {
 removePnpmEntries(pnpmDir, '@img+sharp-darwin')
 removePnpmEntries(pnpmDir, '@img+sharp-libvips-darwin')
 removePnpmEntries(pnpmDir, '@libsql+darwin')
-removeScopeSymlinks(pnpmDir, 'sharp@', '@img', /darwin|win32/)
-removeScopeSymlinks(pnpmDir, 'libsql@', '@libsql', /darwin|win32/)
 
-console.log('→ Removed darwin native bindings')
+pruneStandaloneBundle(pnpmDir)
+
+console.log('→ Linux native patch and prune complete')

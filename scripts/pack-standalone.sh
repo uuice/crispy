@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Pack Next.js standalone output for self-hosted deployment.
 # Requires `pnpm cli dev:build` first (or use `pnpm cli dev:pack` which builds automatically).
+#
+# Linux deploy: use scripts/pack-linux-standalone.sh (sets PACK_LINUX=1 and platform env).
+#   PACK_LINUX=1     — exclude public/media, patch native modules, prune bundle
+#   LINUX_ARCH=x64   — target CPU (x64 | arm64)
+#   LINUX_LIBC=glibc — target libc (glibc | musl for Alpine)
 
 set -euo pipefail
 
@@ -20,6 +25,7 @@ fi
 VERSION="$(node -p "require('./package.json').version")"
 TIMESTAMP="$(date -u +%Y%m%d%H%M%S)"
 LINUX_ARCH="${LINUX_ARCH:-x64}"
+LINUX_LIBC="${LINUX_LIBC:-glibc}"
 STAGING_DIR="$OUT_DIR/crispy-standalone-$VERSION"
 if [[ "${PACK_LINUX:-}" == "1" ]]; then
   ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-standalone-${TIMESTAMP}.tar.gz"
@@ -39,9 +45,19 @@ mkdir -p "$STAGING_DIR/.next/static"
 cp -a "$STATIC_DIR/." "$STAGING_DIR/.next/static/"
 
 if [[ -d "$PUBLIC_DIR" ]]; then
-  echo "→ Copying public/..."
   mkdir -p "$STAGING_DIR/public"
-  cp -a "$PUBLIC_DIR/." "$STAGING_DIR/public/"
+  if [[ "${PACK_LINUX:-}" == "1" ]]; then
+    echo "→ Copying public/ (excluding local media uploads)..."
+    (cd "$PUBLIC_DIR" && tar cf - --exclude='./media' .) | (cd "$STAGING_DIR/public" && tar xf -)
+    mkdir -p "$STAGING_DIR/public/media"
+    cat > "$STAGING_DIR/public/media/README.txt" <<'MEDIAEOF'
+Local uploads are not bundled in Linux deploy tarballs.
+Mount a volume here or configure S3 (see .env.example) for production media.
+MEDIAEOF
+  else
+    echo "→ Copying public/..."
+    cp -a "$PUBLIC_DIR/." "$STAGING_DIR/public/"
+  fi
 fi
 
 if [[ -f ".env.example" ]]; then
@@ -49,7 +65,7 @@ if [[ -f ".env.example" ]]; then
 fi
 
 if [[ "${PACK_LINUX:-}" == "1" ]]; then
-  echo "→ Patching native modules for linux/${LINUX_ARCH}..."
+  echo "→ Patching native modules for linux/${LINUX_ARCH} (${LINUX_LIBC})..."
   node scripts/patch-standalone-linux-native.mjs "$STAGING_DIR"
   cat > "$STAGING_DIR/start.sh" <<'EOF'
 #!/usr/bin/env sh
@@ -227,9 +243,11 @@ Crispy standalone deployment bundle (linux/${LINUX_ARCH})
    ./start.sh
 
 Notes:
-- Built on macOS/Windows with linux/${LINUX_ARCH} sharp binaries patched in.
-- For Alpine/musl use LINUX_LIBC=musl when packing.
+- Built on macOS/Windows with linux/${LINUX_ARCH} (${LINUX_LIBC}) native binaries patched in.
+- Override target: LINUX_ARCH=x64|arm64 LINUX_LIBC=glibc|musl pnpm cli dev:pack-linux
+- For Alpine/musl set LINUX_LIBC=musl when packing.
 - PostgreSQL is required in production; set DATABASE_DRIVER=postgres.
+- public/media is excluded from the tarball; mount a volume or use S3 for uploads.
 EOF
 else
   cat > "$STAGING_DIR/DEPLOY.txt" <<'EOF'
