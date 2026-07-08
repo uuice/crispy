@@ -73,6 +73,7 @@ import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/component
 import { default as default_a0ee26f07b35ad97f90799ca2f39d8a4 } from '@/components/AdminThemeProvider'
 import { default as default_cff106b9d4befe9b61a5f1a43092e18a } from '@/components/AdminAiAgent/AdminAiAgentProvider'
 import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { default as default_8764214764e609424531b42b54ec237b } from '@/app/(payload)/admin/dev-docs/DevDocsView'
 import { default as default_167468770c8106c49118befba831d642 } from '@/app/(payload)/admin/api-docs/SwaggerView'
 import { default as default_d9568c1ed1cbf811dc1b4af3a8debb56 } from '@/app/(payload)/admin/ai-agent/AiAgentView'
@@ -158,6 +159,7 @@ export const importMap = {
   "@/components/AdminThemeProvider#default": default_a0ee26f07b35ad97f90799ca2f39d8a4,
   "@/components/AdminAiAgent/AdminAiAgentProvider#default": default_cff106b9d4befe9b61a5f1a43092e18a,
   "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@/app/(payload)/admin/dev-docs/DevDocsView#default": default_8764214764e609424531b42b54ec237b,
   "@/app/(payload)/admin/api-docs/SwaggerView#default": default_167468770c8106c49118befba831d642,
   "@/app/(payload)/admin/ai-agent/AiAgentView#default": default_d9568c1ed1cbf811dc1b4af3a8debb56,

@@ -1,8 +1,9 @@
 import { resolveApiKeyForProvider, parseAiProvider } from '@/ai/providers/presets'
 import { resolveDatabaseDriver } from '@/database/adapter'
+import { isPgvectorEnabled } from '@/database/pgvector'
 
 export function isEmbeddingsSupported(): boolean {
-  return resolveDatabaseDriver() === 'postgres'
+  return resolveDatabaseDriver() === 'postgres' && isPgvectorEnabled()
 }
 
 export function resolveEmbeddingConfig(): {

@@ -9,7 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
-import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { resolveMediaImageSrc } from '@/utilities/resolveMediaImageSrc'
 
 const { breakpoints } = cssVariables
 
@@ -62,17 +62,17 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   let height: number | undefined
   let alt = altFromProps
   let src: StaticImageData | string = srcFromProps || ''
+  let unoptimized = false
 
   if (!src && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
-
-    width = fullWidth!
-    height = fullHeight!
+    const { alt: altFromResource } = resource
     alt = altFromResource || ''
 
-    const cacheTag = resource.updatedAt
-
-    src = getMediaUrl(url, cacheTag)
+    const resolved = resolveMediaImageSrc(resource)
+    src = resolved.src
+    width = resolved.width ?? undefined
+    height = resolved.height ?? undefined
+    unoptimized = resolved.unoptimized
   }
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
@@ -98,6 +98,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         loading={loading}
         sizes={sizes}
         src={src}
+        unoptimized={unoptimized}
         width={!fill ? width : undefined}
       />
     </picture>

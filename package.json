@@ -44,7 +44,6 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-hook-form": "7.71.1",
-    "sharp": "0.34.5",
     "swagger-ui-dist": "^5.32.8",
     "tailwind-merge": "^3.4.0"
   },
@@ -77,11 +76,7 @@
     "pnpm": "^9 || ^10"
   },
   "pnpm": {
-    "overrides": {
-      "sharp": "0.34.5"
-    },
     "onlyBuiltDependencies": [
-      "sharp",
       "esbuild",
       "unrs-resolver"
     ]

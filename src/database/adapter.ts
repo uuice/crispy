@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
+import { isPgvectorEnabled } from '@/database/pgvector'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const projectRoot = path.resolve(dirname, '../..')
@@ -89,7 +91,7 @@ export function createDatabaseAdapter() {
 
   return postgresAdapter({
     migrationDir: MIGRATIONS_DIR,
-    extensions: ['vector'],
+    extensions: isPgvectorEnabled() ? ['vector'] : [],
     pool: {
       connectionString: url,
     },

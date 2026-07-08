@@ -81,13 +81,6 @@ export NODE_ENV="${NODE_ENV:-production}"
 export HOSTNAME="${HOSTNAME:-0.0.0.0}"
 export PORT="${PORT:-3333}"
 
-# Fallback for sharp libvips if rpath symlinks are missing
-for libdir in node_modules/.pnpm/@img+sharp-libvips-linux-*/node_modules/@img/sharp-libvips-linux-*/lib; do
-  if [ -d "$libdir" ]; then
-    export LD_LIBRARY_PATH="${libdir}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-  fi
-done
-
 exec node server.js
 EOF
 else
@@ -282,7 +275,7 @@ Crispy standalone deployment bundle
    ./start.sh
 
 Notes:
-- Build the tarball on the same OS/CPU as the target server (sharp native bindings).
+- Build the tarball on the same OS/CPU as the target server (libsql native bindings when using SQLite).
 - PostgreSQL is required in production; set DATABASE_DRIVER=postgres.
 - Static files are included under .next/static and public/.
 - PM2 logs are written to ./logs/

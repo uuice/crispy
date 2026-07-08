@@ -1,4 +1,3 @@
-import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
@@ -170,7 +169,6 @@ export default buildConfig({
   globals: [Header, Footer, SiteSettings, AiSettings, CommentSettings, CacheSettings],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
-  sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

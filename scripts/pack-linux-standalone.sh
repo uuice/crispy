@@ -9,7 +9,7 @@
 #   Required for Linux deploy mode. Set automatically by this script.
 #   Effects (in pack-standalone.sh + patch-standalone-linux-native.mjs):
 #     - Exclude public/media uploads from the tarball
-#     - Replace darwin native modules with Linux binaries (sharp, libsql)
+#     - Replace darwin native modules with Linux binaries (libsql)
 #     - Prune non-target platforms and dev-only packages (playwright, vitest…)
 #
 # LINUX_ARCH (default: x64)

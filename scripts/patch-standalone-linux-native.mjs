@@ -42,14 +42,9 @@ if (!fs.existsSync(pnpmDir)) {
   process.exit(1)
 }
 
-const sharpPlatformSuffix =
-  linuxLibc === 'musl' ? `linuxmusl-${linuxArch}` : `linux-${linuxArch}`
-
 const libsqlTarget =
   linuxLibc === 'musl' ? `linux-${linuxArch}-musl` : `linux-${linuxArch}-gnu`
 
-const keepSharpPlatformPrefix = `@img+sharp-${sharpPlatformSuffix}@`
-const keepLibvipsPrefix = `@img+sharp-libvips-${sharpPlatformSuffix}@`
 const keepLibsqlPrefix = `@libsql+${libsqlTarget}@`
 
 /** Dev-only packages that should not ship in a Linux production tarball. */
@@ -113,34 +108,6 @@ function linkScopedPackage(scopeDir, scopePath, version, pnpmRoot) {
   fs.symlinkSync(path.relative(path.dirname(link), target), link)
 }
 
-function removePnpmEntries(pnpmRoot, prefix) {
-  let removed = 0
-  for (const entry of fs.readdirSync(pnpmRoot)) {
-    if (entry.startsWith(prefix)) {
-      fs.rmSync(path.join(pnpmRoot, entry), { force: true, recursive: true })
-      removed++
-    }
-  }
-  return removed
-}
-
-function cleanSharpScopeSymlinks(pnpmRoot) {
-  const keepSharpName = `sharp-${sharpPlatformSuffix}`
-  const keepLibvipsName = `sharp-libvips-${sharpPlatformSuffix}`
-
-  for (const entry of fs.readdirSync(pnpmRoot)) {
-    if (!entry.startsWith('sharp@')) continue
-    const imgDir = path.join(pnpmRoot, entry, 'node_modules', '@img')
-    if (!fs.existsSync(imgDir)) continue
-    for (const name of fs.readdirSync(imgDir)) {
-      if (name === keepSharpName || name === keepLibvipsName) continue
-      if (name.startsWith('sharp-') || name.startsWith('sharp-libvips-')) {
-        fs.rmSync(path.join(imgDir, name), { force: true })
-      }
-    }
-  }
-}
-
 function cleanLibsqlScopeSymlinks(pnpmRoot) {
   for (const entry of fs.readdirSync(pnpmRoot)) {
     if (!entry.startsWith('libsql@')) continue
@@ -153,38 +120,6 @@ function cleanLibsqlScopeSymlinks(pnpmRoot) {
       }
     }
   }
-}
-
-function patchSharpVersion(sharpVersion, pnpmRoot) {
-  const sharpPkgPath = path.join(pnpmRoot, `sharp@${sharpVersion}`, 'node_modules', 'sharp', 'package.json')
-  if (!fs.existsSync(sharpPkgPath)) return
-
-  const sharpPkg = JSON.parse(fs.readFileSync(sharpPkgPath, 'utf8'))
-  const opt = sharpPkg.optionalDependencies || {}
-  const sharpPlatform = `@img/sharp-${sharpPlatformSuffix}`
-  const libvipsPlatform = `@img/sharp-libvips-${sharpPlatformSuffix}`
-
-  const sharpPlatformVer = opt[sharpPlatform]
-  const libvipsVer = opt[libvipsPlatform]
-  if (!sharpPlatformVer) {
-    throw new Error(`sharp@${sharpVersion} has no optional dep ${sharpPlatform}`)
-  }
-
-  installScopedPackage(sharpPlatform, sharpPlatformVer, pnpmRoot)
-  if (libvipsVer) {
-    installScopedPackage(libvipsPlatform, libvipsVer, pnpmRoot)
-    const sharpImgDir = path.join(
-      pnpmRoot,
-      pnpmFolderName(sharpPlatform, sharpPlatformVer),
-      'node_modules',
-      '@img',
-    )
-    linkScopedPackage(sharpImgDir, libvipsPlatform, libvipsVer, pnpmRoot)
-  }
-
-  const imgDir = path.join(pnpmRoot, `sharp@${sharpVersion}`, 'node_modules', '@img')
-  linkScopedPackage(imgDir, sharpPlatform, sharpPlatformVer, pnpmRoot)
-  if (libvipsVer) linkScopedPackage(imgDir, libvipsPlatform, libvipsVer, pnpmRoot)
 }
 
 function patchLibsql(libsqlVersion, pnpmRoot) {
@@ -201,13 +136,6 @@ function patchLibsql(libsqlVersion, pnpmRoot) {
   installScopedPackage(platformPkg, platformVer, pnpmRoot)
   const libsqlScopeDir = path.join(pnpmRoot, `libsql@${libsqlVersion}`, 'node_modules', '@libsql')
   linkScopedPackage(libsqlScopeDir, platformPkg, platformVer, pnpmRoot)
-}
-
-function shouldKeepSharpEntry(entry) {
-  if (entry.startsWith(keepLibvipsPrefix)) return true
-  if (entry.startsWith(keepSharpPlatformPrefix)) return true
-  if (entry.startsWith('@img+sharp-wasm32') || entry.startsWith('@img+colour')) return true
-  return false
 }
 
 function shouldKeepLibsqlEntry(entry) {
@@ -274,9 +202,7 @@ function pruneStandaloneBundle(pnpmRoot) {
   for (const entry of fs.readdirSync(pnpmRoot)) {
     let shouldRemove = false
 
-    if (entry.startsWith('@img+sharp-') && !shouldKeepSharpEntry(entry)) {
-      shouldRemove = true
-    } else if (entry.startsWith('@libsql+') && !shouldKeepLibsqlEntry(entry)) {
+    if (entry.startsWith('@libsql+') && !shouldKeepLibsqlEntry(entry)) {
       shouldRemove = true
     } else if (DEV_PNPM_PREFIXES.some((prefix) => entry.startsWith(prefix))) {
       shouldRemove = true
@@ -288,23 +214,23 @@ function pruneStandaloneBundle(pnpmRoot) {
     }
   }
 
-  cleanSharpScopeSymlinks(pnpmRoot)
   cleanLibsqlScopeSymlinks(pnpmRoot)
 
   console.log(`→ Removed ${removedEntries} pnpm entries from bundle`)
 }
 
-console.log(`→ Patching native modules for linux/${linuxArch} (${linuxLibc})`)
-
-const sharpVersions = fs
-  .readdirSync(pnpmDir)
-  .filter((e) => e.startsWith('sharp@'))
-  .map((e) => e.slice('sharp@'.length))
-
-for (const version of sharpVersions) {
-  console.log(`→ sharp@${version}`)
-  patchSharpVersion(version, pnpmDir)
+function removePnpmEntries(pnpmRoot, prefix) {
+  let removed = 0
+  for (const entry of fs.readdirSync(pnpmRoot)) {
+    if (entry.startsWith(prefix)) {
+      fs.rmSync(path.join(pnpmRoot, entry), { force: true, recursive: true })
+      removed++
+    }
+  }
+  return removed
 }
+
+console.log(`→ Patching native modules for linux/${linuxArch} (${linuxLibc})`)
 
 const libsqlVersions = fs
   .readdirSync(pnpmDir)
@@ -316,8 +242,6 @@ for (const version of libsqlVersions) {
   patchLibsql(version, pnpmDir)
 }
 
-removePnpmEntries(pnpmDir, '@img+sharp-darwin')
-removePnpmEntries(pnpmDir, '@img+sharp-libvips-darwin')
 removePnpmEntries(pnpmDir, '@libsql+darwin')
 
 patchTurbopackExternals(stagingDir)
