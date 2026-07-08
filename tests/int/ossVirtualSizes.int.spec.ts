@@ -7,6 +7,7 @@ import {
   resolveMediaOriginalUrl,
 } from '@/uploads/ossVirtualSizes'
 import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
+import { resolveAdminMediaThumbnailUrl } from '@/uploads/resolveAdminMediaThumbnailUrl'
 
 describe('ossVirtualSizes', () => {
   it('builds Aliyun resize process for width-only sizes', () => {
@@ -80,5 +81,49 @@ describe('ossVirtualSizes', () => {
     expect(sizes?.og?.url).toContain('m_fill')
     expect(sizes?.og?.url).toContain('w_1200')
     expect(Object.keys(sizes ?? {})).toHaveLength(MEDIA_IMAGE_SIZES.length)
+  })
+
+  it('resolves admin thumbnail as direct OSS URL when S3 virtual sizes are enabled', () => {
+    const prev = {
+      bucket: process.env.S3_BUCKET,
+      accessKey: process.env.S3_ACCESS_KEY_ID,
+      secret: process.env.S3_SECRET_ACCESS_KEY,
+      publicBase: process.env.S3_PUBLIC_BASE_URL,
+      virtualSizes: process.env.CRISPY_OSS_VIRTUAL_SIZES,
+    }
+
+    process.env.S3_BUCKET = 'my-bucket'
+    process.env.S3_ACCESS_KEY_ID = 'key'
+    process.env.S3_SECRET_ACCESS_KEY = 'secret'
+    process.env.S3_PUBLIC_BASE_URL = 'https://bucket.oss-cn-hangzhou.aliyuncs.com'
+    delete process.env.CRISPY_OSS_VIRTUAL_SIZES
+
+    const thumb = resolveAdminMediaThumbnailUrl({
+      mimeType: 'image/jpeg',
+      url: '/api/media/file/100.jpg',
+      filename: '100.jpg',
+      prefix: 'crispy/2026/07/08',
+      width: 4000,
+      height: 3000,
+    })
+
+    expect(thumb).toContain('https://bucket.oss-cn-hangzhou.aliyuncs.com/')
+    expect(thumb).toContain('x-oss-process=')
+    expect(thumb).toContain('w_300')
+    expect(thumb).not.toContain('/api/media/file')
+
+    process.env.S3_BUCKET = prev.bucket
+    process.env.S3_ACCESS_KEY_ID = prev.accessKey
+    process.env.S3_SECRET_ACCESS_KEY = prev.secret
+    if (prev.publicBase) {
+      process.env.S3_PUBLIC_BASE_URL = prev.publicBase
+    } else {
+      delete process.env.S3_PUBLIC_BASE_URL
+    }
+    if (prev.virtualSizes) {
+      process.env.CRISPY_OSS_VIRTUAL_SIZES = prev.virtualSizes
+    } else {
+      delete process.env.CRISPY_OSS_VIRTUAL_SIZES
+    }
   })
 })

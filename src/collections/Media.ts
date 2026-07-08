@@ -13,6 +13,7 @@ import { setMediaOssDatePrefix } from '@/hooks/setMediaOssDatePrefix'
 import { syncOssVirtualSizesAfterOperation } from '@/hooks/syncOssVirtualSizes'
 import { isOssVirtualSizesEnabled } from '@/uploads/isOssVirtualSizesEnabled'
 import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
+import { resolveAdminMediaThumbnailUrl } from '@/uploads/resolveAdminMediaThumbnailUrl'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -57,7 +58,8 @@ export const Media: CollectionConfig = {
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
     staticDir: path.resolve(dirname, '../../public/media'),
-    adminThumbnail: 'thumbnail',
+    // Function form returns direct OSS URLs; string form only loads sizes.*.filename in list views.
+    adminThumbnail: ({ doc }) => resolveAdminMediaThumbnailUrl(doc),
     focalPoint: !useOssVirtualSizes,
     // Virtual OSS sizes when S3 is enabled; Sharp is not used in this project
     imageSizes: MEDIA_IMAGE_SIZES,
