@@ -19,6 +19,8 @@ export function createS3StoragePlugin(): Plugin | null {
 
   return s3Storage({
     enabled: true,
+    // Combine collection prefix (S3_PREFIX) with per-document date prefix from Media beforeChange hook.
+    useCompositePrefixes: true,
     collections: {
       media: {
         prefix: process.env.S3_PREFIX ?? 'media',

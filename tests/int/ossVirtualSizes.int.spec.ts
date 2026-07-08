@@ -32,11 +32,13 @@ describe('ossVirtualSizes', () => {
       endpoint: process.env.S3_ENDPOINT,
       bucket: process.env.S3_BUCKET,
       prefix: process.env.S3_PREFIX,
+      publicBase: process.env.S3_PUBLIC_BASE_URL,
     }
 
     process.env.S3_ENDPOINT = 'https://oss-cn-hangzhou.aliyuncs.com'
     process.env.S3_BUCKET = 'my-bucket'
     process.env.S3_PREFIX = 'media'
+    delete process.env.S3_PUBLIC_BASE_URL
 
     expect(
       resolveMediaOriginalUrl({
@@ -45,9 +47,22 @@ describe('ossVirtualSizes', () => {
       }),
     ).toBe('https://oss-cn-hangzhou.aliyuncs.com/my-bucket/media/photo.jpg')
 
+    expect(
+      resolveMediaOriginalUrl({
+        url: '/api/media/file/photo.jpg',
+        filename: 'photo.jpg',
+        prefix: '2026/07/08',
+      }),
+    ).toBe('https://oss-cn-hangzhou.aliyuncs.com/my-bucket/media/2026/07/08/photo.jpg')
+
     process.env.S3_ENDPOINT = prev.endpoint
     process.env.S3_BUCKET = prev.bucket
     process.env.S3_PREFIX = prev.prefix
+    if (prev.publicBase) {
+      process.env.S3_PUBLIC_BASE_URL = prev.publicBase
+    } else {
+      delete process.env.S3_PUBLIC_BASE_URL
+    }
   })
 
   it('builds all configured virtual sizes', () => {

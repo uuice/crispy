@@ -38,6 +38,7 @@ async function main() {
       const sizes = buildVirtualMediaSizes({
         url,
         filename: typeof doc.filename === 'string' ? doc.filename : null,
+        prefix: typeof doc.prefix === 'string' ? doc.prefix : null,
         mimeType,
         width: typeof doc.width === 'number' ? doc.width : null,
         height: typeof doc.height === 'number' ? doc.height : null,

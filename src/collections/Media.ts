@@ -9,6 +9,7 @@ import { mediaCreateAccess, mediaDeleteAccess, mediaUpdateAccess } from '../acce
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
+import { setMediaOssDatePrefix } from '@/hooks/setMediaOssDatePrefix'
 import { syncOssVirtualSizesAfterOperation } from '@/hooks/syncOssVirtualSizes'
 import { isOssVirtualSizesEnabled } from '@/uploads/isOssVirtualSizesEnabled'
 import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
@@ -29,6 +30,7 @@ export const Media: CollectionConfig = {
     update: mediaUpdateAccess,
   },
   hooks: {
+    beforeChange: [setMediaOssDatePrefix],
     beforeValidate: [createSanitizeLexicalHook(['caption'])],
     // Always register; hook checks isOssVirtualSizesEnabled() at runtime (env may be unset at module load).
     afterOperation: [syncOssVirtualSizesAfterOperation],

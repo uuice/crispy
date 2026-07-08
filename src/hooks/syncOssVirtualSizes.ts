@@ -13,6 +13,7 @@ type MediaLike = TypeWithID & {
   mimeType?: string | null
   url?: string | null
   filename?: string | null
+  prefix?: string | null
   width?: number | null
   height?: number | null
   thumbnailURL?: string | null
@@ -67,6 +68,7 @@ async function syncOssVirtualSizesForDoc(req: PayloadRequest, doc: MediaLike): P
   const sizes = buildVirtualMediaSizes({
     url,
     filename: typeof doc.filename === 'string' ? doc.filename : null,
+    prefix: typeof doc.prefix === 'string' ? doc.prefix : null,
     mimeType,
     width: toNumber(doc.width),
     height: toNumber(doc.height),

@@ -2,6 +2,7 @@ import type { Media } from '@/payload-types'
 
 import type { MediaImageSize } from '@/uploads/mediaImageSizes'
 import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
+import { buildOssEndpointUrl, buildOssPublicUrl } from '@/uploads/ossObjectKey'
 
 export type VirtualMediaSizeEntry = NonNullable<Media['sizes']>[keyof NonNullable<Media['sizes']>]
 
@@ -20,25 +21,21 @@ function stripOssProcessParams(url: string): string {
 export function resolveMediaOriginalUrl(input: {
   url: string
   filename?: string | null
+  prefix?: string | null
 }): string | null {
-  const { url, filename } = input
+  const { url, filename, prefix: docPrefix } = input
   if (!url) return null
 
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return stripOssProcessParams(url)
   }
 
-  const publicBase = process.env.S3_PUBLIC_BASE_URL?.replace(/\/$/, '')
-  if (publicBase && filename) {
-    const prefix = process.env.S3_PREFIX ?? 'media'
-    return `${publicBase}/${prefix}/${encodeURIComponent(filename)}`
-  }
+  if (filename) {
+    const publicUrl = buildOssPublicUrl({ docPrefix, filename })
+    if (publicUrl) return publicUrl
 
-  const endpoint = process.env.S3_ENDPOINT?.replace(/\/$/, '')
-  const bucket = process.env.S3_BUCKET
-  if (endpoint && bucket && filename) {
-    const prefix = process.env.S3_PREFIX ?? 'media'
-    return `${endpoint}/${bucket}/${prefix}/${encodeURIComponent(filename)}`
+    const endpointUrl = buildOssEndpointUrl({ docPrefix, filename })
+    if (endpointUrl) return endpointUrl
   }
 
   return null
@@ -78,6 +75,7 @@ function estimateHeight(
 export function buildVirtualMediaSizes(input: {
   url: string
   filename?: string | null
+  prefix?: string | null
   mimeType?: string | null
   width?: number | null
   height?: number | null
@@ -86,6 +84,7 @@ export function buildVirtualMediaSizes(input: {
   const originalUrl = resolveMediaOriginalUrl({
     url: input.url,
     filename: input.filename,
+    prefix: input.prefix,
   })
 
   if (!originalUrl) return null
