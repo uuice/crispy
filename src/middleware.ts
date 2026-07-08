@@ -39,10 +39,13 @@ async function isEditorRequest(request: NextRequest): Promise<boolean> {
   }
 
   try {
-    const response = await fetch(new URL('/api/users/me', request.url), {
-      headers: { Authorization: `JWT ${token}` },
-      cache: 'no-store',
-    })
+    const response = await fetch(
+      internalApiUrl('/api/users/me', request.url),
+      withForwardedPublicHost(request.url, {
+        headers: { Authorization: `JWT ${token}` },
+        cache: 'no-store',
+      }),
+    )
 
     if (!response.ok) {
       return false
