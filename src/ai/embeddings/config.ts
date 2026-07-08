@@ -2,6 +2,13 @@ import { resolveApiKeyForProvider, parseAiProvider } from '@/ai/providers/preset
 import { resolveDatabaseDriver } from '@/database/adapter'
 import { isPgvectorEnabled } from '@/database/pgvector'
 
+import { EMBEDDING_DIMENSIONS } from './constants'
+
+/** Models that accept an optional `dimensions` request field (OpenAI v3, Qwen3-Embedding, etc.). */
+export function embeddingModelSupportsDimensions(model: string): boolean {
+  return /text-embedding-3|text-embedding-v3|Qwen3-Embedding/i.test(model)
+}
+
 export function isEmbeddingsSupported(): boolean {
   return resolveDatabaseDriver() === 'postgres' && isPgvectorEnabled()
 }
@@ -11,6 +18,8 @@ export function resolveEmbeddingConfig(): {
   apiKey: string
   baseUrl: string
   model: string
+  dimensions: number
+  supportsDimensions: boolean
 } {
   const apiKey =
     process.env.LLM_EMBEDDING_API_KEY?.trim() ||
@@ -34,5 +43,7 @@ export function resolveEmbeddingConfig(): {
     apiKey,
     baseUrl,
     model,
+    dimensions: EMBEDDING_DIMENSIONS,
+    supportsDimensions: embeddingModelSupportsDimensions(model),
   }
 }

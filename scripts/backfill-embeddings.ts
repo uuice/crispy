@@ -1,7 +1,10 @@
+import 'dotenv/config'
+
 import type { Payload } from 'payload'
 
 import type { EmbeddableCollection } from '@/ai/embeddings/constants'
 import { resolveEmbeddingConfig } from '@/ai/embeddings/config'
+import { normalizeOpenAiBaseUrl } from '@/ai/providers/openaiCompatible'
 import { syncContentEmbedding } from '@/ai/embeddings/syncContentEmbedding'
 import { createLocalReq } from 'payload'
 
@@ -44,7 +47,8 @@ async function main() {
 
   console.log('\nCrispy 向量回填\n')
   console.log(`• 模型 ${config.model}`)
-  console.log(`• API ${config.baseUrl}/v1/embeddings\n`)
+  console.log(`• 维度 ${config.dimensions}`)
+  console.log(`• API ${normalizeOpenAiBaseUrl(config.baseUrl)}/v1/embeddings\n`)
 
   const { getPayload } = await import('payload')
   const configPromise = await import('@payload-config')
