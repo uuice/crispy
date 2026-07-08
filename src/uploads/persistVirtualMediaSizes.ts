@@ -1,4 +1,4 @@
-import { sql, type SQL } from '@payloadcms/db-postgres'
+import { sql } from '@payloadcms/db-postgres'
 import type { PayloadRequest } from 'payload'
 
 import type { Media } from '@/payload-types'
@@ -14,8 +14,8 @@ function mediaSizeColumnPrefix(name: string): string {
 export function buildVirtualMediaSizesSqlSets(
   sizes: VirtualSizes,
   thumbnailURL?: string | null,
-): SQL[] {
-  const sets: SQL[] = []
+) {
+  const sets = []
 
   if (thumbnailURL != null) {
     sets.push(sql`thumbnail_u_r_l = ${thumbnailURL}`)
