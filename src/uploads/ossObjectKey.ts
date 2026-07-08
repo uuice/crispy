@@ -4,7 +4,7 @@ function collectionPrefix(): string {
   return (process.env.S3_PREFIX ?? 'media').replace(/^\/+|\/+$/g, '')
 }
 
-/** Build the OSS object key for a media file (matches Payload S3 adapter layout). */
+/** Build the OSS object key for a media file (matches Payload S3 adapter, non-composite mode). */
 export function buildOssObjectKey(input: {
   docPrefix?: string | null
   filename: string
@@ -13,12 +13,17 @@ export function buildOssObjectKey(input: {
   const docPrefix = (input.docPrefix ?? '').replace(/^\/+|\/+$/g, '')
   const filename = input.filename
 
-  // Legacy rows stored collection prefix in `prefix`; object key was `{collection}/{filename}`.
   if (!docPrefix || docPrefix === collection) {
     return path.posix.join(collection, filename)
   }
 
-  return path.posix.join(collection, docPrefix, filename)
+  // Interim rows: date-only prefix from the composite-prefix era (`2026/07/08`).
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(docPrefix)) {
+    return path.posix.join(collection, docPrefix, filename)
+  }
+
+  // Full upload prefix (`crispy/2026/07/08`) is used as-is.
+  return path.posix.join(docPrefix, filename)
 }
 
 /** Encode filename segment the same way as @payloadcms/storage-s3 generateURL. */

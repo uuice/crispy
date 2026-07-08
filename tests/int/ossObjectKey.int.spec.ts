@@ -4,7 +4,21 @@ import { buildOssDatePrefix } from '@/uploads/ossDatePrefix'
 import { buildOssObjectKey, buildOssPublicUrl } from '@/uploads/ossObjectKey'
 
 describe('ossObjectKey', () => {
-  it('builds date-based composite object keys', () => {
+  it('builds full upload prefix object keys', () => {
+    const prev = process.env.S3_PREFIX
+    process.env.S3_PREFIX = 'media'
+
+    expect(
+      buildOssObjectKey({
+        docPrefix: 'media/2026/07/08',
+        filename: 'photo.jpg',
+      }),
+    ).toBe('media/2026/07/08/photo.jpg')
+
+    process.env.S3_PREFIX = prev
+  })
+
+  it('supports interim date-only prefix rows', () => {
     const prev = process.env.S3_PREFIX
     process.env.S3_PREFIX = 'media'
 
@@ -38,7 +52,7 @@ describe('ossObjectKey', () => {
 
     expect(
       buildOssPublicUrl({
-        docPrefix: '2026/07/08',
+        docPrefix: 'media/2026/07/08',
         filename: 'my photo.jpg',
         publicBaseUrl: 'https://bucket.oss-cn-hangzhou.aliyuncs.com',
       }),

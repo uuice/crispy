@@ -1,22 +1,17 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
-import { buildOssDatePrefix } from '@/uploads/ossDatePrefix'
+import { buildOssUploadPrefix } from '@/uploads/ossDatePrefix'
 import { isS3Enabled } from '@/storage/s3'
 
-type MediaData = {
-  filename?: string | null
-  prefix?: string | null
-}
-
 /** Set per-upload date prefix so OSS keys become `{S3_PREFIX}/{YYYY}/{MM}/{DD}/{filename}`. */
-export const setMediaOssDatePrefix: CollectionBeforeChangeHook<MediaData> = async ({
+export const setMediaOssDatePrefix: CollectionBeforeChangeHook = async ({
   data,
   operation,
   originalDoc,
 }) => {
   if (!isS3Enabled()) return data
 
-  const incoming = data as MediaData
+  const incoming = data as { filename?: string | null; prefix?: string | null }
   const isNewUpload =
     operation === 'create' ||
     (typeof incoming.filename === 'string' &&
@@ -29,6 +24,6 @@ export const setMediaOssDatePrefix: CollectionBeforeChangeHook<MediaData> = asyn
 
   return {
     ...incoming,
-    prefix: buildOssDatePrefix(),
+    prefix: buildOssUploadPrefix(),
   }
 }
