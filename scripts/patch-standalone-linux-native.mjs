@@ -47,6 +47,9 @@ const libsqlTarget =
 
 const keepLibsqlPrefix = `@libsql+${libsqlTarget}@`
 
+/** Next.js may still trace sharp; Crispy uses OSS virtual sizes and ships without sharp. */
+const SHARP_PNPM_PREFIXES = ['sharp@', '@img+sharp-', '@img+sharp-libvips-']
+
 /** Dev-only packages that should not ship in a Linux production tarball. */
 const DEV_PNPM_PREFIXES = [
   '@playwright+test@',
@@ -138,6 +141,10 @@ function patchLibsql(libsqlVersion, pnpmRoot) {
   linkScopedPackage(libsqlScopeDir, platformPkg, platformVer, pnpmRoot)
 }
 
+function isSharpPnpmEntry(entry) {
+  return SHARP_PNPM_PREFIXES.some((prefix) => entry.startsWith(prefix))
+}
+
 function shouldKeepLibsqlEntry(entry) {
   if (entry.startsWith(keepLibsqlPrefix)) return true
   if (entry.startsWith('@libsql+core@') || entry.startsWith('@libsql+client@')) return true
@@ -202,7 +209,9 @@ function pruneStandaloneBundle(pnpmRoot) {
   for (const entry of fs.readdirSync(pnpmRoot)) {
     let shouldRemove = false
 
-    if (entry.startsWith('@libsql+') && !shouldKeepLibsqlEntry(entry)) {
+    if (isSharpPnpmEntry(entry)) {
+      shouldRemove = true
+    } else if (entry.startsWith('@libsql+') && !shouldKeepLibsqlEntry(entry)) {
       shouldRemove = true
     } else if (DEV_PNPM_PREFIXES.some((prefix) => entry.startsWith(prefix))) {
       shouldRemove = true
@@ -245,6 +254,10 @@ for (const version of libsqlVersions) {
 removePnpmEntries(pnpmDir, '@libsql+darwin')
 
 patchTurbopackExternals(stagingDir)
+console.log('→ Removing traced sharp packages (OSS virtual sizes; no runtime sharp)...')
+for (const prefix of SHARP_PNPM_PREFIXES) {
+  removePnpmEntries(pnpmDir, prefix)
+}
 pruneStandaloneBundle(pnpmDir)
 
 console.log('→ Linux native patch and prune complete')
