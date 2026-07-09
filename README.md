@@ -1,132 +1,161 @@
 # Crispy 3.0
 
-基于 **Payload CMS 3** 的通用内容管理系统。
+基于 **Payload CMS 3** 的通用内容管理系统。在 Payload 原生 REST / GraphQL / Admin / 插件体系之上，叠加 Crispy 产品层 API 与运营能力。
 
 ## 快速开始
 
 ```bash
-# 1. 环境变量
-cp .env.example .env
-# 编辑 .env：设置 PAYLOAD_SECRET（openssl rand -hex 32）
-
-# 2. 依赖
+cp .env.example .env          # 设置 PAYLOAD_SECRET（openssl rand -hex 32）
 pnpm install
-
-# 3. 开发（默认 SQLite，无需 Docker）
-pnpm cli dev:dev
+pnpm cli dev:dev              # http://localhost:3333
 ```
 
-本地默认使用 **SQLite**（`.data/payload.db`），首次启动自动建表。
+本地默认 **SQLite**（`.data/payload.db`），首次启动自动建表。
 
-### 生产环境（PostgreSQL）
+生产环境使用 **PostgreSQL**，`DATABASE_PUSH=false`，部署前执行 `pnpm cli db:migrate`。完整说明见 Admin **[二次开发文档](http://localhost:3333/admin/dev-docs)**。
 
-部署时设置：
+## Payload 原生能力
 
-```bash
-DATABASE_URL=postgresql://user:password@host:5432/crispy
-DATABASE_DRIVER=postgres
-DATABASE_PUSH=false         # 生产禁止 schema push
-NODE_ENV=production
-pnpm cli db:migrate     # 生产必须跑迁移
-pnpm cli dev:build && pnpm cli dev:start
-```
+Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 
-详见 Admin 内 **[二次开发文档](http://localhost:3333/admin/dev-docs)**（部署、迁移、权限、AI、MCP 等完整说明）。
+| 能力 | 说明 |
+| ---- | ---- |
+| **REST API** | `GET/POST/PATCH/DELETE /api/{collection}`，按 Collection `access` 鉴权 |
+| **GraphQL** | `POST /api/graphql`；Playground：`/api/graphql-playground`（需 Admin 登录） |
+| **Admin** | Lexical 富文本、Live Preview、草稿 / 定时发布、版本历史、媒体文件夹 |
+| **SEO 插件** | posts / pages 的 meta title / description / image |
+| **Search 插件** | posts、pages、jobs、gallery-items 站内搜索索引 |
+| **Redirects 插件** | Admin 配置 URL 重定向（Crispy 接入 middleware 实时生效） |
+| **Nested Docs** | categories 嵌套分类与面包屑 URL |
+| **Form Builder** | 表单定义 + `POST /api/form-submissions` 提交（可配邮件通知） |
+| **Import/Export** | Admin 批量导入导出多 Collection |
+| **MCP 插件** | `POST /api/mcp` JSON-RPC，外部 Agent 读写内容 |
+| **S3 Storage** | 配置 `S3_*` 后 media 存对象存储 |
+| **Jobs** | 定时发布（`schedulePublish`）、导入导出任务等 |
 
-可选：本地调试 PostgreSQL 时使用 `pnpm cli db:docker-up` 并改 `DATABASE_URL`。
+**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
+
+**RBAC 三角色**：`super-admin` / `editor` / `author`（见文末角色表）。
+
+## API 一览
+
+### Payload 标准 API
+
+| 端点 | 方法 | 鉴权 | 说明 |
+| ---- | ---- | ---- | ---- |
+| `/api/{collection}` | REST | JWT / API Key / 公开 read | 标准 CRUD + count |
+| `/api/globals/{slug}` | REST | 按 Global access | header、footer、site-settings 等 |
+| `/api/graphql` | POST | 按 Collection access | GraphQL 查询与变更 |
+| `/api/form-submissions` | POST | 匿名（插件默认） | 前台表单提交 |
+| `/api/mcp` | POST | Bearer MCP Key 或 `users API-Key` | JSON-RPC，见 [MCP 章节](#mcp) |
+
+### Crispy 扩展 API
+
+| 端点 | 方法 | 鉴权 | 说明 |
+| ---- | ---- | ---- | ---- |
+| `/api/openapi.json` | GET | Admin 登录 | OpenAPI 3.0 文档（动态生成） |
+| `/admin/api-docs` | GET | Admin 登录 | Swagger UI |
+| `/api/ai/stream` | POST | Admin | 字段 AI 流式输出 |
+| `/api/ai/complete` | POST | Admin | 字段 AI 一次性补全 |
+| `/api/ai/structured` | POST | Admin | 字段 AI 结构化 JSON |
+| `/api/ai/agent` | POST | Admin | 后台对话助手 SSE（Function Calling CRUD） |
+| `/api/ai/agent/sessions` | GET/DELETE | Admin | 助手会话列表 / 删除 |
+| `/api/ai/assistant` | GET/POST | **公开** | 前台只读检索助手（SSE） |
+| `/search-index.json` | GET | 公开 | 前台主题搜索索引（posts/pages/jobs/gallery） |
+| `/api/internal/redirects` | GET | 内部 | middleware 拉取重定向映射（60s 缓存） |
+| `/api/internal/route-cache-*` | POST | 内部 | 前台 HTML 缓存读写 |
+| `/api/internal/access-log` | POST | Secret | API 访问日志写入 |
+
+OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详见 `/admin/dev-docs#openapi`。
+
+## Crispy 新增能力
+
+在 Payload 原生能力之上的产品层扩展：
+
+| 能力 | 说明 |
+| ---- | ---- |
+| **软删除 + 版本历史** | 全业务 Collection 回收站与版本面板（`enableTrashAndVersionsPlugin`） |
+| **URL 重定向（实时）** | Redirects 插件 + middleware，约 60 秒内生效，无需重建 |
+| **表单邮件** | Resend 或 SMTP（`RESEND_API_KEY` / `SMTP_*`），未配置时仅入库不发信 |
+| **Import/Export 扩展** | 含 gallery-items、short-links、redirects、forms、novels 等 |
+| **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（novels、redirects、forms 等） |
+| **前台可插拔主题** | blog / cms / kb，`site-settings` 或 `?theme_preview=` 切换 |
+| **字段 AI** | 润色、SEO、智能填充（DeepSeek / OpenAI 兼容） |
+| **后台 AI 助手** | `/admin/ai-agent` — CRUD、语义搜索、缓存、Unsplash 导入 |
+| **前台 AI 助手** | 公开只读检索，无需登录 |
+| **审计日志** | 写操作记录至 `audit-logs` |
+| **前台 DB 缓存** | HTML 路由缓存，`/admin/cache` 手动清除 |
+| **语义搜索** | Postgres + pgvector + embedding API（posts/pages） |
+
+**Pages 布局 Blocks**：CTA、Content、MediaBlock、Archive、FormBlock、RelatedPosts、Faq。
 
 ## 访问地址
 
-| 入口       | URL                               |
-| ---------- | --------------------------------- |
-| 前台首页   | http://localhost:3333             |
-| 后台 Admin | http://localhost:3333/admin       |
-| REST API   | http://localhost:3333/api         |
-| MCP 端点   | http://localhost:3333/api/mcp     |
-| GraphQL    | http://localhost:3333/api/graphql |
-| Swagger    | http://localhost:3333/admin/api-docs |
-| AI 助手（后台） | http://localhost:3333/admin/ai-agent |
-| 二次开发文档   | http://localhost:3333/admin/dev-docs |
-
-首次访问 Admin 会引导创建超级管理员账号。
+| 入口 | URL |
+| ---- | --- |
+| 前台 | http://localhost:3333 |
+| Admin | http://localhost:3333/admin |
+| REST | http://localhost:3333/api |
+| GraphQL | http://localhost:3333/api/graphql |
+| MCP | http://localhost:3333/api/mcp |
+| Swagger | http://localhost:3333/admin/api-docs |
+| 后台 AI | http://localhost:3333/admin/ai-agent |
+| 二次开发文档 | http://localhost:3333/admin/dev-docs |
 
 ## 技术栈
 
-| 层             | 技术                         |
-| -------------- | ---------------------------- |
-| CMS            | Payload 3.85                 |
-| 框架           | Next.js 16 App Router        |
-| 数据库（本地） | SQLite（`.data/payload.db`） |
-| 数据库（生产） | PostgreSQL                   |
-| 编辑器         | Lexical                      |
-| UI             | Tailwind 4 + shadcn/ui       |
-
-## 官方插件（已启用）
-
-- SEO、Search、Redirects、Nested Docs、Form Builder
-- **MCP** — 外部 AI Agent 读写内容
-- Import/Export、Audit Log、Query Presets
-
-## Crispy 自建能力
-
-- **软删除 + 版本历史** — 全业务 Collection 回收站与版本面板
-- **前台可插拔主题** — 博客 / CMS / 知识库三套皮肤，站点设置切换与预览
-- **Admin AI 助手** — 对话式内容管理（`/admin/ai-agent`）
-- **前台 AI 助手** — 访客公开只读检索（右下角浮窗，无需登录）
-- **字段 AI** — 润色、SEO、智能填充（DeepSeek）
-- **OpenAPI / Swagger** — 自动生成 REST 文档
-
-## 文档
-
-完整二次开发文档已内置在 Admin：**http://localhost:3333/admin/dev-docs**（侧边栏「二次开发文档」）。
-
-涵盖：技术栈、目录结构、环境变量、命令、Collection 字段、RBAC 权限、Payload 扩展架构、自建 Plugin、前台主题、Admin AI（字段 + 对话助手）、前台 AI 助手、MCP、部署迁移与 CI。
+| 层 | 技术 |
+| -- | ---- |
+| CMS | Payload 3.85 |
+| 框架 | Next.js 16 App Router |
+| 数据库 | SQLite（本地）/ PostgreSQL（生产） |
+| 编辑器 | Lexical |
+| UI | Tailwind 4 + Payload Admin UI |
 
 ## 常用命令
 
-所有命令通过 **`pnpm cli`** 统一入口；`pnpm cli help` 查看全部分组与备注。
+`pnpm cli help` 查看全部命令。
 
 | 命令 | 说明 |
 | ---- | ---- |
-| `pnpm cli dev:dev` | 开发服务器（端口 3333） |
-| `pnpm cli dev:build` | 生产构建（含主题 CSS + sitemap） |
-| `pnpm cli db:docker-up` | 启动 PostgreSQL（可选） |
-| `pnpm cli verify:all` | 完整冒烟 |
-| `pnpm cli db:seed` | 填充示例数据 |
-| `pnpm cli db:bootstrap` | 首次 Postgres 迁移 |
-| `pnpm cli db:migrate` | 执行数据库迁移（生产） |
-| `pnpm cli quality:ci` | 本地 CI（lint/tsc/test/build） |
+| `pnpm cli dev:dev` | 开发服务器（3333） |
+| `pnpm cli dev:build` | 生产构建 |
+| `pnpm cli db:migrate` | Postgres 迁移（生产必跑） |
+| `pnpm cli db:create <name>` | 新建迁移（需 Node 22 + Postgres） |
+| `pnpm cli generate:types` | 生成 `payload-types.ts` |
+| `pnpm cli verify:all` | 冒烟验证 |
+| `pnpm cli quality:ci` | lint + tsc + test + build |
 
-## AI / MCP
+## MCP
 
-**Admin AI 助手**（对话式，CRUD + 语义搜索）：`/admin/ai-agent` 或 Admin 右下角浮窗。详见 [二次开发文档 — Admin AI 助手](http://localhost:3333/admin/dev-docs#ai-agent)。
+外部 Agent（Cursor 等）通过 JSON-RPC 读写 CMS：
 
-**前台 AI 助手**（公开只读检索，无需登录）：前台任意页面右下角浮窗；`GET/POST /api/ai/assistant`。可检索文章、页面、分类、标签、友链、招聘、图库与导航。详见 [二次开发文档 — 前台 AI 助手](http://localhost:3333/admin/dev-docs#frontend-ai-assistant)。
+```bash
+# 端点
+POST http://localhost:3333/api/mcp
 
-**字段 AI**（润色/SEO/智能填充，DeepSeek）：见 [二次开发文档 — Admin AI](http://localhost:3333/admin/dev-docs#ai)。
+# 鉴权（二选一）
+Authorization: Bearer <mcp-api-key>
+Authorization: users API-Key <user-api-key>
+```
 
-**前台主题**（blog / cms / kb）：站点设置切换，`?theme_preview=` 预览。详见 [二次开发文档 — 前台主题](http://localhost:3333/admin/dev-docs#frontend-themes)。
+1. `pnpm cli db:seed` 或 Admin 创建 editor 用户
+2. Admin → MCP → API Keys 生成 Key
+3. 验证：`MCP_API_KEY=xxx pnpm cli verify:phase1`
 
-**MCP**（外部 Agent 读写内容）：
-
-1. Admin 创建用户并分配 `editor` 或 `super-admin` 角色
-2. 为用户生成 API Key（Users 详情 → API Key）
-3. MCP 客户端连接 `http://localhost:3333/api/mcp`
-4. 鉴权：`Authorization: users API-Key <your-key>`
-
-详见 Admin [二次开发文档 — MCP](http://localhost:3333/admin/dev-docs#mcp) 章节。
+MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](http://localhost:3333/admin/dev-docs#mcp)。
 
 ## 角色说明
 
-| 角色          | 权限                                                                    |
-| ------------- | ----------------------------------------------------------------------- |
-| `super-admin` | 全部权限 + 用户管理                                                     |
-| `editor`      | 内容 CRUD、发布、站点/导航/运营模块                                     |
-| `author`      | 创建/编辑自己的文章（草稿）；上传媒体；不可改单页、分类、导航、删除媒体 |
+| 角色 | 权限 |
+| ---- | ---- |
+| `super-admin` | 全部权限 + 用户管理 |
+| `editor` | 内容 CRUD、发布、运营模块、站点/导航 Globals |
+| `author` | 自己的 posts（草稿）；上传媒体；不可改 pages、分类、Globals |
 
 ## 与 2.x 的关系
 
-Crispy 3.0 在 `v3-payload` 分支完全重写，不继承 2.x 代码。2.x（Next.js + Prisma + 自研 Admin）保留在 `nextjs` 等历史分支。
+Crispy 3.0 在 `v3-payload` 分支 greenfield 重写，不继承 2.x 代码。
 
 ## License
 

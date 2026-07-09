@@ -74,6 +74,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           'SEO、Search、Redirects、Nested Docs、Form Builder',
           'MCP — 外部 AI Agent 读写内容',
           'Import/Export — 批量导入导出',
+          'Email — @payloadcms/email-resend / email-nodemailer（Form Builder 发信）',
           'S3 Storage — 生产媒体（配置 S3_* 后启用）',
           'Audit Log — 自建 audit-logs collection',
         ],
@@ -135,6 +136,9 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
 │   ├── components/FrontendThemePreview/ # 站点设置主题卡片
 │   ├── fields/ai/               # withAiTextField 等
 │   ├── plugins/                 # 官方 + 自建插件聚合
+│   ├── redirects/               # 前台 URL 重定向（middleware + internal API）
+│   ├── email/                   # Form Builder 邮件适配器（Resend / SMTP）
+│   ├── search/                  # Search 插件 beforeSync、前台 search-index 构建
 │   ├── utilities/               # trashOrDeleteDocument 等横切工具
 │   ├── database/adapter.ts      # SQLite / Postgres 双驱动
 │   ├── migrations/              # Postgres 迁移（生产）
@@ -171,6 +175,11 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['FRONTEND_THEME', '可选：blog | cms | kb，覆盖 site-settings.frontendTheme'],
           ['S3_*', '生产媒体存储（bucket、密钥、region 等）'],
           ['API_ACCESS_LOG_ENABLED', 'API 访问日志 middleware'],
+          ['RESEND_API_KEY', 'Form Builder 邮件（Resend，优先于 SMTP）'],
+          ['SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS', 'Form Builder 邮件（Nodemailer）'],
+          ['EMAIL_FROM_ADDRESS / EMAIL_FROM_NAME', '发件人（默认 noreply@example.com / Crispy CMS）'],
+          ['FORM_DEFAULT_TO_EMAIL', '表单未配置收件人时的默认邮箱'],
+          ['EMAIL_OVERRIDE_RECIPIENT', '测试：所有表单邮件重定向到此地址'],
         ],
       },
       {
@@ -285,7 +294,19 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           'Banner — content 富文本 + AI 选区',
           'Code — 代码块 + AiCodeField',
           'Media Block — media 关联 + 可选 Caption AI',
-          'Pages layout — CTA, Content, MediaBlock, Archive, FormBlock',
+          'Pages layout — CTA, Content, MediaBlock, Archive, FormBlock, RelatedPosts（相关文章）, Faq（常见问题）',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '头图（hero）与版本还原',
+      },
+      {
+        type: 'ul',
+        items: [
+          'hero.type 为 highImpact / mediumImpact 时才需要 hero.media；lowImpact / none 不要求媒体',
+          '版本还原若报「头图 > Media 无效」：检查该版本 hero 类型是否需配图，或关联 media 是否已删除',
+          '实现：src/heros/config.ts（条件 validate，非全局 required）',
         ],
       },
     ],
@@ -788,10 +809,19 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
         type: 'table',
         headers: ['Collection', 'find', 'create', 'update', 'delete'],
         rows: [
-          ['posts / pages / categories / tags / links / jobs / gallery / ad-slots / ads', '✓', '✓', '✓', '✓'],
+          ['posts / pages / categories / tags / links / link-groups', '✓', '✓', '✓', '✓'],
+          ['jobs / gallery-items / ad-slots / ads / novels / short-links', '✓', '✓', '✓', '✓'],
+          ['redirects / forms / payload-query-presets', '✓', '✓', '✓', '✓'],
+          ['form-submissions', '✓', '✗', '✗', '✓'],
           ['media', '✓', '✓', '✓', '✗'],
+          ['app-configs', '✓', '✗', '✗', '✗'],
+          ['comments', '✓', '✓', '✓', '✗'],
           ['users', 'find only', '—', '—', '—'],
         ],
+      },
+      {
+        type: 'p',
+        text: '与后台 AI 助手（src/ai/agent/resources.ts）范围对齐；差异时以 plugins/index.ts mcpPlugin 为准。',
       },
       {
         type: 'h3',
@@ -817,6 +847,81 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
     ],
   },
   {
+    id: 'cms-operations',
+    title: '运营能力（重定向 / 邮件 / 导入导出 / 搜索）',
+    blocks: [
+      {
+        type: 'h3',
+        text: 'URL 重定向（Redirects 插件 + middleware）',
+      },
+      {
+        type: 'p',
+        text: 'Admin → 运营 → 重定向 配置 from → to（自定义 URL 或关联 pages/posts）。修改后约 60 秒内前台生效，无需重新构建。',
+      },
+      {
+        type: 'ul',
+        items: [
+          'middleware：handlePayloadRedirect（src/redirects/middlewareRedirects.ts）在 legacy redirect 之后、HTML 缓存之前执行',
+          '内部 API：GET /api/internal/redirects 返回 { redirects: Record<from, to> }，middleware 内存缓存 60s',
+          'SSR 兜底：src/components/PayloadRedirects + unstable_cache(getRedirects)',
+          '路径解析：src/redirects/resolveRedirectDestination.ts（pages 用 getPagePath，posts 用 getPostPath）',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Form Builder 邮件',
+      },
+      {
+        type: 'p',
+        text: 'payload.config.ts 通过 src/email/createEmailAdapter.ts 注册邮件适配器。未配置 RESEND_API_KEY 与 SMTP_HOST 时表单仍可提交并入库，但不会发信（Payload 控制台 warn）。',
+      },
+      {
+        type: 'table',
+        headers: ['优先级', '环境变量', '说明'],
+        rows: [
+          ['1', 'RESEND_API_KEY', '使用 @payloadcms/email-resend'],
+          ['2', 'SMTP_HOST + SMTP_*', '使用 @payloadcms/email-nodemailer'],
+          ['—', 'EMAIL_FROM_ADDRESS / EMAIL_FROM_NAME', '发件人'],
+          ['—', 'FORM_DEFAULT_TO_EMAIL', 'formBuilderPlugin.defaultToEmail 默认收件人'],
+          ['—', 'EMAIL_OVERRIDE_RECIPIENT', '测试环境全部重定向到此邮箱'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Import / Export',
+      },
+      {
+        type: 'p',
+        text: 'Admin → 导入导出。importExportPlugin 已启用 Collection（src/plugins/index.ts）：',
+      },
+      {
+        type: 'ul',
+        items: [
+          'posts, pages, categories, tags, links, link-groups, jobs, users',
+          'gallery-items, short-links, redirects, forms, comments, ad-slots, ads, novels',
+          '不含 media（二进制）、form-submissions（敏感数据）、audit-logs 等系统表',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '搜索索引',
+      },
+      {
+        type: 'table',
+        headers: ['层级', '范围', '代码'],
+        rows: [
+          ['Payload Search 插件', 'posts, pages, jobs, gallery-items', 'src/plugins/index.ts searchPlugin + src/search/beforeSync.ts'],
+          ['前台 /search-index.json', '已发布 posts/pages + 启用 jobs/gallery-items', 'src/search/buildThemeSearchIndex.ts'],
+          ['前台 AI 助手', 'post/page/category/tag/link/job/gallery 等公开数据', 'src/ai/frontend-assistant/publicContent.ts'],
+        ],
+      },
+      {
+        type: 'p',
+        text: '新增 jobs / gallery-items 到 Search 插件后，已有数据可能需在 Admin → 系统 → 搜索索引 手动重建一次。',
+      },
+    ],
+  },
+  {
     id: 'deploy',
     title: '部署与迁移',
     blocks: [
@@ -832,7 +937,10 @@ DATABASE_PUSH=false
 PAYLOAD_SECRET=...
 NEXT_PUBLIC_SERVER_URL=https://your-domain.com
 PREVIEW_SECRET=...
-CRON_SECRET=...`,
+CRON_SECRET=...
+# 可选：表单邮件
+RESEND_API_KEY=...
+# 或 SMTP_HOST=... SMTP_USER=... SMTP_PASS=...`,
       },
       {
         type: 'h3',
@@ -843,7 +951,7 @@ CRON_SECRET=...`,
         items: [
           'pnpm cli db:migrate && pnpm cli db:status',
           'pnpm cli dev:build && pnpm cli dev:start（或 Docker standalone，端口 3333）',
-          '可选：配置 S3_*、DEEPSEEK_API_KEY',
+          '可选：配置 S3_*、DEEPSEEK_API_KEY、RESEND_API_KEY 或 SMTP_*（表单邮件）',
         ],
       },
       {
@@ -986,7 +1094,7 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
       },
       {
         type: 'p',
-        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?theme_preview / ?nocache → BYPASS。',
+        text: 'middleware 为 Edge 环境，禁止 import Payload。流程：legacy redirect → Payload redirects（60s 缓存）→ getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?theme_preview / ?nocache → BYPASS。',
       },
       {
         type: 'h3',
@@ -1292,6 +1400,8 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           ['importMap 随 Admin 组件变更', '改组件后执行 pnpm cli generate:importmap'],
           ['插件 Collection 英文 labels', 'localizePluginCollectionsPlugin 集中中文化'],
           ['Media 文件夹视图无列表刷新', '已知缺口；需单独 Folder 视图扩展时再评估'],
+          ['版本还原报 hero.media 无效', '检查 hero 类型是否需配图、media 是否已删；见 #collections 头图说明'],
+          ['新增 Pages Blocks 后 Postgres 报错', 'pnpm cli db:create <name> && pnpm cli db:migrate（需 Node 22）'],
         ],
       },
       {
@@ -1441,7 +1551,8 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           'super-admin / editor：AGENT_COLLECTIONS 内全部（media 不可 delete；form-submissions 不可 create/update）',
           'author：仅 posts，且必须是文档 authors 之一',
           'app-configs：仅 super-admin 可 create/update/delete',
-          'redirects / forms：editor+ 可 CRUD；form-submissions：editor+ 只读查/删',
+          'redirects / forms / short-links / novels / payload-query-presets：editor+ 可 CRUD（与 MCP 对齐）',
+          'form-submissions：editor+ 只读查/删',
           'Globals：header/footer/site-settings/cache-settings/comment-settings/ai-settings（ai-settings 修改仅 super-admin）',
           '前台缓存：list_frontend_cache、purge_frontend_cache、update_cache_settings 仅 super-admin / editor',
           'get_site_stats：editor+；list_audit_logs：仅 super-admin',
@@ -1524,6 +1635,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           'section — 站点栏目入口（/posts、/links、/jobs 等）',
           '数据查询均 overrideAccess: false，遵守 Collection read access',
           '索引实现：src/ai/frontend-assistant/publicContent.ts',
+          '前台主题搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildThemeSearchIndex.ts）',
         ],
       },
       {
