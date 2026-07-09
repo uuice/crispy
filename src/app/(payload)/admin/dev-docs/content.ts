@@ -1636,11 +1636,19 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         rows: [
           ['Admin 页面', '/admin/ai-agent'],
           ['右下角浮窗', '任意 Admin 页可唤起（AdminAiAgentWidget）'],
-          ['POST /api/ai/agent', 'SSE 流式对话（含 tool call 结果）'],
+          ['POST /api/ai/agent', 'SSE 流式对话（含 tool call 结果）；事件格式与前台相同，另含 session 事件'],
           ['GET /api/ai/agent/sessions', '当前用户会话列表'],
           ['GET /api/ai/agent/sessions/:id', '会话详情与消息历史'],
           ['DELETE /api/ai/agent/sessions/:id', '删除会话（软删除）'],
         ],
+      },
+      {
+        type: 'h3',
+        text: '请求与流式传输',
+      },
+      {
+        type: 'p',
+        text: '与前台助手相同：POST 返回 text/event-stream，客户端用 fetch + consumeAgentStream（src/components/AdminAiAgent/consumeAgentStream.ts）解析。区别是请求体可带 sessionId，响应流中额外推送 { type: "session", sessionId } 用于会话持久化。完整协议说明见 #frontend-ai-assistant 章节「请求与流式传输」。',
       },
       {
         type: 'h3',
@@ -1716,6 +1724,106 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           ['前台浮窗', 'src/components/FrontendAiAssistant（layout.tsx 全局挂载）'],
           ['GET /api/ai/assistant', '返回 { available, semanticSearch }，用于控制浮窗显隐'],
           ['POST /api/ai/assistant', 'SSE 流式对话（无 session 事件）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '请求与流式传输',
+      },
+      {
+        type: 'p',
+        text: '前台 AI 助手使用两条 HTTP 请求，对话走 SSE（Server-Sent Events）流式响应，不是 WebSocket。客户端用 fetch POST + response.body.getReader() 手动解析 SSE，而非浏览器原生 EventSource——因为 EventSource 仅支持 GET，无法 POST 携带 messages 历史。',
+      },
+      {
+        type: 'table',
+        headers: ['场景', '方法', 'Content-Type', '说明'],
+        rows: [
+          ['检测可用性', 'GET /api/ai/assistant', 'application/json', '返回 { available, semanticSearch }；浮窗挂载前调用'],
+          ['发送对话', 'POST /api/ai/assistant', 'text/event-stream', '请求体 JSON；响应体为持续打开的 SSE 流'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'POST 请求 / 响应格式',
+      },
+      {
+        type: 'pre',
+        text: `# Request
+POST /api/ai/assistant
+Content-Type: application/json
+
+{
+  "messages": [
+    { "role": "user", "content": "有哪些关于 Payload 的文章？" },
+    { "role": "assistant", "content": "..." },
+    { "role": "user", "content": "第一篇讲了什么？" }
+  ]
+}
+
+# Response headers
+Content-Type: text/event-stream; charset=utf-8
+Cache-Control: no-cache, no-transform
+Connection: keep-alive
+
+# Response body（SSE，每行一个事件）
+data: {"type":"tool_start","id":"call_xxx","name":"semantic_search","args":{"query":"Payload"}}
+
+data: {"type":"tool_result","id":"call_xxx","name":"semantic_search","result":{"count":3}}
+
+data: {"type":"text","text":"根据"}
+data: {"type":"text","text":"检索"}
+data: {"type":"text","text":"结果..."}
+
+data: {"type":"done"}
+
+# 错误（流内事件，连接随后关闭）
+data: {"type":"error","error":"AI 助手暂未开启"}`,
+      },
+      {
+        type: 'h3',
+        text: 'SSE 事件类型（AgentStreamEvent）',
+      },
+      {
+        type: 'table',
+        headers: ['type', '说明', '前台助手', '后台助手'],
+        rows: [
+          ['text', '模型输出文本增量（客户端拼接为完整回复）', '✓', '✓'],
+          ['tool_start', '开始执行 Function Calling 工具', '✓', '✓'],
+          ['tool_result', '工具执行完成（含 error 字段表示失败）', '✓', '✓'],
+          ['done', '本轮对话结束', '✓', '✓'],
+          ['error', '错误信息', '✓', '✓'],
+          ['session', '持久化会话 ID', '—', '✓（仅 /api/ai/agent）'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '为何能流式传递（三层链路）',
+      },
+      {
+        type: 'ol',
+        items: [
+          '上游 LLM：openAiChatCompletionWithToolsStream 请求 OpenAI 兼容 /v1/chat/completions，body 设 stream: true；提供商按 token 推送 SSE，服务端逐块解析。',
+          'Crispy API：route.ts 创建 ReadableStream，runFrontendAssistantStream 每 yield 一个 AgentStreamEvent 即 enqueue 一行 data: {...}\\n\\n，连接保持不关闭直至 done/error。',
+          '浏览器：useFrontendAiAssistant → fetch POST 后调用 consumeAgentStream；response.body.getReader() 循环 read()，按 \\n\\n 切分并 JSON.parse，onText 回调更新 React state，界面逐字刷新。',
+        ],
+      },
+      {
+        type: 'p',
+        text: '与普通 POST JSON 的区别：JSON 需等模型与工具全部执行完才返回完整 body；SSE 在 LLM 生成每个 token、工具开始/结束时立即推送，用户可见「打字机效果」与检索状态，无需长时间白屏等待。',
+      },
+      {
+        type: 'h3',
+        text: '流式相关代码',
+      },
+      {
+        type: 'table',
+        headers: ['层级', '文件', '职责'],
+        rows: [
+          ['客户端 hook', 'src/components/FrontendAiAssistant/useFrontendAiAssistant.ts', 'fetch POST、维护 messages 状态'],
+          ['SSE 解析（共用）', 'src/components/AdminAiAgent/consumeAgentStream.ts', 'getReader 读流、解析 data: 行、分发回调'],
+          ['API 路由', 'src/app/(frontend)/api/ai/assistant/route.ts', 'ReadableStream 包装 SSE 响应'],
+          ['流式推理', 'src/ai/frontend-assistant/runStream.ts', '工具循环 + yield AgentStreamEvent'],
+          ['上游 LLM', 'src/ai/providers/openaiCompatible.ts', 'openAiChatCompletionWithToolsStream（stream: true）'],
         ],
       },
       {
