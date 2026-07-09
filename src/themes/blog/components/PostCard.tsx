@@ -17,6 +17,7 @@ export function PostCard({ title, url, excerpt = '', pubDate, categories = [], t
       <Link
         className="post-card-link block px-4 py-3 transition-colors hover:text-(--accent)"
         href={url}
+        prefetch={false}
       >
         <p className="post-card-title-line m-0 mt-1 font-mono text-sm">{title}</p>
         <p className="post-card-meta-line m-0 mt-0.5 font-mono text-xs">

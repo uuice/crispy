@@ -16,7 +16,7 @@ export function PostDetailView({ data }: Props) {
   return (
     <article className="kb-article">
       <header className="kb-article-header">
-        <Link className="kb-back-link" href={getPostsListPath()}>
+        <Link className="kb-back-link" href={getPostsListPath()} prefetch={false}>
           ← 全部文档
         </Link>
         <h1 className="kb-article-title">{post.title}</h1>

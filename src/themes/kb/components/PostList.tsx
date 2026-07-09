@@ -32,7 +32,7 @@ export function PostCard({ post }: Props) {
           ) : null}
         </div>
         <h3 className="kb-doc-card-title">
-          <Link href={post.url}>{post.title}</Link>
+          <Link href={post.url} prefetch={false}>{post.title}</Link>
         </h3>
         {post.excerpt ? <p className="kb-doc-card-excerpt">{post.excerpt}</p> : null}
       </div>

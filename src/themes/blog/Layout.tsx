@@ -64,6 +64,7 @@ export async function Layout({ children, layoutData }: Props) {
             <Link
               className="header-brand font-semibold transition-opacity hover:opacity-80 flex items-center gap-1.5"
               href="/"
+              prefetch={false}
               style={{ fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)' }}
             >
               <span className="header-brand-name">{siteName}</span>
@@ -78,6 +79,7 @@ export async function Layout({ children, layoutData }: Props) {
                   className="nav-link-cute py-1 flex items-center gap-1.5"
                   href={item.url}
                   key={item.url + item.title}
+                  prefetch={false}
                   style={{
                     color: 'var(--text-muted)',
                     fontSize: 'var(--text-xs)',
@@ -153,6 +155,7 @@ export async function Layout({ children, layoutData }: Props) {
                     key={item.url + item.title}
                     className="hover:opacity-80"
                     href={item.url}
+                    prefetch={false}
                     style={{ color: 'var(--accent)' }}
                     target={item.target || '_self'}
                   >

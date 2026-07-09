@@ -40,6 +40,17 @@ mkdir -p "$STAGING_DIR" "$OUT_DIR"
 echo "→ Copying standalone server..."
 cp -a "$STANDALONE_DIR/." "$STAGING_DIR/"
 
+if [[ "${PACK_LINUX:-}" == "1" ]]; then
+  echo "→ Removing local .env files from Linux bundle..."
+  rm -f \
+    "$STAGING_DIR/.env" \
+    "$STAGING_DIR/.env.local" \
+    "$STAGING_DIR/.env.production" \
+    "$STAGING_DIR/.env.production.local" \
+    "$STAGING_DIR/.env.development" \
+    "$STAGING_DIR/.env.development.local"
+fi
+
 echo "→ Copying .next/static..."
 mkdir -p "$STAGING_DIR/.next/static"
 cp -a "$STATIC_DIR/." "$STAGING_DIR/.next/static/"
@@ -241,6 +252,7 @@ Notes:
 - For Alpine/musl set LINUX_LIBC=musl when packing.
 - PostgreSQL is required in production; set DATABASE_DRIVER=postgres.
 - public/media is excluded from the tarball; mount a volume or use S3 for uploads.
+- Local .env is not bundled; copy .env.example to .env on the server and configure secrets there.
 EOF
 else
   cat > "$STAGING_DIR/DEPLOY.txt" <<'EOF'

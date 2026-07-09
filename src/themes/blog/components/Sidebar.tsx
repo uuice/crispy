@@ -21,7 +21,7 @@ export function Sidebar({ categories, tags, user }: Props) {
           <ul className="terminal-list-sidebar">
             {categories.map((c, i) => (
               <li key={c.id}>
-                <Link href={c.url}>
+                <Link href={c.url} prefetch={false}>
                   <span>{c.title}</span>
                   <span className={`sidebar-category-count chroma-tag--${i % 6}`}>{c.count}</span>
                 </Link>
@@ -40,6 +40,7 @@ export function Sidebar({ categories, tags, user }: Props) {
                 <Link
                   className={`sidebar-tag-pill inline-flex items-center gap-1 px-2 py-1 rounded font-medium chroma-tag chroma-tag--${i % 6}`}
                   href={t.url}
+                  prefetch={false}
                   style={{
                     background: 'transparent',
                     fontSize: 'var(--text-xs)',
@@ -69,6 +70,7 @@ export function Sidebar({ categories, tags, user }: Props) {
           <Link
             className="mt-3 inline-flex items-center gap-1 font-medium rounded px-2 py-1 text-sm transition-colors hover:bg-(--card-border)"
             href={user.url}
+            prefetch={false}
             style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
           >
             查看详情 →

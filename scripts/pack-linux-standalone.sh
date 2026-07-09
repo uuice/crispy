@@ -27,6 +27,8 @@
 # Combined example (Alpine on ARM):
 #   LINUX_ARCH=arm64 LINUX_LIBC=musl pnpm cli dev:pack-linux
 #
+# Local .env is stripped from the tarball (use .env.example on the server).
+#
 # See also: scripts/patch-standalone-linux-native.mjs
 
 set -euo pipefail

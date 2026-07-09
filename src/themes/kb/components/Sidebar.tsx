@@ -17,7 +17,7 @@ export function Sidebar({ categories }: Props) {
         <ul>
           {categories.map((item) => (
             <li key={item.id}>
-              <Link className="kb-sidebar-link" href={item.url}>
+              <Link className="kb-sidebar-link" href={item.url} prefetch={false}>
                 <span>{item.title}</span>
                 {item.count > 0 ? <span className="kb-sidebar-count">{item.count}</span> : null}
               </Link>

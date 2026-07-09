@@ -14,7 +14,7 @@ export function ServerErrorView({ data: _data }: Props) {
           <p className="cms-eyebrow">500</p>
           <h1 className="cms-hero-title">服务暂时不可用</h1>
           <p className="cms-hero-subtitle">请稍后再试，或返回首页继续浏览。</p>
-          <Link className="cms-hero-cta" href="/">
+          <Link className="cms-hero-cta" href="/" prefetch={false}>
             返回首页
           </Link>
         </div>

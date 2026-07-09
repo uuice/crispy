@@ -28,6 +28,7 @@ export function GamesView({ data }: Props) {
                 <Link
                   className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-4 px-4 border-b transition-colors hover:bg-(--card-border)/30"
                   href={game.url}
+                  prefetch={false}
                   style={{ borderColor: 'var(--card-border)' }}
                 >
                   <span>

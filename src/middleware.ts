@@ -25,6 +25,7 @@ import {
 import type { FrontendThemeId } from '@/themes/definitions'
 import { handlePayloadRedirect } from '@/redirects/middlewareRedirects'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
+import { applyPoweredByHeader } from '@/utilities/poweredByHeader'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
 
@@ -354,30 +355,37 @@ function handleApiAccessLog(request: NextRequest): NextResponse | null {
   return response
 }
 
+function finalizeMiddlewareResponse(
+  response: NextResponse,
+  themePreview: ThemePreviewContext | null,
+): NextResponse {
+  return applyPoweredByHeader(withThemePreview(response, themePreview))
+}
+
 export async function middleware(request: NextRequest) {
   const legacyRedirect = handleLegacyFrontendRedirect(request)
   if (legacyRedirect) {
-    return legacyRedirect
+    return applyPoweredByHeader(legacyRedirect)
   }
 
   const payloadRedirect = await handlePayloadRedirect(request)
   if (payloadRedirect) {
-    return payloadRedirect
+    return applyPoweredByHeader(payloadRedirect)
   }
 
   const themePreview = await resolveThemePreviewContext(request)
 
   const frontendResponse = await applyFrontendCacheHeaders(request, themePreview)
   if (frontendResponse) {
-    return withThemePreview(frontendResponse, themePreview)
+    return finalizeMiddlewareResponse(frontendResponse, themePreview)
   }
 
   const apiResponse = handleApiAccessLog(request)
   if (apiResponse) {
-    return withThemePreview(apiResponse, themePreview)
+    return finalizeMiddlewareResponse(apiResponse, themePreview)
   }
 
-  return withThemePreview(NextResponse.next(), themePreview)
+  return finalizeMiddlewareResponse(NextResponse.next(), themePreview)
 }
 
 export const config = {

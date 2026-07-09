@@ -206,6 +206,7 @@ export function BlogSearch() {
                           className="terminal-meta-line block transition-colors hover:text-(--accent)"
                           href={item.url}
                           onClick={close}
+                          prefetch={false}
                         >
                           <span className="font-medium">{item.title || ''}</span>
                           <span className="meta-from">{categoryStr}</span>

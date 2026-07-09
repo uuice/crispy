@@ -18,7 +18,7 @@ export function PostDetailView({ data }: Props) {
       <section className="cms-hero cms-hero--compact">
         <div aria-hidden="true" className="cms-hero-bg" />
         <div className="cms-container cms-hero-inner">
-          <Link className="cms-back-link" href={getPostsListPath()}>
+          <Link className="cms-back-link" href={getPostsListPath()} prefetch={false}>
             ← 返回内容列表
           </Link>
           <h1 className="cms-hero-title cms-hero-title--article">{post.title}</h1>

@@ -13,7 +13,7 @@ export function GamesMathView({ data: _data }: Props) {
       <PageHeader
         eyebrow="Game"
         stats={
-          <Link className="kb-hero-cta kb-hero-cta--ghost" href="/games">
+          <Link className="kb-hero-cta kb-hero-cta--ghost" href="/games" prefetch={false}>
             返回游戏列表
           </Link>
         }

@@ -18,10 +18,10 @@ export function GamesView({ data }: Props) {
             <article className="kb-feature-card" key={game.url}>
               <p className="kb-eyebrow kb-eyebrow--dark">Game</p>
               <h2 className="kb-feature-title">
-                <Link href={game.url}>{game.title}</Link>
+                <Link href={game.url} prefetch={false}>{game.title}</Link>
               </h2>
               <p className="kb-feature-desc">{game.description}</p>
-              <Link className="kb-card-link" href={game.url}>
+              <Link className="kb-card-link" href={game.url} prefetch={false}>
                 开始游戏 →
               </Link>
             </article>

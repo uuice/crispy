@@ -40,6 +40,7 @@ export function MobileNav({ menu, categories }: Props) {
                 href={item.url}
                 key={item.url + item.title}
                 onClick={() => setOpen(false)}
+                prefetch={false}
                 target={item.target || '_self'}
               >
                 {item.title}
@@ -53,6 +54,7 @@ export function MobileNav({ menu, categories }: Props) {
                     href={item.url}
                     key={item.id}
                     onClick={() => setOpen(false)}
+                    prefetch={false}
                   >
                     {item.title}
                     {item.count > 0 ? ` (${item.count})` : ''}

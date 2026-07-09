@@ -36,7 +36,7 @@ export async function Layout({ children, layoutData }: Props) {
     <div className="cms-shell">
       <header className="cms-topbar">
         <div className="cms-container cms-topbar-inner">
-          <Link className="cms-logo" href="/">
+          <Link className="cms-logo" href="/" prefetch={false}>
             <span className="cms-logo-mark" aria-hidden="true" />
             <span className="cms-logo-text">{siteName}</span>
           </Link>
@@ -47,6 +47,7 @@ export async function Layout({ children, layoutData }: Props) {
                 className="cms-nav-link"
                 href={item.url}
                 key={item.url + item.title}
+                prefetch={false}
                 target={item.target || '_self'}
               >
                 {item.title}
@@ -75,14 +76,14 @@ export async function Layout({ children, layoutData }: Props) {
               {footerMenu.length > 0
                 ? footerMenu.slice(0, 8).map((item) => (
                     <li key={item.url + item.title}>
-                      <Link href={item.url} target={item.target || '_self'}>
+                      <Link href={item.url} prefetch={false} target={item.target || '_self'}>
                         {item.title}
                       </Link>
                     </li>
                   ))
                 : menu.slice(0, 6).map((item) => (
                     <li key={item.url + item.title}>
-                      <Link href={item.url} target={item.target || '_self'}>
+                      <Link href={item.url} prefetch={false} target={item.target || '_self'}>
                         {item.title}
                       </Link>
                     </li>
@@ -93,10 +94,10 @@ export async function Layout({ children, layoutData }: Props) {
             <p className="cms-footer-heading">资源</p>
             <ul className="cms-footer-links">
               <li>
-                <Link href="/rss">RSS 订阅</Link>
+                <Link href="/rss" prefetch={false}>RSS 订阅</Link>
               </li>
               <li>
-                <Link href="/sitemap.xml">站点地图</Link>
+                <Link href="/sitemap.xml" prefetch={false}>站点地图</Link>
               </li>
             </ul>
           </div>

@@ -24,7 +24,7 @@ export function NotFoundView({ data }: Props) {
         <ul className="error-page-nav-list">
           {menu.map((item) => (
             <li key={item.url + item.title}>
-              <Link href={item.url} target={item.target || '_self'}>
+              <Link href={item.url} prefetch={false} target={item.target || '_self'}>
                 {item.title}
               </Link>
             </li>
@@ -32,7 +32,7 @@ export function NotFoundView({ data }: Props) {
         </ul>
       </div>
       <p className="error-page-back">
-        <Link href="/">← 返回首页</Link>
+        <Link href="/" prefetch={false}>← 返回首页</Link>
       </p>
     </article>
   )

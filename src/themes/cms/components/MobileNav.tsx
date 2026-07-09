@@ -39,6 +39,7 @@ export function MobileNav({ menu }: Props) {
                 href={item.url}
                 key={item.url + item.title}
                 onClick={() => setOpen(false)}
+                prefetch={false}
                 target={item.target || '_self'}
               >
                 {item.title}

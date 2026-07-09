@@ -34,10 +34,10 @@ export function PostCard({ post, featured = false }: Props) {
           ) : null}
         </div>
         <h3 className="cms-card-title">
-          <Link href={post.url}>{post.title}</Link>
+          <Link href={post.url} prefetch={false}>{post.title}</Link>
         </h3>
         {post.excerpt ? <p className="cms-card-excerpt">{post.excerpt}</p> : null}
-        <Link className="cms-card-link" href={post.url}>
+        <Link className="cms-card-link" href={post.url} prefetch={false}>
           阅读全文 →
         </Link>
       </div>

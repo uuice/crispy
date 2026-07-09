@@ -114,7 +114,7 @@ export function DocSearch() {
               ) : (
                 matched.map((doc) => (
                   <li key={doc.id}>
-                    <Link className="kb-search-result" href={doc.url} onClick={close}>
+                    <Link className="kb-search-result" href={doc.url} onClick={close} prefetch={false}>
                       <span className="kb-search-result-title">{doc.title}</span>
                       {doc.excerpt ? (
                         <span className="kb-search-result-excerpt">{doc.excerpt}</span>

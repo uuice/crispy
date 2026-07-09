@@ -38,7 +38,7 @@ export async function Layout({ children, layoutData }: Props) {
     <div className="kb-shell">
       <header className="kb-topbar">
         <div className="kb-topbar-inner">
-          <Link className="kb-logo" href="/">
+          <Link className="kb-logo" href="/" prefetch={false}>
             <span className="kb-logo-mark" aria-hidden="true">
               ◈
             </span>
@@ -53,6 +53,7 @@ export async function Layout({ children, layoutData }: Props) {
                 className="kb-topnav-link"
                 href={item.url}
                 key={item.url + item.title}
+                prefetch={false}
                 target={item.target || '_self'}
               >
                 {item.title}
@@ -83,7 +84,7 @@ export async function Layout({ children, layoutData }: Props) {
             <ul className="kb-footer-links">
               {(footerMenu.length > 0 ? footerMenu : menu).slice(0, 6).map((item) => (
                 <li key={item.url + item.title}>
-                  <Link href={item.url} target={item.target || '_self'}>
+                  <Link href={item.url} prefetch={false} target={item.target || '_self'}>
                     {item.title}
                   </Link>
                 </li>
@@ -94,10 +95,10 @@ export async function Layout({ children, layoutData }: Props) {
             <p className="kb-footer-heading">资源</p>
             <ul className="kb-footer-links">
               <li>
-                <Link href="/rss">RSS 订阅</Link>
+                <Link href="/rss" prefetch={false}>RSS 订阅</Link>
               </li>
               <li>
-                <Link href="/sitemap.xml">站点地图</Link>
+                <Link href="/sitemap.xml" prefetch={false}>站点地图</Link>
               </li>
             </ul>
           </div>

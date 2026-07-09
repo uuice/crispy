@@ -31,7 +31,7 @@ export function HomeView({ data }: Props) {
             </div>
             <div className="kb-category-grid">
               {topCategories.map((item) => (
-                <Link className="kb-category-card" href={item.url} key={item.id}>
+                <Link className="kb-category-card" href={item.url} key={item.id} prefetch={false}>
                   <span className="kb-category-card-title">{item.title}</span>
                   <span className="kb-category-card-count">{item.count} 篇</span>
                 </Link>
@@ -43,7 +43,7 @@ export function HomeView({ data }: Props) {
         <section className="kb-section">
           <div className="kb-section-head">
             <h2 className="kb-section-title">最近更新</h2>
-            <Link className="kb-section-more" href={getPostsListPath()}>
+            <Link className="kb-section-more" href={getPostsListPath()} prefetch={false}>
               查看全部 →
             </Link>
           </div>

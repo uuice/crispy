@@ -24,13 +24,13 @@ export function NotFoundView({ data }: Props) {
           <ul className="cms-error-links">
             {menu.map((item) => (
               <li key={item.url + item.title}>
-                <Link href={item.url} target={item.target || '_self'}>
+                <Link href={item.url} prefetch={false} target={item.target || '_self'}>
                   {item.title}
                 </Link>
               </li>
             ))}
           </ul>
-          <Link className="cms-hero-cta" href="/">
+          <Link className="cms-hero-cta" href="/" prefetch={false}>
             返回首页
           </Link>
         </div>

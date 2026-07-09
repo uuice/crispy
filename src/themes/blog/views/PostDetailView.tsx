@@ -21,6 +21,7 @@ export function PostDetailView({ data }: Props) {
         <Link
           className="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium transition-colors hover:bg-(--card-border)"
           href={getPostsListPath()}
+          prefetch={false}
           style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
         >
           ← 返回归档

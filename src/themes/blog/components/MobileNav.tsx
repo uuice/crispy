@@ -99,6 +99,7 @@ export function MobileNav({ menu }: Props) {
               className="nav-link-cute flex items-center gap-2 rounded-md px-3 py-3 shrink-0"
               href={item.url}
               key={item.url + item.title}
+              prefetch={false}
               onClick={() => setNavOpen(false)}
               style={{
                 color: 'var(--text-muted)',

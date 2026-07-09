@@ -19,7 +19,7 @@ export function HomeView({ data }: Props) {
         stats={
           <>
             <span className="cms-stat-pill">{posts.length} 篇内容</span>
-            <Link className="cms-hero-cta" href={getPostsListPath()}>
+            <Link className="cms-hero-cta" href={getPostsListPath()} prefetch={false}>
               浏览全部
             </Link>
           </>
@@ -35,7 +35,7 @@ export function HomeView({ data }: Props) {
               <p className="cms-eyebrow cms-eyebrow--dark">Latest</p>
               <h2 className="cms-section-title">最新发布</h2>
             </div>
-            <Link className="cms-section-more" href={getPostsListPath()}>
+            <Link className="cms-section-more" href={getPostsListPath()} prefetch={false}>
               查看归档 →
             </Link>
           </div>

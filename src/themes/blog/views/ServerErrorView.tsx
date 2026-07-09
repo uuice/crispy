@@ -19,7 +19,7 @@ export function ServerErrorView({ data: _data }: Props) {
         </div>
         <h1 className="error-page-title">500 Server Error</h1>
         <p className="error-page-back">
-          <Link href="/">← 返回首页</Link>
+          <Link href="/" prefetch={false}>← 返回首页</Link>
         </p>
       </article>
     </>
