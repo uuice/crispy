@@ -219,6 +219,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['pnpm cli verify:all', '完整冒烟 phase1+2+ai'],
           ['pnpm cli db:seed / mcp:key', '示例数据 / MCP Key'],
           ['pnpm cli generate:types|importmap|openapi', '类型 / import map / OpenAPI'],
+          ['—', 'Payload 版本升级 SOP：见 #payload-upgrade'],
         ],
       },
     ],
@@ -996,6 +997,143 @@ docker run -p 3333:3333 \\
     ],
   },
   {
+    id: 'payload-upgrade',
+    title: 'Payload 版本升级 SOP',
+    blocks: [
+      {
+        type: 'p',
+        text: 'Crispy 是 Payload 3 上的二次开发，不是 fork。与官方同步的核心原则：只升 npm 依赖、不改 node_modules；所有 @payloadcms/* 与 payload 锁同一版本；生产 Schema 只走迁移（DATABASE_PUSH=false），Admin 定制走 generate:importmap。',
+      },
+      {
+        type: 'h3',
+        text: '职责边界（升级时哪里会动）',
+      },
+      {
+        type: 'table',
+        headers: ['层', '随 Payload 升级可能变', 'Crispy 自有（相对稳定）'],
+        rows: [
+          ['数据层', 'Collection/插件表结构、迁移格式', 'src/collections/、src/migrations/'],
+          ['Admin', '@payloadcms/ui API、Lexical、Custom View 约定', 'src/app/(payload)/admin/*、AI 组件'],
+          ['API', 'REST/GraphQL、@payloadcms/next 路由', 'src/app/(payload)/api/ai/*、internal API'],
+          ['前台', 'Live Preview、AdminBar', 'src/themes/*、middleware、frontend-cache'],
+          ['插件', '官方 plugin 配置项', 'src/plugins/* 自建 plugin'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '版本锁定铁律',
+      },
+      {
+        type: 'ul',
+        items: [
+          'payload 与全部 @payloadcms/*（db、next、ui、richtext-lexical、各 plugin…）必须同一版本号，见 package.json（当前 3.85.1）',
+          '不要用 ^ 让 pnpm 自动漂到不同小版本',
+          'Next.js 大版本升级需对照 Payload 官方兼容说明，勿单独猛升 Next',
+          'lexical 版本与 @payloadcms/richtext-lexical 要求保持一致',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '推荐升级流程',
+      },
+      {
+        type: 'ol',
+        items: [
+          '阅读 Payload Release Notes / Breaking Changes（重点：Plugin API、Admin 组件、DB adapter）',
+          '开独立分支 upgrade/payload-x.y.z，不与功能开发混发',
+          '一次性升级全部 @payloadcms/* 与 payload 到目标版本 → pnpm install',
+          'pnpm cli generate:types && pnpm cli generate:importmap（Admin Custom 组件必跑）',
+          '若 Collection/Global/Block 字段有变：pnpm cli db:create <name> → 审阅 src/migrations/ → pnpm cli db:migrate（需 Postgres + Node 22）',
+          'pnpm cli quality:ci && pnpm cli verify:all',
+          '手工冒烟（见下方 Checklist）',
+          '生产：先 db:migrate，再发应用包（Linux 包不含 .env，服务器 cp .env.example .env）',
+        ],
+      },
+      {
+        type: 'pre',
+        text: `# 示例：升级到 3.86.0（版本号按 release 为准，以下包须全部同版本）
+pnpm up payload@3.86.0 \\
+  @payloadcms/db-postgres@3.86.0 \\
+  @payloadcms/db-sqlite@3.86.0 \\
+  @payloadcms/next@3.86.0 \\
+  @payloadcms/ui@3.86.0 \\
+  @payloadcms/richtext-lexical@3.86.0 \\
+  # …其余 package.json 中所有 @payloadcms/* 一并升级
+
+pnpm install
+pnpm cli generate:types
+pnpm cli generate:importmap
+pnpm cli quality:ci
+pnpm cli verify:all`,
+      },
+      {
+        type: 'h3',
+        text: '高风险区域（Crispy 现状）',
+      },
+      {
+        type: 'table',
+        headers: ['区域', '风险', '升级后重点测'],
+        rows: [
+          ['Admin importMap', 'Custom 组件路径/ props 变更', 'dev-docs、cache、stats、ai-agent 页面能打开'],
+          ['Lexical + AI 改写', 'richtext-lexical / Lexical API 变更', 'Posts/Pages 编辑、AI 改写按钮'],
+          ['官方 Plugin overrides', 'fields/hooks 签名漂移', 'Redirects、Search、Form 发信、Import/Export、MCP'],
+          ['Postgres 迁移', '插件新增表/字段', 'db:migrate + db:status；勿生产 push'],
+          ['enableTrashAndVersionsPlugin', 'versions/trash 行为', '回收站、版本还原、hero 条件校验'],
+          ['Edge middleware', '与 Payload 版本无关，但 Next 升级要回归', '缓存 HIT、redirects、theme preview'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '同步频率建议',
+      },
+      {
+        type: 'table',
+        headers: ['类型', '建议', '说明'],
+        rows: [
+          ['Patch（3.85.1→3.85.2）', '可跟', '修 bug，仍跑 quality:ci'],
+          ['Minor（3.85→3.86）', '按计划升', '读 changelog，完整 Checklist'],
+          ['Major（3.x→4.x）', '单独分支、充分测试', '可能涉及 Next/React/插件大改'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: '升级后 Checklist',
+      },
+      {
+        type: 'ol',
+        items: [
+          'Admin：登录、Collection 列表/编辑/保存、回收站切换',
+          'Posts/Pages：draft 发布、版本历史还原（含 hero 类型与 media）',
+          '插件：Redirects 生效、Forms 提交+邮件、Search 索引、Import/Export',
+          'MCP：pnpm cli verify:phase1',
+          'AI：pnpm cli verify:ai；/admin/ai-agent 对话',
+          '前台：三主题首页/详情、Live Preview（editor）',
+          '缓存：/admin/cache 手动清除、middleware X-Crispy-* 头',
+          'Postgres：pnpm cli db:migrate && pnpm cli db:status',
+          '部署包：pnpm cli dev:pack-linux 能构建；服务器 ./start.sh 或 ./pm2.sh start',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '禁止事项',
+      },
+      {
+        type: 'ul',
+        items: [
+          '修改 node_modules 或 fork Payload 核心',
+          '生产 DATABASE_PUSH=true（必须 migrate）',
+          '只升 payload 不升 @payloadcms/ui / next / db-*',
+          '跳过 generate:importmap 直接部署 Admin',
+          '用 SQLite 跑 db:create（会读 Postgres snapshot 失败；见 src/migrations/README.md）',
+        ],
+      },
+      {
+        type: 'p',
+        text: '扩展原则与禁止模式详见 #architecture；自建 Plugin 说明见 #payload-plugins。',
+      },
+    ],
+  },
+  {
     id: 'frontend-cache',
     title: '前台缓存（Database Cache）',
     blocks: [
@@ -1087,6 +1225,10 @@ age >= TTL*2        → MISS（重新 fetch 并 upsert）`,
       {
         type: 'p',
         text: 'bypass 条件（middlewareCache.ts）：URL 带 ?nocache、存在 __prerender_bypass 或 __next_preview_data Cookie（草稿预览）。',
+      },
+      {
+        type: 'p',
+        text: '开发环境可用 CRISPY_FRONTEND_HTML_CACHE=true|false 强制开关 HTML 缓存（覆盖 cache-settings Global；生产环境忽略）。修改后需重启 dev 服务。',
       },
       {
         type: 'h3',
@@ -1420,26 +1562,11 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
       },
       {
         type: 'h3',
-        text: 'Payload 升级 Checklist',
+        text: 'Payload 升级',
       },
       {
         type: 'p',
-        text: '升级前：@payloadcms/* 全家桶保持同版本（见 package.json）；大版本单独分支，不与功能开发混发。小版本建议隔 1–2 个 minor 跟进，避免 lag 过久。',
-      },
-      {
-        type: 'ol',
-        items: [
-          'pnpm update @payloadcms/* payload（或按 release note 指定版本），确保所有 @payloadcms 包版本一致',
-          '阅读 Payload changelog / breaking changes；重点看 Plugin API、Admin 组件、DB adapter',
-          'pnpm install && pnpm cli generate:importmap',
-          '若 schema 有变：pnpm cli db:create <name> → 审阅 src/migrations/ → pnpm cli db:migrate',
-          'pnpm cli db:status && pnpm cli quality:ci（lint + tsc + test + build）',
-          'Admin 冒烟：登录、Collection 列表、编辑保存、回收站切换、版本历史还原',
-          'Plugin 相关：Query Presets 保存/加载、列表「刷新」按钮',
-          'AI：pnpm cli verify:ai；/admin/ai-agent 对话 + delete_document 软删除',
-          'MCP / Preview：pnpm cli verify:phase1',
-          'Postgres 环境再跑一遍 migrate + test:int（与 CI postgres-migrations job 一致）',
-        ],
+        text: '完整步骤、高风险区域与 Checklist 见独立章节 #payload-upgrade。此处仅保留原则：@payloadcms/* 全家桶同版本；大版本单独分支；改 Admin 组件后必跑 generate:importmap。',
       },
       {
         type: 'h3',
@@ -1580,7 +1707,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
     blocks: [
       {
         type: 'p',
-        text: '访客可在任意前台主题右下角唤起 AI 助手，无需登录。与后台 /admin/ai-agent 完全分离：独立 API、独立工具集、无会话持久化、仅检索公开数据。共用 ai-settings 的 LLM 配置（enabled / model / baseUrl），关闭 AI 总开关后前台浮窗不显示。',
+        text: '访客可在任意前台主题右下角唤起 AI 助手，无需登录。浮窗样式使用各主题 styles.css 内定义的 --crispy-ai-* 变量（与 --accent / --cms-gold / --kb-accent 等同源），随主题色与 html.dark 明暗切换自动适配。与后台 /admin/ai-agent 完全分离：独立 API、独立工具集、无会话持久化、仅检索公开数据。共用 ai-settings 的 LLM 配置（enabled / model / baseUrl），关闭 AI 总开关后前台浮窗不显示。',
       },
       {
         type: 'table',
@@ -1664,7 +1791,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           'Admin 组件：admin.components → generate:importmap',
           '横切行为：优先写 Plugin（参考 enableTrashAndVersionsPlugin）',
           '软删除调用：trashOrDeleteDocument，勿直接 payload.delete()',
-          '扩展红线与 Payload 升级：见本文档 #architecture 章节',
+          '扩展红线与 Payload 升级：见 #payload-upgrade（原则见 #architecture）',
           '前台路由：src/app/(frontend)/',
           '前台主题：src/themes/（见 #frontend-themes）',
           '前台 AI：src/ai/frontend-assistant/（见 #frontend-ai-assistant）',

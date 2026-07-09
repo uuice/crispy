@@ -129,6 +129,21 @@ html.blog-skin {
   );
   --prose-selection-bg: var(--chroma-prompt);
   --prose-selection-fg: var(--card-bg-base);
+  --crispy-ai-accent: var(--accent);
+  --crispy-ai-surface: var(--card-bg);
+  --crispy-ai-text: var(--text);
+  --crispy-ai-text-muted: var(--text-muted);
+  --crispy-ai-border: var(--card-border);
+  --crispy-ai-bg-soft: var(--page-bg);
+  --crispy-ai-bubble-assistant: var(--page-bg);
+  --crispy-ai-on-accent: oklch(0.99 0.01 var(--hue));
+  --crispy-ai-accent-mix: color-mix(in oklch, var(--crispy-ai-accent) 22%, transparent);
+  --crispy-ai-accent-shadow: color-mix(in oklch, var(--crispy-ai-accent) 30%, transparent);
+  --crispy-ai-backdrop: color-mix(in oklch, var(--crispy-ai-text) 42%, transparent);
+  --crispy-ai-success: var(--chroma-prompt);
+  --crispy-ai-error: oklch(0.58 0.2 25);
+  --crispy-ai-radius: var(--radius);
+  --crispy-ai-radius-sm: var(--radius-sm);
   &.dark {
   --page-bg-base: oklch(0.18 0.02 var(--hue));
   --card-bg-base: oklch(0.22 0.025 var(--hue));

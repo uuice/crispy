@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import { DEFAULT_CACHE_SETTINGS, normalizeCacheSettings, type ResolvedCacheSettings } from '@/frontend-cache/settings'
+import { applyDevHtmlCacheEnvOverride } from '@/frontend-cache/envOverrides'
 
 export type { ResolvedCacheSettings } from '@/frontend-cache/settings'
 export { DEFAULT_CACHE_SETTINGS, normalizeCacheSettings } from '@/frontend-cache/settings'
@@ -22,11 +23,13 @@ export async function getResolvedCacheSettings(): Promise<ResolvedCacheSettings>
     overrideAccess: true,
   })
 
-  cachedSettings = normalizeCacheSettings({
-    cachingEnabled: settings.cachingEnabled ?? undefined,
-    pageRevalidateSeconds: settings.pageRevalidateSeconds ?? undefined,
-    exposeCacheHeaders: settings.exposeCacheHeaders ?? undefined,
-  })
+  cachedSettings = applyDevHtmlCacheEnvOverride(
+    normalizeCacheSettings({
+      cachingEnabled: settings.cachingEnabled ?? undefined,
+      pageRevalidateSeconds: settings.pageRevalidateSeconds ?? undefined,
+      exposeCacheHeaders: settings.exposeCacheHeaders ?? undefined,
+    }),
+  )
   cachedAt = Date.now()
   return cachedSettings
 }

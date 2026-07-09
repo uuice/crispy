@@ -4,6 +4,7 @@ import {
   DEFAULT_CACHE_SETTINGS,
   type ResolvedCacheSettings,
 } from '@/frontend-cache/settings'
+import { applyDevHtmlCacheEnvOverride } from '@/frontend-cache/envOverrides'
 import { internalApiUrl, withForwardedPublicHost } from '@/frontend-cache/internalFetch'
 import { hasThemePreviewQuery } from '@/themes/preview.shared'
 
@@ -28,19 +29,19 @@ export async function getMiddlewareCacheSettings(
     const response = await fetch(url, withForwardedPublicHost(requestUrl, { cache: 'no-store' }))
     if (!response.ok) throw new Error('cache settings fetch failed')
     const data = (await response.json()) as MiddlewareCacheSettings
-    cachedSettings = {
+    cachedSettings = applyDevHtmlCacheEnvOverride({
       cachingEnabled: data.cachingEnabled ?? DEFAULT_CACHE_SETTINGS.cachingEnabled,
       pageRevalidateSeconds:
         data.pageRevalidateSeconds ?? DEFAULT_CACHE_SETTINGS.pageRevalidateSeconds,
       exposeCacheHeaders: data.exposeCacheHeaders ?? true,
-    }
+    })
     cachedAt = Date.now()
     return cachedSettings
   } catch {
-    return {
+    return applyDevHtmlCacheEnvOverride({
       ...DEFAULT_CACHE_SETTINGS,
       exposeCacheHeaders: true,
-    }
+    })
   }
 }
 

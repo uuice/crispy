@@ -14,6 +14,7 @@
 @source '../../../components/AdminBar/**/*.{ts,tsx}';
 @source '../../../components/ThemePreviewBanner/**/*.{ts,tsx}';
 @source '../../../components/ThemePreview/**/*.{ts,tsx}';
+@source '../../../components/FrontendAiAssistant/**/*.{ts,tsx}';
 
 @layer base {
   .crispy-chrome h1,

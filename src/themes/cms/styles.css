@@ -14,6 +14,21 @@ html.cms-skin {
   --cms-container: 72rem;
   --cms-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   --cms-shadow-hover: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --crispy-ai-accent: var(--cms-gold);
+  --crispy-ai-surface: var(--cms-surface);
+  --crispy-ai-text: var(--cms-text);
+  --crispy-ai-text-muted: var(--cms-muted);
+  --crispy-ai-border: var(--cms-border);
+  --crispy-ai-bg-soft: var(--cms-bg);
+  --crispy-ai-bubble-assistant: var(--cms-bg);
+  --crispy-ai-on-accent: var(--cms-navy);
+  --crispy-ai-accent-mix: color-mix(in oklch, var(--crispy-ai-accent) 24%, transparent);
+  --crispy-ai-accent-shadow: color-mix(in oklch, var(--crispy-ai-accent) 32%, transparent);
+  --crispy-ai-backdrop: color-mix(in oklch, var(--cms-navy) 55%, transparent);
+  --crispy-ai-success: oklch(0.55 0.14 145);
+  --crispy-ai-error: oklch(0.58 0.2 25);
+  --crispy-ai-radius: var(--cms-radius);
+  --crispy-ai-radius-sm: var(--cms-radius);
   &.dark {
   --cms-navy: oklch(0.14 0.03 258);
   --cms-navy-soft: oklch(0.2 0.035 258);

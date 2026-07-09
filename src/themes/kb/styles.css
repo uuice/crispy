@@ -11,6 +11,21 @@ html.kb-skin {
   --kb-radius: 0.5rem;
   --kb-content: 48rem;
   --kb-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  --crispy-ai-accent: var(--kb-accent);
+  --crispy-ai-surface: var(--kb-surface);
+  --crispy-ai-text: var(--kb-text);
+  --crispy-ai-text-muted: var(--kb-muted);
+  --crispy-ai-border: var(--kb-border);
+  --crispy-ai-bg-soft: var(--kb-bg);
+  --crispy-ai-bubble-assistant: var(--kb-sidebar-bg);
+  --crispy-ai-on-accent: oklch(0.99 0.01 195);
+  --crispy-ai-accent-mix: color-mix(in oklch, var(--crispy-ai-accent) 22%, transparent);
+  --crispy-ai-accent-shadow: color-mix(in oklch, var(--crispy-ai-accent) 30%, transparent);
+  --crispy-ai-backdrop: color-mix(in oklch, var(--kb-text) 42%, transparent);
+  --crispy-ai-success: oklch(0.55 0.14 145);
+  --crispy-ai-error: oklch(0.58 0.2 25);
+  --crispy-ai-radius: var(--kb-radius);
+  --crispy-ai-radius-sm: var(--kb-radius);
   &.dark {
   --kb-accent: oklch(0.72 0.12 195);
   --kb-accent-soft: oklch(0.28 0.04 195);
