@@ -19,6 +19,11 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
       '长篇小说项目（一本一条）：书名、梗概、人物、大纲、当前进度、单章目标字数；章节通过 posts.novel 关联',
   },
   {
+    slug: 'short-links',
+    label: '短链',
+    description: '短链接跳转规则，前台路径 /s/{slug}',
+  },
+  {
     slug: 'app-configs',
     label: '应用配置',
     description: '键值型应用配置（string/number/boolean/json），按 key 读取',

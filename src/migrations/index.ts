@@ -10,6 +10,7 @@ import * as migration_20260707_161100_novels_system_rels from './20260707_161100
 import * as migration_20260708_031500_media_s3_prefix from './20260708_031500_media_s3_prefix';
 import * as migration_20260708_092200_content_embeddings from './20260708_092200_content_embeddings';
 import * as migration_20260708_175300_content_embeddings_1024 from './20260708_175300_content_embeddings_1024';
+import * as migration_20260709_022335_pages_blocks_related_faq from './20260709_022335_pages_blocks_related_faq';
 
 export const migrations = [
   {
@@ -45,7 +46,7 @@ export const migrations = [
   {
     up: migration_20260706_143634_short_links.up,
     down: migration_20260706_143634_short_links.down,
-    name: '20260706_143634_short_links'
+    name: '20260706_143634_short_links',
   },
   {
     up: migration_20260707_155700_novel_settings.up,
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260708_175300_content_embeddings_1024.up,
     down: migration_20260708_175300_content_embeddings_1024.down,
     name: '20260708_175300_content_embeddings_1024',
+  },
+  {
+    up: migration_20260709_022335_pages_blocks_related_faq.up,
+    down: migration_20260709_022335_pages_blocks_related_faq.down,
+    name: '20260709_022335_pages_blocks_related_faq'
   },
 ];

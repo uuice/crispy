@@ -9,8 +9,10 @@ import {
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
+import { Faq } from '../../blocks/FaqBlock/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { RelatedPostsBlock } from '../../blocks/RelatedPosts/config'
 import { hero } from '@/heros/config'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -89,7 +91,7 @@ export const Pages: CollectionConfig<'pages'> = {
               name: 'layout',
               type: 'blocks',
               label: adminLabels.layout,
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, RelatedPostsBlock, Faq],
               required: true,
               admin: {
                 initCollapsed: true,

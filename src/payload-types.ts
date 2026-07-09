@@ -271,7 +271,7 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | RelatedPostsBlock | FaqBlock)[];
   meta?: {
     title?: string | null;
     /**
@@ -989,6 +989,61 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsBlock".
+ */
+export interface RelatedPostsBlock {
+  introContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  docs: (number | Post)[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relatedPosts';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock".
+ */
+export interface FaqBlock {
+  items?:
+    | {
+        question: string;
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "links".
  */
 export interface Link {
@@ -1313,7 +1368,7 @@ export interface AiChatSession {
 export interface Redirect {
   id: number;
   /**
-   * 修改后需要重新构建站点才能在前台生效。
+   * 修改后约 60 秒内自动生效（middleware 缓存）。
    */
   from: string;
   to?: {
@@ -1369,6 +1424,14 @@ export interface Search {
     | {
         relationTo: 'pages';
         value: number | Page;
+      }
+    | {
+        relationTo: 'jobs';
+        value: number | Job;
+      }
+    | {
+        relationTo: 'gallery-items';
+        value: number | GalleryItem;
       };
   slug?: string | null;
   meta?: {
@@ -1689,6 +1752,106 @@ export interface PayloadMcpApiKey {
     update?: boolean | null;
     /**
      * Allow clients to delete gallery-items.
+     */
+    delete?: boolean | null;
+  };
+  novels?: {
+    /**
+     * Allow clients to find novels.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create novels.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update novels.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete novels.
+     */
+    delete?: boolean | null;
+  };
+  shortLinks?: {
+    /**
+     * Allow clients to find short-links.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create short-links.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update short-links.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete short-links.
+     */
+    delete?: boolean | null;
+  };
+  redirects?: {
+    /**
+     * Allow clients to find redirects.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create redirects.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update redirects.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete redirects.
+     */
+    delete?: boolean | null;
+  };
+  forms?: {
+    /**
+     * Allow clients to find forms.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create forms.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update forms.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete forms.
+     */
+    delete?: boolean | null;
+  };
+  formSubmissions?: {
+    /**
+     * Allow clients to find form-submissions.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to delete form-submissions.
+     */
+    delete?: boolean | null;
+  };
+  payloadQueryPresets?: {
+    /**
+     * Allow clients to find payload-query-presets.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create payload-query-presets.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update payload-query-presets.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete payload-query-presets.
      */
     delete?: boolean | null;
   };
@@ -2138,6 +2301,8 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        relatedPosts?: T | RelatedPostsBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
       };
   meta?:
     | T
@@ -2236,6 +2401,31 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsBlock_select".
+ */
+export interface RelatedPostsBlockSelect<T extends boolean = true> {
+  introContent?: T;
+  docs?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlock_select".
+ */
+export interface FaqBlockSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3011,6 +3201,52 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         delete?: T;
       };
   galleryItems?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  novels?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  shortLinks?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  redirects?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  forms?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  formSubmissions?:
+    | T
+    | {
+        find?: T;
+        delete?: T;
+      };
+  payloadQueryPresets?:
     | T
     | {
         find?: T;

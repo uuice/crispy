@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache'
+
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -14,4 +16,10 @@ export async function getRedirects(depth = 1) {
   return redirects
 }
 
-export const getCachedRedirects = () => getRedirects
+const getCachedRedirectsImpl = unstable_cache(
+  async () => getRedirects(1),
+  ['payload-redirects'],
+  { revalidate: 60 },
+)
+
+export const getCachedRedirects = getCachedRedirectsImpl

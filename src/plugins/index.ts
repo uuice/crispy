@@ -53,7 +53,7 @@ export const plugins: Plugin[] = [
             return {
               ...field,
               admin: {
-                description: '修改后需要重新构建站点才能在前台生效。',
+                description: '修改后约 60 秒内自动生效（middleware 缓存）。',
               },
             }
           }
@@ -71,6 +71,7 @@ export const plugins: Plugin[] = [
     generateURL,
   }),
   formBuilderPlugin({
+    defaultToEmail: process.env.FORM_DEFAULT_TO_EMAIL,
     fields: {
       payment: false,
     },
@@ -112,7 +113,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts', 'pages'],
+    collections: ['posts', 'pages', 'jobs', 'gallery-items'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       labels: {
@@ -139,6 +140,19 @@ export const plugins: Plugin[] = [
       ads: { enabled: true },
       jobs: { enabled: true },
       'gallery-items': { enabled: true },
+      novels: { enabled: true },
+      'short-links': { enabled: true },
+      redirects: { enabled: true },
+      forms: { enabled: true },
+      'form-submissions': {
+        enabled: {
+          create: false,
+          delete: true,
+          find: true,
+          update: false,
+        },
+      },
+      'payload-query-presets': { enabled: true },
       'app-configs': {
         enabled: {
           create: false,
@@ -183,6 +197,14 @@ export const plugins: Plugin[] = [
       { slug: 'link-groups' },
       { slug: 'jobs' },
       { slug: 'users' },
+      { slug: 'gallery-items' },
+      { slug: 'short-links' },
+      { slug: 'redirects' },
+      { slug: 'forms' },
+      { slug: 'comments' },
+      { slug: 'ad-slots' },
+      { slug: 'ads' },
+      { slug: 'novels' },
     ],
   }),
   auditLogPlugin(),

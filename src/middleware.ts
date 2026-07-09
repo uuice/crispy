@@ -23,6 +23,7 @@ import {
   THEME_PREVIEW_REQUEST_HEADER,
 } from '@/themes/preview.shared'
 import type { FrontendThemeId } from '@/themes/definitions'
+import { handlePayloadRedirect } from '@/redirects/middlewareRedirects'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
@@ -357,6 +358,11 @@ export async function middleware(request: NextRequest) {
   const legacyRedirect = handleLegacyFrontendRedirect(request)
   if (legacyRedirect) {
     return legacyRedirect
+  }
+
+  const payloadRedirect = await handlePayloadRedirect(request)
+  if (payloadRedirect) {
+    return payloadRedirect
   }
 
   const themePreview = await resolveThemePreviewContext(request)

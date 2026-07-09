@@ -1,9 +1,48 @@
 import { BeforeSync, DocToSync } from '@payloadcms/plugin-search/types'
 
+function syncSimpleDoc({
+  originalDoc,
+  searchDoc,
+  descriptionField = 'description',
+}: {
+  originalDoc: Record<string, unknown>
+  searchDoc: DocToSync
+  descriptionField?: string
+}): DocToSync {
+  const title = typeof originalDoc.title === 'string' ? originalDoc.title : ''
+  const slug = typeof originalDoc.slug === 'string' ? originalDoc.slug : undefined
+  const description =
+    typeof originalDoc[descriptionField] === 'string'
+      ? (originalDoc[descriptionField] as string)
+      : undefined
+
+  return {
+    ...searchDoc,
+    slug,
+    meta: {
+      title,
+      description,
+    },
+    categories: [],
+  }
+}
+
 export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searchDoc }) => {
   const {
     doc: { relationTo: collection },
   } = searchDoc
+
+  if (collection === 'jobs') {
+    return syncSimpleDoc({
+      originalDoc,
+      searchDoc,
+      descriptionField: 'location',
+    })
+  }
+
+  if (collection === 'gallery-items') {
+    return syncSimpleDoc({ originalDoc, searchDoc })
+  }
 
   const { slug, id, categories, title, meta } = originalDoc
 

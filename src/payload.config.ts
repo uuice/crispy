@@ -34,6 +34,7 @@ import { adminLabels } from './i18n/admin-labels'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { purgeExpiredFrontendCacheTask } from './jobs/purgeExpiredFrontendCache'
+import { createEmailAdapter } from './email/createEmailAdapter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -144,6 +145,7 @@ export default buildConfig({
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: createDatabaseAdapter(),
+  email: createEmailAdapter(),
   collections: [
     Pages,
     Posts,
