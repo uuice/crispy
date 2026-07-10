@@ -1895,6 +1895,92 @@ export interface PayloadMcpApiKey {
      */
     find?: boolean | null;
   };
+  header?: {
+    /**
+     * Allow clients to find header global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update header global.
+     */
+    update?: boolean | null;
+  };
+  footer?: {
+    /**
+     * Allow clients to find footer global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update footer global.
+     */
+    update?: boolean | null;
+  };
+  siteSettings?: {
+    /**
+     * Allow clients to find site-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update site-settings global.
+     */
+    update?: boolean | null;
+  };
+  commentSettings?: {
+    /**
+     * Allow clients to find comment-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update comment-settings global.
+     */
+    update?: boolean | null;
+  };
+  cacheSettings?: {
+    /**
+     * Allow clients to find cache-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update cache-settings global.
+     */
+    update?: boolean | null;
+  };
+  aiSettings?: {
+    /**
+     * Allow clients to find ai-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update ai-settings global.
+     */
+    update?: boolean | null;
+  };
+  'payload-mcp-tool'?: {
+    /**
+     * 查询前台 HTML 缓存：registry 路径列表、DB 状态、动态路由明细、cache-settings（对应 /admin/cache）
+     */
+    listFrontendCache?: boolean | null;
+    /**
+     * 清除前台 DB 页面 HTML 缓存。支持 ids、routePaths、expired: true 或 all: true；内容变更后需手动清除
+     */
+    purgeFrontendCache?: boolean | null;
+    /**
+     * 读取 cache-settings：HTML 缓存开关、TTL 秒数、是否输出调试 Header
+     */
+    getCacheSettings?: boolean | null;
+    /**
+     * 更新 cache-settings：cachingEnabled、pageRevalidateSeconds、exposeCacheHeaders（至少提供一个字段）
+     */
+    updateCacheSettings?: boolean | null;
+    /**
+     * 从回收站恢复软删除的文档（clear deletedAt）。查回收站用 Find 对应 Collection 并设 trash 条件
+     */
+    restoreDocument?: boolean | null;
+    /**
+     * 按语义相似度搜索 posts/pages（需 PostgreSQL pgvector + Embedding API Key）。适合自然语言查找内容
+     */
+    semanticSearch?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -3277,6 +3363,52 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | T
     | {
         find?: T;
+      };
+  header?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  footer?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  siteSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  commentSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  cacheSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  aiSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  'payload-mcp-tool'?:
+    | T
+    | {
+        listFrontendCache?: T;
+        purgeFrontendCache?: T;
+        getCacheSettings?: T;
+        updateCacheSettings?: T;
+        restoreDocument?: T;
+        semanticSearch?: T;
       };
   updatedAt?: T;
   createdAt?: T;

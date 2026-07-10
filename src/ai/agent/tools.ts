@@ -22,20 +22,11 @@ import type { AgentToolCall } from '@/ai/agent/types'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
 import {
-  getDbCacheStats,
-  getDynamicRouteCacheEntries,
-  getRegistryCacheStatuses,
-  purgeDbCacheByRoutePaths,
-  purgeExpiredCacheEntries,
-} from '@/frontend-cache/dbCache'
-import { getResolvedCacheSettings, normalizeCacheSettings, resetResolvedCacheSettingsCache } from '@/frontend-cache/getCacheSettings'
-import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
-import {
-  FRONTEND_CACHE_GROUP_LABELS,
-  getFrontendCacheRegistry,
-  type FrontendCacheGroup,
-  resolveCacheEntries,
-} from '@/frontend-cache/registry'
+  getFrontendCacheSettings,
+  listFrontendCache,
+  purgeFrontendCache,
+  updateFrontendCacheSettings,
+} from '@/frontend-cache/cacheToolHandlers'
 import { trashOrDeleteDocument, restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
 import { resolveAgentListSelect } from '@/ai/agent/listSelect'
 import {
@@ -569,50 +560,6 @@ function parseToolArgs(raw: string): Record<string, unknown> {
   }
 }
 
-const CACHE_SETTINGS_FIELDS = [
-  'cachingEnabled',
-  'pageRevalidateSeconds',
-  'exposeCacheHeaders',
-] as const
-
-type CacheSettingsField = (typeof CACHE_SETTINGS_FIELDS)[number]
-
-function parseCacheSettingsUpdate(args: Record<string, unknown>): {
-  cachingEnabled?: boolean
-  pageRevalidateSeconds?: number
-  exposeCacheHeaders?: boolean
-} {
-  const data: {
-    cachingEnabled?: boolean
-    pageRevalidateSeconds?: number
-    exposeCacheHeaders?: boolean
-  } = {}
-
-  for (const field of CACHE_SETTINGS_FIELDS) {
-    if (args[field] === undefined) continue
-
-    if (field === 'cachingEnabled' || field === 'exposeCacheHeaders') {
-      if (typeof args[field] !== 'boolean') {
-        throw new Error(`${field} 必须是布尔值`)
-      }
-      data[field] = args[field]
-      continue
-    }
-
-    const value = Number(args[field])
-    if (!Number.isFinite(value) || value < 0) {
-      throw new Error(`${field} 必须是非负数字`)
-    }
-    data[field] = value
-  }
-
-  if (Object.keys(data).length === 0) {
-    throw new Error('至少提供一个 cache-settings 字段')
-  }
-
-  return data
-}
-
 export async function executeAgentTool(
   req: PayloadRequest,
   toolCall: AgentToolCall,
@@ -805,147 +752,39 @@ export async function executeAgentTool(
 
     case 'get_cache_settings': {
       assertAgentCacheAccess(req)
-      result = await getResolvedCacheSettings()
+      result = await getFrontendCacheSettings()
       break
     }
 
     case 'update_cache_settings': {
       assertAgentCacheAccess(req)
       await assertAgentGlobalAccess(req, 'cache-settings', 'update')
-      const data = parseCacheSettingsUpdate(args)
-      const updated = await req.payload.updateGlobal({
-        slug: 'cache-settings',
-        data,
-        overrideAccess: false,
-        user: req.user,
-      })
-      resetResolvedCacheSettingsCache()
-      result = normalizeCacheSettings({
-        cachingEnabled: updated.cachingEnabled ?? undefined,
-        pageRevalidateSeconds: updated.pageRevalidateSeconds ?? undefined,
-        exposeCacheHeaders: updated.exposeCacheHeaders ?? undefined,
-      })
+      result = await updateFrontendCacheSettings(req, args)
       break
     }
 
     case 'list_frontend_cache': {
       assertAgentCacheAccess(req)
-      const group = args.group ? String(args.group) : undefined
-      const registry = getFrontendCacheRegistry()
-      const entries = group
-        ? registry.filter((entry) => entry.group === group)
-        : registry
-
-      if (group && entries.length === 0) {
-        throw new Error(`未知的缓存分组：${group}`)
+      const cacheList = await listFrontendCache({
+        group: args.group ? String(args.group) : undefined,
+        dynamicLimit: args.dynamicLimit !== undefined ? Number(args.dynamicLimit) : undefined,
+      })
+      if (cacheList.dynamicRoutesNote) {
+        cacheList.dynamicRoutesNote +=
+          '；registry 每项 status 含 expiryStatus（valid/expiringSoon/expired/none）'
       }
-
-      const includeDynamicRoutes = !group || group === 'dynamic'
-      const dynamicLimit = includeDynamicRoutes
-        ? Math.min(Math.max(Number(args.dynamicLimit) || 100, 1), 500)
-        : 0
-
-      const [settings, dbStats, entryStatuses, dynamicRoutes] = await Promise.all([
-        getResolvedCacheSettings(),
-        getDbCacheStats(),
-        getRegistryCacheStatuses(entries),
-        includeDynamicRoutes ? getDynamicRouteCacheEntries(dynamicLimit) : Promise.resolve([]),
-      ])
-
-      result = {
-        settings,
-        dbStats,
-        groupLabels: FRONTEND_CACHE_GROUP_LABELS,
-        entries: entries.map((entry) => ({
-          id: entry.id,
-          label: entry.label,
-          description: entry.description,
-          group: entry.group,
-          groupLabel: FRONTEND_CACHE_GROUP_LABELS[entry.group as FrontendCacheGroup],
-          kind: entry.kind,
-          target: entry.target,
-          pathMatch: entry.pathMatch,
-          status: entryStatuses[entry.id] ?? {
-            active: false,
-            count: 0,
-            expiryStatus: 'none',
-            expiringSoonCount: 0,
-            expiredCount: 0,
-          },
-        })),
-        ...(includeDynamicRoutes
-          ? {
-              dynamicRoutes,
-              dynamicRoutesNote:
-                '内容发布后缓存不会自动清除。单条动态 path 用 purge_frontend_cache(routePaths=[...])；按 pattern 聚合清除用 ids（如 auto-s-slug）；registry 每项 status 含 expiryStatus（valid/expiringSoon/expired/none）',
-            }
-          : {}),
-      }
+      result = cacheList
       break
     }
 
     case 'purge_frontend_cache': {
       assertAgentCacheAccess(req)
-
-      if (args.all === true) {
-        const deleted = await purgeAllRegisteredCache()
-        result = {
-          ok: true,
-          purged: deleted,
-          failed: 0,
-          scope: 'all',
-        }
-        break
-      }
-
-      if (args.expired === true) {
-        const deleted = await purgeExpiredCacheEntries()
-        result = {
-          ok: true,
-          deleted,
-          scope: 'expired',
-        }
-        break
-      }
-
-      const routePaths = Array.isArray(args.routePaths)
-        ? args.routePaths.map(String).filter(Boolean)
-        : []
-      if (routePaths.length > 0) {
-        const deleted = await purgeDbCacheByRoutePaths(routePaths)
-        result = {
-          ok: true,
-          purged: routePaths.length,
-          failed: 0,
-          deleted,
-          scope: 'routePaths',
-          routePaths,
-        }
-        break
-      }
-
-      const ids = Array.isArray(args.ids) ? args.ids.map(String) : []
-      if (ids.length === 0) {
-        throw new Error('请提供 ids、routePaths、expired: true 或 all: true')
-      }
-
-      const cacheEntries = resolveCacheEntries(ids)
-      if (cacheEntries.length === 0) {
-        throw new Error('未找到有效的缓存条目 id')
-      }
-
-      const results = await purgeCacheEntries(cacheEntries)
-      const purged = results.filter((item) => item.success).length
-      const failed = results.filter((item) => !item.success).length
-      const deleted = results.reduce((sum, item) => sum + (item.deleted ?? 0), 0)
-
-      result = {
-        ok: failed === 0,
-        purged,
-        failed,
-        deleted,
-        results,
-      }
+      result = await purgeFrontendCache({
+        all: args.all === true,
+        expired: args.expired === true,
+        routePaths: Array.isArray(args.routePaths) ? args.routePaths.map(String) : undefined,
+        ids: Array.isArray(args.ids) ? args.ids.map(String) : undefined,
+      })
       break
     }
 

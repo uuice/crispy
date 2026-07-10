@@ -826,6 +826,38 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'h3',
+        text: 'Globals（与 Agent 对齐）',
+      },
+      {
+        type: 'p',
+        text: 'mcpPlugin.globals 启用 header、footer、site-settings、cache-settings、comment-settings、ai-settings。自动生成 findHeader / updateHeader、findSiteSettings / updateSiteSettings 等；comment-settings / ai-settings 的 update 受 Payload Global access 限制（仅 super-admin）。',
+      },
+      {
+        type: 'h3',
+        text: '自定义 Tools（缓存 / 恢复 / 语义搜索）',
+      },
+      {
+        type: 'p',
+        text: '除 Collection / Global 自动生成工具外，mcpPlugin.mcp.tools 注册与 Admin AI 助手对齐的自定义工具（src/plugins/mcpCustomTools.ts）。需在 API Key 的 payload-mcp-tool 组中单独开启；缓存相关权限为 super-admin / editor。',
+      },
+      {
+        type: 'table',
+        headers: ['Tool', '说明', 'API Key 字段'],
+        rows: [
+          ['list_frontend_cache', 'registry 状态、DB 统计、动态路由明细', 'listFrontendCache'],
+          ['purge_frontend_cache', '按 ids / routePaths / expired / all 清除 HTML 缓存', 'purgeFrontendCache'],
+          ['get_cache_settings', '读取 cache-settings', 'getCacheSettings'],
+          ['update_cache_settings', '更新 cache-settings（开关、TTL、调试 Header）', 'updateCacheSettings'],
+          ['restore_document', '从回收站恢复软删除文档', 'restoreDocument'],
+          ['semantic_search', 'posts/pages 语义搜索（需 pgvector）', 'semanticSearch'],
+        ],
+      },
+      {
+        type: 'p',
+        text: 'pnpm cli mcp:key 轮换 Key 时默认开启上述自定义 tools 与常用 Globals。内容发布后缓存不会自动清除，可用 purge_frontend_cache 手动清除。',
+      },
+      {
+        type: 'h3',
         text: 'Cursor .cursor/mcp.json 示例',
       },
       {
@@ -1703,7 +1735,9 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         items: [
           'AI 助手：Admin 内对话，Cookie 鉴权，适合运营人员',
           'MCP：外部 Agent（Cursor 等），Bearer / API-Key，JSON-RPC',
-          '两者 Collection 范围大致对齐（见 src/ai/agent/resources.ts 与 plugins/index.ts mcpPlugin）',
+          '两者 Collection 与 Globals 范围对齐（见 src/ai/agent/resources.ts 与 plugins/index.ts mcpPlugin）',
+          '自定义 tools 已对齐：缓存（含 update_cache_settings）、restore_document、semantic_search',
+          'Globals 使用 findXxx / updateXxx 自动生成工具；Agent 使用 get_global / update_global 统一入口',
           'AI 助手 delete 走软删除；MCP delete 行为取决于 Payload MCP 插件实现',
         ],
       },

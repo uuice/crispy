@@ -18,6 +18,8 @@ import { enableQueryPresetsPlugin } from '@/plugins/enableQueryPresets'
 import { enableTrashAndVersionsPlugin } from '@/plugins/enableTrashAndVersions'
 import { localizeFieldLabelsPlugin } from '@/plugins/localizeFieldLabels'
 import { localizePluginCollectionsPlugin } from '@/plugins/localizePluginCollections'
+import { AGENT_GLOBALS } from '@/ai/agent/resources'
+import { mcpCustomTools } from '@/plugins/mcpCustomTools'
 import { createS3StoragePlugin } from '@/storage/s3'
 
 import { Page, Post } from '@/payload-types'
@@ -185,6 +187,18 @@ export const plugins: Plugin[] = [
           update: false,
         },
       },
+    },
+    globals: Object.fromEntries(
+      AGENT_GLOBALS.map((global) => [
+        global.slug,
+        {
+          enabled: { find: true, update: true },
+          description: global.description,
+        },
+      ]),
+    ),
+    mcp: {
+      tools: mcpCustomTools,
     },
   }),
   importExportPlugin({
