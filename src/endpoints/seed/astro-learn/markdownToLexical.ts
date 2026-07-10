@@ -217,6 +217,10 @@ export function markdownToLexical(markdown: string): DefaultTypedEditorState {
 
     if (/^\s*[-*+]\s+/.test(line)) {
       const items: LexicalChild[] = []
+      const firstItemMatch = line.match(/^\s*[-*+]\s+(.+)$/)
+      if (firstItemMatch) {
+        items.push(listItemNode(parseInline(firstItemMatch[1] ?? '')))
+      }
       while (index <= lines.length) {
         const current = index === lines.length ? '' : (lines[index] ?? '')
         const itemMatch = current.match(/^\s*[-*+]\s+(.+)$/)
@@ -232,6 +236,10 @@ export function markdownToLexical(markdown: string): DefaultTypedEditorState {
 
     if (/^\s*\d+\.\s+/.test(line)) {
       const items: LexicalChild[] = []
+      const firstItemMatch = line.match(/^\s*\d+\.\s+(.+)$/)
+      if (firstItemMatch) {
+        items.push(listItemNode(parseInline(firstItemMatch[1] ?? '')))
+      }
       while (index <= lines.length) {
         const current = index === lines.length ? '' : (lines[index] ?? '')
         const itemMatch = current.match(/^\s*\d+\.\s+(.+)$/)
