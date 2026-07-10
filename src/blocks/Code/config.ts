@@ -2,6 +2,8 @@ import type { Block } from 'payload'
 
 import { withAiCodeField } from '@/fields/ai'
 
+import { CODE_BLOCK_LANGUAGES } from './languages'
+
 export const Code: Block = {
   slug: 'code',
   interfaceName: 'CodeBlock',
@@ -10,20 +12,7 @@ export const Code: Block = {
       name: 'language',
       type: 'select',
       defaultValue: 'typescript',
-      options: [
-        {
-          label: 'Typescript',
-          value: 'typescript',
-        },
-        {
-          label: 'Javascript',
-          value: 'javascript',
-        },
-        {
-          label: 'CSS',
-          value: 'css',
-        },
-      ],
+      options: [...CODE_BLOCK_LANGUAGES],
     },
     withAiCodeField({
       name: 'code',

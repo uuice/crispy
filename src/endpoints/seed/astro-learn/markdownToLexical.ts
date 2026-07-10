@@ -1,5 +1,7 @@
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
+import { normalizeCodeBlockLanguage } from '@/blocks/Code/languages'
+
 type LexicalChild = Record<string, unknown>
 
 const FORMAT_BOLD = 1
@@ -98,11 +100,7 @@ function codeBlockNode(code: string, language: string): LexicalChild {
 }
 
 function normalizeCodeLanguage(language: string): string {
-  const normalized = language.trim().toLowerCase()
-  if (normalized === 'js' || normalized === 'javascript' || normalized === 'jsx') return 'javascript'
-  if (normalized === 'ts' || normalized === 'typescript' || normalized === 'tsx') return 'typescript'
-  if (normalized === 'css' || normalized === 'scss' || normalized === 'less') return 'css'
-  return 'javascript'
+  return normalizeCodeBlockLanguage(language)
 }
 
 function parseInline(text: string): LexicalChild[] {
@@ -173,7 +171,7 @@ export function markdownToLexical(markdown: string): DefaultTypedEditorState {
     const headingMatch = line.match(/^(#{1,4})\s+(.+)$/)
     if (headingMatch) {
       const level = headingMatch[1]?.length ?? 2
-      const tag = (`h${Math.min(level, 4)}` as 'h1' | 'h2' | 'h3' | 'h4')
+      const tag = `h${Math.min(level, 4)}` as 'h1' | 'h2' | 'h3' | 'h4'
       children.push(headingNode(tag, parseInline(headingMatch[2] ?? '')))
       continue
     }

@@ -4041,7 +4041,44 @@ export interface BannerBlock {
  * via the `definition` "CodeBlock".
  */
 export interface CodeBlock {
-  language?: ('typescript' | 'javascript' | 'css') | null;
+  language?:
+    | (
+        | 'typescript'
+        | 'javascript'
+        | 'jsx'
+        | 'tsx'
+        | 'css'
+        | 'scss'
+        | 'less'
+        | 'markup'
+        | 'json'
+        | 'bash'
+        | 'shell-session'
+        | 'python'
+        | 'java'
+        | 'kotlin'
+        | 'swift'
+        | 'go'
+        | 'rust'
+        | 'c'
+        | 'cpp'
+        | 'csharp'
+        | 'php'
+        | 'ruby'
+        | 'sql'
+        | 'yaml'
+        | 'toml'
+        | 'ini'
+        | 'markdown'
+        | 'docker'
+        | 'graphql'
+        | 'powershell'
+        | 'diff'
+        | 'git'
+        | 'http'
+        | 'nginx'
+      )
+    | null;
   code: string;
   id?: string | null;
   blockName?: string | null;
