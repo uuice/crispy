@@ -38,6 +38,10 @@ export const COLLECTION_AI_PROFILES: Record<string, CollectionAiProfile> = {
     contentFields: ['description'],
     suggest: { descriptionPath: 'description' },
   },
+  novels: {
+    contentFields: ['synopsis', 'writingStyle', 'worldBuilding', 'plotOutline', 'currentProgress'],
+    suggest: { descriptionPath: 'synopsis' },
+  },
   links: {
     contentFields: ['description'],
     suggest: { descriptionPath: 'description' },

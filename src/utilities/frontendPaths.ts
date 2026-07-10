@@ -53,6 +53,18 @@ export function getJobsPath(): string {
   return `/${frontendCollectionRoutes.jobs}`
 }
 
+export function getNovelsPath(): string {
+  return '/novels'
+}
+
+export function getNovelPath(slug: string): string {
+  return `${getNovelsPath()}/${encodeURIComponent(slug)}`
+}
+
+export function getNovelChapterPath(novelSlug: string, chapterSlug: string): string {
+  return `${getNovelPath(novelSlug)}/${encodeURIComponent(chapterSlug)}`
+}
+
 export function getCollectionDocumentPath(collection: CollectionSlug, slug: string): string | null {
   switch (collection) {
     case 'posts':

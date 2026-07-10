@@ -26,6 +26,7 @@ import type { FrontendThemeId } from '@/themes/definitions'
 import { handlePayloadRedirect } from '@/redirects/middlewareRedirects'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 import { applyPoweredByHeader } from '@/utilities/poweredByHeader'
+import { FRONTEND_PATHNAME_HEADER } from '@/utilities/requestPathname'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
 
@@ -86,6 +87,17 @@ function withThemePreview(
 }
 
 function nextWithRequestHeaders(request: NextRequest, requestHeaders: Headers): NextResponse {
+  requestHeaders.set(FRONTEND_PATHNAME_HEADER, request.nextUrl.pathname)
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+}
+
+function nextWithPathname(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(FRONTEND_PATHNAME_HEADER, request.nextUrl.pathname)
   return NextResponse.next({
     request: {
       headers: requestHeaders,
@@ -202,6 +214,7 @@ async function captureAndStoreRouteHtml(
       withForwardedPublicHost(request.url, {
         headers: {
           [CRISPY_CACHE_INTERNAL_HEADER]: secret,
+          [FRONTEND_PATHNAME_HEADER]: request.nextUrl.pathname,
           Accept: 'text/html',
         },
         cache: 'no-store',
@@ -267,14 +280,14 @@ async function applyFrontendCacheHeaders(
   }
 
   if (isInternalCacheCaptureRequest(request)) {
-    return themePreview ? nextWithRequestHeaders(request, themePreview.requestHeaders) : NextResponse.next()
+    return themePreview ? nextWithRequestHeaders(request, themePreview.requestHeaders) : nextWithPathname(request)
   }
 
   const settings = await getMiddlewareCacheSettings(request.url)
   if (!settings.exposeCacheHeaders) {
     return themePreview
       ? nextWithRequestHeaders(request, themePreview.requestHeaders)
-      : NextResponse.next()
+      : nextWithPathname(request)
   }
 
   const bypass = shouldBypassFrontendCache(request)
@@ -290,7 +303,7 @@ async function applyFrontendCacheHeaders(
 
   const response = themePreview
     ? nextWithRequestHeaders(request, themePreview.requestHeaders)
-    : NextResponse.next()
+    : nextWithPathname(request)
   applyCrispyCacheHeaders(response.headers, {
     pageStatus: lookup.status,
     dataStatus: 'BYPASS',
@@ -321,7 +334,7 @@ function handleApiAccessLog(request: NextRequest): NextResponse | null {
   }
 
   const startedAt = Date.now()
-  const response = NextResponse.next()
+  const response = nextWithPathname(request)
 
   after(async () => {
     const secret = process.env.ACCESS_LOG_SECRET || process.env.PAYLOAD_SECRET
@@ -385,7 +398,7 @@ export async function middleware(request: NextRequest) {
     return finalizeMiddlewareResponse(apiResponse, themePreview)
   }
 
-  return finalizeMiddlewareResponse(NextResponse.next(), themePreview)
+  return finalizeMiddlewareResponse(nextWithPathname(request), themePreview)
 }
 
 export const config = {

@@ -2,11 +2,14 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import type { Category, GalleryItem, Tag } from '@/payload-types'
+import type { Category, GalleryItem, Novel, Tag } from '@/payload-types'
 
 import { getCachedFriendLinkSections, getCachedFriendLinks } from '@/utilities/getFriendLinks'
 import {
   getCategoryPath,
+  getNovelChapterPath,
+  getNovelPath,
+  getNovelsPath,
   getPostPath,
   getTagPath,
   getUserPath,
@@ -14,11 +17,23 @@ import {
 } from '@/utilities/frontendPaths'
 import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
 
-import type { NavItem, PaginatedPostList, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
+import type {
+  LatestNovelChapterItem,
+  NavItem,
+  NovelChapterItem,
+  NovelListItem,
+  PaginatedPostList,
+  PostListItem,
+  SidebarCategory,
+  SidebarTag,
+  SidebarUser,
+} from './types'
 import { pickPublicAuthorBio } from './types'
 
 export type {
   NavItem,
+  NovelChapterItem,
+  NovelListItem,
   PaginatedPostList,
   PostListItem,
   SidebarCategory,
@@ -564,4 +579,173 @@ export const queryGalleryItems = cache(async (): Promise<GalleryItem[]> => {
   })
 
   return result.docs
+})
+
+export const queryPublishedNovels = cache(async (): Promise<NovelListItem[]> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const novelsResult = await payload.find({
+    collection: 'novels',
+    depth: 0,
+    limit: 100,
+    overrideAccess: false,
+    pagination: false,
+    sort: '-updatedAt',
+    where: { enabled: { equals: true } },
+    select: { title: true, slug: true, genre: true, synopsis: true, updatedAt: true },
+  })
+
+  const novels = novelsResult.docs.filter((novel) => Boolean(novel.slug))
+  if (novels.length === 0) return []
+
+  const counts = await Promise.all(
+    novels.map(async (novel) => {
+      const result = await payload.count({
+        collection: 'posts',
+        overrideAccess: false,
+        where: {
+          and: [{ _status: { equals: 'published' } }, { novel: { equals: novel.id } }],
+        },
+      })
+      return result.totalDocs
+    }),
+  )
+
+  return novels.map((novel, index) => ({
+    title: novel.title,
+    slug: novel.slug!,
+    url: getNovelPath(novel.slug!),
+    genre: novel.genre || undefined,
+    synopsis: novel.synopsis || undefined,
+    chapterCount: counts[index] ?? 0,
+    updatedAt: novel.updatedAt,
+  }))
+})
+
+export const queryNovelBySlug = cache(async (slug: string) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'novels',
+    depth: 0,
+    limit: 1,
+    overrideAccess: false,
+    where: {
+      and: [{ slug: { equals: slug } }, { enabled: { equals: true } }],
+    },
+  })
+
+  return result.docs[0] ?? null
+})
+
+export const queryNovelChapters = cache(
+  async (
+    novelSlug: string,
+  ): Promise<{ novel: Novel | null; chapters: NovelChapterItem[] }> => {
+    const novel = await queryNovelBySlug(novelSlug)
+    if (!novel?.slug) return { novel: null, chapters: [] }
+
+    const payload = await getPayload({ config: configPromise })
+
+    const result = await payload.find({
+      collection: 'posts',
+      depth: 0,
+      limit: 500,
+      overrideAccess: false,
+      pagination: false,
+      sort: 'publishedAt',
+      select: { title: true, slug: true, publishedAt: true },
+      where: {
+        and: [{ _status: { equals: 'published' } }, { novel: { equals: novel.id } }],
+      },
+    })
+
+    const chapters = result.docs
+      .filter((post) => Boolean(post.slug && post.title))
+      .map((post, index) => ({
+        index: index + 1,
+        title: post.title,
+        slug: post.slug!,
+        url: getNovelChapterPath(novel.slug!, post.slug!),
+        publishedAt: post.publishedAt || undefined,
+      }))
+
+    return { novel, chapters }
+  },
+)
+
+export const queryNovelChapter = cache(async (novelSlug: string, chapterSlug: string) => {
+  const { novel, chapters } = await queryNovelChapters(novelSlug)
+  if (!novel?.slug) return null
+
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    depth: 2,
+    limit: 1,
+    overrideAccess: false,
+    where: {
+      and: [
+        { slug: { equals: chapterSlug } },
+        { _status: { equals: 'published' } },
+        { novel: { equals: novel.id } },
+      ],
+    },
+  })
+
+  const post = result.docs[0]
+  if (!post) return null
+
+  const chapterIndex = chapters.findIndex((chapter) => chapter.slug === chapterSlug)
+  const prev = chapterIndex > 0 ? chapters[chapterIndex - 1] : null
+  const next =
+    chapterIndex >= 0 && chapterIndex < chapters.length - 1 ? chapters[chapterIndex + 1] : null
+
+    return {
+    novel,
+    post,
+    chapters,
+    chapterIndex: chapterIndex >= 0 ? chapterIndex + 1 : 0,
+    prev,
+    next,
+    novelUrl: getNovelPath(novel.slug),
+    novelsUrl: getNovelsPath(),
+  }
+})
+
+export const queryLatestNovelChapters = cache(async (limit = 20): Promise<LatestNovelChapterItem[]> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    depth: 1,
+    limit,
+    overrideAccess: false,
+    pagination: false,
+    sort: '-publishedAt',
+    select: { title: true, slug: true, publishedAt: true, novel: true },
+    where: {
+      and: [{ _status: { equals: 'published' } }, { novel: { exists: true } }],
+    },
+  })
+
+  const chapters: LatestNovelChapterItem[] = []
+
+  for (const post of result.docs) {
+    if (!post.slug || !post.title) continue
+
+    const novel = typeof post.novel === 'object' ? post.novel : null
+    if (!novel?.slug || novel.enabled === false) continue
+
+    chapters.push({
+      title: post.title,
+      url: getNovelChapterPath(novel.slug, post.slug),
+      novelTitle: novel.title,
+      novelUrl: getNovelPath(novel.slug),
+      publishedAt: post.publishedAt || undefined,
+    })
+  }
+
+  return chapters
 })

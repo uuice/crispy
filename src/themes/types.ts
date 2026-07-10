@@ -16,6 +16,10 @@ export type ThemeListPageProps = {
   searchParams?: Promise<ThemeSearchParams>
 }
 
+export type NovelChapterPageProps = {
+  params: Promise<{ slug: string; chapterSlug: string }>
+}
+
 export type ThemePageName =
   | 'home'
   | 'posts'
@@ -30,6 +34,9 @@ export type ThemePageName =
   | 'navigations'
   | 'games'
   | 'gamesMath'
+  | 'novels'
+  | 'novelDetail'
+  | 'novelChapter'
   | 'notFound'
   | 'serverError'
 
@@ -42,7 +49,7 @@ export type ThemePageDefinition = {
   metadata?: (...args: any[]) => Promise<Metadata> | Metadata
   staticParams?: () => Promise<Array<Record<string, string>>>
   /** When set, load/metadata receive SlugPageProps from the app route. */
-  params?: 'slug'
+  params?: 'slug' | 'novelChapter'
 }
 
 export type FrontendThemePages = Record<ThemePageName, ThemePageDefinition>

@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 import { getActiveFrontendTheme } from './registry'
-import type { SlugPageProps, ThemeListPageProps, ThemePageName } from './types'
+import type { NovelChapterPageProps, SlugPageProps, ThemeListPageProps, ThemePageName } from './types'
 
-export type ThemeRouteProps = SlugPageProps | ThemeListPageProps
+export type ThemeRouteProps = SlugPageProps | ThemeListPageProps | NovelChapterPageProps
 
 export async function renderThemePage(
   name: ThemePageName,
@@ -12,18 +12,26 @@ export async function renderThemePage(
   const theme = await getActiveFrontendTheme()
   const page = theme.pages[name]
 
+  if (page.params === 'novelChapter') {
+    const data = await (page.load as (input: NovelChapterPageProps) => Promise<unknown>)(
+      props as NovelChapterPageProps,
+    )
+    const View = page.View as ComponentType<{ data: unknown }>
+    return <View data={data} />
+  }
+
   if (page.params === 'slug') {
     const data = await (page.load as (input: SlugPageProps) => Promise<unknown>)(
       props as SlugPageProps,
     )
-    const View = page.View as React.ComponentType<{ data: unknown }>
+    const View = page.View as ComponentType<{ data: unknown }>
     return <View data={data} />
   }
 
   const data = await (page.load as (input?: ThemeListPageProps) => Promise<unknown>)(
     props as ThemeListPageProps | undefined,
   )
-  const View = page.View as React.ComponentType<{ data: unknown }>
+  const View = page.View as ComponentType<{ data: unknown }>
   return <View data={data} />
 }
 
@@ -31,6 +39,12 @@ export async function generateThemeMetadata(name: ThemePageName, props?: ThemeRo
   const theme = await getActiveFrontendTheme()
   const page = theme.pages[name]
   if (!page.metadata) return {}
+
+  if (page.params === 'novelChapter') {
+    return (page.metadata as (input: NovelChapterPageProps) => Promise<unknown>)(
+      props as NovelChapterPageProps,
+    )
+  }
 
   if (page.params === 'slug') {
     return (page.metadata as (input: SlugPageProps) => Promise<unknown>)(props as SlugPageProps)

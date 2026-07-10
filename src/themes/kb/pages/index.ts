@@ -8,6 +8,9 @@ import { homePage } from './home'
 import { jobsPage } from './jobs'
 import { linksPage } from './links'
 import { navigationsPage } from './navigations'
+import { novelChapterPage } from '../../blog/pages/novelChapter'
+import { novelDetailPage } from '../../blog/pages/novelDetail'
+import { novelsPage } from '../../blog/pages/novels'
 import { notFoundPage } from './notFound'
 import { pageDetailPage } from './pageDetail'
 import { postDetailPage } from './postDetail'
@@ -30,6 +33,9 @@ export const kbPages = {
   navigations: navigationsPage,
   games: gamesPage,
   gamesMath: gamesMathPage,
+  novels: novelsPage,
+  novelDetail: novelDetailPage,
+  novelChapter: novelChapterPage,
   notFound: notFoundPage,
   serverError: serverErrorPage,
 } satisfies FrontendThemePages

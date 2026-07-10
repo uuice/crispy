@@ -9,9 +9,12 @@ import type { SidebarData } from './data/types'
 
 import { BackToTop, FooterBackToTop } from './components/BackToTop'
 import { BlogSearch } from './components/BlogSearch'
+import { BlogSidebarShell } from './components/BlogSidebarShell'
 import { DarkModeToggle } from './components/DarkModeToggle'
 import { MobileNav } from './components/MobileNav'
+import { NovelsListSidebarShell } from './components/NovelsListSidebarShell'
 import { Sidebar } from './components/Sidebar'
+import { queryLatestNovelChapters } from './data/queries'
 import { SiteCuteDecor } from './components/SiteCuteDecor'
 import { ThemeColor } from './components/ThemeColor'
 
@@ -28,7 +31,10 @@ const emptySidebar: SidebarData = {
 }
 
 export async function Layout({ children, layoutData }: Props) {
-  const settings = (await getCachedSiteSettings()()) as SiteSetting
+  const [settings, latestNovelChapters] = await Promise.all([
+    getCachedSiteSettings()(),
+    queryLatestNovelChapters(20),
+  ])
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
@@ -37,6 +43,10 @@ export async function Layout({ children, layoutData }: Props) {
   const recordInfo = settings.recordSettings
   const showRecord =
     recordInfo?.showRecord !== false && (recordInfo?.icpNumber || recordInfo?.policeNumber)
+
+  const defaultSidebar = (
+    <Sidebar user={sidebar.user} categories={sidebar.categories} tags={sidebar.tags} />
+  )
 
   return (
     <>
@@ -56,7 +66,7 @@ export async function Layout({ children, layoutData }: Props) {
       <SiteCuteDecor variant="blog" />
 
       <div className="relative z-[1] min-h-screen flex flex-col">
-        <a className="blog-skip-link" href="#pjax-main">
+        <a className="blog-skip-link" href="#main-content">
           跳到主要内容
         </a>
         <header
@@ -105,21 +115,18 @@ export async function Layout({ children, layoutData }: Props) {
         </header>
 
         <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 md:py-8 flex-1 flex flex-col lg:flex-row gap-8 lg:gap-10">
-          <main className="flex-1 min-w-0 page-main" id="pjax-main">
+          <main className="flex-1 min-w-0 page-main" id="main-content">
             {children}
           </main>
-          <div className="w-64 shrink-0 hidden lg:block">
-            <div className="sticky top-24">
-              <Sidebar
-                user={sidebar.user}
-                categories={sidebar.categories}
-                tags={sidebar.tags}
-              />
+          <BlogSidebarShell>
+            <div className="w-64 shrink-0 hidden lg:block">
+              <div className="sticky top-24">{defaultSidebar}</div>
             </div>
-          </div>
-          <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
-            <Sidebar user={sidebar.user} categories={sidebar.categories} tags={sidebar.tags} />
-          </div>
+            <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
+              {defaultSidebar}
+            </div>
+          </BlogSidebarShell>
+          <NovelsListSidebarShell chapters={latestNovelChapters} />
         </div>
 
         <footer

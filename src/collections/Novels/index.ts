@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { isEditor } from '@/access/roles'
+import { novelsReadAccess, novelsWriteAccess } from '@/access/novels'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { withAiTextField } from '@/fields/ai'
+import { aiSuggestAssistField, withAiTextField } from '@/fields/ai'
 
 export const Novels: CollectionConfig<'novels'> = {
   slug: 'novels',
@@ -11,10 +11,10 @@ export const Novels: CollectionConfig<'novels'> = {
   trash: true,
   versions: false,
   access: {
-    create: isEditor,
-    delete: isEditor,
-    read: isEditor,
-    update: isEditor,
+    create: novelsWriteAccess,
+    delete: novelsWriteAccess,
+    read: novelsReadAccess,
+    update: novelsWriteAccess,
   },
   admin: {
     group: adminLabels.contentGroup,
@@ -23,11 +23,19 @@ export const Novels: CollectionConfig<'novels'> = {
     description: '长篇小说项目设定，一本一条记录；章节通过 posts.novel 关联。',
   },
   fields: [
-    withAiTextField({
-      name: 'title',
-      type: 'text',
-      label: adminLabels.novelTitle,
-      required: true,
+    withAiTextField(
+      {
+        name: 'title',
+        type: 'text',
+        label: adminLabels.novelTitle,
+        required: true,
+      },
+      {
+        contentFieldPaths: ['synopsis', 'genre', 'plotOutline', 'writingStyle'],
+      },
+    ),
+    aiSuggestAssistField({
+      contentFieldPaths: ['synopsis', 'writingStyle', 'worldBuilding', 'plotOutline'],
     }),
     chineseSlugField(),
     {

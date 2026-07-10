@@ -1,5 +1,6 @@
 import {
   getGalleryItemsPath,
+  getNovelsPath,
   getPagePath,
   getPostsListPath,
 } from '@/utilities/frontendPaths'
@@ -10,6 +11,7 @@ import type { NavItem } from './types'
 export const defaultBlogMenu: NavItem[] = [
   { title: '首页', url: '/', target: '_self' },
   { title: '归档', url: getPostsListPath(), target: '_self' },
+  { title: '小说', url: getNovelsPath(), target: '_self' },
   { title: '友情链接', url: '/links', target: '_self' },
   { title: '类库导航', url: '/navigations', target: '_self' },
   { title: '小游戏', url: '/games', target: '_self' },
