@@ -67,5 +67,5 @@ Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的�
 ## 版权与说明
 
 - 文章采用 **CC BY-NC-SA 4.0** 许可，转载需署名、非商用、相同方式共享。
-- Crispy 3.0 在 `v3-payload` 分支 greenfield 重写，与 2.x 无代码继承。
+- Crispy 3.0 为 greenfield 重写，与 2.x 无代码继承；`main` 为稳定主线，`v3-payload` 用于开发测试，2.x 归档在 `crispy-2x`。
 - 开源仓库：[GitHub](https://github.com/uuice/crispy)

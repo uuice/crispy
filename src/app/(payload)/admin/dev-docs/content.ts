@@ -19,7 +19,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
     blocks: [
       {
         type: 'p',
-        text: 'Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js App Router，本地 SQLite 开发、生产 PostgreSQL + 显式迁移。分支 v3-payload 为 greenfield 重写，与 2.x 无代码继承。',
+        text: 'Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js App Router，本地 SQLite 开发、生产 PostgreSQL + 显式迁移。greenfield 重写，与 2.x 无代码继承。main 为稳定主线（生产部署）；v3-payload 用于日常开发、测试与 bug 修复；2.x 已归档至 crispy-2x 与 v2-last。',
       },
       {
         type: 'table',

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Crispy 3 Core
 
-Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，分支 `v3-payload`，greenfield 重写，与 2.x 无代码继承。
+Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，greenfield 重写，与 2.x 无代码继承。`main` 为稳定主线；`v3-payload` 用于开发/测试/修 bug；2.x 归档在 `crispy-2x`。
 
 ## Stack
 

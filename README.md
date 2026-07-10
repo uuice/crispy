@@ -153,9 +153,15 @@ MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items�
 | `editor` | 内容 CRUD、发布、运营模块、站点/导航 Globals |
 | `author` | 自己的 posts（草稿）；上传媒体；不可改 pages、分类、Globals |
 
-## 与 2.x 的关系
+## 分支与 2.x
 
-Crispy 3.0 在 `v3-payload` 分支 greenfield 重写，不继承 2.x 代码。
+Crispy 3.0 为 greenfield 重写，不继承 2.x 代码。2.x 已归档至 `crispy-2x` 分支与 `v2-last` 标签。
+
+| 分支 | 用途 |
+| ---- | ---- |
+| `main` | 稳定版，生产部署 |
+| `v3-payload` | 日常开发、测试与 bug 修复 |
+| `crispy-2x` | 2.x 归档（只读） |
 
 ## License
 
