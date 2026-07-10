@@ -131,6 +131,14 @@ export const plugins: Plugin[] = [
     },
   }),
   mcpPlugin({
+    overrideAuth: async (req, getDefaultMcpAccessSettings) => {
+      const settings = await getDefaultMcpAccessSettings()
+      const user = settings.user
+      if (user && typeof user === 'object') {
+        req.user = user
+      }
+      return settings
+    },
     collections: {
       posts: { enabled: true },
       pages: { enabled: true },
