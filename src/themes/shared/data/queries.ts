@@ -14,11 +14,12 @@ import {
 } from '@/utilities/frontendPaths'
 import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
 
-import type { NavItem, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
+import type { NavItem, PaginatedPostList, PostListItem, SidebarCategory, SidebarTag, SidebarUser } from './types'
 import { pickPublicAuthorBio } from './types'
 
 export type {
   NavItem,
+  PaginatedPostList,
   PostListItem,
   SidebarCategory,
   SidebarData,
@@ -82,6 +83,46 @@ export const queryPosts = cache(async (limit = 1000): Promise<PostListItem[]> =>
     .filter((post): post is PostListItem => post !== null)
 })
 
+export const queryPublishedPostsCount = cache(async (): Promise<number> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.count({
+    collection: 'posts',
+    overrideAccess: false,
+    where: { _status: { equals: 'published' } },
+  })
+
+  return result.totalDocs
+})
+
+export const queryPostsPaginated = cache(
+  async (page = 1, pageSize = 12): Promise<PaginatedPostList> => {
+    const payload = await getPayload({ config: configPromise })
+
+    const result = await payload.find({
+      collection: 'posts',
+      depth: 1,
+      limit: pageSize,
+      page,
+      overrideAccess: false,
+      pagination: true,
+      select: POST_CARD_SELECT,
+      sort: '-publishedAt',
+      where: { _status: { equals: 'published' } },
+    })
+
+    return {
+      posts: result.docs
+        .map(formatPostListItem)
+        .filter((post): post is PostListItem => post !== null),
+      page: result.page ?? page,
+      pageSize,
+      totalDocs: result.totalDocs,
+      totalPages: result.totalPages,
+    }
+  },
+)
+
 export const queryPostBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
@@ -132,6 +173,51 @@ export const queryPostsByCategorySlug = cache(async (slug: string) => {
   }
 })
 
+export const queryPostsByCategorySlugPaginated = cache(
+  async (slug: string, page = 1, pageSize = 12) => {
+    const payload = await getPayload({ config: configPromise })
+
+    const categoryResult = await payload.find({
+      collection: 'categories',
+      limit: 1,
+      overrideAccess: false,
+      pagination: false,
+      where: { slug: { equals: slug } },
+    })
+
+    const category = categoryResult.docs[0]
+    if (!category) {
+      return { category: null, posts: [] as PostListItem[], page: 1, pageSize, totalDocs: 0, totalPages: 1 }
+    }
+
+    const result = await payload.find({
+      collection: 'posts',
+      depth: 1,
+      limit: pageSize,
+      page,
+      overrideAccess: false,
+      pagination: true,
+      select: POST_CARD_SELECT,
+      sort: '-publishedAt',
+      where: {
+        _status: { equals: 'published' },
+        categories: { contains: category.id },
+      },
+    })
+
+    return {
+      category,
+      posts: result.docs
+        .map(formatPostListItem)
+        .filter((p): p is PostListItem => p !== null),
+      page: result.page ?? page,
+      pageSize,
+      totalDocs: result.totalDocs,
+      totalPages: result.totalPages,
+    }
+  },
+)
+
 export const queryPostsByTagSlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
@@ -163,6 +249,47 @@ export const queryPostsByTagSlug = cache(async (slug: string) => {
   return {
     tag,
     posts: docs.map(formatPostListItem).filter((p): p is PostListItem => p !== null),
+  }
+})
+
+export const queryPostsByTagSlugPaginated = cache(async (slug: string, page = 1, pageSize = 12) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const tagResult = await payload.find({
+    collection: 'tags',
+    limit: 1,
+    overrideAccess: false,
+    pagination: false,
+    where: { slug: { equals: slug } },
+  })
+
+  const tag = tagResult.docs[0]
+  if (!tag) {
+    return { tag: null, posts: [] as PostListItem[], page: 1, pageSize, totalDocs: 0, totalPages: 1 }
+  }
+
+  const result = await payload.find({
+    collection: 'posts',
+    depth: 1,
+    limit: pageSize,
+    page,
+    overrideAccess: false,
+    pagination: true,
+    select: POST_CARD_SELECT,
+    sort: '-publishedAt',
+    where: {
+      _status: { equals: 'published' },
+      tags: { contains: tag.id },
+    },
+  })
+
+  return {
+    tag,
+    posts: result.docs.map(formatPostListItem).filter((p): p is PostListItem => p !== null),
+    page: result.page ?? page,
+    pageSize,
+    totalDocs: result.totalDocs,
+    totalPages: result.totalPages,
   }
 })
 
@@ -225,6 +352,7 @@ export const querySidebarData = cache(async () => {
       url: getCategoryPath(c.slug),
       count: categoryCounts.get(String(c.id)) || 0,
     }))
+    .filter((c) => c.count > 0)
 
   const tags: SidebarTag[] = tagsResult.docs
     .filter((t): t is Tag & { slug: string } => Boolean(t.slug))
@@ -234,6 +362,7 @@ export const querySidebarData = cache(async () => {
       url: getTagPath(t.slug),
       count: tagCounts.get(String(t.id)) || 0,
     }))
+    .filter((t) => t.count > 0)
 
   const menu = mapGlobalNavItems(headerData?.navItems)
   const footerMenu = mapGlobalNavItems(footerData?.navItems)
@@ -361,6 +490,36 @@ export const queryUserPage = cache(async (slug: string) => {
     .filter((post): post is PostListItem => post !== null)
 
   return { user, posts }
+})
+
+export const queryUserPagePaginated = cache(async (slug: string, page = 1, pageSize = 12) => {
+  const user = await queryUserBySlug(slug)
+  if (!user?.id || !user.name) return null
+
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    depth: 1,
+    limit: pageSize,
+    page,
+    overrideAccess: false,
+    pagination: true,
+    select: POST_CARD_SELECT,
+    sort: '-publishedAt',
+    where: {
+      and: [{ _status: { equals: 'published' } }, { authors: { contains: user.id } }],
+    },
+  })
+
+  return {
+    user,
+    posts: result.docs.map(formatPostListItem).filter((post): post is PostListItem => post !== null),
+    page: result.page ?? page,
+    pageSize,
+    totalDocs: result.totalDocs,
+    totalPages: result.totalPages,
+  }
 })
 
 export const queryFriendLinks = getCachedFriendLinks

@@ -4,7 +4,7 @@ import React from 'react'
 import type { SiteSetting } from '@/payload-types'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
-import { defaultBlogMenu } from './data/constants'
+import { defaultBlogMenu, resolveBlogMenu } from './data/constants'
 import type { SidebarData } from './data/types'
 
 import { BackToTop, FooterBackToTop } from './components/BackToTop'
@@ -32,7 +32,7 @@ export async function Layout({ children, layoutData }: Props) {
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
-  const menu = defaultBlogMenu
+  const menu = resolveBlogMenu(sidebar.menu)
   const footerMenu = sidebar.footerMenu
   const recordInfo = settings.recordSettings
   const showRecord =
@@ -56,6 +56,9 @@ export async function Layout({ children, layoutData }: Props) {
       <SiteCuteDecor variant="blog" />
 
       <div className="relative z-[1] min-h-screen flex flex-col">
+        <a className="blog-skip-link" href="#pjax-main">
+          跳到主要内容
+        </a>
         <header
           className="sticky top-0 z-30 flex flex-col border-b"
           style={{ background: 'var(--header-bg)', borderColor: 'var(--border)' }}

@@ -11,6 +11,14 @@ export type PostListItem = {
   tags: string[]
 }
 
+export type PaginatedPostList = {
+  posts: PostListItem[]
+  page: number
+  pageSize: number
+  totalDocs: number
+  totalPages: number
+}
+
 export type SidebarCategory = {
   id: string
   title: string

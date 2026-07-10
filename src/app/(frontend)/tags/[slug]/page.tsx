@@ -1,17 +1,16 @@
 import { generateThemeMetadata, generateThemeStaticParams, renderThemePage } from '@/themes/render'
+import type { SlugPageProps } from '@/themes/types'
 
 export const revalidate = false
 
-type Args = {
-  params: Promise<{ slug: string }>
+type Args = SlugPageProps
+
+export default function TagPage({ params, searchParams }: Args) {
+  return renderThemePage('tagDetail', { params, searchParams })
 }
 
-export default function TagPage({ params }: Args) {
-  return renderThemePage('tagDetail', { params })
-}
-
-export function generateMetadata({ params }: Args) {
-  return generateThemeMetadata('tagDetail', { params })
+export function generateMetadata({ params, searchParams }: Args) {
+  return generateThemeMetadata('tagDetail', { params, searchParams })
 }
 
 export function generateStaticParams() {

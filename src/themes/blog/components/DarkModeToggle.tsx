@@ -22,7 +22,8 @@ export function DarkModeToggle() {
 
   return (
     <button
-      aria-label="切换暗色模式"
+      aria-label={isDark ? '切换到浅色模式' : '切换到暗色模式'}
+      aria-pressed={isDark}
       className="search-trigger inline-flex items-center justify-center min-h-9 min-w-9 shrink-0 rounded-md border px-1.5 py-1.5 transition-colors hover:bg-(--card-border)"
       id="dark-toggle"
       onClick={toggle}
@@ -31,7 +32,7 @@ export function DarkModeToggle() {
         background: 'var(--card-bg)',
         color: 'var(--text-muted)',
       }}
-      title="明暗"
+      title={isDark ? '浅色模式' : '暗色模式'}
       type="button"
     >
       {!isDark ? (

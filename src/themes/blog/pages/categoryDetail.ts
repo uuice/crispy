@@ -3,32 +3,63 @@ import { notFound } from 'next/navigation'
 
 import type { Category } from '@/payload-types'
 import type { SlugPageProps } from '@/themes/types'
+import { getCategoryPath } from '@/utilities/frontendPaths'
 
 import type { PostListItem } from '../data/types'
-import { queryPostsByCategorySlug } from '../data/queries'
+import { queryPostsByCategorySlugPaginated } from '../data/queries'
+import {
+  BLOG_LIST_PAGE_SIZE,
+  buildPaginationMeta,
+  parsePageParam,
+} from '../pagination'
+import type { PaginationMeta } from '../pagination'
+import { buildBlogListMetadata } from '../seo'
 import { CategoryDetailView } from '../views/CategoryDetailView'
 
 export type CategoryDetailPageData = {
   category: Category
   posts: PostListItem[]
+  pagination: PaginationMeta
 }
 
 export async function loadCategoryDetailPageData({
   params,
+  searchParams,
 }: SlugPageProps): Promise<CategoryDetailPageData> {
   const { slug } = await params
-  const { category, posts } = await queryPostsByCategorySlug(decodeURIComponent(slug))
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const result = await queryPostsByCategorySlugPaginated(
+    decodedSlug,
+    page,
+    BLOG_LIST_PAGE_SIZE,
+  )
 
-  if (!category) notFound()
+  if (!result.category) notFound()
 
-  return { category, posts }
+  return {
+    category: result.category,
+    posts: result.posts,
+    pagination: buildPaginationMeta(result.page, result.pageSize, result.totalDocs),
+  }
 }
 
-export async function categoryDetailPageMetadata({ params }: SlugPageProps): Promise<Metadata> {
+export async function categoryDetailPageMetadata({
+  params,
+  searchParams,
+}: SlugPageProps): Promise<Metadata> {
   const { slug } = await params
-  const { category } = await queryPostsByCategorySlug(decodeURIComponent(slug))
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const { category } = await queryPostsByCategorySlugPaginated(decodedSlug, 1, 1)
   if (!category) return { title: '分类不存在' }
-  return { title: `分类: ${category.title}` }
+
+  return buildBlogListMetadata({
+    title: `分类: ${category.title}`,
+    description: `查看分类「${category.title}」下的全部文章`,
+    path: getCategoryPath(decodedSlug),
+    page,
+  })
 }
 
 export async function categoryDetailStaticParams() {

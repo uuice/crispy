@@ -3,30 +3,59 @@ import { notFound } from 'next/navigation'
 
 import type { Tag } from '@/payload-types'
 import type { SlugPageProps } from '@/themes/types'
+import { getTagPath } from '@/utilities/frontendPaths'
 
 import type { PostListItem } from '../data/types'
-import { queryPostsByTagSlug } from '../data/queries'
+import { queryPostsByTagSlugPaginated } from '../data/queries'
+import {
+  BLOG_LIST_PAGE_SIZE,
+  buildPaginationMeta,
+  parsePageParam,
+} from '../pagination'
+import type { PaginationMeta } from '../pagination'
+import { buildBlogListMetadata } from '../seo'
 import { TagDetailView } from '../views/TagDetailView'
 
 export type TagDetailPageData = {
   tag: Tag
   posts: PostListItem[]
+  pagination: PaginationMeta
 }
 
-export async function loadTagDetailPageData({ params }: SlugPageProps): Promise<TagDetailPageData> {
+export async function loadTagDetailPageData({
+  params,
+  searchParams,
+}: SlugPageProps): Promise<TagDetailPageData> {
   const { slug } = await params
-  const { tag, posts } = await queryPostsByTagSlug(decodeURIComponent(slug))
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const result = await queryPostsByTagSlugPaginated(decodedSlug, page, BLOG_LIST_PAGE_SIZE)
 
-  if (!tag) notFound()
+  if (!result.tag) notFound()
 
-  return { tag, posts }
+  return {
+    tag: result.tag,
+    posts: result.posts,
+    pagination: buildPaginationMeta(result.page, result.pageSize, result.totalDocs),
+  }
 }
 
-export async function tagDetailPageMetadata({ params }: SlugPageProps): Promise<Metadata> {
+export async function tagDetailPageMetadata({
+  params,
+  searchParams,
+}: SlugPageProps): Promise<Metadata> {
   const { slug } = await params
-  const { tag } = await queryPostsByTagSlug(decodeURIComponent(slug))
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const { tag } = await queryPostsByTagSlugPaginated(decodedSlug, 1, 1)
   if (!tag) return { title: '标签不存在' }
-  return { title: `标签: ${tag.title}` }
+
+  return buildBlogListMetadata({
+    title: `标签: ${tag.title}`,
+    description: `查看标签「${tag.title}」下的全部文章`,
+    path: getTagPath(decodedSlug),
+    page,
+  })
 }
 
 export async function tagDetailStaticParams() {

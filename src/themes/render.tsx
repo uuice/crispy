@@ -1,24 +1,33 @@
 import type { ReactNode } from 'react'
 
 import { getActiveFrontendTheme } from './registry'
-import type { SlugPageProps, ThemePageName } from './types'
+import type { SlugPageProps, ThemeListPageProps, ThemePageName } from './types'
 
-export async function renderThemePage(name: ThemePageName, props?: SlugPageProps): Promise<ReactNode> {
+export type ThemeRouteProps = SlugPageProps | ThemeListPageProps
+
+export async function renderThemePage(
+  name: ThemePageName,
+  props?: ThemeRouteProps,
+): Promise<ReactNode> {
   const theme = await getActiveFrontendTheme()
   const page = theme.pages[name]
 
   if (page.params === 'slug') {
-    const data = await (page.load as (input: SlugPageProps) => Promise<unknown>)(props as SlugPageProps)
+    const data = await (page.load as (input: SlugPageProps) => Promise<unknown>)(
+      props as SlugPageProps,
+    )
     const View = page.View as React.ComponentType<{ data: unknown }>
     return <View data={data} />
   }
 
-  const data = await (page.load as () => Promise<unknown>)()
+  const data = await (page.load as (input?: ThemeListPageProps) => Promise<unknown>)(
+    props as ThemeListPageProps | undefined,
+  )
   const View = page.View as React.ComponentType<{ data: unknown }>
   return <View data={data} />
 }
 
-export async function generateThemeMetadata(name: ThemePageName, props?: SlugPageProps) {
+export async function generateThemeMetadata(name: ThemePageName, props?: ThemeRouteProps) {
   const theme = await getActiveFrontendTheme()
   const page = theme.pages[name]
   if (!page.metadata) return {}
@@ -27,7 +36,9 @@ export async function generateThemeMetadata(name: ThemePageName, props?: SlugPag
     return (page.metadata as (input: SlugPageProps) => Promise<unknown>)(props as SlugPageProps)
   }
 
-  return (page.metadata as () => Promise<unknown>)()
+  return (page.metadata as (input?: ThemeListPageProps) => Promise<unknown>)(
+    props as ThemeListPageProps | undefined,
+  )
 }
 
 export async function generateThemeStaticParams(name: ThemePageName) {

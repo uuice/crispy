@@ -5,6 +5,7 @@ import type { Page } from '@/payload-types'
 import type { SlugPageProps } from '@/themes/types'
 
 import { queryPageBySlug } from '../data/queries'
+import { buildBlogPageMetadata } from '../seo'
 import { PageDetailView } from '../views/PageDetailView'
 
 export type PageDetailPageData = {
@@ -33,10 +34,7 @@ export async function pageDetailPageMetadata({ params }: SlugPageProps): Promise
   const { slug } = await params
   const page = await queryPageBySlug(decodeURIComponent(slug))
   if (!page) return { title: '页面不存在' }
-  return {
-    title: page.title,
-    description: page.meta?.description || undefined,
-  }
+  return buildBlogPageMetadata(page)
 }
 
 export async function pageDetailStaticParams() {

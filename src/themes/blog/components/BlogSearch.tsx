@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type SearchDoc = {
@@ -14,10 +15,12 @@ type SearchDoc = {
 }
 
 export function BlogSearch() {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [docs, setDocs] = useState<SearchDoc[] | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const loadStarted = useRef(false)
 
   const loadIndex = useCallback(() => {
@@ -36,19 +39,6 @@ export function BlogSearch() {
   }, [loadIndex])
 
   const close = useCallback(() => setOpen(false), [])
-
-  useEffect(() => {
-    if (open) inputRef.current?.focus()
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [close, open])
 
   const matched = useMemo(() => {
     const term = query.trim().toLowerCase()
@@ -70,6 +60,81 @@ export function BlogSearch() {
       .slice(0, 15)
   }, [docs, query])
 
+  const openFirstMatch = useCallback(() => {
+    const first = matched?.[0]
+    if (!first?.url) return
+    close()
+    router.push(first.url)
+  }, [close, matched, router])
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus()
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [close, open])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        openPanel()
+      }
+    }
+
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openPanel])
+
+  useEffect(() => {
+    if (!open) return
+
+    const panel = panelRef.current
+    if (!panel) return
+
+    const focusable = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute('disabled'))
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const items = focusable()
+      if (items.length === 0) return
+
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    panel.addEventListener('keydown', onKeyDown)
+    return () => panel.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
   const term = query.trim()
   const showEmptyHint = !term
   const showNoMatch = Boolean(term && matched && matched.length === 0)
@@ -78,6 +143,7 @@ export function BlogSearch() {
   return (
     <>
       <button
+        aria-haspopup="dialog"
         aria-label="搜索"
         className="search-trigger inline-flex items-center justify-center min-h-9 min-w-9 shrink-0 rounded-md border px-1.5 py-1.5 transition-colors hover:bg-(--card-border)"
         onClick={openPanel}
@@ -86,7 +152,7 @@ export function BlogSearch() {
           background: 'var(--card-bg)',
           color: 'var(--text-muted)',
         }}
-        title="搜索"
+        title="搜索 (Ctrl+K)"
         type="button"
       >
         <svg
@@ -113,17 +179,25 @@ export function BlogSearch() {
           if (e.target === e.currentTarget) close()
         }}
       >
-        <div aria-label="搜索文章" className="search-panel-terminal search-panel-cute" role="dialog">
+        <div
+          ref={panelRef}
+          aria-label="搜索文章"
+          aria-modal="true"
+          className="search-panel-terminal search-panel-cute"
+          role="dialog"
+        >
           <span aria-hidden="true" className="search-panel-cute-glyph">
             ✦ find · ✧
           </span>
           <div className="search-panel-header flex items-start justify-between gap-2">
             <div>
-              <h2 className="search-panel-title">搜索</h2>
-              <p className="code-label mt-1 mb-2">输入关键词后按回车打开结果</p>
+              <h2 className="search-panel-title" id="blog-search-title">
+                搜索
+              </h2>
+              <p className="code-label mt-1 mb-2">输入关键词，回车打开第一条结果</p>
             </div>
             <button
-              aria-label="关闭"
+              aria-label="关闭搜索"
               className="search-trigger inline-flex items-center justify-center min-h-8 min-w-8 shrink-0 rounded-md border p-1 transition-colors hover:bg-(--card-border)"
               onClick={close}
               style={{
@@ -153,11 +227,16 @@ export function BlogSearch() {
           </div>
           <div className="search-panel-input-wrap">
             <input
+              aria-labelledby="blog-search-title"
               autoComplete="off"
               className="search-panel-input"
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Escape') close()
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  openFirstMatch()
+                }
               }}
               placeholder="输入关键词"
               ref={inputRef}

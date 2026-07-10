@@ -3,38 +3,66 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import type { SlugPageProps } from '@/themes/types'
+import { getUserPath } from '@/utilities/frontendPaths'
 
 import type { PostListItem } from '@/themes/shared/data/types'
 import { pickPublicAuthorBio, pickPublicAuthorBioDetail } from '@/themes/shared/data/types'
-import { queryUserPage } from '../data/queries'
+import { queryUserPagePaginated } from '../data/queries'
+import {
+  BLOG_LIST_PAGE_SIZE,
+  buildPaginationMeta,
+  parsePageParam,
+} from '../pagination'
+import type { PaginationMeta } from '../pagination'
+import { buildBlogListMetadata } from '../seo'
 import { UserDetailView } from '../views/UserDetailView'
 
 export type UserDetailPageData = {
   userName: string
+  userSlug: string
   userBio?: string
   userBioDetail?: DefaultTypedEditorState
   posts: PostListItem[]
+  pagination: PaginationMeta
 }
 
-export async function loadUserDetailPageData({ params }: SlugPageProps): Promise<UserDetailPageData> {
+export async function loadUserDetailPageData({
+  params,
+  searchParams,
+}: SlugPageProps): Promise<UserDetailPageData> {
   const { slug } = await params
-  const page = await queryUserPage(decodeURIComponent(slug))
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const result = await queryUserPagePaginated(decodedSlug, page, BLOG_LIST_PAGE_SIZE)
 
-  if (!page?.user?.name) notFound()
+  if (!result?.user?.name) notFound()
 
   return {
-    userName: page.user.name,
-    userBio: pickPublicAuthorBio(page.user),
-    userBioDetail: pickPublicAuthorBioDetail(page.user),
-    posts: page.posts,
+    userName: result.user.name,
+    userSlug: decodedSlug,
+    userBio: pickPublicAuthorBio(result.user),
+    userBioDetail: pickPublicAuthorBioDetail(result.user),
+    posts: result.posts,
+    pagination: buildPaginationMeta(result.page, result.pageSize, result.totalDocs),
   }
 }
 
-export async function userDetailPageMetadata({ params }: SlugPageProps): Promise<Metadata> {
+export async function userDetailPageMetadata({
+  params,
+  searchParams,
+}: SlugPageProps): Promise<Metadata> {
   const { slug } = await params
-  const page = await queryUserPage(decodeURIComponent(slug))
-  if (!page?.user?.name) return { title: '用户不存在' }
-  return { title: page.user.name }
+  const decodedSlug = decodeURIComponent(slug)
+  const page = parsePageParam(searchParams ? await searchParams : undefined)
+  const result = await queryUserPagePaginated(decodedSlug, 1, 1)
+  if (!result?.user?.name) return { title: '用户不存在' }
+
+  return buildBlogListMetadata({
+    title: result.user.name,
+    description: pickPublicAuthorBio(result.user) || `查看 ${result.user.name} 发布的文章`,
+    path: getUserPath(decodedSlug),
+    page,
+  })
 }
 
 export const userDetailPage = {

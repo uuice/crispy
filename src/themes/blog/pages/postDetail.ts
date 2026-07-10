@@ -6,15 +6,22 @@ import type { SlugPageProps } from '@/themes/types'
 import { getPostPath } from '@/utilities/frontendPaths'
 
 import { queryPostBySlug } from '../data/queries'
+import { buildBlogPostMetadata } from '../seo'
 import { PostDetailView } from '../views/PostDetailView'
+
+export type TaxonomyLink = {
+  title: string
+  slug: string
+}
 
 export type PostDetailPageData = {
   post: Post
   decodedSlug: string
   dateStr: string
-  categories: string[]
-  tags: string[]
+  categories: TaxonomyLink[]
+  tags: TaxonomyLink[]
   articleUrl: string
+  authorName?: string
 }
 
 export async function loadPostDetailPageData({ params }: SlugPageProps): Promise<PostDetailPageData> {
@@ -33,12 +40,18 @@ export async function loadPostDetailPageData({ params }: SlugPageProps): Promise
     : ''
 
   const categories = (post.categories || [])
-    .map((c) => (typeof c === 'object' && c?.title ? c.title : null))
-    .filter(Boolean) as string[]
+    .map((c) =>
+      typeof c === 'object' && c?.title && c?.slug ? { title: c.title, slug: c.slug } : null,
+    )
+    .filter((item): item is TaxonomyLink => item !== null)
 
   const tags = (post.tags || [])
-    .map((t) => (typeof t === 'object' && t?.title ? t.title : null))
-    .filter(Boolean) as string[]
+    .map((t) =>
+      typeof t === 'object' && t?.title && t?.slug ? { title: t.title, slug: t.slug } : null,
+    )
+    .filter((item): item is TaxonomyLink => item !== null)
+
+  const authorName = post.populatedAuthors?.[0]?.name || undefined
 
   return {
     post,
@@ -47,6 +60,7 @@ export async function loadPostDetailPageData({ params }: SlugPageProps): Promise
     categories,
     tags,
     articleUrl: getPostPath(decodedSlug),
+    authorName,
   }
 }
 
@@ -54,10 +68,7 @@ export async function postDetailPageMetadata({ params }: SlugPageProps): Promise
   const { slug } = await params
   const post = await queryPostBySlug(decodeURIComponent(slug))
   if (!post) return { title: '文章不存在' }
-  return {
-    title: post.title,
-    description: post.meta?.description || undefined,
-  }
+  return buildBlogPostMetadata(post)
 }
 
 export async function postDetailStaticParams() {

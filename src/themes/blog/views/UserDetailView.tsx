@@ -1,8 +1,11 @@
 import React from 'react'
 
+import { getUserPath } from '@/utilities/frontendPaths'
+
 import type { UserDetailPageData } from '../pages/userDetail'
 import { Banner } from '../components/Banner'
 import { BlogRichText } from '../components/BlogRichText'
+import { PaginationNav } from '../components/PaginationNav'
 import { PostList } from '../components/PostList'
 
 type Props = {
@@ -10,9 +13,9 @@ type Props = {
 }
 
 export function UserDetailView({ data }: Props) {
-  const { userName, userBio, userBioDetail, posts } = data
+  const { userName, userSlug, userBio, userBioDetail, posts, pagination } = data
   const bannerSubtitle =
-    userBio || (posts.length ? `共 ${posts.length} 篇文章` : undefined)
+    userBio || (pagination.totalDocs ? `共 ${pagination.totalDocs} 篇文章` : undefined)
 
   return (
     <>
@@ -26,13 +29,14 @@ export function UserDetailView({ data }: Props) {
       ) : null}
       <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
-          共 <strong>{posts.length}</strong> 篇文章
+          共 <strong>{pagination.totalDocs}</strong> 篇文章
         </p>
       </div>
       <section className="space-y-5">
         <h2 className="section-title animate-in animate-in-delay-2">{userName} 的文章</h2>
         <PostList emptyMessage="该用户暂无文章" posts={posts} />
       </section>
+      <PaginationNav basePath={getUserPath(userSlug)} pagination={pagination} />
     </>
   )
 }

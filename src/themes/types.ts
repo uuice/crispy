@@ -5,8 +5,15 @@ import type { FrontendThemeId } from './definitions'
 
 export type { FrontendThemeId } from './definitions'
 
+export type ThemeSearchParams = Record<string, string | string[] | undefined>
+
 export type SlugPageProps = {
   params: Promise<{ slug: string }>
+  searchParams?: Promise<ThemeSearchParams>
+}
+
+export type ThemeListPageProps = {
+  searchParams?: Promise<ThemeSearchParams>
 }
 
 export type ThemePageName =

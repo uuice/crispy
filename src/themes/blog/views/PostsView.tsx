@@ -2,21 +2,23 @@ import React from 'react'
 
 import type { PostsPageData } from '../pages/posts'
 import { Banner } from '../components/Banner'
+import { PaginationNav } from '../components/PaginationNav'
 import { PostCard } from '../components/PostCard'
+import { getPostsListPath } from '@/utilities/frontendPaths'
 
 type Props = {
   data: PostsPageData
 }
 
 export function PostsView({ data }: Props) {
-  const { posts, groups } = data
+  const { groups, pagination } = data
 
   return (
     <>
       <Banner subtitle="按时间查看文章" title="归档" />
       <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
-          共 <strong>{posts.length}</strong> 篇文章
+          共 <strong>{pagination.totalDocs}</strong> 篇文章
         </p>
       </div>
       <section className="space-y-8">
@@ -44,6 +46,7 @@ export function PostsView({ data }: Props) {
           ))
         )}
       </section>
+      <PaginationNav basePath={getPostsListPath()} pagination={pagination} />
     </>
   )
 }
