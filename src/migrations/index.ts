@@ -11,6 +11,7 @@ import * as migration_20260708_031500_media_s3_prefix from './20260708_031500_me
 import * as migration_20260708_092200_content_embeddings from './20260708_092200_content_embeddings';
 import * as migration_20260708_175300_content_embeddings_1024 from './20260708_175300_content_embeddings_1024';
 import * as migration_20260709_022335_pages_blocks_related_faq from './20260709_022335_pages_blocks_related_faq';
+import * as migration_20260710_100600_mcp_globals_tools from './20260710_100600_mcp_globals_tools';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260709_022335_pages_blocks_related_faq.up,
     down: migration_20260709_022335_pages_blocks_related_faq.down,
     name: '20260709_022335_pages_blocks_related_faq'
+  },
+  {
+    up: migration_20260710_100600_mcp_globals_tools.up,
+    down: migration_20260710_100600_mcp_globals_tools.down,
+    name: '20260710_100600_mcp_globals_tools',
   },
 ];
