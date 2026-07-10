@@ -11,6 +11,8 @@ import {
   getUserPath,
   slugifyUserName,
 } from '@/utilities/frontendPaths'
+import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { buildNovelSitemapEntries } from '@/utilities/buildNovelsSitemap'
 
 export type SitemapUrlEntry = {
   loc: string
@@ -35,7 +37,7 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
   const siteUrl = getServerSideURL().replace(/\/$/, '')
   const today = new Date().toISOString().split('T')[0]
 
-  const [postsResult, pagesResult, categoriesResult, tagsResult, postsForAuthors] =
+  const [postsResult, pagesResult, categoriesResult, tagsResult, postsForAuthors, novelEntries] =
     await Promise.all([
       payload.find({
         collection: 'posts',
@@ -45,7 +47,7 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
         overrideAccess: false,
         pagination: false,
         sort: '-publishedAt',
-        where: { _status: { equals: 'published' } },
+        where: publishedBlogPostsWhere,
         select: { slug: true, updatedAt: true, publishedAt: true },
       }),
       payload.find({
@@ -81,8 +83,9 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
         overrideAccess: false,
         pagination: false,
         select: { populatedAuthors: true },
-        where: { _status: { equals: 'published' } },
+        where: publishedBlogPostsWhere,
       }),
+      buildNovelSitemapEntries(siteUrl),
     ])
 
   const urls: SitemapUrlEntry[] = [
@@ -152,6 +155,8 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
       priority: '0.5',
     })
   }
+
+  urls.push(...novelEntries)
 
   return urls
 }

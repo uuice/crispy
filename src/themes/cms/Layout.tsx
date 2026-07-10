@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { MobileNav } from './components/MobileNav'
@@ -94,7 +95,10 @@ export async function Layout({ children, layoutData }: Props) {
             <p className="cms-footer-heading">资源</p>
             <ul className="cms-footer-links">
               <li>
-                <Link href="/rss" prefetch={false}>RSS 订阅</Link>
+                <Link href="/rss" prefetch={false}>{frontendLabels.site.blogRss}</Link>
+              </li>
+              <li>
+                <Link href="/novels/rss" prefetch={false}>{frontendLabels.novels.rss}</Link>
               </li>
               <li>
                 <Link href="/sitemap.xml" prefetch={false}>站点地图</Link>

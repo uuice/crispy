@@ -2,6 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import type { SiteSetting } from '@/payload-types'
+import { frontendLabels } from '@/i18n/frontend-labels'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 import { defaultBlogMenu, resolveBlogMenu } from './data/constants'
@@ -203,7 +204,17 @@ export async function Layout({ children, layoutData }: Props) {
                 style={{ color: 'var(--accent)' }}
                 target="_blank"
               >
-                RSS
+                {frontendLabels.site.blogRss}
+              </a>
+              {' · '}
+              <a
+                className="hover:opacity-80"
+                href="/novels/rss"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)' }}
+                target="_blank"
+              >
+                {frontendLabels.novels.rss}
               </a>
               {' · '}
               <a

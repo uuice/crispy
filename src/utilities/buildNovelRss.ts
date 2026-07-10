@@ -2,8 +2,8 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { Post } from '@/payload-types'
-import { getPostPath } from '@/utilities/frontendPaths'
-import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { getNovelChapterPath } from '@/utilities/frontendPaths'
+import { publishedNovelChapterPostsWhere } from '@/utilities/publishedBlogPostsWhere'
 import { getServerSideURL } from '@/utilities/getURL'
 
 function escapeXml(value: string): string {
@@ -19,8 +19,8 @@ function cdata(value: string): string {
   return `<![CDATA[${value.replace(/]]>/g, ']]]]><![CDATA[>')}]]>`
 }
 
-export async function buildBlogRssXml(options?: { feedPath?: string; limit?: number }): Promise<string> {
-  const feedPath = options?.feedPath ?? '/rss.xml'
+export async function buildNovelRssXml(options?: { feedPath?: string; limit?: number }): Promise<string> {
+  const feedPath = options?.feedPath ?? '/novels/rss.xml'
   const limit = options?.limit ?? 50
 
   const payload = await getPayload({ config: configPromise })
@@ -41,41 +41,38 @@ export async function buildBlogRssXml(options?: { feedPath?: string; limit?: num
     overrideAccess: false,
     pagination: false,
     sort: '-publishedAt',
-    where: publishedBlogPostsWhere,
+    where: publishedNovelChapterPostsWhere,
   })
 
   const items = docs
     .map((post: Post) => {
-      const link = `${siteUrl}${getPostPath(post.slug || '')}`
+      const novel = typeof post.novel === 'object' ? post.novel : null
+      if (!novel?.slug || novel.enabled === false || !post.slug) return ''
+
+      const link = `${siteUrl}${getNovelChapterPath(novel.slug, post.slug)}`
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
       const description = post.meta?.description || post.title || ''
-      const categories = (post.categories || [])
-        .map((category) =>
-          typeof category === 'object' && category?.title
-            ? `<category>${cdata(category.title)}</category>`
-            : '',
-        )
-        .filter(Boolean)
-        .join('\n      ')
+      const itemTitle = `[${novel.title}] ${post.title}`
 
       return `<item>
-    <title>${cdata(post.title)}</title>
+    <title>${cdata(itemTitle)}</title>
     <link>${escapeXml(link)}</link>
     <guid isPermaLink="true">${escapeXml(link)}</guid>
     <description>${cdata(description)}</description>
     <content:encoded>${cdata(description)}</content:encoded>
     ${pubDate ? `<pubDate>${pubDate}</pubDate>` : ''}
-    ${categories}
+    <category>${cdata(novel.title)}</category>
   </item>`
     })
+    .filter(Boolean)
     .join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(`${siteName} · 博客`)}</title>
-    <link>${escapeXml(siteUrl)}</link>
-    <description>${escapeXml(siteDescription)}</description>
+    <title>${escapeXml(`${siteName} · 小说`)}</title>
+    <link>${escapeXml(`${siteUrl}/novels`)}</link>
+    <description>${escapeXml(siteDescription || '小说章节更新')}</description>
     <language>zh-CN</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${escapeXml(`${siteUrl}${feedPath}`)}" rel="self" type="application/rss+xml"/>

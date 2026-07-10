@@ -18,6 +18,16 @@ export function NovelsView({ data }: Props) {
       <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
           共 <strong>{novels.length}</strong> 部长篇
+          {' · '}
+          <a
+            className="hover:opacity-80"
+            href="/novels/rss"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--accent)' }}
+            target="_blank"
+          >
+            {frontendLabels.novels.rss}
+          </a>
         </p>
       </div>
       <section className="space-y-4">

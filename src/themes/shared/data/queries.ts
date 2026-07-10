@@ -1,4 +1,5 @@
 import configPromise from '@payload-config'
+import type { Where } from 'payload'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -16,6 +17,10 @@ import {
   slugifyUserName,
 } from '@/utilities/frontendPaths'
 import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
+import {
+  publishedBlogPostsWhere,
+  withPublishedBlogPostsWhere,
+} from '@/utilities/publishedBlogPostsWhere'
 
 import type {
   LatestNovelChapterItem,
@@ -50,6 +55,10 @@ const POST_CARD_SELECT = {
   categories: true,
   tags: true,
 } as const
+
+function blogStreamPostWhere(extra?: Where): Where {
+  return withPublishedBlogPostsWhere(extra)
+}
 
 function formatPostListItem(post: {
   slug?: string | null
@@ -90,7 +99,7 @@ export const queryPosts = cache(async (limit = 1000): Promise<PostListItem[]> =>
     pagination: false,
     select: POST_CARD_SELECT,
     sort: '-publishedAt',
-    where: { _status: { equals: 'published' } },
+    where: publishedBlogPostsWhere,
   })
 
   return docs
@@ -104,7 +113,7 @@ export const queryPublishedPostsCount = cache(async (): Promise<number> => {
   const result = await payload.count({
     collection: 'posts',
     overrideAccess: false,
-    where: { _status: { equals: 'published' } },
+    where: publishedBlogPostsWhere,
   })
 
   return result.totalDocs
@@ -123,7 +132,7 @@ export const queryPostsPaginated = cache(
       pagination: true,
       select: POST_CARD_SELECT,
       sort: '-publishedAt',
-      where: { _status: { equals: 'published' } },
+      where: publishedBlogPostsWhere,
     })
 
     return {
@@ -176,10 +185,7 @@ export const queryPostsByCategorySlug = cache(async (slug: string) => {
     pagination: false,
     select: POST_CARD_SELECT,
     sort: '-publishedAt',
-    where: {
-      _status: { equals: 'published' },
-      categories: { contains: category.id },
-    },
+    where: blogStreamPostWhere({ categories: { contains: category.id } }),
   })
 
   return {
@@ -214,10 +220,7 @@ export const queryPostsByCategorySlugPaginated = cache(
       pagination: true,
       select: POST_CARD_SELECT,
       sort: '-publishedAt',
-      where: {
-        _status: { equals: 'published' },
-        categories: { contains: category.id },
-      },
+      where: blogStreamPostWhere({ categories: { contains: category.id } }),
     })
 
     return {
@@ -255,10 +258,7 @@ export const queryPostsByTagSlug = cache(async (slug: string) => {
     pagination: false,
     select: POST_CARD_SELECT,
     sort: '-publishedAt',
-    where: {
-      _status: { equals: 'published' },
-      tags: { contains: tag.id },
-    },
+    where: blogStreamPostWhere({ tags: { contains: tag.id } }),
   })
 
   return {
@@ -292,10 +292,7 @@ export const queryPostsByTagSlugPaginated = cache(async (slug: string, page = 1,
     pagination: true,
     select: POST_CARD_SELECT,
     sort: '-publishedAt',
-    where: {
-      _status: { equals: 'published' },
-      tags: { contains: tag.id },
-    },
+    where: blogStreamPostWhere({ tags: { contains: tag.id } }),
   })
 
   return {
@@ -337,7 +334,7 @@ export const querySidebarData = cache(async () => {
       overrideAccess: false,
       pagination: false,
       select: { categories: true, tags: true },
-      where: { _status: { equals: 'published' } },
+      where: publishedBlogPostsWhere,
     }),
     payload.findGlobal({ slug: 'header', depth: 1 }),
     payload.findGlobal({ slug: 'footer', depth: 1 }),
@@ -390,7 +387,7 @@ export const querySidebarData = cache(async () => {
     pagination: false,
     sort: '-publishedAt',
     select: { authors: true, populatedAuthors: true },
-    where: { _status: { equals: 'published' } },
+    where: publishedBlogPostsWhere,
   })
 
   const firstUser = defaultUserPost.docs[0]?.populatedAuthors?.[0]

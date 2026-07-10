@@ -5,6 +5,7 @@ import config from '@payload-config'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { getPostPath } from '@/utilities/frontendPaths'
+import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
 
 async function getPostsSitemap() {
   const payload = await getPayload({ config })
@@ -20,11 +21,7 @@ async function getPostsSitemap() {
     depth: 0,
     limit: 1000,
     pagination: false,
-    where: {
-      _status: {
-        equals: 'published',
-      },
-    },
+    where: publishedBlogPostsWhere,
     select: {
       slug: true,
       updatedAt: true,
