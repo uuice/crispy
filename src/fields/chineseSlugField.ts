@@ -1,20 +1,22 @@
-import { slugField } from 'payload'
+import { slugField, type Field, type FieldHook } from 'payload'
 
 import { createSlugifyFromTitleHook } from '@/hooks/slugifyFromTitle'
 import { adminLabels } from '@/i18n/admin-labels'
 
 type SlugFieldOptions = NonNullable<Parameters<typeof slugField>[0]>
 
-type SlugFieldResult = ReturnType<typeof slugField> & {
-  admin?: Record<string, unknown>
-  fields?: Array<Record<string, unknown> & { name?: string; hooks?: { beforeValidate?: unknown[] } }>
-}
+type SlugFieldResult = ReturnType<typeof slugField>
 
 type ChineseSlugFieldOptions = SlugFieldOptions & {
   admin?: Record<string, unknown>
 }
 
-export function chineseSlugField(options: ChineseSlugFieldOptions = {}) {
+function existingBeforeValidateHooks(field: Field): FieldHook[] {
+  if (!('hooks' in field) || !field.hooks?.beforeValidate) return []
+  return field.hooks.beforeValidate
+}
+
+export function chineseSlugField(options: ChineseSlugFieldOptions = {}): Field {
   const { admin, ...slugOptions } = options
   const fieldToUse = slugOptions.fieldToUse ?? 'title'
   const baseField = slugField(slugOptions) as SlugFieldResult
@@ -25,16 +27,12 @@ export function chineseSlugField(options: ChineseSlugFieldOptions = {}) {
     ...baseField,
     fields: (baseField.fields ?? []).map((field) => {
       if ('name' in field && field.name === slugName) {
-        const slugSubField = field as {
-          hooks?: { beforeValidate?: unknown[] }
-        }
-
         return {
           ...field,
           label: adminLabels.slug,
           hooks: {
-            ...(slugSubField.hooks ?? {}),
-            beforeValidate: [slugifyHook, ...(slugSubField.hooks?.beforeValidate ?? [])],
+            ...('hooks' in field ? field.hooks : undefined),
+            beforeValidate: [slugifyHook, ...existingBeforeValidateHooks(field)],
           },
         }
       }
@@ -44,5 +42,5 @@ export function chineseSlugField(options: ChineseSlugFieldOptions = {}) {
       ...(baseField.admin ?? {}),
       ...(admin ?? {}),
     },
-  }
+  } as Field
 }
