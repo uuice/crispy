@@ -39,7 +39,7 @@ const s3StoragePlugin = createS3StoragePlugin()
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
-    collections: ['pages', 'posts'],
+    collections: ['pages', 'posts', 'novel-chapters'],
     overrides: {
       labels: {
         singular: '重定向',
@@ -151,6 +151,9 @@ export const plugins: Plugin[] = [
       jobs: { enabled: true },
       'gallery-items': { enabled: true },
       novels: { enabled: true },
+      'novel-chapters': { enabled: true },
+      'novel-categories': { enabled: true },
+      'novel-tags': { enabled: true },
       'short-links': { enabled: true },
       redirects: { enabled: true },
       forms: { enabled: true },
@@ -227,6 +230,9 @@ export const plugins: Plugin[] = [
       { slug: 'ad-slots' },
       { slug: 'ads' },
       { slug: 'novels' },
+      { slug: 'novel-chapters' },
+      { slug: 'novel-categories' },
+      { slug: 'novel-tags' },
     ],
   }),
   auditLogPlugin(),

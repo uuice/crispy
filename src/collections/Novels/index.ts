@@ -4,6 +4,10 @@ import { novelsReadAccess, novelsWriteAccess } from '@/access/novels'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { aiSuggestAssistField, withAiTextField } from '@/fields/ai'
+import {
+  createRemoveContentEmbeddingHook,
+  createSyncContentEmbeddingHook,
+} from '@/hooks/syncContentEmbeddingHook'
 
 export const Novels: CollectionConfig<'novels'> = {
   slug: 'novels',
@@ -17,10 +21,10 @@ export const Novels: CollectionConfig<'novels'> = {
     update: novelsWriteAccess,
   },
   admin: {
-    group: adminLabels.contentGroup,
+    group: adminLabels.novelGroup,
     defaultColumns: ['title', 'genre', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
-    description: '长篇小说项目设定，一本一条记录；章节通过 posts.novel 关联。',
+    description: '长篇小说项目设定，一本一条记录；章节在 novel-chapters 集合中管理。',
   },
   fields: [
     withAiTextField(
@@ -52,7 +56,27 @@ export const Novels: CollectionConfig<'novels'> = {
       name: 'genre',
       type: 'text',
       label: adminLabels.novelGenre,
-      admin: { description: '如玄幻、科幻、言情、悬疑' },
+      admin: { description: '如玄幻、科幻、言情、悬疑（可与下方小说分类并用）' },
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
+      label: adminLabels.novelCategoriesField,
+      relationTo: 'novel-categories',
+      hasMany: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'tags',
+      type: 'relationship',
+      label: adminLabels.novelTagsField,
+      relationTo: 'novel-tags',
+      hasMany: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'synopsis',
@@ -134,23 +158,30 @@ export const Novels: CollectionConfig<'novels'> = {
           admin: { width: '50%', step: 100 },
         },
         {
-          name: 'chapterCategory',
+          name: 'defaultChapterCategory',
           type: 'relationship',
-          relationTo: 'categories',
-          label: adminLabels.novelChapterCategory,
+          relationTo: 'novel-categories',
+          label: adminLabels.novelDefaultChapterCategory,
           admin: {
             width: '50%',
-            description: '新章节 post 默认归入的分类（可选）。',
+            description: 'Agent 写新章节时默认套用的小说分类（可选）。',
           },
         },
       ],
     },
     {
-      name: 'chapterTag',
+      name: 'defaultChapterTag',
       type: 'relationship',
-      relationTo: 'tags',
-      label: adminLabels.novelChapterTag,
-      admin: { description: '新章节 post 默认标签（可选），如卷名。' },
+      relationTo: 'novel-tags',
+      label: adminLabels.novelDefaultChapterTag,
+      admin: {
+        position: 'sidebar',
+        description: 'Agent 写新章节时默认套用的小说标签（可选），如卷名。',
+      },
     },
   ],
+  hooks: {
+    afterChange: [createSyncContentEmbeddingHook('novels')],
+    afterDelete: [createRemoveContentEmbeddingHook('novels')],
+  },
 }

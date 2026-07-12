@@ -37,6 +37,8 @@ export type ThemePageName =
   | 'novels'
   | 'novelDetail'
   | 'novelChapter'
+  | 'novelCategoryDetail'
+  | 'novelTagDetail'
   | 'notFound'
   | 'serverError'
 

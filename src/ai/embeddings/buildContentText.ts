@@ -1,5 +1,6 @@
 import { fieldValueToPlainText } from '@/ai/fieldValueToPlainText'
 import type { EmbeddableCollection } from '@/ai/embeddings/constants'
+import { relationshipTitles } from '@/ai/embeddings/relationshipTitles'
 
 type DocLike = Record<string, unknown>
 
@@ -12,7 +13,7 @@ export function buildEmbeddableContentText(
 
   if (title) parts.push(title)
 
-  if (collection === 'posts') {
+  if (collection === 'posts' || collection === 'novel-chapters') {
     const content = fieldValueToPlainText(doc.content, 6000)
     if (content) parts.push(content)
     const metaDesc =
@@ -20,6 +21,10 @@ export function buildEmbeddableContentText(
         ? String((doc.meta as { description?: string }).description ?? '').trim()
         : ''
     if (metaDesc) parts.push(metaDesc)
+    const categoryLabels = relationshipTitles(doc.categories)
+    const tagLabels = relationshipTitles(doc.tags)
+    if (categoryLabels.length) parts.push(categoryLabels.join('、'))
+    if (tagLabels.length) parts.push(tagLabels.join('、'))
   }
 
   if (collection === 'pages') {
@@ -33,6 +38,38 @@ export function buildEmbeddableContentText(
         ? String((doc.meta as { description?: string }).description ?? '').trim()
         : ''
     if (metaDesc) parts.push(metaDesc)
+  }
+
+  if (collection === 'novels') {
+    for (const field of [
+      'synopsis',
+      'writingStyle',
+      'worldBuilding',
+      'constraints',
+      'plotOutline',
+      'genre',
+      'currentProgress',
+    ] as const) {
+      const value = typeof doc[field] === 'string' ? doc[field].trim() : ''
+      if (value) parts.push(value)
+    }
+
+    const categoryLabels = relationshipTitles(doc.categories)
+    const tagLabels = relationshipTitles(doc.tags)
+    if (categoryLabels.length) parts.push(categoryLabels.join('、'))
+    if (tagLabels.length) parts.push(tagLabels.join('、'))
+
+    const characters = Array.isArray(doc.characters) ? doc.characters : []
+    for (const character of characters) {
+      if (!character || typeof character !== 'object') continue
+      const record = character as Record<string, unknown>
+      const name = typeof record.name === 'string' ? record.name.trim() : ''
+      const role = typeof record.role === 'string' ? record.role.trim() : ''
+      const personality = typeof record.personality === 'string' ? record.personality.trim() : ''
+      const notes = typeof record.notes === 'string' ? record.notes.trim() : ''
+      const line = [name, role, personality, notes].filter(Boolean).join(' · ')
+      if (line) parts.push(line)
+    }
   }
 
   return parts.join('\n\n').trim()

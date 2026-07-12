@@ -9,7 +9,9 @@ import { jobsPage } from './jobs'
 import { linksPage } from './links'
 import { navigationsPage } from './navigations'
 import { novelChapterPage } from './novelChapter'
+import { novelCategoryDetailPage } from './novelCategoryDetail'
 import { novelDetailPage } from './novelDetail'
+import { novelTagDetailPage } from './novelTagDetail'
 import { novelsPage } from './novels'
 import { notFoundPage } from './notFound'
 import { pageDetailPage } from './pageDetail'
@@ -36,6 +38,8 @@ export const blogPages = {
   novels: novelsPage,
   novelDetail: novelDetailPage,
   novelChapter: novelChapterPage,
+  novelCategoryDetail: novelCategoryDetailPage,
+  novelTagDetail: novelTagDetailPage,
   notFound: notFoundPage,
   serverError: serverErrorPage,
 } satisfies FrontendThemePages

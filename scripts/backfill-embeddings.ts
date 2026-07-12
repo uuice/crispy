@@ -2,11 +2,15 @@ import 'dotenv/config'
 
 import type { Payload } from 'payload'
 
-import type { EmbeddableCollection } from '@/ai/embeddings/constants'
+import { EMBEDDING_COLLECTIONS, type EmbeddableCollection } from '@/ai/embeddings/constants'
 import { resolveEmbeddingConfig } from '@/ai/embeddings/config'
 import { normalizeOpenAiBaseUrl } from '@/ai/providers/openaiCompatible'
 import { syncContentEmbedding } from '@/ai/embeddings/syncContentEmbedding'
 import { createLocalReq } from 'payload'
+
+function backfillDepth(collection: EmbeddableCollection): number {
+  return collection === 'novels' || collection === 'novel-chapters' ? 1 : 0
+}
 
 async function backfillCollection(payload: Payload, collection: EmbeddableCollection) {
   let page = 1
@@ -17,7 +21,7 @@ async function backfillCollection(payload: Payload, collection: EmbeddableCollec
       collection,
       limit: 20,
       page,
-      depth: 0,
+      depth: backfillDepth(collection),
       overrideAccess: true,
     })
 
@@ -55,7 +59,7 @@ async function main() {
   const payload = await getPayload({ config: configPromise.default })
 
   let total = 0
-  for (const collection of ['posts', 'pages'] as const) {
+  for (const collection of EMBEDDING_COLLECTIONS) {
     process.stdout.write(`→ ${collection}\n`)
     total += await backfillCollection(payload, collection)
   }

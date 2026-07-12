@@ -80,6 +80,9 @@ export interface Config {
     ads: Ad;
     jobs: Job;
     novels: Novel;
+    'novel-chapters': NovelChapter;
+    'novel-categories': NovelCategory;
+    'novel-tags': NovelTag;
     'gallery-items': GalleryItem;
     'app-configs': AppConfig;
     comments: Comment;
@@ -121,6 +124,9 @@ export interface Config {
     ads: AdsSelect<false> | AdsSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
     novels: NovelsSelect<false> | NovelsSelect<true>;
+    'novel-chapters': NovelChaptersSelect<false> | NovelChaptersSelect<true>;
+    'novel-categories': NovelCategoriesSelect<false> | NovelCategoriesSelect<true>;
+    'novel-tags': NovelTagsSelect<false> | NovelTagsSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
     'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
@@ -314,7 +320,6 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  novel?: (number | null) | Novel;
   relatedPosts?: (number | Post)[] | null;
   categories?: (number | Category)[] | null;
   tags?: (number | Tag)[] | null;
@@ -465,71 +470,6 @@ export interface FolderInterface {
   folderType?: 'media'[] | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * 长篇小说项目设定，一本一条记录；章节通过 posts.novel 关联。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "novels".
- */
-export interface Novel {
-  id: number;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  /**
-   * 关闭后 AI Agent 写章时可忽略本书设定。
-   */
-  enabled?: boolean | null;
-  /**
-   * 如玄幻、科幻、言情、悬疑
-   */
-  genre?: string | null;
-  /**
-   * 全书梗概，一两段即可。
-   */
-  synopsis?: string | null;
-  /**
-   * 人称、文风、参考作品、对话风格等。
-   */
-  writingStyle?: string | null;
-  worldBuilding?: string | null;
-  /**
-   * 不可违反的硬设定、禁忌、避讳。
-   */
-  constraints?: string | null;
-  characters?:
-    | {
-        name: string;
-        role?: string | null;
-        personality?: string | null;
-        notes?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * 卷/章级别大纲，可随创作更新。
-   */
-  plotOutline?: string | null;
-  /**
-   * 当前写到第几章、上章结尾、下一章要点。写章后由人工或 Agent 更新。
-   */
-  currentProgress?: string | null;
-  chapterTargetWords?: number | null;
-  /**
-   * 新章节 post 默认归入的分类（可选）。
-   */
-  chapterCategory?: (number | null) | Category;
-  /**
-   * 新章节 post 默认标签（可选），如卷名。
-   */
-  chapterTag?: (number | null) | Tag;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1207,6 +1147,156 @@ export interface Job {
   deletedAt?: string | null;
 }
 /**
+ * 长篇小说项目设定，一本一条记录；章节在 novel-chapters 集合中管理。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novels".
+ */
+export interface Novel {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * 关闭后 AI Agent 写章时可忽略本书设定。
+   */
+  enabled?: boolean | null;
+  /**
+   * 如玄幻、科幻、言情、悬疑（可与下方小说分类并用）
+   */
+  genre?: string | null;
+  categories?: (number | NovelCategory)[] | null;
+  tags?: (number | NovelTag)[] | null;
+  /**
+   * 全书梗概，一两段即可。
+   */
+  synopsis?: string | null;
+  /**
+   * 人称、文风、参考作品、对话风格等。
+   */
+  writingStyle?: string | null;
+  worldBuilding?: string | null;
+  /**
+   * 不可违反的硬设定、禁忌、避讳。
+   */
+  constraints?: string | null;
+  characters?:
+    | {
+        name: string;
+        role?: string | null;
+        personality?: string | null;
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 卷/章级别大纲，可随创作更新。
+   */
+  plotOutline?: string | null;
+  /**
+   * 当前写到第几章、上章结尾、下一章要点。写章后由人工或 Agent 更新。
+   */
+  currentProgress?: string | null;
+  chapterTargetWords?: number | null;
+  /**
+   * Agent 写新章节时默认套用的小说分类（可选）。
+   */
+  defaultChapterCategory?: (number | null) | NovelCategory;
+  /**
+   * Agent 写新章节时默认套用的小说标签（可选），如卷名。
+   */
+  defaultChapterTag?: (number | null) | NovelTag;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 小说专用分类，与博客 categories 独立。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-categories".
+ */
+export interface NovelCategory {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 小说专用标签，与博客 tags 独立。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-tags".
+ */
+export interface NovelTag {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 长篇小说章节正文，与博客文章（posts）独立管理。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-chapters".
+ */
+export interface NovelChapter {
+  id: number;
+  title: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  novel: number | Novel;
+  categories?: (number | NovelCategory)[] | null;
+  tags?: (number | NovelTag)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * Curated images shown on the public /gallery-items page. Media library items are not listed until added here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1381,6 +1471,10 @@ export interface Redirect {
       | ({
           relationTo: 'posts';
           value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'novel-chapters';
+          value: number | NovelChapter;
         } | null);
     url?: string | null;
   };
@@ -1773,6 +1867,60 @@ export interface PayloadMcpApiKey {
      */
     delete?: boolean | null;
   };
+  novelChapters?: {
+    /**
+     * Allow clients to find novel-chapters.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create novel-chapters.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update novel-chapters.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete novel-chapters.
+     */
+    delete?: boolean | null;
+  };
+  novelCategories?: {
+    /**
+     * Allow clients to find novel-categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create novel-categories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update novel-categories.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete novel-categories.
+     */
+    delete?: boolean | null;
+  };
+  novelTags?: {
+    /**
+     * Allow clients to find novel-tags.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create novel-tags.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update novel-tags.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete novel-tags.
+     */
+    delete?: boolean | null;
+  };
   shortLinks?: {
     /**
      * Allow clients to find short-links.
@@ -1977,7 +2125,11 @@ export interface PayloadMcpApiKey {
      */
     restoreDocument?: boolean | null;
     /**
-     * 按语义相似度搜索 posts/pages（需 PostgreSQL pgvector + Embedding API Key）。适合自然语言查找内容
+     * 查看某个 collection 或 global 的字段结构（create/update 前应先调用）。含小说章节 slug、发布状态等 hints。
+     */
+    describeResource?: boolean | null;
+    /**
+     * 按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector + Embedding API Key）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。
      */
     semanticSearch?: boolean | null;
   };
@@ -2169,6 +2321,18 @@ export interface PayloadLockedDocument {
         value: number | Novel;
       } | null)
     | ({
+        relationTo: 'novel-chapters';
+        value: number | NovelChapter;
+      } | null)
+    | ({
+        relationTo: 'novel-categories';
+        value: number | NovelCategory;
+      } | null)
+    | ({
+        relationTo: 'novel-tags';
+        value: number | NovelTag;
+      } | null)
+    | ({
         relationTo: 'gallery-items';
         value: number | GalleryItem;
       } | null)
@@ -2330,6 +2494,9 @@ export interface PayloadQueryPreset {
     | 'ads'
     | 'jobs'
     | 'novels'
+    | 'novel-chapters'
+    | 'novel-categories'
+    | 'novel-tags'
     | 'gallery-items'
     | 'app-configs'
     | 'comments'
@@ -2523,7 +2690,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   content?: T;
-  novel?: T;
   relatedPosts?: T;
   categories?: T;
   tags?: T;
@@ -2790,6 +2956,8 @@ export interface NovelsSelect<T extends boolean = true> {
   slug?: T;
   enabled?: T;
   genre?: T;
+  categories?: T;
+  tags?: T;
   synopsis?: T;
   writingStyle?: T;
   worldBuilding?: T;
@@ -2806,8 +2974,58 @@ export interface NovelsSelect<T extends boolean = true> {
   plotOutline?: T;
   currentProgress?: T;
   chapterTargetWords?: T;
-  chapterCategory?: T;
-  chapterTag?: T;
+  defaultChapterCategory?: T;
+  defaultChapterTag?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-chapters_select".
+ */
+export interface NovelChaptersSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  novel?: T;
+  categories?: T;
+  tags?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  publishedAt?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-categories_select".
+ */
+export interface NovelCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "novel-tags_select".
+ */
+export interface NovelTagsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  generateSlug?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3302,6 +3520,30 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
         delete?: T;
       };
+  novelChapters?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  novelCategories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  novelTags?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
   shortLinks?:
     | T
     | {
@@ -3408,6 +3650,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         getCacheSettings?: T;
         updateCacheSettings?: T;
         restoreDocument?: T;
+        describeResource?: T;
         semanticSearch?: T;
       };
   updatedAt?: T;
@@ -3936,6 +4179,9 @@ export interface TaskCreateCollectionExport {
       | 'ads'
       | 'jobs'
       | 'novels'
+      | 'novel-chapters'
+      | 'novel-categories'
+      | 'novel-tags'
       | 'gallery-items'
       | 'app-configs'
       | 'comments'
@@ -4005,6 +4251,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'novel-chapters';
+          value: number | NovelChapter;
         } | null);
     global?: string | null;
     user?: (number | null) | User;

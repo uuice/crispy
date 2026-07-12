@@ -1,5 +1,7 @@
 import type { CollectionSlug, PayloadRequest, Where } from 'payload'
 
+import type { EmbeddableCollection } from '@/ai/embeddings/constants'
+
 import {
   assertAgentAuditLogAccess,
   assertAgentCacheAccess,
@@ -21,6 +23,7 @@ import type { AuditLog, Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
+import { formatEmbeddingSearchHit } from '@/ai/embeddings/formatEmbeddingSearchHit'
 import {
   getFrontendCacheSettings,
   listFrontendCache,
@@ -154,15 +157,15 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'semantic_search',
       description:
-        '按语义相似度搜索 posts/pages 内容（需 PostgreSQL pgvector）。适合自然语言查找相关文章或页面。',
+        '按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 get_document(collection, docId)。',
       parameters: {
         type: 'object',
         properties: {
           query: { type: 'string', description: '自然语言搜索词' },
           collections: {
             type: 'array',
-            items: { type: 'string', enum: ['posts', 'pages'] },
-            description: '限定内容类型，默认 posts + pages',
+            items: { type: 'string', enum: ['posts', 'pages', 'novels', 'novel-chapters'] },
+            description: '限定内容类型，默认 posts + pages + novels + novel-chapters',
           },
           limit: { type: 'number', description: '返回条数，默认 8，最大 25' },
           status: {
@@ -179,7 +182,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'find_documents',
       description:
-        '查询/搜索某个内容类型下的文档列表（不含正文等大字段，详情用 get_document）；查回收站时设 trash: true',
+        '查询/搜索某个内容类型下的文档列表（不含正文等大字段，详情用 get_document）；novel-chapters 的 slug 仅为章节段，须配合 where.novel；查回收站时设 trash: true',
       parameters: {
         type: 'object',
         properties: {
@@ -204,7 +207,8 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     type: 'function',
     function: {
       name: 'get_document',
-      description: '根据 ID 获取单个文档详情',
+      description:
+        '根据 ID 获取单个文档详情（含富文本正文；列表 find_documents 不含 content 等大字段）',
       parameters: {
         type: 'object',
         properties: {
@@ -590,19 +594,19 @@ export async function executeAgentTool(
     case 'semantic_search': {
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
-        ? (args.collections.filter((c) => c === 'posts' || c === 'pages') as (
-            | 'posts'
-            | 'pages'
-          )[])
+        ? (args.collections.filter(
+            (c) => c === 'posts' || c === 'pages' || c === 'novels' || c === 'novel-chapters',
+          ) as EmbeddableCollection[])
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)
       const status = args.status != null ? String(args.status) : undefined
 
-      result = await runSemanticContentSearch(req, query, {
+      const rows = await runSemanticContentSearch(req, query, {
         collections,
         limit,
         status,
       })
+      result = rows.map(formatEmbeddingSearchHit)
       break
     }
 

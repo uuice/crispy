@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { frontendLabels } from '@/i18n/frontend-labels'
-import type { Post } from '@/payload-types'
+import type { NovelChapter } from '@/payload-types'
 import type { NovelChapterPageProps } from '@/themes/types'
 import { getNovelChapterPath } from '@/utilities/frontendPaths'
+import { publishedNovelChaptersWhere } from '@/utilities/publishedContentWhere'
 
 import type { NovelChapterItem } from '../data/types'
 import { queryNovelChapter } from '../data/queries'
@@ -15,7 +16,7 @@ export type NovelChapterPageData = {
   novelTitle: string
   novelUrl: string
   novelsUrl: string
-  post: Post
+  chapter: NovelChapter
   chapters: NovelChapterItem[]
   chapterIndex: number
   prev: NovelChapterItem | null
@@ -33,8 +34,8 @@ export async function loadNovelChapterPageData({
 
   if (!result) notFound()
 
-  const dateStr = result.post.publishedAt
-    ? new Date(result.post.publishedAt).toLocaleDateString('zh-CN', {
+  const dateStr = result.chapter.publishedAt
+    ? new Date(result.chapter.publishedAt).toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -45,7 +46,7 @@ export async function loadNovelChapterPageData({
     novelTitle: result.novel.title,
     novelUrl: result.novelUrl,
     novelsUrl: result.novelsUrl,
-    post: result.post,
+    chapter: result.chapter,
     chapters: result.chapters,
     chapterIndex: result.chapterIndex,
     prev: result.prev,
@@ -61,12 +62,12 @@ export async function novelChapterPageMetadata({
   const result = await queryNovelChapter(decodeURIComponent(slug), decodeURIComponent(chapterSlug))
   if (!result) return { title: frontendLabels.novels.chapterNotFound }
 
-  const meta = await buildBlogPostMetadata(result.post)
+  const meta = await buildBlogPostMetadata(result.chapter)
   return {
     ...meta,
-    title: `${result.post.title} | ${result.novel.title}`,
+    title: `${result.chapter.title} | ${result.novel.title}`,
     alternates: {
-      canonical: getNovelChapterPath(result.novel.slug!, result.post.slug!),
+      canonical: getNovelChapterPath(result.novel.slug!, result.chapter.slug!),
     },
   }
 }
@@ -76,14 +77,14 @@ export async function novelChapterStaticParams() {
   const { getPayload } = await import('payload')
   const payload = await getPayload({ config: configPromise })
 
-  const posts = await payload.find({
-    collection: 'posts',
+  const chapters = await payload.find({
+    collection: 'novel-chapters',
     depth: 0,
     limit: 1000,
     overrideAccess: false,
     pagination: false,
     select: { slug: true, novel: true },
-    where: { _status: { equals: 'published' } },
+    where: publishedNovelChaptersWhere,
   })
 
   const novels = await payload.find({
@@ -100,11 +101,11 @@ export async function novelChapterStaticParams() {
     novels.docs.filter((novel) => novel.slug).map((novel) => [novel.id, novel.slug!]),
   )
 
-  return posts.docs.flatMap((post) => {
-    const novelId = typeof post.novel === 'object' ? post.novel?.id : post.novel
+  return chapters.docs.flatMap((chapter) => {
+    const novelId = typeof chapter.novel === 'object' ? chapter.novel?.id : chapter.novel
     const novelSlug = novelId != null ? novelSlugById.get(novelId) : undefined
-    if (!novelSlug || !post.slug) return []
-    return [{ slug: novelSlug, chapterSlug: post.slug }]
+    if (!novelSlug || !chapter.slug) return []
+    return [{ slug: novelSlug, chapterSlug: chapter.slug }]
   })
 }
 

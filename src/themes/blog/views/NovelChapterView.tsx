@@ -11,7 +11,7 @@ type Props = {
 }
 
 export function NovelChapterView({ data }: Props) {
-  const { novelTitle, novelUrl, novelsUrl, post, chapters, chapterIndex, prev, next, dateStr } = data
+  const { novelTitle, novelUrl, novelsUrl, chapter, chapters, chapterIndex, prev, next, dateStr } = data
 
   return (
     <>
@@ -50,18 +50,18 @@ export function NovelChapterView({ data }: Props) {
               margin: 0,
             }}
           >
-            {post.title}
+            {chapter.title}
           </h1>
           {dateStr ? (
             <p className="doc-detail-meta m-0">
               <span className="doc-detail-meta-label">更新：</span>
-              <time dateTime={post.publishedAt || undefined}>{dateStr}</time>
+              <time dateTime={chapter.publishedAt || undefined}>{dateStr}</time>
             </p>
           ) : null}
         </header>
 
-        {post.content ? (
-          <BlogArticleBody content={post.content} />
+        {chapter.content ? (
+          <BlogArticleBody content={chapter.content} />
         ) : (
           <div className="p-6 md:p-10">
             <p className="m-0 code-label">{frontendLabels.novels.emptyChapter}</p>

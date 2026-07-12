@@ -11,7 +11,7 @@ import {
   getUserPath,
   slugifyUserName,
 } from '@/utilities/frontendPaths'
-import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { publishedBlogPostsWhere } from '@/utilities/publishedContentWhere'
 import { buildNovelSitemapEntries } from '@/utilities/buildNovelsSitemap'
 
 export type SitemapUrlEntry = {

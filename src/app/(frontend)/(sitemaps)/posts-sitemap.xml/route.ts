@@ -5,7 +5,7 @@ import config from '@payload-config'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { getPostPath } from '@/utilities/frontendPaths'
-import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { publishedBlogPostsWhere } from '@/utilities/publishedContentWhere'
 
 async function getPostsSitemap() {
   const payload = await getPayload({ config })

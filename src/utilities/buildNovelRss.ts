@@ -1,9 +1,9 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import type { Post } from '@/payload-types'
+import type { NovelChapter } from '@/payload-types'
 import { getNovelChapterPath } from '@/utilities/frontendPaths'
-import { publishedNovelChapterPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { publishedNovelChaptersWhere } from '@/utilities/publishedContentWhere'
 import { getServerSideURL } from '@/utilities/getURL'
 
 function escapeXml(value: string): string {
@@ -35,24 +35,24 @@ export async function buildNovelRssXml(options?: { feedPath?: string; limit?: nu
   const siteDescription = settings.siteDescription || ''
 
   const { docs } = await payload.find({
-    collection: 'posts',
+    collection: 'novel-chapters',
     depth: 1,
     limit,
     overrideAccess: false,
     pagination: false,
     sort: '-publishedAt',
-    where: publishedNovelChapterPostsWhere,
+    where: publishedNovelChaptersWhere,
   })
 
   const items = docs
-    .map((post: Post) => {
-      const novel = typeof post.novel === 'object' ? post.novel : null
-      if (!novel?.slug || novel.enabled === false || !post.slug) return ''
+    .map((chapter: NovelChapter) => {
+      const novel = typeof chapter.novel === 'object' ? chapter.novel : null
+      if (!novel?.slug || novel.enabled === false || !chapter.slug) return ''
 
-      const link = `${siteUrl}${getNovelChapterPath(novel.slug, post.slug)}`
-      const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : ''
-      const description = post.meta?.description || post.title || ''
-      const itemTitle = `[${novel.title}] ${post.title}`
+      const link = `${siteUrl}${getNovelChapterPath(novel.slug, chapter.slug)}`
+      const pubDate = chapter.publishedAt ? new Date(chapter.publishedAt).toUTCString() : ''
+      const description = chapter.meta?.description || chapter.title || ''
+      const itemTitle = `[${novel.title}] ${chapter.title}`
 
       return `<item>
     <title>${cdata(itemTitle)}</title>

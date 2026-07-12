@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 
 import type { Post } from '@/payload-types'
 import { getPostPath } from '@/utilities/frontendPaths'
-import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { publishedBlogPostsWhere } from '@/utilities/publishedContentWhere'
 import { getServerSideURL } from '@/utilities/getURL'
 
 function escapeXml(value: string): string {

@@ -65,6 +65,14 @@ export function getNovelChapterPath(novelSlug: string, chapterSlug: string): str
   return `${getNovelPath(novelSlug)}/${encodeURIComponent(chapterSlug)}`
 }
 
+export function getNovelCategoryPath(slug: string): string {
+  return `/novel-categories/${encodeURIComponent(slug)}`
+}
+
+export function getNovelTagPath(slug: string): string {
+  return `/novel-tags/${encodeURIComponent(slug)}`
+}
+
 export function getCollectionDocumentPath(collection: CollectionSlug, slug: string): string | null {
   switch (collection) {
     case 'posts':
@@ -75,6 +83,16 @@ export function getCollectionDocumentPath(collection: CollectionSlug, slug: stri
       return getCategoryPath(slug)
     case 'tags':
       return getTagPath(slug)
+    case 'novels':
+      return getNovelPath(slug)
+    case 'novel-chapters': {
+      const [novelSlug, chapterSlug] = slug.split('/')
+      return novelSlug && chapterSlug ? getNovelChapterPath(novelSlug, chapterSlug) : null
+    }
+    case 'novel-categories':
+      return getNovelCategoryPath(slug)
+    case 'novel-tags':
+      return getNovelTagPath(slug)
     case 'users':
       return getUserPath(slug)
     default:

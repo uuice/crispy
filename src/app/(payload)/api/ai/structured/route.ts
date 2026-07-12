@@ -4,6 +4,7 @@ import { createLocalReq, getPayload } from 'payload'
 
 import { assertAiAccess } from '@/ai/access'
 import { runAiSuggestTaxonomy } from '@/ai/runCompletion'
+import { resolveSuggestTaxonomySource } from '@/ai/suggestTaxonomySources'
 import type { AiStructuredRequest } from '@/ai/types'
 
 export async function POST(request: Request): Promise<Response> {
@@ -31,9 +32,14 @@ export async function POST(request: Request): Promise<Response> {
     const req = await createLocalReq({ user }, payload)
     await assertAiAccess(req, body.collection, body.docId)
 
+    const taxonomySource = resolveSuggestTaxonomySource(body.collection)
+    if (!taxonomySource) {
+      return Response.json({ error: '该集合不支持分类/标签建议' }, { status: 400 })
+    }
+
     const [categories, tags, siteSettings] = await Promise.all([
       payload.find({
-        collection: 'categories',
+        collection: taxonomySource.categoryCollection,
         limit: 200,
         pagination: false,
         depth: 0,
@@ -41,7 +47,7 @@ export async function POST(request: Request): Promise<Response> {
         overrideAccess: false,
       }),
       payload.find({
-        collection: 'tags',
+        collection: taxonomySource.tagCollection,
         limit: 200,
         pagination: false,
         depth: 0,
@@ -58,8 +64,12 @@ export async function POST(request: Request): Promise<Response> {
     const context = {
       ...body.context,
       siteName: body.context.siteName ?? siteSettings?.siteName ?? 'Crispy',
-      existingCategories: categories.docs.map((c) => c.title).filter(Boolean) as string[],
-      existingTags: tags.docs.map((t) => t.title).filter(Boolean) as string[],
+      existingCategories: categories.docs
+        .map((c) => ('title' in c && typeof c.title === 'string' ? c.title : ''))
+        .filter(Boolean),
+      existingTags: tags.docs
+        .map((t) => ('title' in t && typeof t.title === 'string' ? t.title : ''))
+        .filter(Boolean),
     }
 
     const result = await runAiSuggestTaxonomy(context)

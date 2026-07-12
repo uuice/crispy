@@ -6,7 +6,7 @@ import {
   getNovelPath,
   getNovelsPath,
 } from '@/utilities/frontendPaths'
-import { publishedNovelChapterPostsWhere } from '@/utilities/publishedBlogPostsWhere'
+import { publishedNovelChaptersWhere } from '@/utilities/publishedContentWhere'
 import { getServerSideURL } from '@/utilities/getURL'
 
 import type { SitemapUrlEntry } from './buildBlogSitemap'
@@ -34,14 +34,14 @@ export async function buildNovelSitemapEntries(siteUrlInput?: string): Promise<S
       select: { slug: true, updatedAt: true },
     }),
     payload.find({
-      collection: 'posts',
+      collection: 'novel-chapters',
       depth: 1,
       draft: false,
       limit: 5000,
       overrideAccess: false,
       pagination: false,
       sort: '-publishedAt',
-      where: publishedNovelChapterPostsWhere,
+      where: publishedNovelChaptersWhere,
       select: { slug: true, updatedAt: true, publishedAt: true, novel: true },
     }),
   ])
@@ -65,13 +65,13 @@ export async function buildNovelSitemapEntries(siteUrlInput?: string): Promise<S
     })
   }
 
-  for (const post of novelChaptersResult.docs) {
-    if (!post.slug) continue
-    const novel = typeof post.novel === 'object' ? post.novel : null
+  for (const chapter of novelChaptersResult.docs) {
+    if (!chapter.slug) continue
+    const novel = typeof chapter.novel === 'object' ? chapter.novel : null
     if (!novel?.slug || novel.enabled === false) continue
     urls.push({
-      loc: `${siteUrl}${getNovelChapterPath(novel.slug, post.slug)}`,
-      lastmod: toDateOnly(post.updatedAt || post.publishedAt, today),
+      loc: `${siteUrl}${getNovelChapterPath(novel.slug, chapter.slug)}`,
+      lastmod: toDateOnly(chapter.updatedAt || chapter.publishedAt, today),
       changefreq: 'weekly',
       priority: '0.7',
     })

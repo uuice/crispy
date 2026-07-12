@@ -40,7 +40,19 @@ export const COLLECTION_AI_PROFILES: Record<string, CollectionAiProfile> = {
   },
   novels: {
     contentFields: ['synopsis', 'writingStyle', 'worldBuilding', 'plotOutline', 'currentProgress'],
-    suggest: { descriptionPath: 'synopsis' },
+    suggest: { descriptionPath: 'synopsis', taxonomy: true },
+  },
+  'novel-categories': {
+    contentFields: [],
+  },
+  'novel-tags': {
+    contentFields: ['description'],
+    suggest: { descriptionPath: 'description' },
+  },
+  'novel-chapters': {
+    contentFields: ['content'],
+    seo: true,
+    suggest: { taxonomy: true },
   },
   links: {
     contentFields: ['description'],

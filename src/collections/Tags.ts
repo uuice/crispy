@@ -16,6 +16,7 @@ export const Tags: CollectionConfig = {
     update: isEditor,
   },
   admin: {
+    group: adminLabels.contentGroup,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
   },

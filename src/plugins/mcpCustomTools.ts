@@ -8,7 +8,10 @@ import {
   assertAgentCollectionAccess,
   assertAgentGlobalAccess,
 } from '@/ai/agent/access'
+import { describeCollectionSchema, describeGlobalSchema } from '@/ai/agent/describeResource'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
+import type { EmbeddableCollection } from '@/ai/embeddings/constants'
+import { formatEmbeddingSearchHit } from '@/ai/embeddings/formatEmbeddingSearchHit'
 import {
   getFrontendCacheSettings,
   listFrontendCache,
@@ -124,29 +127,59 @@ export const mcpCustomTools: McpCustomTool[] = [
     },
   },
   {
+    name: 'describe_resource',
+    description:
+      '查看某个 collection 或 global 的字段结构（create/update 前应先调用）。含小说章节 slug、发布状态等 hints。',
+    parameters: {
+      kind: z.enum(['collection', 'global']),
+      slug: z.string(),
+    },
+    handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
+      const kind = String(args.kind ?? '')
+      const slug = String(args.slug ?? '')
+      if (kind === 'collection') {
+        await assertAgentCollectionAccess(req, slug, 'read')
+        return mcpTextResult(describeCollectionSchema(req, slug))
+      }
+      if (kind === 'global') {
+        await assertAgentGlobalAccess(req, slug, 'read')
+        return mcpTextResult(describeGlobalSchema(req, slug))
+      }
+      throw new Error('kind 必须是 collection 或 global')
+    },
+  },
+  {
     name: 'semantic_search',
     description:
-      '按语义相似度搜索 posts/pages（需 PostgreSQL pgvector + Embedding API Key）。适合自然语言查找内容',
+      '按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector + Embedding API Key）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。',
     parameters: {
       query: z.string(),
-      collections: z.array(z.enum(['posts', 'pages'])).optional(),
+      collections: z
+        .array(z.enum(['posts', 'pages', 'novels', 'novel-chapters']))
+        .optional(),
       limit: z.number().optional(),
       status: z.string().optional(),
     },
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
-        ? (args.collections.filter((c) => c === 'posts' || c === 'pages') as ('posts' | 'pages')[])
+        ? (args.collections.filter(
+            (c) =>
+              c === 'posts' ||
+              c === 'pages' ||
+              c === 'novels' ||
+              c === 'novel-chapters',
+          ) as EmbeddableCollection[])
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)
       const status = args.status != null ? String(args.status) : undefined
 
-      const result = await runSemanticContentSearch(req, query, {
+      const rows = await runSemanticContentSearch(req, query, {
         collections,
         limit,
         status,
       })
-      return mcpTextResult(result)
+      return mcpTextResult(rows.map(formatEmbeddingSearchHit))
     },
   },
 ]

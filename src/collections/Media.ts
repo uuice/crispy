@@ -24,6 +24,9 @@ export const Media: CollectionConfig = {
   slug: 'media',
   labels: adminLabels.media,
   folders: true,
+  admin: {
+    group: adminLabels.contentGroup,
+  },
   access: {
     create: mediaCreateAccess,
     delete: mediaDeleteAccess,

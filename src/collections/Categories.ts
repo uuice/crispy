@@ -16,6 +16,7 @@ export const Categories: CollectionConfig = {
     update: isEditor,
   },
   admin: {
+    group: adminLabels.contentGroup,
     useAsTitle: 'title',
   },
   fields: [

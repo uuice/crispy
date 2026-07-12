@@ -86,6 +86,13 @@ export async function semanticSearchContent(
   const statusFilter =
     options.status != null ? sql`AND status = ${options.status}` : sql``
 
+  const collectionFilter =
+    options.collections?.length === 1
+      ? sql`AND collection = ${options.collections[0]}`
+      : options.collections?.length
+        ? sql`AND collection IN (${sql.join(options.collections.map((c) => sql`${c}`), sql`, `)})`
+        : sql`AND collection IN ('posts', 'pages', 'novels', 'novel-chapters')`
+
   const result = await req.payload.db.drizzle.execute(sql`
     SELECT
       id,
@@ -98,8 +105,7 @@ export async function semanticSearchContent(
       1 - (embedding <=> ${sql.raw(`'${vec}'::vector`)}) AS similarity
     FROM ${sql.raw(CONTENT_EMBEDDINGS_TABLE)}
     WHERE embedding IS NOT NULL
-      AND collection IN ('posts', 'pages')
-      ${options.collections?.length === 1 ? sql`AND collection = ${options.collections[0]}` : sql``}
+      ${collectionFilter}
       ${statusFilter}
       AND 1 - (embedding <=> ${sql.raw(`'${vec}'::vector`)}) >= ${minSimilarity}
     ORDER BY embedding <=> ${sql.raw(`'${vec}'::vector`)}

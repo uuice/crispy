@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { assertAgentCollectionAccess } from '@/ai/agent/access'
 import { describeCollectionSchema } from '@/ai/agent/describeResource'
 import { executeAgentTool } from '@/ai/agent/tools'
-import type { User } from '@/payload-types'
+import type { NovelCategory, NovelTag, User } from '@/payload-types'
 
 let payload: Payload
 
@@ -345,5 +345,41 @@ describe('AI agent', () => {
     })
 
     expect(active.deletedAt).toBeFalsy()
+  })
+
+  it('auto-generates novel-category slug from title when slug is omitted', async () => {
+    const title = `测试分类-${Date.now()}`
+    const created = (await payload.create({
+      collection: 'novel-categories',
+      data: { title },
+      overrideAccess: true,
+    } as never)) as NovelCategory
+
+    expect(created.slug).toBeTruthy()
+    expect(created.slug).toMatch(/^ce-shi-fen-lei/)
+
+    await payload.delete({
+      collection: 'novel-categories',
+      id: created.id,
+      overrideAccess: true,
+    })
+  })
+
+  it('auto-generates novel-tag slug from title when slug is omitted', async () => {
+    const title = `测试标签-${Date.now()}`
+    const created = (await payload.create({
+      collection: 'novel-tags',
+      data: { title },
+      overrideAccess: true,
+    } as never)) as NovelTag
+
+    expect(created.slug).toBeTruthy()
+    expect(created.slug).toMatch(/^ce-shi-biao-qian/)
+
+    await payload.delete({
+      collection: 'novel-tags',
+      id: created.id,
+      overrideAccess: true,
+    })
   })
 })

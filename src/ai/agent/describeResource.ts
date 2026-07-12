@@ -111,6 +111,35 @@ function describeField(field: Field, prefix = ''): DescribedField[] {
   return [described]
 }
 
+const COLLECTION_HINTS: Record<string, string[]> = {
+  novels: [
+    'novels 无 versions；前台可见性用 enabled: true（非 _status）',
+    '章节在 novel-chapters；taxonomy 用 novel-categories / novel-tags（勿用博客 categories/tags）',
+  ],
+  'novel-chapters': [
+    'novel 字段必填（relationship → novels）',
+    'slug 仅存章节段（如 zoulang-jintou），非 URL 复合路径',
+    '前台 URL / embedding / semantic_search 的 slug 为 {novelSlug}/{chapterSlug}',
+    'find 按章节 slug 查询须同时 where.novel；勿用复合 slug 查文档 slug 字段',
+    '发布：_status 设为 published；草稿不进前台与 semantic_search 索引',
+    'find 列表不含 content；读全文用 get_document',
+    'categories/tags 关联 novel-categories / novel-tags',
+    '写章发布后建议 purge_frontend_cache',
+  ],
+  posts: ['发布草稿：_status 设为 published'],
+  pages: ['发布草稿：_status 设为 published'],
+  comments: ['审核：status 为 pending/approved/rejected/spam'],
+}
+
+function resolveCollectionHints(slug: string): string[] {
+  return [
+    'relationship/upload 字段传 ID 或 ID 数组',
+    'richText 为 Lexical JSON',
+    '查回收站：find_documents(trash: true)；恢复：restore_document',
+    ...(COLLECTION_HINTS[slug] ?? []),
+  ]
+}
+
 export function describeCollectionSchema(req: PayloadRequest, slug: string): unknown {
   if (!isAgentCollection(slug)) {
     throw new Error(`不支持的内容类型：${slug}`)
@@ -129,13 +158,7 @@ export function describeCollectionSchema(req: PayloadRequest, slug: string): unk
     slug,
     label: labels?.singular ?? slug,
     fields: fields.filter((f) => f.name && !f.name.includes('[]')),
-    hints: [
-      'relationship/upload 字段传 ID 或 ID 数组',
-      'richText 为 Lexical JSON',
-      'posts/pages 草稿发布：_status 设为 published',
-      'comments 审核：status 为 pending/approved/rejected/spam',
-      '查回收站：find_documents(trash: true)；恢复：restore_document',
-    ],
+    hints: resolveCollectionHints(slug),
   }
 }
 

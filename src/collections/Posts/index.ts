@@ -62,6 +62,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
+    group: adminLabels.contentGroup,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
@@ -117,15 +118,6 @@ export const Posts: CollectionConfig<'posts'> = {
         {
           fields: [
             aiSuggestAssistField({ contentFieldPaths: 'content' }),
-            {
-              name: 'novel',
-              type: 'relationship',
-              label: adminLabels.postNovel,
-              relationTo: 'novels',
-              admin: {
-                position: 'sidebar',
-              },
-            },
             {
               name: 'relatedPosts',
               type: 'relationship',

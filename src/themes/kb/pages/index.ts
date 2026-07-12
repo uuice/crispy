@@ -9,7 +9,9 @@ import { jobsPage } from './jobs'
 import { linksPage } from './links'
 import { navigationsPage } from './navigations'
 import { novelChapterPage } from '../../blog/pages/novelChapter'
+import { novelCategoryDetailPage } from '../../blog/pages/novelCategoryDetail'
 import { novelDetailPage } from '../../blog/pages/novelDetail'
+import { novelTagDetailPage } from '../../blog/pages/novelTagDetail'
 import { novelsPage } from '../../blog/pages/novels'
 import { notFoundPage } from './notFound'
 import { pageDetailPage } from './pageDetail'
@@ -36,6 +38,8 @@ export const kbPages = {
   novels: novelsPage,
   novelDetail: novelDetailPage,
   novelChapter: novelChapterPage,
+  novelCategoryDetail: novelCategoryDetailPage,
+  novelTagDetail: novelTagDetailPage,
   notFound: notFoundPage,
   serverError: serverErrorPage,
 } satisfies FrontendThemePages

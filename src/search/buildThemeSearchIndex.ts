@@ -1,6 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import { fieldValueToPlainText } from '@/ai/fieldValueToPlainText'
 import type { ThemeSearchIndexItem } from '@/themes/types'
 import {
   getGalleryItemsPath,
@@ -12,8 +13,8 @@ import {
 } from '@/utilities/frontendPaths'
 import {
   publishedBlogPostsWhere,
-  publishedNovelChapterPostsWhere,
-} from '@/utilities/publishedBlogPostsWhere'
+  publishedNovelChaptersWhere,
+} from '@/utilities/publishedContentWhere'
 
 export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
   const payload = await getPayload({ config: configPromise })
@@ -80,7 +81,7 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
       }),
       payload.find({
         collection: 'novels',
-        depth: 0,
+        depth: 1,
         limit: 500,
         overrideAccess: false,
         pagination: false,
@@ -91,11 +92,13 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
           synopsis: true,
           writingStyle: true,
           plotOutline: true,
+          categories: true,
+          tags: true,
         },
         where: { enabled: { equals: true } },
       }),
       payload.find({
-        collection: 'posts',
+        collection: 'novel-chapters',
         depth: 1,
         limit: 2000,
         overrideAccess: false,
@@ -103,11 +106,14 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
         select: {
           title: true,
           slug: true,
+          content: true,
           meta: true,
           novel: true,
+          categories: true,
+          tags: true,
         },
         sort: '-publishedAt',
-        where: publishedNovelChapterPostsWhere,
+        where: publishedNovelChaptersWhere,
       }),
     ])
 
@@ -183,7 +189,13 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
     if (!novel.slug || !novel.title) continue
 
     const body = [novel.synopsis, novel.writingStyle, novel.plotOutline].filter(Boolean).join('\n')
-    const categories = novel.genre ? [novel.genre] : []
+    const novelCategories = (novel.categories || [])
+      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
+      .filter(Boolean) as string[]
+    const novelTags = (novel.tags || [])
+      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
+      .filter(Boolean) as string[]
+    const categories = [...novelCategories, ...(novel.genre ? [novel.genre] : [])]
 
     items.push({
       id: `novel:${novel.slug}`,
@@ -191,28 +203,40 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
       url: getNovelPath(novel.slug),
       excerpt: (novel.synopsis || '').slice(0, 200),
       categories,
-      tags: ['小说'],
+      tags: ['小说', ...novelTags],
       body: body.slice(0, 8000),
     })
   }
 
-  for (const post of novelChaptersResult.docs) {
-    if (!post.slug || !post.title) continue
+  for (const chapter of novelChaptersResult.docs) {
+    if (!chapter.slug || !chapter.title) continue
 
-    const novel = typeof post.novel === 'object' ? post.novel : null
+    const novel = typeof chapter.novel === 'object' ? chapter.novel : null
     if (!novel?.slug || novel.enabled === false) continue
 
-    const excerpt = post.meta?.description || post.title
-    const categories = novel.genre ? [novel.genre] : []
+    const contentText = fieldValueToPlainText(chapter.content, 8000)
+    const excerpt = chapter.meta?.description || contentText.slice(0, 200) || chapter.title
+    const chapterCategories = (chapter.categories || [])
+      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
+      .filter(Boolean) as string[]
+    const chapterTags = (chapter.tags || [])
+      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
+      .filter(Boolean) as string[]
+    const categories =
+      chapterCategories.length > 0
+        ? chapterCategories
+        : novel.genre
+          ? [novel.genre]
+          : []
 
     items.push({
-      id: `novel-chapter:${novel.slug}:${post.slug}`,
-      title: `${post.title}`,
-      url: getNovelChapterPath(novel.slug, post.slug),
+      id: `novel-chapter:${novel.slug}:${chapter.slug}`,
+      title: `${chapter.title}`,
+      url: getNovelChapterPath(novel.slug, chapter.slug),
       excerpt: excerpt.slice(0, 200),
       categories,
-      tags: ['小说', novel.title],
-      body: excerpt.slice(0, 8000),
+      tags: ['小说', novel.title, ...chapterTags],
+      body: (contentText || excerpt).slice(0, 8000),
     })
   }
 

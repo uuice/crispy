@@ -8,6 +8,11 @@ export function createSlugifyFromTitleHook(fieldToUse = 'title'): FieldHook {
       return value
     }
 
+    const generateSlug = siblingData?.generateSlug ?? data?.generateSlug
+    if (generateSlug === false) {
+      return value
+    }
+
     const source =
       (data?.[fieldToUse] as string | undefined) ??
       (siblingData?.[fieldToUse] as string | undefined)

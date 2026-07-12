@@ -26,7 +26,10 @@ import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
+import { NovelCategories } from './collections/NovelCategories'
+import { NovelChapters } from './collections/NovelChapters'
 import { Novels } from './collections/Novels'
+import { NovelTags } from './collections/NovelTags'
 import { CacheSettings } from './CacheSettings/config'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
@@ -159,6 +162,9 @@ export default buildConfig({
     Ads,
     Jobs,
     Novels,
+    NovelChapters,
+    NovelCategories,
+    NovelTags,
     GalleryItems,
     AppConfigs,
     Comments,
