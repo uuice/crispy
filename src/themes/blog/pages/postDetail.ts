@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import type { Post } from '@/payload-types'
 import type { SlugPageProps } from '@/themes/types'
 import { getPostPath } from '@/utilities/frontendPaths'
+import { resolveNovelChapterPostUrl } from '@/utilities/resolveNovelChapterPostUrl'
+import { publishedBlogPostsWhere } from '@/utilities/publishedBlogPostsWhere'
 
 import { queryPostBySlug } from '../data/queries'
 import { buildBlogPostMetadata } from '../seo'
@@ -30,6 +32,9 @@ export async function loadPostDetailPageData({ params }: SlugPageProps): Promise
   const post = await queryPostBySlug(decodedSlug)
 
   if (!post) notFound()
+
+  const novelChapterUrl = resolveNovelChapterPostUrl(post)
+  if (novelChapterUrl) redirect(novelChapterUrl)
 
   const dateStr = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('zh-CN', {
@@ -68,6 +73,10 @@ export async function postDetailPageMetadata({ params }: SlugPageProps): Promise
   const { slug } = await params
   const post = await queryPostBySlug(decodeURIComponent(slug))
   if (!post) return { title: '文章不存在' }
+
+  const novelChapterUrl = resolveNovelChapterPostUrl(post)
+  if (novelChapterUrl) redirect(novelChapterUrl)
+
   return buildBlogPostMetadata(post)
 }
 
@@ -83,6 +92,7 @@ export async function postDetailStaticParams() {
     overrideAccess: false,
     pagination: false,
     select: { slug: true },
+    where: publishedBlogPostsWhere,
   })
 
   return posts.docs.map(({ slug }) => ({ slug: slug || '' }))

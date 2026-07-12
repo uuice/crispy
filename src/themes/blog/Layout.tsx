@@ -4,9 +4,11 @@ import React from 'react'
 import type { SiteSetting } from '@/payload-types'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
+import { getRequestPathname } from '@/utilities/requestPathname'
 
 import { defaultBlogMenu, resolveBlogMenu } from './data/constants'
 import type { SidebarData } from './data/types'
+import { isNovelsListPath } from './data/novelRoutes'
 
 import { BackToTop, FooterBackToTop } from './components/BackToTop'
 import { BlogSearch } from './components/BlogSearch'
@@ -32,9 +34,10 @@ const emptySidebar: SidebarData = {
 }
 
 export async function Layout({ children, layoutData }: Props) {
+  const pathname = await getRequestPathname()
   const [settings, latestNovelChapters] = await Promise.all([
     getCachedSiteSettings()(),
-    queryLatestNovelChapters(20),
+    isNovelsListPath(pathname) ? queryLatestNovelChapters(20) : Promise.resolve([]),
   ])
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
