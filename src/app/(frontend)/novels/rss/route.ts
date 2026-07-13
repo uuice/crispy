@@ -2,6 +2,7 @@ import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { buildNovelRssXml } from '@/utilities/buildNovelRss'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = false
 
 export async function GET() {

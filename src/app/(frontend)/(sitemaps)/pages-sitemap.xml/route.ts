@@ -6,6 +6,8 @@ import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
 
+export const dynamic = 'force-dynamic'
+
 function pageSitemapLoc(siteUrl: string, slug: string): string {
   return `${siteUrl}${getPagePath(slug)}`
 }

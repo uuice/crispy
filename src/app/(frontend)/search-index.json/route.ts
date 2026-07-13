@@ -1,5 +1,6 @@
 import { loadThemeSearchIndex } from '@/themes/render'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = false
 
 export async function GET() {

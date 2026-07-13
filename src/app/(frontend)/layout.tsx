@@ -19,6 +19,9 @@ import { draftMode } from 'next/headers'
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 
+// HTML is generated at request time and cached in DB; skip build-time prerender.
+export const dynamic = 'force-dynamic'
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ isEnabled }, theme, previewThemeId, themeId] = await Promise.all([
     draftMode(),

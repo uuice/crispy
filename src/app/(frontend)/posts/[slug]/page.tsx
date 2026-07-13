@@ -1,4 +1,4 @@
-import { generateThemeMetadata, generateThemeStaticParams, renderThemePage } from '@/themes/render'
+import { generateThemeMetadata, renderThemePage } from '@/themes/render'
 
 export const revalidate = false
 
@@ -12,8 +12,4 @@ export default function PostPage({ params }: Args) {
 
 export function generateMetadata({ params }: Args) {
   return generateThemeMetadata('postDetail', { params })
-}
-
-export function generateStaticParams() {
-  return generateThemeStaticParams('postDetail')
 }

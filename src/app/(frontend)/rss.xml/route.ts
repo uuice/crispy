@@ -2,6 +2,7 @@ import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { buildBlogRssXml } from '@/utilities/buildBlogRss'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = false
 
 async function rssResponse(feedPath: string) {

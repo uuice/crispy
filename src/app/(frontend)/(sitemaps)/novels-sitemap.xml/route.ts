@@ -4,6 +4,8 @@ import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { getNovelsSitemapForNextSitemap } from '@/utilities/buildNovelsSitemap'
 
+export const dynamic = 'force-dynamic'
+
 async function getNovelsSitemap() {
   const SITE_URL =
     process.env.NEXT_PUBLIC_SERVER_URL ||

@@ -1,4 +1,4 @@
-import { generateThemeMetadata, generateThemeStaticParams, renderThemePage } from '@/themes/render'
+import { generateThemeMetadata, renderThemePage } from '@/themes/render'
 import type { SlugPageProps } from '@/themes/types'
 
 export const revalidate = false
@@ -11,8 +11,4 @@ export default function NovelDetailPage({ params }: Args) {
 
 export function generateMetadata({ params }: Args) {
   return generateThemeMetadata('novelDetail', { params })
-}
-
-export function generateStaticParams() {
-  return generateThemeStaticParams('novelDetail')
 }

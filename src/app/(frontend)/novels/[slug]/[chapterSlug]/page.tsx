@@ -1,4 +1,4 @@
-import { generateThemeMetadata, generateThemeStaticParams, renderThemePage } from '@/themes/render'
+import { generateThemeMetadata, renderThemePage } from '@/themes/render'
 import type { NovelChapterPageProps } from '@/themes/types'
 
 export const revalidate = false
@@ -11,8 +11,4 @@ export default function NovelChapterPage({ params }: Args) {
 
 export function generateMetadata({ params }: Args) {
   return generateThemeMetadata('novelChapter', { params })
-}
-
-export function generateStaticParams() {
-  return generateThemeStaticParams('novelChapter')
 }

@@ -2,6 +2,7 @@ import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
 import { withRouteCacheHeaders } from '@/frontend-cache/withRouteCacheHeaders'
 import { buildBlogSitemapEntries, renderSitemapXml } from '@/utilities/buildBlogSitemap'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = false
 
 export async function GET() {
