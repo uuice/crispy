@@ -65,6 +65,13 @@ export type NavItem = {
   target?: string | null
 }
 
+export type SidebarAuthor = {
+  id: string
+  title: string
+  url: string
+  count: number
+}
+
 export type SidebarUser = {
   title: string
   /** Public author bio; omitted when empty in CMS. */
@@ -91,7 +98,7 @@ export function pickPublicAuthorBioDetail(
 export type SidebarData = {
   categories: SidebarCategory[]
   tags: SidebarTag[]
+  authors: SidebarAuthor[]
   menu: NavItem[]
   footerMenu: NavItem[]
-  user?: SidebarUser
 }

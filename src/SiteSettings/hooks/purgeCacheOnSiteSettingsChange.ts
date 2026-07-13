@@ -21,7 +21,8 @@ export const purgeCacheOnSiteSettingsChange: GlobalAfterChangeHook = async ({ do
     themeChanged ||
     recordSettingsChanged(previous?.recordSettings, next.recordSettings) ||
     previous?.siteName !== next.siteName ||
-    previous?.siteDescription !== next.siteDescription
+    previous?.siteDescription !== next.siteDescription ||
+    previous?.showNovelUpdatesOnHome !== next.showNovelUpdatesOnHome
 
   if (shouldPurge) {
     await purgeAllRegisteredCache()

@@ -17,11 +17,15 @@ export type HomePageData = {
 }
 
 export async function loadHomePageData(): Promise<HomePageData> {
-  const [settings, posts, totalPosts, latestNovelChapters] = await Promise.all([
-    getCachedSiteSettings()(),
+  const settings = await getCachedSiteSettings()()
+  const showNovelUpdates = settings.showNovelUpdatesOnHome === true
+
+  const [posts, totalPosts, latestNovelChapters] = await Promise.all([
     queryPosts(BLOG_HOME_POST_LIMIT),
     queryPublishedPostsCount(),
-    queryLatestNovelChapters(BLOG_HOME_NOVEL_UPDATE_LIMIT),
+    showNovelUpdates
+      ? queryLatestNovelChapters(BLOG_HOME_NOVEL_UPDATE_LIMIT)
+      : Promise.resolve([]),
   ])
 
   return {

@@ -114,6 +114,8 @@ export const adminLabels = {
   url: '链接',
   analyticsId: '统计 ID',
   enableRss: '启用 RSS',
+  showNovelUpdatesOnHome: '首页展示小说更新',
+  showNovelUpdatesOnHomeHint: '关闭后首页不显示「小说更新」区块；/novels 页面不受影响。',
   frontendTheme: '前台主题',
   frontendThemeHint: '点击卡片选择主题，保存后全站生效。可先预览再决定。',
   frontendThemeSelected: '已选',

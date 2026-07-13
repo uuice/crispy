@@ -29,6 +29,7 @@ type Props = {
 const emptySidebar: SidebarData = {
   categories: [],
   tags: [],
+  authors: [],
   menu: [],
   footerMenu: [],
 }
@@ -49,7 +50,7 @@ export async function Layout({ children, layoutData }: Props) {
     recordInfo?.showRecord !== false && (recordInfo?.icpNumber || recordInfo?.policeNumber)
 
   const defaultSidebar = (
-    <Sidebar user={sidebar.user} categories={sidebar.categories} tags={sidebar.tags} />
+    <Sidebar authors={sidebar.authors} categories={sidebar.categories} tags={sidebar.tags} />
   )
 
   return (

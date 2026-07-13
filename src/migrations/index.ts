@@ -19,6 +19,7 @@ import * as migration_20260712_151000_redirects_novel_chapters from './20260712_
 import * as migration_20260712_152000_novel_chapters_version_backfill from './20260712_152000_novel_chapters_version_backfill';
 import * as migration_20260712_153000_collection_versions_completeness from './20260712_153000_collection_versions_completeness';
 import * as migration_20260712_154000_mcp_describe_resource from './20260712_154000_mcp_describe_resource';
+import * as migration_20260713_110500_site_novel_home_toggle from './20260713_110500_site_novel_home_toggle';
 
 export const migrations = [
   {
@@ -125,5 +126,10 @@ export const migrations = [
     up: migration_20260712_154000_mcp_describe_resource.up,
     down: migration_20260712_154000_mcp_describe_resource.down,
     name: '20260712_154000_mcp_describe_resource',
+  },
+  {
+    up: migration_20260713_110500_site_novel_home_toggle.up,
+    down: migration_20260713_110500_site_novel_home_toggle.down,
+    name: '20260713_110500_site_novel_home_toggle',
   },
 ];

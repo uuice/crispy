@@ -3869,6 +3869,10 @@ export interface SiteSetting {
    */
   analyticsId?: string | null;
   enableRss?: boolean | null;
+  /**
+   * 关闭后首页不显示「小说更新」区块；/novels 页面不受影响。
+   */
+  showNovelUpdatesOnHome?: boolean | null;
   recordSettings?: {
     /**
      * 如：浙ICP备13002567号-4
@@ -4058,6 +4062,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
       };
   analyticsId?: T;
   enableRss?: T;
+  showNovelUpdatesOnHome?: T;
   recordSettings?:
     | T
     | {

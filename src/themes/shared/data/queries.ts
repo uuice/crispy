@@ -32,11 +32,10 @@ import type {
   NovelListItem,
   PaginatedPostList,
   PostListItem,
+  SidebarAuthor,
   SidebarCategory,
   SidebarTag,
-  SidebarUser,
 } from './types'
-import { pickPublicAuthorBio } from './types'
 
 export type {
   NavItem,
@@ -44,10 +43,10 @@ export type {
   NovelListItem,
   PaginatedPostList,
   PostListItem,
+  SidebarAuthor,
   SidebarCategory,
   SidebarData,
   SidebarTag,
-  SidebarUser,
 } from './types'
 
 const POST_CARD_SELECT = {
@@ -336,7 +335,7 @@ export const querySidebarData = cache(async () => {
       limit: 1000,
       overrideAccess: false,
       pagination: false,
-      select: { categories: true, tags: true },
+      select: { categories: true, tags: true, authors: true, populatedAuthors: true },
       where: publishedBlogPostsWhere,
     }),
     payload.findGlobal({ slug: 'header', depth: 1 }),
@@ -345,6 +344,7 @@ export const querySidebarData = cache(async () => {
 
   const categoryCounts = new Map<string, number>()
   const tagCounts = new Map<string, number>()
+  const authorCounts = new Map<string, { id: string; name: string; count: number }>()
 
   for (const post of postsResult.docs) {
     for (const cat of post.categories || []) {
@@ -355,6 +355,16 @@ export const querySidebarData = cache(async () => {
     for (const tag of post.tags || []) {
       if (typeof tag === 'object' && tag?.id) {
         tagCounts.set(String(tag.id), (tagCounts.get(String(tag.id)) || 0) + 1)
+      }
+    }
+    for (const author of post.populatedAuthors || []) {
+      if (!author?.id || !author?.name) continue
+      const key = String(author.id)
+      const existing = authorCounts.get(key)
+      if (existing) {
+        existing.count += 1
+      } else {
+        authorCounts.set(key, { id: key, name: author.name, count: 1 })
       }
     }
   }
@@ -379,31 +389,20 @@ export const querySidebarData = cache(async () => {
     }))
     .filter((t) => t.count > 0)
 
+  const authors: SidebarAuthor[] = Array.from(authorCounts.values())
+    .map((author) => ({
+      id: author.id,
+      title: author.name,
+      url: getUserPath(slugifyUserName(author.name, author.id)),
+      count: author.count,
+    }))
+    .filter((author) => author.count > 0)
+    .sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'))
+
   const menu = mapGlobalNavItems(headerData?.navItems)
   const footerMenu = mapGlobalNavItems(footerData?.navItems)
 
-  const defaultUserPost = await payload.find({
-    collection: 'posts',
-    depth: 0,
-    limit: 1,
-    overrideAccess: false,
-    pagination: false,
-    sort: '-publishedAt',
-    select: { authors: true, populatedAuthors: true },
-    where: publishedBlogPostsWhere,
-  })
-
-  const firstUser = defaultUserPost.docs[0]?.populatedAuthors?.[0]
-  const firstUserBio = pickPublicAuthorBio(firstUser)
-  const user: SidebarUser | undefined = firstUser?.name
-    ? {
-        title: firstUser.name,
-        url: getUserPath(slugifyUserName(firstUser.name, firstUser.id || 'user')),
-        ...(firstUserBio ? { excerpt: firstUserBio } : {}),
-      }
-    : undefined
-
-  return { categories, tags, menu, footerMenu, user }
+  return { categories, tags, authors, menu, footerMenu }
 })
 
 export const queryPostArchiveGroups = cache(async () => {

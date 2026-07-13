@@ -75,6 +75,15 @@ export const SiteSettings: GlobalConfig = {
       defaultValue: true,
     },
     {
+      name: 'showNovelUpdatesOnHome',
+      type: 'checkbox',
+      label: adminLabels.showNovelUpdatesOnHome,
+      defaultValue: false,
+      admin: {
+        description: adminLabels.showNovelUpdatesOnHomeHint,
+      },
+    },
+    {
       name: 'recordSettings',
       type: 'group',
       label: adminLabels.recordSettings,
