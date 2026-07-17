@@ -43,7 +43,7 @@ async function backfillCollection(payload: Payload, collection: EmbeddableCollec
 }
 
 async function main() {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
   if (!config.enabled) {
     console.error('✗ 向量回填未启用：需要 DATABASE_DRIVER=postgres、pgvector 及 Embedding API Key')
     process.exit(1)

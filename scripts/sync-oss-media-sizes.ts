@@ -11,7 +11,7 @@ import { persistVirtualMediaSizes } from '@/uploads/persistVirtualMediaSizes'
 
 async function main() {
   if (!isOssVirtualSizesEnabled()) {
-    console.error('OSS virtual sizes disabled (S3 off or CRISPY_OSS_VIRTUAL_SIZES=false)')
+    console.error('OSS virtual sizes disabled (Admin storage-settings not S3 or virtualSizes off)')
     process.exit(1)
   }
 

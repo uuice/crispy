@@ -5,5 +5,5 @@ export async function GET(): Promise<Response> {
   const auth = await requireAuthorSession()
   if (!auth.ok) return auth.response
 
-  return Response.json({ enabled: isUnsplashEnabled() })
+  return Response.json({ enabled: await isUnsplashEnabled() })
 }

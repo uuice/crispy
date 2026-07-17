@@ -21,6 +21,7 @@ import { localizePluginCollectionsPlugin } from '@/plugins/localizePluginCollect
 import { AGENT_GLOBALS } from '@/ai/agent/resources'
 import { mcpCustomTools } from '@/plugins/mcpCustomTools'
 import { createS3StoragePlugin } from '@/storage/s3'
+import { resolveEmailConfigSync } from '@/email/resolveEmailConfig'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -73,7 +74,7 @@ export const plugins: Plugin[] = [
     generateURL,
   }),
   formBuilderPlugin({
-    defaultToEmail: process.env.FORM_DEFAULT_TO_EMAIL,
+    defaultToEmail: resolveEmailConfigSync().formDefaultToEmail,
     fields: {
       payment: false,
     },
@@ -123,7 +124,7 @@ export const plugins: Plugin[] = [
         plural: '搜索索引',
       },
       admin: {
-        group: adminLabels.systemGroup,
+        group: adminLabels.devGroup,
       },
       fields: ({ defaultFields }) => {
         return [...defaultFields, ...searchFields]
@@ -167,6 +168,46 @@ export const plugins: Plugin[] = [
       },
       'payload-query-presets': { enabled: true },
       'app-configs': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      'llm-providers': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      'prompt-templates': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      'storage-targets': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      'integration-credentials': {
+        enabled: {
+          create: false,
+          delete: false,
+          find: true,
+          update: false,
+        },
+      },
+      'email-transports': {
         enabled: {
           create: false,
           delete: false,

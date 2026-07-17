@@ -9,6 +9,7 @@ export const Footer: GlobalConfig = {
   slug: 'footer',
   label: adminLabels.footer,
   admin: {
+    group: adminLabels.configGroup,
     description: '控制前台页脚导航链接（blog / cms 主题均读取此配置）。',
   },
   access: {

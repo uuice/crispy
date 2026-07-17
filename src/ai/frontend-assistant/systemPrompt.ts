@@ -1,9 +1,9 @@
-import { resolveEmbeddingConfig } from '@/ai/embeddings/config'
-
 import { PUBLIC_CONTENT_TYPES } from './publicContent'
 
-export function buildFrontendAssistantSystemPrompt(siteName: string): string {
-  const semanticEnabled = resolveEmbeddingConfig().enabled
+export function buildFrontendAssistantSystemPrompt(
+  siteName: string,
+  semanticEnabled = false,
+): string {
   const typeList = PUBLIC_CONTENT_TYPES.map((type) => {
     const labels: Record<(typeof PUBLIC_CONTENT_TYPES)[number], string> = {
       post: '文章',

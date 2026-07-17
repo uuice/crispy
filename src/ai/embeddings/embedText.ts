@@ -8,7 +8,7 @@ type EmbeddingResponse = {
 }
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
 
   if (!config.enabled) {
     throw new Error('向量搜索未启用：需要 PostgreSQL + pgvector 及 Embedding API Key')
@@ -73,7 +73,7 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
   for (const vector of vectors) {
     if (vector.length !== config.dimensions) {
       throw new Error(
-        `Embedding 维度为 ${vector.length}，与 LLM_EMBEDDING_DIMENSIONS=${config.dimensions} 不一致`,
+        `Embedding 维度为 ${vector.length}，与 Provider embeddingDimensions=${config.dimensions} 不一致`,
       )
     }
   }

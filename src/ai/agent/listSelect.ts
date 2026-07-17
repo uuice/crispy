@@ -113,6 +113,30 @@ const AGENT_LIST_SELECT: Partial<Record<CollectionSlug, Record<string, true>>> =
     createdAt: true,
     deletedAt: true,
   },
+  'prompt-templates': {
+    id: true,
+    title: true,
+    slug: true,
+    action: true,
+    outputFormat: true,
+    enabled: true,
+    sort: true,
+    provider: true,
+    model: true,
+    temperature: true,
+    maxTokens: true,
+    updatedAt: true,
+    createdAt: true,
+    deletedAt: true,
+  },
+  'ai-canvases': {
+    id: true,
+    title: true,
+    user: true,
+    updatedAt: true,
+    createdAt: true,
+    deletedAt: true,
+  },
 }
 
 export function resolveAgentListSelect(

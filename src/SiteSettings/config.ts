@@ -11,6 +11,9 @@ import { purgeCacheOnSiteSettingsChange } from './hooks/purgeCacheOnSiteSettings
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: adminLabels.siteSettings,
+  admin: {
+    group: adminLabels.configGroup,
+  },
   access: {
     read: anyone,
     update: isEditor,

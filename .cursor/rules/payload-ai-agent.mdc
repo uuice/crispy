@@ -40,7 +40,7 @@ alwaysApply: false
 2. 字段用 `withAiTextField` 等 wrapper
 3. `pnpm cli generate:importmap`
 
-## 环境
+## 配置
 
-- `DEEPSEEK_API_KEY` + Admin → AI 设置 Global
-- 语义搜索需 Postgres pgvector（`src/ai/embeddings/`）
+- Admin 配置中心：`llm-providers` + `ai-settings`（见 `/admin/dev-docs#config-center`）
+- 语义搜索需 Postgres pgvector（`src/ai/embeddings/`）+ Embedding Provider（capabilities=embedding）

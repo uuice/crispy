@@ -5,9 +5,9 @@ import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import type { NavPreferences, StaticLabel } from 'payload'
-import React, { Fragment } from 'react'
+import React, { Fragment, useMemo } from 'react'
 
-import { isCustomViewEntity, type CrispyNavGroup } from '@/admin-nav/mergeCustomNavIntoGroups'
+import { isCustomViewEntity, type CrispyNavEntity, type CrispyNavGroup } from '@/admin-nav/mergeCustomNavIntoGroups'
 
 const baseClass = 'nav'
 
@@ -17,6 +17,38 @@ function getEntityLabel(label: StaticLabel, language: string): string {
   }
 
   return label[language] ?? label.en ?? Object.values(label)[0] ?? ''
+}
+
+function isActivePath(pathname: string, href: string): boolean {
+  return (
+    pathname.startsWith(href) &&
+    ['/', undefined].includes(pathname[href.length] as string | undefined)
+  )
+}
+
+function getEntityHref(
+  entity: CrispyNavEntity,
+  adminRoute: string,
+): string | null {
+  if (isCustomViewEntity(entity)) {
+    return formatAdminURL({ adminRoute, path: entity.path })
+  }
+
+  if (entity.type === EntityType.collection) {
+    return formatAdminURL({
+      adminRoute,
+      path: `/collections/${entity.slug}`,
+    })
+  }
+
+  if (entity.type === EntityType.global) {
+    return formatAdminURL({
+      adminRoute,
+      path: `/globals/${entity.slug}`,
+    })
+  }
+
+  return null
 }
 
 type Props = {
@@ -35,8 +67,7 @@ function renderNavLink({
   label: string
   pathname: string
 }) {
-  const isActive =
-    pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length] as string | undefined)
+  const isActive = isActivePath(pathname, href)
 
   const content = (
     <>
@@ -78,18 +109,35 @@ export function AdminNavClient({ groups, navPreferences }: Props) {
   })
   const viewingRootFolderView = pathname.startsWith(folderURL)
 
+  const openByLabel = useMemo(() => {
+    const map = new Map<string, boolean>()
+    for (const group of groups) {
+      const saved = navPreferences?.groups?.[group.label]?.open
+      const containsActive = group.entities.some((entity) => {
+        const href = getEntityHref(entity, adminRoute)
+        return href ? isActivePath(pathname, href) : false
+      })
+      // Default collapsed; open only the group of the current page (until user toggles).
+      map.set(group.label, typeof saved === 'boolean' ? saved : containsActive)
+    }
+    return map
+  }, [adminRoute, groups, navPreferences, pathname])
+
   return (
     <>
       {typeof folders === 'object' && folders.browseByFolder && (
         <BrowseByFolderButton active={viewingRootFolderView} />
       )}
-      {groups.map((group, key) => (
+      {groups.map((group) => {
+        const isOpen = openByLabel.get(group.label) ?? false
+        return (
         <NavGroup
-          isOpen={navPreferences?.groups?.[group.label]?.open}
-          key={key}
+          // Remount when default/open intent changes so Payload NavGroup picks up isOpen.
+          isOpen={isOpen}
+          key={`${group.label}:${isOpen ? 'open' : 'closed'}`}
           label={group.label}
         >
-          {group.entities.map((entity, i) => {
+          {group.entities.map((entity) => {
             if (isCustomViewEntity(entity)) {
               const href = formatAdminURL({
                 adminRoute,
@@ -146,7 +194,8 @@ export function AdminNavClient({ groups, navPreferences }: Props) {
             )
           })}
         </NavGroup>
-      ))}
+        )
+      })}
     </>
   )
 }

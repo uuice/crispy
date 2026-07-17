@@ -5,7 +5,7 @@ import { fetchRemoteFile } from '@/unsplash/server/fetchRemoteFile'
 import type { UnsplashImportRequest } from '@/unsplash/types'
 
 async function resolveDownloadUrl(downloadLocation: string): Promise<string> {
-  const accessKey = getUnsplashAccessKey()
+  const accessKey = await getUnsplashAccessKey()
   const res = await fetch(downloadLocation, {
     headers: { Authorization: `Client-ID ${accessKey}` },
   })

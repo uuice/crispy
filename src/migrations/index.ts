@@ -20,6 +20,14 @@ import * as migration_20260712_152000_novel_chapters_version_backfill from './20
 import * as migration_20260712_153000_collection_versions_completeness from './20260712_153000_collection_versions_completeness';
 import * as migration_20260712_154000_mcp_describe_resource from './20260712_154000_mcp_describe_resource';
 import * as migration_20260713_110500_site_novel_home_toggle from './20260713_110500_site_novel_home_toggle';
+import * as migration_20260717_141000_config_center_p0 from './20260717_141000_config_center_p0';
+import * as migration_20260717_142000_locked_docs_llm_prompt_rels from './20260717_142000_locked_docs_llm_prompt_rels';
+import * as migration_20260717_150000_config_center_p1 from './20260717_150000_config_center_p1';
+import * as migration_20260717_160000_config_center_p2 from './20260717_160000_config_center_p2';
+import * as migration_20260717_170000_ai_canvases from './20260717_170000_ai_canvases';
+import * as migration_20260717_180000_ai_settings_embedding from './20260717_180000_ai_settings_embedding';
+import * as migration_20260717_190000_drop_ai_legacy_env from './20260717_190000_drop_ai_legacy_env';
+import * as migration_20260717_191000_drop_orphan_ai_settings_enums from './20260717_191000_drop_orphan_ai_settings_enums';
 
 export const migrations = [
   {
@@ -131,5 +139,45 @@ export const migrations = [
     up: migration_20260713_110500_site_novel_home_toggle.up,
     down: migration_20260713_110500_site_novel_home_toggle.down,
     name: '20260713_110500_site_novel_home_toggle',
+  },
+  {
+    up: migration_20260717_141000_config_center_p0.up,
+    down: migration_20260717_141000_config_center_p0.down,
+    name: '20260717_141000_config_center_p0',
+  },
+  {
+    up: migration_20260717_142000_locked_docs_llm_prompt_rels.up,
+    down: migration_20260717_142000_locked_docs_llm_prompt_rels.down,
+    name: '20260717_142000_locked_docs_llm_prompt_rels',
+  },
+  {
+    up: migration_20260717_150000_config_center_p1.up,
+    down: migration_20260717_150000_config_center_p1.down,
+    name: '20260717_150000_config_center_p1',
+  },
+  {
+    up: migration_20260717_160000_config_center_p2.up,
+    down: migration_20260717_160000_config_center_p2.down,
+    name: '20260717_160000_config_center_p2',
+  },
+  {
+    up: migration_20260717_170000_ai_canvases.up,
+    down: migration_20260717_170000_ai_canvases.down,
+    name: '20260717_170000_ai_canvases',
+  },
+  {
+    up: migration_20260717_180000_ai_settings_embedding.up,
+    down: migration_20260717_180000_ai_settings_embedding.down,
+    name: '20260717_180000_ai_settings_embedding',
+  },
+  {
+    up: migration_20260717_190000_drop_ai_legacy_env.up,
+    down: migration_20260717_190000_drop_ai_legacy_env.down,
+    name: '20260717_190000_drop_ai_legacy_env',
+  },
+  {
+    up: migration_20260717_191000_drop_orphan_ai_settings_enums.up,
+    down: migration_20260717_191000_drop_orphan_ai_settings_enums.down,
+    name: '20260717_191000_drop_orphan_ai_settings_enums',
   },
 ];

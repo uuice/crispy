@@ -30,7 +30,7 @@ export const AiChatSessions: CollectionConfig = {
     defaultColumns: ['title', 'user', 'lastMessageAt', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.systemGroup,
-    description: 'AI 内容助手完整会话历史，由聊天 API 自动写入。',
+    description: 'AI 内容助手完整会话历史，由聊天 API 自动写入。也可从运营 → AI 内容助手进入。',
   },
   defaultSort: '-lastMessageAt',
   timestamps: true,

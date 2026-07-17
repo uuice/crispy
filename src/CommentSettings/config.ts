@@ -11,7 +11,7 @@ export const CommentSettings: GlobalConfig = {
     update: isSuperAdmin,
   },
   admin: {
-    group: adminLabels.systemGroup,
+    group: adminLabels.configGroup,
     description: '评论功能的全局开关与审核策略。',
   },
   fields: [

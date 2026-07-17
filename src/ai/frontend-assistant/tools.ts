@@ -97,7 +97,7 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     function: {
       name: 'semantic_search',
       description:
-        '按语义相似度搜索已发布文章、页面、小说与章节（需 PostgreSQL pgvector）。返回 title、url、slug、短 excerpt（非正文）；novel-chapter 的 slug 为 {novelSlug}/{chapterSlug}，可传给 get_content 取元数据；读全文引导用户打开 url。',
+        '按语义相似度搜索已发布文章、页面、小说与章节（需站点已配置 Embedding 提供商）。返回 title、url、slug、短 excerpt（非正文）；novel-chapter 的 slug 为 {novelSlug}/{chapterSlug}，可传给 get_content 取元数据；读全文引导用户打开 url。',
       parameters: {
         type: 'object',
         properties: {
@@ -170,7 +170,7 @@ export async function executeFrontendAssistantTool(
     }
 
     case 'semantic_search': {
-      const embedding = resolveEmbeddingConfig()
+      const embedding = await resolveEmbeddingConfig()
       if (!embedding.enabled) {
         throw new Error('语义搜索未启用，请改用 search_content')
       }

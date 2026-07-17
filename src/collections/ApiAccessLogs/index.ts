@@ -17,7 +17,7 @@ export const ApiAccessLogs: CollectionConfig = {
   admin: {
     defaultColumns: ['method', 'path', 'status', 'durationMs', 'authType', 'createdAt'],
     useAsTitle: 'path',
-    group: adminLabels.systemGroup,
+    group: adminLabels.devGroup,
     description: 'REST / GraphQL API request history (written by middleware).',
   },
   defaultSort: '-createdAt',

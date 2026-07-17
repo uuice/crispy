@@ -77,6 +77,7 @@ import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc056
 import { default as default_8764214764e609424531b42b54ec237b } from '@/app/(payload)/admin/dev-docs/DevDocsView'
 import { default as default_167468770c8106c49118befba831d642 } from '@/app/(payload)/admin/api-docs/SwaggerView'
 import { default as default_d9568c1ed1cbf811dc1b4af3a8debb56 } from '@/app/(payload)/admin/ai-agent/AiAgentView'
+import { default as default_f7512e72586d6682951e5881a82808a5 } from '@/app/(payload)/admin/ai-canvases/AiCanvasesView'
 import { default as default_0450ff08bccdd65acb0af19d12ceca89 } from '@/app/(payload)/admin/stats/StatsView'
 import { default as default_713a7babd883a9dc56f463857f761995 } from '@/app/(payload)/admin/cache/CacheView'
 import { default as default_20177520ae52785e614fad0cc35e0b8c } from '@/components/AdminCollectionCards'
@@ -163,6 +164,7 @@ export const importMap = {
   "@/app/(payload)/admin/dev-docs/DevDocsView#default": default_8764214764e609424531b42b54ec237b,
   "@/app/(payload)/admin/api-docs/SwaggerView#default": default_167468770c8106c49118befba831d642,
   "@/app/(payload)/admin/ai-agent/AiAgentView#default": default_d9568c1ed1cbf811dc1b4af3a8debb56,
+  "@/app/(payload)/admin/ai-canvases/AiCanvasesView#default": default_f7512e72586d6682951e5881a82808a5,
   "@/app/(payload)/admin/stats/StatsView#default": default_0450ff08bccdd65acb0af19d12ceca89,
   "@/app/(payload)/admin/cache/CacheView#default": default_713a7babd883a9dc56f463857f761995,
   "@/components/AdminCollectionCards#default": default_20177520ae52785e614fad0cc35e0b8c,

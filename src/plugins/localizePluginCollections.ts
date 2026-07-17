@@ -9,7 +9,7 @@ const COLLECTION_LOCALIZATIONS: Record<string, Partial<CollectionConfig>> = {
   },
   search: {
     labels: { singular: '搜索索引', plural: '搜索索引' },
-    admin: { group: adminLabels.systemGroup },
+    admin: { group: adminLabels.devGroup },
   },
   forms: {
     labels: { singular: '表单', plural: '表单' },
@@ -30,7 +30,7 @@ const COLLECTION_LOCALIZATIONS: Record<string, Partial<CollectionConfig>> = {
   'payload-mcp-api-keys': {
     labels: { singular: 'MCP API 密钥', plural: 'MCP API 密钥' },
     admin: {
-      group: 'MCP',
+      group: adminLabels.devGroup,
       description: 'API 密钥控制 MCP 客户端可访问的集合、资源、工具与提示。',
     },
   },

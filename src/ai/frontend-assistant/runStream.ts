@@ -2,11 +2,11 @@ import type { PayloadRequest } from 'payload'
 
 import { trimAgentMessages } from '@/ai/agent/trimMessages'
 import type { AgentChatMessage, AgentStreamEvent } from '@/ai/agent/types'
+import { resolveLlmClient } from '@/ai/resolveLlmClient'
 import {
   openAiChatCompletionWithToolsStream,
   toOpenAiToolMessages,
 } from '@/ai/providers/openaiCompatible'
-import { getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
 import { resolveEmbeddingConfig } from '@/ai/embeddings/config'
 
 import { buildFrontendAssistantSystemPrompt } from './systemPrompt'
@@ -27,19 +27,20 @@ export async function* runFrontendAssistantStream(
   userMessages: AgentChatMessage[],
   siteName: string,
 ): AsyncGenerator<AgentStreamEvent, void, undefined> {
-  const settings = await resolveAiSettings()
+  const settings = await resolveLlmClient({ purpose: 'assistant' })
 
   if (!settings.enabled) {
-    yield { type: 'error', error: getAiDisabledMessage(settings.provider) }
+    yield { type: 'error', error: settings.disabledReason ?? 'AI 未启用' }
     return
   }
 
-  const tools = resolveEmbeddingConfig().enabled
+  const embedding = await resolveEmbeddingConfig()
+  const tools = embedding.enabled
     ? FRONTEND_ASSISTANT_TOOLS
     : FRONTEND_ASSISTANT_TOOLS.filter((tool) => tool.function.name !== 'semantic_search')
 
   const conversation: AgentChatMessage[] = [
-    { role: 'system', content: buildFrontendAssistantSystemPrompt(siteName) },
+    { role: 'system', content: buildFrontendAssistantSystemPrompt(siteName, embedding.enabled) },
     ...trimAgentMessages(userMessages),
   ]
 

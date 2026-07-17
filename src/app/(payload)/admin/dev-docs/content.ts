@@ -40,6 +40,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['OpenAPI JSON', 'GET /api/openapi.json（需 Admin 登录）'],
           ['前台缓存管理', '/admin/cache（editor+）'],
           ['缓存配置 Global', '/admin/globals/cache-settings（editor+）'],
+          ['配置中心方案', '/admin/dev-docs#config-center'],
         ],
       },
     ],
@@ -75,7 +76,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           'MCP — 外部 AI Agent 读写内容',
           'Import/Export — 批量导入导出',
           'Email — @payloadcms/email-resend / email-nodemailer（Form Builder 发信）',
-          'S3 Storage — 生产媒体（配置 S3_* 后启用）',
+          'S3 Storage — 生产媒体（Admin 存储目标 / 存储设置；改 Active 后需重启）',
           'Audit Log — 自建 audit-logs collection',
         ],
       },
@@ -164,23 +165,19 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['DATABASE_URL', 'file:./.data/payload.db（本地）或 postgresql://…（生产）'],
           ['DATABASE_DRIVER', 'sqlite | postgres（可省略，按 URL 推断）'],
           ['DATABASE_PUSH', '生产设为 false，禁止 schema push'],
+          ['PGVECTOR_ENABLED', '语义搜索；无 pgvector 时设 false'],
           ['PAYLOAD_SECRET', 'JWT 加密（openssl rand -hex 32）'],
           ['NEXT_PUBLIC_SERVER_URL', '站点公网 URL，默认 http://localhost:3333'],
           ['PREVIEW_SECRET', '草稿 / Live Preview 鉴权'],
           ['CRON_SECRET', '定时发布 Jobs 鉴权'],
           ['MCP_API_KEY', '本地 verify 用，来自 seed 或 Admin MCP Keys'],
-          ['DEEPSEEK_API_KEY', 'LLM API Key（Admin 字段 AI + 双端对话助手共用）'],
-          ['DEEPSEEK_BASE_URL', '默认 https://api.deepseek.com（勿带 /v1 后缀）'],
-          ['DEEPSEEK_MODEL', '默认 deepseek-chat'],
-          ['FRONTEND_THEME', '可选：blog | cms | kb，覆盖 site-settings.frontendTheme'],
-          ['S3_*', '生产媒体存储（bucket、密钥、region 等）'],
-          ['API_ACCESS_LOG_ENABLED', 'API 访问日志 middleware'],
-          ['RESEND_API_KEY', 'Form Builder 邮件（Resend，优先于 SMTP）'],
-          ['SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS', 'Form Builder 邮件（Nodemailer）'],
-          ['EMAIL_FROM_ADDRESS / EMAIL_FROM_NAME', '发件人（默认 noreply@example.com / Crispy CMS）'],
-          ['FORM_DEFAULT_TO_EMAIL', '表单未配置收件人时的默认邮箱'],
-          ['EMAIL_OVERRIDE_RECIPIENT', '测试：所有表单邮件重定向到此地址'],
+          ['API_ACCESS_LOG_ENABLED', 'API 访问日志 middleware（可选）'],
+          ['CRISPY_FRONTEND_HTML_CACHE', '仅开发：覆盖 cache-settings HTML 缓存开关'],
         ],
+      },
+      {
+        type: 'p',
+        text: 'LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .env（详见 #config-center）。',
       },
       {
         type: 'h3',
@@ -192,7 +189,7 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           'src/payload.config.ts — collections、globals、plugins、admin 定制',
           'src/database/adapter.ts — 双驱动与 migrationDir、push 策略',
           'src/plugins/index.ts — SEO/MCP/Search/Import 等插件开关',
-          'Admin → AI 设置 Global — 模型参数与 Prompt 模板覆盖',
+          'Admin → 配置中心 — LLM / 存储 / 集成 / 邮件（#config-center）',
         ],
       },
     ],
@@ -216,7 +213,6 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['pnpm cli db:bootstrap', '首次迁移（Docker + Node 22）'],
           ['pnpm cli db:create <name>', 'Schema 变更后新建迁移'],
           ['pnpm cli quality:ci', '本地 CI：lint + tsc + test + build'],
-          ['pnpm cli verify:all', '完整冒烟 phase1+2+ai'],
           ['pnpm cli db:seed / mcp:key', '示例数据 / MCP Key'],
           ['pnpm cli generate:types|importmap|openapi', '类型 / import map / OpenAPI'],
           ['—', 'Payload 版本升级 SOP：见 #payload-upgrade'],
@@ -249,6 +245,11 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['gallery-items', '图库', 'title, image, description, enabled, order'],
           ['comments', '评论', 'content, status, post/page, parent, author, guestInfo'],
           ['app-configs', '应用配置', 'key, valueType, value（KV 配置，Agent 只读除 super-admin）'],
+          ['llm-providers', 'LLM 提供商', 'OpenAI 兼容端点 Catalog（apiKey 加密；仅 super-admin）'],
+          ['prompt-templates', 'Prompt 模板', '字段 AI 技能卡；Admin Agent 可维护（写：super-admin）；MCP 仅读'],
+          ['storage-targets', '存储目标', 'S3/OSS Catalog（密钥加密；Active 切换后需重启）'],
+          ['integration-credentials', '集成凭证', 'Unsplash 等 Catalog（密钥加密；即时生效）'],
+          ['email-transports', '邮件通道', 'Resend / SMTP Catalog（密钥加密；Active 切换后需重启）'],
           ['ai-chat-sessions', 'AI 对话会话', 'title, messages[], user（Agent 侧栏历史）'],
           ['api-access-logs', 'API 访问日志', 'method, path, status, authType, user, duration'],
           ['frontend-cache-entries', '前台缓存条目（系统）', 'cacheKey, kind(route), cachedValue(JSON), routePath, expiresAt'],
@@ -281,9 +282,17 @@ export const DEV_DOC_SECTIONS: DocSection[] = [
           ['footer', '页脚', 'navItems[]'],
           ['site-settings', '站点设置', 'siteName, description, logo, socialLinks[], enableRss, frontendTheme, adminThemeHue'],
           ['comment-settings', '评论设置', 'enabled, moderation, guestComments, nesting, posts/pages 开关'],
-          ['ai-settings', 'AI 设置', 'enabled, baseUrl, model, temperature, maxTokens, promptTemplates[]'],
+          [
+            'ai-settings',
+            'AI 设置',
+            'enabled, defaultProvider, defaultModel, temperature, maxTokens（旧字段在兼容区）',
+          ],
           ['cache-settings', '缓存设置', 'cachingEnabled, pageRevalidateSeconds, exposeCacheHeaders'],
         ],
+      },
+      {
+        type: 'p',
+        text: '配置中心（Catalog + Active + Override）详见 #config-center。',
       },
       {
         type: 'h3',
@@ -481,29 +490,32 @@ POST {baseUrl}/v1/chat/completions              ← OpenAI 兼容上游
       },
       {
         type: 'table',
-        headers: ['配置项', '环境变量', 'Admin AI 设置', '说明'],
+        headers: ['配置项', 'Admin 位置', '说明'],
         rows: [
-          ['API Key', 'DEEPSEEK_API_KEY', '—（仅 .env）', 'Bearer Token，勿提交 Git'],
-          ['Base URL', 'DEEPSEEK_BASE_URL', 'baseUrl 字段', '不含 /v1 后缀，代码自动拼接 /v1/chat/completions'],
-          ['Model', 'DEEPSEEK_MODEL', 'model 字段', '如 deepseek-chat、gpt-4o-mini'],
-          ['Temperature', '—', 'temperature', '0–2，默认 0.7'],
-          ['Max Tokens', '—', 'maxTokens', '默认 2048'],
-          ['总开关', '—', 'enabled', '关闭后所有 AI 路由返回 503'],
+          ['API Key / Base URL / Model', '配置 → LLM 提供商', '加密入库；capabilities=chat'],
+          ['默认提供商 / 模型', '配置 → AI 设置', 'defaultProvider / defaultModel'],
+          ['Temperature / Max Tokens', '配置 → AI 设置', '全局默认；Prompt 可覆盖'],
+          ['总开关', '配置 → AI 设置 enabled', '关闭后所有 AI 路由返回 503'],
+          ['Prompt 模板', '配置 → Prompt 模板', '可绑定 provider + model'],
         ],
       },
       {
         type: 'h3',
-        text: '切换至 OpenAI 官方',
+        text: '切换 / 新增上游',
       },
       {
         type: 'pre',
-        text: `# .env
-DEEPSEEK_API_KEY=sk-...your-openai-key...
-DEEPSEEK_BASE_URL=https://api.openai.com
-DEEPSEEK_MODEL=gpt-4o-mini
+        text: `Admin → LLM 提供商 → 新建
+  name: OpenAI
+  baseUrl: https://api.openai.com   # 勿带 /v1
+  apiKey: sk-...
+  defaultModel: gpt-4o-mini
+  capabilities: chat
 
-# Admin → AI 设置 中 baseUrl / model 会覆盖 .env 默认值
-# Azure OpenAI：baseUrl 设为 https://{resource}.openai.azure.com/openai/deployments/{deployment}`,
+Admin → AI 设置 → 默认 LLM 提供商 = 上一条
+
+# Azure OpenAI：baseUrl 设为
+# https://{resource}.openai.azure.com/openai/deployments/{deployment}`,
       },
       {
         type: 'h3',
@@ -511,7 +523,7 @@ DEEPSEEK_MODEL=gpt-4o-mini
       },
       {
         type: 'p',
-        text: '实现：src/ai/providers/deepseek.ts、deepseekStream.ts。非流式与流式均 POST 同一端点，流式设 stream: true。',
+        text: '实现：src/ai/providers/openaiCompatible.ts。非流式与流式均 POST 同一端点，流式设 stream: true。解析入口：resolveLlmClient。',
       },
       {
         type: 'pre',
@@ -595,7 +607,7 @@ data: {"text":"好"}
 data: {"done":true,"templateId":"polish"}
 
 # 错误（仍 200 + SSE）
-data: {"error":"AI 未启用：请在 .env 设置 DEEPSEEK_API_KEY"}`,
+data: {"error":"AI 未启用：请在「LLM 提供商」配置端点，并在「AI 设置」选择默认提供商"}`,
       },
       {
         type: 'h3',
@@ -665,7 +677,7 @@ POST /api/ai/structured
       },
       {
         type: 'p',
-        text: '默认模板：src/ai/defaultTemplates.ts；可在 Admin → AI 设置 → Prompt 模板 按 id/action 覆盖。',
+        text: '默认模板：src/ai/defaultTemplates.ts；正式环境请在 Admin → Prompt 模板 按 action 维护（可绑 provider/model）。',
       },
       {
         type: 'h3',
@@ -698,7 +710,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       {
         type: 'ul',
         items: [
-          'pnpm cli verify:ai — 检测 API Key、流式 /complete /stream 连通',
+          'Admin：字段 AI 按钮；/admin/ai-agent 对话',
           '代码入口：src/app/(payload)/api/ai/*/route.ts',
           '类型定义：src/ai/types.ts',
           'OpenAI 官方文档：https://platform.openai.com/docs/api-reference/chat',
@@ -877,7 +889,7 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'p',
-        text: '验证：MCP_API_KEY=xxx pnpm cli verify:phase1',
+        text: '配置后在 Cursor MCP 或 curl 调 POST /api/mcp 即可验证连通。',
       },
     ],
   },
@@ -908,17 +920,16 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
       },
       {
         type: 'p',
-        text: 'payload.config.ts 通过 src/email/createEmailAdapter.ts 注册邮件适配器。未配置 RESEND_API_KEY 与 SMTP_HOST 时表单仍可提交并入库，但不会发信（Payload 控制台 warn）。',
+        text: 'payload.config.ts 通过 src/email/createEmailAdapter.ts 注册邮件适配器。只读 Admin「邮件设置」写入的 .data/email-runtime.json（无 .env 回退）。无通道时表单仍可提交并入库，但不会发信。',
       },
       {
         type: 'table',
-        headers: ['优先级', '环境变量', '说明'],
+        headers: ['来源', '说明'],
         rows: [
-          ['1', 'RESEND_API_KEY', '使用 @payloadcms/email-resend'],
-          ['2', 'SMTP_HOST + SMTP_*', '使用 @payloadcms/email-nodemailer'],
-          ['—', 'EMAIL_FROM_ADDRESS / EMAIL_FROM_NAME', '发件人'],
-          ['—', 'FORM_DEFAULT_TO_EMAIL', 'formBuilderPlugin.defaultToEmail 默认收件人'],
-          ['—', 'EMAIL_OVERRIDE_RECIPIENT', '测试环境全部重定向到此邮箱'],
+          ['email-transports + email-settings.activeTransport', 'Catalog + Active（改后需重启）'],
+          ['email-settings.fromAddress / fromName', '默认发件人'],
+          ['email-settings.formDefaultToEmail', '表单默认收件人'],
+          ['email-settings.overrideRecipient', '测试重定向'],
         ],
       },
       {
@@ -969,13 +980,12 @@ curl -N -X POST http://localhost:3333/api/ai/stream \\
         text: `DATABASE_DRIVER=postgres
 DATABASE_URL=postgresql://user:pass@host:5432/crispy
 DATABASE_PUSH=false
+PGVECTOR_ENABLED=true   # 需服务器已装 pgvector
 PAYLOAD_SECRET=...
 NEXT_PUBLIC_SERVER_URL=https://your-domain.com
 PREVIEW_SECRET=...
 CRON_SECRET=...
-# 可选：表单邮件
-RESEND_API_KEY=...
-# 或 SMTP_HOST=... SMTP_USER=... SMTP_PASS=...`,
+# LLM / S3 / Unsplash / Email → Admin 配置中心（改 S3/邮件 Active 后重启进程）`,
       },
       {
         type: 'h3',
@@ -986,7 +996,7 @@ RESEND_API_KEY=...
         items: [
           'pnpm cli db:migrate && pnpm cli db:status',
           'pnpm cli dev:build && pnpm cli dev:start（或 Docker standalone，端口 3333）',
-          '可选：配置 S3_*、DEEPSEEK_API_KEY、RESEND_API_KEY 或 SMTP_*（表单邮件）',
+          'Admin 配置中心：LLM 提供商、存储目标、集成凭证、邮件通道（见 #config-center）',
         ],
       },
       {
@@ -1078,7 +1088,7 @@ docker run -p 3333:3333 \\
           '一次性升级全部 @payloadcms/* 与 payload 到目标版本 → pnpm install',
           'pnpm cli generate:types && pnpm cli generate:importmap（Admin Custom 组件必跑）',
           '若 Collection/Global/Block 字段有变：pnpm cli db:create <name> → 审阅 src/migrations/ → pnpm cli db:migrate（需 Postgres + Node 22）',
-          'pnpm cli quality:ci && pnpm cli verify:all',
+          'pnpm cli quality:ci',
           '手工冒烟（见下方 Checklist）',
           '生产：先 db:migrate，再发应用包（Linux 包不含 .env，服务器 cp .env.example .env）',
         ],
@@ -1097,8 +1107,7 @@ pnpm up payload@3.86.0 \\
 pnpm install
 pnpm cli generate:types
 pnpm cli generate:importmap
-pnpm cli quality:ci
-pnpm cli verify:all`,
+pnpm cli quality:ci`,
       },
       {
         type: 'h3',
@@ -1139,8 +1148,8 @@ pnpm cli verify:all`,
           'Admin：登录、Collection 列表/编辑/保存、回收站切换',
           'Posts/Pages：draft 发布、版本历史还原（含 hero 类型与 media）',
           '插件：Redirects 生效、Forms 提交+邮件、Search 索引、Import/Export',
-          'MCP：pnpm cli verify:phase1',
-          'AI：pnpm cli verify:ai；/admin/ai-agent 对话',
+          'MCP：curl / Cursor 调 POST /api/mcp',
+          'AI：Admin 字段 AI；/admin/ai-agent 对话',
           '前台：三主题首页/详情、Live Preview（editor）',
           '缓存：/admin/cache 手动清除、middleware X-Crispy-* 头',
           'Postgres：pnpm cli db:migrate && pnpm cli db:status',
@@ -1473,16 +1482,196 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         type: 'ul',
         items: [
           '中文化：i18n zh + 自定义 labels',
-          'Draft / Live Preview：PREVIEW_SECRET + verify:phase1',
+          'Draft / Live Preview：PREVIEW_SECRET + 编辑页预览',
           '回收站 / 版本历史：列表切换回收站、编辑页版本面板',
           '列表刷新：各 Collection 列表右上角「刷新」按钮',
           'Query Presets：保存列表筛选与排序',
           '深色模式：Admin 主题色相 + 各前台皮肤自带 ThemeToggle',
           '前台主题：站点设置切换 blog / cms / kb；editor 可 ?theme_preview= 预览',
-          'AI：DEEPSEEK_API_KEY + verify:ai',
-          '后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search',
+          'AI：Admin LLM 提供商 + AI 设置 + verify:ai',
+          '后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search + prompt-templates + ai-canvases 元数据',
           '前台 AI 助手：右下角浮窗，公开检索文章/小说/章节/分类/友链等（不含正文，ai-settings.enabled 开启时）',
           '前台缓存：/admin/cache DB 条目统计；curl -I 查看 X-Crispy-Page-Cache HIT/MISS',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'config-center',
+    title: '配置中心方案（Catalog + Active + Override）',
+    blocks: [
+      {
+        type: 'p',
+        text: '目标：把 LLM / S3 / 邮件 / Unsplash 等可换配置迁入 Admin，方便增删改与多选一；Prompt 可绑定模型；为无限画布（节点各自指定模型）共用同一解析层。仅超级管理员可写密钥类配置。',
+      },
+      {
+        type: 'h3',
+        text: '核心模型',
+      },
+      {
+        type: 'pre',
+        text: `Catalog（多条配置）
+  → Active（全局默认选中一条）
+  → Override（Prompt / API / 画布节点临时指定）`,
+      },
+      {
+        type: 'table',
+        headers: ['资源', 'Catalog Collection', 'Active（Global）', 'Override', '改后是否重启'],
+        rows: [
+          ['LLM', 'llm-providers', 'ai-settings.defaultProvider', 'Prompt / 请求 / 画布节点', '否'],
+          ['Embedding', 'llm-providers (capabilities=embedding)', 'ai-settings.defaultEmbeddingProvider', '暂无', '否'],
+          ['S3', 'storage-targets', 'storage-settings.activeTarget', '暂无（全局生效）', '是'],
+          ['Unsplash', 'integration-credentials (type=unsplash)', 'integration-settings.activeUnsplash', '可预留', '否'],
+          ['邮件', 'email-transports', 'email-settings.activeTransport', '暂无', '是'],
+        ],
+      },
+      {
+        type: 'p',
+        text: '以上资源均无 .env 回退：密钥与端点只在 Admin Catalog；S3/邮件通过 .data/*-runtime.json 供进程启动读取。',
+      },
+      {
+        type: 'h3',
+        text: 'LLM Providers',
+      },
+      {
+        type: 'ul',
+        items: [
+          '一律 OpenAI 兼容（DeepSeek / OpenAI / 自定义共用 baseUrl + apiKey + model）',
+          '字段：name、baseUrl、apiKey（加密）、models[]、defaultModel、capabilities(chat|embedding)、embeddingDimensions、enabled',
+          'Embedding：AI 设置选 defaultEmbeddingProvider；embeddingDimensions 须与 content_embeddings.vector(N) 一致（当前 1024）',
+          '密钥：PAYLOAD_SECRET 派生 AES-GCM 入库；Admin 回显掩码；MCP/Agent 永不返回明文',
+          '解析入口 resolveLlmClient({ purpose, providerId?, model?, promptId? })',
+          '优先级：显式 Override → Prompt 绑定 → ai-settings 全局默认（无 env）',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Prompt Templates（列表 / trash / versions）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Collection prompt-templates，像文章一样列表管理，支持软删除与版本',
+          '可绑定 provider + model（可空则跟全局默认）——字段 AI 与画布「技能卡」共用',
+          'action：polish / expand / shorten / custom / seo_* / rewrite / suggest_taxonomy 等',
+          'editor 可读；super-admin 可写',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'ai-settings Global（瘦身）',
+      },
+      {
+        type: 'p',
+        text: '只保留 enabled、defaultProvider、defaultModel、defaultEmbeddingProvider、defaultEmbeddingModel、temperature、maxTokens。旧 provider/baseUrl/model/promptTemplates 已移除。',
+      },
+      {
+        type: 'h3',
+        text: '无限画布',
+      },
+      {
+        type: 'pre',
+        text: `// 节点可扩展字段（MVP 已支持 promptId；providerId/model 走 resolveLlmClient）
+{
+  promptId: 'xxx',
+  providerId: 'yyy',
+  model: 'deepseek-chat',
+  tools: [...]
+}`,
+      },
+      {
+        type: 'ul',
+        items: [
+          '画布不另起配置体系，只消费 resolveLlmClient + prompt-templates',
+          'MVP：ai-canvases + /admin/ai-canvases（输入节点 + Prompt 节点）',
+          'Provider/Model 有稳定 id，可被节点引用',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '安全与权限',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Catalog 与系统 Global：update 仅 super-admin；密钥字段加密 + 掩码',
+          '未改密钥提交（空或 ***）时保留原密文',
+          'DATABASE_URL / PAYLOAD_SECRET / CRON_SECRET / PREVIEW_SECRET 永不进后台',
+          '.env 只保留基础设施变量；LLM / S3 / Unsplash / Email 一律 Admin Catalog',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '落地阶段',
+      },
+      {
+        type: 'table',
+        headers: ['阶段', '内容', '收益'],
+        rows: [
+          ['P0（已完成）', 'llm-providers + 瘦身 ai-settings + prompt-templates + resolveLlmClient', '多模型切换、Prompt 指定模型'],
+          ['P1（已完成）', 'storage-targets / Unsplash + Active Globals（无 env 回退）', 'S3、Unsplash 多选一'],
+          ['P2（已完成）', 'email-transports + email-settings（重启生效）', '邮件多套切换'],
+          ['P3（MVP）', 'ai-canvases + /admin/ai-canvases', '画布跑通'],
+          ['Embedding', 'defaultEmbeddingProvider + embeddingDimensions', '语义搜索走 Catalog'],
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'AI 画布（P3 MVP）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'Collection ai-canvases：user 隔离，一人可建多份；Admin 导航「运营 → AI 画布」；Agent 可管 title/新建/删除，节点图仅 UI',
+          '节点：输入 + Prompt（绑 prompt-templates）；运行走 purpose=canvas 的 resolveLlmClient',
+          'API：/api/ai/canvases、/api/ai/canvases/:id、/api/ai/canvases/:id/run',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'S3 / Unsplash（P1）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'storage-targets Catalog + storage-settings（mode local|s3 + activeTarget）',
+          '保存 Active 后写入 .data/storage-runtime.json；S3 插件启动时读取 → 改后需重启',
+          'integration-credentials（type=unsplash）+ integration-settings.activeUnsplash',
+          'Unsplash 按请求 resolve（30s 缓存）→ 改 Active 即时生效',
+        ],
+      },
+      {
+        type: 'h3',
+        text: 'Email（P2）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'email-transports Catalog（resend | smtp）+ email-settings.activeTransport',
+          '保存 Active 后写入 .data/email-runtime.json；createEmailAdapter 启动时读取 → 改后需重启',
+          '发件人 / 表单默认收件人 / 测试重定向可在 email-settings 维护',
+        ],
+      },
+      {
+        type: 'h3',
+        text: '相关代码（随实现更新）',
+      },
+      {
+        type: 'ul',
+        items: [
+          'src/collections/LlmProviders — LLM Catalog',
+          'src/collections/PromptTemplates — Prompt Catalog',
+          'src/collections/StorageTargets — S3 Catalog',
+          'src/collections/IntegrationCredentials — Unsplash 等 Catalog',
+          'src/collections/EmailTransports — 邮件通道 Catalog',
+          'src/collections/AiCanvases — 无限画布',
+          'src/AiSettings / StorageSettings / IntegrationSettings / EmailSettings — Active Globals',
+          'src/ai/resolveLlmClient.ts — LLM 统一解析',
+          'src/ai/embeddings/config.ts — Embedding Catalog 解析',
+          'src/storage/resolveStorageConfig.ts + syncStorageRuntimeFile.ts — S3 运行时',
+          'src/email/resolveEmailConfig.ts + syncEmailRuntimeFile.ts — 邮件运行时',
+          'src/unsplash/resolveUnsplashKey.ts — Unsplash Active',
+          'src/utilities/secretCrypto.ts — 密钥加解密',
         ],
       },
     ],
@@ -1590,7 +1779,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           '前台 (frontend) 不加载 Admin bundle；RSC 直查 Payload，页面 HTML 走 DB + middleware（revalidate=false）',
           'Admin 列表避免 populate 大字段（Lexical 正文）；详情页再提高 depth',
           '语义搜索 / embedding 走 Postgres pgvector + 独立 API，不经 Admin 渲染链',
-          '生产媒体用 S3（S3_*），避免本机磁盘成为瓶颈',
+          '生产媒体用 S3（Admin 存储目标），避免本机磁盘成为瓶颈',
           'Local API 查询可显式 select 字段、控制 limit/depth',
         ],
       },
@@ -1662,7 +1851,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
     blocks: [
       {
         type: 'p',
-        text: 'Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读写 CMS 内容，与字段级 AI（润色/SEO）互补。需 DEEPSEEK_API_KEY 且 AI 总开关开启。',
+        text: 'Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读写 CMS 内容，与字段级 AI（润色/SEO）互补。需 Admin「LLM 提供商 + AI 设置」配置且总开关开启。',
       },
       {
         type: 'table',

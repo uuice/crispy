@@ -78,7 +78,7 @@ export async function syncContentEmbedding(
   collection: EmbeddableCollection,
   doc: DocLike,
 ): Promise<void> {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
   if (!config.enabled) return
 
   const docId = Number(doc.id)
@@ -134,7 +134,7 @@ export async function removeContentEmbedding(
   collection: EmbeddableCollection,
   docId: number | string,
 ): Promise<void> {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
   if (!config.enabled) return
 
   await deleteContentEmbedding(req.payload, collection, Number(docId))

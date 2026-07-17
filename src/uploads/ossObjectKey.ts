@@ -1,7 +1,9 @@
 import path from 'path'
 
+import { resolveStorageConfigSync } from '@/storage/resolveStorageConfig'
+
 function collectionPrefix(): string {
-  return (process.env.S3_PREFIX ?? 'media').replace(/^\/+|\/+$/g, '')
+  return resolveStorageConfigSync().prefix.replace(/^\/+|\/+$/g, '') || 'media'
 }
 
 /** Build the OSS object key for a media file (matches Payload S3 adapter, non-composite mode). */
@@ -38,7 +40,8 @@ export function buildOssPublicUrl(input: {
   filename: string
   publicBaseUrl?: string | null
 }): string | null {
-  const publicBase = (input.publicBaseUrl ?? process.env.S3_PUBLIC_BASE_URL)?.replace(/\/$/, '')
+  const storage = resolveStorageConfigSync()
+  const publicBase = (input.publicBaseUrl ?? storage.publicBaseUrl)?.replace(/\/$/, '')
   if (!publicBase) return null
 
   const fileKey = encodeOssObjectKey(buildOssObjectKey(input))
@@ -51,8 +54,9 @@ export function buildOssEndpointUrl(input: {
   endpoint?: string | null
   bucket?: string | null
 }): string | null {
-  const endpoint = (input.endpoint ?? process.env.S3_ENDPOINT)?.replace(/\/$/, '')
-  const bucket = input.bucket ?? process.env.S3_BUCKET
+  const storage = resolveStorageConfigSync()
+  const endpoint = (input.endpoint ?? storage.endpoint)?.replace(/\/$/, '')
+  const bucket = input.bucket ?? storage.bucket
   if (!endpoint || !bucket) return null
 
   const fileKey = encodeOssObjectKey(buildOssObjectKey(input))

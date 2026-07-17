@@ -10,7 +10,7 @@ import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 
 export async function GET(): Promise<Response> {
   const settings = await resolveAiSettings()
-  const embedding = resolveEmbeddingConfig()
+  const embedding = await resolveEmbeddingConfig()
 
   return Response.json({
     available: settings.enabled,

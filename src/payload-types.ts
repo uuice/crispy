@@ -85,10 +85,16 @@ export interface Config {
     'novel-tags': NovelTag;
     'gallery-items': GalleryItem;
     'app-configs': AppConfig;
+    'llm-providers': LlmProvider;
+    'prompt-templates': PromptTemplate;
+    'storage-targets': StorageTarget;
+    'integration-credentials': IntegrationCredential;
+    'email-transports': EmailTransport;
     comments: Comment;
     'api-access-logs': ApiAccessLog;
     'frontend-cache-entries': FrontendCacheEntry;
     'ai-chat-sessions': AiChatSession;
+    'ai-canvases': AiCanvase;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -129,10 +135,16 @@ export interface Config {
     'novel-tags': NovelTagsSelect<false> | NovelTagsSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
     'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
+    'llm-providers': LlmProvidersSelect<false> | LlmProvidersSelect<true>;
+    'prompt-templates': PromptTemplatesSelect<false> | PromptTemplatesSelect<true>;
+    'storage-targets': StorageTargetsSelect<false> | StorageTargetsSelect<true>;
+    'integration-credentials': IntegrationCredentialsSelect<false> | IntegrationCredentialsSelect<true>;
+    'email-transports': EmailTransportsSelect<false> | EmailTransportsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
     'frontend-cache-entries': FrontendCacheEntriesSelect<false> | FrontendCacheEntriesSelect<true>;
     'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
+    'ai-canvases': AiCanvasesSelect<false> | AiCanvasesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -161,6 +173,9 @@ export interface Config {
     'ai-settings': AiSetting;
     'comment-settings': CommentSetting;
     'cache-settings': CacheSetting;
+    'storage-settings': StorageSetting;
+    'integration-settings': IntegrationSetting;
+    'email-settings': EmailSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
@@ -170,6 +185,9 @@ export interface Config {
     'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
     'comment-settings': CommentSettingsSelect<false> | CommentSettingsSelect<true>;
     'cache-settings': CacheSettingsSelect<false> | CacheSettingsSelect<true>;
+    'storage-settings': StorageSettingsSelect<false> | StorageSettingsSelect<true>;
+    'integration-settings': IntegrationSettingsSelect<false> | IntegrationSettingsSelect<true>;
+    'email-settings': EmailSettingsSelect<false> | EmailSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -1339,6 +1357,183 @@ export interface AppConfig {
   deletedAt?: string | null;
 }
 /**
+ * OpenAI 兼容端点 Catalog。DeepSeek / OpenAI / 自定义网关均可添加入口；capabilities 勾选 chat 或 embedding；在 AI 设置中分别选默认聊天 / Embedding 提供商，或在 Prompt 模板上绑定。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "llm-providers".
+ */
+export interface LlmProvider {
+  id: number;
+  /**
+   * 显示名称，如 DeepSeek、Aliyun Embedding
+   */
+  name: string;
+  /**
+   * OpenAI 兼容 API 根地址，不含末尾 /v1（代码会自动拼接）。例：https://api.deepseek.com 或 …/compatible-mode
+   */
+  baseUrl: string;
+  /**
+   * API Key（加密存储；留空或保持掩码则不修改）
+   */
+  apiKey: string;
+  /**
+   * 该端点可用模型列表；可为空（仅用 defaultModel）
+   */
+  models?:
+    | {
+        modelId: string;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 未指定 model 时使用的默认模型 id
+   */
+  defaultModel: string;
+  /**
+   * 该端点支持的能力；字段 AI / Agent 需 chat；语义搜索需 embedding
+   */
+  capabilities?: ('chat' | 'embedding')[] | null;
+  /**
+   * 仅 embedding：输出向量维数，须与 content_embeddings.embedding（当前 vector(1024)）一致；改维需 DB 迁移。
+   */
+  embeddingDimensions?: number | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 字段 AI / 画布技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prompt-templates".
+ */
+export interface PromptTemplate {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  action: 'polish' | 'expand' | 'shorten' | 'custom' | 'seo_title' | 'seo_description' | 'rewrite' | 'suggest_taxonomy';
+  outputFormat?: ('text' | 'json') | null;
+  enabled?: boolean | null;
+  sort?: number | null;
+  /**
+   * 可空 = 使用 AI 设置中的默认 Provider
+   */
+  provider?: (number | null) | LlmProvider;
+  /**
+   * 可空 = 使用 Provider 的 defaultModel 或全局 defaultModel
+   */
+  model?: string | null;
+  /**
+   * 可空 = 全局默认
+   */
+  temperature?: number | null;
+  /**
+   * 可空 = 全局默认
+   */
+  maxTokens?: number | null;
+  systemPrompt: string;
+  /**
+   * 变量：{{field}} {{selection}} {{title}} {{content_plain}} {{siteName}} {{existing_categories}} {{existing_tags}} {{instruction}}
+   */
+  userPrompt: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * S3/OSS 存储目标 Catalog。在「存储设置」中选中一条为 Active。保存后需重启进程才能让上传插件切换目标。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-targets".
+ */
+export interface StorageTarget {
+  id: number;
+  name: string;
+  bucket: string;
+  region?: string | null;
+  /**
+   * 对象键前缀，默认 media
+   */
+  prefix?: string | null;
+  /**
+   * 兼容 S3 的自定义 Endpoint（阿里云 OSS / MinIO 等）；留空用 AWS 默认
+   */
+  endpoint?: string | null;
+  accessKeyId: string;
+  secretAccessKey: string;
+  /**
+   * 多数兼容 Endpoint 需开启 path-style
+   */
+  forcePathStyle?: boolean | null;
+  /**
+   * 对外访问 CDN/域名根，不含末尾 /
+   */
+  publicBaseUrl?: string | null;
+  /**
+   * OSS 虚拟尺寸（替代 Sharp）；关闭则回退本地处理策略
+   */
+  virtualSizes?: boolean | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 第三方集成凭证 Catalog（Unsplash 等）。在「集成设置」中多选一启用。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integration-credentials".
+ */
+export interface IntegrationCredential {
+  id: number;
+  name: string;
+  type: 'unsplash';
+  /**
+   * Access Key / API Key（加密存储）
+   */
+  apiKey: string;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 邮件通道 Catalog（Resend / SMTP）。在「邮件设置」中选中一条为 Active。保存后需重启进程才能切换发信通道。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-transports".
+ */
+export interface EmailTransport {
+  id: number;
+  name: string;
+  type: 'resend' | 'smtp';
+  /**
+   * Resend API Key
+   */
+  apiKey?: string | null;
+  smtpHost?: string | null;
+  smtpPort?: number | null;
+  /**
+   * 465 端口通常需开启；587 用 STARTTLS 时关闭
+   */
+  smtpSecure?: boolean | null;
+  smtpUser?: string | null;
+  /**
+   * SMTP 密码（加密存储）
+   */
+  smtpPass?: string | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
  * 文章与单页的用户评论，支持嵌套回复与审核。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1416,7 +1611,7 @@ export interface FrontendCacheEntry {
   createdAt: string;
 }
 /**
- * AI 内容助手完整会话历史，由聊天 API 自动写入。
+ * AI 内容助手完整会话历史，由聊天 API 自动写入。也可从运营 → AI 内容助手进入。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ai-chat-sessions".
@@ -1430,6 +1625,32 @@ export interface AiChatSession {
    * 完整对话记录（用户消息、AI 回复、工具调用摘要）。
    */
   messages:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * AI 无限画布；按账号隔离，一人可创建多份。请从运营 → AI 画布进入。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-canvases".
+ */
+export interface AiCanvase {
+  id: number;
+  title: string;
+  user: number | User;
+  /**
+   * React Flow 节点与边（JSON）
+   */
+  graph:
     | {
         [k: string]: unknown;
       }
@@ -2000,6 +2221,36 @@ export interface PayloadMcpApiKey {
      */
     find?: boolean | null;
   };
+  llmProviders?: {
+    /**
+     * Allow clients to find llm-providers.
+     */
+    find?: boolean | null;
+  };
+  promptTemplates?: {
+    /**
+     * Allow clients to find prompt-templates.
+     */
+    find?: boolean | null;
+  };
+  storageTargets?: {
+    /**
+     * Allow clients to find storage-targets.
+     */
+    find?: boolean | null;
+  };
+  integrationCredentials?: {
+    /**
+     * Allow clients to find integration-credentials.
+     */
+    find?: boolean | null;
+  };
+  emailTransports?: {
+    /**
+     * Allow clients to find email-transports.
+     */
+    find?: boolean | null;
+  };
   comments?: {
     /**
      * Allow clients to find comments.
@@ -2094,6 +2345,36 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  storageSettings?: {
+    /**
+     * Allow clients to find storage-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update storage-settings global.
+     */
+    update?: boolean | null;
+  };
+  integrationSettings?: {
+    /**
+     * Allow clients to find integration-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update integration-settings global.
+     */
+    update?: boolean | null;
+  };
+  emailSettings?: {
+    /**
+     * Allow clients to find email-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update email-settings global.
+     */
+    update?: boolean | null;
+  };
   'payload-mcp-tool'?: {
     /**
      * 查询前台 HTML 缓存：registry 路径列表、DB 状态、动态路由明细、cache-settings（对应 /admin/cache）
@@ -2120,7 +2401,7 @@ export interface PayloadMcpApiKey {
      */
     describeResource?: boolean | null;
     /**
-     * 按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector + Embedding API Key）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。
+     * 按语义相似度搜索 posts/pages/novels/novel-chapters（需 Postgres + pgvector，且 Admin「AI 设置」已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。
      */
     semanticSearch?: boolean | null;
   };
@@ -2332,6 +2613,26 @@ export interface PayloadLockedDocument {
         value: number | AppConfig;
       } | null)
     | ({
+        relationTo: 'llm-providers';
+        value: number | LlmProvider;
+      } | null)
+    | ({
+        relationTo: 'prompt-templates';
+        value: number | PromptTemplate;
+      } | null)
+    | ({
+        relationTo: 'storage-targets';
+        value: number | StorageTarget;
+      } | null)
+    | ({
+        relationTo: 'integration-credentials';
+        value: number | IntegrationCredential;
+      } | null)
+    | ({
+        relationTo: 'email-transports';
+        value: number | EmailTransport;
+      } | null)
+    | ({
         relationTo: 'comments';
         value: number | Comment;
       } | null)
@@ -2346,6 +2647,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'ai-chat-sessions';
         value: number | AiChatSession;
+      } | null)
+    | ({
+        relationTo: 'ai-canvases';
+        value: number | AiCanvase;
       } | null)
     | ({
         relationTo: 'users';
@@ -2490,10 +2795,16 @@ export interface PayloadQueryPreset {
     | 'novel-tags'
     | 'gallery-items'
     | 'app-configs'
+    | 'llm-providers'
+    | 'prompt-templates'
+    | 'storage-targets'
+    | 'integration-credentials'
+    | 'email-transports'
     | 'comments'
     | 'api-access-logs'
     | 'frontend-cache-entries'
     | 'ai-chat-sessions'
+    | 'ai-canvases'
     | 'users'
     | 'redirects'
     | 'forms'
@@ -3056,6 +3367,102 @@ export interface AppConfigsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "llm-providers_select".
+ */
+export interface LlmProvidersSelect<T extends boolean = true> {
+  name?: T;
+  baseUrl?: T;
+  apiKey?: T;
+  models?:
+    | T
+    | {
+        modelId?: T;
+        label?: T;
+        id?: T;
+      };
+  defaultModel?: T;
+  capabilities?: T;
+  embeddingDimensions?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prompt-templates_select".
+ */
+export interface PromptTemplatesSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  action?: T;
+  outputFormat?: T;
+  enabled?: T;
+  sort?: T;
+  provider?: T;
+  model?: T;
+  temperature?: T;
+  maxTokens?: T;
+  systemPrompt?: T;
+  userPrompt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-targets_select".
+ */
+export interface StorageTargetsSelect<T extends boolean = true> {
+  name?: T;
+  bucket?: T;
+  region?: T;
+  prefix?: T;
+  endpoint?: T;
+  accessKeyId?: T;
+  secretAccessKey?: T;
+  forcePathStyle?: T;
+  publicBaseUrl?: T;
+  virtualSizes?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integration-credentials_select".
+ */
+export interface IntegrationCredentialsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  apiKey?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-transports_select".
+ */
+export interface EmailTransportsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  apiKey?: T;
+  smtpHost?: T;
+  smtpPort?: T;
+  smtpSecure?: T;
+  smtpUser?: T;
+  smtpPass?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "comments_select".
  */
 export interface CommentsSelect<T extends boolean = true> {
@@ -3111,6 +3518,18 @@ export interface AiChatSessionsSelect<T extends boolean = true> {
   user?: T;
   lastMessageAt?: T;
   messages?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-canvases_select".
+ */
+export interface AiCanvasesSelect<T extends boolean = true> {
+  title?: T;
+  user?: T;
+  graph?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3578,6 +3997,31 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | {
         find?: T;
       };
+  llmProviders?:
+    | T
+    | {
+        find?: T;
+      };
+  promptTemplates?:
+    | T
+    | {
+        find?: T;
+      };
+  storageTargets?:
+    | T
+    | {
+        find?: T;
+      };
+  integrationCredentials?:
+    | T
+    | {
+        find?: T;
+      };
+  emailTransports?:
+    | T
+    | {
+        find?: T;
+      };
   comments?:
     | T
     | {
@@ -3628,6 +4072,24 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
       };
   aiSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  storageSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  integrationSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  emailSettings?:
     | T
     | {
         find?: T;
@@ -3881,47 +4343,35 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * 全局 AI 开关与默认模型。聊天 / Embedding 端点在「LLM 提供商」维护（capabilities）；Prompt 在「Prompt 模板」。密钥加密入库，不使用 .env。详见 /admin/dev-docs#config-center
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ai-settings".
  */
 export interface AiSetting {
   id: number;
   /**
-   * 关闭后 Admin 内 AI 按钮不可用。API Key 请在 .env 配置：DeepSeek 用 DEEPSEEK_API_KEY，OpenAI 用 OPENAI_API_KEY，或通用 LLM_API_KEY。
+   * 关闭后字段 AI / Agent / 前台助手均不可用。
    */
   enabled?: boolean | null;
   /**
-   * 选择上游 LLM 提供商；切换后会自动填充默认模型与 API 地址，可按需修改。
+   * 全局默认聊天 LLM（多选一）。未配置则字段 AI / Agent / 助手不可用。
    */
-  provider?: ('deepseek' | 'openai' | 'custom') | null;
+  defaultProvider?: (number | null) | LlmProvider;
   /**
-   * 模型名称，取决于所选提供商
+   * 可空 = 使用所选 Provider 的 defaultModel
    */
-  model?: string | null;
+  defaultModel?: string | null;
   /**
-   * OpenAI 兼容 API 根地址，不含 /v1 后缀
+   * 语义搜索 Active。Provider 须勾选 embedding，并设置 embeddingDimensions（当前库表 vector(1024)）。
    */
-  baseUrl?: string | null;
+  defaultEmbeddingProvider?: (number | null) | LlmProvider;
+  /**
+   * 可空 = 使用 Embedding Provider 的 defaultModel
+   */
+  defaultEmbeddingModel?: string | null;
   temperature?: number | null;
   maxTokens?: number | null;
-  /**
-   * 留空则使用内置默认模板。id 与 action 需与系统约定一致。
-   */
-  promptTemplates?:
-    | {
-        id: string;
-        label: string;
-        action:
-          'polish' | 'expand' | 'shorten' | 'custom' | 'seo_title' | 'seo_description' | 'rewrite' | 'suggest_taxonomy';
-        outputFormat?: ('text' | 'json') | null;
-        enabled?: boolean | null;
-        systemPrompt: string;
-        /**
-         * 变量：{{field}} {{selection}} {{title}} {{content_plain}} {{siteName}} {{existing_categories}} {{existing_tags}}
-         */
-        userPrompt: string;
-      }[]
-    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3969,6 +4419,68 @@ export interface CacheSetting {
    * 在 HTTP 响应中输出 X-Crispy-Page-Cache 等调试头（HIT/MISS/STALE/BYPASS）。
    */
   exposeCacheHeaders?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * 存储 Active 层：选择 local 或 S3 目标。切换 S3 目标后请重启 Node 进程，上传插件才会切换凭证。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-settings".
+ */
+export interface StorageSetting {
+  id: number;
+  mode: 'local' | 's3';
+  /**
+   * mode=s3 时必选。保存后请重启进程（pm2 restart / 重新 dev）才能让上传插件切换凭证。
+   */
+  activeTarget?: (number | null) | StorageTarget;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * 第三方集成 Active 层。Unsplash 切换即时生效，无需重启。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integration-settings".
+ */
+export interface IntegrationSetting {
+  id: number;
+  /**
+   * 多套 Unsplash Key 中选一；未选则导入功能不可用
+   */
+  activeUnsplash?: (number | null) | IntegrationCredential;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * 邮件 Active 层：选择发信通道与默认发件人。切换通道后请重启 Node 进程，邮件适配器才会生效。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-settings".
+ */
+export interface EmailSetting {
+  id: number;
+  /**
+   * 多套通道中选一；未选则不发信。改后需重启。
+   */
+  activeTransport?: (number | null) | EmailTransport;
+  /**
+   * 默认发件地址；空则 noreply@example.com
+   */
+  fromAddress?: string | null;
+  /**
+   * 默认发件名称；空则 Crispy CMS
+   */
+  fromName?: string | null;
+  /**
+   * 表单未配置收件人时的默认邮箱。改后需重启。
+   */
+  formDefaultToEmail?: string | null;
+  /**
+   * 测试用：所有外发邮件重定向到此地址。改后需重启。
+   */
+  overrideRecipient?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4076,22 +4588,12 @@ export interface SiteSettingsSelect<T extends boolean = true> {
  */
 export interface AiSettingsSelect<T extends boolean = true> {
   enabled?: T;
-  provider?: T;
-  model?: T;
-  baseUrl?: T;
+  defaultProvider?: T;
+  defaultModel?: T;
+  defaultEmbeddingProvider?: T;
+  defaultEmbeddingModel?: T;
   temperature?: T;
   maxTokens?: T;
-  promptTemplates?:
-    | T
-    | {
-        id?: T;
-        label?: T;
-        action?: T;
-        outputFormat?: T;
-        enabled?: T;
-        systemPrompt?: T;
-        userPrompt?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4119,6 +4621,41 @@ export interface CacheSettingsSelect<T extends boolean = true> {
   cachingEnabled?: T;
   pageRevalidateSeconds?: T;
   exposeCacheHeaders?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-settings_select".
+ */
+export interface StorageSettingsSelect<T extends boolean = true> {
+  mode?: T;
+  activeTarget?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "integration-settings_select".
+ */
+export interface IntegrationSettingsSelect<T extends boolean = true> {
+  activeUnsplash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-settings_select".
+ */
+export interface EmailSettingsSelect<T extends boolean = true> {
+  activeTransport?: T;
+  fromAddress?: T;
+  fromName?: T;
+  formDefaultToEmail?: T;
+  overrideRecipient?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4180,10 +4717,16 @@ export interface TaskCreateCollectionExport {
       | 'novel-tags'
       | 'gallery-items'
       | 'app-configs'
+      | 'llm-providers'
+      | 'prompt-templates'
+      | 'storage-targets'
+      | 'integration-credentials'
+      | 'email-transports'
       | 'comments'
       | 'api-access-logs'
       | 'frontend-cache-entries'
       | 'ai-chat-sessions'
+      | 'ai-canvases'
       | 'users'
       | 'redirects'
       | 'forms'

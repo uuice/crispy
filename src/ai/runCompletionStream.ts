@@ -1,28 +1,32 @@
 import { renderPromptTemplate } from '@/ai/promptRenderer'
 import { openAiChatCompletionStream } from '@/ai/providers/openaiCompatible'
-import { findTemplate, getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
+import { resolveLlmClient } from '@/ai/resolveLlmClient'
 import type { AiCompleteRequest } from '@/ai/types'
 
 export async function* runAiTextCompletionStream(
   body: AiCompleteRequest,
 ): AsyncGenerator<string, { templateId: string }, undefined> {
-  const settings = await resolveAiSettings()
-
-  if (!settings.enabled) {
-    throw new Error(getAiDisabledMessage(settings.provider))
+  if (body.action === 'custom' && !body.customPrompt?.trim()) {
+    throw new Error('自定义指令不能为空')
   }
 
-  const template = findTemplate(settings, body.action, body.templateId)
+  const client = await resolveLlmClient({
+    purpose: 'field',
+    action: body.action,
+    templateId: body.templateId,
+  })
+
+  if (!client.enabled) {
+    throw new Error(client.disabledReason ?? 'AI 未启用')
+  }
+
+  const template = client.template
   if (!template) {
     throw new Error(`未找到 action=${body.action} 的 Prompt 模板`)
   }
 
   if (template.outputFormat === 'json') {
     throw new Error('该模板需要 structured 接口')
-  }
-
-  if (body.action === 'custom' && !body.customPrompt?.trim()) {
-    throw new Error('自定义指令不能为空')
   }
 
   const variables = {
@@ -33,11 +37,11 @@ export async function* runAiTextCompletionStream(
   }
 
   const stream = openAiChatCompletionStream({
-    baseUrl: settings.baseUrl,
-    apiKey: settings.apiKey,
-    model: settings.model,
-    temperature: settings.temperature,
-    maxTokens: settings.maxTokens,
+    baseUrl: client.baseUrl,
+    apiKey: client.apiKey,
+    model: client.model,
+    temperature: client.temperature,
+    maxTokens: client.maxTokens,
     messages: [
       { role: 'system', content: renderPromptTemplate(template.systemPrompt, variables) },
       { role: 'user', content: renderPromptTemplate(template.userPrompt, variables) },

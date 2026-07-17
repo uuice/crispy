@@ -35,7 +35,7 @@ export async function searchUnsplashPhotos({
   limit,
   orientation,
 }: UnsplashSearchRequest): Promise<UnsplashSearchResponse> {
-  const accessKey = getUnsplashAccessKey()
+  const accessKey = await getUnsplashAccessKey()
   const perPage = parseUnsplashLimit(limit)
   const params = new URLSearchParams({
     query: query.trim(),

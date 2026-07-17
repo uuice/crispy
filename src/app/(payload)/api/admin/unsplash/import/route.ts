@@ -21,7 +21,7 @@ export async function POST(request: Request): Promise<Response> {
   const auth = await requireAuthorSessionFromRequest(request)
   if (!auth.ok) return auth.response
 
-  if (!isUnsplashEnabled()) {
+  if (!(await isUnsplashEnabled())) {
     return Response.json({ error: 'Unsplash is not configured' }, { status: 503 })
   }
 

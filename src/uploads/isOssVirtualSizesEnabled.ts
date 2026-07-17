@@ -1,7 +1,7 @@
-import { isS3Enabled } from '@/storage/s3'
+import { resolveStorageConfigSync } from '@/storage/resolveStorageConfig'
 
-/** OSS virtual sizes replace Sharp when S3 storage is enabled. Set CRISPY_OSS_VIRTUAL_SIZES=false to disable. */
+/** OSS virtual sizes replace Sharp when S3 storage is enabled (Admin storage-targets.virtualSizes). */
 export function isOssVirtualSizesEnabled(): boolean {
-  if (!isS3Enabled()) return false
-  return process.env.CRISPY_OSS_VIRTUAL_SIZES !== 'false'
+  const config = resolveStorageConfigSync()
+  return config.enabled && config.virtualSizes
 }

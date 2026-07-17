@@ -14,7 +14,7 @@ export async function searchContentBySemantics(
     status?: string
   } = {},
 ) {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
   if (!config.enabled || !query.trim()) {
     return []
   }

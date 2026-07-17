@@ -4,11 +4,11 @@ import { buildAgentSystemPrompt } from '@/ai/agent/systemPrompt'
 import { trimAgentMessages } from '@/ai/agent/trimMessages'
 import { AGENT_TOOLS, executeAgentTool } from '@/ai/agent/tools'
 import type { AgentChatMessage, AgentStreamEvent } from '@/ai/agent/types'
+import { resolveLlmClient } from '@/ai/resolveLlmClient'
 import {
   openAiChatCompletionWithToolsStream,
   toOpenAiToolMessages,
 } from '@/ai/providers/openaiCompatible'
-import { getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
 
 const MAX_TOOL_ITERATIONS = 8
 
@@ -24,10 +24,10 @@ export async function* runAiAgentStream(
   req: PayloadRequest,
   userMessages: AgentChatMessage[],
 ): AsyncGenerator<AgentStreamEvent, void, undefined> {
-  const settings = await resolveAiSettings()
+  const settings = await resolveLlmClient({ purpose: 'agent' })
 
   if (!settings.enabled) {
-    yield { type: 'error', error: getAiDisabledMessage(settings.provider) }
+    yield { type: 'error', error: settings.disabledReason ?? 'AI 未启用' }
     return
   }
 

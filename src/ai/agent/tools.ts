@@ -25,6 +25,10 @@ import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
 import { formatEmbeddingSearchHit } from '@/ai/embeddings/formatEmbeddingSearchHit'
 import {
+  prepareCanvasWriteData,
+  sanitizeCanvasDocForAgent,
+} from '@/ai/canvas/agentView'
+import {
   getFrontendCacheSettings,
   listFrontendCache,
   purgeFrontendCache,
@@ -49,26 +53,11 @@ function sanitizeGlobalResult(slug: string, data: Record<string, unknown>): Reco
     return data
   }
 
-  const templates = Array.isArray(data.promptTemplates) ? data.promptTemplates : []
-
   return {
     ...data,
-    promptTemplates: templates.map((item) => {
-      if (!item || typeof item !== 'object') {
-        return item
-      }
-
-      const template = item as Record<string, unknown>
-      return {
-        id: template.id,
-        label: template.label,
-        action: template.action,
-        outputFormat: template.outputFormat,
-        enabled: template.enabled,
-        note: '完整 systemPrompt/userPrompt 请用 describe_resource(kind=global, slug=ai-settings) 查看',
-      }
-    }),
-    apiKeyNote: 'API Key 仅通过环境变量配置，不在 Global 中存储',
+    apiKeyNote:
+      'API Key 在 llm-providers / integration-credentials / email-transports / storage-targets 中加密存储，不在 Global 明文保存',
+    promptsNote: 'Prompt 模板见 Collection prompt-templates，不在 ai-settings 内嵌',
   }
 }
 
@@ -157,7 +146,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'semantic_search',
       description:
-        '按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 get_document(collection, docId)。',
+        '按语义相似度搜索 posts/pages/novels/novel-chapters（需 Postgres + pgvector，且 AI 设置已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 get_document(collection, docId)。',
       parameters: {
         type: 'object',
         properties: {
@@ -427,7 +416,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'search_stock_images',
       description:
-        '从 Unsplash 检索可导入 media 媒体库的图片（需 UNSPLASH_ACCESS_KEY）。返回 photoId、缩略图与 downloadLocation。用户说「N 张」时必须传 limit: N。展示结果后须询问用户要导入哪些；用户确认后再 import_stock_image，或让用户点击聊天中的「加入图库」按钮。',
+        '从 Unsplash 检索可导入 media 媒体库的图片（需 Admin 集成设置 Active Unsplash）。返回 photoId、缩略图与 downloadLocation。用户说「N 张」时必须传 limit: N。展示结果后须询问用户要导入哪些；用户确认后再 import_stock_image，或让用户点击聊天中的「加入图库」按钮。',
       parameters: {
         type: 'object',
         properties: {
@@ -517,7 +506,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'get_global',
       description:
-        '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings）',
+        '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings、storage-settings、integration-settings、email-settings）',
       parameters: {
         type: 'object',
         properties: {
@@ -643,13 +632,17 @@ export async function executeAgentTool(
       const collection = String(args.collection ?? '')
       const id = args.id as string | number
       await assertAgentCollectionAccess(req, collection, 'read', id)
-      result = await req.payload.findByID({
+      const doc = await req.payload.findByID({
         collection: collection as CollectionSlug,
         id,
         depth: Math.min(Number(args.depth) || 1, 2),
         overrideAccess: false,
         user: req.user,
       })
+      result =
+        collection === 'ai-canvases' && doc && typeof doc === 'object'
+          ? sanitizeCanvasDocForAgent(doc as unknown as Record<string, unknown>)
+          : doc
       break
     }
 
@@ -659,13 +652,19 @@ export async function executeAgentTool(
       if (!args.data || typeof args.data !== 'object') {
         throw new Error('data 必须是对象')
       }
-      result = await req.payload.create({
+      const rawData = args.data as Record<string, unknown>
+      const data =
+        collection === 'ai-canvases' ? prepareCanvasWriteData(rawData, 'create') : rawData
+      const created = await req.payload.create({
         collection: collection as CollectionSlug,
-        // Dynamic data shape from AI tool arguments
-        data: args.data as never,
+        data: data as never,
         overrideAccess: false,
         user: req.user,
       })
+      result =
+        collection === 'ai-canvases' && created && typeof created === 'object'
+          ? sanitizeCanvasDocForAgent(created as unknown as Record<string, unknown>)
+          : created
       break
     }
 
@@ -676,13 +675,20 @@ export async function executeAgentTool(
       if (!args.data || typeof args.data !== 'object') {
         throw new Error('data 必须是对象')
       }
-      result = await req.payload.update({
+      const rawData = args.data as Record<string, unknown>
+      const data =
+        collection === 'ai-canvases' ? prepareCanvasWriteData(rawData, 'update') : rawData
+      const updated = await req.payload.update({
         collection: collection as CollectionSlug,
         id,
-        data: args.data as never,
+        data: data as never,
         overrideAccess: false,
         user: req.user,
       })
+      result =
+        collection === 'ai-canvases' && updated && typeof updated === 'object'
+          ? sanitizeCanvasDocForAgent(updated as unknown as Record<string, unknown>)
+          : updated
       break
     }
 

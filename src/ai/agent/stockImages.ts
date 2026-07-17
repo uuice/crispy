@@ -35,7 +35,7 @@ export type AgentStockSearchResult = {
 
 const MAX_BATCH_IMPORT = 10
 
-export function assertAgentStockImageAccess(req: PayloadRequest): void {
+export async function assertAgentStockImageAccess(req: PayloadRequest): Promise<void> {
   if (!canUseAiAgent(req.user)) {
     throw new Error('无权使用 AI 助手')
   }
@@ -44,8 +44,8 @@ export function assertAgentStockImageAccess(req: PayloadRequest): void {
     throw new Error('仅作者及以上可通过 AI 助手检索或导入图片')
   }
 
-  if (!isUnsplashEnabled()) {
-    throw new Error('Unsplash 未配置，请在环境变量中设置 UNSPLASH_ACCESS_KEY')
+  if (!(await isUnsplashEnabled())) {
+    throw new Error('Unsplash 未配置：请在「集成凭证」添加 Key，并在「集成设置」中选为 Active')
   }
 }
 
@@ -88,7 +88,7 @@ export async function searchStockImagesForAgent(
   req: PayloadRequest,
   args: Record<string, unknown>,
 ): Promise<AgentStockSearchResult> {
-  assertAgentStockImageAccess(req)
+  await assertAgentStockImageAccess(req)
 
   const keyword = args.keyword != null ? String(args.keyword) : ''
   const topicParam = args.topic != null ? String(args.topic) : 'all'
@@ -140,7 +140,7 @@ export async function importStockImageForAgent(
   req: PayloadRequest,
   args: Record<string, unknown>,
 ) {
-  assertAgentStockImageAccess(req)
+  await assertAgentStockImageAccess(req)
 
   if (args.userConfirmed !== true) {
     throw new Error(
@@ -170,7 +170,7 @@ export async function importStockImagesForAgent(
   req: PayloadRequest,
   args: Record<string, unknown>,
 ) {
-  assertAgentStockImageAccess(req)
+  await assertAgentStockImageAccess(req)
 
   if (args.userConfirmed !== true) {
     throw new Error(

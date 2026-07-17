@@ -40,6 +40,39 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     description: '键值型应用配置（string/number/boolean/json），按 key 读取',
   },
   {
+    slug: 'llm-providers',
+    label: 'LLM 提供商',
+    description:
+      'OpenAI 兼容端点 Catalog（chat / embedding）；密钥加密；capabilities 区分用途；仅 super-admin',
+  },
+  {
+    slug: 'prompt-templates',
+    label: 'Prompt 模板',
+    description:
+      '字段 AI / 画布技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。列表可查；增删改仅 super-admin',
+  },
+  {
+    slug: 'storage-targets',
+    label: '存储目标',
+    description: 'S3/OSS 目标 Catalog（密钥加密；切换 Active 后需重启）',
+  },
+  {
+    slug: 'integration-credentials',
+    label: '集成凭证',
+    description: 'Unsplash 等第三方凭证 Catalog（密钥加密）',
+  },
+  {
+    slug: 'email-transports',
+    label: '邮件通道',
+    description: 'Resend / SMTP Catalog（密钥加密；切换 Active 后需重启）',
+  },
+  {
+    slug: 'ai-canvases',
+    label: 'AI 画布',
+    description:
+      '无限画布元数据（title、归属用户）。可 list/重命名/删除/新建空画布；节点图请在 /admin/ai-canvases 编辑，Agent 不改 graph',
+  },
+  {
     slug: 'comments',
     label: '评论',
     description: '文章与单页评论，含审核状态、嵌套回复、访客信息',
@@ -85,7 +118,23 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
   {
     slug: 'ai-settings',
     label: 'AI 设置',
-    description: 'AI 助手开关、LLM 提供商/模型/温度、字段 AI Prompt 模板（API Key 在环境变量）',
+    description:
+      'AI 总开关、默认 chat Provider/模型、默认 Embedding Provider/模型；Prompt 见 prompt-templates，密钥在 llm-providers',
+  },
+  {
+    slug: 'storage-settings',
+    label: '存储设置',
+    description: 'local / S3 模式与 Active 存储目标（切换 S3 后需重启）',
+  },
+  {
+    slug: 'integration-settings',
+    label: '集成设置',
+    description: 'Unsplash 等 Active 凭证（即时生效）',
+  },
+  {
+    slug: 'email-settings',
+    label: '邮件设置',
+    description: 'Active 邮件通道与发件人（切换后需重启）',
   },
 ]
 

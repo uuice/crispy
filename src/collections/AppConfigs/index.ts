@@ -15,7 +15,7 @@ export const AppConfigs: CollectionConfig = {
   admin: {
     defaultColumns: ['key', 'label', 'category', 'valueType', 'enabled', 'updatedAt'],
     useAsTitle: 'label',
-    group: adminLabels.systemGroup,
+    group: adminLabels.configGroup,
     description: '键值型应用配置，供运行时通过 src/config/resolve.ts 读取。',
   },
   defaultSort: 'category',

@@ -151,7 +151,7 @@ export const mcpCustomTools: McpCustomTool[] = [
   {
     name: 'semantic_search',
     description:
-      '按语义相似度搜索 posts/pages/novels/novel-chapters（需 PostgreSQL pgvector + Embedding API Key）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。',
+      '按语义相似度搜索 posts/pages/novels/novel-chapters（需 Postgres + pgvector，且 Admin「AI 设置」已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。',
     parameters: {
       query: z.string(),
       collections: z

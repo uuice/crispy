@@ -15,7 +15,7 @@ export async function runSemanticContentSearch(
     status?: string
   } = {},
 ) {
-  const config = resolveEmbeddingConfig()
+  const config = await resolveEmbeddingConfig()
   if (!config.enabled) {
     throw new Error('语义搜索未启用：需要 PostgreSQL + pgvector 及 Embedding API Key')
   }

@@ -39,6 +39,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'email', 'roles'],
     useAsTitle: 'name',
+    group: adminLabels.systemGroup,
   },
   auth: {
     useAPIKey: true,

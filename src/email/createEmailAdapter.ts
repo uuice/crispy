@@ -2,48 +2,40 @@ import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { resendAdapter } from '@payloadcms/email-resend'
 import type { EmailAdapter } from 'payload'
 
-function readDefaultFrom(): { address: string; name: string } {
-  const address = process.env.EMAIL_FROM_ADDRESS?.trim() || 'noreply@example.com'
-  const name = process.env.EMAIL_FROM_NAME?.trim() || 'Crispy CMS'
-  return { address, name }
-}
+import { resolveEmailConfigSync } from '@/email/resolveEmailConfig'
 
 /**
- * Resend takes precedence when RESEND_API_KEY is set; otherwise SMTP via Nodemailer.
+ * Build Payload email adapter from Admin Active transport (.data/email-runtime.json).
  * Returns undefined when no transport is configured (form submissions still persist).
+ * Changing Active transport requires a process restart.
  */
 export function createEmailAdapter(): EmailAdapter | Promise<EmailAdapter> | undefined {
-  const { address, name } = readDefaultFrom()
-  const overrideRecipientAddress = process.env.EMAIL_OVERRIDE_RECIPIENT?.trim() || undefined
+  const config = resolveEmailConfigSync()
+  if (!config.enabled || !config.type) return undefined
 
-  const resendApiKey = process.env.RESEND_API_KEY?.trim()
-  if (resendApiKey) {
+  if (config.type === 'resend' && config.apiKey) {
     return resendAdapter({
-      apiKey: resendApiKey,
-      defaultFromAddress: address,
-      defaultFromName: name,
-      overrideRecipientAddress,
+      apiKey: config.apiKey,
+      defaultFromAddress: config.fromAddress,
+      defaultFromName: config.fromName,
+      overrideRecipientAddress: config.overrideRecipient,
     })
   }
 
-  const smtpHost = process.env.SMTP_HOST?.trim()
-  if (smtpHost) {
-    const port = Number(process.env.SMTP_PORT || 587)
-    const secure = process.env.SMTP_SECURE === 'true' || port === 465
-
+  if (config.type === 'smtp' && config.smtpHost) {
     return nodemailerAdapter({
-      defaultFromAddress: address,
-      defaultFromName: name,
-      overrideRecipientAddress,
+      defaultFromAddress: config.fromAddress,
+      defaultFromName: config.fromName,
+      overrideRecipientAddress: config.overrideRecipient,
       transportOptions: {
-        host: smtpHost,
-        port,
-        secure,
+        host: config.smtpHost,
+        port: config.smtpPort,
+        secure: config.smtpSecure,
         auth:
-          process.env.SMTP_USER && process.env.SMTP_PASS
+          config.smtpUser && config.smtpPass
             ? {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: config.smtpUser,
+                pass: config.smtpPass,
               }
             : undefined,
       },

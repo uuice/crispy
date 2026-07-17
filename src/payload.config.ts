@@ -4,10 +4,16 @@ import { fileURLToPath } from 'url'
 
 import { FrontendCacheEntries } from './collections/FrontendCacheEntries'
 import { AppConfigs } from './collections/AppConfigs'
+import { LlmProviders } from './collections/LlmProviders'
+import { PromptTemplates } from './collections/PromptTemplates'
+import { StorageTargets } from './collections/StorageTargets'
+import { IntegrationCredentials } from './collections/IntegrationCredentials'
+import { EmailTransports } from './collections/EmailTransports'
 import { Comments } from './collections/Comments'
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
+import { AiCanvases } from './collections/AiCanvases'
 import { AdSlots } from './collections/AdSlots'
 import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
@@ -26,6 +32,9 @@ import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
+import { StorageSettings } from './StorageSettings/config'
+import { IntegrationSettings } from './IntegrationSettings/config'
+import { EmailSettings } from './EmailSettings/config'
 import { NovelCategories } from './collections/NovelCategories'
 import { NovelChapters } from './collections/NovelChapters'
 import { Novels } from './collections/Novels'
@@ -70,6 +79,11 @@ export default buildConfig({
         aiAgent: {
           Component: '@/app/(payload)/admin/ai-agent/AiAgentView',
           path: '/ai-agent',
+          exact: true,
+        },
+        aiCanvases: {
+          Component: '@/app/(payload)/admin/ai-canvases/AiCanvasesView',
+          path: '/ai-canvases',
           exact: true,
         },
         stats: {
@@ -167,14 +181,30 @@ export default buildConfig({
     NovelTags,
     GalleryItems,
     AppConfigs,
+    LlmProviders,
+    PromptTemplates,
+    StorageTargets,
+    IntegrationCredentials,
+    EmailTransports,
     Comments,
     ApiAccessLogs,
     FrontendCacheEntries,
     AiChatSessions,
+    AiCanvases,
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SiteSettings, AiSettings, CommentSettings, CacheSettings],
+  globals: [
+    Header,
+    Footer,
+    SiteSettings,
+    AiSettings,
+    CommentSettings,
+    CacheSettings,
+    StorageSettings,
+    IntegrationSettings,
+    EmailSettings,
+  ],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   typescript: {

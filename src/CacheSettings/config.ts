@@ -15,7 +15,7 @@ export const CacheSettings: GlobalConfig = {
     update: isEditor,
   },
   admin: {
-    group: adminLabels.systemGroup,
+    group: adminLabels.configGroup,
   },
   fields: [
     {

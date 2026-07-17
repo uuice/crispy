@@ -1,6 +1,6 @@
 import { MigrateDownArgs, MigrateUpArgs, sql } from '@payloadcms/db-postgres'
 
-/** Semantic search vectors for posts/pages (pgvector). Dimensions match LLM_EMBEDDING_DIMENSIONS default (1536). */
+/** Semantic search vectors for posts/pages (pgvector). Later resized to vector(1024). */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`CREATE EXTENSION IF NOT EXISTS vector`)
 

@@ -19,7 +19,7 @@ export const AuditLogs: CollectionConfig = {
   admin: {
     defaultColumns: ['collection', 'action', 'documentId', 'user', 'createdAt'],
     useAsTitle: 'documentId',
-    group: adminLabels.systemGroup,
+    group: adminLabels.devGroup,
     description: 'Content change history. Entries are created automatically.',
   },
   defaultSort: '-createdAt',

@@ -1,44 +1,38 @@
 import type { Plugin } from 'payload'
 import { s3Storage } from '@payloadcms/storage-s3'
 
-function isS3Enabled(): boolean {
-  return Boolean(
-    process.env.S3_BUCKET &&
-      process.env.S3_ACCESS_KEY_ID &&
-      process.env.S3_SECRET_ACCESS_KEY,
-  )
+import { resolveStorageConfigSync } from '@/storage/resolveStorageConfig'
+
+export function isS3Enabled(): boolean {
+  return resolveStorageConfigSync().enabled
 }
 
 export function createS3StoragePlugin(): Plugin | null {
-  if (!isS3Enabled()) {
+  const config = resolveStorageConfigSync()
+  if (!config.enabled) {
     return null
   }
-
-  const region = process.env.S3_REGION ?? 'us-east-1'
-  const endpoint = process.env.S3_ENDPOINT
 
   return s3Storage({
     enabled: true,
     collections: {
       media: {
-        prefix: process.env.S3_PREFIX ?? 'media',
+        prefix: config.prefix,
       },
     },
-    bucket: process.env.S3_BUCKET!,
+    bucket: config.bucket,
     config: {
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        accessKeyId: config.accessKeyId,
+        secretAccessKey: config.secretAccessKey,
       },
-      region,
-      ...(endpoint
+      region: config.region,
+      ...(config.endpoint
         ? {
-            endpoint,
-            forcePathStyle: process.env.S3_FORCE_PATH_STYLE !== 'false',
+            endpoint: config.endpoint,
+            forcePathStyle: config.forcePathStyle,
           }
         : {}),
     },
   })
 }
-
-export { isS3Enabled }

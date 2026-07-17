@@ -129,6 +129,22 @@ const COLLECTION_HINTS: Record<string, string[]> = {
   posts: ['发布草稿：_status 设为 published'],
   pages: ['发布草稿：_status 设为 published'],
   comments: ['审核：status 为 pending/approved/rejected/spam'],
+  'prompt-templates': [
+    '字段 AI 按 action 匹配启用模板（同 action 多条时取 sort 最小）',
+    '必填：title、action、systemPrompt、userPrompt；slug 可自动生成',
+    'action：polish | expand | shorten | custom | seo_title | seo_description | rewrite | suggest_taxonomy',
+    'provider / model / temperature / maxTokens 可空 = 跟 AI 设置全局默认',
+    'userPrompt 变量：{{field}} {{title}} {{selection}} {{instruction}} {{content_plain}} {{siteName}} {{existing_categories}} {{existing_tags}} 等',
+    'find 列表不含 systemPrompt/userPrompt；改文案前先 get_document 读全文',
+    '增删改仅 super-admin；editor 可 find/get',
+  ],
+  'ai-canvases': [
+    '按账号隔离：普通用户只能看/改自己的画布；super-admin 可看全部',
+    'Agent 只管理元数据：title；创建时自动带默认空图（输入+Prompt 节点）',
+    '禁止通过 Agent 写入/修改 graph（节点与边）；引导用户打开 /admin/ai-canvases',
+    'get_document 返回图摘要（节点/边数量），不含完整 graph JSON',
+    '删除为软删除；恢复用 restore_document',
+  ],
 }
 
 function resolveCollectionHints(slug: string): string[] {

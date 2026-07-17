@@ -1,6 +1,6 @@
 import { renderPromptTemplate } from '@/ai/promptRenderer'
 import { openAiChatCompletion } from '@/ai/providers/openaiCompatible'
-import { findTemplate, getAiDisabledMessage, resolveAiSettings } from '@/ai/settings'
+import { resolveLlmClient } from '@/ai/resolveLlmClient'
 import type { AiCompleteRequest, AiContext, AiSuggestTaxonomyResult } from '@/ai/types'
 
 export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
@@ -8,17 +8,21 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
   templateId: string
   usage?: { total_tokens?: number }
 }> {
-  const settings = await resolveAiSettings()
-
-  if (!settings.enabled) {
-    throw new Error(getAiDisabledMessage(settings.provider))
-  }
-
   if (body.action === 'custom' && !body.customPrompt?.trim()) {
     throw new Error('自定义指令不能为空')
   }
 
-  const template = findTemplate(settings, body.action, body.templateId)
+  const client = await resolveLlmClient({
+    purpose: 'field',
+    action: body.action,
+    templateId: body.templateId,
+  })
+
+  if (!client.enabled) {
+    throw new Error(client.disabledReason ?? 'AI 未启用')
+  }
+
+  const template = client.template
   if (!template) {
     throw new Error(`未找到 action=${body.action} 的 Prompt 模板`)
   }
@@ -35,11 +39,11 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
   }
 
   const result = await openAiChatCompletion({
-    baseUrl: settings.baseUrl,
-    apiKey: settings.apiKey,
-    model: settings.model,
-    temperature: settings.temperature,
-    maxTokens: settings.maxTokens,
+    baseUrl: client.baseUrl,
+    apiKey: client.apiKey,
+    model: client.model,
+    temperature: client.temperature,
+    maxTokens: client.maxTokens,
     messages: [
       { role: 'system', content: renderPromptTemplate(template.systemPrompt, variables) },
       { role: 'user', content: renderPromptTemplate(template.userPrompt, variables) },
@@ -54,13 +58,16 @@ export async function runAiTextCompletion(body: AiCompleteRequest): Promise<{
 }
 
 export async function runAiSuggestTaxonomy(context: AiContext): Promise<AiSuggestTaxonomyResult> {
-  const settings = await resolveAiSettings()
+  const client = await resolveLlmClient({
+    purpose: 'field',
+    action: 'suggest_taxonomy',
+  })
 
-  if (!settings.enabled) {
-    throw new Error(getAiDisabledMessage(settings.provider))
+  if (!client.enabled) {
+    throw new Error(client.disabledReason ?? 'AI 未启用')
   }
 
-  const template = findTemplate(settings, 'suggest_taxonomy')
+  const template = client.template
   if (!template) {
     throw new Error('未配置 suggest_taxonomy 模板')
   }
@@ -68,11 +75,11 @@ export async function runAiSuggestTaxonomy(context: AiContext): Promise<AiSugges
   const variables = { field: context.contentPlain ?? '', context }
 
   const result = await openAiChatCompletion({
-    baseUrl: settings.baseUrl,
-    apiKey: settings.apiKey,
-    model: settings.model,
-    temperature: settings.temperature,
-    maxTokens: settings.maxTokens,
+    baseUrl: client.baseUrl,
+    apiKey: client.apiKey,
+    model: client.model,
+    temperature: client.temperature,
+    maxTokens: client.maxTokens,
     jsonMode: true,
     messages: [
       { role: 'system', content: renderPromptTemplate(template.systemPrompt, variables) },

@@ -35,4 +35,4 @@ Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，greenfield 重写，与
 
 ## 常用命令
 
-`pnpm cli` · `pnpm cli dev:dev` · `pnpm cli quality:ci` · `pnpm cli db:migrate` · `pnpm cli generate:types` · `pnpm cli generate:importmap` · `pnpm cli verify:phase1` · `pnpm cli verify:ai`
+`pnpm cli` · `pnpm cli dev:dev` · `pnpm cli quality:ci` · `pnpm cli db:migrate` · `pnpm cli generate:types` · `pnpm cli generate:importmap`

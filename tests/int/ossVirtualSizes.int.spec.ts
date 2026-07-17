@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+
+import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   appendAliyunOssProcess,
@@ -9,7 +13,27 @@ import {
 import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
 import { resolveAdminMediaThumbnailUrl } from '@/uploads/resolveAdminMediaThumbnailUrl'
 
+function writeTestStorageRuntime(config: Record<string, unknown>): string {
+  const filePath = path.join(os.tmpdir(), `crispy-storage-runtime-${process.pid}-${Date.now()}.json`)
+  fs.writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`, 'utf8')
+  process.env.CRISPY_STORAGE_RUNTIME_PATH = filePath
+  return filePath
+}
+
 describe('ossVirtualSizes', () => {
+  const runtimeFiles: string[] = []
+
+  afterEach(() => {
+    delete process.env.CRISPY_STORAGE_RUNTIME_PATH
+    for (const file of runtimeFiles.splice(0)) {
+      try {
+        fs.unlinkSync(file)
+      } catch {
+        // ignore
+      }
+    }
+  })
+
   it('builds Aliyun resize process for width-only sizes', () => {
     expect(buildAliyunOssProcess({ name: 'thumbnail', width: 300 })).toBe('image/resize,w_300')
   })
@@ -28,18 +52,20 @@ describe('ossVirtualSizes', () => {
     expect(url).toContain('x-oss-process=image%2Fresize%2Cw_300')
   })
 
-  it('resolves relative media paths from S3 env', () => {
-    const prev = {
-      endpoint: process.env.S3_ENDPOINT,
-      bucket: process.env.S3_BUCKET,
-      prefix: process.env.S3_PREFIX,
-      publicBase: process.env.S3_PUBLIC_BASE_URL,
-    }
-
-    process.env.S3_ENDPOINT = 'https://oss-cn-hangzhou.aliyuncs.com'
-    process.env.S3_BUCKET = 'my-bucket'
-    process.env.S3_PREFIX = 'media'
-    delete process.env.S3_PUBLIC_BASE_URL
+  it('resolves relative media paths from storage runtime file', () => {
+    runtimeFiles.push(
+      writeTestStorageRuntime({
+        mode: 's3',
+        bucket: 'my-bucket',
+        region: 'oss-cn-hangzhou',
+        endpoint: 'https://oss-cn-hangzhou.aliyuncs.com',
+        prefix: 'media',
+        accessKeyId: 'key',
+        secretAccessKey: 'secret',
+        forcePathStyle: false,
+        virtualSizes: true,
+      }),
+    )
 
     expect(
       resolveMediaOriginalUrl({
@@ -55,15 +81,6 @@ describe('ossVirtualSizes', () => {
         prefix: '2026/07/08',
       }),
     ).toBe('https://oss-cn-hangzhou.aliyuncs.com/my-bucket/media/2026/07/08/photo.jpg')
-
-    process.env.S3_ENDPOINT = prev.endpoint
-    process.env.S3_BUCKET = prev.bucket
-    process.env.S3_PREFIX = prev.prefix
-    if (prev.publicBase) {
-      process.env.S3_PUBLIC_BASE_URL = prev.publicBase
-    } else {
-      delete process.env.S3_PUBLIC_BASE_URL
-    }
   })
 
   it('builds all configured virtual sizes', () => {
@@ -84,19 +101,20 @@ describe('ossVirtualSizes', () => {
   })
 
   it('resolves admin thumbnail as direct OSS URL when S3 virtual sizes are enabled', () => {
-    const prev = {
-      bucket: process.env.S3_BUCKET,
-      accessKey: process.env.S3_ACCESS_KEY_ID,
-      secret: process.env.S3_SECRET_ACCESS_KEY,
-      publicBase: process.env.S3_PUBLIC_BASE_URL,
-      virtualSizes: process.env.CRISPY_OSS_VIRTUAL_SIZES,
-    }
-
-    process.env.S3_BUCKET = 'my-bucket'
-    process.env.S3_ACCESS_KEY_ID = 'key'
-    process.env.S3_SECRET_ACCESS_KEY = 'secret'
-    process.env.S3_PUBLIC_BASE_URL = 'https://bucket.oss-cn-hangzhou.aliyuncs.com'
-    delete process.env.CRISPY_OSS_VIRTUAL_SIZES
+    runtimeFiles.push(
+      writeTestStorageRuntime({
+        mode: 's3',
+        bucket: 'my-bucket',
+        region: 'oss-cn-hangzhou',
+        endpoint: 'https://oss-cn-hangzhou.aliyuncs.com',
+        prefix: 'media',
+        accessKeyId: 'key',
+        secretAccessKey: 'secret',
+        forcePathStyle: false,
+        publicBaseUrl: 'https://bucket.oss-cn-hangzhou.aliyuncs.com',
+        virtualSizes: true,
+      }),
+    )
 
     const thumb = resolveAdminMediaThumbnailUrl({
       mimeType: 'image/jpeg',
@@ -111,19 +129,5 @@ describe('ossVirtualSizes', () => {
     expect(thumb).toContain('x-oss-process=')
     expect(thumb).toContain('w_300')
     expect(thumb).not.toContain('/api/media/file')
-
-    process.env.S3_BUCKET = prev.bucket
-    process.env.S3_ACCESS_KEY_ID = prev.accessKey
-    process.env.S3_SECRET_ACCESS_KEY = prev.secret
-    if (prev.publicBase) {
-      process.env.S3_PUBLIC_BASE_URL = prev.publicBase
-    } else {
-      delete process.env.S3_PUBLIC_BASE_URL
-    }
-    if (prev.virtualSizes) {
-      process.env.CRISPY_OSS_VIRTUAL_SIZES = prev.virtualSizes
-    } else {
-      delete process.env.CRISPY_OSS_VIRTUAL_SIZES
-    }
   })
 })

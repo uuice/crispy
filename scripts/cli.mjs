@@ -194,41 +194,6 @@ const GROUPS = {
       },
     ],
   },
-  verify: {
-    title: '冒烟验证',
-    commands: [
-      {
-        id: 'phase1',
-        summary: 'MCP + Preview + RSS',
-        note: '可选 MCP_API_KEY=xxx；未设置则跳过 MCP 段。',
-        run: () => tsxScript('verify-phase1.ts'),
-      },
-      {
-        id: 'phase2',
-        summary: '图库 / 招聘 / 中文前台 / access-log',
-        note: '需 dev 服务器运行中。',
-        run: () => tsxScript('verify-phase2.ts'),
-      },
-      {
-        id: 'ai',
-        summary: 'DeepSeek 连通与流式 API',
-        note: '需 .env 中 DeepSeek API Key。',
-        run: () => tsxScript('verify-ai.ts'),
-      },
-      {
-        id: 'all',
-        summary: '依次跑 phase1 → phase2 → ai',
-        note: '发布前完整冒烟；任一步失败即退出。',
-        run: async () => {
-          await runChain([
-            () => tsxScript('verify-phase1.ts'),
-            () => tsxScript('verify-phase2.ts'),
-            () => tsxScript('verify-ai.ts'),
-          ])
-        },
-      },
-    ],
-  },
   ai: {
     title: 'AI 工具',
     commands: [
@@ -246,7 +211,7 @@ const GROUPS = {
       {
         id: 'key',
         summary: '为 agent 用户生成 MCP API Key',
-        note: '需先 pnpm cli db:seed；输出 MCP_API_KEY 供 verify:phase1 使用。',
+        note: '需先 pnpm cli db:seed；输出 MCP_API_KEY 写入 .env 或 Cursor MCP 配置。',
         run: () => tsxScript('create-mcp-key.ts'),
       },
     ],
@@ -524,7 +489,6 @@ Crispy CLI — 统一开发命令入口
   pnpm cli dev:build               生产构建
   pnpm cli db:migrate              跑迁移
   pnpm cli generate:types          更新 payload-types
-  pnpm cli verify:all              完整冒烟
   pnpm cli quality:ci              本地 CI
 `)
 

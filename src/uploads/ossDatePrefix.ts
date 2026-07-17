@@ -1,3 +1,5 @@
+import { resolveStorageConfigSync } from '@/storage/resolveStorageConfig'
+
 /** Date segment for OSS object keys (e.g. `2026/07/08`). */
 export function buildOssDatePrefix(date: Date = new Date()): string {
   const year = date.getFullYear()
@@ -8,6 +10,6 @@ export function buildOssDatePrefix(date: Date = new Date()): string {
 
 /** Full document prefix stored in media.prefix (e.g. `crispy/2026/07/08`). */
 export function buildOssUploadPrefix(date: Date = new Date()): string {
-  const collection = (process.env.S3_PREFIX ?? 'media').replace(/^\/+|\/+$/g, '')
+  const collection = resolveStorageConfigSync().prefix.replace(/^\/+|\/+$/g, '') || 'media'
   return `${collection}/${buildOssDatePrefix(date)}`
 }

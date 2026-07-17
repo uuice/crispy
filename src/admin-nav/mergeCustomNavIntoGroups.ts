@@ -1,6 +1,6 @@
 import type { NavGroupType } from '@payloadcms/ui/shared'
 
-import { CUSTOM_ADMIN_NAV_ITEMS } from './customItems'
+import { ADMIN_NAV_GROUP_ORDER, CUSTOM_ADMIN_NAV_ITEMS } from './customItems'
 
 export type CustomViewNavEntity = {
   label: string
@@ -17,6 +17,16 @@ export type CrispyNavGroup = {
 
 export function isCustomViewEntity(entity: CrispyNavEntity): entity is CustomViewNavEntity {
   return 'type' in entity && entity.type === 'custom-view'
+}
+
+function sortNavGroups(groups: CrispyNavGroup[]): CrispyNavGroup[] {
+  const rank = new Map(ADMIN_NAV_GROUP_ORDER.map((label, index) => [label, index]))
+  return [...groups].sort((a, b) => {
+    const ai = rank.get(a.label) ?? 1000
+    const bi = rank.get(b.label) ?? 1000
+    if (ai !== bi) return ai - bi
+    return a.label.localeCompare(b.label, 'zh')
+  })
 }
 
 export function mergeCustomNavIntoGroups(groups: NavGroupType[]): CrispyNavGroup[] {
@@ -49,5 +59,5 @@ export function mergeCustomNavIntoGroups(groups: NavGroupType[]): CrispyNavGroup
     })
   }
 
-  return merged
+  return sortNavGroups(merged)
 }

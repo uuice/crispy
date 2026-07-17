@@ -30,6 +30,27 @@ export async function assertAgentCollectionAccess(
   const user = req.user as User
 
   if (
+    (collection === 'llm-providers' ||
+      collection === 'storage-targets' ||
+      collection === 'integration-credentials' ||
+      collection === 'email-transports') &&
+    (operation === 'create' || operation === 'update' || operation === 'delete')
+  ) {
+    if (!hasRole(user, ['super-admin'])) {
+      throw new Error('密钥类 Catalog 仅超级管理员可通过 AI 助手修改')
+    }
+  }
+
+  if (
+    collection === 'prompt-templates' &&
+    (operation === 'create' || operation === 'update' || operation === 'delete')
+  ) {
+    if (!hasRole(user, ['super-admin'])) {
+      throw new Error('Prompt 模板仅超级管理员可通过 AI 助手修改（editor 可查询）')
+    }
+  }
+
+  if (
     collection === 'app-configs' &&
     (operation === 'create' || operation === 'update' || operation === 'delete')
   ) {
@@ -55,9 +76,13 @@ export async function assertAgentCollectionAccess(
     return
   }
 
-  // Authors may only manage their own posts
+  // Authors: own posts, or own AI canvases (Payload access enforces ownership).
+  if (collection === 'ai-canvases') {
+    return
+  }
+
   if (collection !== 'posts') {
-    throw new Error('作者仅可通过 AI 助手管理自己的文章')
+    throw new Error('作者仅可通过 AI 助手管理自己的文章或画布')
   }
 
   if (operation === 'create') {
@@ -101,6 +126,16 @@ export async function assertAgentGlobalAccess(
 
   if (slug === 'ai-settings' && operation === 'update' && !hasRole(req.user, ['super-admin'])) {
     throw new Error('AI 设置仅超级管理员可通过 AI 助手修改')
+  }
+
+  if (
+    (slug === 'storage-settings' ||
+      slug === 'integration-settings' ||
+      slug === 'email-settings') &&
+    operation === 'update' &&
+    !hasRole(req.user, ['super-admin'])
+  ) {
+    throw new Error('存储/集成/邮件设置仅超级管理员可通过 AI 助手修改')
   }
 }
 

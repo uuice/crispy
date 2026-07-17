@@ -76,7 +76,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | ---- | ---- |
 | **软删除 + 版本历史** | 全业务 Collection 回收站与版本面板（`enableTrashAndVersionsPlugin`） |
 | **URL 重定向（实时）** | Redirects 插件 + middleware，约 60 秒内生效，无需重建 |
-| **表单邮件** | Resend 或 SMTP（`RESEND_API_KEY` / `SMTP_*`），未配置时仅入库不发信 |
+| **表单邮件** | Admin「邮件通道 / 邮件设置」（改 Active 后需重启）；未配置时仅入库不发信 |
 | **Import/Export 扩展** | 含 gallery-items、short-links、redirects、forms、novels 等 |
 | **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（novels、redirects、forms 等） |
 | **前台可插拔主题** | blog / cms / kb，`site-settings` 或 `?theme_preview=` 切换 |
@@ -123,7 +123,6 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | `pnpm cli db:migrate` | Postgres 迁移（生产必跑） |
 | `pnpm cli db:create <name>` | 新建迁移（需 Node 22 + Postgres） |
 | `pnpm cli generate:types` | 生成 `payload-types.ts` |
-| `pnpm cli verify:all` | 冒烟验证 |
 | `pnpm cli quality:ci` | lint + tsc + test + build |
 
 ## MCP
@@ -140,8 +139,7 @@ Authorization: users API-Key <user-api-key>
 ```
 
 1. `pnpm cli db:seed` 或 Admin 创建 editor 用户
-2. Admin → MCP → API Keys 生成 Key
-3. 验证：`MCP_API_KEY=xxx pnpm cli verify:phase1`
+2. Admin → MCP → API Keys 生成 Key（或 `pnpm cli mcp:key`）
 
 MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](http://localhost:3333/admin/dev-docs#mcp)。
 
