@@ -3,7 +3,8 @@ import path from 'node:path'
 
 import type { FrontendCacheEntry } from './registry'
 
-const FRONTEND_APP_ROOT = path.join(process.cwd(), 'src/app/(frontend)')
+// cwd-relative (no process.cwd()) so NFT does not treat the project root as traced.
+const FRONTEND_APP_ROOT = path.join('src', 'app', '(frontend)')
 
 /** Route segments excluded from auto-discovery (internal / non-document routes). */
 const SKIP_SEGMENTS = new Set(['next', '(sitemaps)'])

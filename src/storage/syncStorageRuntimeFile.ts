@@ -3,6 +3,8 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
+import { resolveDataFile } from '@/utilities/runtimeDataPath'
+
 export type StorageRuntimeConfig = {
   mode: 'local' | 's3'
   bucket?: string
@@ -18,9 +20,7 @@ export type StorageRuntimeConfig = {
 }
 
 export function getStorageRuntimePath(): string {
-  const override = process.env.CRISPY_STORAGE_RUNTIME_PATH?.trim()
-  if (override) return path.resolve(override)
-  return path.resolve(process.cwd(), '.data', 'storage-runtime.json')
+  return resolveDataFile('storage-runtime.json', 'CRISPY_STORAGE_RUNTIME_PATH')
 }
 
 export function readStorageRuntimeFile(): StorageRuntimeConfig | null {

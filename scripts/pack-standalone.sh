@@ -22,6 +22,11 @@ if [[ ! -f "$STANDALONE_DIR/server.js" ]]; then
   exit 1
 fi
 
+# Drop prior archives so they are not nested into the new tarball
+# (Next standalone may already have copied dist/ during a previous build).
+echo "→ Removing dist/ before pack..."
+rm -rf "$OUT_DIR" "$STANDALONE_DIR/dist"
+
 VERSION="$(node -p "require('./package.json').version")"
 TIMESTAMP="$(date -u +%Y%m%d%H%M%S)"
 LINUX_ARCH="${LINUX_ARCH:-x64}"

@@ -3,6 +3,8 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
+import { resolveDataFile } from '@/utilities/runtimeDataPath'
+
 export type EmailRuntimeConfig = {
   enabled: boolean
   type?: 'resend' | 'smtp'
@@ -20,9 +22,7 @@ export type EmailRuntimeConfig = {
 }
 
 export function getEmailRuntimePath(): string {
-  const override = process.env.CRISPY_EMAIL_RUNTIME_PATH?.trim()
-  if (override) return path.resolve(override)
-  return path.resolve(process.cwd(), '.data', 'email-runtime.json')
+  return resolveDataFile('email-runtime.json', 'CRISPY_EMAIL_RUNTIME_PATH')
 }
 
 export function readEmailRuntimeFile(): EmailRuntimeConfig | null {

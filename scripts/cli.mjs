@@ -56,8 +56,10 @@ const GROUPS = {
       {
         id: 'pack',
         summary: 'build + 打包 standalone 部署目录',
-        note: '输出 dist/crispy-*-standalone-*.tar.gz。',
+        note: '输出 dist/crispy-*-standalone-*.tar.gz。打包前会清空 dist/。',
         run: async () => {
+          console.log('→ Removing dist/ before build+pack...')
+          rmRf('dist')
           const build = lookup.get('dev:build')
           await build.def.run([])
           bashScript('pack-standalone.sh')
@@ -67,8 +69,10 @@ const GROUPS = {
         id: 'pack-linux',
         summary: 'build + 打包 Linux standalone（无需 Docker）',
         note:
-          'PACK_LINUX=1（自动）。目标平台：LINUX_ARCH=x64|arm64（默认 x64），LINUX_LIBC=glibc|musl（默认 glibc，Alpine 用 musl）。排除 public/media，替换 libsql 原生包并 prune。例：LINUX_ARCH=arm64 pnpm cli dev:pack-linux',
+          'PACK_LINUX=1（自动）。目标平台：LINUX_ARCH=x64|arm64（默认 x64），LINUX_LIBC=glibc|musl（默认 glibc，Alpine 用 musl）。排除 public/media，替换 libsql 原生包并 prune。打包前会清空 dist/。例：LINUX_ARCH=arm64 pnpm cli dev:pack-linux',
         run: async () => {
+          console.log('→ Removing dist/ before build+pack...')
+          rmRf('dist')
           const build = lookup.get('dev:build')
           await build.def.run([])
           bashScript('pack-linux-standalone.sh')
