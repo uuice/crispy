@@ -11,6 +11,7 @@ import config from '@payload-config'
 async function main() {
   await getPayload({ config })
   console.log('Schema push completed.')
+  process.exit(0)
 }
 
 main().catch((err) => {

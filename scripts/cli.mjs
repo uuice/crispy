@@ -284,7 +284,7 @@ const GROUPS = {
         id: 'tsc',
         summary: 'TypeScript 类型检查（不 emit）',
         note: 'ci:check 的子步骤。',
-        run: () => pnpmExec(['exec', 'tsc', '--noEmit']),
+        run: () => pnpmExec(['tsc', '--noEmit']),
       },
       {
         id: 'test',
@@ -343,6 +343,13 @@ const GROUPS = {
           const ciEnv = {
             DATABASE_URL: 'file:./.data/ci-payload.db',
             DATABASE_DRIVER: 'sqlite',
+            // Override local .env DATABASE_PUSH=false so SQLite CI can create schema.
+            DATABASE_PUSH: 'true',
+          }
+          const ciTestEnv = {
+            ...ciEnv,
+            // Schema already warmed; avoid re-push races / interactive prompts.
+            DATABASE_PUSH: 'false',
           }
           await runChain([
             () =>
@@ -352,7 +359,9 @@ const GROUPS = {
                 'eslint',
                 '.',
               ]),
-            () => pnpmExec(['exec', 'tsc', '--noEmit']),
+            () => pnpmExec(['tsc', '--noEmit']),
+            // Warm SQLite schema once before int tests.
+            () => tsxScript('push-dev-schema.ts', [], ciEnv),
             () =>
               pnpmExec(
                 [
@@ -362,8 +371,9 @@ const GROUPS = {
                   'run',
                   '--config',
                   './vitest.config.mts',
+                  '--no-file-parallelism',
                 ],
-                ciEnv,
+                ciTestEnv,
               ),
             () => nodeScript('build-theme-css.mjs'),
             () => runProductionBuild(ciEnv),
@@ -457,8 +467,11 @@ function bashScript(name, args = []) {
   spawnSyncInherit('bash', [path.join('scripts', name), ...args])
 }
 
-function tsxScript(name, args = []) {
-  pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', 'tsx', path.join('scripts', name), ...args])
+function tsxScript(name, args = [], env = {}) {
+  pnpmExec(
+    ['cross-env', 'NODE_OPTIONS=--no-deprecation', 'tsx', path.join('scripts', name), ...args],
+    env,
+  )
 }
 
 function rmRf(relativePath) {

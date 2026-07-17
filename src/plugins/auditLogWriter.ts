@@ -17,20 +17,25 @@ export async function writeAuditLog({
 }): Promise<void> {
   if (req.context?.skipAuditLog) return
 
-  await req.payload.create({
-    collection: AUDIT_LOG_SLUG,
-    data: {
-      collection,
-      action,
-      documentId: String(documentId),
-      user: req.user?.id,
-      changes: changes as Record<string, unknown>,
-    },
-    overrideAccess: true,
-    req,
-    context: {
-      ...req.context,
-      skipAuditLog: true,
-    },
-  })
+  try {
+    await req.payload.create({
+      collection: AUDIT_LOG_SLUG,
+      data: {
+        collection,
+        action,
+        documentId: String(documentId),
+        user: req.user?.id,
+        changes: changes as Record<string, unknown>,
+      },
+      overrideAccess: true,
+      req,
+      context: {
+        ...req.context,
+        skipAuditLog: true,
+      },
+    })
+  } catch (error) {
+    // Never fail the primary mutation because audit logging failed (e.g. missing user FK in tests).
+    req.payload.logger.error({ err: error, msg: 'Failed to write audit log' })
+  }
 }

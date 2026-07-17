@@ -8,20 +8,33 @@ import { executeAgentTool } from '@/ai/agent/tools'
 import type { NovelCategory, NovelTag, User } from '@/payload-types'
 
 let payload: Payload
-
-const mockSuperAdmin = {
-  id: 1,
-  roles: ['super-admin'],
-} as User
-
-const mockEditor = {
-  id: 2,
-  roles: ['editor'],
-} as User
+let mockSuperAdmin: User
+let mockEditor: User
 
 describe('AI agent', () => {
   beforeAll(async () => {
     payload = await getPayload({ config: await config })
+
+    const stamp = Date.now()
+    mockSuperAdmin = (await payload.create({
+      collection: 'users',
+      data: {
+        email: `agent-super-${stamp}@example.com`,
+        password: 'test-password-123456',
+        roles: ['super-admin'],
+      },
+      overrideAccess: true,
+    })) as User
+
+    mockEditor = (await payload.create({
+      collection: 'users',
+      data: {
+        email: `agent-editor-${stamp}@example.com`,
+        password: 'test-password-123456',
+        roles: ['editor'],
+      },
+      overrideAccess: true,
+    })) as User
   })
 
   it('describeCollectionSchema returns fields for posts', async () => {

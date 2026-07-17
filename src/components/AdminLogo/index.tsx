@@ -48,6 +48,8 @@ const DefaultLogo: React.FC = () => (
 )
 
 const AdminLogo = async ({ payload }: Props) => {
+  let mediaLogo: { alt: string; src: string } | null = null
+
   if (payload) {
     try {
       const settings = await payload.findGlobal({
@@ -56,21 +58,23 @@ const AdminLogo = async ({ payload }: Props) => {
       })
 
       const logo = settings.logo
-
       if (logo && typeof logo === 'object' && logo.url) {
-        return (
-          <div className="crispy-admin-logo crispy-admin-logo--media">
-            <img
-              alt={settings.siteName ?? 'Logo'}
-              className="crispy-admin-logo__image"
-              src={getMediaUrl(logo.url)}
-            />
-          </div>
-        )
+        mediaLogo = {
+          alt: settings.siteName ?? 'Logo',
+          src: getMediaUrl(logo.url),
+        }
       }
     } catch {
       // fall through to default mark
     }
+  }
+
+  if (mediaLogo) {
+    return (
+      <div className="crispy-admin-logo crispy-admin-logo--media">
+        <img alt={mediaLogo.alt} className="crispy-admin-logo__image" src={mediaLogo.src} />
+      </div>
+    )
   }
 
   return <DefaultLogo />

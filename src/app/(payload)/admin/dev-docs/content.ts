@@ -1060,7 +1060,7 @@ docker run -p 3333:3333 \\
       {
         type: 'ul',
         items: [
-          'payload 与全部 @payloadcms/*（db、next、ui、richtext-lexical、各 plugin…）必须同一版本号，见 package.json（当前 3.85.1）',
+          'payload 与全部 @payloadcms/*（db、next、ui、richtext-lexical、各 plugin…）必须同一版本号，见 package.json（当前 3.86.0）',
           '不要用 ^ 让 pnpm 自动漂到不同小版本',
           'Next.js 大版本升级需对照 Payload 官方兼容说明，勿单独猛升 Next',
           'lexical 版本与 @payloadcms/richtext-lexical 要求保持一致',
@@ -1124,7 +1124,7 @@ pnpm cli verify:all`,
         type: 'table',
         headers: ['类型', '建议', '说明'],
         rows: [
-          ['Patch（3.85.1→3.85.2）', '可跟', '修 bug，仍跑 quality:ci'],
+          ['Patch / minor（3.85.2→3.86.0）', '可跟', '修 bug + 小功能，仍跑 quality:ci'],
           ['Minor（3.85→3.86）', '按计划升', '读 changelog，完整 Checklist'],
           ['Major（3.x→4.x）', '单独分支、充分测试', '可能涉及 Next/React/插件大改'],
         ],
