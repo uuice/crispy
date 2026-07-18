@@ -100,6 +100,29 @@ describe('ossVirtualSizes', () => {
     expect(Object.keys(sizes ?? {})).toHaveLength(MEDIA_IMAGE_SIZES.length)
   })
 
+  it('resolves OSS URL from Payload proxy path + prefix query without filename arg', () => {
+    runtimeFiles.push(
+      writeTestStorageRuntime({
+        mode: 's3',
+        bucket: 'my-bucket',
+        region: 'oss-cn-hangzhou',
+        endpoint: 'https://oss-cn-hangzhou.aliyuncs.com',
+        prefix: 'media',
+        accessKeyId: 'key',
+        secretAccessKey: 'secret',
+        forcePathStyle: false,
+        publicBaseUrl: 'https://bucket.oss-cn-hangzhou.aliyuncs.com',
+        virtualSizes: true,
+      }),
+    )
+
+    expect(
+      resolveMediaOriginalUrl({
+        url: '/api/media/file/27.jpg?prefix=crispy%2F2026%2F07%2F08',
+      }),
+    ).toBe('https://bucket.oss-cn-hangzhou.aliyuncs.com/crispy/2026/07/08/27.jpg')
+  })
+
   it('resolves admin thumbnail as direct OSS URL when S3 virtual sizes are enabled', () => {
     runtimeFiles.push(
       writeTestStorageRuntime({

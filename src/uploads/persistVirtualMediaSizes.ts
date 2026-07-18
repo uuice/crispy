@@ -30,7 +30,8 @@ export function buildVirtualMediaSizesSqlSets(
     sets.push(sql`${sql.raw(`"${prefix}_width"`)} = ${entry.width ?? null}`)
     sets.push(sql`${sql.raw(`"${prefix}_height"`)} = ${entry.height ?? null}`)
     sets.push(sql`${sql.raw(`"${prefix}_mime_type"`)} = ${entry.mimeType ?? null}`)
-    sets.push(sql`${sql.raw(`"${prefix}_filename"`)} = ${entry.filename ?? null}`)
+    // Do not write sizes_*_filename: duplicate original filenames exist in media,
+    // and Payload's unique filename index can fail the whole UPDATE.
   }
 
   return sets

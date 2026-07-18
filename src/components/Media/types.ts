@@ -2,6 +2,7 @@ import type { StaticImageData } from 'next/image'
 import type { ElementType, Ref } from 'react'
 
 import type { Media as MediaType } from '@/payload-types'
+import type { MediaImageVariant } from '@/utilities/resolveMediaImageSrc'
 
 export interface Props {
   alt?: string
@@ -10,6 +11,8 @@ export interface Props {
   htmlElement?: ElementType | null
   pictureClassName?: string
   imgClassName?: string
+  /** Preferred Payload/OSS image size. Gallery thumbs use `small`; lightbox uses `xlarge`. */
+  imageVariant?: MediaImageVariant
   onClick?: () => void
   onLoad?: () => void
   loading?: 'lazy' | 'eager' // for NextImage only

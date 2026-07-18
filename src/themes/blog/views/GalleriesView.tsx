@@ -36,7 +36,13 @@ export function GalleriesView({ data }: Props) {
                   {cover?.url ? (
                     <Link className="gallery-list-cover relative block shrink-0" href={href} prefetch={false}>
                       <div className="gallery-grid-media" style={{ width: '8rem' }}>
-                        <Media fill imgClassName="gallery-grid-image" resource={cover as MediaType} />
+                        <Media
+                          fill
+                          imageVariant="thumbnail"
+                          imgClassName="gallery-grid-image"
+                          resource={cover as MediaType}
+                          size="8rem"
+                        />
                       </div>
                     </Link>
                   ) : null}

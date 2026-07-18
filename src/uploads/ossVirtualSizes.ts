@@ -17,18 +17,45 @@ function stripOssProcessParams(url: string): string {
   }
 }
 
+/** Parse Payload S3 proxy paths: `/api/media/file/name.jpg?prefix=crispy%2F2026%2F07%2F08`. */
+export function parsePayloadMediaProxyUrl(url: string): {
+  filename?: string
+  prefix?: string
+} {
+  try {
+    const parsed = new URL(url, 'http://local.invalid')
+    const marker = '/api/media/file/'
+    if (!parsed.pathname.startsWith(marker)) return {}
+
+    const filename = decodeURIComponent(parsed.pathname.slice(marker.length))
+    if (!filename) return {}
+
+    const prefixParam = parsed.searchParams.get('prefix')
+    return {
+      filename,
+      prefix: prefixParam ? decodeURIComponent(prefixParam) : undefined,
+    }
+  } catch {
+    return {}
+  }
+}
+
 /** Resolve a public OSS URL for x-oss-process (Aliyun image processing). */
 export function resolveMediaOriginalUrl(input: {
   url: string
   filename?: string | null
   prefix?: string | null
 }): string | null {
-  const { url, filename, prefix: docPrefix } = input
+  const { url } = input
   if (!url) return null
 
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return stripOssProcessParams(url)
   }
+
+  const fromProxy = parsePayloadMediaProxyUrl(url)
+  const filename = input.filename || fromProxy.filename
+  const docPrefix = input.prefix || fromProxy.prefix
 
   if (filename) {
     const publicUrl = buildOssPublicUrl({ docPrefix, filename })

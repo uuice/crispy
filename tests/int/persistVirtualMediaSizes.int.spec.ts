@@ -18,7 +18,7 @@ describe('persistVirtualMediaSizes', () => {
     expect(sizes).toBeTruthy()
 
     const sets = buildVirtualMediaSizesSqlSets(sizes!, sizes!.thumbnail?.url)
-    // thumbnail_u_r_l + 6 fields per size (url, width, height, mime_type, filename)
-    expect(sets).toHaveLength(1 + MEDIA_IMAGE_SIZES.length * 5)
+    // thumbnail_u_r_l + 4 fields per size (url, width, height, mime_type)
+    expect(sets).toHaveLength(1 + MEDIA_IMAGE_SIZES.length * 4)
   })
 })
