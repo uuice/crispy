@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 
 import { getServerSideURL } from '@/utilities/getURL'
 import {
-  getGalleryItemsPath,
+  getGalleriesPath,
   getJobsPath,
   getPagePath,
   getPostPath,
@@ -92,7 +92,7 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
     { loc: `${siteUrl}/`, lastmod: today, changefreq: 'daily', priority: '1.0' },
     { loc: `${siteUrl}${getPostsListPath()}`, lastmod: today, changefreq: 'daily', priority: '0.9' },
     { loc: `${siteUrl}/links`, lastmod: today, changefreq: 'monthly', priority: '0.5' },
-    { loc: `${siteUrl}${getGalleryItemsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
+    { loc: `${siteUrl}${getGalleriesPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}${getJobsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}/navigations`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
     { loc: `${siteUrl}/games`, lastmod: today, changefreq: 'weekly', priority: '0.5' },

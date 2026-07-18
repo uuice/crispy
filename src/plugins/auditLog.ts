@@ -20,6 +20,7 @@ const DEFAULT_AUDITED_COLLECTIONS: CollectionSlug[] = [
   'ad-slots',
   'ads',
   'jobs',
+  'galleries',
   'gallery-items',
   'novels',
   'novel-chapters',

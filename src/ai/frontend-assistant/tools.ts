@@ -79,13 +79,13 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
         properties: {
           type: {
             type: 'string',
-            enum: ['post', 'page', 'novel', 'novel-chapter', 'novel-category', 'novel-tag', 'category', 'tag', 'link', 'link-group', 'job', 'gallery-item', 'navigation'],
+            enum: ['post', 'page', 'novel', 'novel-chapter', 'novel-category', 'novel-tag', 'category', 'tag', 'link', 'link-group', 'job', 'gallery', 'navigation'],
             description: '内容类型',
           },
           slug: {
             type: 'string',
             description:
-              'slug 或唯一标识；novel-chapter 须传复合 slug（{novelSlug}/{chapterSlug}）；link/gallery-item 传数字 id',
+              'slug 或唯一标识；novel-chapter 须传复合 slug（{novelSlug}/{chapterSlug}）；link 传数字 id；gallery 传相册 slug',
           },
         },
         required: ['type', 'slug'],

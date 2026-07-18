@@ -1,7 +1,8 @@
 import type { FrontendThemePages } from '@/themes/types'
 
 import { categoryDetailPage } from './categoryDetail'
-import { galleryItemsPage } from './galleryItems'
+import { galleriesPage } from '../../blog/pages/galleries'
+import { galleryDetailPage } from '../../blog/pages/galleryDetail'
 import { gamesMathPage } from './gamesMath'
 import { gamesPage } from './games'
 import { homePage } from './home'
@@ -30,7 +31,8 @@ export const kbPages = {
   tagDetail: tagDetailPage,
   userDetail: userDetailPage,
   links: linksPage,
-  galleryItems: galleryItemsPage,
+  galleries: galleriesPage,
+  galleryDetail: galleryDetailPage,
   jobs: jobsPage,
   navigations: navigationsPage,
   games: gamesPage,

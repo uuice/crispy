@@ -83,6 +83,7 @@ export interface Config {
     'novel-chapters': NovelChapter;
     'novel-categories': NovelCategory;
     'novel-tags': NovelTag;
+    galleries: Gallery;
     'gallery-items': GalleryItem;
     'app-configs': AppConfig;
     'llm-providers': LlmProvider;
@@ -133,6 +134,7 @@ export interface Config {
     'novel-chapters': NovelChaptersSelect<false> | NovelChaptersSelect<true>;
     'novel-categories': NovelCategoriesSelect<false> | NovelCategoriesSelect<true>;
     'novel-tags': NovelTagsSelect<false> | NovelTagsSelect<true>;
+    galleries: GalleriesSelect<false> | GalleriesSelect<true>;
     'gallery-items': GalleryItemsSelect<false> | GalleryItemsSelect<true>;
     'app-configs': AppConfigsSelect<false> | AppConfigsSelect<true>;
     'llm-providers': LlmProvidersSelect<false> | LlmProvidersSelect<true>;
@@ -1306,22 +1308,54 @@ export interface NovelChapter {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Curated images shown on the public /gallery-items page. Media library items are not listed until added here.
+ * 图库相册（主实体）。每本图库可包含多条 gallery-items 图片；前台路径 /galleries/{slug}。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "galleries".
+ */
+export interface Gallery {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  description?: string | null;
+  /**
+   * Optional cover shown on the galleries list.
+   */
+  cover?: (number | null) | Media;
+  /**
+   * Lower numbers appear first.
+   */
+  sort?: number | null;
+  /**
+   * Only enabled galleries appear on the public site.
+   */
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * 图库内的单张图片条目。必须归属一本 galleries；Media 库中的文件不会自动出现在前台。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-items".
  */
 export interface GalleryItem {
   id: number;
+  gallery: number | Gallery;
   title: string;
   image: number | Media;
   description?: string | null;
   /**
-   * Lower numbers appear first.
+   * Lower numbers appear first within the gallery.
    */
   sort?: number | null;
   /**
-   * Only enabled items appear on the public gallery page.
+   * Only enabled items appear inside a public gallery.
    */
   enabled?: boolean | null;
   updatedAt: string;
@@ -1736,8 +1770,8 @@ export interface Search {
         value: number | Job;
       }
     | {
-        relationTo: 'gallery-items';
-        value: number | GalleryItem;
+        relationTo: 'galleries';
+        value: number | Gallery;
       };
   slug?: string | null;
   meta?: {
@@ -2040,6 +2074,24 @@ export interface PayloadMcpApiKey {
     update?: boolean | null;
     /**
      * Allow clients to delete jobs.
+     */
+    delete?: boolean | null;
+  };
+  galleries?: {
+    /**
+     * Allow clients to find galleries.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create galleries.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update galleries.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete galleries.
      */
     delete?: boolean | null;
   };
@@ -2605,6 +2657,10 @@ export interface PayloadLockedDocument {
         value: number | NovelTag;
       } | null)
     | ({
+        relationTo: 'galleries';
+        value: number | Gallery;
+      } | null)
+    | ({
         relationTo: 'gallery-items';
         value: number | GalleryItem;
       } | null)
@@ -2793,6 +2849,7 @@ export interface PayloadQueryPreset {
     | 'novel-chapters'
     | 'novel-categories'
     | 'novel-tags'
+    | 'galleries'
     | 'gallery-items'
     | 'app-configs'
     | 'llm-providers'
@@ -3334,9 +3391,26 @@ export interface NovelTagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "galleries_select".
+ */
+export interface GalleriesSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  cover?: T;
+  sort?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-items_select".
  */
 export interface GalleryItemsSelect<T extends boolean = true> {
+  gallery?: T;
   title?: T;
   image?: T;
   description?: T;
@@ -3907,6 +3981,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         delete?: T;
       };
   jobs?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  galleries?:
     | T
     | {
         find?: T;
@@ -4715,6 +4797,7 @@ export interface TaskCreateCollectionExport {
       | 'novel-chapters'
       | 'novel-categories'
       | 'novel-tags'
+      | 'galleries'
       | 'gallery-items'
       | 'app-configs'
       | 'llm-providers'

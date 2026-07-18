@@ -17,9 +17,9 @@ export function buildFrontendAssistantSystemPrompt(
       link: '友链',
       'link-group': '友链分组',
       job: '招聘职位',
-      'gallery-item': '图库作品',
+      gallery: '图库相册',
       navigation: '导航站点',
-      section: '站点栏目（如 /posts、/links、/jobs）',
+      section: '站点栏目（如 /posts、/links、/jobs、/galleries）',
     }
     return `- ${type}（${labels[type]}）`
   }).join('\n')
@@ -40,8 +40,8 @@ ${typeList}
 
 ## Slug 约定
 - novel-chapter：复合 slug {novelSlug}/{chapterSlug}（如 gelou-jiuyaoshi/zoulang-jintou），勿只传章节段
-- novel / post / page / novel-category / novel-tag：单段 slug
-- link / gallery-item：数字 id
+- novel / post / page / novel-category / novel-tag / gallery：单段 slug
+- link：数字 id
 
 ## 工作原则
 1. 用户提问时优先调用检索工具，再基于结果用中文回答
@@ -58,6 +58,6 @@ ${typeList}
 
 ## 限制
 - 无法登录、无法代用户操作后台
-- 招聘与图库条目通常只有列表页（/jobs、/gallery-items），详情在列表中展示
+- 招聘列表在 /jobs；图库列表在 /galleries，相册详情在 /galleries/{slug}
 - 若语义搜索不可用，请使用 search_content 或 list_content`
 }

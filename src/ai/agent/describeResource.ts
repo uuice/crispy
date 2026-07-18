@@ -126,6 +126,14 @@ const COLLECTION_HINTS: Record<string, string[]> = {
     'categories/tags 关联 novel-categories / novel-tags',
     '写章发布后建议 purge_frontend_cache',
   ],
+  galleries: [
+    '图库主实体；前台列表 /galleries，详情 /galleries/{slug}',
+    '图片在 gallery-items 中，通过 gallery 字段归属本图库',
+  ],
+  'gallery-items': [
+    'gallery 字段必填（relationship → galleries）',
+    'image 必填（upload → media）；仅 enabled 的条目出现在所属图库详情页',
+  ],
   posts: ['发布草稿：_status 设为 published'],
   pages: ['发布草稿：_status 设为 published'],
   comments: ['审核：status 为 pending/approved/rejected/spam'],

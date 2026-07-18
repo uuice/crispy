@@ -66,9 +66,12 @@ export const frontendLabels = {
   },
   gallery: {
     title: '图库',
-    description: '精选图片展示，仅在此处发布的条目会对访客可见。',
-    none: '暂无公开图片',
+    description: '精选相册；每个图库可包含多张图片。',
+    none: '暂无公开图库',
+    noneItems: '该图库暂无公开图片',
+    notFound: '图库不存在',
     viewAll: '进入图库',
+    itemCount: '张图片',
   },
   jobs: {
     title: '加入我们',

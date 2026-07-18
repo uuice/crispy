@@ -4,7 +4,8 @@ import { getPayload } from 'payload'
 import { fieldValueToPlainText } from '@/ai/fieldValueToPlainText'
 import type { ThemeSearchIndexItem } from '@/themes/types'
 import {
-  getGalleryItemsPath,
+  getGalleriesPath,
+  getGalleryPath,
   getJobsPath,
   getNovelChapterPath,
   getNovelPath,
@@ -67,13 +68,14 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
         where: { enabled: { equals: true } },
       }),
       payload.find({
-        collection: 'gallery-items',
+        collection: 'galleries',
         depth: 0,
         limit: 200,
         overrideAccess: false,
         pagination: false,
         select: {
           title: true,
+          slug: true,
           description: true,
         },
         sort: 'sort',
@@ -172,14 +174,14 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
   }
 
   for (const item of galleryResult.docs) {
-    if (!item.title) continue
+    if (!item.title || !item.slug) continue
 
     const excerpt = item.description || ''
 
     items.push({
-      id: `gallery:${item.id}`,
+      id: `gallery:${item.slug}`,
       title: item.title,
-      url: getGalleryItemsPath(),
+      url: getGalleryPath(item.slug),
       excerpt: excerpt.slice(0, 200),
       body: excerpt.slice(0, 8000),
     })

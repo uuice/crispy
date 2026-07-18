@@ -13,7 +13,7 @@ import { imageHero1 } from './image-hero-1'
 import { getMigratedAuthorProfile, seedFromAstroLearn } from './astro-learn/seedFromAstroLearn'
 import { getPagePath } from '@/utilities/frontendPaths'
 
-/** Delete order respects FK constraints (e.g. gallery-items → media). */
+/** Delete order respects FK constraints (e.g. gallery-items → galleries → media). */
 const collectionsToClear: CollectionSlug[] = [
   'form-submissions',
   'search',
@@ -22,6 +22,7 @@ const collectionsToClear: CollectionSlug[] = [
   'pages',
   'forms',
   'gallery-items',
+  'galleries',
   'jobs',
   'links',
   'link-groups',
@@ -524,6 +525,21 @@ export const seed = async ({
     }),
   ])
 
+  payload.logger.info(`— Seeding galleries...`)
+
+  const demoGallery = await payload.create({
+    collection: 'galleries',
+    context: { ...seedContext, skipAuditLog: true },
+    overrideAccess: true,
+    data: {
+      title: '示例图库',
+      slug: 'demo-gallery',
+      description: '图库精选展示示例',
+      sort: 0,
+      enabled: true,
+    },
+  })
+
   payload.logger.info(`— Seeding gallery items...`)
 
   await Promise.all([
@@ -532,6 +548,7 @@ export const seed = async ({
       context: { ...seedContext, skipAuditLog: true },
       overrideAccess: true,
       data: {
+        gallery: demoGallery.id,
         title: '示例图片一',
         image: image1Doc.id,
         description: '图库精选展示示例',
@@ -544,6 +561,7 @@ export const seed = async ({
       context: { ...seedContext, skipAuditLog: true },
       overrideAccess: true,
       data: {
+        gallery: demoGallery.id,
         title: '示例图片二',
         image: image2Doc.id,
         description: '图库精选展示示例',
@@ -556,6 +574,7 @@ export const seed = async ({
       context: { ...seedContext, skipAuditLog: true },
       overrideAccess: true,
       data: {
+        gallery: demoGallery.id,
         title: '示例图片三',
         image: image3Doc.id,
         sort: 2,
@@ -599,6 +618,7 @@ export const seed = async ({
         adSlots: { find: true, create: true, update: true, delete: true },
         ads: { find: true, create: true, update: true, delete: true },
         jobs: { find: true, create: true, update: true, delete: true },
+        galleries: { find: true, create: true, update: true, delete: true },
         galleryItems: { find: true, create: true, update: true, delete: true },
         media: { find: true, create: true, update: true },
       },

@@ -42,14 +42,14 @@ export async function getSiteExploreData() {
       select: { title: true, slug: true, location: true, employmentType: true },
     }),
     payload.find({
-      collection: 'gallery-items',
+      collection: 'galleries',
       depth: 1,
       limit: 8,
       overrideAccess: false,
       pagination: false,
       sort: 'sort',
       where: { enabled: { equals: true } },
-      select: { title: true, image: true },
+      select: { title: true, slug: true, cover: true, description: true },
     }),
     payload.find({
       collection: 'pages',

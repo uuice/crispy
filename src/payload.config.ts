@@ -10,6 +10,7 @@ import { StorageTargets } from './collections/StorageTargets'
 import { IntegrationCredentials } from './collections/IntegrationCredentials'
 import { EmailTransports } from './collections/EmailTransports'
 import { Comments } from './collections/Comments'
+import { Galleries } from './collections/Galleries'
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
@@ -179,6 +180,7 @@ export default buildConfig({
     NovelChapters,
     NovelCategories,
     NovelTags,
+    Galleries,
     GalleryItems,
     AppConfigs,
     LlmProviders,

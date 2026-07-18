@@ -1,11 +1,8 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { permanentRedirect } from 'next/navigation'
 
-export const revalidate = false
+import { getGalleriesPath } from '@/utilities/frontendPaths'
 
-export default function GalleryItemsPage() {
-  return renderThemePage('galleryItems')
-}
-
-export function generateMetadata() {
-  return generateThemeMetadata('galleryItems')
+/** Legacy flat gallery route → galleries list. */
+export default function GalleryItemsLegacyPage() {
+  permanentRedirect(getGalleriesPath())
 }

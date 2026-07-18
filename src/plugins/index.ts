@@ -116,7 +116,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts', 'pages', 'jobs', 'gallery-items'],
+    collections: ['posts', 'pages', 'jobs', 'galleries'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       labels: {
@@ -150,6 +150,7 @@ export const plugins: Plugin[] = [
       'ad-slots': { enabled: true },
       ads: { enabled: true },
       jobs: { enabled: true },
+      galleries: { enabled: true },
       'gallery-items': { enabled: true },
       novels: { enabled: true },
       'novel-chapters': { enabled: true },
@@ -263,6 +264,7 @@ export const plugins: Plugin[] = [
       { slug: 'link-groups' },
       { slug: 'jobs' },
       { slug: 'users' },
+      { slug: 'galleries' },
       { slug: 'gallery-items' },
       { slug: 'short-links' },
       { slug: 'redirects' },

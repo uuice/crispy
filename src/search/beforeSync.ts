@@ -40,7 +40,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     })
   }
 
-  if (collection === 'gallery-items') {
+  if (collection === 'galleries') {
     return syncSimpleDoc({ originalDoc, searchDoc })
   }
 

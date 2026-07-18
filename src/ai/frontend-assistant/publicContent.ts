@@ -4,14 +4,15 @@ import { cache } from 'react'
 
 import navigationData from '@/data/navigationWebsiteData.json'
 import {
-  queryGalleryItems,
+  queryGalleries,
   queryJobs,
   queryPosts,
   querySidebarData,
 } from '@/themes/shared/data/queries'
 import {
   getCategoryPath,
-  getGalleryItemsPath,
+  getGalleriesPath,
+  getGalleryPath,
   getJobsPath,
   getLinksPath,
   getNovelChapterPath,
@@ -39,7 +40,7 @@ export const PUBLIC_CONTENT_TYPES = [
   'link',
   'link-group',
   'job',
-  'gallery-item',
+  'gallery',
   'navigation',
   'section',
 ] as const
@@ -67,7 +68,7 @@ const TYPE_LABELS: Record<PublicContentType, string> = {
   link: '友链',
   'link-group': '友链分组',
   job: '招聘',
-  'gallery-item': '图库',
+  gallery: '图库',
   navigation: '导航站点',
   section: '站点栏目',
 }
@@ -100,9 +101,9 @@ const SECTION_PAGES: PublicContentHit[] = [
   {
     type: 'section',
     title: '图库',
-    url: getGalleryItemsPath(),
-    slug: 'gallery-items',
-    excerpt: '站点精选图片展示',
+    url: getGalleriesPath(),
+    slug: 'galleries',
+    excerpt: '站点精选相册',
     keywords: ['图库', '图片', '相册'],
   },
   {
@@ -134,7 +135,7 @@ const SECTION_PAGES: PublicContentHit[] = [
 export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]> => {
   const payload = await getPayload({ config: configPromise })
 
-  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleryItems, novelsResult, novelChaptersResult, novelCategoriesResult, novelTagsResult] =
+  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleries, novelsResult, novelChaptersResult, novelCategoriesResult, novelTagsResult] =
     await Promise.all([
     queryPosts(),
     payload.find({
@@ -151,7 +152,7 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     getCachedFriendLinks(),
     getCachedFriendLinkGroups(),
     queryJobs(),
-    queryGalleryItems(),
+    queryGalleries(),
     payload.find({
       collection: 'novels',
       depth: 1,
@@ -347,14 +348,15 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     })
   }
 
-  for (const item of galleryItems) {
+  for (const gallery of galleries) {
+    if (!gallery.slug) continue
     records.push({
-      type: 'gallery-item',
-      title: item.title,
-      url: getGalleryItemsPath(),
-      slug: String(item.id),
-      excerpt: item.description || undefined,
-      keywords: ['图库', '图片'],
+      type: 'gallery',
+      title: gallery.title,
+      url: getGalleryPath(gallery.slug),
+      slug: gallery.slug,
+      excerpt: gallery.description || undefined,
+      keywords: ['图库', '相册', '图片'],
     })
   }
 

@@ -9,6 +9,7 @@ export const frontendCollectionRoutes = {
   users: 'users',
   links: 'links',
   'gallery-items': 'gallery-items',
+  galleries: 'galleries',
   jobs: 'jobs',
 } as const satisfies Partial<Record<CollectionSlug, string>>
 
@@ -45,8 +46,17 @@ export function getShortLinkPath(slug: string): string {
   return `/s/${encodeURIComponent(slug)}`
 }
 
+export function getGalleriesPath(): string {
+  return `/${frontendCollectionRoutes.galleries}`
+}
+
+export function getGalleryPath(slug: string): string {
+  return `${getGalleriesPath()}/${encodeURIComponent(slug)}`
+}
+
+/** @deprecated Use getGalleriesPath — kept for legacy redirects. */
 export function getGalleryItemsPath(): string {
-  return `/${frontendCollectionRoutes['gallery-items']}`
+  return getGalleriesPath()
 }
 
 export function getJobsPath(): string {
@@ -93,6 +103,8 @@ export function getCollectionDocumentPath(collection: CollectionSlug, slug: stri
       return getNovelCategoryPath(slug)
     case 'novel-tags':
       return getNovelTagPath(slug)
+    case 'galleries':
+      return getGalleryPath(slug)
     case 'users':
       return getUserPath(slug)
     default:

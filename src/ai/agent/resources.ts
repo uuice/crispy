@@ -17,7 +17,16 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
   { slug: 'ad-slots', label: '广告位', description: '广告展示位' },
   { slug: 'ads', label: '广告', description: '广告素材' },
   { slug: 'jobs', label: '招聘', description: '招聘职位' },
-  { slug: 'gallery-items', label: '图库', description: '图库条目' },
+  {
+    slug: 'galleries',
+    label: '图库',
+    description: '图库相册（主实体）；一本图库含多条图片；前台 /galleries/{slug}',
+  },
+  {
+    slug: 'gallery-items',
+    label: '图库图片',
+    description: '单张图片条目，gallery 字段必填归属一本图库',
+  },
   {
     slug: 'novels',
     label: '小说',

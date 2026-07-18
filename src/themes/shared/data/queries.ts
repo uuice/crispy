@@ -3,7 +3,16 @@ import type { Where } from 'payload'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import type { Category, GalleryItem, Novel, NovelCategory, NovelTag, Tag } from '@/payload-types'
+import type {
+  Category,
+  Gallery,
+  GalleryItem,
+  Media,
+  Novel,
+  NovelCategory,
+  NovelTag,
+  Tag,
+} from '@/payload-types'
 
 import { getCachedFriendLinkSections, getCachedFriendLinks } from '@/utilities/getFriendLinks'
 import {
@@ -564,6 +573,109 @@ export const queryJobs = cache(async () => {
   return result.docs
 })
 
+export type GalleryListItem = Gallery & {
+  /** Explicit cover, or first enabled item image when cover is unset. */
+  listCover: Media | null
+}
+
+function mediaFromUpload(value: Gallery['cover'] | GalleryItem['image']): Media | null {
+  if (value && typeof value === 'object' && 'url' in value && value.url) {
+    return value as Media
+  }
+  return null
+}
+
+export const queryGalleries = cache(async (): Promise<GalleryListItem[]> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'galleries',
+    depth: 1,
+    limit: 100,
+    overrideAccess: false,
+    pagination: false,
+    sort: 'sort',
+    where: { enabled: { equals: true } },
+  })
+
+  const galleries = result.docs
+  const missingCoverIds = galleries
+    .filter((gallery) => !mediaFromUpload(gallery.cover))
+    .map((gallery) => gallery.id)
+
+  const firstImageByGallery = new Map<number | string, Media>()
+
+  if (missingCoverIds.length > 0) {
+    const items = await payload.find({
+      collection: 'gallery-items',
+      depth: 1,
+      limit: Math.min(missingCoverIds.length * 5, 500),
+      overrideAccess: false,
+      pagination: false,
+      sort: 'sort',
+      where: {
+        and: [
+          { gallery: { in: missingCoverIds } },
+          { enabled: { equals: true } },
+        ],
+      },
+    })
+
+    for (const item of items.docs) {
+      const galleryId =
+        typeof item.gallery === 'object' && item.gallery ? item.gallery.id : item.gallery
+      if (galleryId == null || firstImageByGallery.has(galleryId)) continue
+      const image = mediaFromUpload(item.image)
+      if (image) firstImageByGallery.set(galleryId, image)
+    }
+  }
+
+  return galleries.map((gallery) => ({
+    ...gallery,
+    listCover: mediaFromUpload(gallery.cover) ?? firstImageByGallery.get(gallery.id) ?? null,
+  }))
+})
+
+export const queryGalleryBySlug = cache(
+  async (
+    slug: string,
+  ): Promise<{ gallery: Gallery | null; items: GalleryItem[] }> => {
+    const payload = await getPayload({ config: configPromise })
+
+    const galleries = await payload.find({
+      collection: 'galleries',
+      depth: 1,
+      limit: 1,
+      overrideAccess: false,
+      pagination: false,
+      where: {
+        and: [{ slug: { equals: slug } }, { enabled: { equals: true } }],
+      },
+    })
+
+    const gallery = galleries.docs[0] ?? null
+    if (!gallery) return { gallery: null, items: [] }
+
+    const items = await payload.find({
+      collection: 'gallery-items',
+      depth: 1,
+      limit: 500,
+      overrideAccess: false,
+      pagination: false,
+      sort: 'sort',
+      where: {
+        and: [
+          { gallery: { equals: gallery.id } },
+          { enabled: { equals: true } },
+        ],
+      },
+    })
+
+    return { gallery, items: items.docs }
+  },
+)
+
+/** @deprecated Prefer queryGalleries / queryGalleryBySlug */
 export const queryGalleryItems = cache(async (): Promise<GalleryItem[]> => {
   const payload = await getPayload({ config: configPromise })
 

@@ -1,5 +1,5 @@
 import {
-  getGalleryItemsPath,
+  getGalleriesPath,
   getNovelsPath,
   getPagePath,
   getPostsListPath,
@@ -12,6 +12,7 @@ export const defaultBlogMenu: NavItem[] = [
   { title: '首页', url: '/', target: '_self' },
   { title: '归档', url: getPostsListPath(), target: '_self' },
   { title: '小说', url: getNovelsPath(), target: '_self' },
+  { title: '图库', url: getGalleriesPath(), target: '_self' },
   { title: '友情链接', url: '/links', target: '_self' },
   { title: '类库导航', url: '/navigations', target: '_self' },
   { title: '小游戏', url: '/games', target: '_self' },
@@ -21,7 +22,8 @@ export const defaultBlogMenu: NavItem[] = [
 const NAV_URL_ALIASES: Record<string, string> = {
   '/archive': getPostsListPath(),
   '/archives': getPostsListPath(),
-  '/gallery': getGalleryItemsPath(),
+  '/gallery': getGalleriesPath(),
+  '/gallery-items': getGalleriesPath(),
   '/about': getPagePath('about'),
 }
 

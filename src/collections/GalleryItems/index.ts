@@ -16,13 +16,24 @@ export const GalleryItems: CollectionConfig = {
     update: isEditor,
   },
   admin: {
-    defaultColumns: ['title', 'image', 'sort', 'enabled', 'updatedAt'],
+    defaultColumns: ['title', 'gallery', 'image', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
-    description: 'Curated images shown on the public /gallery-items page. Media library items are not listed until added here.',
+    description:
+      '图库内的单张图片条目。必须归属一本 galleries；Media 库中的文件不会自动出现在前台。',
   },
   defaultSort: 'sort',
   fields: [
+    {
+      name: 'gallery',
+      type: 'relationship',
+      label: adminLabels.galleryParent,
+      relationTo: 'galleries',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
     withAiTextField({
       name: 'title',
       type: 'text',
@@ -51,7 +62,7 @@ export const GalleryItems: CollectionConfig = {
       label: adminLabels.sort,
       defaultValue: 0,
       admin: {
-        description: 'Lower numbers appear first.',
+        description: 'Lower numbers appear first within the gallery.',
         position: 'sidebar',
       },
     },
@@ -61,7 +72,7 @@ export const GalleryItems: CollectionConfig = {
       label: adminLabels.enabled,
       defaultValue: true,
       admin: {
-        description: 'Only enabled items appear on the public gallery page.',
+        description: 'Only enabled items appear inside a public gallery.',
         position: 'sidebar',
       },
     },
