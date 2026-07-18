@@ -1,23 +1,35 @@
-import type { CollectionAfterChangeHook } from 'payload'
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload'
 
 import { bulkAddGalleryImages } from '@/utilities/bulkAddGalleryImages'
 
-type BulkContext = {
-  skipGalleryBulkImages?: boolean
+type GalleryBulkContext = {
+  galleryBulkMediaIds?: unknown
 }
 
-/** After save: turn staging bulkImages uploads into gallery-items, then clear the staging field. */
+/** Stash bulkImages IDs and clear staging field before write (avoids a second update). */
+export const stashGalleryBulkImagesBeforeChange: CollectionBeforeChangeHook = ({
+  data,
+  context,
+}) => {
+  const staging = data?.bulkImages
+  if (!Array.isArray(staging) || staging.length === 0) return data
+
+  ;(context as GalleryBulkContext).galleryBulkMediaIds = staging
+  return {
+    ...data,
+    bulkImages: [],
+  }
+}
+
+/** Create gallery-items from stashed bulkImages; return a fresh doc for Admin form. */
 export const syncGalleryBulkImagesAfterChange: CollectionAfterChangeHook = async ({
   doc,
   req,
   context,
+  overrideAccess,
 }) => {
-  const ctx = context as BulkContext
-  if (ctx.skipGalleryBulkImages) return doc
-
-  const staging = (doc as { bulkImages?: unknown }).bulkImages
-  const mediaIds = Array.isArray(staging) ? staging : []
-  if (mediaIds.length === 0) return doc
+  const mediaIds = (context as GalleryBulkContext).galleryBulkMediaIds
+  if (!Array.isArray(mediaIds) || mediaIds.length === 0) return doc
 
   await bulkAddGalleryImages({
     payload: req.payload,
@@ -26,13 +38,16 @@ export const syncGalleryBulkImagesAfterChange: CollectionAfterChangeHook = async
     req,
   })
 
-  return req.payload.update({
-    collection: 'galleries',
-    id: doc.id,
-    data: { bulkImages: [] },
-    depth: 0,
-    overrideAccess: true,
-    req,
-    context: { skipGalleryBulkImages: true },
-  })
+  try {
+    return await req.payload.findByID({
+      collection: 'galleries',
+      id: doc.id,
+      depth: 1,
+      draft: false,
+      overrideAccess: overrideAccess ?? true,
+      req,
+    })
+  } catch {
+    return doc
+  }
 }

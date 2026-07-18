@@ -6,7 +6,10 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleriesReadAccess } from './access'
-import { syncGalleryBulkImagesAfterChange } from './hooks/syncGalleryBulkImagesAfterChange'
+import {
+  stashGalleryBulkImagesBeforeChange,
+  syncGalleryBulkImagesAfterChange,
+} from './hooks/syncGalleryBulkImagesAfterChange'
 
 export const Galleries: CollectionConfig = {
   slug: 'galleries',
@@ -26,6 +29,7 @@ export const Galleries: CollectionConfig = {
   },
   defaultSort: 'sort',
   hooks: {
+    beforeChange: [stashGalleryBulkImagesBeforeChange],
     afterChange: [syncGalleryBulkImagesAfterChange],
   },
   fields: [
@@ -48,6 +52,9 @@ export const Galleries: CollectionConfig = {
       relationTo: 'media',
       admin: {
         description: 'Optional cover shown on the galleries list. Empty → first image.',
+        components: {
+          Field: '@/components/Galleries/GalleryCoverUploadField',
+        },
       },
     },
     {
@@ -70,6 +77,9 @@ export const Galleries: CollectionConfig = {
       admin: {
         defaultColumns: ['title', 'image', 'sort', 'enabled', 'updatedAt'],
         allowCreate: true,
+        components: {
+          Field: '@/components/Galleries/GalleryItemsJoinField',
+        },
       },
     },
     {

@@ -40,6 +40,8 @@ import { default as default_5de855efcd04a71419ab1049e3c91762 } from '@/component
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { default as default_d89645f4912952bd22ffbdd4d4d905f1 } from '@/components/AdminAi/AiTextareaField'
+import { default as default_85c4e3624a8e471ca1cb83e0aba2c70f } from '@/components/Galleries/GalleryCoverUploadField'
+import { default as default_a1d449222129507903584f0406407e82 } from '@/components/Galleries/GalleryItemsJoinField'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { FormatField as FormatField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
@@ -127,6 +129,8 @@ export const importMap = {
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@/components/AdminAi/AiTextareaField#default": default_d89645f4912952bd22ffbdd4d4d905f1,
+  "@/components/Galleries/GalleryCoverUploadField#default": default_85c4e3624a8e471ca1cb83e0aba2c70f,
+  "@/components/Galleries/GalleryItemsJoinField#default": default_a1d449222129507903584f0406407e82,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-import-export/rsc#FormatField": FormatField_cdf7e044479f899a31f804427d568b36,
