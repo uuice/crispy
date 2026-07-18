@@ -114,6 +114,9 @@ export interface Config {
     'payload-query-presets': PayloadQueryPreset;
   };
   collectionsJoins: {
+    galleries: {
+      items: 'gallery-items';
+    };
     'payload-folders': {
       documentsAndFolders: 'payload-folders' | 'media';
     };
@@ -1308,7 +1311,7 @@ export interface NovelChapter {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * 图库相册（主实体）。每本图库可包含多条 gallery-items 图片；前台路径 /galleries/{slug}。
+ * 图库相册（主实体）。可批量选图保存；图片条目在下方「图片」列表，前台路径 /galleries/{slug}。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "galleries".
@@ -1323,9 +1326,18 @@ export interface Gallery {
   slug: string;
   description?: string | null;
   /**
-   * Optional cover shown on the galleries list.
+   * Optional cover shown on the galleries list. Empty → first image.
    */
   cover?: (number | null) | Media;
+  /**
+   * 批量选择媒体库图片后保存：自动生成图库图片条目（标题取自 alt/文件名），本字段会清空。已存在的图会跳过。
+   */
+  bulkImages?: (number | Media)[] | null;
+  items?: {
+    docs?: (number | GalleryItem)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   /**
    * Lower numbers appear first.
    */
@@ -1339,7 +1351,7 @@ export interface Gallery {
   deletedAt?: string | null;
 }
 /**
- * 图库内的单张图片条目。必须归属一本 galleries；Media 库中的文件不会自动出现在前台。
+ * 图库内的单张图片。建议在「图库」编辑页用「批量添加图片」或下方图片列表操作；列表可按所属图库筛选。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gallery-items".
@@ -1347,7 +1359,10 @@ export interface Gallery {
 export interface GalleryItem {
   id: number;
   gallery: number | Gallery;
-  title: string;
+  /**
+   * 可空；空则保存时用媒体 alt / 文件名。
+   */
+  title?: string | null;
   image: number | Media;
   description?: string | null;
   /**
@@ -3399,6 +3414,8 @@ export interface GalleriesSelect<T extends boolean = true> {
   slug?: T;
   description?: T;
   cover?: T;
+  bulkImages?: T;
+  items?: T;
   sort?: T;
   enabled?: T;
   updatedAt?: T;

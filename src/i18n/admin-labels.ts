@@ -9,6 +9,8 @@ export const adminLabels = {
   galleryItems: { singular: '图库图片', plural: '图库图片' },
   galleryParent: '所属图库',
   galleryCover: '封面',
+  galleryBulkImages: '批量添加图片',
+  galleryItemsJoin: '图片列表',
   galleryImage: '图片',
   imageField: '图片',
   adminHome: '后台首页',

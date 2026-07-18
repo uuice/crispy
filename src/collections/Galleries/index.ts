@@ -6,6 +6,7 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleriesReadAccess } from './access'
+import { syncGalleryBulkImagesAfterChange } from './hooks/syncGalleryBulkImagesAfterChange'
 
 export const Galleries: CollectionConfig = {
   slug: 'galleries',
@@ -21,9 +22,12 @@ export const Galleries: CollectionConfig = {
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
     description:
-      '图库相册（主实体）。每本图库可包含多条 gallery-items 图片；前台路径 /galleries/{slug}。',
+      '图库相册（主实体）。可批量选图保存；图片条目在下方「图片」列表，前台路径 /galleries/{slug}。',
   },
   defaultSort: 'sort',
+  hooks: {
+    afterChange: [syncGalleryBulkImagesAfterChange],
+  },
   fields: [
     withAiTextField({
       name: 'title',
@@ -43,7 +47,29 @@ export const Galleries: CollectionConfig = {
       label: adminLabels.galleryCover,
       relationTo: 'media',
       admin: {
-        description: 'Optional cover shown on the galleries list.',
+        description: 'Optional cover shown on the galleries list. Empty → first image.',
+      },
+    },
+    {
+      name: 'bulkImages',
+      type: 'upload',
+      label: adminLabels.galleryBulkImages,
+      relationTo: 'media',
+      hasMany: true,
+      admin: {
+        description:
+          '批量选择媒体库图片后保存：自动生成图库图片条目（标题取自 alt/文件名），本字段会清空。已存在的图会跳过。',
+      },
+    },
+    {
+      name: 'items',
+      type: 'join',
+      label: adminLabels.galleryItemsJoin,
+      collection: 'gallery-items',
+      on: 'gallery',
+      admin: {
+        defaultColumns: ['title', 'image', 'sort', 'enabled', 'updatedAt'],
+        allowCreate: true,
       },
     },
     {

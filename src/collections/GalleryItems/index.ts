@@ -5,6 +5,7 @@ import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleryItemsReadAccess } from './access'
+import { fillGalleryItemTitleFromMedia } from './hooks/fillTitleFromMedia'
 
 export const GalleryItems: CollectionConfig = {
   slug: 'gallery-items',
@@ -20,7 +21,8 @@ export const GalleryItems: CollectionConfig = {
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
     description:
-      '图库内的单张图片条目。必须归属一本 galleries；Media 库中的文件不会自动出现在前台。',
+      '图库内的单张图片。建议在「图库」编辑页用「批量添加图片」或下方图片列表操作；列表可按所属图库筛选。',
+    listSearchableFields: ['title', 'description'],
   },
   defaultSort: 'sort',
   fields: [
@@ -30,16 +32,24 @@ export const GalleryItems: CollectionConfig = {
       label: adminLabels.galleryParent,
       relationTo: 'galleries',
       required: true,
+      index: true,
       admin: {
         position: 'sidebar',
       },
     },
-    withAiTextField({
-      name: 'title',
-      type: 'text',
-      label: adminLabels.title,
-      required: true,
-    }),
+    withAiTextField(
+      {
+        name: 'title',
+        type: 'text',
+        label: adminLabels.title,
+        hooks: {
+          beforeValidate: [fillGalleryItemTitleFromMedia],
+        },
+        admin: {
+          description: '可空；空则保存时用媒体 alt / 文件名。',
+        },
+      },
+    ),
     {
       name: 'image',
       type: 'upload',

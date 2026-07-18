@@ -128,11 +128,13 @@ const COLLECTION_HINTS: Record<string, string[]> = {
   ],
   galleries: [
     '图库主实体；前台列表 /galleries，详情 /galleries/{slug}',
-    '图片在 gallery-items 中，通过 gallery 字段归属本图库',
+    '图片在 gallery-items；Admin 可用 bulkImages 批量选 media 后保存自动建条目',
+    'Agent 批量加图用 bulk_add_gallery_images(galleryId, mediaIds)',
   ],
   'gallery-items': [
     'gallery 字段必填（relationship → galleries）',
-    'image 必填（upload → media）；仅 enabled 的条目出现在所属图库详情页',
+    'image 必填（upload → media）；title 可空（自动用 media alt/文件名）',
+    '仅 enabled 的条目出现在所属图库详情页；find 时用 where.gallery 过滤',
   ],
   posts: ['发布草稿：_status 设为 published'],
   pages: ['发布草稿：_status 设为 published'],

@@ -42,6 +42,7 @@ import {
   importStockImagesForAgent,
   searchStockImagesForAgent,
 } from '@/ai/agent/stockImages'
+import { bulkAddGalleryImages } from '@/utilities/bulkAddGalleryImages'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -504,6 +505,29 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
   {
     type: 'function',
     function: {
+      name: 'bulk_add_gallery_images',
+      description:
+        '将已有 media ID 批量加入指定图库（galleries），自动创建 gallery-items；已在该图库中的图片会跳过。单次最多 50 张。',
+      parameters: {
+        type: 'object',
+        properties: {
+          galleryId: {
+            type: ['string', 'number'],
+            description: '目标图库 galleries 的文档 ID',
+          },
+          mediaIds: {
+            type: 'array',
+            description: 'media 文档 ID 列表',
+            items: { type: ['string', 'number'] },
+          },
+        },
+        required: ['galleryId', 'mediaIds'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'get_global',
       description:
         '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings、storage-settings、integration-settings、email-settings）',
@@ -868,6 +892,26 @@ export async function executeAgentTool(
     case 'import_stock_images':
       result = await importStockImagesForAgent(req, args)
       break
+
+    case 'bulk_add_gallery_images': {
+      const galleryId = args.galleryId as string | number
+      await assertAgentCollectionAccess(req, 'galleries', 'update', galleryId)
+      await assertAgentCollectionAccess(req, 'gallery-items', 'create')
+      const mediaIds = args.mediaIds
+      if (!Array.isArray(mediaIds) || mediaIds.length === 0) {
+        throw new Error('mediaIds 必须是非空数组')
+      }
+      if (mediaIds.length > 50) {
+        throw new Error('单次最多 50 张，请分批调用')
+      }
+      result = await bulkAddGalleryImages({
+        payload: req.payload,
+        galleryId,
+        mediaIds,
+        req,
+      })
+      break
+    }
 
     default:
       throw new Error(`未知工具：${toolCall.name}`)
