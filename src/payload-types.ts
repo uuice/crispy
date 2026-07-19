@@ -544,6 +544,10 @@ export interface User {
   id: number;
   name?: string | null;
   /**
+   * 后台头像；未上传时显示默认图标（不依赖 Gravatar）。
+   */
+  avatar?: (number | null) | Media;
+  /**
    * 短简介，用于侧栏与作者页 Banner；留空则不展示。
    */
   bio?: string | null;
@@ -3631,6 +3635,7 @@ export interface AiCanvasesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  avatar?: T;
   bio?: T;
   bioDetail?: T;
   roles?: T;

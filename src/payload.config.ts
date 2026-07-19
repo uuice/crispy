@@ -57,6 +57,10 @@ export default buildConfig({
     meta: {
       titleSuffix: '- Crispy CMS',
     },
+    // Uploadable user avatar; falls back to local SVG (Gravatar is blocked in CN).
+    avatar: {
+      Component: '@/components/AdminAvatar',
+    },
     components: {
       graphics: {
         Logo: '@/components/AdminLogo',

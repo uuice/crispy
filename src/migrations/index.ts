@@ -31,6 +31,7 @@ import * as migration_20260717_191000_drop_orphan_ai_settings_enums from './2026
 import * as migration_20260718_140000_galleries from './20260718_140000_galleries';
 import * as migration_20260718_143000_galleries_bulk_images from './20260718_143000_galleries_bulk_images';
 import * as migration_20260718_150000_search_v_rels_galleries from './20260718_150000_search_v_rels_galleries';
+import * as migration_20260719_100000_users_avatar from './20260719_100000_users_avatar';
 
 export const migrations = [
   {
@@ -197,5 +198,10 @@ export const migrations = [
     up: migration_20260718_150000_search_v_rels_galleries.up,
     down: migration_20260718_150000_search_v_rels_galleries.down,
     name: '20260718_150000_search_v_rels_galleries',
+  },
+  {
+    up: migration_20260719_100000_users_avatar.up,
+    down: migration_20260719_100000_users_avatar.down,
+    name: '20260719_100000_users_avatar',
   },
 ];

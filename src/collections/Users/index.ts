@@ -42,6 +42,8 @@ export const Users: CollectionConfig = {
     group: adminLabels.systemGroup,
   },
   auth: {
+    // Populate upload relations (e.g. avatar) on /me for the Admin header.
+    depth: 1,
     useAPIKey: true,
   },
   hooks: {
@@ -52,6 +54,15 @@ export const Users: CollectionConfig = {
       name: 'name',
       type: 'text',
       label: adminLabels.name,
+    },
+    {
+      name: 'avatar',
+      type: 'upload',
+      relationTo: 'media',
+      label: adminLabels.userAvatar,
+      admin: {
+        description: '后台头像；未上传时显示默认图标（不依赖 Gravatar）。',
+      },
     },
     {
       name: 'bio',

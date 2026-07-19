@@ -67,6 +67,7 @@ import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02
 import { RowLabel as RowLabel_ec255a65fa6fa8d1faeb09cf35284224 } from '@/Header/RowLabel'
 import { RowLabel as RowLabel_1f6ff6ff633e3695d348f4f3c58f1466 } from '@/Footer/RowLabel'
 import { default as default_241f55cb8d82aadf79f510288248932e } from '@/components/FrontendThemePreview/FrontendThemeField'
+import { default as default_497ff965a89fc4c87f4d374e11f3f378 } from '@/components/AdminAvatar'
 import { default as default_a202ad21aea188adfad41087711ba85c } from '@/components/AdminNav'
 import { default as default_c1363893506d7ed29a71d1a4da01ddb5 } from '@/components/AdminIcon'
 import { default as default_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
@@ -156,6 +157,7 @@ export const importMap = {
   "@/Header/RowLabel#RowLabel": RowLabel_ec255a65fa6fa8d1faeb09cf35284224,
   "@/Footer/RowLabel#RowLabel": RowLabel_1f6ff6ff633e3695d348f4f3c58f1466,
   "@/components/FrontendThemePreview/FrontendThemeField#default": default_241f55cb8d82aadf79f510288248932e,
+  "@/components/AdminAvatar#default": default_497ff965a89fc4c87f4d374e11f3f378,
   "@/components/AdminNav#default": default_a202ad21aea188adfad41087711ba85c,
   "@/components/AdminIcon#default": default_c1363893506d7ed29a71d1a4da01ddb5,
   "@/components/AdminLogo#default": default_aa0a2d19d38a4839dbd373417e210b89,

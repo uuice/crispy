@@ -8,7 +8,6 @@ export const frontendCollectionRoutes = {
   tags: 'tags',
   users: 'users',
   links: 'links',
-  'gallery-items': 'gallery-items',
   galleries: 'galleries',
   jobs: 'jobs',
 } as const satisfies Partial<Record<CollectionSlug, string>>
@@ -52,11 +51,6 @@ export function getGalleriesPath(): string {
 
 export function getGalleryPath(slug: string): string {
   return `${getGalleriesPath()}/${encodeURIComponent(slug)}`
-}
-
-/** @deprecated Use getGalleriesPath — kept for legacy redirects. */
-export function getGalleryItemsPath(): string {
-  return getGalleriesPath()
 }
 
 export function getJobsPath(): string {

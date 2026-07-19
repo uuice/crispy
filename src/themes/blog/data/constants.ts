@@ -22,8 +22,6 @@ export const defaultBlogMenu: NavItem[] = [
 const NAV_URL_ALIASES: Record<string, string> = {
   '/archive': getPostsListPath(),
   '/archives': getPostsListPath(),
-  '/gallery': getGalleriesPath(),
-  '/gallery-items': getGalleriesPath(),
   '/about': getPagePath('about'),
 }
 

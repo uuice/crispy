@@ -1,5 +1,4 @@
 import {
-  getGalleriesPath,
   getPagePath,
   getPostPath,
   getPostsListPath,
@@ -10,10 +9,6 @@ import {
 export function resolveLegacyFrontendRedirect(pathname: string): string | null {
   if (pathname === '/archives' || pathname === '/archive') {
     return getPostsListPath()
-  }
-
-  if (pathname === '/gallery' || pathname === '/gallery-items') {
-    return getGalleriesPath()
   }
 
   if (pathname === '/about') {
@@ -39,6 +34,4 @@ export const legacyFrontendRedirectRules = [
   { source: '/archives/:slug', destination: '/posts/:slug' },
   { source: '/authors/:slug', destination: '/users/:slug' },
   { source: '/about', destination: getPagePath('about') },
-  { source: '/gallery', destination: getGalleriesPath() },
-  { source: '/gallery-items', destination: getGalleriesPath() },
 ] as const

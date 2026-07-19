@@ -104,6 +104,7 @@ export const adminLabels = {
   layout: '页面区块',
   roles: '角色',
   name: '姓名',
+  userAvatar: '头像',
   userBio: '个人简介',
   userBioDetail: '详细介绍',
   siteName: '站点名称',
