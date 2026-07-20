@@ -33,9 +33,9 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | **S3 Storage** | 配置 `S3_*` 后 media 存对象存储 |
 | **Jobs** | 定时发布（`schedulePublish`）、导入导出任务等 |
 
-**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
+**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
 
-**RBAC 三角色**：`super-admin` / `editor` / `author`（见文末角色表）。
+**RBAC**：代码 Permission 枚举 + 后台可配 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`（见文末）。详情：`/admin/dev-docs#permissions`。
 
 ## API 一览
 
@@ -143,13 +143,17 @@ Authorization: users API-Key <user-api-key>
 
 MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](http://localhost:3333/admin/dev-docs#mcp)。
 
-## 角色说明
+## 角色与权限（RBAC）
 
-| 角色 | 权限 |
+权限枚举在 `src/access/permissions.ts`；后台 **系统 → 角色** 勾选；用户挂角色后写入 `authz-cache`，`can()` 即时生效（无需重登）。
+
+| 系统角色 | 说明 |
 | ---- | ---- |
-| `super-admin` | 全部权限 + 用户管理 |
-| `editor` | 内容 CRUD、发布、运营模块、站点/导航 Globals |
-| `author` | 自己的 posts（草稿）；上传媒体；不可改 pages、分类、Globals |
+| `super-admin` | 全部 Permission（用户/角色/密钥 Catalog/日志等） |
+| `editor` | 内容与运营、发布、站点设置、缓存/统计；无用户与密钥写 |
+| `author` | 自己的文章（草稿）、媒体上传、AI；不可发布 |
+
+自定义角色：Admin 新建角色并勾选权限即可。完整矩阵与 API 鉴权见 [dev-docs — 权限](http://localhost:3333/admin/dev-docs#permissions)。
 
 ## 分支与 2.x
 

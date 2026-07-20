@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
-import { isEditor } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 
@@ -10,10 +10,10 @@ export const AdSlots: CollectionConfig = {
   slug: 'ad-slots',
   labels: adminLabels.adSlots,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('ops:manage'),
+    delete: requirePermission('ops:manage'),
     read: enabledPublicReadAccess,
-    update: isEditor,
+    update: requirePermission('ops:manage'),
   },
   admin: {
     defaultColumns: ['title', 'slug', 'enabled', 'updatedAt'],

@@ -52,28 +52,28 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     slug: 'llm-providers',
     label: 'LLM 提供商',
     description:
-      'OpenAI 兼容端点 Catalog（chat / embedding）；密钥加密；capabilities 区分用途；仅 super-admin',
+      'OpenAI 兼容端点 Catalog（chat / embedding）；密钥加密；capabilities 区分用途；需 catalog:secrets',
   },
   {
     slug: 'prompt-templates',
     label: 'Prompt 模板',
     description:
-      '字段 AI / 画布技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。列表可查；增删改仅 super-admin',
+      '字段 AI / 画布技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。读 catalog:prompts:read；写 catalog:prompts:write',
   },
   {
     slug: 'storage-targets',
     label: '存储目标',
-    description: 'S3/OSS 目标 Catalog（密钥加密；切换 Active 后需重启）',
+    description: 'S3/OSS 目标 Catalog（密钥加密；catalog:secrets；切换 Active 后需重启）',
   },
   {
     slug: 'integration-credentials',
     label: '集成凭证',
-    description: 'Unsplash 等第三方凭证 Catalog（密钥加密）',
+    description: 'Unsplash 等第三方凭证 Catalog（密钥加密；catalog:secrets）',
   },
   {
     slug: 'email-transports',
     label: '邮件通道',
-    description: 'Resend / SMTP Catalog（密钥加密；切换 Active 后需重启）',
+    description: 'Resend / SMTP Catalog（密钥加密；catalog:secrets；切换 Active 后需重启）',
   },
   {
     slug: 'ai-canvases',

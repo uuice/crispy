@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone } from '@/access/anyone'
-import { isEditor } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { DEFAULT_PAGE_REVALIDATE } from '@/frontend-cache/constants'
 
@@ -12,7 +12,7 @@ export const CacheSettings: GlobalConfig = {
   label: adminLabels.cacheSettings,
   access: {
     read: anyone,
-    update: isEditor,
+    update: requirePermission('settings:site'),
   },
   admin: {
     group: adminLabels.configGroup,

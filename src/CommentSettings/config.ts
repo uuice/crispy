@@ -1,14 +1,14 @@
 import type { GlobalConfig } from 'payload'
 
-import { isEditor, isSuperAdmin } from '@/access/roles'
+import { requireAnyPermission, requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 
 export const CommentSettings: GlobalConfig = {
   slug: 'comment-settings',
   label: adminLabels.commentSettings,
   access: {
-    read: isEditor,
-    update: isSuperAdmin,
+    read: requireAnyPermission(['settings:comment', 'settings:site', 'comments:moderate']),
+    update: requirePermission('settings:comment'),
   },
   admin: {
     group: adminLabels.configGroup,

@@ -1,10 +1,10 @@
 import type { Access } from 'payload'
 
-import { hasRole } from '@/access/roles'
+import { can } from '@/access/can'
 import { resolveCommentSettings } from '@/comments/settings'
 
-export const commentsReadAccess: Access = ({ req: { user } }) => {
-  if (hasRole(user, ['super-admin', 'editor'])) return true
+export const commentsReadAccess: Access = async ({ req }) => {
+  if (await can(req.user, 'comments:moderate', req)) return true
 
   return {
     status: {
@@ -20,8 +20,6 @@ export const commentsCreateAccess: Access = async ({ req: { user } }) => {
   return settings.allowGuestComments
 }
 
-export const commentsUpdateAccess: Access = ({ req: { user } }) =>
-  hasRole(user, ['super-admin', 'editor'])
+export const commentsUpdateAccess: Access = async ({ req }) => can(req.user, 'comments:moderate', req)
 
-export const commentsDeleteAccess: Access = ({ req: { user } }) =>
-  hasRole(user, ['super-admin', 'editor'])
+export const commentsDeleteAccess: Access = async ({ req }) => can(req.user, 'comments:moderate', req)

@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { isEditor, isSuperAdmin } from '@/access/roles'
+import { requireAnyPermission, requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 
 /**
@@ -11,8 +11,8 @@ export const AiSettings: GlobalConfig = {
   slug: 'ai-settings',
   label: adminLabels.aiSettings,
   access: {
-    read: isEditor,
-    update: isSuperAdmin,
+    read: requireAnyPermission(['settings:ai', 'settings:site', 'catalog:prompts:read']),
+    update: requirePermission('settings:ai'),
   },
   admin: {
     group: adminLabels.configGroup,

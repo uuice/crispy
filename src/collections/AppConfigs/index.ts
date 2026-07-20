@@ -1,16 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { isEditor, isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 
 export const AppConfigs: CollectionConfig = {
   slug: 'app-configs',
   labels: adminLabels.appConfigs,
   access: {
-    create: isSuperAdmin,
-    delete: isSuperAdmin,
-    read: isEditor,
-    update: isSuperAdmin,
+    create: requirePermission('catalog:app-configs:write'),
+    delete: requirePermission('catalog:app-configs:write'),
+    read: requirePermission('catalog:app-configs:read'),
+    update: requirePermission('catalog:app-configs:write'),
   },
   admin: {
     defaultColumns: ['key', 'label', 'category', 'valueType', 'enabled', 'updatedAt'],

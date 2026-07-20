@@ -1,7 +1,7 @@
 import { resolveCacheEntries } from '@/frontend-cache/registry'
 import { purgeDbCacheByRoutePaths } from '@/frontend-cache/dbCache'
 import { purgeAllRegisteredCache, purgeCacheEntries } from '@/frontend-cache/purge'
-import { requireEditorSession } from '@/utilities/requireEditorSession'
+import { requirePermissionSession } from '@/utilities/requirePermissionSession'
 
 type PurgeRequestBody = {
   ids?: string[]
@@ -10,7 +10,7 @@ type PurgeRequestBody = {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const auth = await requireEditorSession()
+  const auth = await requirePermissionSession('cache:manage')
   if (!auth.ok) return auth.response
 
   let body: PurgeRequestBody

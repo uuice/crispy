@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { isEditor } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
@@ -14,10 +14,10 @@ export const Jobs: CollectionConfig = {
   slug: 'jobs',
   labels: adminLabels.jobs,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('ops:manage'),
+    delete: requirePermission('ops:manage'),
     read: jobsReadAccess,
-    update: isEditor,
+    update: requirePermission('ops:manage'),
   },
   admin: {
     defaultColumns: ['title', 'location', 'employmentType', 'enabled', 'updatedAt'],

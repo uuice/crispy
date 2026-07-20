@@ -5,10 +5,12 @@
 import 'dotenv/config'
 import { createLocalReq, getPayload } from 'payload'
 import config from '@payload-config'
+import { ensureSystemRoles } from '@/access/ensureSystemRoles'
 import { seed } from '@/endpoints/seed'
 
 async function main() {
   const payload = await getPayload({ config })
+  const roleIds = await ensureSystemRoles(payload)
 
   const { totalDocs } = await payload.count({ collection: 'users' })
   if (totalDocs === 0) {
@@ -19,7 +21,7 @@ async function main() {
         name: 'Admin',
         email: 'admin@example.com',
         password: 'password',
-        roles: ['super-admin'],
+        roles: [roleIds['super-admin']],
       },
     })
     console.log(`Created bootstrap admin: ${admin.email}`)

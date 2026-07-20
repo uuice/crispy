@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { syncStorageRuntimeFile } from '@/storage/syncStorageRuntimeFile'
 
@@ -8,8 +8,8 @@ export const StorageSettings: GlobalConfig = {
   slug: 'storage-settings',
   label: adminLabels.storageSettings,
   access: {
-    read: isSuperAdmin,
-    update: isSuperAdmin,
+    read: requirePermission('settings:storage'),
+    update: requirePermission('settings:storage'),
   },
   admin: {
     group: adminLabels.configGroup,

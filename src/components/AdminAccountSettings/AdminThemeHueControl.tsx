@@ -4,10 +4,9 @@ import { FieldLabel, toast, useAuth, useConfig, useTranslation } from '@payloadc
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { hasRole } from '@/access/roles'
+import { canUseThemePreview } from '@/themes/preview.shared'
 import { DEFAULT_ADMIN_THEME_HUE, normalizeAdminThemeHue } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
-import type { User } from '@/payload-types'
 
 function applyHue(hue: number) {
   document.documentElement.style.setProperty('--crispy-hue', `${normalizeAdminThemeHue(hue)}deg`)
@@ -21,7 +20,9 @@ export function AdminThemeHueControl() {
   const [loaded, setLoaded] = useState(false)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const canEdit = user != null && hasRole(user as User, ['super-admin', 'editor'])
+  const canEdit =
+    user != null &&
+    canUseThemePreview(user as { permissions?: string[] | null; roles?: unknown })
 
   useEffect(() => {
     if (!canEdit) return

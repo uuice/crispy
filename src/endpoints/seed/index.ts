@@ -12,6 +12,8 @@ import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
 import { getMigratedAuthorProfile, seedFromAstroLearn } from './astro-learn/seedFromAstroLearn'
 import { getPagePath } from '@/utilities/frontendPaths'
+import { ensureSystemRoles } from '@/access/ensureSystemRoles'
+import type { SystemRoleSlug } from '@/access/permissions'
 
 /** Delete order respects FK constraints (e.g. gallery-items → galleries → media). */
 const collectionsToClear: CollectionSlug[] = [
@@ -99,11 +101,13 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding demo users...`)
 
-  const demoUsers = [
-    { name: 'uuice', email: 'demo-author@example.com', roles: ['author'] as const },
-    { name: 'Editor', email: 'editor@example.com', roles: ['editor'] as const },
-    { name: 'Author', email: 'author@example.com', roles: ['author'] as const },
-    { name: 'Agent', email: 'agent@example.com', roles: ['editor'] as const },
+  const roleIds = await ensureSystemRoles(payload)
+
+  const demoUsers: { name: string; email: string; roles: SystemRoleSlug[] }[] = [
+    { name: 'uuice', email: 'demo-author@example.com', roles: ['author'] },
+    { name: 'Editor', email: 'editor@example.com', roles: ['editor'] },
+    { name: 'Author', email: 'author@example.com', roles: ['author'] },
+    { name: 'Agent', email: 'agent@example.com', roles: ['editor'] },
   ]
 
   await payload.delete({
@@ -140,7 +144,7 @@ export const seed = async ({
         name: demoUsers[0].name,
         email: demoUsers[0].email,
         password: 'password',
-        roles: [...demoUsers[0].roles],
+        roles: demoUsers[0].roles.map((slug) => roleIds[slug]),
         bio: authorProfile.bio,
         bioDetail: authorProfile.bioDetail,
       },
@@ -176,7 +180,7 @@ export const seed = async ({
           name: user.name,
           email: user.email,
           password: 'password',
-          roles: [...user.roles],
+          roles: user.roles.map((slug) => roleIds[slug]),
         },
       }),
     ),

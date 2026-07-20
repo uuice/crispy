@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { isEditor } from '../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField } from '@/fields/ai'
@@ -10,10 +10,10 @@ export const NovelCategories: CollectionConfig<'novel-categories'> = {
   slug: 'novel-categories',
   labels: adminLabels.novelCategories,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('taxonomy:manage'),
+    delete: requirePermission('taxonomy:manage'),
     read: anyone,
-    update: isEditor,
+    update: requirePermission('taxonomy:manage'),
   },
   admin: {
     group: adminLabels.novelGroup,

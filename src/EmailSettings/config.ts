@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { syncEmailRuntimeFile } from '@/email/syncEmailRuntimeFile'
 
@@ -8,8 +8,8 @@ export const EmailSettings: GlobalConfig = {
   slug: 'email-settings',
   label: adminLabels.emailSettings,
   access: {
-    read: isSuperAdmin,
-    update: isSuperAdmin,
+    read: requirePermission('settings:email'),
+    update: requirePermission('settings:email'),
   },
   admin: {
     group: adminLabels.configGroup,

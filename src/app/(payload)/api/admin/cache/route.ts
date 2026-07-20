@@ -8,10 +8,10 @@ import {
   getRegistryCacheStatuses,
 } from '@/frontend-cache/dbCache'
 import { getResolvedCacheSettings } from '@/frontend-cache/getCacheSettings'
-import { requireEditorSession } from '@/utilities/requireEditorSession'
+import { requirePermissionSession } from '@/utilities/requirePermissionSession'
 
 export async function GET(): Promise<Response> {
-  const auth = await requireEditorSession()
+  const auth = await requirePermissionSession('cache:manage')
   if (!auth.ok) return auth.response
 
   const registry = getFrontendCacheRegistry()

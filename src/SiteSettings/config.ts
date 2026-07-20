@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone } from '@/access/anyone'
-import { isEditor } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
 import { getFrontendThemeSelectOptions } from '@/themes/definitions'
@@ -16,7 +16,7 @@ export const SiteSettings: GlobalConfig = {
   },
   access: {
     read: anyone,
-    update: isEditor,
+    update: requirePermission('settings:site'),
   },
   fields: [
     {

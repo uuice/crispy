@@ -1,12 +1,14 @@
-import type { PayloadRequest } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
+import { can, canAny } from '@/access/can'
 import { isAiEnabledCollection } from '@/ai/collectionProfiles'
-import { hasRole } from '@/access/roles'
 import type { User } from '@/payload-types'
 
-export function canUseAi(user: PayloadRequest['user']): boolean {
-  if (!user || !('roles' in user)) return false
-  return hasRole(user as User, ['super-admin', 'editor', 'author'])
+export async function canUseAi(
+  user: PayloadRequest['user'],
+  reqOrPayload: PayloadRequest | Payload,
+): Promise<boolean> {
+  return can(user, 'ai:use', reqOrPayload)
 }
 
 export async function assertAiAccess(
@@ -14,7 +16,7 @@ export async function assertAiAccess(
   collection: string,
   docId?: string | number,
 ) {
-  if (!canUseAi(req.user)) {
+  if (!(await canUseAi(req.user, req))) {
     throw new Error('无权使用 AI 功能')
   }
 
@@ -24,7 +26,7 @@ export async function assertAiAccess(
 
   const user = req.user as User
 
-  if (hasRole(user, ['super-admin', 'editor'])) {
+  if (await canAny(user, ['posts:update:any', 'pages:manage'], req)) {
     return
   }
 

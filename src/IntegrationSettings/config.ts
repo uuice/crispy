@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { resetUnsplashKeyCache } from '@/unsplash/resolveUnsplashKey'
 
@@ -8,8 +8,8 @@ export const IntegrationSettings: GlobalConfig = {
   slug: 'integration-settings',
   label: adminLabels.integrationSettings,
   access: {
-    read: isSuperAdmin,
-    update: isSuperAdmin,
+    read: requirePermission('settings:integration'),
+    update: requirePermission('settings:integration'),
   },
   admin: {
     group: adminLabels.configGroup,

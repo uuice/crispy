@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
-import { isEditor } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField } from '@/fields/ai'
 
@@ -15,10 +15,10 @@ export const ShortLinks: CollectionConfig = {
   slug: 'short-links',
   labels: adminLabels.shortLinks,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('ops:manage'),
+    delete: requirePermission('ops:manage'),
     read: enabledPublicReadAccess,
-    update: isEditor,
+    update: requirePermission('ops:manage'),
   },
   admin: {
     defaultColumns: ['title', 'slug', 'targetUrl', 'enabled', 'updatedAt'],

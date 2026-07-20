@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isSuperAdmin } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 
 export const API_ACCESS_LOG_SLUG = 'api-access-logs' as const
@@ -10,8 +10,8 @@ export const ApiAccessLogs: CollectionConfig = {
   labels: adminLabels.apiAccessLogs,
   access: {
     create: () => false,
-    delete: isSuperAdmin,
-    read: isSuperAdmin,
+    delete: requirePermission('logs:read'),
+    read: requirePermission('logs:read'),
     update: () => false,
   },
   admin: {

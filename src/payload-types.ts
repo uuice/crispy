@@ -94,6 +94,8 @@ export interface Config {
     comments: Comment;
     'api-access-logs': ApiAccessLog;
     'frontend-cache-entries': FrontendCacheEntry;
+    'authz-cache': AuthzCache;
+    roles: Role;
     'ai-chat-sessions': AiChatSession;
     'ai-canvases': AiCanvase;
     users: User;
@@ -148,6 +150,8 @@ export interface Config {
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
     'frontend-cache-entries': FrontendCacheEntriesSelect<false> | FrontendCacheEntriesSelect<true>;
+    'authz-cache': AuthzCacheSelect<false> | AuthzCacheSelect<true>;
+    roles: RolesSelect<false> | RolesSelect<true>;
     'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
     'ai-canvases': AiCanvasesSelect<false> | AiCanvasesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -569,7 +573,10 @@ export interface User {
     };
     [k: string]: unknown;
   } | null;
-  roles: ('super-admin' | 'editor' | 'author')[];
+  /**
+   * 可多选；权限来自角色并在 authz-cache 中合并，改角色后立即生效。
+   */
+  roles: (number | Role)[];
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -592,6 +599,67 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * 后台可新增角色并勾选权限；保存后写入 authz-cache，立即生效。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles".
+ */
+export interface Role {
+  id: number;
+  name: string;
+  /**
+   * 稳定标识（如 editor）。系统角色创建后不可改 slug。
+   */
+  slug: string;
+  description?: string | null;
+  /**
+   * 系统角色由程序维护，不可删除。
+   */
+  isSystem?: boolean | null;
+  /**
+   * 权限枚举由代码注册；此处仅勾选。
+   */
+  permissions?:
+    | (
+        | 'posts:create'
+        | 'posts:update:own'
+        | 'posts:update:any'
+        | 'posts:delete'
+        | 'posts:publish'
+        | 'pages:manage'
+        | 'pages:read:drafts'
+        | 'media:create'
+        | 'media:update'
+        | 'media:delete'
+        | 'taxonomy:manage'
+        | 'ops:manage'
+        | 'novels:manage'
+        | 'novels:read:all'
+        | 'comments:moderate'
+        | 'users:manage'
+        | 'roles:manage'
+        | 'settings:site'
+        | 'settings:ai'
+        | 'settings:comment'
+        | 'settings:storage'
+        | 'settings:integration'
+        | 'settings:email'
+        | 'catalog:secrets'
+        | 'catalog:prompts:read'
+        | 'catalog:prompts:write'
+        | 'catalog:app-configs:read'
+        | 'catalog:app-configs:write'
+        | 'logs:read'
+        | 'cache:manage'
+        | 'stats:read'
+        | 'ai:use'
+        | 'presets:manage'
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1664,6 +1732,31 @@ export interface FrontendCacheEntry {
   createdAt: string;
 }
 /**
+ * RBAC authz cache (role/user permissions). No TTL — overwritten on role/user changes.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authz-cache".
+ */
+export interface AuthzCache {
+  id: number;
+  cacheKey: string;
+  scope: 'user' | 'role';
+  /**
+   * user: { roleIds, roleSlugs, permissions }; role: { slug, permissions }
+   */
+  cachedValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * AI 内容助手完整会话历史，由聊天 API 自动写入。也可从运营 → AI 内容助手进入。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2720,6 +2813,14 @@ export interface PayloadLockedDocument {
         value: number | FrontendCacheEntry;
       } | null)
     | ({
+        relationTo: 'authz-cache';
+        value: number | AuthzCache;
+      } | null)
+    | ({
+        relationTo: 'roles';
+        value: number | Role;
+      } | null)
+    | ({
         relationTo: 'ai-chat-sessions';
         value: number | AiChatSession;
       } | null)
@@ -2879,6 +2980,8 @@ export interface PayloadQueryPreset {
     | 'comments'
     | 'api-access-logs'
     | 'frontend-cache-entries'
+    | 'authz-cache'
+    | 'roles'
     | 'ai-chat-sessions'
     | 'ai-canvases'
     | 'users'
@@ -3601,6 +3704,30 @@ export interface FrontendCacheEntriesSelect<T extends boolean = true> {
   routePath?: T;
   cachedValue?: T;
   expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authz-cache_select".
+ */
+export interface AuthzCacheSelect<T extends boolean = true> {
+  cacheKey?: T;
+  scope?: T;
+  cachedValue?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles_select".
+ */
+export interface RolesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  isSystem?: T;
+  permissions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4830,6 +4957,8 @@ export interface TaskCreateCollectionExport {
       | 'comments'
       | 'api-access-logs'
       | 'frontend-cache-entries'
+      | 'authz-cache'
+      | 'roles'
       | 'ai-chat-sessions'
       | 'ai-canvases'
       | 'users'

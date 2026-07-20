@@ -7,7 +7,7 @@ import { canUseAiAgent } from '@/ai/agent/access'
 import { AdminAiCanvasesApp } from '@/components/AdminAiCanvases/AdminAiCanvasesApp'
 import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
-export function AiCanvasesView({
+export async function AiCanvasesView({
   initPageResult,
   params,
   searchParams,
@@ -23,7 +23,7 @@ export function AiCanvasesView({
     )
   }
 
-  if (!canUseAiAgent(user)) {
+  if (!(await canUseAiAgent(user, req))) {
     return (
       <Gutter>
         <p>当前账号无权使用 AI 画布。</p>

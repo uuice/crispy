@@ -1,10 +1,10 @@
 import type { Access } from 'payload'
 
-import { hasRole } from './roles'
+import { can } from './can'
 
-/** Editors see all novels; public sees only enabled novels. */
-export const novelsReadAccess: Access = ({ req: { user } }) => {
-  if (user && hasRole(user, ['super-admin', 'editor', 'author'])) {
+/** Staff see all novels; public sees only enabled novels. */
+export const novelsReadAccess: Access = async ({ req }) => {
+  if (await can(req.user, 'novels:read:all', req)) {
     return true
   }
 
@@ -15,5 +15,4 @@ export const novelsReadAccess: Access = ({ req: { user } }) => {
   }
 }
 
-export const novelsWriteAccess: Access = ({ req: { user } }) =>
-  hasRole(user, ['super-admin', 'editor'])
+export const novelsWriteAccess: Access = async ({ req }) => can(req.user, 'novels:manage', req)

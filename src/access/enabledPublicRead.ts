@@ -1,10 +1,10 @@
 import type { Access } from 'payload'
 
-import { hasRole } from './roles'
+import { can } from './can'
 
 /** Anonymous users only see enabled records; editors and above see all. */
-export const enabledPublicReadAccess: Access = ({ req: { user } }) => {
-  if (hasRole(user, ['super-admin', 'editor'])) {
+export const enabledPublicReadAccess: Access = async ({ req }) => {
+  if (await can(req.user, 'ops:manage', req)) {
     return true
   }
 

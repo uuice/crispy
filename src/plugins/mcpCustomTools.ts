@@ -2,7 +2,6 @@ import type { MCPPluginConfig } from '@payloadcms/plugin-mcp'
 import type { CollectionSlug, PayloadRequest } from 'payload'
 import { z } from 'zod'
 
-import { hasRole } from '@/access/roles'
 import {
   assertAgentCacheAccess,
   assertAgentCollectionAccess,
@@ -19,20 +18,9 @@ import {
   purgeFrontendCache,
   updateFrontendCacheSettings,
 } from '@/frontend-cache/cacheToolHandlers'
-import type { User } from '@/payload-types'
 import { restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
 
 type McpCustomTool = NonNullable<NonNullable<MCPPluginConfig['mcp']>['tools']>[number]
-
-function assertMcpCacheAccess(req: PayloadRequest): void {
-  if (!req.user || !('roles' in req.user)) {
-    throw new Error('未授权')
-  }
-
-  if (!hasRole(req.user as User, ['super-admin', 'editor'])) {
-    throw new Error('仅管理员和编辑可通过 MCP 管理前台缓存')
-  }
-}
 
 function mcpTextResult(data: unknown) {
   return {
@@ -51,7 +39,7 @@ export const mcpCustomTools: McpCustomTool[] = [
       dynamicLimit: z.number().optional(),
     },
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
-      assertMcpCacheAccess(req)
+      await assertAgentCacheAccess(req)
       const result = await listFrontendCache({
         group: args.group ? String(args.group) : undefined,
         dynamicLimit: args.dynamicLimit !== undefined ? Number(args.dynamicLimit) : undefined,
@@ -70,7 +58,7 @@ export const mcpCustomTools: McpCustomTool[] = [
       all: z.boolean().optional(),
     },
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
-      assertMcpCacheAccess(req)
+      await assertAgentCacheAccess(req)
       const result = await purgeFrontendCache({
         all: args.all === true,
         expired: args.expired === true,
@@ -85,7 +73,7 @@ export const mcpCustomTools: McpCustomTool[] = [
     description: '读取 cache-settings：HTML 缓存开关、TTL 秒数、是否输出调试 Header',
     parameters: {},
     handler: async (_args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
-      assertMcpCacheAccess(req)
+      await assertAgentCacheAccess(req)
       return mcpTextResult(await getFrontendCacheSettings())
     },
   },
@@ -99,7 +87,7 @@ export const mcpCustomTools: McpCustomTool[] = [
       exposeCacheHeaders: z.boolean().optional(),
     },
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
-      assertMcpCacheAccess(req)
+      await assertAgentCacheAccess(req)
       await assertAgentGlobalAccess(req, 'cache-settings', 'update')
       parseCacheSettingsUpdate(args)
       const result = await updateFrontendCacheSettings(req, args)

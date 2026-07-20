@@ -3,7 +3,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-import { hasRole } from '@/access/roles'
+import { can } from '@/access/can'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
@@ -25,7 +25,7 @@ export async function StatsView({
     )
   }
 
-  if (!hasRole(user, ['super-admin', 'editor'])) {
+  if (!(await can(user, 'stats:read', req))) {
     return (
       <DefaultTemplate
         i18n={req.i18n}

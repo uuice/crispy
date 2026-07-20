@@ -8,6 +8,8 @@ import {
   assertAgentCollectionAccess,
   assertAgentGlobalAccess,
   assertAgentStatsAccess,
+  canAgentAccessAnyPost,
+  ownPostsWhere,
 } from '@/ai/agent/access'
 import {
   describeCollectionSchema,
@@ -285,7 +287,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'list_audit_logs',
       description:
-        '查询审计日志（只读，自动记录的内容变更历史）。仅 super-admin；可按 collection/action/documentId 过滤',
+        '查询审计日志（只读）。需 logs:read；可按 collection/action/documentId 过滤',
       parameters: {
         type: 'object',
         properties: {
@@ -616,10 +618,25 @@ export async function executeAgentTool(
 
       const rows = await runSemanticContentSearch(req, query, {
         collections,
-        limit,
+        limit: limit * 3,
         status,
       })
-      result = rows.map(formatEmbeddingSearchHit)
+
+      const ownPostsOnly = !(await canAgentAccessAnyPost(req))
+      const scoped = []
+      for (const row of rows) {
+        if (ownPostsOnly && row.collection === 'posts') {
+          try {
+            await assertAgentCollectionAccess(req, 'posts', 'read', row.docId)
+          } catch {
+            continue
+          }
+        }
+        scoped.push(row)
+        if (scoped.length >= limit) break
+      }
+
+      result = scoped.map(formatEmbeddingSearchHit)
       break
     }
 
@@ -630,9 +647,16 @@ export async function executeAgentTool(
       const page = Math.max(Number(args.page) || 1, 1)
       const trash = args.trash === true
       const listSelect = resolveAgentListSelect(collection)
+
+      let where = args.where as Where | undefined
+      if (collection === 'posts' && req.user && !(await canAgentAccessAnyPost(req))) {
+        const own = ownPostsWhere(req.user.id)
+        where = where ? ({ and: [where, own] } as Where) : own
+      }
+
       const docs = await req.payload.find({
         collection: collection as CollectionSlug,
-        where: args.where as Where | undefined,
+        where,
         limit,
         page,
         sort: (args.sort as string) || '-updatedAt',
@@ -741,13 +765,13 @@ export async function executeAgentTool(
     }
 
     case 'get_site_stats': {
-      assertAgentStatsAccess(req)
+      await assertAgentStatsAccess(req)
       result = await collectCollectionStats(req.payload, req)
       break
     }
 
     case 'list_audit_logs': {
-      assertAgentAuditLogAccess(req)
+      await assertAgentAuditLogAccess(req)
       const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25)
       const page = Math.max(Number(args.page) || 1, 1)
       const filters: Where[] = []
@@ -785,20 +809,20 @@ export async function executeAgentTool(
     }
 
     case 'get_cache_settings': {
-      assertAgentCacheAccess(req)
+      await assertAgentCacheAccess(req)
       result = await getFrontendCacheSettings()
       break
     }
 
     case 'update_cache_settings': {
-      assertAgentCacheAccess(req)
+      await assertAgentCacheAccess(req)
       await assertAgentGlobalAccess(req, 'cache-settings', 'update')
       result = await updateFrontendCacheSettings(req, args)
       break
     }
 
     case 'list_frontend_cache': {
-      assertAgentCacheAccess(req)
+      await assertAgentCacheAccess(req)
       const cacheList = await listFrontendCache({
         group: args.group ? String(args.group) : undefined,
         dynamicLimit: args.dynamicLimit !== undefined ? Number(args.dynamicLimit) : undefined,
@@ -812,7 +836,7 @@ export async function executeAgentTool(
     }
 
     case 'purge_frontend_cache': {
-      assertAgentCacheAccess(req)
+      await assertAgentCacheAccess(req)
       result = await purgeFrontendCache({
         all: args.all === true,
         expired: args.expired === true,

@@ -3,7 +3,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-import { hasRole } from '@/access/roles'
+import { can } from '@/access/can'
 import {
   FRONTEND_CACHE_GROUP_LABELS,
   getFrontendCacheRegistry,
@@ -30,7 +30,7 @@ export async function CacheView({
     )
   }
 
-  if (!hasRole(user, ['super-admin', 'editor'])) {
+  if (!(await can(user, 'cache:manage', req))) {
     return (
       <DefaultTemplate
         i18n={req.i18n}

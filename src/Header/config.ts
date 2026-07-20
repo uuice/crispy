@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { link } from '@/fields/link'
-import { isEditor } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { frontendNavPathHint } from '@/utilities/mapGlobalNavItems'
 
@@ -14,7 +14,7 @@ export const Header: GlobalConfig = {
   },
   access: {
     read: () => true,
-    update: isEditor,
+    update: requirePermission('settings:site'),
   },
   fields: [
     {

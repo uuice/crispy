@@ -8,7 +8,14 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
-import { CRISPY_ROLES, hasRole } from '../../access/roles'
+import { can } from '@/access/can'
+import { ROLES_SLUG } from '@/access/collectionSlugs'
+import { ensureSystemRoles, findRoleIdBySlug } from '@/access/ensureSystemRoles'
+import {
+  deleteUserAuthzCache,
+  getUserAuthz,
+  recomputeAndCacheUserAuthz,
+} from '@/access/authzCache'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
@@ -31,10 +38,14 @@ export const Users: CollectionConfig = {
   labels: adminLabels.users,
   access: {
     admin: authenticated,
-    create: ({ req: { user } }) => hasRole(user, ['super-admin']),
-    delete: ({ req: { user } }) => hasRole(user, ['super-admin']),
+    create: ({ req }) => can(req.user, 'users:manage', req),
+    delete: ({ req }) => can(req.user, 'users:manage', req),
     read: authenticated,
-    update: authenticated,
+    update: async ({ req }) => {
+      if (!req.user) return false
+      if (await can(req.user, 'users:manage', req)) return true
+      return { id: { equals: req.user.id } }
+    },
   },
   admin: {
     defaultColumns: ['name', 'email', 'roles'],
@@ -47,7 +58,49 @@ export const Users: CollectionConfig = {
     useAPIKey: true,
   },
   hooks: {
-    beforeValidate: [createSanitizeLexicalHook(['bioDetail'])],
+    beforeValidate: [
+      createSanitizeLexicalHook(['bioDetail']),
+      async ({ data, operation, req }) => {
+        if (!data) return data
+        if (operation === 'create' && (!data.roles || (Array.isArray(data.roles) && data.roles.length === 0))) {
+          await ensureSystemRoles(req.payload)
+          const authorId = await findRoleIdBySlug(req.payload, 'author')
+          if (authorId != null) data.roles = [authorId]
+        }
+        return data
+      },
+    ],
+    afterRead: [
+      async ({ doc, req }) => {
+        // Attach authz-cache permissions for /me (Edge middleware + Admin client).
+        if (!doc?.id || !req?.user || String(req.user.id) !== String(doc.id)) {
+          return doc
+        }
+        try {
+          const authz = await getUserAuthz(req.payload, doc.id, req)
+          return {
+            ...doc,
+            permissions: authz.permissions,
+            roleSlugs: authz.roleSlugs,
+          }
+        } catch {
+          return doc
+        }
+      },
+    ],
+    afterChange: [
+      async ({ doc, req, context }) => {
+        if (context?.skipAuthzCacheHooks) return doc
+        await recomputeAndCacheUserAuthz(req.payload, doc.id, doc.roles)
+        return doc
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await deleteUserAuthzCache(req.payload, doc.id)
+        return doc
+      },
+    ],
   },
   fields: [
     {
@@ -83,15 +136,16 @@ export const Users: CollectionConfig = {
     },
     {
       name: 'roles',
-      type: 'select',
+      type: 'relationship',
+      relationTo: ROLES_SLUG,
       hasMany: true,
-      saveToJWT: true,
-      defaultValue: ['author'],
       required: true,
       label: adminLabels.roles,
-      options: CRISPY_ROLES,
+      admin: {
+        description: '可多选；权限来自角色并在 authz-cache 中合并，改角色后立即生效。',
+      },
       access: {
-        update: ({ req: { user } }) => hasRole(user, ['super-admin']),
+        update: ({ req }) => can(req.user, 'users:manage', req),
       },
     },
   ],

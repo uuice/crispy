@@ -2,7 +2,9 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { AuthzCache } from './collections/AuthzCache'
 import { FrontendCacheEntries } from './collections/FrontendCacheEntries'
+import { Roles } from './collections/Roles'
 import { AppConfigs } from './collections/AppConfigs'
 import { LlmProviders } from './collections/LlmProviders'
 import { PromptTemplates } from './collections/PromptTemplates'
@@ -195,10 +197,23 @@ export default buildConfig({
     Comments,
     ApiAccessLogs,
     FrontendCacheEntries,
+    AuthzCache,
+    Roles,
     AiChatSessions,
     AiCanvases,
     Users,
   ],
+  onInit: async (payload) => {
+    try {
+      const { ensureSystemRoles } = await import('./access/ensureSystemRoles')
+      const { recomputeAllUserAuthzCaches } = await import('./access/authzCache')
+      await ensureSystemRoles(payload)
+      const updated = await recomputeAllUserAuthzCaches(payload)
+      payload.logger.info(`Authz-cache warmed for ${updated} user(s)`)
+    } catch (error) {
+      payload.logger.error({ err: error }, 'Failed to ensure system roles / authz-cache')
+    }
+  },
   cors: [getServerSideURL()].filter(Boolean),
   globals: [
     Header,

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isEditor, isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { defaultCollectionVersions } from '@/collections/defaults'
 import { chineseSlugField } from '@/fields/chineseSlugField'
@@ -9,10 +9,10 @@ export const PromptTemplates: CollectionConfig = {
   slug: 'prompt-templates',
   labels: adminLabels.promptTemplates,
   access: {
-    create: isSuperAdmin,
-    delete: isSuperAdmin,
-    read: isEditor,
-    update: isSuperAdmin,
+    create: requirePermission('catalog:prompts:write'),
+    delete: requirePermission('catalog:prompts:write'),
+    read: requirePermission('catalog:prompts:read'),
+    update: requirePermission('catalog:prompts:write'),
   },
   admin: {
     useAsTitle: 'title',

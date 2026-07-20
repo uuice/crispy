@@ -290,7 +290,7 @@ sequenceDiagram
   participant DB as Payload / Postgres
 
   U->>API: POST 用户消息 SSE
-  API->>API: auth editor+ 存会话
+  API->>API: auth ai:use 存会话
   API->>Agent: sanitizedMessages
   Agent->>LLM: system + tools 定义
   LLM-->>Agent: tool_call semantic_search
@@ -313,7 +313,7 @@ sequenceDiagram
         </li>
         <li>
           <strong>Crispy 鉴权与存会话</strong>
-          <code>payload.auth</code> 校验 cookie；<code>canUseAiAgent</code> 要求 editor+；写入 <code>ai-chat-sessions</code>；<code>createLocalReq({ user })</code> 后续工具用你的权限。
+          <code>payload.auth</code> 校验 cookie；<code>canUseAiAgent</code> 要求 <code>ai:use</code>；写入 <code>ai-chat-sessions</code>；工具层按 Permission（与 Admin <code>can()</code> 对齐）。
         </li>
         <li>
           <strong>组装对话并发给 DeepSeek</strong>

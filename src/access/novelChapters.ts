@@ -1,9 +1,8 @@
 import type { Access } from 'payload'
 
 import { authenticatedOrPublished } from './authenticatedOrPublished'
-import { hasRole } from './roles'
+import { can } from './can'
 
 export const novelChaptersReadAccess = authenticatedOrPublished
 
-export const novelChaptersWriteAccess: Access = ({ req: { user } }) =>
-  hasRole(user, ['super-admin', 'editor'])
+export const novelChaptersWriteAccess: Access = async ({ req }) => can(req.user, 'novels:manage', req)

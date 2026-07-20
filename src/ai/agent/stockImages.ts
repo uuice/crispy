@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload'
 
-import { hasRole } from '@/access/roles'
+import { can } from '@/access/can'
 import { canUseAiAgent } from '@/ai/agent/access'
 import {
   buildUnsplashSearchQuery,
@@ -36,16 +36,23 @@ export type AgentStockSearchResult = {
 const MAX_BATCH_IMPORT = 10
 
 export async function assertAgentStockImageAccess(req: PayloadRequest): Promise<void> {
-  if (!canUseAiAgent(req.user)) {
+  if (!(await canUseAiAgent(req.user, req))) {
     throw new Error('无权使用 AI 助手')
   }
 
-  if (!hasRole(req.user, ['super-admin', 'editor', 'author'])) {
-    throw new Error('仅作者及以上可通过 AI 助手检索或导入图片')
+  if (!(await can(req.user, 'ai:use', req))) {
+    throw new Error('仅具备 ai:use 可通过 AI 助手检索或导入图片')
   }
 
   if (!(await isUnsplashEnabled())) {
     throw new Error('Unsplash 未配置：请在「集成凭证」添加 Key，并在「集成设置」中选为 Active')
+  }
+}
+
+export async function assertAgentStockImageImportAccess(req: PayloadRequest): Promise<void> {
+  await assertAgentStockImageAccess(req)
+  if (!(await can(req.user, 'media:create', req))) {
+    throw new Error('仅具备 media:create 可通过 AI 助手导入图片到 media')
   }
 }
 
@@ -140,7 +147,7 @@ export async function importStockImageForAgent(
   req: PayloadRequest,
   args: Record<string, unknown>,
 ) {
-  await assertAgentStockImageAccess(req)
+  await assertAgentStockImageImportAccess(req)
 
   if (args.userConfirmed !== true) {
     throw new Error(
@@ -170,7 +177,7 @@ export async function importStockImagesForAgent(
   req: PayloadRequest,
   args: Record<string, unknown>,
 ) {
-  await assertAgentStockImageAccess(req)
+  await assertAgentStockImageImportAccess(req)
 
   if (args.userConfirmed !== true) {
     throw new Error(

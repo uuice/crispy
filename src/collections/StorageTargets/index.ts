@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 
-import { isSuperAdmin } from '@/access/roles'
+import { requirePermission } from '@/access/can'
 import { encryptedTextField } from '@/fields/encryptedText'
 import { adminLabels } from '@/i18n/admin-labels'
 import { defaultCollectionVersions } from '@/collections/defaults'
@@ -18,10 +18,10 @@ export const StorageTargets: CollectionConfig = {
   slug: 'storage-targets',
   labels: adminLabels.storageTargets,
   access: {
-    create: isSuperAdmin,
-    delete: isSuperAdmin,
-    read: isSuperAdmin,
-    update: isSuperAdmin,
+    create: requirePermission('catalog:secrets'),
+    delete: requirePermission('catalog:secrets'),
+    read: requirePermission('catalog:secrets'),
+    update: requirePermission('catalog:secrets'),
   },
   admin: {
     useAsTitle: 'name',

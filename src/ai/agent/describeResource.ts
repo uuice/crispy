@@ -146,10 +146,10 @@ const COLLECTION_HINTS: Record<string, string[]> = {
     'provider / model / temperature / maxTokens 可空 = 跟 AI 设置全局默认',
     'userPrompt 变量：{{field}} {{title}} {{selection}} {{instruction}} {{content_plain}} {{siteName}} {{existing_categories}} {{existing_tags}} 等',
     'find 列表不含 systemPrompt/userPrompt；改文案前先 get_document 读全文',
-    '增删改仅 super-admin；editor 可 find/get',
+    '增删改需 catalog:prompts:write；find/get 需 catalog:prompts:read',
   ],
   'ai-canvases': [
-    '按账号隔离：普通用户只能看/改自己的画布；super-admin 可看全部',
+    '按账号隔离：默认只能看/改自己的画布',
     'Agent 只管理元数据：title；创建时自动带默认空图（输入+Prompt 节点）',
     '禁止通过 Agent 写入/修改 graph（节点与边）；引导用户打开 /admin/ai-canvases',
     'get_document 返回图摘要（节点/边数量），不含完整 graph JSON',

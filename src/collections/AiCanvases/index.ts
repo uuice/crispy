@@ -1,20 +1,20 @@
 import type { Access, CollectionConfig } from 'payload'
 
+import { userHasRole } from '@/access/roles'
 import { canUseAiAgent } from '@/ai/agent/access'
-import { hasRole } from '@/access/roles'
 import { adminLabels } from '@/i18n/admin-labels'
 
 export const AI_CANVAS_SLUG = 'ai-canvases' as const
 
-const canAccessAiCanvases: Access = ({ req: { user } }) => {
-  if (!user) return false
-  return canUseAiAgent(user)
+const canAccessAiCanvases: Access = async ({ req }) => {
+  if (!req.user) return false
+  return canUseAiAgent(req.user, req)
 }
 
-const ownCanvasOrSuperAdmin: Access = ({ req: { user } }) => {
-  if (!user) return false
-  if (hasRole(user, ['super-admin'])) return true
-  return { user: { equals: user.id } }
+const ownCanvasOrSuperAdmin: Access = async ({ req }) => {
+  if (!req.user) return false
+  if (await userHasRole(req.user, ['super-admin'], req.payload, req)) return true
+  return { user: { equals: req.user.id } }
 }
 
 export const AiCanvases: CollectionConfig = {

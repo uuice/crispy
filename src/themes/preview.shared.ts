@@ -1,11 +1,21 @@
 import type { NextRequest } from 'next/server'
 
+import type { Permission } from '@/access/permissions'
+import { extractRoleSlugs } from '@/access/roles'
+
 import { FRONTEND_THEME_IDS, type FrontendThemeId } from './definitions'
 
 export const THEME_PREVIEW_QUERY_PARAM = 'theme_preview'
 export const THEME_PREVIEW_REQUEST_HEADER = 'x-crispy-theme-preview'
 export const THEME_PREVIEW_COOKIE = 'crispy_theme_preview'
 export const THEME_PREVIEW_COOKIE_MAX_AGE = 60 * 60
+
+/** Permissions that allow ?theme_preview= (aligned with site/content editor access). */
+export const THEME_PREVIEW_PERMISSIONS: Permission[] = [
+  'settings:site',
+  'pages:manage',
+  'ops:manage',
+]
 
 export function isFrontendThemeId(value: string | null | undefined): value is FrontendThemeId {
   return value != null && (FRONTEND_THEME_IDS as readonly string[]).includes(value)
@@ -75,7 +85,23 @@ export function withThemePreviewParam(
   return `${url.pathname}${url.search}${hash}`
 }
 
-export function isEditorUser(user: { roles?: string[] | null } | null | undefined): boolean {
-  const roles = user?.roles ?? []
+type AuthzUserShape = {
+  permissions?: string[] | null
+  roles?: unknown
+} | null | undefined
+
+/** Prefer authz permissions from /me; fall back to system role slugs. */
+export function canUseThemePreview(user: AuthzUserShape): boolean {
+  const permissions = user?.permissions
+  if (Array.isArray(permissions) && permissions.length > 0) {
+    return THEME_PREVIEW_PERMISSIONS.some((permission) => permissions.includes(permission))
+  }
+
+  return isEditorUser(user)
+}
+
+/** @deprecated Prefer canUseThemePreview (permission-based). */
+export function isEditorUser(user: AuthzUserShape): boolean {
+  const roles = extractRoleSlugs(user)
   return roles.some((role) => role === 'super-admin' || role === 'editor')
 }

@@ -2,7 +2,7 @@ import config from '@payload-config'
 import { headers } from 'next/headers'
 import { getPayload, type TypedUser } from 'payload'
 
-import { hasRole } from '@/access/roles'
+import { can } from '@/access/can'
 
 type AuthorSessionResult =
   | { ok: true; user: TypedUser }
@@ -20,7 +20,7 @@ export async function requireAuthorSession(): Promise<AuthorSessionResult> {
     }
   }
 
-  if (!hasRole(user, ['super-admin', 'editor', 'author'])) {
+  if (!(await can(user, 'ai:use', payload))) {
     return {
       ok: false,
       response: Response.json({ error: 'Forbidden' }, { status: 403 }),
@@ -43,7 +43,7 @@ export async function requireAuthorSessionFromRequest(
     }
   }
 
-  if (!hasRole(user, ['super-admin', 'editor', 'author'])) {
+  if (!(await can(user, 'ai:use', payload))) {
     return {
       ok: false,
       response: Response.json({ error: 'Forbidden' }, { status: 403 }),

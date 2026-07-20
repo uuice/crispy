@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
-import { isEditor } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
 
@@ -9,10 +9,10 @@ export const LinkGroups: CollectionConfig = {
   slug: 'link-groups',
   labels: adminLabels.linkGroups,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('ops:manage'),
+    delete: requirePermission('ops:manage'),
     read: enabledPublicReadAccess,
-    update: isEditor,
+    update: requirePermission('ops:manage'),
   },
   admin: {
     defaultColumns: ['title', 'sort', 'enabled', 'updatedAt'],

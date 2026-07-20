@@ -19,8 +19,8 @@ alwaysApply: false
 - 可管理范围: `src/ai/agent/resources.ts`（与 MCP 大致对齐）
 - 写操作前: 工具 `describe_resource` 了解字段结构
 - 删除: `delete_document` → `trashOrDeleteDocument`（软删除，media 不可删）
-- `app-configs` 写操作: 仅 super-admin
-- author: 仅自己的 posts
+- 鉴权: `src/ai/agent/access.ts` 按 Permission（与 Admin `can()` 对齐）；`app-configs` 写需 `catalog:app-configs:write`
+- 无 `posts:update:any` 时仅能管理自己的 posts
 
 ## 扩展后台 Agent 工具
 

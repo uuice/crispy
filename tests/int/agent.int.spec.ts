@@ -2,6 +2,7 @@ import { getPayload, createLocalReq, type Payload } from 'payload'
 import config from '@/payload.config'
 import { beforeAll, describe, expect, it } from 'vitest'
 
+import { ensureSystemRoles } from '@/access/ensureSystemRoles'
 import { assertAgentCollectionAccess } from '@/ai/agent/access'
 import { describeCollectionSchema } from '@/ai/agent/describeResource'
 import { executeAgentTool } from '@/ai/agent/tools'
@@ -16,12 +17,13 @@ describe('AI agent', () => {
     payload = await getPayload({ config: await config })
 
     const stamp = Date.now()
+    const roleIds = await ensureSystemRoles(payload)
     mockSuperAdmin = (await payload.create({
       collection: 'users',
       data: {
         email: `agent-super-${stamp}@example.com`,
         password: 'test-password-123456',
-        roles: ['super-admin'],
+        roles: [roleIds['super-admin']],
       },
       overrideAccess: true,
     })) as User
@@ -31,7 +33,7 @@ describe('AI agent', () => {
       data: {
         email: `agent-editor-${stamp}@example.com`,
         password: 'test-password-123456',
-        roles: ['editor'],
+        roles: [roleIds.editor],
       },
       overrideAccess: true,
     })) as User

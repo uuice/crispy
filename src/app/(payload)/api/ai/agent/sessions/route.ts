@@ -14,7 +14,7 @@ export async function GET(): Promise<Response> {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!canUseAiAgent(user)) {
+  if (!(await canUseAiAgent(user, payload))) {
     return Response.json({ error: '无权使用 AI 助手' }, { status: 403 })
   }
 

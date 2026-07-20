@@ -36,7 +36,7 @@ import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 ## 权限
 
-Custom View 内自行校验角色（如 `hasRole(user, ['super-admin', 'editor'])`）；API 路由用 `requireAdminSession`。Collection 统计/查询用 `overrideAccess: false` 尊重 read access。
+Custom View / API：用 `can(user, permission, req)` 或 `requirePermissionSession('…')`（见 `src/access/permissions.ts`）。勿再写死 `hasRole(..., ['editor'])`。Collection 查询 `overrideAccess: false`。文档：`/admin/dev-docs#permissions`。
 
 ## 样式
 

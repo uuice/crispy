@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isEditor } from '../../access/roles'
+import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
@@ -15,10 +15,10 @@ export const Galleries: CollectionConfig = {
   slug: 'galleries',
   labels: adminLabels.galleries,
   access: {
-    create: isEditor,
-    delete: isEditor,
+    create: requirePermission('ops:manage'),
+    delete: requirePermission('ops:manage'),
     read: galleriesReadAccess,
-    update: isEditor,
+    update: requirePermission('ops:manage'),
   },
   admin: {
     defaultColumns: ['title', 'slug', 'sort', 'enabled', 'updatedAt'],

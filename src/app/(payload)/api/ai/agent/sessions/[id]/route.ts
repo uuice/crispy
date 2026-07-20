@@ -19,7 +19,7 @@ export async function GET(_request: Request, context: RouteContext): Promise<Res
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!canUseAiAgent(user)) {
+  if (!(await canUseAiAgent(user, payload))) {
     return Response.json({ error: '无权使用 AI 助手' }, { status: 403 })
   }
 
@@ -43,7 +43,7 @@ export async function DELETE(_request: Request, context: RouteContext): Promise<
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!canUseAiAgent(user)) {
+  if (!(await canUseAiAgent(user, payload))) {
     return Response.json({ error: '无权使用 AI 助手' }, { status: 403 })
   }
 

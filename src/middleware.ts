@@ -17,8 +17,8 @@ import {
 } from '@/frontend-cache/middlewareCache'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import {
+  canUseThemePreview,
   getThemePreviewQueryValue,
-  isEditorUser,
   isFrontendThemeId,
   THEME_PREVIEW_REQUEST_HEADER,
 } from '@/themes/preview.shared'
@@ -35,7 +35,7 @@ type ThemePreviewContext = {
   requestHeaders: Headers
 }
 
-async function isEditorRequest(request: NextRequest): Promise<boolean> {
+async function canThemePreviewRequest(request: NextRequest): Promise<boolean> {
   const token = request.cookies.get('payload-token')?.value
   if (!token) {
     return false
@@ -54,8 +54,10 @@ async function isEditorRequest(request: NextRequest): Promise<boolean> {
       return false
     }
 
-    const data = (await response.json()) as { user?: { roles?: string[] | null } | null }
-    return isEditorUser(data.user)
+    const data = (await response.json()) as {
+      user?: { permissions?: string[] | null; roles?: unknown } | null
+    }
+    return canUseThemePreview(data.user)
   } catch {
     return false
   }
@@ -64,7 +66,7 @@ async function isEditorRequest(request: NextRequest): Promise<boolean> {
 async function resolveThemePreviewContext(request: NextRequest): Promise<ThemePreviewContext | null> {
   const queryTheme = getThemePreviewQueryValue(request)
 
-  if (!isFrontendThemeId(queryTheme) || !(await isEditorRequest(request))) {
+  if (!isFrontendThemeId(queryTheme) || !(await canThemePreviewRequest(request))) {
     return null
   }
 

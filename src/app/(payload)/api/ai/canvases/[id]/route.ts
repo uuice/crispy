@@ -16,7 +16,7 @@ async function authCanvasReq() {
   if (!user) {
     return { error: Response.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
-  if (!canUseAiAgent(user)) {
+  if (!(await canUseAiAgent(user, payload))) {
     return { error: Response.json({ error: '无权使用 AI 画布' }, { status: 403 }) }
   }
 
