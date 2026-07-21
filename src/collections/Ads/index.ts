@@ -4,6 +4,7 @@ import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField } from '@/fields/ai'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const Ads: CollectionConfig = {
   slug: 'ads',
@@ -15,6 +16,7 @@ export const Ads: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'slot', 'format', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.operationsGroup,

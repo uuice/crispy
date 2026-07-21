@@ -13,6 +13,7 @@ import {
   postsReadAccess,
   postsUpdateAccess,
 } from '../../access/posts'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
@@ -64,6 +65,13 @@ export const Posts: CollectionConfig<'posts'> = {
   admin: {
     group: adminLabels.contentGroup,
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    hidden: hideUnlessAnyPermission(
+      'posts:create',
+      'posts:update:own',
+      'posts:update:any',
+      'posts:delete',
+      'posts:publish',
+    ),
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({

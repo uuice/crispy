@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { novelsReadAccess, novelsWriteAccess } from '@/access/novels'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { aiSuggestAssistField, withAiTextField } from '@/fields/ai'
@@ -25,6 +26,7 @@ export const Novels: CollectionConfig<'novels'> = {
     defaultColumns: ['title', 'genre', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     description: '长篇小说项目设定，一本一条记录；章节在 novel-chapters 集合中管理。',
+    hidden: hideUnlessAnyPermission('novels:manage', 'novels:read:all'),
   },
   fields: [
     withAiTextField(

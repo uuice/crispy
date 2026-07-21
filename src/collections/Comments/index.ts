@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { adminLabels } from '@/i18n/admin-labels'
 
 import {
@@ -14,6 +15,7 @@ export const Comments: CollectionConfig = {
   slug: 'comments',
   labels: adminLabels.comments,
   access: {
+    // Frontend create stays open for guests / logged-in users; Admin UI is hidden without moderate.
     create: commentsCreateAccess,
     delete: commentsDeleteAccess,
     read: commentsReadAccess,
@@ -24,6 +26,8 @@ export const Comments: CollectionConfig = {
     useAsTitle: 'content',
     group: adminLabels.operationsGroup,
     description: '文章与单页的用户评论，支持嵌套回复与审核。',
+    // Where-type read would still show Create in Admin for authors; hide the collection instead.
+    hidden: hideUnlessAnyPermission('comments:moderate'),
   },
   defaultSort: '-createdAt',
   hooks: {

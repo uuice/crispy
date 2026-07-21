@@ -5,6 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { mediaCreateAccess, mediaDeleteAccess, mediaUpdateAccess } from '../access/media'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
@@ -27,6 +28,7 @@ export const Media: CollectionConfig = {
   folders: true,
   admin: {
     group: adminLabels.contentGroup,
+    hidden: hideUnlessAnyPermission('media:create', 'media:update', 'media:delete'),
   },
   access: {
     create: mediaCreateAccess,

@@ -4,6 +4,7 @@ import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField } from '@/fields/ai'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 function normalizeShortLinkSlug(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined
@@ -21,6 +22,7 @@ export const ShortLinks: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'slug', 'targetUrl', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.operationsGroup,

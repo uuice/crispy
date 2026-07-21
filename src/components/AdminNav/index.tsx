@@ -7,6 +7,7 @@ import React from 'react'
 
 import { getNavPrefs } from '@/admin-nav/getNavPrefs'
 import { mergeCustomNavIntoGroups } from '@/admin-nav/mergeCustomNavIntoGroups'
+import type { AuthzUserShape } from '@/access/can'
 
 import { AdminHomeLink } from './AdminHomeLink'
 import { AdminNavClient } from './NavClient'
@@ -63,6 +64,7 @@ export async function AdminNav(props: AdminNavProps) {
       permissions,
       i18n,
     ),
+    user as AuthzUserShape,
   )
 
   const navPreferences = req ? await getNavPrefs(req) : null

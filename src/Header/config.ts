@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { link } from '@/fields/link'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
@@ -11,6 +12,7 @@ export const Header: GlobalConfig = {
   admin: {
     group: adminLabels.configGroup,
     description: '控制前台顶栏导航（blog / cms 主题均读取此配置）。',
+    hidden: hideUnlessAnyPermission('settings:site'),
   },
   access: {
     read: () => true,

@@ -43,6 +43,7 @@ import { NovelChapters } from './collections/NovelChapters'
 import { Novels } from './collections/Novels'
 import { NovelTags } from './collections/NovelTags'
 import { CacheSettings } from './CacheSettings/config'
+import { requirePermission } from './access/can'
 import { plugins } from './plugins'
 import { i18nConfig } from './i18n'
 import { adminLabels } from './i18n/admin-labels'
@@ -143,7 +144,12 @@ export default buildConfig({
   },
   i18n: i18nConfig,
   queryPresets: {
-    access: {},
+    access: {
+      create: requirePermission('presets:manage'),
+      read: requirePermission('presets:manage'),
+      update: requirePermission('presets:manage'),
+      delete: requirePermission('presets:manage'),
+    },
     constraints: {},
     labels: {
       singular: '查询预设',

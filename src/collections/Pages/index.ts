@@ -6,6 +6,7 @@ import {
   pagesReadAccess,
   pagesUpdateAccess,
 } from '../../access/pages'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
@@ -56,6 +57,7 @@ export const Pages: CollectionConfig<'pages'> = {
   admin: {
     group: adminLabels.contentGroup,
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    hidden: hideUnlessAnyPermission('pages:manage', 'pages:read:drafts'),
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({

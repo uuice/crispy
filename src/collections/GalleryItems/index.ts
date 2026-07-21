@@ -6,6 +6,7 @@ import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fi
 
 import { galleryItemsReadAccess } from './access'
 import { fillGalleryItemTitleFromMedia } from './hooks/fillTitleFromMedia'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const GalleryItems: CollectionConfig = {
   slug: 'gallery-items',
@@ -17,6 +18,7 @@ export const GalleryItems: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'gallery', 'image', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,

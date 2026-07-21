@@ -9,6 +9,7 @@ import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import { jobsReadAccess } from './access'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const Jobs: CollectionConfig = {
   slug: 'jobs',
@@ -20,6 +21,7 @@ export const Jobs: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'location', 'employmentType', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.operationsGroup,

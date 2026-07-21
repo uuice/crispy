@@ -6,6 +6,7 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
 
 import { galleriesReadAccess } from './access'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import {
   stashGalleryBulkImagesBeforeChange,
   syncGalleryBulkImagesAfterChange,
@@ -21,6 +22,7 @@ export const Galleries: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'slug', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,

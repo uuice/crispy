@@ -1,5 +1,7 @@
 import type { NavGroupType } from '@payloadcms/ui/shared'
 
+import type { AuthzUserShape } from '@/access/can'
+import { userHasAnyPermissionSync } from '@/access/can'
 import { ADMIN_NAV_GROUP_ORDER, CUSTOM_ADMIN_NAV_ITEMS } from './customItems'
 
 export type CustomViewNavEntity = {
@@ -29,13 +31,20 @@ function sortNavGroups(groups: CrispyNavGroup[]): CrispyNavGroup[] {
   })
 }
 
-export function mergeCustomNavIntoGroups(groups: NavGroupType[]): CrispyNavGroup[] {
+export function mergeCustomNavIntoGroups(
+  groups: NavGroupType[],
+  user?: AuthzUserShape,
+): CrispyNavGroup[] {
   const merged: CrispyNavGroup[] = groups.map((group) => ({
     label: group.label,
     entities: [...group.entities],
   }))
 
   for (const item of CUSTOM_ADMIN_NAV_ITEMS) {
+    if (item.anyOf?.length && !userHasAnyPermissionSync(user, item.anyOf)) {
+      continue
+    }
+
     const group = merged.find((entry) => entry.label === item.group)
 
     if (!group) {
@@ -59,5 +68,5 @@ export function mergeCustomNavIntoGroups(groups: NavGroupType[]): CrispyNavGroup
     })
   }
 
-  return sortNavGroups(merged)
+  return sortNavGroups(merged).filter((group) => group.entities.length > 0)
 }

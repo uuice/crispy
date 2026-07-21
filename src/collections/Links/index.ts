@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
@@ -18,6 +19,7 @@ export const Links: CollectionConfig = {
     defaultColumns: ['title', 'group', 'url', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,
+    hidden: hideUnlessAnyPermission('ops:manage'),
   },
   defaultSort: 'sort',
   fields: [

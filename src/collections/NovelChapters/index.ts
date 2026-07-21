@@ -11,6 +11,7 @@ import {
   novelChaptersReadAccess,
   novelChaptersWriteAccess,
 } from '@/access/novelChapters'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { Banner } from '@/blocks/Banner/config'
 import { Code } from '@/blocks/Code/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
@@ -43,6 +44,7 @@ export const NovelChapters: CollectionConfig<'novel-chapters'> = {
     group: adminLabels.novelGroup,
     defaultColumns: ['title', 'novel', 'slug', 'updatedAt'],
     useAsTitle: 'title',
+    hidden: hideUnlessAnyPermission('novels:manage', 'novels:read:all'),
     description: '长篇小说章节正文，与博客文章（posts）独立管理。',
   },
   defaultPopulate: {

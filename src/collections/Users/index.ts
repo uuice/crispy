@@ -8,6 +8,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { can } from '@/access/can'
 import { ROLES_SLUG } from '@/access/collectionSlugs'
 import { ensureSystemRoles, findRoleIdBySlug } from '@/access/ensureSystemRoles'
@@ -51,6 +52,7 @@ export const Users: CollectionConfig = {
     defaultColumns: ['name', 'email', 'roles'],
     useAsTitle: 'name',
     group: adminLabels.systemGroup,
+    hidden: hideUnlessAnyPermission('users:manage'),
   },
   auth: {
     // Populate upload relations (e.g. avatar) on /me for the Admin header.

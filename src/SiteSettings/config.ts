@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone } from '@/access/anyone'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
@@ -13,6 +14,7 @@ export const SiteSettings: GlobalConfig = {
   label: adminLabels.siteSettings,
   admin: {
     group: adminLabels.configGroup,
+    hidden: hideUnlessAnyPermission('settings:site'),
   },
   access: {
     read: anyone,

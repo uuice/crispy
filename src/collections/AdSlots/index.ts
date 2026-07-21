@@ -5,6 +5,7 @@ import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const AdSlots: CollectionConfig = {
   slug: 'ad-slots',
@@ -16,6 +17,7 @@ export const AdSlots: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'slug', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.operationsGroup,

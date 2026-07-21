@@ -4,6 +4,7 @@ import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { withAiTextField, withAiTextareaField } from '@/fields/ai'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const LinkGroups: CollectionConfig = {
   slug: 'link-groups',
@@ -15,6 +16,7 @@ export const LinkGroups: CollectionConfig = {
     update: requirePermission('ops:manage'),
   },
   admin: {
+    hidden: hideUnlessAnyPermission('ops:manage'),
     defaultColumns: ['title', 'sort', 'enabled', 'updatedAt'],
     useAsTitle: 'title',
     group: adminLabels.contentGroup,

@@ -23,6 +23,8 @@ import { mcpCustomTools } from '@/plugins/mcpCustomTools'
 import { createS3StoragePlugin } from '@/storage/s3'
 import { resolveEmailConfigSync } from '@/email/resolveEmailConfig'
 
+import { requireAnyPermission, requirePermission } from '@/access/can'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -42,12 +44,20 @@ export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts', 'novel-chapters'],
     overrides: {
+      // Keep public read for middleware; gate write so Admin Create/Delete hide without permission.
+      access: {
+        read: () => true,
+        create: requireAnyPermission(['ops:manage', 'pages:manage']),
+        update: requireAnyPermission(['ops:manage', 'pages:manage']),
+        delete: requireAnyPermission(['ops:manage', 'pages:manage']),
+      },
       labels: {
         singular: '重定向',
         plural: '重定向',
       },
       admin: {
         group: adminLabels.operationsGroup,
+        hidden: hideUnlessAnyPermission('ops:manage', 'pages:manage'),
       },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
@@ -79,12 +89,20 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formOverrides: {
+      // Public read for frontend Form blocks; write gated for Admin list buttons.
+      access: {
+        read: () => true,
+        create: requirePermission('ops:manage'),
+        update: requirePermission('ops:manage'),
+        delete: requirePermission('ops:manage'),
+      },
       labels: {
         singular: '表单',
         plural: '表单',
       },
       admin: {
         group: adminLabels.operationsGroup,
+        hidden: hideUnlessAnyPermission('ops:manage'),
       },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -106,6 +124,13 @@ export const plugins: Plugin[] = [
       },
     },
     formSubmissionOverrides: {
+      // create stays open for public frontend POST; Admin list requires ops:manage to read.
+      access: {
+        create: () => true,
+        read: requirePermission('ops:manage'),
+        update: () => false,
+        delete: requirePermission('ops:manage'),
+      },
       labels: {
         singular: '表单提交',
         plural: '表单提交',
@@ -119,6 +144,12 @@ export const plugins: Plugin[] = [
     collections: ['posts', 'pages', 'jobs', 'galleries'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
+      access: {
+        create: () => false,
+        read: requirePermission('ops:manage'),
+        update: requirePermission('ops:manage'),
+        delete: requirePermission('ops:manage'),
+      },
       labels: {
         singular: '搜索索引',
         plural: '搜索索引',

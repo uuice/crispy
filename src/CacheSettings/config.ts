@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone } from '@/access/anyone'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { DEFAULT_PAGE_REVALIDATE } from '@/frontend-cache/constants'
@@ -16,6 +17,7 @@ export const CacheSettings: GlobalConfig = {
   },
   admin: {
     group: adminLabels.configGroup,
+    hidden: hideUnlessAnyPermission('settings:site'),
   },
   fields: [
     {

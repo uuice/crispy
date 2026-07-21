@@ -1,9 +1,20 @@
 import type { Access, Payload, PayloadRequest } from 'payload'
 
 import { getUserAuthz } from '@/access/authzCache'
-import type { Permission } from '@/access/permissions'
+import { extractRoleSlugs } from '@/access/roles'
+import {
+  type Permission,
+  type SystemRoleSlug,
+  SYSTEM_ROLE_DEFINITIONS,
+} from '@/access/permissions'
 
 type AuthUser = PayloadRequest['user']
+
+/** Shape attached on /me (permissions) or JWT (roles fallback). */
+export type AuthzUserShape = {
+  permissions?: string[] | null
+  roles?: unknown
+} | null | undefined
 
 function resolvePayload(reqOrPayload: PayloadRequest | Payload): Payload {
   if ('payload' in reqOrPayload && reqOrPayload.payload) {
@@ -34,6 +45,36 @@ export async function canAny(
   const req = 'payload' in reqOrPayload ? (reqOrPayload as PayloadRequest) : undefined
   const authz = await getUserAuthz(payload, user.id, req)
   return permissions.some((permission) => authz.permissions.includes(permission))
+}
+
+function permissionsFromRoleSlugs(user: AuthzUserShape): Permission[] {
+  const merged = new Set<Permission>()
+  for (const slug of extractRoleSlugs(user)) {
+    const definition = SYSTEM_ROLE_DEFINITIONS[slug as SystemRoleSlug]
+    if (!definition) continue
+    for (const permission of definition.permissions) merged.add(permission)
+  }
+  return [...merged]
+}
+
+/**
+ * Sync check for Admin UI (e.g. admin.hidden). Prefer /me permissions;
+ * fall back to system role matrices when permissions are not yet attached.
+ */
+export function userHasPermissionSync(user: AuthzUserShape, permission: Permission): boolean {
+  const permissions = user?.permissions
+  if (Array.isArray(permissions) && permissions.length > 0) {
+    return permissions.includes(permission)
+  }
+  return permissionsFromRoleSlugs(user).includes(permission)
+}
+
+export function userHasAnyPermissionSync(
+  user: AuthzUserShape,
+  permissions: Permission[],
+): boolean {
+  if (permissions.length === 0) return false
+  return permissions.some((permission) => userHasPermissionSync(user, permission))
 }
 
 /** Access helper: user must have the given permission. */

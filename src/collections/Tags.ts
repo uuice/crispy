@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
+import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
@@ -19,6 +20,7 @@ export const Tags: CollectionConfig = {
     group: adminLabels.contentGroup,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     useAsTitle: 'title',
+    hidden: hideUnlessAnyPermission('taxonomy:manage'),
   },
   fields: [
     withAiTextField({
