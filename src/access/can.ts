@@ -58,12 +58,13 @@ function permissionsFromRoleSlugs(user: AuthzUserShape): Permission[] {
 }
 
 /**
- * Sync check for Admin UI (e.g. admin.hidden). Prefer /me permissions;
- * fall back to system role matrices when permissions are not yet attached.
+ * Sync check for Admin UI (e.g. admin.hidden). Prefer /me permissions when
+ * attached (including an empty list after roles were stripped). Fall back to
+ * system role matrices only when permissions are not yet on the user object.
  */
 export function userHasPermissionSync(user: AuthzUserShape, permission: Permission): boolean {
   const permissions = user?.permissions
-  if (Array.isArray(permissions) && permissions.length > 0) {
+  if (Array.isArray(permissions)) {
     return permissions.includes(permission)
   }
   return permissionsFromRoleSlugs(user).includes(permission)

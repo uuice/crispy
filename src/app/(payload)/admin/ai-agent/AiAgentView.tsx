@@ -3,10 +3,11 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
+import { canUseAiAgent } from '@/ai/agent/access'
 import { AdminAiAgentChatPanel } from '@/components/AdminAiAgent/AdminAiAgentChatPanel'
 import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
-export function AiAgentView({
+export async function AiAgentView({
   initPageResult,
   params,
   searchParams,
@@ -18,6 +19,14 @@ export function AiAgentView({
     return (
       <Gutter>
         <p>请先登录 Admin 后使用 AI 内容助手。</p>
+      </Gutter>
+    )
+  }
+
+  if (!(await canUseAiAgent(user, req))) {
+    return (
+      <Gutter>
+        <p>当前账号无权使用 AI 内容助手。</p>
       </Gutter>
     )
   }

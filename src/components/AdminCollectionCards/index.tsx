@@ -6,6 +6,7 @@ import { EntityType, getAccessResults, type ClientUser, type StaticLabel, type W
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { AuthzUserShape } from '@/access/can'
 import { isCustomViewEntity, mergeCustomNavIntoGroups } from '@/admin-nav/mergeCustomNavIntoGroups'
 
 import './index.scss'
@@ -30,6 +31,7 @@ export async function AdminCollectionCards(props: WidgetServerProps) {
   const globalData = await getGlobalData(props.req)
   const navGroups = mergeCustomNavIntoGroups(
     getNavGroups(permissions, visibleEntities, payload.config, i18n),
+    user as AuthzUserShape,
   )
 
   return (
