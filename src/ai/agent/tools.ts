@@ -45,6 +45,11 @@ import {
   searchStockImagesForAgent,
 } from '@/ai/agent/stockImages'
 import { bulkAddGalleryImages } from '@/utilities/bulkAddGalleryImages'
+import {
+  formatAgentPermissions,
+  toAgentAuthzContext,
+} from '@/ai/agent/formatPermissions'
+import { getUserAuthz } from '@/access/authzCache'
 
 type AgentGlobalSlug = keyof Config['globals']
 
@@ -116,6 +121,15 @@ export type AgentToolDefinition = {
 }
 
 export const AGENT_TOOLS: AgentToolDefinition[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_my_permissions',
+      description:
+        '返回当前登录用户的角色 slug 与 Permission 列表（来自 authz-cache）。用户询问「我有什么权限/角色」时必须调用；勿臆测。',
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
   {
     type: 'function',
     function: {
@@ -587,6 +601,13 @@ export async function executeAgentTool(
   let result: unknown
 
   switch (toolCall.name) {
+    case 'get_my_permissions': {
+      if (!req.user?.id) throw new Error('Unauthorized')
+      const authz = await getUserAuthz(req.payload, req.user.id, req)
+      result = formatAgentPermissions(toAgentAuthzContext(authz))
+      break
+    }
+
     case 'list_resources':
       result = { collections: AGENT_COLLECTIONS, globals: AGENT_GLOBALS }
       break

@@ -1,13 +1,18 @@
 import { AGENT_COLLECTIONS, AGENT_GLOBALS } from '@/ai/agent/resources'
+import type { AgentAuthzContext } from '@/ai/agent/formatPermissions'
+import { formatAgentPermissionsPromptBlock } from '@/ai/agent/formatPermissions'
 
-export function buildAgentSystemPrompt(): string {
+export function buildAgentSystemPrompt(authz?: AgentAuthzContext): string {
   const collectionList = AGENT_COLLECTIONS.map((c) => `- ${c.slug}（${c.label}）：${c.description}`).join(
     '\n',
   )
   const globalList = AGENT_GLOBALS.map((g) => `- ${g.slug}（${g.label}）：${g.description}`).join('\n')
+  const authzBlock = authz
+    ? `\n${formatAgentPermissionsPromptBlock(authz)}\n`
+    : `\n## 当前用户权限\n- 未知；用户询问权限时必须调用 get_my_permissions，勿臆测。\n`
 
   return `你是 Crispy CMS 后台的全局 AI 助手，帮助管理员查询、创建、修改和删除站点内容。
-
+${authzBlock}
 ## 能力
 - 通过工具调用访问 Payload CMS 的内容资源
 - 支持语义搜索（semantic_search）、查询（find/get）、新增（create）、修改（update）、删除（delete）、恢复（restore_document）
@@ -19,6 +24,7 @@ export function buildAgentSystemPrompt(): string {
 - 可管理 Prompt 模板（prompt-templates）：查询需 catalog:prompts:read；增删改需 catalog:prompts:write；改文案前 get_document
 - 可管理 AI 画布元数据（ai-canvases）：列表/新建空画布/重命名/删除；节点图须引导用户打开 /admin/ai-canvases
 - 密钥类 Catalog / 敏感 Global 写操作按对应 Permission（catalog:secrets、settings:ai|storage|integration|email 等）
+- 查询当前登录用户角色与 Permission：get_my_permissions
 
 ## 可用内容类型
 ${collectionList}
@@ -51,7 +57,7 @@ ${globalList}
 17. 回复使用中文，格式清晰，必要时使用列表或表格
 18. **Prompt 模板（prompt-templates）**：
    - 用户要改字段 AI 润色/SEO 等文案时，用 find_documents(collection=prompt-templates, where.action) 定位，再 get_document 读 systemPrompt/userPrompt
-   - 新建须含 title、action、systemPrompt、userPrompt；enabled 默认 true；可绑 provider（llm-providers id）与 model
+   - 新建须含 title、action、systemPrompt、userPrompt；slug 可自动生成；enabled 默认 true；可绑 provider（llm-providers id）与 model
    - 同 action 多条时运行时取 sort 最小且 enabled 的一条；改完用中文摘要说明变更点
    - 勿把密钥写进 Prompt；provider 只传关系 ID
 19. **AI 画布（ai-canvases）**：
@@ -65,6 +71,7 @@ ${globalList}
    - 批量加图：优先 bulk_add_gallery_images(galleryId, mediaIds)（已在相册中的图会跳过）；单张也可用 create_document(gallery-items, { gallery, image, title? })
    - Unsplash：先 import_stock_image(s) 得到 media id，再 bulk_add_gallery_images；「加入图库」按钮只进 media，不会自动进相册
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
+22. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）

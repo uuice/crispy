@@ -1,5 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
+import { getUserAuthz } from '@/access/authzCache'
+import { toAgentAuthzContext } from '@/ai/agent/formatPermissions'
 import { buildAgentSystemPrompt } from '@/ai/agent/systemPrompt'
 import { trimAgentMessages } from '@/ai/agent/trimMessages'
 import { AGENT_TOOLS, executeAgentTool } from '@/ai/agent/tools'
@@ -31,8 +33,15 @@ export async function* runAiAgentStream(
     return
   }
 
+  if (!req.user?.id) {
+    yield { type: 'error', error: 'Unauthorized' }
+    return
+  }
+
+  const authz = toAgentAuthzContext(await getUserAuthz(req.payload, req.user.id, req))
+
   const conversation: AgentChatMessage[] = [
-    { role: 'system', content: buildAgentSystemPrompt() },
+    { role: 'system', content: buildAgentSystemPrompt(authz) },
     ...trimAgentMessages(userMessages),
   ]
 

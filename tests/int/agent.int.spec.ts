@@ -62,6 +62,24 @@ describe('AI agent', () => {
     expect(schema.fields.some((f) => f.name === 'currentProgress')).toBe(true)
   })
 
+  it('get_my_permissions returns authz for the current user', async () => {
+    const req = await createLocalReq({ user: mockEditor }, payload)
+    const { summary } = await executeAgentTool(req, {
+      id: 'call-perms',
+      name: 'get_my_permissions',
+      arguments: '{}',
+    })
+
+    const result = summary as {
+      roleSlugs: string[]
+      permissions: { value: string; label: string }[]
+    }
+
+    expect(result.roleSlugs).toContain('editor')
+    expect(result.permissions.some((p) => p.value === 'ai:use')).toBe(true)
+    expect(result.permissions.some((p) => p.value === 'users:manage')).toBe(false)
+  })
+
   it('executeAgentTool rejects unsupported collections', async () => {
     const req = await createLocalReq({ user: mockSuperAdmin }, payload)
 
