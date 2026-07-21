@@ -56,13 +56,16 @@ export async function bulkAddGalleryImages(args: {
     return { created: 0, skipped: 0, itemIds: [] }
   }
 
+  // Prefer Payload access when req is present (Admin / Agent). Avoid binding media the user cannot read.
+  const access = args.req
+    ? { req: args.req, overrideAccess: false as const }
+    : { overrideAccess: true as const }
+
   const existing = await args.payload.find({
     collection: 'gallery-items',
     depth: 0,
     limit: 500,
-    overrideAccess: true,
     pagination: false,
-    req: args.req,
     where: {
       and: [
         { gallery: { equals: galleryId } },
@@ -70,6 +73,7 @@ export async function bulkAddGalleryImages(args: {
       ],
     },
     select: { image: true },
+    ...access,
   })
 
   const existingImageIds = new Set(
@@ -82,12 +86,11 @@ export async function bulkAddGalleryImages(args: {
     collection: 'gallery-items',
     depth: 0,
     limit: 1,
-    overrideAccess: true,
     pagination: false,
-    req: args.req,
     sort: '-sort',
     where: { gallery: { equals: galleryId } },
     select: { sort: true },
+    ...access,
   })
   let nextSort = typeof sortBase.docs[0]?.sort === 'number' ? sortBase.docs[0].sort + 1 : 0
 
@@ -107,8 +110,7 @@ export async function bulkAddGalleryImages(args: {
         collection: 'media',
         id: mediaId,
         depth: 0,
-        overrideAccess: true,
-        req: args.req,
+        ...access,
       })
       title = titleFromMedia(media)
     } catch {
@@ -125,9 +127,8 @@ export async function bulkAddGalleryImages(args: {
         sort: nextSort,
         enabled: true,
       },
-      overrideAccess: true,
-      req: args.req,
       context: { skipAuditLog: true },
+      ...access,
     })
     itemIds.push(item.id)
     existingImageIds.add(mediaId)
