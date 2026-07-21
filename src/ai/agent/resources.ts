@@ -150,6 +150,22 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
 export const AGENT_COLLECTION_SLUGS = new Set(AGENT_COLLECTIONS.map((c) => c.slug))
 export const AGENT_GLOBAL_SLUGS = new Set(AGENT_GLOBALS.map((g) => g.slug))
 
+/**
+ * Admin surfaces intentionally out of Agent scope (use Admin UI / dedicated APIs).
+ * Keep in sync with systemPrompt「不可管理」and /admin/dev-docs#permissions.
+ */
+export const AGENT_OUT_OF_SCOPE = [
+  'users',
+  'roles',
+  'authz-cache',
+  'payload-mcp-api-keys',
+  'search',
+  'imports',
+  'exports',
+  'api-access-logs',
+  'document-versions', // Payload versions restore UI — no Agent tool
+] as const
+
 export function isAgentCollection(slug: string): boolean {
   return AGENT_COLLECTION_SLUGS.has(slug)
 }

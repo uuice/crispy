@@ -1961,7 +1961,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           'Globals：settings:* 分权；ai-settings 更新需 settings:ai',
           '前台缓存工具：cache:manage；get_site_stats：stats:read；list_audit_logs：logs:read',
           'payload-query-presets：presets:manage',
-          '不覆盖：users/roles、MCP API Keys、search 索引、imports/exports、api-access-logs、文档版本还原',
+          '不覆盖（永久）：users/roles、MCP API Keys、search 索引、imports/exports、api-access-logs、文档版本还原（见 AGENT_OUT_OF_SCOPE）',
           '代码：src/ai/agent/、src/components/AdminAiAgent/',
         ],
       },
