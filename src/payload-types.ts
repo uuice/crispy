@@ -1757,7 +1757,7 @@ export interface AuthzCache {
   createdAt: string;
 }
 /**
- * AI 内容助手完整会话历史，由聊天 API 自动写入。也可从运营 → AI 内容助手进入。
+ * AI 内容助手完整会话历史，由聊天 API 自动写入。请从运营 → AI 内容助手进入。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ai-chat-sessions".

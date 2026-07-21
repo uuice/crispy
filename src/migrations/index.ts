@@ -33,6 +33,7 @@ import * as migration_20260718_143000_galleries_bulk_images from './20260718_143
 import * as migration_20260718_150000_search_v_rels_galleries from './20260718_150000_search_v_rels_galleries';
 import * as migration_20260719_100000_users_avatar from './20260719_100000_users_avatar';
 import * as migration_20260720_100000_authz_roles from './20260720_100000_authz_roles';
+import * as migration_20260721_104200_users_v_rels from './20260721_104200_users_v_rels';
 
 export const migrations = [
   {
@@ -209,5 +210,10 @@ export const migrations = [
     up: migration_20260720_100000_authz_roles.up,
     down: migration_20260720_100000_authz_roles.down,
     name: '20260720_100000_authz_roles',
+  },
+  {
+    up: migration_20260721_104200_users_v_rels.up,
+    down: migration_20260721_104200_users_v_rels.down,
+    name: '20260721_104200_users_v_rels',
   },
 ];
