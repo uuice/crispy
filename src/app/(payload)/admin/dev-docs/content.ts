@@ -1937,7 +1937,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
           ['get_cache_settings', '读取 cache-settings（开关、TTL、调试 Header）'],
           ['update_cache_settings', '更新 cache-settings（开关、TTL、调试 Header；修改前确认）'],
           ['list_frontend_cache', '缓存 registry 状态、DB 统计、动态路由明细（dynamicRoutes）'],
-          ['purge_frontend_cache', '按 ids / routePaths / expired / all 清除前台 DB 缓存'],
+          ['purge_frontend_cache', '按 ids / routePaths / expired / all 清除；all 须 confirm: true'],
           ['list_query_presets', '列出查询预设；增删改用 create/update/delete_document(payload-query-presets)'],
           ['get_site_stats', '各 Collection 数量统计（需 stats:read）'],
           ['list_audit_logs', '审计日志只读查询（需 logs:read）'],

@@ -48,15 +48,19 @@ export const mcpCustomTools: McpCustomTool[] = [
   {
     name: 'purge_frontend_cache',
     description:
-      '清除前台 DB 页面 HTML 缓存。支持 ids、routePaths、expired: true 或 all: true；内容变更后需手动清除',
+      '清除前台 DB 页面 HTML 缓存。支持 ids、routePaths、expired: true，或 all: true（须同时 confirm: true）；内容变更后需手动清除',
     parameters: {
       ids: z.array(z.string()).optional(),
       routePaths: z.array(z.string()).optional(),
       expired: z.boolean().optional(),
       all: z.boolean().optional(),
+      confirm: z.boolean().optional(),
     },
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
       await assertAgentCacheAccess(req)
+      if (args.all === true && args.confirm !== true) {
+        throw new Error('清空全部前台缓存须传 confirm: true（请先向用户确认）')
+      }
       const result = await purgeFrontendCache({
         all: args.all === true,
         expired: args.expired === true,

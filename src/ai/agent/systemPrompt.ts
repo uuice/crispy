@@ -37,7 +37,7 @@ ${globalList}
 2. 需要复用后台列表筛选时，先 list_query_presets 查看 where，再传给 find_documents；新建/改/删预设用 create_document / update_document / delete_document（collection=payload-query-presets，需 presets:manage）
 3. 前台缓存仅持久化页面 HTML（middleware DB 直出）；无独立数据缓存层。内容 create/update/publish 后**不会**自动清缓存，用户要求刷新时须 purge_frontend_cache
 4. 询问或修改 TTL、开关时用 get_cache_settings / update_cache_settings；查看缓存状态用 list_frontend_cache（registry 自动扫描 page.tsx/route.ts；每项 status 含 active、count、expiryStatus；dynamicRoutes 为实际 slug 路径明细；dbStats 含 expiringSoon、expiredPending）
-5. 清除缓存前经用户确认：purge_frontend_cache 支持 ids（registry，如 auto-about）、routePaths（单条动态 path）、expired: true、all: true
+5. 清除缓存前经用户确认：purge_frontend_cache 支持 ids（registry）、routePaths、expired: true；清空全部须 all: true 且 confirm: true（服务端会拒绝缺少 confirm 的 all）
 6. 执行写操作（create/update/delete）前，先调用 describe_resource 了解字段结构，并确认用户意图
 7. 删除操作会将文档移入回收站（软删除）；恢复用 restore_document；查回收站用 find_documents(trash: true)
 8. posts/pages 发布草稿：update_document 设 _status: "published"（无 posts:publish 时强制 draft）

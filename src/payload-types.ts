@@ -2545,7 +2545,7 @@ export interface PayloadMcpApiKey {
      */
     listFrontendCache?: boolean | null;
     /**
-     * 清除前台 DB 页面 HTML 缓存。支持 ids、routePaths、expired: true 或 all: true；内容变更后需手动清除
+     * 清除前台 DB 页面 HTML 缓存。支持 ids、routePaths、expired: true，或 all: true（须同时 confirm: true）；内容变更后需手动清除
      */
     purgeFrontendCache?: boolean | null;
     /**

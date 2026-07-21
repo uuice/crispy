@@ -7,6 +7,7 @@ import {
   assertAgentGlobalAccess,
   assertAgentStatsAccess,
   canAgentAccessAnyPost,
+  canUseAiAgent,
   ownPostsWhere,
 } from '@/ai/agent/access'
 import { runScopedSemanticContentSearch } from '@/ai/agent/scopeSemanticSearch'
@@ -344,7 +345,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'purge_frontend_cache',
       description:
-        '清除前台 DB 中的页面 HTML 缓存（内容变更不会自动失效，需手动清除）。支持 ids（registry id）、routePaths（具体 path）、expired: true（仅删过期）、或 all: true；操作前应向用户确认',
+        '清除前台 DB 中的页面 HTML 缓存（内容变更不会自动失效，需手动清除）。支持 ids、routePaths、expired: true，或 all: true。清空全部（all）时必须同时传 confirm: true；操作前应向用户确认',
       parameters: {
         type: 'object',
         properties: {
@@ -364,7 +365,11 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
           },
           all: {
             type: 'boolean',
-            description: '为 true 时清空全部 DB 前台缓存',
+            description: '为 true 时清空全部 DB 前台缓存；必须同时传 confirm: true',
+          },
+          confirm: {
+            type: 'boolean',
+            description: 'all: true 时必填且须为 true，表示用户已确认清空全部缓存',
           },
         },
         required: [],
@@ -599,6 +604,9 @@ export async function executeAgentTool(
 
   switch (toolCall.name) {
     case 'get_my_permissions': {
+      if (!(await canUseAiAgent(req.user, req))) {
+        throw new Error('无权使用 AI 助手')
+      }
       if (!req.user?.id) throw new Error('Unauthorized')
       const authz = await getUserAuthz(req.payload, req.user.id, req)
       result = formatAgentPermissions(toAgentAuthzContext(authz))
@@ -606,6 +614,9 @@ export async function executeAgentTool(
     }
 
     case 'list_resources':
+      if (!(await canUseAiAgent(req.user, req))) {
+        throw new Error('无权使用 AI 助手')
+      }
       result = { collections: AGENT_COLLECTIONS, globals: AGENT_GLOBALS }
       break
 
@@ -841,6 +852,9 @@ export async function executeAgentTool(
 
     case 'purge_frontend_cache': {
       await assertAgentCacheAccess(req)
+      if (args.all === true && args.confirm !== true) {
+        throw new Error('清空全部前台缓存须传 confirm: true（请先向用户确认）')
+      }
       result = await purgeFrontendCache({
         all: args.all === true,
         expired: args.expired === true,

@@ -313,6 +313,18 @@ describe('AI agent', () => {
     expect(result.summary.scope).toBe('expired')
   })
 
+  it('purge_frontend_cache all requires confirm:true', async () => {
+    const req = await createLocalReq({ user: mockSuperAdmin }, payload)
+
+    await expect(
+      executeAgentTool(req, {
+        id: 'call-cache-purge-all-denied',
+        name: 'purge_frontend_cache',
+        arguments: JSON.stringify({ all: true }),
+      }),
+    ).rejects.toThrow(/confirm: true/)
+  })
+
   it('get_site_stats returns collection rows', async () => {
     const req = await createLocalReq({ user: mockSuperAdmin }, payload)
     const result = (await executeAgentTool(req, {

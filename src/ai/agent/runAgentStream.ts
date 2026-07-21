@@ -12,7 +12,7 @@ import {
   toOpenAiToolMessages,
 } from '@/ai/providers/openaiCompatible'
 
-const MAX_TOOL_ITERATIONS = 8
+const MAX_TOOL_ITERATIONS = 16
 
 function parseToolArgs(raw: string): Record<string, unknown> {
   try {
@@ -120,5 +120,5 @@ export async function* runAiAgentStream(
     return
   }
 
-  yield { type: 'error', error: '工具调用次数过多，请简化请求后重试' }
+  yield { type: 'error', error: `工具调用轮次过多（最多 ${MAX_TOOL_ITERATIONS} 轮），请拆成更小的步骤后重试` }
 }
