@@ -1,7 +1,5 @@
 import type { CollectionSlug, PayloadRequest, Where } from 'payload'
 
-import type { EmbeddableCollection } from '@/ai/embeddings/constants'
-
 import {
   assertAgentAuditLogAccess,
   assertAgentCacheAccess,
@@ -11,6 +9,7 @@ import {
   canAgentAccessAnyPost,
   ownPostsWhere,
 } from '@/ai/agent/access'
+import { runScopedSemanticContentSearch } from '@/ai/agent/scopeSemanticSearch'
 import {
   describeCollectionSchema,
   describeGlobalSchema,
@@ -24,8 +23,6 @@ import {
 import type { AuditLog, Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
-import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
-import { formatEmbeddingSearchHit } from '@/ai/embeddings/formatEmbeddingSearchHit'
 import {
   prepareCanvasWriteData,
   sanitizeCanvasDocForAgent,
@@ -630,34 +627,20 @@ export async function executeAgentTool(
     case 'semantic_search': {
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
-        ? (args.collections.filter(
-            (c) => c === 'posts' || c === 'pages' || c === 'novels' || c === 'novel-chapters',
-          ) as EmbeddableCollection[])
+        ? args.collections.filter(
+            (c): c is 'posts' | 'pages' | 'novels' | 'novel-chapters' =>
+              c === 'posts' || c === 'pages' || c === 'novels' || c === 'novel-chapters',
+          )
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)
       const status = args.status != null ? String(args.status) : undefined
 
-      const rows = await runSemanticContentSearch(req, query, {
+      result = await runScopedSemanticContentSearch(req, {
+        query,
         collections,
-        limit: limit * 3,
+        limit,
         status,
       })
-
-      const ownPostsOnly = !(await canAgentAccessAnyPost(req))
-      const scoped = []
-      for (const row of rows) {
-        if (ownPostsOnly && row.collection === 'posts') {
-          try {
-            await assertAgentCollectionAccess(req, 'posts', 'read', row.docId)
-          } catch {
-            continue
-          }
-        }
-        scoped.push(row)
-        if (scoped.length >= limit) break
-      }
-
-      result = scoped.map(formatEmbeddingSearchHit)
       break
     }
 

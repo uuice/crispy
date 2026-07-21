@@ -5,12 +5,31 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { ensureSystemRoles } from '@/access/ensureSystemRoles'
 import { assertAgentCollectionAccess } from '@/ai/agent/access'
 import { describeCollectionSchema } from '@/ai/agent/describeResource'
+import { scopeSemanticSearchHits } from '@/ai/agent/scopeSemanticSearch'
 import { executeAgentTool } from '@/ai/agent/tools'
 import type { NovelCategory, NovelTag, User } from '@/payload-types'
 
 let payload: Payload
 let mockSuperAdmin: User
 let mockEditor: User
+let mockAuthor: User
+
+const emptyLexical = {
+  root: {
+    type: 'root',
+    children: [
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'agent ownership test', version: 1 }],
+        version: 1,
+      },
+    ],
+    direction: null,
+    format: '',
+    indent: 0,
+    version: 1,
+  },
+}
 
 describe('AI agent', () => {
   beforeAll(async () => {
@@ -27,13 +46,21 @@ describe('AI agent', () => {
       },
       overrideAccess: true,
     })) as User
-
     mockEditor = (await payload.create({
       collection: 'users',
       data: {
         email: `agent-editor-${stamp}@example.com`,
         password: 'test-password-123456',
         roles: [roleIds.editor],
+      },
+      overrideAccess: true,
+    })) as User
+    mockAuthor = (await payload.create({
+      collection: 'users',
+      data: {
+        email: `agent-author-${stamp}@example.com`,
+        password: 'test-password-123456',
+        roles: [roleIds.author],
       },
       overrideAccess: true,
     })) as User
@@ -319,7 +346,128 @@ describe('AI agent', () => {
         name: 'list_audit_logs',
         arguments: '{}',
       }),
-    ).rejects.toThrow(/审计日志仅超级管理员/)
+    ).rejects.toThrow(/logs:read/)
+  })
+
+  it('author find_documents only returns own posts', async () => {
+    const stamp = Date.now()
+    const own = await payload.create({
+      collection: 'posts',
+      data: {
+        title: `author-own-${stamp}`,
+        slug: `author-own-${stamp}`,
+        _status: 'draft',
+        authors: [mockAuthor.id],
+        content: emptyLexical,
+      },
+      overrideAccess: true,
+    })
+    const other = await payload.create({
+      collection: 'posts',
+      data: {
+        title: `author-other-${stamp}`,
+        slug: `author-other-${stamp}`,
+        _status: 'draft',
+        authors: [mockEditor.id],
+        content: emptyLexical,
+      },
+      overrideAccess: true,
+    })
+
+    const req = await createLocalReq({ user: mockAuthor }, payload)
+    const listed = (await executeAgentTool(req, {
+      id: 'call-author-find',
+      name: 'find_documents',
+      arguments: JSON.stringify({
+        collection: 'posts',
+        where: { slug: { in: [`author-own-${stamp}`, `author-other-${stamp}`] } },
+        limit: 10,
+      }),
+    })) as { summary: { docs: { id: number | string }[] } }
+
+    const ids = listed.summary.docs.map((doc) => doc.id)
+    expect(ids).toContain(own.id)
+    expect(ids).not.toContain(other.id)
+
+    await expect(
+      executeAgentTool(req, {
+        id: 'call-author-get-other',
+        name: 'get_document',
+        arguments: JSON.stringify({ collection: 'posts', id: other.id }),
+      }),
+    ).rejects.toThrow(/只能管理自己创建的文章/)
+
+    await payload.delete({ collection: 'posts', id: own.id, overrideAccess: true })
+    await payload.delete({ collection: 'posts', id: other.id, overrideAccess: true })
+  })
+
+  it('scopeSemanticSearchHits drops posts/pages the author cannot read', async () => {
+    const stamp = Date.now()
+    const ownPost = await payload.create({
+      collection: 'posts',
+      data: {
+        title: `scope-own-${stamp}`,
+        slug: `scope-own-${stamp}`,
+        _status: 'draft',
+        authors: [mockAuthor.id],
+        content: emptyLexical,
+      },
+      overrideAccess: true,
+    })
+    const otherPost = await payload.create({
+      collection: 'posts',
+      data: {
+        title: `scope-other-${stamp}`,
+        slug: `scope-other-${stamp}`,
+        _status: 'draft',
+        authors: [mockEditor.id],
+        content: emptyLexical,
+      },
+      overrideAccess: true,
+    })
+
+    const req = await createLocalReq({ user: mockAuthor }, payload)
+    const scoped = await scopeSemanticSearchHits(
+      req,
+      [
+        {
+          id: 1,
+          collection: 'posts',
+          docId: Number(ownPost.id),
+          title: 'own',
+          slug: `scope-own-${stamp}`,
+          status: 'draft',
+          excerpt: 'own',
+          similarity: 0.9,
+        },
+        {
+          id: 2,
+          collection: 'posts',
+          docId: Number(otherPost.id),
+          title: 'other',
+          slug: `scope-other-${stamp}`,
+          status: 'draft',
+          excerpt: 'other',
+          similarity: 0.8,
+        },
+        {
+          id: 3,
+          collection: 'pages',
+          docId: 999999001,
+          title: 'page',
+          slug: `scope-page-${stamp}`,
+          status: 'draft',
+          excerpt: 'page',
+          similarity: 0.7,
+        },
+      ],
+      10,
+    )
+
+    expect(scoped.map((row) => row.docId)).toEqual([Number(ownPost.id)])
+
+    await payload.delete({ collection: 'posts', id: ownPost.id, overrideAccess: true })
+    await payload.delete({ collection: 'posts', id: otherPost.id, overrideAccess: true })
   })
 
   it('blocks form-submissions create via agent', async () => {

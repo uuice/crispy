@@ -8,9 +8,7 @@ import {
   assertAgentGlobalAccess,
 } from '@/ai/agent/access'
 import { describeCollectionSchema, describeGlobalSchema } from '@/ai/agent/describeResource'
-import { runSemanticContentSearch } from '@/ai/embeddings/semanticSearch'
-import type { EmbeddableCollection } from '@/ai/embeddings/constants'
-import { formatEmbeddingSearchHit } from '@/ai/embeddings/formatEmbeddingSearchHit'
+import { runScopedSemanticContentSearch } from '@/ai/agent/scopeSemanticSearch'
 import {
   getFrontendCacheSettings,
   listFrontendCache,
@@ -151,23 +149,24 @@ export const mcpCustomTools: McpCustomTool[] = [
     handler: async (args: Record<string, unknown>, req: PayloadRequest, _extra: unknown) => {
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
-        ? (args.collections.filter(
-            (c) =>
+        ? args.collections.filter(
+            (c): c is 'posts' | 'pages' | 'novels' | 'novel-chapters' =>
               c === 'posts' ||
               c === 'pages' ||
               c === 'novels' ||
               c === 'novel-chapters',
-          ) as EmbeddableCollection[])
+          )
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)
       const status = args.status != null ? String(args.status) : undefined
 
-      const rows = await runSemanticContentSearch(req, query, {
+      const rows = await runScopedSemanticContentSearch(req, {
+        query,
         collections,
         limit,
         status,
       })
-      return mcpTextResult(rows.map(formatEmbeddingSearchHit))
+      return mcpTextResult(rows)
     },
   },
 ]
