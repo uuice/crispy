@@ -78,7 +78,7 @@ export async function Layout({ children, layoutData }: Props) {
           className="sticky top-0 z-30 flex flex-col border-b"
           style={{ background: 'var(--header-bg)', borderColor: 'var(--border)' }}
         >
-          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <div className="blog-shell mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
             <Link
               className="header-brand font-semibold transition-opacity hover:opacity-80 flex items-center gap-1.5"
               href="/"
@@ -119,7 +119,7 @@ export async function Layout({ children, layoutData }: Props) {
           </div>
         </header>
 
-        <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 md:py-8 flex-1 flex flex-col lg:flex-row gap-8 lg:gap-10">
+        <div className="blog-shell mx-auto w-full px-4 sm:px-6 py-6 md:py-8 flex-1 flex flex-col lg:flex-row gap-8 lg:gap-10">
           <main className="flex-1 min-w-0 page-main" id="main-content">
             {children}
           </main>
@@ -139,7 +139,7 @@ export async function Layout({ children, layoutData }: Props) {
           style={{ background: 'var(--footer-bg)', borderColor: 'var(--border)' }}
         >
           <div
-            className="max-w-6xl mx-auto px-4 sm:px-6"
+            className="blog-shell mx-auto px-4 sm:px-6"
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 'var(--text-xs)',
