@@ -116,13 +116,20 @@ describe('AI agent', () => {
         arguments: '{}',
       })
     ).summary as {
-      groups: { group: string; items: { path: string; type: string; href: string }[] }[]
+      groups: {
+        group: string
+        items: { path: string; type: string; href: string; url: string }[]
+      }[]
     }
 
     const authorPaths = authorMenu.groups.flatMap((g) => g.items.map((i) => i.path))
     expect(authorPaths).toContain('/ai-agent')
     expect(authorPaths).not.toContain('/cache')
     expect(authorPaths).not.toContain('/stats')
+
+    const aiAgent = authorMenu.groups.flatMap((g) => g.items).find((i) => i.path === '/ai-agent')
+    expect(aiAgent?.href).toBe('/admin/ai-agent')
+    expect(aiAgent?.url).toMatch(/\/admin\/ai-agent$/)
 
     const editorReq = await createLocalReq({ user: mockEditor }, payload)
     const editorMenu = (

@@ -7,16 +7,19 @@ import { getUserAuthz } from '@/access/authzCache'
 import { CUSTOM_ADMIN_NAV_ITEMS } from '@/admin-nav/customItems'
 import { isCustomViewEntity, mergeCustomNavIntoGroups } from '@/admin-nav/mergeCustomNavIntoGroups'
 import type { Permission } from '@/access/permissions'
+import { getServerSideURL } from '@/utilities/getURL'
 
 export type AdminMenuItem = {
   type: 'collection' | 'global' | 'custom-view'
   label: string
   /** Collection / Global slug when applicable. */
   slug?: string
-  /** Admin path relative to admin route (e.g. /collections/posts, /ai-agent). */
+  /** Path relative to admin route (e.g. /collections/posts). */
   path: string
-  /** Full Admin href (e.g. /admin/collections/posts). */
+  /** Site-relative Admin href (e.g. /admin/collections/posts). Prefer this in Markdown links. */
   href: string
+  /** Absolute Admin URL (serverURL + href). */
+  url: string
   /** Custom views only: Permission any-of gate (omit = any Admin user). */
   requiredAnyOf?: Permission[]
 }
@@ -31,6 +34,16 @@ function resolveLabel(label: StaticLabel | string, language: string): string {
   return label[language] ?? label.en ?? Object.values(label)[0] ?? ''
 }
 
+function buildAdminLinks(
+  adminRoute: string,
+  serverURL: string,
+  path: `/${string}`,
+): { href: string; url: string } {
+  const href = formatAdminURL({ adminRoute, path })
+  const url = formatAdminURL({ adminRoute, path, serverURL })
+  return { href, url }
+}
+
 /**
  * Build the Admin sidebar menu for the current user (same visibility rules as AdminNav).
  * Attaches authz-cache permissions onto the user so admin.hidden + custom nav anyOf match the UI.
@@ -40,6 +53,7 @@ export async function listAdminMenuForAgent(
   options?: { group?: string },
 ): Promise<{
   adminRoute: string
+  serverURL: string
   groups: AdminMenuGroup[]
   note: string
 }> {
@@ -64,6 +78,7 @@ export async function listAdminMenuForAgent(
   )
 
   const { admin: adminRoute } = req.payload.config.routes
+  const serverURL = getServerSideURL().replace(/\/$/, '')
   const language = req.i18n.language
   const customRequired = new Map(
     CUSTOM_ADMIN_NAV_ITEMS.map((item) => [item.path, item.anyOf] as const),
@@ -84,13 +99,13 @@ export async function listAdminMenuForAgent(
     for (const entity of navGroup.entities) {
       if (isCustomViewEntity(entity)) {
         const path = entity.path
-        const href = formatAdminURL({ adminRoute, path })
+        const links = buildAdminLinks(adminRoute, serverURL, path)
         const requiredAnyOf = customRequired.get(path)
         items.push({
           type: 'custom-view',
           label: entity.label,
           path,
-          href,
+          ...links,
           ...(requiredAnyOf?.length ? { requiredAnyOf } : {}),
         })
         continue
@@ -104,7 +119,7 @@ export async function listAdminMenuForAgent(
           label,
           slug: entity.slug,
           path,
-          href: formatAdminURL({ adminRoute, path }),
+          ...buildAdminLinks(adminRoute, serverURL, path),
         })
         continue
       }
@@ -116,7 +131,7 @@ export async function listAdminMenuForAgent(
           label,
           slug: entity.slug,
           path,
-          href: formatAdminURL({ adminRoute, path }),
+          ...buildAdminLinks(adminRoute, serverURL, path),
         })
       }
     }
@@ -128,7 +143,9 @@ export async function listAdminMenuForAgent(
 
   return {
     adminRoute,
+    serverURL,
     groups,
-    note: '仅返回当前用户可见的 Admin 侧栏入口（已按 Collection/Global access、admin.hidden 与自定义菜单 Permission 过滤）',
+    note:
+      '仅返回当前用户可见入口。回复时必须用 Markdown 链接：[label](href) 或 [label](url)；href 为站内路径（推荐），url 为完整绝对地址。禁止自行拼接域名或省略 /admin。',
   }
 }

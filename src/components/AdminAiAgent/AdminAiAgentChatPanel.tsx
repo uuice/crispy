@@ -30,6 +30,69 @@ function toolLabel(name: string): string {
   return TOOL_LABELS[name] ?? name
 }
 
+/** Render Markdown links and bare http(s) /admin URLs as clickable anchors. */
+function renderMessageContent(content: string): React.ReactNode {
+  const lines = content.split('\n')
+  return lines.map((line, lineIndex) => (
+    <React.Fragment key={lineIndex}>
+      {renderInlineLinks(line)}
+      {lineIndex < lines.length - 1 && <br />}
+    </React.Fragment>
+  ))
+}
+
+function renderInlineLinks(text: string): React.ReactNode[] {
+  // [label](url) | https?://... | /admin/...
+  const pattern =
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)|(https?:\/\/[^\s<]+)|(?<![\w/])(\/admin\/[^\s<),，。；;]+)/g
+  const nodes: React.ReactNode[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  let key = 0
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index))
+    }
+
+    if (match[1] !== undefined && match[2] !== undefined) {
+      const href = match[2]
+      nodes.push(
+        <a
+          className="admin-ai-agent__link"
+          href={href}
+          key={`link-${key++}`}
+          rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          target={href.startsWith('http') ? '_blank' : undefined}
+        >
+          {match[1]}
+        </a>,
+      )
+    } else {
+      const href = (match[3] ?? match[4]) as string
+      nodes.push(
+        <a
+          className="admin-ai-agent__link"
+          href={href}
+          key={`link-${key++}`}
+          rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          target={href.startsWith('http') ? '_blank' : undefined}
+        >
+          {href}
+        </a>,
+      )
+    }
+
+    lastIndex = match.index + match[0].length
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex))
+  }
+
+  return nodes.length > 0 ? nodes : [text]
+}
+
 type ChatPanelProps = {
   variant?: 'widget' | 'page'
   onClose?: () => void
@@ -294,14 +357,7 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
         )
       })}
       {message.content && (
-        <div className="admin-ai-agent__bubble">
-          {message.content.split('\n').map((line, i, arr) => (
-            <React.Fragment key={i}>
-              {line}
-              {i < arr.length - 1 && <br />}
-            </React.Fragment>
-          ))}
-        </div>
+        <div className="admin-ai-agent__bubble">{renderMessageContent(message.content)}</div>
       )}
       {message.loading && !message.content && (
         <div className="admin-ai-agent__bubble admin-ai-agent__bubble--loading">

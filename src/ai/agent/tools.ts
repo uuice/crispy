@@ -134,7 +134,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'list_admin_menu',
       description:
-        '返回当前用户可见的 Admin 侧栏菜单（Collections / Globals / 自定义页面），已按权限过滤；用户询问「后台有哪些菜单/入口/在哪打开某功能」时调用。勿臆测不可见入口。',
+        '返回当前用户可见的 Admin 侧栏菜单（Collections / Globals / 自定义页面），已按权限过滤。每项含 label、href（站内如 /admin/collections/links）、url（绝对地址）。回复时用 Markdown [label](href)；勿臆测不可见入口、勿自行拼域名。',
       parameters: {
         type: 'object',
         properties: {

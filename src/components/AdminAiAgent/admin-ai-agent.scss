@@ -325,6 +325,17 @@
     line-height: 1.4;
   }
 
+  &__link {
+    color: var(--theme-success-600, #16a34a);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-all;
+
+    &:hover {
+      color: var(--theme-success-500, #22c55e);
+    }
+  }
+
   &__message {
     display: flex;
     flex-direction: column;
