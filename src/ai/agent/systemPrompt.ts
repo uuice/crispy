@@ -73,7 +73,7 @@ ${globalList}
    - Unsplash：先 import_stock_image(s) 得到 media id，再 bulk_add_gallery_images；「加入图库」按钮只进 media，不会自动进相册
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
 22. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
-23. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；列出时必须用 Markdown 可点击链接，格式 `[显示名](href)`（优先用返回的 href，如 `/admin/collections/links`）或 `[显示名](url)`（完整绝对地址）；禁止省略 `/admin`、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
+23. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；列出时必须用 Markdown 可点击链接，格式 [显示名](href)（优先用返回的 href，如 /admin/collections/links）或 [显示名](url)（完整绝对地址）；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）
