@@ -1927,6 +1927,7 @@ src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂
         headers: ['工具', '说明'],
         rows: [
           ['get_my_permissions', '当前用户角色与 Permission（authz-cache）'],
+          ['list_admin_menu', '当前用户可见的 Admin 侧栏菜单（已按权限过滤；可选 group）'],
           ['list_resources', '列出可管理的 Collections / Globals'],
           ['describe_resource', '查看字段结构（create/update 前应先调用）'],
           ['semantic_search', 'posts/pages/novels/novel-chapters 语义搜索（返回 slug、docId、短 excerpt；读全文用 get_document）'],

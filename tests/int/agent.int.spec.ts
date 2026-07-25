@@ -107,6 +107,40 @@ describe('AI agent', () => {
     expect(result.permissions.some((p) => p.value === 'users:manage')).toBe(false)
   })
 
+  it('list_admin_menu returns permission-filtered sidebar entries', async () => {
+    const authorReq = await createLocalReq({ user: mockAuthor }, payload)
+    const authorMenu = (
+      await executeAgentTool(authorReq, {
+        id: 'call-menu-author',
+        name: 'list_admin_menu',
+        arguments: '{}',
+      })
+    ).summary as {
+      groups: { group: string; items: { path: string; type: string; href: string }[] }[]
+    }
+
+    const authorPaths = authorMenu.groups.flatMap((g) => g.items.map((i) => i.path))
+    expect(authorPaths).toContain('/ai-agent')
+    expect(authorPaths).not.toContain('/cache')
+    expect(authorPaths).not.toContain('/stats')
+
+    const editorReq = await createLocalReq({ user: mockEditor }, payload)
+    const editorMenu = (
+      await executeAgentTool(editorReq, {
+        id: 'call-menu-editor',
+        name: 'list_admin_menu',
+        arguments: JSON.stringify({ group: '配置' }),
+      })
+    ).summary as {
+      groups: { group: string; items: { path: string }[] }[]
+    }
+
+    expect(editorMenu.groups.length).toBeGreaterThan(0)
+    expect(editorMenu.groups.every((g) => g.group.includes('配置'))).toBe(true)
+    const editorPaths = editorMenu.groups.flatMap((g) => g.items.map((i) => i.path))
+    expect(editorPaths).toContain('/cache')
+  })
+
   it('executeAgentTool rejects unsupported collections', async () => {
     const req = await createLocalReq({ user: mockSuperAdmin }, payload)
 

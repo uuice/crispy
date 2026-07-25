@@ -316,6 +316,15 @@
     }
   }
 
+  &__error {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--theme-error-100, #fee2e2);
+    color: var(--theme-error-600, #dc2626);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
   &__message {
     display: flex;
     flex-direction: column;

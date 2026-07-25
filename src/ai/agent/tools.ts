@@ -47,6 +47,7 @@ import {
   formatAgentPermissions,
   toAgentAuthzContext,
 } from '@/ai/agent/formatPermissions'
+import { listAdminMenuForAgent } from '@/ai/agent/listAdminMenu'
 import { getUserAuthz } from '@/access/authzCache'
 
 type AgentGlobalSlug = keyof Config['globals']
@@ -126,6 +127,24 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
       description:
         '返回当前登录用户的角色 slug 与 Permission 列表（来自 authz-cache）。用户询问「我有什么权限/角色」时必须调用；勿臆测。',
       parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'list_admin_menu',
+      description:
+        '返回当前用户可见的 Admin 侧栏菜单（Collections / Globals / 自定义页面），已按权限过滤；用户询问「后台有哪些菜单/入口/在哪打开某功能」时调用。勿臆测不可见入口。',
+      parameters: {
+        type: 'object',
+        properties: {
+          group: {
+            type: 'string',
+            description: '可选，按导航分组名模糊过滤（如 内容、运营、配置、开发）',
+          },
+        },
+        required: [],
+      },
     },
   },
   {
@@ -610,6 +629,15 @@ export async function executeAgentTool(
       if (!req.user?.id) throw new Error('Unauthorized')
       const authz = await getUserAuthz(req.payload, req.user.id, req)
       result = formatAgentPermissions(toAgentAuthzContext(authz))
+      break
+    }
+
+    case 'list_admin_menu': {
+      if (!(await canUseAiAgent(req.user, req))) {
+        throw new Error('无权使用 AI 助手')
+      }
+      const group = typeof args.group === 'string' ? args.group : undefined
+      result = await listAdminMenuForAgent(req, { group })
       break
     }
 

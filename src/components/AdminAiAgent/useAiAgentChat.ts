@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from '@payloadcms/ui'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { AgentChatMessage } from '@/ai/agent/types'
-import type { AiChatSessionSummary, StoredAgentMessage } from '@/ai/agent/sessionTypes'
+import type { AiChatSessionSummary } from '@/ai/agent/sessionTypes'
 import { storedMessageToDisplay } from '@/ai/agent/sessionTypes'
 
 import { consumeAgentStream } from './consumeAgentStream'
@@ -44,34 +45,57 @@ function formatSessionTime(iso: string): string {
 }
 
 export function useAiAgentChat() {
+  const { user } = useAuth()
+  const userId = user?.id ?? null
   const [messages, setMessages] = useState<AgentDisplayMessage[]>([])
   const [sessionId, setSessionId] = useState<string | number | null>(null)
   const [sessions, setSessions] = useState<AiChatSessionSummary[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingSession, setIsLoadingSession] = useState(false)
   const [isLoadingSessions, setIsLoadingSessions] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /** Avoid treating a failed pre-login fetch as a successful empty list. */
+  const sessionsFetchedForUserRef = useRef<string | number | null>(null)
 
   const refreshSessions = useCallback(async () => {
+    if (!userId) {
+      setSessions([])
+      sessionsFetchedForUserRef.current = null
+      return
+    }
+
     setIsLoadingSessions(true)
     try {
       const res = await fetch('/api/ai/agent/sessions', { credentials: 'include' })
-      if (!res.ok) return
+      if (!res.ok) {
+        // Keep previous list on transient errors after a successful fetch.
+        if (sessionsFetchedForUserRef.current !== userId) {
+          setSessions([])
+        }
+        return
+      }
       const data = (await res.json()) as { sessions: AiChatSessionSummary[] }
       setSessions(data.sessions ?? [])
+      sessionsFetchedForUserRef.current = userId
     } catch {
-      // ignore list errors
+      if (sessionsFetchedForUserRef.current !== userId) {
+        setSessions([])
+      }
     } finally {
       setIsLoadingSessions(false)
     }
-  }, [])
+  }, [userId])
 
+  // Providers mount on the login page too; re-fetch once auth user is available.
   useEffect(() => {
     void refreshSessions()
   }, [refreshSessions])
 
   const loadSession = useCallback(async (id: string | number) => {
     setError(null)
-    setIsLoading(true)
+    setIsLoadingSession(true)
+    setMessages([])
+    setSessionId(id)
     try {
       const res = await fetch(`/api/ai/agent/sessions/${id}`, { credentials: 'include' })
       if (!res.ok) {
@@ -84,8 +108,9 @@ export function useAiAgentChat() {
       setMessages(data.session.messages.map((m) => storedMessageToDisplay(m)))
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载会话失败')
+      setMessages([])
     } finally {
-      setIsLoading(false)
+      setIsLoadingSession(false)
     }
   }, [])
 
@@ -104,7 +129,7 @@ export function useAiAgentChat() {
       if (!res.ok) {
         throw new Error('删除会话失败')
       }
-      if (sessionId === id) {
+      if (String(sessionId) === String(id)) {
         startNewSession()
       }
       await refreshSessions()
@@ -216,6 +241,7 @@ export function useAiAgentChat() {
     sessionId,
     sessions,
     isLoading,
+    isLoadingSession,
     isLoadingSessions,
     error,
     sendMessage,

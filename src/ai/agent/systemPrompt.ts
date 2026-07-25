@@ -25,6 +25,7 @@ ${authzBlock}
 - 可管理 AI 画布元数据（ai-canvases）：列表/新建空画布/重命名/删除；节点图须引导用户打开 /admin/ai-canvases
 - 密钥类 Catalog / 敏感 Global 写操作按对应 Permission（catalog:secrets、settings:ai|storage|integration|email 等）
 - 查询当前登录用户角色与 Permission：get_my_permissions
+- 查询当前用户可见的后台侧栏菜单（含自定义页面路径）：list_admin_menu
 
 ## 可用内容类型
 ${collectionList}
@@ -72,6 +73,7 @@ ${globalList}
    - Unsplash：先 import_stock_image(s) 得到 media id，再 bulk_add_gallery_images；「加入图库」按钮只进 media，不会自动进相册
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
 22. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
+23. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；只陈述返回的可见项与 href，勿编造无权限入口；与 list_resources（Agent 可管资源）不同
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）

@@ -41,22 +41,38 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
     sessionId,
     sessions,
     isLoading,
+    isLoadingSession,
     isLoadingSessions,
+    error,
     sendMessage,
     loadSession,
     startNewSession,
     deleteSession,
+    refreshSessions,
     formatSessionTime,
   } = useAdminAiAgent()
   const [input, setInput] = useState('')
   const [showHistory, setShowHistory] = useState(variant === 'page')
   const listRef = useRef<HTMLDivElement>(null)
+  const prevShowHistoryRef = useRef(false)
 
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
   }, [messages])
+
+  // Reload session list when history sidebar becomes visible (page mount or widget toggle).
+  useEffect(() => {
+    if (!showHistory) {
+      prevShowHistoryRef.current = false
+      return
+    }
+    if (variant === 'page' || !prevShowHistoryRef.current) {
+      void refreshSessions()
+    }
+    prevShowHistoryRef.current = true
+  }, [showHistory, variant, refreshSessions])
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
@@ -118,8 +134,11 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
               <button
                 key={String(session.id)}
                 className={`admin-ai-agent-sidebar__item${
-                  sessionId === session.id ? ' admin-ai-agent-sidebar__item--active' : ''
+                  String(sessionId) === String(session.id)
+                    ? ' admin-ai-agent-sidebar__item--active'
+                    : ''
                 }`}
+                disabled={isLoading || isLoadingSession}
                 onClick={() => void loadSession(session.id)}
                 type="button"
               >
@@ -181,7 +200,15 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
         </header>
 
         <div ref={listRef} className="admin-ai-agent__messages">
-          {messages.length === 0 && (
+          {error && <div className="admin-ai-agent__error">{error}</div>}
+
+          {isLoadingSession && messages.length === 0 && (
+            <div className="admin-ai-agent__empty">
+              <p>正在加载历史会话…</p>
+            </div>
+          )}
+
+          {!isLoadingSession && messages.length === 0 && (
             <div className="admin-ai-agent__empty">
               <p>你好！我是 Crispy CMS 的全局 AI 助手。</p>
               <p>对话会自动保存，可在左侧查看历史会话。</p>
