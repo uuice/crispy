@@ -1469,7 +1469,7 @@ export interface AppConfig {
   valueNumber?: number | null;
   valueBoolean?: boolean | null;
   /**
-   * 合法 JSON 字符串，如 {"foo": "bar"} 或 ["a","b"]
+   * 合法 JSON（打开/保存时自动格式化）
    */
   valueJson?: string | null;
   enabled?: boolean | null;

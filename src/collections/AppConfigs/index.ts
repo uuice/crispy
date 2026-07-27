@@ -3,6 +3,18 @@ import type { CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 
+function prettyPrintJson(raw: unknown): string | unknown {
+  if (typeof raw !== 'string') return raw
+  const trimmed = raw.trim()
+  if (!trimmed) return raw
+
+  try {
+    return JSON.stringify(JSON.parse(trimmed), null, 2)
+  } catch {
+    return raw
+  }
+}
+
 export const AppConfigs: CollectionConfig = {
   slug: 'app-configs',
   labels: adminLabels.appConfigs,
@@ -19,6 +31,24 @@ export const AppConfigs: CollectionConfig = {
     description: '键值型应用配置，供运行时通过 src/config/resolve.ts 读取。',
   },
   defaultSort: 'category',
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        if (doc?.valueType === 'json') {
+          doc.valueJson = prettyPrintJson(doc.valueJson) as string
+        }
+        return doc
+      },
+    ],
+    beforeChange: [
+      ({ data }) => {
+        if (data?.valueType === 'json') {
+          data.valueJson = prettyPrintJson(data.valueJson) as string
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     {
       type: 'row',
@@ -108,11 +138,26 @@ export const AppConfigs: CollectionConfig = {
     },
     {
       name: 'valueJson',
-      type: 'textarea',
+      type: 'code',
       label: adminLabels.configValue,
       admin: {
+        language: 'json',
         condition: (_, siblingData) => siblingData?.valueType === 'json',
-        description: '合法 JSON 字符串，如 {"foo": "bar"} 或 ["a","b"]',
+        description: '合法 JSON（打开/保存时自动格式化）',
+        editorOptions: {
+          lineNumbers: 'on',
+          minimap: { enabled: false },
+        },
+      },
+      validate: (value) => {
+        if (value == null || value === '') return true
+        if (typeof value !== 'string') return 'JSON 必须是字符串'
+        try {
+          JSON.parse(value)
+          return true
+        } catch {
+          return '不是合法 JSON'
+        }
       },
     },
     {
