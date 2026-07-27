@@ -201,10 +201,10 @@ export const plugins: Plugin[] = [
       'payload-query-presets': { enabled: true },
       'app-configs': {
         enabled: {
-          create: false,
+          create: true,
           delete: false,
           find: true,
-          update: false,
+          update: true,
         },
       },
       'llm-providers': {

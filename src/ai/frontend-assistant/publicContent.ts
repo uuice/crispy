@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import navigationData from '@/data/navigationWebsiteData.json'
+import { loadNavigationsPageData } from '@/navigations/loadNavigationsPageData'
 import {
   queryGalleries,
   queryJobs,
@@ -135,7 +135,7 @@ const SECTION_PAGES: PublicContentHit[] = [
 export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]> => {
   const payload = await getPayload({ config: configPromise })
 
-  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleries, novelsResult, novelChaptersResult, novelCategoriesResult, novelTagsResult] =
+  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleries, novelsResult, novelChaptersResult, novelCategoriesResult, novelTagsResult, navigation] =
     await Promise.all([
     queryPosts(),
     payload.find({
@@ -191,6 +191,7 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
       select: { title: true, slug: true, description: true },
       sort: 'title',
     }),
+    loadNavigationsPageData(),
   ])
 
   const records: PublicContentHit[] = [...SECTION_PAGES]
@@ -360,14 +361,7 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     })
   }
 
-  const navCategories = (navigationData as { categories: Array<{
-    id: string
-    name: string
-    description?: string
-    websites: Array<{ id: string; title: string; description?: string; url: string }>
-  }> }).categories
-
-  for (const category of navCategories) {
+  for (const category of navigation.categories) {
     for (const site of category.websites) {
       records.push({
         type: 'navigation',

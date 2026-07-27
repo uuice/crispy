@@ -2384,6 +2384,14 @@ export interface PayloadMcpApiKey {
      * Allow clients to find app-configs.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create app-configs.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update app-configs.
+     */
+    update?: boolean | null;
   };
   llmProviders?: {
     /**
@@ -4227,6 +4235,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
       };
   llmProviders?:
     | T
