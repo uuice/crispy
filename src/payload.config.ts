@@ -143,6 +143,10 @@ export default buildConfig({
     },
   },
   i18n: i18nConfig,
+  // Roles.permissions select values use ":" (e.g. posts:create), which are invalid GraphQL enum names.
+  graphQL: {
+    disable: true,
+  },
   queryPresets: {
     access: {
       create: requirePermission('presets:manage'),
