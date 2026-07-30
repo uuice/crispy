@@ -8,12 +8,7 @@ export DATABASE_DRIVER=postgres
 export DATABASE_URL="${DATABASE_URL:-postgresql://crispy:crispy@127.0.0.1:5432/crispy}"
 export PAYLOAD_SECRET="${PAYLOAD_SECRET:-dev-migration-secret}"
 
-# migrate:create requires Node 22 (Node 24 + tsx may fail); CI uses node 22
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env)"
-  fnm use 22 2>/dev/null || fnm install 22 && fnm use 22
-fi
-
+# tsx is pinned to 4.21.0 (package.json pnpm.overrides) so migrate:create works on Node 20/22/24.
 echo "→ Starting PostgreSQL (docker compose)…"
 docker compose up -d --wait
 

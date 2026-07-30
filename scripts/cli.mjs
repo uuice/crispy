@@ -150,8 +150,8 @@ const GROUPS = {
       },
       {
         id: 'create',
-        summary: '新建 Postgres 迁移（需 Docker PG + Node 22）',
-        note: 'SQLite 不可用；参数：迁移名称。例：pnpm cli db:create add_foo',
+        summary: '新建 Postgres 迁移（需 Docker PG）',
+        note: 'SQLite 不可用；tsx 已 pin 4.21.0，Node 20/22/24 均可。例：pnpm cli db:create add_foo',
         run: (args) => bashScript('migrate-create.sh', args),
       },
       {
@@ -352,13 +352,43 @@ const GROUPS = {
     ],
   },
   util: {
-    title: '工具',
+    title: '工具与运维脚本',
     commands: [
       {
         id: 'payload',
         summary: '透传 payload 子命令',
-        note: '例：pnpm cli util:payload migrate:create foo',
+        note: '例：pnpm cli util:payload migrate:status。新建迁移请用 db:create（会设 PG 环境）。',
         run: (args) => payload(args),
+      },
+      {
+        id: 'bootstrap-seed',
+        summary: '空库建超管并 seed',
+        note: '生产/新库一次性：无用户时创建 admin@example.com，再跑 seed。',
+        run: () => tsxScript('bootstrap-and-seed.ts'),
+      },
+      {
+        id: 'repair-authz',
+        summary: '重建系统角色并回填 authz-cache',
+        note: '权限漂移或 Roles 变更后运行。',
+        run: () => tsxScript('repair-authz.ts'),
+      },
+      {
+        id: 'check-version-tables',
+        summary: '检查 drafts/versions 的 _v 表完整性',
+        note: 'Admin 列表 latest=true 异常时排查用。',
+        run: () => tsxScript('check-version-tables.ts'),
+      },
+      {
+        id: 'sync-oss-sizes',
+        summary: '回填 Media OSS 虚拟尺寸 URL',
+        note: '需已启用 S3 + virtualSizes；只处理图片。',
+        run: () => tsxScript('sync-oss-media-sizes.ts'),
+      },
+      {
+        id: 'test-oss',
+        summary: '探测 Active 存储目标 OSS 连通性',
+        note: '读 .data/storage-runtime.json；不写业务数据（会试 Put 测写权限）。',
+        run: () => tsxScript('test-oss.ts'),
       },
       {
         id: 'install',
@@ -494,6 +524,7 @@ Crispy CLI — 统一开发命令入口
   pnpm cli db:migrate              跑迁移
   pnpm cli generate:types          更新 payload-types
   pnpm cli quality:ci              本地 CI
+  pnpm cli util:repair-authz       运维：权限缓存修复
 `)
 
   for (const [groupKey, group] of Object.entries(GROUPS)) {

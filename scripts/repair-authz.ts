@@ -1,3 +1,8 @@
+/**
+ * Ensure system roles exist and recompute all user authz-cache rows.
+ *
+ * Usage: pnpm cli util:repair-authz
+ */
 import 'dotenv/config'
 import { getPayload } from 'payload'
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { formatDateTime } from 'src/utilities/formatDateTime'
+import { formatDateTime } from '@/utilities/formatDateTime'
 import React from 'react'
 
 import type { Post } from '@/payload-types'

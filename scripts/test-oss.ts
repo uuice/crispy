@@ -1,6 +1,8 @@
 /**
- * One-off OSS connectivity test. Usage: pnpm exec tsx scripts/test-oss.ts
+ * One-off OSS connectivity test.
  * Reads Admin Active storage from .data/storage-runtime.json.
+ *
+ * Usage: pnpm cli util:test-oss
  */
 import 'dotenv/config'
 import { createRequire } from 'node:module'

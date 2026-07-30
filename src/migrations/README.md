@@ -6,7 +6,7 @@ SQLite local dev does not use this folder.
 
 ## Create the initial migration (once)
 
-Requires **Docker** (Postgres) and **Node 22** (`migrate:create` fails on Node 24 with tsx).
+Requires **Docker** (Postgres). `migrate:create` works on Node 20/22/24 because this repo pins `tsx@4.21.0` via `pnpm.overrides` (avoids Node 24 + tsx≥4.21.1 `node:crypto` ENOENT; see Payload [#16949](https://github.com/payloadcms/payload/issues/16949)).
 
 ```bash
 pnpm cli db:docker-up
@@ -40,7 +40,7 @@ pnpm cli db:create my_change_name
 pnpm cli db:migrate
 ```
 
-The `db:create` command auto-sets Postgres env, starts Docker if needed, and prefers Node 22.
+The `db:create` command auto-sets Postgres env and starts Docker if needed.
 
 Commit new files under `src/migrations/`.
 

@@ -19,21 +19,8 @@ if [[ ! "$DATABASE_URL" =~ ^postgres(ql)?:// ]]; then
   exit 1
 fi
 
-# Node 24 + tsx may fail with ENOENT on node:crypto; prefer Node 22 when available.
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env)"
-  fnm use 22 2>/dev/null || fnm install 22 && fnm use 22
-elif command -v nvm >/dev/null 2>&1; then
-  # shellcheck disable=SC1090
-  source "$NVM_DIR/nvm.sh" 2>/dev/null || source "$HOME/.nvm/nvm.sh"
-  nvm use 22 2>/dev/null || true
-fi
-
-NODE_MAJOR="$(node -p "process.version.slice(1).split('.')[0]")"
-if [[ "$NODE_MAJOR" -ge 24 ]]; then
-  echo "Warning: Node $(node -v) may fail migrate:create. Use Node 22 if you see node:crypto errors." >&2
-fi
-
+# Node 24 + tsx≥4.21.1 can hit ENOENT on node:crypto (Payload #16949 / tsx #801).
+# Crispy pins tsx@4.21.0 via pnpm.overrides so Node 20/22/24 all work for migrate:create.
 if ! command -v docker >/dev/null 2>&1; then
   echo "Warning: Docker not found. Ensure PostgreSQL is reachable at DATABASE_URL." >&2
 else

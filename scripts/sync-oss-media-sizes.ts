@@ -1,6 +1,7 @@
 /**
  * Backfill OSS virtual size URLs for existing media rows (images only).
- * Usage: pnpm exec tsx scripts/sync-oss-media-sizes.ts
+ *
+ * Usage: pnpm cli util:sync-oss-sizes
  */
 import { getPayload } from 'payload'
 

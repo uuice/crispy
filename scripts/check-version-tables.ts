@@ -1,3 +1,8 @@
+/**
+ * Check draft/version `_v` table integrity for Admin list (latest=true) paths.
+ *
+ * Usage: pnpm cli util:check-version-tables
+ */
 import 'dotenv/config'
 
 import { getPayload } from 'payload'

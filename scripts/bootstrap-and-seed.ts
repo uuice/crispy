@@ -1,6 +1,8 @@
 /**
  * Bootstrap first super-admin (if empty DB) then run seed.
  * One-off helper for fresh migrate on production.
+ *
+ * Usage: pnpm cli util:bootstrap-seed
  */
 import 'dotenv/config'
 import { createLocalReq, getPayload } from 'payload'

@@ -121,9 +121,12 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | `pnpm cli dev:dev` | 开发服务器（3333） |
 | `pnpm cli dev:build` | 生产构建 |
 | `pnpm cli db:migrate` | Postgres 迁移（生产必跑） |
-| `pnpm cli db:create <name>` | 新建迁移（需 Node 22 + Postgres） |
+| `pnpm cli db:create <name>` | 新建迁移（需 Postgres；tsx 已 pin，Node 20/22/24 均可） |
 | `pnpm cli generate:types` | 生成 `payload-types.ts` |
 | `pnpm cli quality:ci` | lint + tsc + test + build |
+| `pnpm cli util:repair-authz` | 重建系统角色 / authz-cache |
+| `pnpm cli util:sync-oss-sizes` | 回填 Media OSS 虚拟尺寸 |
+| `pnpm cli util:test-oss` | 探测 Active OSS 连通性 |
 
 ## MCP
 
