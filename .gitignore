@@ -29,3 +29,8 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Go crispy CLI binaries
+tools/crispy-cli/crispy
+tools/crispy-cli/crispy-*
+tools/crispy-cli/dist/
