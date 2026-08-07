@@ -26,7 +26,7 @@ const GROUPS = {
       {
         id: 'build',
         summary: '编译主题 CSS + Next 生产构建',
-        note: 'build 前自动跑 theme CSS；build 后自动生成 sitemap。',
+        note: 'build 前自动跑 theme CSS + 第三方许可证；build 后自动生成 sitemap。',
         run: async () => {
           await runChain([
             () => nodeScript('build-theme-css.mjs'),
@@ -450,6 +450,19 @@ function pnpmExec(args, env = {}) {
 }
 
 function runProductionBuild(env = {}) {
+  // Generate before next build so public/ is copied into standalone output.
+  pnpmExec(
+    [
+      'generate-license-file',
+      '--input',
+      'package.json',
+      '--output',
+      'public/THIRD-PARTY-NOTICES.txt',
+      '--overwrite',
+      '--ci',
+    ],
+    env,
+  )
   pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', 'next', 'build'], env)
   pnpmExec(['next-sitemap', '--config', 'next-sitemap.config.cjs'], env)
 }
