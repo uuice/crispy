@@ -329,6 +329,14 @@ const GROUPS = {
                 '.',
               ]),
             () => pnpmExec(['tsc', '--noEmit']),
+            // Fresh CI DB avoids stale SQLite schemas after Payload upgrades.
+            () => {
+              console.log('→ Removing .data/ci-payload.db before schema push...')
+              rmRf('.data/ci-payload.db')
+              rmRf('.data/ci-payload.db-journal')
+              rmRf('.data/ci-payload.db-wal')
+              rmRf('.data/ci-payload.db-shm')
+            },
             // Warm SQLite schema once before int tests.
             () => tsxScript('push-dev-schema.ts', [], ciEnv),
             () =>

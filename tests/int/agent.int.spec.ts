@@ -25,7 +25,7 @@ const emptyLexical = {
       },
     ],
     direction: null,
-    format: '',
+    format: '' as const,
     indent: 0,
     version: 1,
   },
