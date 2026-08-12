@@ -114,6 +114,37 @@ describe('frontend cache', () => {
     expect(match?.htmlBytes).toBeGreaterThan(0)
   })
 
+  it('keeps distinct HTML for paginated query variants', async () => {
+    await storeRouteHtmlCache({
+      routePath: '/posts',
+      html: '<html><body>page-1</body></html>',
+      ttlSeconds: 600,
+      cachingEnabled: true,
+    })
+    await storeRouteHtmlCache({
+      routePath: '/posts?page=2',
+      html: '<html><body>page-2</body></html>',
+      ttlSeconds: 600,
+      cachingEnabled: true,
+    })
+
+    const page1 = await resolveRouteCacheFromDb({
+      routePath: '/posts',
+      ttlSeconds: 600,
+      cachingEnabled: true,
+      bypass: false,
+    })
+    const page2 = await resolveRouteCacheFromDb({
+      routePath: '/posts?page=2',
+      ttlSeconds: 600,
+      cachingEnabled: true,
+      bypass: false,
+    })
+
+    expect(page1.html).toContain('page-1')
+    expect(page2.html).toContain('page-2')
+  })
+
   it('purges route entries by pattern', async () => {
     await storeRouteHtmlCache({
       routePath: '/posts/pattern-purge-a',

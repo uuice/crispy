@@ -15,6 +15,7 @@ import {
   isFrontendDocumentRequest,
   shouldBypassFrontendCache,
 } from '@/frontend-cache/middlewareCache'
+import { buildRouteCachePath } from '@/frontend-cache/routeCachePath'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import {
   canUseThemePreview,
@@ -149,7 +150,7 @@ async function resolveRouteCacheViaApi(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          routePath: request.nextUrl.pathname,
+          routePath: buildRouteCachePath(request.nextUrl.pathname, request.nextUrl.search),
           ttlSeconds: settings.pageRevalidateSeconds,
           cachingEnabled: settings.cachingEnabled,
           bypass,
@@ -239,7 +240,7 @@ async function captureAndStoreRouteHtml(
           [CRISPY_CACHE_INTERNAL_HEADER]: secret,
         },
         body: JSON.stringify({
-          routePath: request.nextUrl.pathname,
+          routePath: buildRouteCachePath(request.nextUrl.pathname, request.nextUrl.search),
           html,
           contentType: pageResponse.headers.get('content-type') ?? 'text/html; charset=utf-8',
           statusCode: pageResponse.status,

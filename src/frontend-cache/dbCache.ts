@@ -10,6 +10,7 @@ import {
   isDynamicRoutePath,
   matchRoutePattern,
 } from '@/frontend-cache/routePatterns'
+import { routeCachePathname } from '@/frontend-cache/routeCachePath'
 
 type CacheKind = 'route'
 
@@ -235,6 +236,7 @@ export async function purgeExpiredCacheEntries(): Promise<number> {
 
 export async function purgeDbCacheByRoutePath(routePath: string): Promise<number> {
   const payload = await getPayload({ config: configPromise })
+  const pathname = routeCachePathname(routePath)
 
   const result = await payload.delete({
     collection: FRONTEND_CACHE_ENTRIES_SLUG,
@@ -242,7 +244,12 @@ export async function purgeDbCacheByRoutePath(routePath: string): Promise<number
     where: {
       or: [
         { routePath: { equals: routePath } },
+        { routePath: { equals: pathname } },
         { cacheKey: { equals: routeCacheKey(routePath) } },
+        { cacheKey: { equals: routeCacheKey(pathname) } },
+        // Clear paginated / filtered variants: /posts?page=2 when purging /posts
+        { routePath: { like: `${pathname}?%` } },
+        { cacheKey: { like: `route:${pathname}?%` } },
       ],
     },
   })
@@ -271,7 +278,7 @@ export async function purgeDbCacheByRoutePattern(pattern: string): Promise<numbe
   const ids = result.docs
     .filter((doc) => {
       const routePath = (doc as { routePath?: string | null }).routePath
-      return routePath ? matchRoutePattern(pattern, routePath) : false
+      return routePath ? matchRoutePattern(pattern, routeCachePathname(routePath)) : false
     })
     .map((doc) => doc.id)
 
@@ -471,7 +478,7 @@ export async function getDynamicRouteCacheEntries(limit = 500): Promise<DynamicR
   for (const doc of result.docs) {
     const entry = doc as FrontendCacheEntryDoc
     const routePath = entry.routePath
-    if (!routePath || !isDynamicRoutePath(routePath, exactRegistryPaths)) continue
+    if (!routePath || !isDynamicRoutePath(routeCachePathname(routePath), exactRegistryPaths)) continue
 
     const cached = parseRouteCachedValue(entry.cachedValue)
 
@@ -523,11 +530,17 @@ function entryMatchesRegistryDoc(
   }
 
   if ((entry.pathMatch ?? 'exact') === 'pattern') {
-    if (exactRegistryPaths.has(routePath)) return false
-    return matchRoutePattern(entry.target, routePath)
+    const pathname = routeCachePathname(routePath)
+    if (exactRegistryPaths.has(pathname)) return false
+    return matchRoutePattern(entry.target, pathname)
   }
 
-  return routePath === entry.target || doc.cacheKey === routeCacheKey(entry.target)
+  const pathname = routeCachePathname(routePath)
+  return (
+    pathname === entry.target ||
+    routePath === entry.target ||
+    doc.cacheKey === routeCacheKey(entry.target)
+  )
 }
 
 /** Map registry entry id → whether matching DB rows exist (single query). */
