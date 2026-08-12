@@ -1,13 +1,13 @@
 /**
- * Public site origin for redirects / absolute URLs behind reverse proxies.
- * Standalone often sets HOSTNAME=0.0.0.0 for bind — that must never become the browser origin.
+ * Public site origin for redirects behind reverse proxies.
+ *
+ * Prefer request Host / X-Forwarded-* over NEXT_PUBLIC_SERVER_URL:
+ * NEXT_PUBLIC_* is inlined at `next build` time (often localhost from the pack machine),
+ * while Host reflects the real public domain at runtime.
+ *
+ * Optional runtime override (not baked at build): CRISPY_PUBLIC_ORIGIN=https://uuice.com
  */
 export function resolvePublicRequestOrigin(request: Request): string {
-  const fromEnv = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '')
-  if (fromEnv && !isBindAddressOrigin(fromEnv)) {
-    return fromEnv
-  }
-
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
   const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || 'https'
 
@@ -17,8 +17,18 @@ export function resolvePublicRequestOrigin(request: Request): string {
 
   const host = request.headers.get('host')?.trim()
   if (host && !isBindAddressHost(host)) {
-    const proto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || 'https'
+    const proto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || inferProto(request)
     return `${proto}://${host}`
+  }
+
+  const runtimeOrigin = process.env.CRISPY_PUBLIC_ORIGIN?.replace(/\/$/, '')
+  if (runtimeOrigin && !isBindAddressOrigin(runtimeOrigin)) {
+    return runtimeOrigin
+  }
+
+  const fromPublicEnv = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '')
+  if (fromPublicEnv && !isBindAddressOrigin(fromPublicEnv)) {
+    return fromPublicEnv
   }
 
   try {
@@ -30,7 +40,15 @@ export function resolvePublicRequestOrigin(request: Request): string {
     // ignore
   }
 
-  return fromEnv || 'http://localhost:3333'
+  return runtimeOrigin || fromPublicEnv || 'http://localhost:3333'
+}
+
+function inferProto(request: Request): string {
+  try {
+    return new URL(request.url).protocol === 'https:' ? 'https' : 'http'
+  } catch {
+    return 'http'
+  }
 }
 
 function isBindAddressHost(host: string): boolean {

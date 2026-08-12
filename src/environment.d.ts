@@ -5,6 +5,10 @@ declare global {
       DATABASE_URL: string
       NEXT_PUBLIC_SERVER_URL: string
       VERCEL_PROJECT_PRODUCTION_URL: string
+      /** Runtime public origin for redirects (not baked at build). */
+      CRISPY_PUBLIC_ORIGIN?: string
+      /** Middleware loopback origin, e.g. http://127.0.0.1:3333 */
+      CRISPY_INTERNAL_ORIGIN?: string
     }
   }
 }
