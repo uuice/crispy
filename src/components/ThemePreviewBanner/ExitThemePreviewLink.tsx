@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import React, { useMemo } from 'react'
 
@@ -18,9 +17,10 @@ export function ExitThemePreviewLink({ className, children }: { className?: stri
     return `/next/exit-theme-preview?redirect=${encodeURIComponent(redirect)}`
   }, [pathname, searchParams])
 
+  // Hard navigation avoids RSC soft-nav following a bad absolute redirect (e.g. https://0.0.0.0:3333/).
   return (
-    <Link className={className} href={href}>
+    <a className={className} href={href}>
       {children}
-    </Link>
+    </a>
   )
 }

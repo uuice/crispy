@@ -68,7 +68,11 @@ export function withThemePreviewParam(
     return href
   }
 
-  if (href.startsWith('/admin') || href.startsWith('/api') || href.startsWith('/next/exit-theme-preview')) {
+  if (
+    href.startsWith('/admin') ||
+    href.startsWith('/api') ||
+    href.startsWith('/next/exit-theme-preview')
+  ) {
     return href
   }
 
@@ -85,10 +89,13 @@ export function withThemePreviewParam(
   return `${url.pathname}${url.search}${hash}`
 }
 
-type AuthzUserShape = {
-  permissions?: string[] | null
-  roles?: unknown
-} | null | undefined
+type AuthzUserShape =
+  | {
+      permissions?: string[] | null
+      roles?: unknown
+    }
+  | null
+  | undefined
 
 /** Prefer authz permissions from /me; fall back to system role slugs. */
 export function canUseThemePreview(user: AuthzUserShape): boolean {

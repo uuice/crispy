@@ -63,7 +63,9 @@ async function canThemePreviewRequest(request: NextRequest): Promise<boolean> {
   }
 }
 
-async function resolveThemePreviewContext(request: NextRequest): Promise<ThemePreviewContext | null> {
+async function resolveThemePreviewContext(
+  request: NextRequest,
+): Promise<ThemePreviewContext | null> {
   const queryTheme = getThemePreviewQueryValue(request)
 
   if (!isFrontendThemeId(queryTheme) || !(await canThemePreviewRequest(request))) {
@@ -282,7 +284,9 @@ async function applyFrontendCacheHeaders(
   }
 
   if (isInternalCacheCaptureRequest(request)) {
-    return themePreview ? nextWithRequestHeaders(request, themePreview.requestHeaders) : nextWithPathname(request)
+    return themePreview
+      ? nextWithRequestHeaders(request, themePreview.requestHeaders)
+      : nextWithPathname(request)
   }
 
   const settings = await getMiddlewareCacheSettings(request.url)
