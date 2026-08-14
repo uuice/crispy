@@ -17,7 +17,7 @@ export const AiSettings: GlobalConfig = {
   admin: {
     group: adminLabels.configGroup,
     description:
-      '全局 AI 开关与默认模型。聊天 / Embedding 端点在「LLM 提供商」维护（capabilities）；Prompt 在「Prompt 模板」。密钥加密入库，不使用 .env。详见 /admin/dev-docs#config-center',
+      '全局 AI 开关与默认模型。聊天 / Embedding 端点在「LLM 提供商」维护（capabilities）；Prompt 在「Prompt 模板」。密钥加密入库，不使用 .env。详见 docs/dev-docs.md#config-center',
   },
   fields: [
     {

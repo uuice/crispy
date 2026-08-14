@@ -69,7 +69,7 @@
 | AI Canvases | `src/ai/canvas/`、`AdminAiCanvases/`、`AiCanvases`、`admin/ai-canvases/`、`api/ai/canvases/**` | 与 Agent + Prompt 重叠；维护 React Flow 成本高 |
 | **Unsplash 图库** | `src/unsplash/`、`api/admin/unsplash/**`、`UnsplashImportPill`、`ai/agent/stockImages.ts`、`AgentStockImageResults`、IntegrationSettings / credentials 中 Unsplash 相关 | **非必须**；配图走 Media 上传 / OSS 即可。删后去掉外站 API、密钥与 Agent stock-image 工具链路 |
 | 内容统计页 | `admin/stats/`、`admin-stats/` | Agent 已有 `get_site_stats` |
-| 二次开发文档（Admin 内嵌） | `admin/dev-docs/`（含大体量 `content.ts`） | 迁到仓库 Markdown / 站点文档即可 |
+| 二次开发文档 | `docs/dev-docs.md` | **已迁出**（2026-08-14）；Admin `/dev-docs` 已删除 |
 
 ### 3.3.1 自研 Nav → 回归官方（已定调）
 
@@ -176,8 +176,8 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 | 口径 | 现在 | 做完后 |
 |------|------|--------|
 | importMap 自建条目 | ~27 | **~11～14**（约一半） |
-| 自定义侧栏项 | 6 | **0** |
-| 自定义 View | 6 | **0～1**（可选只留 Agent 全屏；浮窗即可） |
+| 自定义侧栏项 | 5（已去掉二次开发文档） | **0** |
+| 自定义 View | 5（已去掉 dev-docs） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
 | 自研 Nav | 有 | **无**（官方） |
 | 字段 AI / Unsplash / 画布等 | 有 | **无** |
 
@@ -213,3 +213,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-07-19 — 补充 §3.5：削减后剩余的品牌壳 + 业务字段清单。
 - 2026-07-19 — Unsplash 删后 AdminListView 建议整段去掉（仅剩刷新无必要）。
 - 2026-07-19 — 增加 §6 最终剩余汇总。
+- 2026-08-14 — 二次开发文档已迁至 `docs/dev-docs.md`，Admin `/dev-docs` 与侧栏入口已删除。

@@ -152,7 +152,7 @@ export const AGENT_GLOBAL_SLUGS = new Set(AGENT_GLOBALS.map((g) => g.slug))
 
 /**
  * Admin surfaces intentionally out of Agent scope (use Admin UI / dedicated APIs).
- * Keep in sync with systemPrompt「不可管理」and /admin/dev-docs#permissions.
+ * Keep in sync with systemPrompt「不可管理」and docs/dev-docs.md#permissions.
  */
 export const AGENT_OUT_OF_SCOPE = [
   'users',

@@ -42,5 +42,5 @@ alwaysApply: false
 
 ## 配置
 
-- Admin 配置中心：`llm-providers` + `ai-settings`（见 `/admin/dev-docs#config-center`）
+- Admin 配置中心：`llm-providers` + `ai-settings`（见 `docs/dev-docs.md#config-center`）
 - 语义搜索需 Postgres pgvector（`src/ai/embeddings/`）+ Embedding Provider（capabilities=embedding）

@@ -74,11 +74,6 @@ export default buildConfig({
       Nav: '@/components/AdminNav',
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
-        devDocs: {
-          Component: '@/app/(payload)/admin/dev-docs/DevDocsView',
-          path: '/dev-docs',
-          exact: true,
-        },
         apiDocs: {
           Component: '@/app/(payload)/admin/api-docs/SwaggerView',
           path: '/api-docs',

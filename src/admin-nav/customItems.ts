@@ -37,7 +37,6 @@ export const CUSTOM_ADMIN_NAV_ITEMS: CustomAdminNavItem[] = [
   },
   // Docs: any Admin user may open (view itself has no extra gate).
   { path: '/api-docs', label: 'Swagger API', group: adminLabels.devGroup },
-  { path: '/dev-docs', label: '二次开发文档', group: adminLabels.devGroup },
 ]
 
 /** Preferred sidebar group order (unknown groups append at the end). */

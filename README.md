@@ -12,7 +12,9 @@ pnpm cli dev:dev              # http://localhost:3333
 
 本地默认 **SQLite**（`.data/payload.db`），首次启动自动建表。
 
-生产环境使用 **PostgreSQL**，`DATABASE_PUSH=false`，部署前执行 `pnpm cli db:migrate`。完整说明见 Admin **[二次开发文档](http://localhost:3333/admin/dev-docs)**。
+生产环境使用 **PostgreSQL**，`DATABASE_PUSH=false`，部署前执行 `pnpm cli db:migrate`。完整说明见 **[二次开发文档](docs/dev-docs.md)**。
+
+低内存机器（约 1G）不建议常驻 Node；静态导出 + Go 边缘的方案见 [`docs/static-edge.md`](docs/static-edge.md)（仅文档，尚未实现）。
 
 ## Payload 原生能力
 
@@ -35,7 +37,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 
 **内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
 
-**RBAC**：代码 Permission 枚举 + 后台可配 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`（见文末）。详情：`/admin/dev-docs#permissions`。
+**RBAC**：代码 Permission 枚举 + 后台可配 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`（见文末）。详情：[dev-docs — 权限](docs/dev-docs.md#permissions)。
 
 ## API 一览
 
@@ -66,7 +68,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | `/api/internal/route-cache-*` | POST | 内部 | 前台 HTML 缓存读写 |
 | `/api/internal/access-log` | POST | Secret | API 访问日志写入 |
 
-OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详见 `/admin/dev-docs#openapi`。
+OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详见 [dev-docs — OpenAPI](docs/dev-docs.md#openapi)。
 
 ## Crispy 新增能力
 
@@ -100,7 +102,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | MCP | http://localhost:3333/api/mcp |
 | Swagger | http://localhost:3333/admin/api-docs |
 | 后台 AI | http://localhost:3333/admin/ai-agent |
-| 二次开发文档 | http://localhost:3333/admin/dev-docs |
+| 二次开发文档 | [docs/dev-docs.md](docs/dev-docs.md) |
 
 ## 技术栈
 
@@ -144,7 +146,7 @@ Authorization: users API-Key <user-api-key>
 1. `pnpm cli db:seed` 或 Admin 创建 editor 用户
 2. Admin → MCP → API Keys 生成 Key（或 `pnpm cli mcp:key`）
 
-MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](http://localhost:3333/admin/dev-docs#mcp)。
+MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](docs/dev-docs.md#mcp)。
 
 ## 角色与权限（RBAC）
 
@@ -156,7 +158,7 @@ MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items�
 | `editor` | 内容与运营、发布、站点设置、缓存/统计；无用户与密钥写 |
 | `author` | 自己的文章（草稿）、媒体上传、AI；不可发布 |
 
-自定义角色：Admin 新建角色并勾选权限即可。完整矩阵与 API 鉴权见 [dev-docs — 权限](http://localhost:3333/admin/dev-docs#permissions)。
+自定义角色：Admin 新建角色并勾选权限即可。完整矩阵与 API 鉴权见 [dev-docs — 权限](docs/dev-docs.md#permissions)。
 
 ## 分支与 2.x
 

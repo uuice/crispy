@@ -52,7 +52,7 @@ Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的�
 - **RSS** — `/rss`
 - **搜索** — 生成 `search-index.json` 供前台检索
 - **后台** — `/admin` Payload Admin，RBAC 角色权限
-- **二次开发文档** — `/admin/dev-docs`（部署、权限、AI、MCP 等）
+- **二次开发文档** — 仓库 `docs/dev-docs.md`（部署、权限、AI、MCP 等）
 
 ---
 

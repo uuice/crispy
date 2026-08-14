@@ -23,4 +23,4 @@ alwaysApply: false
 - importMap 频繁手动改 → 应用 `generate:importmap`
 - 自定义组件直接依赖 `@payloadcms/ui` 内部非导出 API
 
-完整架构说明见 Admin `/admin/dev-docs#architecture`。
+完整架构说明见 `docs/dev-docs.md#architecture`。
