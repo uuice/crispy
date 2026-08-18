@@ -6,12 +6,18 @@ import { resolveNavLinkUrl } from './resolveNavLink'
 
 type GlobalNavItems = Header['navItems'] | Footer['navItems']
 
+/** Paths removed from the frontend; skip leftover CMS nav entries. */
+export function isRetiredFrontendPath(url: string): boolean {
+  const path = url.split('?')[0]?.replace(/\/$/, '') || ''
+  return path === '/games' || path.startsWith('/games/')
+}
+
 export function mapGlobalNavItems(navItems: GlobalNavItems | null | undefined): NavItem[] {
   return (navItems || []).flatMap((item) => {
     const url = resolveNavLinkUrl(item.link)
     const title = item.link?.label || ''
 
-    if (!title || !url) {
+    if (!title || !url || isRetiredFrontendPath(url)) {
       return []
     }
 
@@ -27,4 +33,4 @@ export function mapGlobalNavItems(navItems: GlobalNavItems | null | undefined): 
 
 /** Admin hint for custom nav URLs on the frontend. */
 export const frontendNavPathHint =
-  '自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/games、/rss。推荐使用「内部链接」关联页面或文章。'
+  '自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/rss。推荐使用「内部链接」关联页面或文章。'

@@ -4483,7 +4483,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
 export interface Header {
   id: number;
   /**
-   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/games、/rss。推荐使用「内部链接」关联页面或文章。
+   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/rss。推荐使用「内部链接」关联页面或文章。
    */
   navItems?:
     | {
@@ -4517,7 +4517,7 @@ export interface Header {
 export interface Footer {
   id: number;
   /**
-   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/games、/rss。推荐使用「内部链接」关联页面或文章。
+   * 自定义 URL 请使用前台路径，如 /、/posts、/pages/about、/links、/navigations、/rss。推荐使用「内部链接」关联页面或文章。
    */
   navItems?:
     | {

@@ -43,7 +43,6 @@ async function getPagesSitemap() {
     { loc: `${SITE_URL}${getPostsListPath()}`, lastmod: dateFallback },
     { loc: `${SITE_URL}/links`, lastmod: dateFallback },
     { loc: `${SITE_URL}/navigations`, lastmod: dateFallback },
-    { loc: `${SITE_URL}/games`, lastmod: dateFallback },
   ]
 
   const sitemap = results.docs

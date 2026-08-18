@@ -33,8 +33,6 @@ export type ThemePageName =
   | 'galleryDetail'
   | 'jobs'
   | 'navigations'
-  | 'games'
-  | 'gamesMath'
   | 'novels'
   | 'novelDetail'
   | 'novelChapter'

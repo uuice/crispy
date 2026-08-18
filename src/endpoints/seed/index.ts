@@ -258,13 +258,6 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: '小游戏',
-              url: '/games',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
               label: '关于',
               url: getPagePath('about'),
             },

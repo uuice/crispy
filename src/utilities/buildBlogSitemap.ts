@@ -95,8 +95,6 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
     { loc: `${siteUrl}${getGalleriesPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}${getJobsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}/navigations`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
-    { loc: `${siteUrl}/games`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
-    { loc: `${siteUrl}/games/math`, lastmod: today, changefreq: 'monthly', priority: '0.45' },
   ]
 
   for (const post of postsResult.docs) {

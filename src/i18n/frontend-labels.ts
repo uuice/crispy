@@ -179,7 +179,6 @@ export const defaultHeaderNav = [
   { label: '友链', url: '/links' },
   { label: '关于', url: getPagePath('about') },
   { label: '导航', url: '/navigations' },
-  { label: '小游戏', url: '/games' },
 ] as const
 
 export function socialPlatformLabel(platform: string | null | undefined): string {

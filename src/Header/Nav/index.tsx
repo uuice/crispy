@@ -6,11 +6,14 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import { defaultHeaderNav, frontendLabels } from '@/i18n/frontend-labels'
+import { isRetiredFrontendPath } from '@/utilities/mapGlobalNavItems'
 import Link from 'next/link'
 import { SearchIcon } from 'lucide-react'
 
 export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
-  const cmsNavItems = data?.navItems || []
+  const cmsNavItems = (data?.navItems || []).filter(
+    ({ link }) => !link?.url || !isRetiredFrontendPath(link.url),
+  )
   const hasCmsNav = cmsNavItems.length > 0
 
   return (

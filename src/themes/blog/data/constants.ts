@@ -1,3 +1,4 @@
+import { isRetiredFrontendPath } from '@/utilities/mapGlobalNavItems'
 import {
   getGalleriesPath,
   getNovelsPath,
@@ -15,7 +16,6 @@ export const defaultBlogMenu: NavItem[] = [
   { title: '图库', url: getGalleriesPath(), target: '_self' },
   { title: '友情链接', url: '/links', target: '_self' },
   { title: '类库导航', url: '/navigations', target: '_self' },
-  { title: '小游戏', url: '/games', target: '_self' },
   { title: '关于', url: getPagePath('about'), target: '_self' },
 ]
 
@@ -38,5 +38,5 @@ export function resolveBlogMenu(menu: NavItem[]): NavItem[] {
       ...item,
       url: normalizeBlogNavUrl(item.url),
     }))
-    .filter((item) => item.url !== '/search')
+    .filter((item) => item.url !== '/search' && !isRetiredFrontendPath(item.url))
 }

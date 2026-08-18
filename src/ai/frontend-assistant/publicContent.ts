@@ -122,14 +122,6 @@ const SECTION_PAGES: PublicContentHit[] = [
     excerpt: '长篇连载与章节阅读',
     keywords: ['小说', '连载', '章节'],
   },
-  {
-    type: 'section',
-    title: '小游戏',
-    url: '/games',
-    slug: 'games',
-    excerpt: '站内互动小游戏',
-    keywords: ['游戏'],
-  },
 ]
 
 export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]> => {

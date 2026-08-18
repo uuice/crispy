@@ -3,8 +3,6 @@ import type { FrontendThemePages } from '@/themes/types'
 import { categoryDetailPage } from './categoryDetail'
 import { galleriesPage } from './galleries'
 import { galleryDetailPage } from './galleryDetail'
-import { gamesMathPage } from './gamesMath'
-import { gamesPage } from './games'
 import { homePage } from './home'
 import { jobsPage } from './jobs'
 import { linksPage } from './links'
@@ -35,8 +33,6 @@ export const blogPages = {
   galleryDetail: galleryDetailPage,
   jobs: jobsPage,
   navigations: navigationsPage,
-  games: gamesPage,
-  gamesMath: gamesMathPage,
   novels: novelsPage,
   novelDetail: novelDetailPage,
   novelChapter: novelChapterPage,

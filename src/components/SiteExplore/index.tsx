@@ -106,7 +106,6 @@ export async function SiteExplore() {
             { href: '/links', label: frontendLabels.links.title },
             { href: getPagePath('about'), label: '关于' },
             { href: '/navigations', label: '导航' },
-            { href: '/games', label: '小游戏' },
             { href: '/rss.xml', label: frontendLabels.site.rss },
           ].map(({ href, label }) => (
             <Link

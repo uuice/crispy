@@ -11,6 +11,7 @@ import { Logo } from '@/components/Logo/Logo'
 import { Media } from '@/components/Media'
 import { frontendLabels, socialPlatformLabel } from '@/i18n/frontend-labels'
 import { getPagePath, getPostsListPath } from '@/utilities/frontendPaths'
+import { isRetiredFrontendPath } from '@/utilities/mapGlobalNavItems'
 import type { Media as MediaType } from '@/payload-types'
 
 export async function Footer() {
@@ -21,7 +22,9 @@ export async function Footer() {
     getCachedSiteExploreData(),
   ])
 
-  const navItems = footerData?.navItems || []
+  const navItems = (footerData?.navItems || []).filter(
+    ({ link }) => !link?.url || !isRetiredFrontendPath(link.url),
+  )
   const socialLinks = siteSettings.socialLinks || []
   const showRss = siteSettings.enableRss !== false
 
@@ -55,9 +58,6 @@ export async function Footer() {
             </Link>
             <Link className="text-white/80 hover:text-white text-sm" href="/navigations">
               导航
-            </Link>
-            <Link className="text-white/80 hover:text-white text-sm" href="/games">
-              小游戏
             </Link>
             {showRss && (
               <Link className="text-white/80 hover:text-white text-sm" href="/rss">
