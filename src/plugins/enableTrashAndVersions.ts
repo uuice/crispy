@@ -1,11 +1,12 @@
 import type { Plugin } from 'payload'
 
-import {
-  defaultCollectionVersions,
-  isInternalCollectionSlug,
-} from '@/collections/defaults'
+import { isInternalCollectionSlug } from '@/collections/defaults'
 
-/** Enable soft delete and version history on every user-facing collection. */
+/**
+ * Enable soft delete on every user-facing collection.
+ * Version history is opt-in on the Collection (drafts for posts/pages/novel-chapters).
+ * Do not blanket-enable versions: each save would duplicate rows in `_v` tables.
+ */
 export function enableTrashAndVersionsPlugin(): Plugin {
   return (config) => ({
     ...config,
@@ -14,14 +15,13 @@ export function enableTrashAndVersionsPlugin(): Plugin {
         return collection
       }
 
-      if (collection.trash && collection.versions) {
+      if (collection.trash != null) {
         return collection
       }
 
       return {
         ...collection,
-        trash: collection.trash ?? true,
-        versions: collection.versions ?? defaultCollectionVersions,
+        trash: true,
       }
     }),
   })

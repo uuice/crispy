@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { encryptedTextField } from '@/fields/encryptedText'
 import { adminLabels } from '@/i18n/admin-labels'
-import { defaultCollectionVersions } from '@/collections/defaults'
 
 export const LlmProviders: CollectionConfig = {
   slug: 'llm-providers',
@@ -21,7 +20,7 @@ export const LlmProviders: CollectionConfig = {
     description:
       'OpenAI 兼容端点 Catalog。DeepSeek / OpenAI / 自定义网关均可添加入口；capabilities 勾选 chat 或 embedding；在 AI 设置中分别选默认聊天 / Embedding 提供商，或在 Prompt 模板上绑定。',
   },
-  versions: defaultCollectionVersions,
+  versions: false,
   trash: true,
   fields: [
     {

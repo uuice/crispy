@@ -3,7 +3,6 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { encryptedTextField } from '@/fields/encryptedText'
 import { adminLabels } from '@/i18n/admin-labels'
-import { defaultCollectionVersions } from '@/collections/defaults'
 import { resetUnsplashKeyCache } from '@/unsplash/resolveUnsplashKey'
 
 const resetCacheIfNeeded: CollectionAfterChangeHook = () => {
@@ -25,7 +24,7 @@ export const IntegrationCredentials: CollectionConfig = {
     group: adminLabels.configGroup,
     description: '第三方集成凭证 Catalog（Unsplash 等）。在「集成设置」中多选一启用。',
   },
-  versions: defaultCollectionVersions,
+  versions: false,
   trash: true,
   hooks: {
     afterChange: [resetCacheIfNeeded],

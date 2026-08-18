@@ -3,7 +3,6 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { encryptedTextField } from '@/fields/encryptedText'
 import { adminLabels } from '@/i18n/admin-labels'
-import { defaultCollectionVersions } from '@/collections/defaults'
 import { syncStorageRuntimeFile } from '@/storage/syncStorageRuntimeFile'
 
 const syncRuntimeIfNeeded: CollectionAfterChangeHook = async ({ req }) => {
@@ -30,7 +29,7 @@ export const StorageTargets: CollectionConfig = {
     description:
       'S3/OSS 存储目标 Catalog。在「存储设置」中选中一条为 Active。保存后需重启进程才能让上传插件切换目标。',
   },
-  versions: defaultCollectionVersions,
+  versions: false,
   trash: true,
   hooks: {
     afterChange: [syncRuntimeIfNeeded],

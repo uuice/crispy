@@ -76,7 +76,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 
 | 能力 | 说明 |
 | ---- | ---- |
-| **软删除 + 版本历史** | 全业务 Collection 回收站与版本面板（`enableTrashAndVersionsPlugin`） |
+| **软删除** | 业务 Collection 回收站（`enableTrashAndVersionsPlugin`）；版本历史仅 posts/pages/novel-chapters 草稿流 |
 | **URL 重定向（实时）** | Redirects 插件 + middleware，约 60 秒内生效，无需重建 |
 | **表单邮件** | Admin「邮件通道 / 邮件设置」（改 Active 后需重启）；未配置时仅入库不发信 |
 | **Import/Export 扩展** | 含 gallery-items、short-links、redirects、forms、novels 等 |

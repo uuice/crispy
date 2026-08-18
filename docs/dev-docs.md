@@ -78,7 +78,7 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 ### Crispy 自建插件（src/plugins/）
 
 - auditLogPlugin — 写操作审计（audit-logs collection）
-- enableTrashAndVersionsPlugin — 全业务 Collection 软删除 + 版本历史
+- enableTrashAndVersionsPlugin — 全业务 Collection 软删除；versions 仅 Collection 显式开启
 - enableQueryPresetsPlugin — 列表 Query Presets（保存筛选/排序）
 - enableListRefreshButtonPlugin — 列表页刷新按钮
 - localizePluginCollectionsPlugin — 插件 Collection 中文 labels / 分组
@@ -177,7 +177,7 @@ LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不
 
 <h2 id="collections">Collection 列表与字段</h2>
 
-以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys、payload-query-presets 等表。除 posts/pages 保留 drafts 外，其余业务 Collection 由 enableTrashAndVersionsPlugin 统一启用 trash（软删除）与 versions（每文档最多 50 条历史）。
+以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys、payload-query-presets 等表。`enableTrashAndVersionsPlugin` 只统一启用 trash（软删除）。versions 仅 opt-in：posts / pages / novel-chapters 保留 drafts。Catalog 密钥类 Collection 关闭 versions，避免历史记录泄露旧密钥。
 
 | Slug | 说明 | 主要字段 |
 | --- | --- | --- |
@@ -822,7 +822,7 @@ pnpm cli quality:ci
 | Lexical + AI 改写 | richtext-lexical / Lexical API 变更 | Posts/Pages 编辑、AI 改写按钮 |
 | 官方 Plugin overrides | fields/hooks 签名漂移 | Redirects、Search、Form 发信、Import/Export、MCP |
 | Postgres 迁移 | 插件新增表/字段 | db:migrate + db:status；勿生产 push |
-| enableTrashAndVersionsPlugin | versions/trash 行为 | 回收站、版本还原、hero 条件校验 |
+| enableTrashAndVersionsPlugin | trash 行为 | 回收站；drafts 版本仍在 posts/pages/novel-chapters |
 | Edge middleware | 与 Payload 版本无关，但 Next 升级要回归 | 缓存 HIT、redirects、theme preview |
 
 ### 同步频率建议
@@ -1261,7 +1261,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 
 | Plugin | 作用 | 代码 |
 | --- | --- | --- |
-| enableTrashAndVersionsPlugin | 业务 Collection 默认 trash + versions（maxPerDoc: 50） | src/plugins/enableTrashAndVersions.ts |
+| enableTrashAndVersionsPlugin | 业务 Collection 默认 trash；versions 不由插件注入 | src/plugins/enableTrashAndVersions.ts |
 | enableQueryPresetsPlugin | enableQueryPresets: true | src/plugins/enableQueryPresets.ts |
 | enableListRefreshButtonPlugin | 列表页注入 AdminListView + 刷新按钮 | src/plugins/enableListRefreshButton.ts |
 | auditLogPlugin | create/update/delete 写 audit-logs | src/plugins/auditLog.ts |

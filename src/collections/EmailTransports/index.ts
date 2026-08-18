@@ -3,7 +3,6 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { encryptedTextField } from '@/fields/encryptedText'
 import { adminLabels } from '@/i18n/admin-labels'
-import { defaultCollectionVersions } from '@/collections/defaults'
 import { syncEmailRuntimeFile } from '@/email/syncEmailRuntimeFile'
 
 const syncRuntimeIfNeeded: CollectionAfterChangeHook = async ({ req }) => {
@@ -30,7 +29,7 @@ export const EmailTransports: CollectionConfig = {
     description:
       '邮件通道 Catalog（Resend / SMTP）。在「邮件设置」中选中一条为 Active。保存后需重启进程才能切换发信通道。',
   },
-  versions: defaultCollectionVersions,
+  versions: false,
   trash: true,
   hooks: {
     afterChange: [syncRuntimeIfNeeded],

@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { defaultCollectionVersions } from '@/collections/defaults'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 
 export const PromptTemplates: CollectionConfig = {
@@ -21,7 +20,7 @@ export const PromptTemplates: CollectionConfig = {
     description:
       '字段 AI / 画布技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。',
   },
-  versions: defaultCollectionVersions,
+  versions: false,
   trash: true,
   defaultSort: 'sort',
   fields: [
