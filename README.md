@@ -32,7 +32,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | **Form Builder** | 表单定义 + `POST /api/form-submissions` 提交（可配邮件通知） |
 | **Import/Export** | Admin 批量导入导出多 Collection |
 | **MCP 插件** | `POST /api/mcp` JSON-RPC，外部 Agent 读写内容 |
-| **S3 Storage** | 配置 `S3_*` 后 media 存对象存储 |
+| **S3 Storage** | Admin 存储目标 + 存储设置；media 存对象存储 |
 | **Jobs** | 定时发布（`schedulePublish`）、导入导出任务等 |
 
 **内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
