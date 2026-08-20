@@ -1,6 +1,6 @@
 # 减少 Admin / AI 定制面（决策备忘）
 
-> 状态：**仅文档，暂不改代码**
+> 状态：**仅文档，暂不改代码**（落地排到 Payload 4.0 升级时）
 > 日期：2026-07-19
 > 背景：个人精力有限；Payload 4.0 将加重 Admin 定制迁移成本；站内 Agent 已覆盖大部分运营操作。
 
@@ -162,7 +162,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - **不把 MCP 当成站内 Agent 的替代品。**
 - **本文档落地前不改代码、不做 migration 删表。**
 
-## 5. 将来实施顺序（备忘，未排期）
+## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
 1. 字段 AI：摘掉 `withAi*` → 删 UI → 清理仅字段用 API（**减定制收益最大**）。
 2. AI Canvases / Stats / Dev Docs / Unsplash 按 §3.3 删除。
@@ -193,7 +193,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 - 4.0 贵在 **Admin UI 定制厚度**，不是 Local API / Collection 模型。
 - 去掉字段 AI + 画布 + Unsplash + 多余运营页 + **自研 Nav** 后，迁移面明显缩小；**Agent UI（浮窗/全屏）仍是主要定制资产**，主题多为样式回归；这是接受的成本。  
-- 正式动手升 4.0 前：等官方 migration guide + 稳定版；本削减可提前做，降低届时工时。
+- 正式动手升 4.0 前：等官方 migration guide + 稳定版。**削减与 4.0 升级一并做，不提前删代码。**
 
 ## 8. 相关入口（便于将来删改）
 
@@ -214,3 +214,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-07-19 — Unsplash 删后 AdminListView 建议整段去掉（仅剩刷新无必要）。
 - 2026-07-19 — 增加 §6 最终剩余汇总。
 - 2026-08-14 — 二次开发文档已迁至 `docs/dev-docs.md`，Admin `/dev-docs` 与侧栏入口已删除。
+- 2026-08-20 — 精简（含 AI Canvases）改到 Payload 4.0 升级时再删，当前不改代码。
