@@ -15,7 +15,7 @@ export function HomeView({ data }: Props) {
   return (
     <>
       <Banner subtitle={siteDescription} title={siteName} />
-      <div className="intro-bubble intro-bubble-cute animate-in animate-in-delay-1">
+      <div className="intro-bubble animate-in animate-in-delay-1">
         <p className="m-0 code-label">
           共 <strong>{totalPosts}</strong> 篇博客文章
           {totalPosts > posts.length ? (
