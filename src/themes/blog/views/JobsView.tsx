@@ -37,7 +37,7 @@ export function JobsView({ data }: Props) {
               key={job.id}
               style={{ animationDelay: `${0.1 + i * 0.05}s` }}
             >
-              <h2 className="section-title">{job.title}</h2>
+              <h2 className="content-title">{job.title}</h2>
               <p className="code-label flex flex-wrap gap-x-3 gap-y-1">
                 {job.department ? <span>部门：{job.department}</span> : null}
                 {job.location ? <span>地点：{job.location}</span> : null}

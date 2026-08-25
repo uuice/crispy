@@ -28,7 +28,7 @@ export function NavigationsView({ data }: Props) {
             key={cat.id}
             style={{ animationDelay: `${0.1 + i * 0.05}s` }}
           >
-            <h2 className="section-title">{cat.name}</h2>
+            <h2 className="content-title">{cat.name}</h2>
             {cat.description ? <p className="code-label mb-1">{cat.description}</p> : null}
             <p className="code-label mb-3">{cat.websites.length} 个站点</p>
             <ul className="post-list terminal-list">

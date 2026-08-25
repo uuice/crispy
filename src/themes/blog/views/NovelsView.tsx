@@ -34,11 +34,11 @@ export function NovelsView({ data }: Props) {
         {novels.length > 0 ? (
           novels.map((novel, index) => (
             <article
-              className="section-card p-5 sm:p-6 animate-in novel-card"
+              className="section-card p-5 sm:p-6 animate-in"
               key={novel.slug}
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
-              <h2 className="section-title m-0">
+              <h2 className="content-title m-0">
                 <Link className="hover:opacity-80" href={novel.url} prefetch={false}>
                   {novel.title}
                 </Link>

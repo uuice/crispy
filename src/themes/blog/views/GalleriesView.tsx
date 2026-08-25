@@ -34,7 +34,7 @@ export function GalleriesView({ data }: Props) {
               <article className="section-card p-5 sm:p-6" key={gallery.id}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   {cover?.url ? (
-                    <Link className="gallery-list-cover relative block shrink-0" href={href} prefetch={false}>
+                    <Link className="relative block shrink-0" href={href} prefetch={false}>
                       <div className="gallery-grid-media" style={{ width: '8rem' }}>
                         <Media
                           fill
@@ -47,7 +47,7 @@ export function GalleriesView({ data }: Props) {
                     </Link>
                   ) : null}
                   <div className="min-w-0 flex-1">
-                    <h2 className="section-title m-0">
+                    <h2 className="content-title m-0">
                       <Link className="hover:opacity-80" href={href} prefetch={false}>
                         {gallery.title}
                       </Link>

@@ -33,7 +33,7 @@ export function PostsView({ data }: Props) {
               key={ym}
               style={{ animationDelay: `${0.1 + i * 0.05}s` }}
             >
-              <h2 className="section-title">{ym}</h2>
+              <h2 className="content-title">{ym}</h2>
               <p className="code-label mb-3">{list.length} 篇文章</p>
               <ul className="post-list terminal-list">
                 {list.map((entry) => (

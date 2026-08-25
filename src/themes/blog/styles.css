@@ -1321,7 +1321,9 @@ html.blog-skin {
     transform: translateY(-2px);
   }
 
-  .section-title {
+  /* section-title = section label; content-title = entity/content heading (same look) */
+  .section-title,
+  .content-title {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -1343,7 +1345,8 @@ html.blog-skin {
     box-shadow: inset 0 1px 0 oklch(0.98 0.02 calc(var(--hue) + 28));
   }
 
-  &.dark .section-title {
+  &.dark .section-title,
+  &.dark .content-title {
     background: linear-gradient(
       155deg,
       var(--card-bg) 0%,
@@ -1354,12 +1357,14 @@ html.blog-skin {
     box-shadow: inset 0 1px 0 oklch(0.32 0.035 calc(var(--hue) + 28));
   }
 
-  .section-title .section-prompt {
+  .section-title .section-prompt,
+  .content-title .section-prompt {
     color: var(--chroma-prompt);
     margin-right: 0.25rem;
   }
 
-  .section-title .sym-keyword {
+  .section-title .sym-keyword,
+  .content-title .sym-keyword {
     color: var(--chroma-keyword);
   }
 
@@ -2709,7 +2714,8 @@ html.blog-skin {
       padding: 0.55rem 0.75rem;
       margin-bottom: 1rem;
     }
-    .section-title {
+    .section-title,
+    .content-title {
       margin-bottom: 0.5rem;
     }
     .error-page {
@@ -2748,7 +2754,9 @@ html.blog-skin {
     padding: 0.5rem 0;
   }
   .archive-group .section-title,
-  .nav-category-group .section-title {
+  .archive-group .content-title,
+  .nav-category-group .section-title,
+  .nav-category-group .content-title {
     margin-bottom: 0.35rem;
   }
   .archive-group .code-label.mb-3,

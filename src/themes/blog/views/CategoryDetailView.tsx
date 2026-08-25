@@ -25,7 +25,7 @@ export function CategoryDetailView({ data }: Props) {
         </p>
       </div>
       <section className="space-y-5">
-        <h2 className="section-title animate-in animate-in-delay-2">{category.title}</h2>
+        <h2 className="content-title animate-in animate-in-delay-2">{category.title}</h2>
         <PostList emptyMessage="该分类下暂无文章" posts={posts} />
       </section>
       <PaginationNav basePath={getCategoryPath(category.slug || '')} pagination={pagination} />

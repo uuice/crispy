@@ -25,7 +25,7 @@ export function NovelSidebar({ data }: Props) {
             ← 全部小说
           </Link>
         </p>
-        <h2 className="section-title m-0">
+        <h2 className="content-title m-0">
           <Link className="hover:opacity-80" href={novelUrl} prefetch={false}>
             {novelTitle}
           </Link>

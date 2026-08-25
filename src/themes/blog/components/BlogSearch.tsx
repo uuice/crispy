@@ -183,7 +183,7 @@ export function BlogSearch() {
           ref={panelRef}
           aria-label="搜索文章"
           aria-modal="true"
-          className="search-panel-terminal search-panel-cute"
+          className="search-panel-terminal"
           role="dialog"
         >
           <span aria-hidden="true" className="search-panel-cute-glyph">
