@@ -290,7 +290,7 @@ function handleApiAccessLog(request: NextRequest): NextResponse | null {
   return response
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const legacyRedirect = handleLegacyFrontendRedirect(request)
   if (legacyRedirect) {
     return applyPoweredByHeader(legacyRedirect)

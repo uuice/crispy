@@ -1,5 +1,5 @@
 /**
- * Resolve the origin middleware should use for internal API self-fetch.
+ * Resolve the origin the request proxy should use for internal API self-fetch.
  * In production behind a reverse proxy, fetching the public URL often fails (hairpin NAT / TLS).
  */
 export function resolveMiddlewareFetchOrigin(requestUrl: string): string {

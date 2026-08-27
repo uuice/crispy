@@ -71,7 +71,7 @@ export const Users: CollectionConfig = {
     ],
     afterRead: [
       async ({ doc, req }) => {
-        // Attach authz-cache permissions for /me (Edge middleware + Admin client).
+        // Attach authz-cache permissions for /me (proxy + Admin client).
         if (!doc?.id || !req?.user || String(req.user.id) !== String(doc.id)) {
           return doc
         }

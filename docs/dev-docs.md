@@ -669,7 +669,7 @@ pnpm cli quality:ci
 | 官方 Plugin overrides | fields/hooks 签名漂移 | Redirects、Search、Form 发信、Import/Export、MCP |
 | Postgres 迁移 | 插件新增表/字段 | db:migrate + db:status；勿生产 push |
 | enableTrashAndVersionsPlugin | trash 行为 | 回收站；drafts 版本仍在 posts/pages/novel-chapters |
-| Edge middleware | 与 Payload 版本无关，但 Next 升级要回归 | 缓存 HIT、redirects、theme preview |
+| Next proxy | 与 Payload 版本无关，但 Next 升级要回归 | 缓存 HIT、redirects |
 
 ### 同步频率建议
 
@@ -769,9 +769,9 @@ bypass 条件（middlewareCache.ts）：URL 带 ?nocache、存在 __prerender_by
 
 开发环境可用 CRISPY_FRONTEND_HTML_CACHE=true|false 强制开关 HTML 缓存（覆盖 cache-settings Global；生产环境忽略）。修改后需重启 dev 服务。
 
-### 路由 HTML 缓存层（middleware）
+### 路由 HTML 缓存层（proxy）
 
-middleware 为 Edge 环境，禁止 import Payload。流程：legacy redirect → Payload redirects（60s 缓存）→ getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?nocache → BYPASS。
+`src/proxy.ts` 跑在 Node runtime（Next 16 起替代 `middleware.ts`），禁止 import Payload。流程：legacy redirect → Payload redirects（60s 缓存）→ getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?nocache → BYPASS。
 
 ### HTTP 调试 Header
 
@@ -810,24 +810,24 @@ curl -I http://localhost:3333/
 | src/frontend-cache/dbCache.ts | resolveRouteCacheFromDb、storeRouteHtmlCache、purge、getDbCacheStats |
 | src/frontend-cache/constants.ts | DEFAULT_PAGE_REVALIDATE 等 Global 默认值 |
 | src/frontend-cache/getCacheSettings.ts | 读 cache-settings Global（防循环） |
-| src/frontend-cache/middlewareCache.ts | Edge 安全 settings 类型 + internal API fetch |
+| src/frontend-cache/middlewareCache.ts | proxy 用 settings 类型 + internal API fetch |
 | src/frontend-cache/registry.ts | Admin 可清除项注册表 |
 | src/frontend-cache/purge.ts | Admin purge 入口（按 path / 全部） |
 | src/frontend-cache/headers.ts | X-Crispy-* Header 常量与写入 |
-| src/middleware.ts | 前台 HTML Header + API access log |
+| src/proxy.ts | 前台 HTML Header + API access log |
 | src/collections/FrontendCacheEntries/ | DB Collection 定义（hidden，系统写入） |
 | src/app/(payload)/admin/cache/ | Custom View 缓存管理 UI |
 
 ### 约束与注意
 
-- middleware 不得 import @payload-config / getPayload（Edge 兼容）；仅 fetch internal API
+- proxy 不得 import @payload-config / getPayload；仅 fetch internal API
 - cache-settings 直接 findGlobal，带 60s 进程内缓存
 - JSON 字段必须叫 cachedValue，不可用 payload（Payload 保留语义）
 - cachedValue 写入前 JSON.parse(JSON.stringify) 保证可序列化
 - frontend-cache-entries 在 SYSTEM_COLLECTION_SLUGS 中，无 trash/versions
 - SQLite dev：schema push 新增表时选 create table，勿 rename 到 _xxx_v 版本表
 - Postgres 生产：Collection 变更需 pnpm cli db:create + db:migrate
-- 页面 HTML 由 DB + middleware 负责；Next.js 页面段 revalidate=false，勿再叠加 ISR
+- 页面 HTML 由 DB + proxy 负责；Next.js 页面段 revalidate=false，勿再叠加 ISR
 
 ### 内容变更失效
 
