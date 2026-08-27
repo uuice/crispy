@@ -80,7 +80,6 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 - auditLogPlugin — 写操作审计（audit-logs collection）
 - enableTrashAndVersionsPlugin — 全业务 Collection 软删除；versions 仅 Collection 显式开启
 - enableQueryPresetsPlugin — 列表 Query Presets（保存筛选/排序）
-- enableListRefreshButtonPlugin — 列表页刷新按钮
 - localizePluginCollectionsPlugin — 插件 Collection 中文 labels / 分组
 - localizeFieldLabelsPlugin — 通用字段（folder/slug/url）中文 label
 
@@ -148,7 +147,7 @@ crispy/
 | API_ACCESS_LOG_ENABLED | API 访问日志 middleware（可选） |
 | CRISPY_FRONTEND_HTML_CACHE | 仅开发：覆盖 cache-settings HTML 缓存开关 |
 
-LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .env（详见 #config-center）。
+LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .env（详见 #config-center）。
 
 ### Payload 配置入口
 
@@ -197,7 +196,6 @@ LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不
 | llm-providers | LLM 提供商 | OpenAI 兼容端点 Catalog（apiKey 加密；catalog:secrets） |
 | prompt-templates | Prompt 模板 | 字段 AI 技能卡；读 prompts:read / 写 prompts:write；MCP 仅读 |
 | storage-targets | 存储目标 | S3/OSS Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
-| integration-credentials | 集成凭证 | Unsplash 等 Catalog（密钥加密；catalog:secrets） |
 | email-transports | 邮件通道 | Resend / SMTP Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
 | ai-chat-sessions | AI 对话会话 | title, messages[], user（Agent 侧栏历史；ai:use） |
 | api-access-logs | API 访问日志 | method, path, status, authType, user, duration（logs:read） |
@@ -274,7 +272,7 @@ LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不
 | novels:manage / novels:read:all | 小说写；读全部（含未启用） |
 | comments:moderate | 评论审核 |
 | users:manage / roles:manage | 用户；角色矩阵（users:manage 可读 roles 供下拉） |
-| settings:site\|ai\|comment\|storage\|integration\|email | 对应 Globals |
+| settings:site\|ai\|comment\|storage\|email | 对应 Globals |
 | catalog:secrets\|prompts:*\|app-configs:* | 密钥 Catalog / Prompt / 应用配置 |
 | cache:manage / stats:read / logs:read / ai:use / presets:manage | 缓存 API、统计、审计、Agent、查询预设 |
 
@@ -315,7 +313,7 @@ LLM / S3 / Unsplash / Email 密钥与端点改在 Admin 配置中心维护，不
 | header / footer / site-settings / cache-settings | 公开读（cache/site 等） | settings:site |
 | ai-settings | settings:ai \| settings:site \| prompts:read | settings:ai |
 | comment-settings | settings:comment \| settings:site \| comments:moderate | settings:comment |
-| storage / integration / email-settings | 对应 settings:* | 对应 settings:* |
+| storage / email-settings | 对应 settings:* | 对应 settings:* |
 
 作者发布：restrictAuthorPublish（无 posts:publish → 强制 draft）。新增权限：改 permissions.ts → 角色勾选 → Collection/Agent access 使用 requirePermission。
 
@@ -727,7 +725,7 @@ PAYLOAD_SECRET=...
 NEXT_PUBLIC_SERVER_URL=https://your-domain.com
 PREVIEW_SECRET=...
 CRON_SECRET=...
-# LLM / S3 / Unsplash / Email → Admin 配置中心（改 S3/邮件 Active 后重启进程）
+# LLM / S3 / Email → Admin 配置中心（改 S3/邮件 Active 后需重启进程）
 ```
 
 ### 部署流程
@@ -1055,7 +1053,6 @@ GitHub Actions .github/workflows/ci.yml：
 - 中文化：i18n zh + 自定义 labels
 - Draft / Live Preview：PREVIEW_SECRET + 编辑页预览
 - 回收站 / 版本历史：列表切换回收站、编辑页版本面板
-- 列表刷新：各 Collection 列表右上角「刷新」按钮
 - Query Presets：保存列表筛选与排序
 - 深色模式：Admin 主题色相 + 各前台皮肤自带 ThemeToggle
 - 前台主题：站点设置切换 blog / cms / kb；有 settings:site|pages:manage|ops:manage 可 ?theme_preview=
@@ -1066,7 +1063,7 @@ GitHub Actions .github/workflows/ci.yml：
 
 <h2 id="config-center">配置中心方案（Catalog + Active + Override）</h2>
 
-目标：把 LLM / S3 / 邮件 / Unsplash 等可换配置迁入 Admin，方便增删改与多选一；Prompt 可绑定模型。仅超级管理员可写密钥类配置。
+目标：把 LLM / S3 / 邮件等可换配置迁入 Admin，方便增删改与多选一；Prompt 可绑定模型。仅超级管理员可写密钥类配置。
 
 ### 核心模型
 
@@ -1081,7 +1078,6 @@ Catalog（多条配置）
 | LLM | llm-providers | ai-settings.defaultProvider | Prompt / 请求 | 否 |
 | Embedding | llm-providers (capabilities=embedding) | ai-settings.defaultEmbeddingProvider | 暂无 | 否 |
 | S3 | storage-targets | storage-settings.activeTarget | 暂无（全局生效） | 是 |
-| Unsplash | integration-credentials (type=unsplash) | integration-settings.activeUnsplash | 可预留 | 否 |
 | 邮件 | email-transports | email-settings.activeTransport | 暂无 | 是 |
 
 以上资源均无 .env 回退：密钥与端点只在 Admin Catalog；S3/邮件通过 .data/*-runtime.json 供进程启动读取。
@@ -1111,24 +1107,23 @@ Catalog（多条配置）
 - Catalog 与系统 Global：按 catalog:secrets / settings:*；密钥字段加密 + 掩码
 - 未改密钥提交（空或 ***）时保留原密文
 - DATABASE_URL / PAYLOAD_SECRET / CRON_SECRET / PREVIEW_SECRET 永不进后台
-- .env 只保留基础设施变量；LLM / S3 / Unsplash / Email 一律 Admin Catalog
+- .env 只保留基础设施变量；LLM / S3 / Email 一律 Admin Catalog
 
 ### 落地阶段
 
 | 阶段 | 内容 | 收益 |
 | --- | --- | --- |
 | P0（已完成） | llm-providers + 瘦身 ai-settings + prompt-templates + resolveLlmClient | 多模型切换、Prompt 指定模型 |
-| P1（已完成） | storage-targets / Unsplash + Active Globals（无 env 回退） | S3、Unsplash 多选一 |
+| P1（已完成） | storage-targets + Active Globals（无 env 回退） | S3 多选一 |
 | P2（已完成） | email-transports + email-settings（重启生效） | 邮件多套切换 |
 | P3 | ai-canvases 已删除（2026-08-27） | 与 Agent + Prompt 重叠，不再维护 React Flow |
+| Unsplash | 已删除（2026-08-27） | 配图走 Media / OSS 上传 |
 | Embedding | defaultEmbeddingProvider + embeddingDimensions | 语义搜索走 Catalog |
 
-### S3 / Unsplash（P1）
+### S3（P1）
 
 - storage-targets Catalog + storage-settings（mode local|s3 + activeTarget）
 - 保存 Active 后写入 .data/storage-runtime.json；S3 插件启动时读取 → 改后需重启
-- integration-credentials（type=unsplash）+ integration-settings.activeUnsplash
-- Unsplash 按请求 resolve（30s 缓存）→ 改 Active 即时生效
 
 ### Email（P2）
 
@@ -1141,14 +1136,12 @@ Catalog（多条配置）
 - src/collections/LlmProviders — LLM Catalog
 - src/collections/PromptTemplates — Prompt Catalog
 - src/collections/StorageTargets — S3 Catalog
-- src/collections/IntegrationCredentials — Unsplash 等 Catalog
 - src/collections/EmailTransports — 邮件通道 Catalog
-- src/AiSettings / StorageSettings / IntegrationSettings / EmailSettings — Active Globals
+- src/AiSettings / StorageSettings / EmailSettings — Active Globals
 - src/ai/resolveLlmClient.ts — LLM 统一解析
 - src/ai/embeddings/config.ts — Embedding Catalog 解析
 - src/storage/resolveStorageConfig.ts + syncStorageRuntimeFile.ts — S3 运行时
 - src/email/resolveEmailConfig.ts + syncEmailRuntimeFile.ts — 邮件运行时
-- src/unsplash/resolveUnsplashKey.ts — Unsplash Active
 - src/utilities/secretCrypto.ts — 密钥加解密
 
 <h2 id="architecture">Payload 扩展架构</h2>
@@ -1161,7 +1154,7 @@ Crispy 在 Payload 能力边界内做产品化二次开发：不 fork 核心、�
 │  AI Agent · 前台助手 · 主题 · 审计 · OpenAPI   │
 ├─────────────────────────────────────────┤
 │  横切 Plugin（src/plugins/）             │
-│  trash/versions · query presets · 刷新   │
+│  trash/versions · query presets            │
 ├─────────────────────────────────────────┤
 │  Payload 3 原生                          │
 │  Collections · Access · Admin · REST/MCP │
@@ -1198,7 +1191,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | --- | --- | --- |
 | 修改 node_modules / fork Payload | 升级灾难、安全补丁无法合并 | Plugin + Custom 组件 |
 | 每个 Collection 复制横切配置 | 遗漏、不一致、升级要改 N 处 | Plugin 统一注入 |
-| 大面积 override DefaultListView / Edit | Payload minor 升级易 breakage | 仅包一层注入 beforeActions；复杂流程用 Custom View |
+| 大面积 override DefaultListView / Edit | Payload minor 升级易 breakage | 不要 override 列表/编辑核心视图；复杂流程用 Custom View |
 | 直接 payload.delete()（已开 trash） | 永久删除，与回收站语义不符 | trashOrDeleteDocument |
 | 在 Plugin 里写重业务逻辑 | config merge 难测、职责混乱 | hooks 放 Collection，Plugin 只改 config |
 | 深度定制 payload-* 系统 Collection | 与上游插件冲突 | isInternalCollectionSlug 排除 |
@@ -1211,7 +1204,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | Admin 列表/编辑 UI 难深度改造 | 接受 Payload 交互；极特殊流程外置 Custom View 或独立服务 |
 | importMap 随 Admin 组件变更 | 改组件后执行 pnpm cli generate:importmap |
 | 插件 Collection 英文 labels | localizePluginCollectionsPlugin 集中中文化 |
-| Media 文件夹视图无列表刷新 | 已知缺口；需单独 Folder 视图扩展时再评估 |
+| Media 文件夹视图 | 官方 Folder 视图，无 Crispy 额外列表控件 |
 | 版本还原报 hero.media 无效 | 检查 hero 类型是否需配图、media 是否已删；见 #collections 头图说明 |
 | 新增 Pages Blocks 后 Postgres 报错 | pnpm cli db:create <name> && pnpm cli db:migrate（需 Postgres） |
 
@@ -1240,14 +1233,13 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | --- | --- | --- |
 | enableTrashAndVersionsPlugin | 业务 Collection 默认 trash；versions 不由插件注入 | src/plugins/enableTrashAndVersions.ts |
 | enableQueryPresetsPlugin | enableQueryPresets: true | src/plugins/enableQueryPresets.ts |
-| enableListRefreshButtonPlugin | 列表页注入 AdminListView + 刷新按钮 | src/plugins/enableListRefreshButton.ts |
 | auditLogPlugin | create/update/delete 写 audit-logs | src/plugins/auditLog.ts |
 | localizePluginCollectionsPlugin | 插件 Collection 中文化 | src/plugins/localizePluginCollections.ts |
 | localizeFieldLabelsPlugin | folder/slug/url 字段中文 label | src/plugins/localizeFieldLabels.ts |
 
 ### 注册顺序
 
-全部在 src/plugins/index.ts 末尾注册；auditLog 需在业务 hooks 之前生效，trash/versions 与 list refresh 在 collection 定义之后 merge。
+全部在 src/plugins/index.ts 末尾注册；auditLog 需在业务 hooks 之前生效，trash/versions 在 collection 定义之后 merge。
 
 ### 新增横切能力
 
@@ -1293,8 +1285,7 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 | list_query_presets | 列出查询预设；增删改用 create/update/delete_document(payload-query-presets) |
 | get_site_stats | 各 Collection 数量统计（需 stats:read） |
 | list_audit_logs | 审计日志只读查询（需 logs:read） |
-| search_stock_images | Unsplash 图片检索（需 ai:use） |
-| import_stock_image / import_stock_images | 导入图片到 media（需 ai:use + media:create） |
+| bulk_add_gallery_images | 将已有 media 批量加入图库 |
 
 ### 权限
 
@@ -1409,7 +1400,7 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 | API | /api/ai/assistant | /api/ai/agent |
 | 鉴权 | 无 | Admin Cookie + canUseAiAgent |
 | 会话 | 仅浏览器内存 | ai-chat-sessions Collection |
-| 能力 | 只读检索 | CRUD + 缓存 + 审计 + Unsplash 等 |
+| 能力 | 只读检索 | CRUD + 缓存 + 审计等 |
 | 代码 | src/ai/frontend-assistant/ | src/ai/agent/ |
 
 ### 工具（Function Calling）

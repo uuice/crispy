@@ -6,8 +6,6 @@ import { AiIcon } from '@/components/AdminAi/AiIcon'
 
 import type { AgentDisplayMessage } from './useAiAgentChat'
 import { useAdminAiAgent } from './AdminAiAgentContext'
-import { AgentStockImageResults } from './AgentStockImageResults'
-import type { AgentStockImage } from '@/ai/agent/stockImages'
 import './admin-ai-agent.scss'
 
 const TOOL_LABELS: Record<string, string> = {
@@ -19,9 +17,6 @@ const TOOL_LABELS: Record<string, string> = {
   create_document: '新建文档',
   update_document: '更新文档',
   delete_document: '删除文档',
-  search_stock_images: '检索图片',
-  import_stock_image: '导入图片',
-  import_stock_images: '批量导入图片',
   get_global: '读取全局配置',
   update_global: '更新全局配置',
 }
@@ -331,31 +326,6 @@ function MessageBubble({ message }: { message: AgentDisplayMessage }) {
           ))}
         </div>
       )}
-      {message.tools?.map((tool) => {
-        if (tool.name !== 'search_stock_images' || tool.status !== 'done' || !tool.result) {
-          return null
-        }
-
-        const result = tool.result as {
-          photos?: AgentStockImage[]
-          query?: string
-          limit?: number
-          error?: string
-        }
-
-        if (result.error || !result.photos?.length) {
-          return null
-        }
-
-        return (
-          <AgentStockImageResults
-            key={`stock-${tool.id}`}
-            limit={result.limit}
-            photos={result.photos}
-            query={result.query}
-          />
-        )
-      })}
       {message.content && (
         <div className="admin-ai-agent__bubble">{renderMessageContent(message.content)}</div>
       )}

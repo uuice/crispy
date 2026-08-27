@@ -89,7 +89,6 @@ export interface Config {
     'llm-providers': LlmProvider;
     'prompt-templates': PromptTemplate;
     'storage-targets': StorageTarget;
-    'integration-credentials': IntegrationCredential;
     'email-transports': EmailTransport;
     comments: Comment;
     'api-access-logs': ApiAccessLog;
@@ -144,7 +143,6 @@ export interface Config {
     'llm-providers': LlmProvidersSelect<false> | LlmProvidersSelect<true>;
     'prompt-templates': PromptTemplatesSelect<false> | PromptTemplatesSelect<true>;
     'storage-targets': StorageTargetsSelect<false> | StorageTargetsSelect<true>;
-    'integration-credentials': IntegrationCredentialsSelect<false> | IntegrationCredentialsSelect<true>;
     'email-transports': EmailTransportsSelect<false> | EmailTransportsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
@@ -181,7 +179,6 @@ export interface Config {
     'comment-settings': CommentSetting;
     'cache-settings': CacheSetting;
     'storage-settings': StorageSetting;
-    'integration-settings': IntegrationSetting;
     'email-settings': EmailSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
@@ -193,7 +190,6 @@ export interface Config {
     'comment-settings': CommentSettingsSelect<false> | CommentSettingsSelect<true>;
     'cache-settings': CacheSettingsSelect<false> | CacheSettingsSelect<true>;
     'storage-settings': StorageSettingsSelect<false> | StorageSettingsSelect<true>;
-    'integration-settings': IntegrationSettingsSelect<false> | IntegrationSettingsSelect<true>;
     'email-settings': EmailSettingsSelect<false> | EmailSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
@@ -642,7 +638,6 @@ export interface Role {
         | 'settings:ai'
         | 'settings:comment'
         | 'settings:storage'
-        | 'settings:integration'
         | 'settings:email'
         | 'catalog:secrets'
         | 'catalog:prompts:read'
@@ -1604,25 +1599,6 @@ export interface StorageTarget {
   deletedAt?: string | null;
 }
 /**
- * 第三方集成凭证 Catalog（Unsplash 等）。在「集成设置」中多选一启用。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "integration-credentials".
- */
-export interface IntegrationCredential {
-  id: number;
-  name: string;
-  type: 'unsplash';
-  /**
-   * Access Key / API Key（加密存储）
-   */
-  apiKey: string;
-  enabled?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
  * 邮件通道 Catalog（Resend / SMTP）。在「邮件设置」中选中一条为 Active。保存后需重启进程才能切换发信通道。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2383,12 +2359,6 @@ export interface PayloadMcpApiKey {
      */
     find?: boolean | null;
   };
-  integrationCredentials?: {
-    /**
-     * Allow clients to find integration-credentials.
-     */
-    find?: boolean | null;
-  };
   emailTransports?: {
     /**
      * Allow clients to find email-transports.
@@ -2496,16 +2466,6 @@ export interface PayloadMcpApiKey {
     find?: boolean | null;
     /**
      * Allow clients to update storage-settings global.
-     */
-    update?: boolean | null;
-  };
-  integrationSettings?: {
-    /**
-     * Allow clients to find integration-settings global.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update integration-settings global.
      */
     update?: boolean | null;
   };
@@ -2773,10 +2733,6 @@ export interface PayloadLockedDocument {
         value: number | StorageTarget;
       } | null)
     | ({
-        relationTo: 'integration-credentials';
-        value: number | IntegrationCredential;
-      } | null)
-    | ({
         relationTo: 'email-transports';
         value: number | EmailTransport;
       } | null)
@@ -2951,7 +2907,6 @@ export interface PayloadQueryPreset {
     | 'llm-providers'
     | 'prompt-templates'
     | 'storage-targets'
-    | 'integration-credentials'
     | 'email-transports'
     | 'comments'
     | 'api-access-logs'
@@ -3605,19 +3560,6 @@ export interface StorageTargetsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "integration-credentials_select".
- */
-export interface IntegrationCredentialsSelect<T extends boolean = true> {
-  name?: T;
-  type?: T;
-  apiKey?: T;
-  enabled?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-transports_select".
  */
 export interface EmailTransportsSelect<T extends boolean = true> {
@@ -4208,11 +4150,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | {
         find?: T;
       };
-  integrationCredentials?:
-    | T
-    | {
-        find?: T;
-      };
   emailTransports?:
     | T
     | {
@@ -4274,12 +4211,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         update?: T;
       };
   storageSettings?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  integrationSettings?:
     | T
     | {
         find?: T;
@@ -4635,21 +4566,6 @@ export interface StorageSetting {
   createdAt?: string | null;
 }
 /**
- * 第三方集成 Active 层。Unsplash 切换即时生效，无需重启。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "integration-settings".
- */
-export interface IntegrationSetting {
-  id: number;
-  /**
-   * 多套 Unsplash Key 中选一；未选则导入功能不可用
-   */
-  activeUnsplash?: (number | null) | IntegrationCredential;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
  * 邮件 Active 层：选择发信通道与默认发件人。切换通道后请重启 Node 进程，邮件适配器才会生效。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4834,16 +4750,6 @@ export interface StorageSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "integration-settings_select".
- */
-export interface IntegrationSettingsSelect<T extends boolean = true> {
-  activeUnsplash?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-settings_select".
  */
 export interface EmailSettingsSelect<T extends boolean = true> {
@@ -4917,7 +4823,6 @@ export interface TaskCreateCollectionExport {
       | 'llm-providers'
       | 'prompt-templates'
       | 'storage-targets'
-      | 'integration-credentials'
       | 'email-transports'
       | 'comments'
       | 'api-access-logs'

@@ -20,7 +20,7 @@
 | MCP plugin | **Keep**（副通道） |
 | 字段 AI（Field Assist / Suggest / SEO 面板 / Lexical rewrite） | **理论可删**，用于显著减少 Collection/字段定制面 |
 | AI Canvases | **已删**（2026-08-27；与 Agent + Prompt 三重叠） |
-| Unsplash 图库引用 | **建议删**（非必须；外站图库集成，维护密钥/API/Agent 工具成本） |
+| Unsplash 图库引用 | **已删**（2026-08-27；配图走 Media / OSS 上传） |
 | Stats / Dev Docs 内嵌 | **建议删或迁出** |
 | **自研 Admin Nav** | **建议回归官方 Nav**（分组嵌入损失可接受） |
 | 侧栏自定义入口（现 4 条） | **清理**；需要时 Agent 快捷方式 / 问 Agent 指路 |
@@ -67,7 +67,7 @@
 | 能力 | 路径（示意） | 理由 |
 |------|----------------|------|
 | AI Canvases | `src/ai/canvas/`、`AdminAiCanvases/`、`AiCanvases`、`admin/ai-canvases/`、`api/ai/canvases/**` | **已删**（2026-08-27） |
-| **Unsplash 图库** | `src/unsplash/`、`api/admin/unsplash/**`、`UnsplashImportPill`、`ai/agent/stockImages.ts`、`AgentStockImageResults`、IntegrationSettings / credentials 中 Unsplash 相关 | **非必须**；配图走 Media 上传 / OSS 即可。删后去掉外站 API、密钥与 Agent stock-image 工具链路 |
+| **Unsplash 图库** | `src/unsplash/`、`api/admin/unsplash/**`、`UnsplashImportPill`、`ai/agent/stockImages.ts`、`AgentStockImageResults`、IntegrationSettings / credentials 中 Unsplash 相关 | **已删**（2026-08-27）；已导入 Media 保留 |
 | 内容统计页 | `admin/stats/`、`admin-stats/` | Agent 已有 `get_site_stats` |
 | 二次开发文档 | `docs/dev-docs.md` | **已迁出**（2026-08-14）；Admin `/dev-docs` 已删除 |
 
@@ -92,12 +92,7 @@
 3. **不必**再上 `afterNavLinks` 硬挂一堆入口（除非极少数常点页）；默认「问 Agent / Agent 快捷方式」。  
 4. 可选：在 Agent 系统提示或聊天欢迎区写明常用能力（清缓存、看统计、打开某配置），代替侧栏发现。
 
-**Unsplash 将来删时注意（本文件不执行）：**
-
-1. 去掉 Media / ListView 上的 `UnsplashImportPill` 等入口。
-2. 从 Agent `tools` / `systemPrompt` / chat UI 移除 stock image 搜索与导入工具及结果卡片。
-3. 删除 `api/admin/unsplash/*` 与 `src/unsplash/**`。
-4. 清理 Integration 配置里 Unsplash 字段与文档引用；已导入的 Media 文件可保留（只是历史来源）。
+**Unsplash 已删（2026-08-27）：** Media 列表 Unsplash 入口、Agent stock 工具、API、`src/unsplash/**`、`integration-credentials` / `integration-settings` 均已移除。已导入的 Media 文件保留。
 
 ### 3.4 可瘦身 / 可删页（入口交给 Agent）
 
@@ -133,14 +128,13 @@
 | Gallery 图片 Join | `src/components/Galleries/GalleryItemsJoinField` | 相册内图片关联编辑 | Keep（业务） |
 | 主题预览字段 | `src/components/FrontendThemePreview/` | 站点设置里主题卡片预览 | Keep（配置 UX） |
 | Header / Footer RowLabel | `src/Header/RowLabel`、`src/Footer/RowLabel` | 导航行标签显示 | Keep（小） |
-| AdminListView | `src/components/AdminListView/` + `enableListRefreshButtonPlugin` | 现：列表注入「刷新」+ Unsplash；**Unsplash 删除后只剩刷新** | **建议连 ListView 包装一起删**（刷新非刚需，浏览器/再进页即可）；若保留则只留 `AdminListRefreshPill`，勿再挂 Unsplash |
+| AdminListView | `src/components/AdminListView/` + 刷新按钮 | 曾注入刷新 | **已删**（2026-08-27）；列表回官方 DefaultListView |
 
 #### 与壳相关、但不在 Admin importMap 主路径
 
 | 项 | 路径 | 说明 |
 |----|------|------|
 | 前台 AdminBar | `src/components/AdminBar/` | 挂在前台 layout，预览/快捷进后台；跟升影响小 |
-| 列表刷新按钮 | `src/components/AdminListRefreshButton/` | 被 `AdminListView` 使用 |
 
 #### 削减后 importMap 自建条数（示意）
 
@@ -148,7 +142,7 @@
 |------|----------|
 | 品牌壳（Logo/Icon/Avatar/Theme/Before*/Cards） | ~7 |
 | 业务字段（图库×2、主题预览、RowLabel×2） | ~5 |
-| AdminListView（Unsplash 已删且连包装也删时） | **0** |
+| AdminListView | **0**（已删） |
 | Agent（Provider ± 全屏 View） | 1～2 |
 | **合计** | **~11～14**（相对现在 ~27；约砍一半） |
 
@@ -165,7 +159,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 ## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
 1. 字段 AI：摘掉 `withAi*` → 删 UI → 清理仅字段用 API（**减定制收益最大**）。
-2. Stats / Unsplash 按 §3.3 删除（AI Canvases、Dev Docs 已删）。
+2. Stats 按 §3.3 删除（AI Canvases、Dev Docs、Unsplash 已删）。
 3. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
 4. **Nav 回归官方**：去掉自研 `AdminNav` / `admin-nav`；不强制 `afterNavLinks`。
 5. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
@@ -179,7 +173,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 | 自定义侧栏项 | 4（已去掉二次开发文档与 AI 画布） | **0** |
 | 自定义 View | 4（已去掉 dev-docs 与 AI 画布） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
 | 自研 Nav | 有 | **无**（官方） |
-| 字段 AI / Unsplash 等 | 有 | **无** |
+| 字段 AI 等 | 有 | **无** |
 
 **还留的 Admin UI 定制（按块）：**
 
@@ -201,7 +195,6 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - Admin 组件注册：`src/payload.config.ts` → `admin.components` / `admin.avatar`
 - AI 开关与配置：`AiSettings` / `src/ai/settings.ts`
 - 字段 AI 挂载：各 collection 中对 `@/fields/ai` 的引用
-- Unsplash：`src/unsplash/`、`api/admin/unsplash/**`、Agent `stockImages` / `AgentStockImageResults`
 
 ---
 
@@ -216,3 +209,5 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-08-14 — 二次开发文档已迁至 `docs/dev-docs.md`，Admin `/dev-docs` 与侧栏入口已删除。
 - 2026-08-20 — 精简（含 AI Canvases）改到 Payload 4.0 升级时再删，当前不改代码。
 - 2026-08-27 — AI Canvases 已删除（Collection / View / API / Agent 工具 / @xyflow/react）；Postgres 迁移 `20260827_120000_drop_ai_canvases`。
+- 2026-08-27 — Unsplash 已删除（API / Agent stock 工具 / 凭证 Catalog / Global）；Postgres 迁移 `20260827_140000_drop_unsplash_integrations`。
+- 2026-08-27 — 列表刷新按钮与 AdminListView 包装已删，列表回官方 DefaultListView。

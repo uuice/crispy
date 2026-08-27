@@ -20,7 +20,6 @@ export const PERMISSION_CATALOG = [
   { value: 'settings:ai', label: 'AI 设置', group: 'settings' },
   { value: 'settings:comment', label: '评论设置', group: 'settings' },
   { value: 'settings:storage', label: '存储设置', group: 'settings' },
-  { value: 'settings:integration', label: '集成设置', group: 'settings' },
   { value: 'settings:email', label: '邮件设置', group: 'settings' },
   { value: 'catalog:secrets', label: '密钥类 Catalog', group: 'catalog' },
   { value: 'catalog:prompts:read', label: '查看 Prompt 模板', group: 'catalog' },

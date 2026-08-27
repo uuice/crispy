@@ -30,9 +30,9 @@ import { AdminCustomViewStepNav } from '@/components/AdminCustomViewStepNav'
 
 5. `pnpm cli generate:importmap`
 
-## 列表页轻量定制
+## 列表页
 
-仅注入按钮等 → 包一层 `DefaultListView`（参考 `AdminListView` + `enableListRefreshButtonPlugin`），不要重写列表逻辑。
+不要包一层 `DefaultListView` 只为注入按钮。标准列表用官方视图。
 
 ## 权限
 

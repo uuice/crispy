@@ -9,7 +9,6 @@ import { AppConfigs } from './collections/AppConfigs'
 import { LlmProviders } from './collections/LlmProviders'
 import { PromptTemplates } from './collections/PromptTemplates'
 import { StorageTargets } from './collections/StorageTargets'
-import { IntegrationCredentials } from './collections/IntegrationCredentials'
 import { EmailTransports } from './collections/EmailTransports'
 import { Comments } from './collections/Comments'
 import { Galleries } from './collections/Galleries'
@@ -35,7 +34,6 @@ import { SiteSettings } from './SiteSettings/config'
 import { AiSettings } from './AiSettings/config'
 import { CommentSettings } from './CommentSettings/config'
 import { StorageSettings } from './StorageSettings/config'
-import { IntegrationSettings } from './IntegrationSettings/config'
 import { EmailSettings } from './EmailSettings/config'
 import { NovelCategories } from './collections/NovelCategories'
 import { NovelChapters } from './collections/NovelChapters'
@@ -191,7 +189,6 @@ export default buildConfig({
     LlmProviders,
     PromptTemplates,
     StorageTargets,
-    IntegrationCredentials,
     EmailTransports,
     Comments,
     ApiAccessLogs,
@@ -221,7 +218,6 @@ export default buildConfig({
     CommentSettings,
     CacheSettings,
     StorageSettings,
-    IntegrationSettings,
     EmailSettings,
   ],
   plugins,

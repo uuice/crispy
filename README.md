@@ -83,7 +83,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（novels、redirects、forms 等） |
 | **前台可插拔主题** | blog / cms / kb，`site-settings` 或 `?theme_preview=` 切换 |
 | **字段 AI** | 润色、SEO、智能填充（DeepSeek / OpenAI 兼容） |
-| **后台 AI 助手** | `/admin/ai-agent` — CRUD、语义搜索、缓存、Unsplash 导入 |
+| **后台 AI 助手** | `/admin/ai-agent` — CRUD、语义搜索、缓存 |
 | **前台 AI 助手** | 公开只读检索，无需登录 |
 | **审计日志** | 写操作记录至 `audit-logs` |
 | **前台 DB 缓存** | HTML 路由缓存，`/admin/cache` 手动清除 |

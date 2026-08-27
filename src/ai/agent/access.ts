@@ -144,12 +144,6 @@ const COLLECTION_PERMISSIONS: Record<string, Partial<Record<AgentOp, Permission[
     update: ['catalog:secrets'],
     delete: ['catalog:secrets'],
   },
-  'integration-credentials': {
-    read: ['catalog:secrets'],
-    create: ['catalog:secrets'],
-    update: ['catalog:secrets'],
-    delete: ['catalog:secrets'],
-  },
   'email-transports': {
     read: ['catalog:secrets'],
     create: ['catalog:secrets'],
@@ -178,7 +172,6 @@ const GLOBAL_UPDATE_PERMISSION: Record<string, Permission> = {
   'comment-settings': 'settings:comment',
   'ai-settings': 'settings:ai',
   'storage-settings': 'settings:storage',
-  'integration-settings': 'settings:integration',
   'email-settings': 'settings:email',
 }
 
@@ -187,7 +180,6 @@ const GLOBAL_READ_ANY: Permission[] = [
   'settings:comment',
   'settings:ai',
   'settings:storage',
-  'settings:integration',
   'settings:email',
   'pages:manage',
   'ops:manage',

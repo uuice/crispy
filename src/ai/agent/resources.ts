@@ -66,11 +66,6 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     description: 'S3/OSS 目标 Catalog（密钥加密；catalog:secrets；切换 Active 后需重启）',
   },
   {
-    slug: 'integration-credentials',
-    label: '集成凭证',
-    description: 'Unsplash 等第三方凭证 Catalog（密钥加密；catalog:secrets）',
-  },
-  {
     slug: 'email-transports',
     label: '邮件通道',
     description: 'Resend / SMTP Catalog（密钥加密；catalog:secrets；切换 Active 后需重启）',
@@ -101,7 +96,7 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     label: '表单提交',
     description: '前台提交的表单记录（只读查询与删除，不可通过助手创建或修改）',
   },
-  { slug: 'media', label: '媒体', description: '图片与文件（不可删除；可通过 search_stock_images + import_stock_image 从 Unsplash 导入）' },
+  { slug: 'media', label: '媒体', description: '图片与文件（不可删除；请在 Admin 媒体库上传）' },
 ]
 
 export const AGENT_GLOBALS: AgentManagedGlobal[] = [
@@ -128,11 +123,6 @@ export const AGENT_GLOBALS: AgentManagedGlobal[] = [
     slug: 'storage-settings',
     label: '存储设置',
     description: 'local / S3 模式与 Active 存储目标（切换 S3 后需重启）',
-  },
-  {
-    slug: 'integration-settings',
-    label: '集成设置',
-    description: 'Unsplash 等 Active 凭证（即时生效）',
   },
   {
     slug: 'email-settings',

@@ -32,12 +32,6 @@ import {
 } from '@/frontend-cache/cacheToolHandlers'
 import { trashOrDeleteDocument, restoreTrashedDocument } from '@/utilities/trashOrDeleteDocument'
 import { resolveAgentListSelect } from '@/ai/agent/listSelect'
-import {
-  formatStockSearchForAgentLlm,
-  importStockImageForAgent,
-  importStockImagesForAgent,
-  searchStockImagesForAgent,
-} from '@/ai/agent/stockImages'
 import { bulkAddGalleryImages } from '@/utilities/bulkAddGalleryImages'
 import {
   formatAgentPermissions,
@@ -59,7 +53,7 @@ function sanitizeGlobalResult(slug: string, data: Record<string, unknown>): Reco
   return {
     ...data,
     apiKeyNote:
-      'API Key 在 llm-providers / integration-credentials / email-transports / storage-targets 中加密存储，不在 Global 明文保存',
+      'API Key 在 llm-providers / email-transports / storage-targets 中加密存储，不在 Global 明文保存',
     promptsNote: 'Prompt 模板见 Collection prompt-templates，不在 ai-settings 内嵌',
   }
 }
@@ -448,96 +442,6 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
   {
     type: 'function',
     function: {
-      name: 'search_stock_images',
-      description:
-        '从 Unsplash 检索可导入 media 媒体库的图片（需 Admin 集成设置 Active Unsplash）。返回 photoId、缩略图与 downloadLocation。用户说「N 张」时必须传 limit: N。展示结果后须询问用户要导入哪些；用户确认后再 import_stock_image，或让用户点击聊天中的「加入图库」按钮。',
-      parameters: {
-        type: 'object',
-        properties: {
-          keyword: { type: 'string', description: '可选，额外搜索关键词' },
-          topic: {
-            type: 'string',
-            description:
-              '主题：all、nature、business、people、technology、food、architecture、abstract',
-          },
-          style: {
-            type: 'string',
-            description:
-              '风格：all、anime、manga、illustration、cartoon、watercolor、minimalist、vintage、cyberpunk、pixel、sketch、3d',
-          },
-          orientation: {
-            type: 'string',
-            enum: ['landscape', 'portrait', 'squarish'],
-            description: '可选，图片比例',
-          },
-          limit: {
-            type: 'number',
-            description: '返回张数；用户要求 N 张时传 N，默认 10，最大 30',
-          },
-          page: { type: 'number', description: '页码，默认 1' },
-        },
-        required: [],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'import_stock_image',
-      description:
-        '将单张 Unsplash 图片导入 media。多图请优先 import_stock_images。userConfirmed 必须为 true。',
-      parameters: {
-        type: 'object',
-        properties: {
-          photoId: { type: 'string', description: 'search_stock_images 返回的 photoId' },
-          downloadLocation: {
-            type: 'string',
-            description: 'search_stock_images 返回的 downloadLocation',
-          },
-          alt: { type: 'string', description: '可选，media 的 alt 文本' },
-          userConfirmed: {
-            type: 'boolean',
-            description: '必须为 true，表示用户已明确确认导入',
-          },
-        },
-        required: ['photoId', 'downloadLocation', 'userConfirmed'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'import_stock_images',
-      description:
-        '批量将多张 Unsplash 图片导入 media（单次最多 10 张）。photos 须来自最近一次 search_stock_images 的 photoId + downloadLocation。userConfirmed 必须为 true。',
-      parameters: {
-        type: 'object',
-        properties: {
-          photos: {
-            type: 'array',
-            description: '待导入图片列表',
-            items: {
-              type: 'object',
-              properties: {
-                photoId: { type: 'string' },
-                downloadLocation: { type: 'string' },
-                alt: { type: 'string' },
-              },
-              required: ['photoId', 'downloadLocation'],
-            },
-          },
-          userConfirmed: {
-            type: 'boolean',
-            description: '必须为 true，表示用户已明确确认导入',
-          },
-        },
-        required: ['photos', 'userConfirmed'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
       name: 'bulk_add_gallery_images',
       description:
         '将已有 media ID 批量加入指定图库（galleries），自动创建 gallery-items；已在该图库中的图片会跳过。单次最多 50 张。',
@@ -563,7 +467,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'get_global',
       description:
-        '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings、storage-settings、integration-settings、email-settings）',
+        '读取全局配置（header、footer、site-settings、comment-settings、cache-settings、ai-settings、storage-settings、email-settings）',
       parameters: {
         type: 'object',
         properties: {
@@ -934,18 +838,6 @@ export async function executeAgentTool(
       break
     }
 
-    case 'search_stock_images':
-      result = await searchStockImagesForAgent(req, args)
-      break
-
-    case 'import_stock_image':
-      result = await importStockImageForAgent(req, args)
-      break
-
-    case 'import_stock_images':
-      result = await importStockImagesForAgent(req, args)
-      break
-
     case 'bulk_add_gallery_images': {
       const galleryId = args.galleryId as string | number
       await assertAgentCollectionAccess(req, 'galleries', 'update', galleryId)
@@ -968,14 +860,6 @@ export async function executeAgentTool(
 
     default:
       throw new Error(`未知工具：${toolCall.name}`)
-  }
-
-  if (toolCall.name === 'search_stock_images') {
-    const full = result as Awaited<ReturnType<typeof searchStockImagesForAgent>>
-    return {
-      content: JSON.stringify(formatStockSearchForAgentLlm(full)),
-      summary: full,
-    }
   }
 
   const truncated = truncateResult(result)
