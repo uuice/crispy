@@ -3,8 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { withAiTextField, withAiTextareaField } from '@/fields/ai'
-
 import { galleriesReadAccess } from './access'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import {
@@ -35,18 +33,18 @@ export const Galleries: CollectionConfig = {
     afterChange: [syncGalleryBulkImagesAfterChange],
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
+    },
     chineseSlugField(),
-    withAiTextareaField({
+    {
       name: 'description',
       type: 'textarea',
       label: adminLabels.description,
-    }),
+    },
     {
       name: 'cover',
       type: 'upload',

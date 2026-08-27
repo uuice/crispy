@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { withAiTextField, withAiTextareaField } from '@/fields/ai'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const LinkGroups: CollectionConfig = {
@@ -23,17 +22,17 @@ export const LinkGroups: CollectionConfig = {
   },
   defaultSort: 'sort',
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
-    withAiTextareaField({
+    },
+    {
       name: 'description',
       type: 'textarea',
       label: adminLabels.description,
-    }),
+    },
     {
       name: 'sort',
       type: 'number',

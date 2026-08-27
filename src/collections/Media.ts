@@ -8,7 +8,6 @@ import { anyone } from '../access/anyone'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { mediaCreateAccess, mediaDeleteAccess, mediaUpdateAccess } from '../access/media'
 import { adminLabels } from '@/i18n/admin-labels'
-import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 import { setMediaOssDatePrefix } from '@/hooks/setMediaOssDatePrefix'
 import { presentMediaOssUrlsAfterRead } from '@/hooks/presentMediaOssUrlsAfterRead'
@@ -44,21 +43,17 @@ export const Media: CollectionConfig = {
     afterOperation: [syncOssVirtualSizesAfterOperation],
   },
   fields: [
-    withAiTextField(
-      {
-        name: 'alt',
-        type: 'text',
-        label: adminLabels.alt,
-      },
-      { contentFieldPaths: 'caption', titleFieldPath: 'alt' },
-    ),
+    {
+      name: 'alt',
+      type: 'text',
+      label: adminLabels.alt,
+    },
     {
       name: 'caption',
       type: 'richText',
       label: adminLabels.caption,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature()]),
+        features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature()],
       }),
     },
   ],

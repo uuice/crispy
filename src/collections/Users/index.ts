@@ -12,26 +12,20 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { can } from '@/access/can'
 import { ROLES_SLUG } from '@/access/collectionSlugs'
 import { ensureSystemRoles, findRoleIdBySlug } from '@/access/ensureSystemRoles'
-import {
-  deleteUserAuthzCache,
-  getUserAuthz,
-  recomputeAndCacheUserAuthz,
-} from '@/access/authzCache'
+import { deleteUserAuthzCache, getUserAuthz, recomputeAndCacheUserAuthz } from '@/access/authzCache'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { withAiRewriteFeatures } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 import { adminLabels } from '@/i18n/admin-labels'
 
 const authorBioDetailEditor = lexicalEditor({
-  features: ({ rootFeatures }) =>
-    withAiRewriteFeatures([
-      ...rootFeatures,
-      HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-      BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
-      FixedToolbarFeature(),
-    ]),
+  features: ({ rootFeatures }) => [
+    ...rootFeatures,
+    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+    FixedToolbarFeature(),
+  ],
 })
 
 export const Users: CollectionConfig = {
@@ -64,7 +58,10 @@ export const Users: CollectionConfig = {
       createSanitizeLexicalHook(['bioDetail']),
       async ({ data, operation, req }) => {
         if (!data) return data
-        if (operation === 'create' && (!data.roles || (Array.isArray(data.roles) && data.roles.length === 0))) {
+        if (
+          operation === 'create' &&
+          (!data.roles || (Array.isArray(data.roles) && data.roles.length === 0))
+        ) {
           await ensureSystemRoles(req.payload)
           const authorId = await findRoleIdBySlug(req.payload, 'author')
           if (authorId != null) data.roles = [authorId]

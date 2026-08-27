@@ -1505,7 +1505,7 @@ export interface LlmProvider {
    */
   defaultModel: string;
   /**
-   * 该端点支持的能力；字段 AI / Agent 需 chat；语义搜索需 embedding
+   * 该端点支持的能力；Agent / 前台助手需 chat；语义搜索需 embedding
    */
   capabilities?: ('chat' | 'embedding')[] | null;
   /**
@@ -1518,7 +1518,7 @@ export interface LlmProvider {
   deletedAt?: string | null;
 }
 /**
- * 字段 AI 技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。
+ * 可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中维护。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "prompt-templates".
@@ -4478,11 +4478,11 @@ export interface SiteSetting {
 export interface AiSetting {
   id: number;
   /**
-   * 关闭后字段 AI / Agent / 前台助手均不可用。
+   * 关闭后 Agent / 前台助手均不可用。
    */
   enabled?: boolean | null;
   /**
-   * 全局默认聊天 LLM（多选一）。未配置则字段 AI / Agent / 助手不可用。
+   * 全局默认聊天 LLM（多选一）。未配置则 Agent / 助手不可用。
    */
   defaultProvider?: (number | null) | LlmProvider;
   /**

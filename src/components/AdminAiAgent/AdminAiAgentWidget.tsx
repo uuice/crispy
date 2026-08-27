@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { type AuthzUserShape, userHasPermissionSync } from '@/access/can'
-import { AiIcon } from '@/components/AdminAi/AiIcon'
+import { AiIcon } from '@/components/AiIcon'
 
 import { useAdminAiAgent } from './AdminAiAgentContext'
 import { AdminAiAgentChatPanel } from './AdminAiAgentChatPanel'

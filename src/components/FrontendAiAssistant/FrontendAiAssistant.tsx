@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { AiIcon } from '@/components/AdminAi/AiIcon'
+import { AiIcon } from '@/components/AiIcon'
 import { frontendLabels } from '@/i18n/frontend-labels'
 
 import type { FrontendAssistantMessage } from './useFrontendAiAssistant'

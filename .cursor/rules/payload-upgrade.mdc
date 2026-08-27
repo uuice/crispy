@@ -14,7 +14,7 @@ alwaysApply: false
 4. `pnpm cli quality:ci`
 5. Admin 冒烟: 登录、列表、编辑、回收站、版本还原
 6. Plugin: Query Presets
-7. AI：Admin 字段 AI / `/admin/ai-agent`；MCP 端点可连通
+7. AI：`/admin/ai-agent`；MCP 端点可连通
 8. Postgres 环境再跑 migrate + test:int
 
 ## 升级风险信号

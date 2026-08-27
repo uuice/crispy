@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { AiIcon } from '@/components/AdminAi/AiIcon'
+import { AiIcon } from '@/components/AiIcon'
 
 import type { AgentDisplayMessage } from './useAiAgentChat'
 import { useAdminAiAgent } from './AdminAiAgentContext'

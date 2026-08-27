@@ -5,7 +5,6 @@ import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/
 import { requirePermission } from '@/access/can'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import { adminLabels } from '@/i18n/admin-labels'
-import { withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import { jobsReadAccess } from './access'
@@ -31,12 +30,12 @@ export const Jobs: CollectionConfig = {
     beforeValidate: [createSanitizeLexicalHook(['description', 'requirements'])],
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
+    },
     chineseSlugField({
       position: 'sidebar',
     }),
@@ -81,12 +80,11 @@ export const Jobs: CollectionConfig = {
       label: adminLabels.jobDescription,
       required: true,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([
-            ...rootFeatures,
-            FixedToolbarFeature(),
-            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          ]),
+        features: ({ rootFeatures }) => [
+          ...rootFeatures,
+          FixedToolbarFeature(),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+        ],
       }),
     },
     {
@@ -94,12 +92,11 @@ export const Jobs: CollectionConfig = {
       type: 'richText',
       label: adminLabels.jobRequirements,
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([
-            ...rootFeatures,
-            FixedToolbarFeature(),
-            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          ]),
+        features: ({ rootFeatures }) => [
+          ...rootFeatures,
+          FixedToolbarFeature(),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+        ],
       }),
     },
     {

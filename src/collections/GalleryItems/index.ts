@@ -2,8 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
-
 import { galleryItemsReadAccess } from './access'
 import { fillGalleryItemTitleFromMedia } from './hooks/fillTitleFromMedia'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
@@ -39,19 +37,17 @@ export const GalleryItems: CollectionConfig = {
         position: 'sidebar',
       },
     },
-    withAiTextField(
-      {
-        name: 'title',
-        type: 'text',
-        label: adminLabels.title,
-        hooks: {
-          beforeValidate: [fillGalleryItemTitleFromMedia],
-        },
-        admin: {
-          description: '可空；空则保存时用媒体 alt / 文件名。',
-        },
+    {
+      name: 'title',
+      type: 'text',
+      label: adminLabels.title,
+      hooks: {
+        beforeValidate: [fillGalleryItemTitleFromMedia],
       },
-    ),
+      admin: {
+        description: '可空；空则保存时用媒体 alt / 文件名。',
+      },
+    },
     {
       name: 'image',
       type: 'upload',
@@ -59,15 +55,11 @@ export const GalleryItems: CollectionConfig = {
       relationTo: 'media',
       required: true,
     },
-    aiSuggestAssistField({ contentFieldPaths: 'description' }),
-    withAiTextareaField(
-      {
-        name: 'description',
-        type: 'textarea',
-        label: adminLabels.description,
-      },
-      { contentFieldPaths: 'description' },
-    ),
+    {
+      name: 'description',
+      type: 'textarea',
+      label: adminLabels.description,
+    },
     {
       name: 'sort',
       type: 'number',

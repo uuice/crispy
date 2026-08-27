@@ -5,8 +5,6 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { withAiTextField } from '@/fields/ai'
-
 export const Categories: CollectionConfig = {
   slug: 'categories',
   labels: adminLabels.categories,
@@ -22,12 +20,12 @@ export const Categories: CollectionConfig = {
     hidden: hideUnlessAnyPermission('taxonomy:manage'),
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
+    },
     chineseSlugField({
       position: undefined,
     }),

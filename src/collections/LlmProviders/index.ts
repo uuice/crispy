@@ -95,7 +95,7 @@ export const LlmProviders: CollectionConfig = {
         { label: 'Embedding', value: 'embedding' },
       ],
       admin: {
-        description: '该端点支持的能力；字段 AI / Agent 需 chat；语义搜索需 embedding',
+        description: '该端点支持的能力；Agent / 前台助手需 chat；语义搜索需 embedding',
       },
     },
     {

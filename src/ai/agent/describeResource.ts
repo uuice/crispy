@@ -140,7 +140,7 @@ const COLLECTION_HINTS: Record<string, string[]> = {
   pages: ['发布草稿：_status 设为 published'],
   comments: ['审核：status 为 pending/approved/rejected/spam'],
   'prompt-templates': [
-    '字段 AI 按 action 匹配启用模板（同 action 多条时取 sort 最小）',
+    '按 action 匹配启用模板（同 action 多条时取 sort 最小）',
     '必填：title、action、systemPrompt、userPrompt；slug 可自动生成',
     'action：polish | expand | shorten | custom | seo_title | seo_description | rewrite | suggest_taxonomy',
     'provider / model / temperature / maxTokens 可空 = 跟 AI 设置全局默认',

@@ -18,7 +18,7 @@ export const PromptTemplates: CollectionConfig = {
     defaultColumns: ['title', 'action', 'provider', 'model', 'enabled', 'updatedAt'],
     group: adminLabels.configGroup,
     description:
-      '字段 AI 技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。',
+      '可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中维护。',
   },
   versions: false,
   trash: true,

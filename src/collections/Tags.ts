@@ -5,8 +5,6 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
-
 export const Tags: CollectionConfig = {
   slug: 'tags',
   labels: adminLabels.tags,
@@ -23,21 +21,17 @@ export const Tags: CollectionConfig = {
     hidden: hideUnlessAnyPermission('taxonomy:manage'),
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
-    aiSuggestAssistField({ contentFieldPaths: 'description' }),
-    withAiTextareaField(
-      {
-        name: 'description',
-        type: 'textarea',
-        label: adminLabels.description,
-      },
-      { contentFieldPaths: 'description' },
-    ),
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      label: adminLabels.description,
+    },
     chineseSlugField({
       position: undefined,
     }),

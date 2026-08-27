@@ -9,7 +9,7 @@
 - 1G 永久机 **不跑 Node**，只提供 HTTPS 访客站。
 - 前台 HTML 尽量与当前主题一致（由现有 Next 渲染后导出，不用 Go 重写皮肤）。
 - 短链、URL 重定向、前台 AI 浮窗在 1G 上仍可用。
-- Payload `/admin`、字段 AI、后台 Agent 仍用当前 Crispy，仅在发文时于本机打开。
+- Payload `/admin`、后台 Agent 仍用当前 Crispy，仅在发文时于本机打开。
 
 ## 2. 架构
 
@@ -154,7 +154,7 @@ rsync -av --delete ./export/ user@1g:/var/www/blog/
 - 1G 上 PM2 + Crispy / SQLite 常驻整站
 - Go 解析 Lexical、实现 blog / cms / kb
 - 导出整库、在 Go 里当 CMS
-- 语义搜索、后台 Agent、字段 AI 上 1G
+- 语义搜索、后台 Agent 上 1G
 - 评论 / 表单 / Live Preview 上 1G
 
 ## 11. 风险

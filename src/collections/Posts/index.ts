@@ -26,12 +26,6 @@ import {
   createSyncContentEmbeddingHook,
 } from '@/hooks/syncContentEmbeddingHook'
 import { adminLabels } from '@/i18n/admin-labels'
-import {
-  aiSeoAssistField,
-  aiSuggestAssistField,
-  withAiRewriteFeatures,
-  withAiTextField,
-} from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import {
@@ -89,12 +83,12 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       required: true,
       label: adminLabels.title,
-    }),
+    },
     {
       type: 'tabs',
       tabs: [
@@ -109,13 +103,12 @@ export const Posts: CollectionConfig<'posts'> = {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
-                features: ({ rootFeatures }) =>
-                  withAiRewriteFeatures([
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
-                    FixedToolbarFeature(),
-                  ]),
+                features: ({ rootFeatures }) => [
+                  ...rootFeatures,
+                  HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                  BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+                  FixedToolbarFeature(),
+                ],
               }),
               label: false,
               required: true,
@@ -125,7 +118,6 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         {
           fields: [
-            aiSuggestAssistField({ contentFieldPaths: 'content' }),
             {
               name: 'relatedPosts',
               type: 'relationship',
@@ -170,7 +162,6 @@ export const Posts: CollectionConfig<'posts'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
-            aiSeoAssistField({ contentFieldPaths: 'content' }),
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',

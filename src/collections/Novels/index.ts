@@ -4,7 +4,6 @@ import { novelsReadAccess, novelsWriteAccess } from '@/access/novels'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { adminLabels } from '@/i18n/admin-labels'
 import { chineseSlugField } from '@/fields/chineseSlugField'
-import { aiSuggestAssistField, withAiTextField } from '@/fields/ai'
 import {
   createRemoveContentEmbeddingHook,
   createSyncContentEmbeddingHook,
@@ -29,20 +28,12 @@ export const Novels: CollectionConfig<'novels'> = {
     hidden: hideUnlessAnyPermission('novels:manage', 'novels:read:all'),
   },
   fields: [
-    withAiTextField(
-      {
-        name: 'title',
-        type: 'text',
-        label: adminLabels.novelTitle,
-        required: true,
-      },
-      {
-        contentFieldPaths: ['synopsis', 'genre', 'plotOutline', 'writingStyle'],
-      },
-    ),
-    aiSuggestAssistField({
-      contentFieldPaths: ['synopsis', 'writingStyle', 'worldBuilding', 'plotOutline'],
-    }),
+    {
+      name: 'title',
+      type: 'text',
+      label: adminLabels.novelTitle,
+      required: true,
+    },
     chineseSlugField(),
     {
       name: 'enabled',

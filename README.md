@@ -57,9 +57,6 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | ---- | ---- | ---- | ---- |
 | `/api/openapi.json` | GET | Admin 登录 | OpenAPI 3.0 文档（动态生成） |
 | `/admin/api-docs` | GET | Admin 登录 | Swagger UI |
-| `/api/ai/stream` | POST | Admin | 字段 AI 流式输出 |
-| `/api/ai/complete` | POST | Admin | 字段 AI 一次性补全 |
-| `/api/ai/structured` | POST | Admin | 字段 AI 结构化 JSON |
 | `/api/ai/agent` | POST | Admin | 后台对话助手 SSE（Function Calling CRUD） |
 | `/api/ai/agent/sessions` | GET/DELETE | Admin | 助手会话列表 / 删除 |
 | `/api/ai/assistant` | GET/POST | **公开** | 前台只读检索助手（SSE） |
@@ -82,7 +79,6 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | **Import/Export 扩展** | 含 gallery-items、short-links、redirects、forms、novels 等 |
 | **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（novels、redirects、forms 等） |
 | **前台可插拔主题** | blog / cms / kb，`site-settings` 或 `?theme_preview=` 切换 |
-| **字段 AI** | 润色、SEO、智能填充（DeepSeek / OpenAI 兼容） |
 | **后台 AI 助手** | `/admin/ai-agent` — CRUD、语义搜索、缓存 |
 | **前台 AI 助手** | 公开只读检索，无需登录 |
 | **审计日志** | 写操作记录至 `audit-logs` |

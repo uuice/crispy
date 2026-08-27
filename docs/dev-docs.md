@@ -40,8 +40,7 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 | GraphQL API | POST /api/graphql（按 Collection access） |
 | GraphQL Playground | /api/graphql-playground（需 Admin 登录） |
 | MCP | http://localhost:3333/api/mcp |
-| AI 流式 | POST /api/ai/stream（需 Admin 登录） |
-| AI 助手（后台） | /admin/ai-agent（需 Admin 登录） |
+| AI 助手（后台） | /admin/ai-agent + POST /api/ai/agent（需 Admin 登录） |
 | AI 助手（前台） | 右下角浮窗 + POST /api/ai/assistant（公开只读） |
 | 前台主题预览 | ?theme_preview=blog\|cms\|kb（需 settings:site\|pages:manage\|ops:manage） |
 | AI 文档 | #openai-api |
@@ -110,11 +109,9 @@ crispy/
 │   ├── ai/                      # LLM provider、Admin Agent、embedding
 │   │   ├── agent/               # 后台对话助手（CRUD 工具 + access.ts）
 │   │   └── frontend-assistant/  # 前台只读检索助手
-│   ├── components/AdminAi/      # 字段 AI 弹框、Lexical Feature
 │   ├── components/AdminAiAgent/ # 后台对话式 AI 助手
 │   ├── components/FrontendAiAssistant/  # 前台 AI 浮窗
 │   ├── components/FrontendThemePreview/ # 站点设置主题卡片
-│   ├── fields/ai/               # withAiTextField 等
 │   ├── plugins/                 # 官方 + 自建插件聚合
 │   ├── redirects/               # 前台 URL 重定向（middleware + internal API）
 │   ├── email/                   # Form Builder 邮件适配器（Resend / SMTP）
@@ -194,7 +191,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | comments | 评论 | content, status, post/page, parent, author, guestInfo |
 | app-configs | 应用配置 | key, valueType, value（KV；读/写：catalog:app-configs:*） |
 | llm-providers | LLM 提供商 | OpenAI 兼容端点 Catalog（apiKey 加密；catalog:secrets） |
-| prompt-templates | Prompt 模板 | 字段 AI 技能卡；读 prompts:read / 写 prompts:write；MCP 仅读 |
+| prompt-templates | Prompt 模板 | Agent 可维护的 Prompt 目录；读 prompts:read / 写 prompts:write；MCP 仅读 |
 | storage-targets | 存储目标 | S3/OSS Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
 | email-transports | 邮件通道 | Resend / SMTP Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
 | ai-chat-sessions | AI 对话会话 | title, messages[], user（Agent 侧栏历史；ai:use） |
@@ -297,7 +294,6 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | GET /api/openapi.json | Admin Cookie | Swagger Spec；未登录 401 |
 | GET /api/graphql-playground | Admin Cookie | GraphQL Playground；未登录 401 |
 | POST /api/graphql | 按 Collection access | Cookie / users API-Key；权限与 REST 一致 |
-| POST /api/ai/complete\|stream\|structured | Admin Cookie + can() | 字段 AI；无 update:any 时仅自己的 posts |
 | POST /api/ai/agent | Admin Cookie + can() | 后台对话助手；工具层与 Collection access 双检 |
 | GET/DELETE /api/ai/agent/sessions | Admin Cookie + ai:use | 会话列表 / 软删除 |
 | GET/POST /api/ai/assistant | 无（公开） | 前台只读助手 |
@@ -319,54 +315,36 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 
 <h2 id="ai">Admin AI（DeepSeek / OpenAI 兼容）</h2>
 
-后台字段 AI 仅 Admin 内使用，基于 OpenAI Chat Completions 兼容协议（默认 DeepSeek）。与前台公开 AI 助手（#frontend-ai-assistant）共用 ai-settings 与 LLM 配置，但 API、工具集、鉴权完全分离。完整请求/响应说明见下文「OpenAI 兼容 API 文档」章节。
+后台对话 Agent（#ai-agent）与前台公开助手（#frontend-ai-assistant）共用 llm-providers / ai-settings，但 API、工具集、鉴权完全分离。编辑页没有内联字段 AI；润色/SEO/分类走 Agent 对话。上游协议见下文「OpenAI 兼容 API 文档」。
 
 ### API 路由
 
 | 路由 | 用途 |
 | --- | --- |
-| POST /api/ai/stream | SSE 流式文本（主入口） |
-| POST /api/ai/complete | 非流式文本 |
-| POST /api/ai/structured | JSON 结构化（智能填充） |
-
-### Collection AI 能力
-
-| Collection | 标题 AI | 文本/描述 AI | Lexical 选区 | SEO 弹框 | 智能填充 |
-| --- | --- | --- | --- | --- | --- |
-| posts | ✓ | — | ✓ 正文+Block | ✓ | ✓ 分类/标签/SEO |
-| pages | ✓ | — | ✓ hero | ✓ | ✓ |
-| jobs | ✓ | — | ✓ 描述/要求 | — | — |
-| categories | ✓ | — | — | — | — |
-| tags / gallery / links / ad-slots | ✓ | ✓ description | — | — | ✓ 描述 |
-| ads | ✓ | ✓ alt | — | — | — |
-| media | ✓ alt | — | ✓ caption | — | — |
+| POST /api/ai/agent | 后台 Agent SSE（Function Calling） |
+| GET/DELETE /api/ai/agent/sessions | 会话列表 / 软删除 |
+| GET/POST /api/ai/assistant | 前台只读助手 |
 
 ### AI 权限
 
-- super-admin / editor：所有已启用 Collection
-- author：仅 posts，且必须是文档 authors 之一
-- 代码：src/ai/、src/components/AdminAi/、src/fields/ai/、src/ai/collectionProfiles.ts
-
-### 扩展新 Collection AI
-
-1. 在 collectionProfiles.ts 增加 profile
-2. 字段使用 withAiTextField / withAiRewriteFeatures / aiSeoAssistField 等
-3. pnpm cli generate:importmap
+- 入口：ai:use（Agent 浮窗与 /admin/ai-agent）
+- 工具层按 Collection Permission 再检（src/ai/agent/access.ts）；无 posts:update:any 时仅自己的 posts
+- 代码：src/ai/agent/、src/components/AdminAiAgent/、src/ai/frontend-assistant/
 
 <h2 id="openai-api">OpenAI 兼容 API 文档</h2>
 
-Crispy Admin AI 通过 OpenAI Chat Completions 协议调用上游 LLM（默认 DeepSeek，可切换 OpenAI / Azure / 其他兼容网关）。Admin 前端调用 Crispy 自有 /api/ai/* 路由，服务端再转发至上游。
+Crispy 通过 OpenAI Chat Completions 协议调用上游 LLM（默认 DeepSeek，可切换 OpenAI / Azure / 其他兼容网关）。Agent / 前台助手经自有路由转发至上游。
 
 ### 架构
 
 ```
-Admin UI (✨ 弹框)
-    │  Cookie 会话鉴权
+Admin Agent UI / 前台助手
+    │  Cookie（Agent）或公开（assistant）
     ▼
-POST /api/ai/stream | /complete | /structured   ← Crispy 内部 API
-    │  assertAiAccess + Prompt 模板渲染
+POST /api/ai/agent | /api/ai/assistant   ← Crispy 内部 API
+    │  resolveLlmClient + 工具循环
     ▼
-POST {baseUrl}/v1/chat/completions              ← OpenAI 兼容上游
+POST {baseUrl}/v1/chat/completions      ← OpenAI 兼容上游
     Authorization: Bearer {apiKey}
 ```
 
@@ -378,7 +356,7 @@ POST {baseUrl}/v1/chat/completions              ← OpenAI 兼容上游
 | 默认提供商 / 模型 | 配置 → AI 设置 | defaultProvider / defaultModel |
 | Temperature / Max Tokens | 配置 → AI 设置 | 全局默认；Prompt 可覆盖 |
 | 总开关 | 配置 → AI 设置 enabled | 关闭后所有 AI 路由返回 503 |
-| Prompt 模板 | 配置 → Prompt 模板 | 可绑定 provider + model |
+| Prompt 模板 | 配置 → Prompt 模板 | 可绑定 provider + model；Agent 可维护 |
 
 ### 切换 / 新增上游
 
@@ -398,7 +376,7 @@ Admin → AI 设置 → 默认 LLM 提供商 = 上一条
 
 ### 上游请求格式（OpenAI Chat Completions）
 
-实现：src/ai/providers/openaiCompatible.ts。非流式与流式均 POST 同一端点，流式设 stream: true。解析入口：resolveLlmClient。
+实现：src/ai/providers/openaiCompatible.ts。解析入口：resolveLlmClient。
 
 ```
 POST {baseUrl}/v1/chat/completions
@@ -413,150 +391,24 @@ Authorization: Bearer {apiKey}
   ],
   "temperature": 0.7,
   "max_tokens": 2048,
-  "stream": false,
-  "response_format": { "type": "json_object" }   // 仅 structured / suggest_taxonomy
+  "stream": true
 }
 ```
 
 ### Crispy 内部 API — 鉴权
 
-- 须已登录 Admin（Payload 会话 Cookie，与 /admin 相同）
-- 未登录 → 401 Unauthorized
-- 无 AI 权限 → 403（作者仅限自己的 posts）
+- Agent：须已登录 Admin（Payload 会话 Cookie）；未登录 401；无 ai:use → 403
 - 未配置 API Key 或 AI 关闭 → 503
-- 前台 / 外部不可匿名调用，无 API Key 对外暴露
+- 前台 /api/ai/assistant 公开只读，不暴露上游 API Key
 
-### POST /api/ai/complete — 非流式文本
+### Prompt 模板
 
-```
-# Request
-POST /api/ai/complete
-Content-Type: application/json
-Cookie: payload-token=...
-
-{
-  "action": "polish",
-  "collection": "posts",
-  "docId": "1",
-  "fieldPath": "title",
-  "input": "这是一段需要润色的标题",
-  "context": {
-    "title": "文章标题",
-    "contentPlain": "正文纯文本摘要…",
-    "selection": "选区文本（Lexical 改写时）"
-  },
-  "customPrompt": "改为英文",        // action=custom 时必填
-  "templateId": "polish"             // 可选，覆盖默认模板
-}
-
-# Response 200
-{
-  "text": "润色后的文本",
-  "templateId": "polish",
-  "usage": { "total_tokens": 128 }
-}
-
-# Error
-{ "error": "无权使用 AI 功能" }   // 403 / 503 / 500
-```
-
-### POST /api/ai/stream — SSE 流式（主入口）
-
-```
-# Request body 与 /complete 相同
-
-# Response: text/event-stream
-data: {"text":"你"}
-data: {"text":"好"}
-data: {"done":true,"templateId":"polish"}
-
-# 错误（仍 200 + SSE）
-data: {"error":"AI 未启用：请在「LLM 提供商」配置端点，并在「AI 设置」选择默认提供商"}
-```
-
-### POST /api/ai/structured — JSON 智能填充
-
-```
-# Request（当前仅支持 suggest_taxonomy）
-POST /api/ai/structured
-{
-  "action": "suggest_taxonomy",
-  "collection": "posts",
-  "docId": "1",
-  "context": {
-    "title": "可选",
-    "contentPlain": "正文纯文本，用于生成标题/SEO/分类建议"
-  }
-}
-
-# Response 200
-{
-  "data": {
-    "title": "建议标题",
-    "summary": "摘要",
-    "categoryTitles": ["已有分类名"],
-    "tagTitles": ["已有标签名"],
-    "seoTitle": "...",
-    "seoDescription": "..."
-  },
-  "categories": [ /* Payload 文档 */ ],
-  "tags": [ /* Payload 文档 */ ]
-}
-
-# 分类/标签只能从已有条目匹配，不会编造新 slug
-```
-
-### action 枚举（AiAction）
-
-| action | 用途 | 接口 |
-| --- | --- | --- |
-| polish | 润色 | stream / complete |
-| expand | 扩写 | stream / complete |
-| shorten | 精简 | stream / complete |
-| custom | 自定义指令（需 customPrompt） | stream / complete |
-| rewrite | Lexical 选区改写 | stream / complete |
-| seo_title | 生成 SEO 标题 | stream / complete |
-| seo_description | 生成 SEO 描述 | stream / complete |
-| suggest_taxonomy | 智能填充标题/SEO/分类/标签 | structured only |
-
-### Prompt 模板变量
-
-| 变量 | 来源 |
-| --- | --- |
-| {{field}} | request.input 当前字段文本 |
-| {{selection}} | context.selection 选区 |
-| {{instruction}} | customPrompt 自定义指令 |
-| {{context.*}} | title、contentPlain、siteName 等 AiContext |
-
-默认模板：src/ai/defaultTemplates.ts；正式环境请在 Admin → Prompt 模板 按 action 维护（可绑 provider/model）。
-
-### curl 示例（需先登录 Admin 获取 Cookie）
-
-```
-# 非流式
-curl -s -X POST http://localhost:3333/api/ai/complete \
-  -H "Content-Type: application/json" \
-  -b "payload-token=YOUR_SESSION" \
-  -d '{
-    "action": "polish",
-    "collection": "posts",
-    "docId": "1",
-    "fieldPath": "title",
-    "input": "测试标题"
-  }'
-
-# 流式
-curl -N -X POST http://localhost:3333/api/ai/stream \
-  -H "Content-Type: application/json" \
-  -b "payload-token=YOUR_SESSION" \
-  -d '{"action":"polish","collection":"posts","fieldPath":"title","input":"测试"}'
-```
+Collection prompt-templates：按 action 维护 systemPrompt / userPrompt，可绑 provider + model。默认兜底见 src/ai/defaultTemplates.ts。Agent 改文案前 get_document。
 
 ### 验证与调试
 
-- Admin：字段 AI 按钮；/admin/ai-agent 对话
-- 代码入口：src/app/(payload)/api/ai/*/route.ts
-- 类型定义：src/ai/types.ts
+- Admin：/admin/ai-agent 对话
+- 代码入口：src/app/(payload)/api/ai/agent/route.ts
 - OpenAI 官方文档：https://platform.openai.com/docs/api-reference/chat
 
 <h2 id="swagger">Swagger / OpenAPI</h2>
@@ -578,7 +430,7 @@ Swagger UI 自动跟随 Admin 主题（html[data-theme]）：右上角切换浅�
 - 每个 Collection：GET/POST /api/{slug}、GET/PATCH/DELETE /api/{slug}/{id}、GET /api/{slug}/count
 - 每个 Global：GET/POST /api/globals/{slug}
 - Auth：login / logout / me / refresh-token
-- AI：/api/ai/complete、/stream、/structured、/agent（含 request/response schema）
+- AI：/api/ai/agent（含 request/response schema）
 - 前台 AI：GET/POST /api/ai/assistant（公开只读）
 - MCP：POST /api/mcp（JSON-RPC）
 - GraphQL：POST /api/graphql（按 Collection access）
@@ -837,7 +689,7 @@ pnpm cli quality:ci
 2. Posts/Pages：draft 发布、版本历史还原（含 hero 类型与 media）
 3. 插件：Redirects 生效、Forms 提交+邮件、Search 索引、Import/Export
 4. MCP：curl / Cursor 调 POST /api/mcp
-5. AI：Admin 字段 AI；/admin/ai-agent 对话
+5. AI：/admin/ai-agent 对话
 6. 前台：三主题首页/详情、Live Preview（editor）
 7. 缓存：/admin/cache 手动清除、middleware X-Crispy-* 头
 8. Postgres：pnpm cli db:migrate && pnpm cli db:status
@@ -1094,7 +946,7 @@ Catalog（多条配置）
 ### Prompt Templates（列表 / trash / versions）
 
 - Collection prompt-templates，像文章一样列表管理，支持软删除与版本
-- 可绑定 provider + model（可空则跟全局默认）——字段 AI 技能卡共用
+- 可绑定 provider + model（可空则跟全局默认）——Agent 可维护
 - action：polish / expand / shorten / custom / seo_* / rewrite / suggest_taxonomy 等
 - editor 可读；super-admin 可写
 
@@ -1117,6 +969,7 @@ Catalog（多条配置）
 | P1（已完成） | storage-targets + Active Globals（无 env 回退） | S3 多选一 |
 | P2（已完成） | email-transports + email-settings（重启生效） | 邮件多套切换 |
 | P3 | ai-canvases 已删除（2026-08-27） | 与 Agent + Prompt 重叠，不再维护 React Flow |
+| 字段 AI | 已删除（2026-08-27） | 编辑页回官方字段；润色/SEO 走 Agent |
 | Unsplash | 已删除（2026-08-27） | 配图走 Media / OSS 上传 |
 | Embedding | defaultEmbeddingProvider + embeddingDimensions | 语义搜索走 Catalog |
 
@@ -1179,7 +1032,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | --- | --- | --- |
 | Plugin 注入 config | 全 Collection 横切行为 | enableTrashAndVersionsPlugin |
 | Collection hooks / access | 单 Collection 业务规则 | restrictAuthorPublish、syncContentEmbedding 等 |
-| Custom Field 组件 | 字段级 UI（AI 按钮等） | withAiTextField、AiCodeField |
+| Custom Field 组件 | 字段级 UI | 业务刚需字段（非官方默认交互） |
 | Custom View（admin.views） | 独立 Admin 页面 | api-docs、ai-agent、cache、stats |
 | utilities 薄封装 | Payload API 语义不足 | trashOrDeleteDocument |
 | 独立 API 路由 | 非 CRUD 能力 | /api/ai/*（Admin）、/api/ai/assistant（前台）、/api/openapi.json |
@@ -1250,7 +1103,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 
 <h2 id="ai-agent">Admin AI 助手（对话）</h2>
 
-Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读写 CMS 内容，与字段级 AI（润色/SEO）互补。需 Admin「LLM 提供商 + AI 设置」配置且总开关开启。
+Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读写 CMS 内容。需 Admin「LLM 提供商 + AI 设置」配置且总开关开启。编辑页无内联字段 AI。
 
 | 入口 | 说明 |
 | --- | --- |

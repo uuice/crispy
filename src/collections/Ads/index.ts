@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { withAiTextField } from '@/fields/ai'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const Ads: CollectionConfig = {
@@ -23,7 +22,7 @@ export const Ads: CollectionConfig = {
   },
   defaultSort: 'sort',
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
@@ -31,7 +30,7 @@ export const Ads: CollectionConfig = {
       admin: {
         description: '仅后台管理用，不展示在前台',
       },
-    }),
+    },
     {
       name: 'slot',
       type: 'relationship',
@@ -76,17 +75,14 @@ export const Ads: CollectionConfig = {
         condition: (_, siblingData) => siblingData?.format === 'image',
       },
     },
-    withAiTextField(
-      {
-        name: 'alt',
-        type: 'text',
-        label: adminLabels.alt,
-        admin: {
-          condition: (_, siblingData) => siblingData?.format === 'image',
-        },
+    {
+      name: 'alt',
+      type: 'text',
+      label: adminLabels.alt,
+      admin: {
+        condition: (_, siblingData) => siblingData?.format === 'image',
       },
-      { contentFieldPaths: 'alt', titleFieldPath: 'title' },
-    ),
+    },
     {
       name: 'sort',
       type: 'number',

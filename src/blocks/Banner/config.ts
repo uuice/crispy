@@ -2,8 +2,6 @@ import type { Block } from 'payload'
 
 import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { withAiRewriteFeatures } from '@/fields/ai'
-
 export const Banner: Block = {
   slug: 'banner',
   fields: [
@@ -23,8 +21,7 @@ export const Banner: Block = {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([...rootFeatures, FixedToolbarFeature()]),
+        features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature()],
       }),
       label: false,
       required: true,

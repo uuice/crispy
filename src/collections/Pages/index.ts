@@ -23,11 +23,6 @@ import {
   createSyncContentEmbeddingHook,
 } from '@/hooks/syncContentEmbeddingHook'
 import { adminLabels } from '@/i18n/admin-labels'
-import {
-  aiSeoAssistField,
-  aiSuggestAssistField,
-  withAiTextField,
-} from '@/fields/ai'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
 
 import {
@@ -75,11 +70,11 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       required: true,
-    }),
+    },
     {
       type: 'tabs',
       tabs: [
@@ -89,12 +84,19 @@ export const Pages: CollectionConfig<'pages'> = {
         },
         {
           fields: [
-            aiSuggestAssistField({ contentFieldPaths: 'hero.richText' }),
             {
               name: 'layout',
               type: 'blocks',
               label: adminLabels.layout,
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, RelatedPostsBlock, Faq],
+              blocks: [
+                CallToAction,
+                Content,
+                MediaBlock,
+                Archive,
+                FormBlock,
+                RelatedPostsBlock,
+                Faq,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,
@@ -107,7 +109,6 @@ export const Pages: CollectionConfig<'pages'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
-            aiSeoAssistField({ contentFieldPaths: 'hero.richText' }),
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',

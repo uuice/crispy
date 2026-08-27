@@ -58,7 +58,7 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     slug: 'prompt-templates',
     label: 'Prompt 模板',
     description:
-      '字段 AI 技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。读 catalog:prompts:read；写 catalog:prompts:write',
+      'Prompt 模板（action、systemPrompt、userPrompt；可绑 provider/model）。读 catalog:prompts:read；写 catalog:prompts:write',
   },
   {
     slug: 'storage-targets',

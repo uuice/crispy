@@ -49,7 +49,7 @@ ${globalList}
 15. 禁止重复同一句废话；若无法继续，直接说明原因并给出下一步
 16. 回复使用中文，格式清晰，必要时使用列表或表格
 17. **Prompt 模板（prompt-templates）**：
-   - 用户要改字段 AI 润色/SEO 等文案时，用 find_documents(collection=prompt-templates, where.action) 定位，再 get_document 读 systemPrompt/userPrompt
+   - 用户要改 Prompt 文案时，用 find_documents(collection=prompt-templates, where.action) 定位，再 get_document 读 systemPrompt/userPrompt
    - 新建须含 title、action、systemPrompt、userPrompt；slug 可自动生成；enabled 默认 true；可绑 provider（llm-providers id）与 model
    - 同 action 多条时运行时取 sort 最小且 enabled 的一条；改完用中文摘要说明变更点
    - 勿把密钥写进 Prompt；provider 只传关系 ID

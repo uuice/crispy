@@ -26,7 +26,7 @@ export const AiSettings: GlobalConfig = {
       label: adminLabels.aiEnabled,
       defaultValue: true,
       admin: {
-        description: '关闭后字段 AI / Agent / 前台助手均不可用。',
+        description: '关闭后 Agent / 前台助手均不可用。',
       },
     },
     {
@@ -39,7 +39,7 @@ export const AiSettings: GlobalConfig = {
         capabilities: { contains: 'chat' },
       },
       admin: {
-        description: '全局默认聊天 LLM（多选一）。未配置则字段 AI / Agent / 助手不可用。',
+        description: '全局默认聊天 LLM（多选一）。未配置则 Agent / 助手不可用。',
       },
     },
     {

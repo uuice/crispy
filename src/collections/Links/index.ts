@@ -4,8 +4,6 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
-
 export const Links: CollectionConfig = {
   slug: 'links',
   labels: adminLabels.links,
@@ -23,27 +21,23 @@ export const Links: CollectionConfig = {
   },
   defaultSort: 'sort',
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
+    },
     {
       name: 'url',
       type: 'text',
       label: adminLabels.url,
       required: true,
     },
-    aiSuggestAssistField({ contentFieldPaths: 'description' }),
-    withAiTextareaField(
-      {
-        name: 'description',
-        type: 'textarea',
-        label: adminLabels.description,
-      },
-      { contentFieldPaths: 'description' },
-    ),
+    {
+      name: 'description',
+      type: 'textarea',
+      label: adminLabels.description,
+    },
     {
       name: 'group',
       type: 'relationship',

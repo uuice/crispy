@@ -2,8 +2,6 @@ import type { Block } from 'payload'
 
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { withAiRewriteFeatures } from '@/fields/ai'
-
 export const RelatedPostsBlock: Block = {
   slug: 'relatedPosts',
   interfaceName: 'RelatedPostsBlock',
@@ -13,12 +11,11 @@ export const RelatedPostsBlock: Block = {
       type: 'richText',
       label: '引导内容',
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-          ]),
+        features: ({ rootFeatures }) => [
+          ...rootFeatures,
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+          FixedToolbarFeature(),
+        ],
       }),
     },
     {

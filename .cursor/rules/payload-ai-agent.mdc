@@ -1,16 +1,15 @@
 ---
-description: Admin AI（字段 AI + 对话 Agent）与前台只读助手开发约定
-globs: src/ai/**/*.ts,src/components/AdminAi*/**,src/components/FrontendAiAssistant/**,src/app/(payload)/api/ai/**,src/app/(frontend)/api/ai/**
+description: Admin AI Agent 与前台只读助手开发约定
+globs: src/ai/**/*.ts,src/components/AdminAiAgent/**,src/components/FrontendAiAssistant/**,src/app/(payload)/api/ai/**,src/app/(frontend)/api/ai/**
 alwaysApply: false
 ---
 
 # AI & Agent
 
-## 三套 AI
+## 两套 AI
 
 | 类型 | 入口 | 用途 |
 |------|------|------|
-| 字段 AI | `AdminAi/*`、`/api/ai/stream\|complete\|structured` | 润色、SEO、Lexical 选区（Admin） |
 | 后台 Agent | `/admin/ai-agent`、`/api/ai/agent` | Function Calling CRUD（需登录） |
 | 前台助手 | `FrontendAiAssistant`、`/api/ai/assistant` | 公开只读检索（无需登录） |
 
@@ -34,13 +33,8 @@ alwaysApply: false
 2. 更新 `systemPrompt.ts` 与 `publicContent.ts`（仅公开可读数据）
 3. 勿复用后台 Agent 写操作工具；查询须 `overrideAccess: false`
 
-## 扩展字段 AI
-
-1. `src/ai/collectionProfiles.ts` 增加 profile
-2. 字段用 `withAiTextField` 等 wrapper
-3. `pnpm cli generate:importmap`
-
 ## 配置
 
 - Admin 配置中心：`llm-providers` + `ai-settings`（见 `docs/dev-docs.md#config-center`）
+- Prompt 模板：`prompt-templates`（Agent 可维护；`resolveLlmClient` 可按 action / promptId 解析）
 - 语义搜索需 Postgres pgvector（`src/ai/embeddings/`）+ Embedding Provider（capabilities=embedding）

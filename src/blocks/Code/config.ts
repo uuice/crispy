@@ -1,7 +1,5 @@
 import type { Block } from 'payload'
 
-import { withAiCodeField } from '@/fields/ai'
-
 import { CODE_BLOCK_LANGUAGES } from './languages'
 
 export const Code: Block = {
@@ -14,11 +12,11 @@ export const Code: Block = {
       defaultValue: 'typescript',
       options: [...CODE_BLOCK_LANGUAGES],
     },
-    withAiCodeField({
+    {
       name: 'code',
       type: 'code',
       label: false,
       required: true,
-    }),
+    },
   ],
 }

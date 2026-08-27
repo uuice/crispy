@@ -1,18 +1,17 @@
 import {
   AI_PROVIDER_PRESETS,
   aiDisabledMessage,
-  parseAiProvider,
   type AiProvider,
 } from '@/ai/providers/presets'
 import { resolveLlmClient } from '@/ai/resolveLlmClient'
-import type { AiPromptTemplate, ResolvedAiSettings } from '@/ai/types'
+import type { ResolvedAiSettings } from '@/ai/types'
 
 /**
  * Backward-compatible AI settings resolver.
  * Internally uses Catalog + Active + Override via resolveLlmClient.
  */
 export async function resolveAiSettings(): Promise<ResolvedAiSettings> {
-  const client = await resolveLlmClient({ purpose: 'field' })
+  const client = await resolveLlmClient({ purpose: 'assistant' })
 
   // Infer legacy provider label for UI messages when using catalog.
   let provider: AiProvider = 'custom'
@@ -29,23 +28,10 @@ export async function resolveAiSettings(): Promise<ResolvedAiSettings> {
     model: client.model,
     temperature: client.temperature,
     maxTokens: client.maxTokens,
-    templates: [], // Prefer prompt-templates collection; see findTemplate()
+    templates: [],
   }
 }
 
 export function getAiDisabledMessage(provider: AiProvider = 'deepseek'): string {
   return aiDisabledMessage(provider)
-}
-
-export async function findTemplate(
-  _settings: ResolvedAiSettings,
-  action: string,
-  templateId?: string,
-): Promise<AiPromptTemplate | undefined> {
-  const client = await resolveLlmClient({
-    purpose: 'field',
-    action,
-    templateId,
-  })
-  return client.template
 }

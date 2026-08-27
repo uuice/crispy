@@ -279,36 +279,17 @@ function buildCustomPaths(): Record<string, unknown> {
         security: [{ mcpBearer: [] }, { usersApiKey: [] }],
       },
     },
-    '/api/ai/complete': {
+    '/api/ai/agent': {
       post: {
         tags: ['AI'],
-        summary: 'AI text completion (non-streaming)',
+        summary: 'Admin AI Agent chat (SSE stream)',
+        description:
+          'Function-calling assistant. Requires Admin session and ai:use. Events are text/event-stream.',
         requestBody: {
           required: true,
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/AiCompleteRequest' },
-            },
-          },
-        },
-        responses: {
-          '200': jsonResponse('Completion result', '#/components/schemas/AiCompleteResponse'),
-          '503': jsonResponse('AI disabled'),
-          ...errorResponses(),
-        },
-        security: [{ cookieAuth: [] }],
-      },
-    },
-    '/api/ai/stream': {
-      post: {
-        tags: ['AI'],
-        summary: 'AI text completion (SSE stream)',
-        description: 'Returns text/event-stream. Events: {"text":"..."} chunks, then {"done":true,"templateId":"..."}.',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: { $ref: '#/components/schemas/AiCompleteRequest' },
+              schema: { $ref: '#/components/schemas/AiAgentRequest' },
             },
           },
         },
@@ -321,25 +302,7 @@ function buildCustomPaths(): Record<string, unknown> {
               },
             },
           },
-          ...errorResponses(),
-        },
-        security: [{ cookieAuth: [] }],
-      },
-    },
-    '/api/ai/structured': {
-      post: {
-        tags: ['AI'],
-        summary: 'AI structured output (suggest_taxonomy)',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: { $ref: '#/components/schemas/AiStructuredRequest' },
-            },
-          },
-        },
-        responses: {
-          '200': jsonResponse('Structured result', '#/components/schemas/AiStructuredResponse'),
+          '503': jsonResponse('AI disabled'),
           ...errorResponses(),
         },
         security: [{ cookieAuth: [] }],
@@ -431,78 +394,21 @@ function buildSchemas(): Record<string, unknown> {
         id: { oneOf: [{ type: 'integer' }, { type: 'string' }] },
       },
     },
-    AiContext: {
+    AiAgentRequest: {
       type: 'object',
+      required: ['messages'],
       properties: {
-        title: { type: 'string' },
-        contentPlain: { type: 'string' },
-        selection: { type: 'string' },
-        siteName: { type: 'string' },
-        locale: { type: 'string' },
-      },
-    },
-    AiCompleteRequest: {
-      type: 'object',
-      required: ['action', 'collection', 'fieldPath', 'input'],
-      properties: {
-        action: {
-          type: 'string',
-          enum: [
-            'polish',
-            'expand',
-            'shorten',
-            'custom',
-            'seo_title',
-            'seo_description',
-            'rewrite',
-          ],
-        },
-        templateId: { type: 'string' },
-        customPrompt: { type: 'string', description: 'Required when action=custom' },
-        collection: { type: 'string', example: 'posts' },
-        docId: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
-        fieldPath: { type: 'string', example: 'title' },
-        input: { type: 'string' },
-        context: { $ref: '#/components/schemas/AiContext' },
-      },
-    },
-    AiCompleteResponse: {
-      type: 'object',
-      properties: {
-        text: { type: 'string' },
-        templateId: { type: 'string' },
-        usage: {
-          type: 'object',
-          properties: { total_tokens: { type: 'integer' } },
-        },
-      },
-    },
-    AiStructuredRequest: {
-      type: 'object',
-      required: ['action', 'collection', 'context'],
-      properties: {
-        action: { type: 'string', enum: ['suggest_taxonomy'] },
-        collection: { type: 'string' },
-        docId: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
-        context: { $ref: '#/components/schemas/AiContext' },
-      },
-    },
-    AiStructuredResponse: {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          properties: {
-            title: { type: 'string' },
-            summary: { type: 'string' },
-            categoryTitles: { type: 'array', items: { type: 'string' } },
-            tagTitles: { type: 'array', items: { type: 'string' } },
-            seoTitle: { type: 'string' },
-            seoDescription: { type: 'string' },
+        messages: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              role: { type: 'string', enum: ['user', 'assistant'] },
+              content: { type: 'string' },
+            },
           },
         },
-        categories: { type: 'array', items: { type: 'object' } },
-        tags: { type: 'array', items: { type: 'object' } },
+        sessionId: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
       },
     },
     AccessLogRequest: {
@@ -531,7 +437,7 @@ function buildTags(
 ): { name: string; description?: string }[] {
   const tags = [
     { name: 'Auth', description: 'Authentication' },
-    { name: 'AI', description: 'Admin AI (OpenAI-compatible upstream)' },
+    { name: 'AI', description: 'Admin AI Agent (OpenAI-compatible upstream)' },
     { name: 'MCP', description: 'Model Context Protocol' },
     { name: 'GraphQL', description: 'GraphQL API' },
     { name: 'Globals', description: 'Payload globals' },

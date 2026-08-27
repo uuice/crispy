@@ -1,7 +1,7 @@
 # 减少 Admin / AI 定制面（决策备忘）
 
-> 状态：**仅文档，暂不改代码**（落地排到 Payload 4.0 升级时）
-> 日期：2026-07-19
+> 状态：决策备忘；部分项已落地（Canvases / Unsplash / 列表刷新 / **字段 AI**）
+> 日期：2026-07-19（修订至 2026-08-27）
 > 背景：个人精力有限；Payload 4.0 将加重 Admin 定制迁移成本；站内 Agent 已覆盖大部分运营操作。
 
 ## 1. 原则
@@ -18,7 +18,7 @@
 |------|------|
 | Admin Agent | **Keep**（主入口） |
 | MCP plugin | **Keep**（副通道） |
-| 字段 AI（Field Assist / Suggest / SEO 面板 / Lexical rewrite） | **理论可删**，用于显著减少 Collection/字段定制面 |
+| 字段 AI（Field Assist / Suggest / SEO 面板 / Lexical rewrite） | **已删**（2026-08-27；个人博客不用内联字段按钮） |
 | AI Canvases | **已删**（2026-08-27；与 Agent + Prompt 三重叠） |
 | Unsplash 图库引用 | **已删**（2026-08-27；配图走 Media / OSS 上传） |
 | Stats / Dev Docs 内嵌 | **建议删或迁出** |
@@ -34,33 +34,22 @@
 | 能力 | 路径（示意） | 说明 |
 |------|----------------|------|
 | Admin AI Agent | `src/ai/agent/`、`src/components/AdminAiAgent/`、`admin/ai-agent/`、`AiChatSessions`、`api/ai/agent/**` | 运营主通道 |
-| LLM 配置中心 | `LlmProviders`、`AiSettings`、`PromptTemplates`、`src/ai/resolveLlmClient.ts` 等 | Agent（及可选字段 AI）共用底座 |
+| LLM 配置中心 | `LlmProviders`、`AiSettings`、`PromptTemplates`、`src/ai/resolveLlmClient.ts` 等 | Agent / 前台助手共用底座 |
 | MCP | `@payloadcms/plugin-mcp`、`mcpCustomTools` | Cursor / 外部 Agent |
 | Frontend cache 引擎 | `src/frontend-cache/`、middleware | 性能 critical path |
 | 业务与前台 | `src/themes/`、collections、OSS uploads | 产品本体 |
 
-### 3.2 理论可删：字段 AI（优先减定制）
+### 3.2 已删：字段 AI
 
-目标：去掉挂在大量 Collection / Block 上的 `withAi*`，降低 Admin 字段组件与 4.0 迁移面。
+2026-08-27 去掉挂在 Collection / Block 上的 `withAi*`，Admin 编辑页回到官方字段。润色、分类、SEO 改走 **Agent 对话**。
 
-| 模块 | 路径（示意） | 删后影响 |
-|------|----------------|----------|
-| 字段包装 | `src/fields/ai/`、`withAiTextField` / `withAiRewriteFeatures` | Posts/Pages/Jobs/… 编辑页不再有内联 AI 按钮 |
-| Admin 字段 UI | `src/components/AdminAi/`（含 Suggest / SEO / Assist 面板） | 润色、分类建议、SEO 建议改走 **Agent 对话** |
-| Lexical 选区改写 | `AdminAi/lexical/AiRewriteFeature` | 正文改写改走 Agent |
-| Completion API（若仅字段 AI 使用） | `api/ai/complete*` 等 | 需确认 Agent 是否共用；共用则保留共享 `runCompletion*` |
+| 模块 | 路径（示意） | 结果 |
+|------|----------------|------|
+| 字段包装 | `src/fields/ai/`、`withAiTextField` / `withAiRewriteFeatures` | 已删；Posts/Pages/Jobs/… 无内联 AI 按钮 |
+| Admin 字段 UI | `src/components/AdminAi/`（Suggest / SEO / Assist / Lexical rewrite） | 已删；`AiIcon` 挪到 `src/components/AiIcon.tsx`（Agent / 前台助手仍用） |
+| Completion API | `api/ai/complete` / `stream` / `structured` | 已删（仅字段 AI 使用） |
 
-**删的前提（产品）：**
-
-- 接受「改标题/正文/SEO/分类」主要在 Agent 里完成，不再追求「当前字段一键应用 + diff」。
-- Prompt 模板里面向字段的条目可收敛为 Agent 侧说明，或保留模板供 Agent/人工选用。
-
-**建议删法（将来实施时，本文件不执行）：**
-
-1. 去掉各 Collection/Block 上的 `withAi*` 包装，恢复普通 field。
-2. 删除或停用 `AdminAi` 组件与 importMap 条目。
-3. 确认无其它调用后再删仅服务字段 AI 的 API。
-4. 保留 `resolveLlmClient` / providers / settings（Agent 仍需要）。
+保留：`resolveLlmClient` / providers / `AiSettings` / `PromptTemplates`（Agent 仍需要）。
 
 ### 3.3 建议删 / 迁出（不碰 Agent 核心）
 
@@ -154,16 +143,14 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 - **不删除、不停更 Admin Agent。**
 - **不把 MCP 当成站内 Agent 的替代品。**
-- **本文档落地前不改代码、不做 migration 删表。**
 
 ## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
-1. 字段 AI：摘掉 `withAi*` → 删 UI → 清理仅字段用 API（**减定制收益最大**）。
-2. Stats 按 §3.3 删除（AI Canvases、Dev Docs、Unsplash 已删）。
-3. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
-4. **Nav 回归官方**：去掉自研 `AdminNav` / `admin-nav`；不强制 `afterNavLinks`。
-5. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
-6. 回归：Agent 浮窗与常用工具、MCP、Media 上传、前台缓存、官方侧栏冒烟。
+1. Stats 按 §3.3 删除（AI Canvases、字段 AI、Dev Docs、Unsplash 已删）。
+2. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
+3. **Nav 回归官方**：去掉自研 `AdminNav` / `admin-nav`；不强制 `afterNavLinks`。
+4. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
+5. 回归：Agent 浮窗与常用工具、MCP、Media 上传、前台缓存、官方侧栏冒烟。
 
 ## 6. 最终剩余（按本文全做完）
 
@@ -173,7 +160,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 | 自定义侧栏项 | 4（已去掉二次开发文档与 AI 画布） | **0** |
 | 自定义 View | 4（已去掉 dev-docs 与 AI 画布） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
 | 自研 Nav | 有 | **无**（官方） |
-| 字段 AI 等 | 有 | **无** |
+| 字段 AI 等 | **无** | **无** |
 
 **还留的 Admin UI 定制（按块）：**
 
@@ -187,14 +174,13 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 - 4.0 贵在 **Admin UI 定制厚度**，不是 Local API / Collection 模型。
 - 去掉字段 AI + 画布 + Unsplash + 多余运营页 + **自研 Nav** 后，迁移面明显缩小；**Agent UI（浮窗/全屏）仍是主要定制资产**，主题多为样式回归；这是接受的成本。  
-- 正式动手升 4.0 前：等官方 migration guide + 稳定版。**削减与 4.0 升级一并做，不提前删代码。**
+- 正式动手升 4.0 前：等官方 migration guide + 稳定版。剩余削减可与 4.0 升级一并做。
 
 ## 8. 相关入口（便于将来删改）
 
 - Admin 自定义导航：`src/admin-nav/customItems.ts`
 - Admin 组件注册：`src/payload.config.ts` → `admin.components` / `admin.avatar`
 - AI 开关与配置：`AiSettings` / `src/ai/settings.ts`
-- 字段 AI 挂载：各 collection 中对 `@/fields/ai` 的引用
 
 ---
 
@@ -211,3 +197,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-08-27 — AI Canvases 已删除（Collection / View / API / Agent 工具 / @xyflow/react）；Postgres 迁移 `20260827_120000_drop_ai_canvases`。
 - 2026-08-27 — Unsplash 已删除（API / Agent stock 工具 / 凭证 Catalog / Global）；Postgres 迁移 `20260827_140000_drop_unsplash_integrations`。
 - 2026-08-27 — 列表刷新按钮与 AdminListView 包装已删，列表回官方 DefaultListView。
+- 2026-08-27 — 字段 AI 已删除（`withAi*` / Assist·SEO 面板 / Lexical rewrite / `/api/ai/complete|stream|structured`）；Agent 与 LLM 配置中心保留。

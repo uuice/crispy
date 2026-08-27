@@ -20,44 +20,6 @@ export type AiPromptTemplate = {
   enabled?: boolean | null
 }
 
-export type AiContext = {
-  title?: string
-  contentPlain?: string
-  selection?: string
-  siteName?: string
-  existingCategories?: string[]
-  existingTags?: string[]
-  locale?: string
-}
-
-export type AiCompleteRequest = {
-  action: AiAction
-  templateId?: string
-  /** Required when action is `custom` */
-  customPrompt?: string
-  collection: string
-  docId?: string | number
-  fieldPath: string
-  input: string
-  context?: AiContext
-}
-
-export type AiStructuredRequest = {
-  action: 'suggest_taxonomy'
-  collection: string
-  docId?: string | number
-  context: AiContext
-}
-
-export type AiSuggestTaxonomyResult = {
-  title?: string
-  summary?: string
-  categoryTitles?: string[]
-  tagTitles?: string[]
-  seoTitle?: string
-  seoDescription?: string
-}
-
 import type { AiProvider } from '@/ai/providers/presets'
 
 export type ResolvedAiSettings = {

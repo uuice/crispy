@@ -31,7 +31,6 @@ Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的�
 - **前台可插拔主题** — blog / cms / kb 三套皮肤，站点设置切换与预览
 - **Admin AI 助手** — 对话式内容管理（`/admin/ai-agent`）
 - **前台 AI 助手** — 访客公开只读检索（右下角浮窗）
-- **字段 AI** — 润色、SEO、智能填充（DeepSeek）
 - **OpenAPI / Swagger** — 自动生成 REST 文档（`/admin/api-docs`）
 - **审计日志** — 操作追踪
 - **前台 HTML 缓存** — 可配置 TTL 与 purge

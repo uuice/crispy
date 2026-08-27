@@ -7,15 +7,11 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import {
-  novelChaptersReadAccess,
-  novelChaptersWriteAccess,
-} from '@/access/novelChapters'
+import { novelChaptersReadAccess, novelChaptersWriteAccess } from '@/access/novelChapters'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { Banner } from '@/blocks/Banner/config'
 import { Code } from '@/blocks/Code/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { aiSeoAssistField, aiSuggestAssistField, withAiRewriteFeatures, withAiTextField } from '@/fields/ai'
 import { chineseSlugField } from '@/fields/chineseSlugField'
 import {
   createRemoveContentEmbeddingHook,
@@ -59,12 +55,12 @@ export const NovelChapters: CollectionConfig<'novel-chapters'> = {
     },
   },
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       required: true,
       label: adminLabels.title,
-    }),
+    },
     {
       type: 'tabs',
       tabs: [
@@ -74,13 +70,12 @@ export const NovelChapters: CollectionConfig<'novel-chapters'> = {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
-                features: ({ rootFeatures }) =>
-                  withAiRewriteFeatures([
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
-                    FixedToolbarFeature(),
-                  ]),
+                features: ({ rootFeatures }) => [
+                  ...rootFeatures,
+                  HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                  BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+                  FixedToolbarFeature(),
+                ],
               }),
               label: false,
               required: true,
@@ -90,7 +85,6 @@ export const NovelChapters: CollectionConfig<'novel-chapters'> = {
         },
         {
           fields: [
-            aiSuggestAssistField({ contentFieldPaths: 'content' }),
             {
               name: 'novel',
               type: 'relationship',
@@ -128,7 +122,6 @@ export const NovelChapters: CollectionConfig<'novel-chapters'> = {
           name: 'meta',
           label: adminLabels.seo,
           fields: [
-            aiSeoAssistField({ contentFieldPaths: 'content' }),
             OverviewField({
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',

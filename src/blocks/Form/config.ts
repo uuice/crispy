@@ -2,8 +2,6 @@ import type { Block } from 'payload'
 
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { withAiRewriteFeatures } from '@/fields/ai'
-
 export const FormBlock: Block = {
   slug: 'formBlock',
   interfaceName: 'FormBlock',
@@ -26,12 +24,11 @@ export const FormBlock: Block = {
         condition: (_, { enableIntro }) => Boolean(enableIntro),
       },
       editor: lexicalEditor({
-        features: ({ rootFeatures }) =>
-          withAiRewriteFeatures([
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-          ]),
+        features: ({ rootFeatures }) => [
+          ...rootFeatures,
+          HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+          FixedToolbarFeature(),
+        ],
       }),
       label: 'Intro Content',
     },

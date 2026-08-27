@@ -2,8 +2,6 @@ import type { Block } from 'payload'
 
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { withAiRewriteFeatures } from '@/fields/ai'
-
 export const Faq: Block = {
   slug: 'faq',
   interfaceName: 'FaqBlock',
@@ -26,12 +24,11 @@ export const Faq: Block = {
           label: '回答',
           required: true,
           editor: lexicalEditor({
-            features: ({ rootFeatures }) =>
-              withAiRewriteFeatures([
-                ...rootFeatures,
-                HeadingFeature({ enabledHeadingSizes: ['h3', 'h4'] }),
-                FixedToolbarFeature(),
-              ]),
+            features: ({ rootFeatures }) => [
+              ...rootFeatures,
+              HeadingFeature({ enabledHeadingSizes: ['h3', 'h4'] }),
+              FixedToolbarFeature(),
+            ],
           }),
         },
       ],

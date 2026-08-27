@@ -4,7 +4,6 @@ import { chineseSlugField } from '@/fields/chineseSlugField'
 import { enabledPublicReadAccess } from '../../access/enabledPublicRead'
 import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
-import { aiSuggestAssistField, withAiTextField, withAiTextareaField } from '@/fields/ai'
 import { hideUnlessAnyPermission } from '@/access/adminHidden'
 
 export const AdSlots: CollectionConfig = {
@@ -24,27 +23,23 @@ export const AdSlots: CollectionConfig = {
   },
   defaultSort: 'title',
   fields: [
-    withAiTextField({
+    {
       name: 'title',
       type: 'text',
       label: adminLabels.title,
       required: true,
-    }),
+    },
     chineseSlugField({
       position: undefined,
       admin: {
         description: '前台 AdSlot 组件使用的标识，如 home-banner、post-content-bottom',
       },
     }),
-    aiSuggestAssistField({ contentFieldPaths: 'description' }),
-    withAiTextareaField(
-      {
-        name: 'description',
-        type: 'textarea',
-        label: adminLabels.description,
-      },
-      { contentFieldPaths: 'description' },
-    ),
+    {
+      name: 'description',
+      type: 'textarea',
+      label: adminLabels.description,
+    },
     {
       type: 'row',
       fields: [

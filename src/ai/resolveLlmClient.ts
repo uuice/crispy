@@ -4,7 +4,7 @@ import { getPayload, type Payload } from 'payload'
 import { DEFAULT_AI_TEMPLATES } from '@/ai/defaultTemplates'
 import type { AiAction, AiOutputFormat, AiPromptTemplate } from '@/ai/types'
 
-export type LlmPurpose = 'field' | 'agent' | 'assistant' | 'embedding'
+export type LlmPurpose = 'agent' | 'assistant' | 'embedding'
 
 export type ResolveLlmClientArgs = {
   purpose?: LlmPurpose
@@ -14,7 +14,7 @@ export type ResolveLlmClientArgs = {
   model?: string | null
   /** Load provider/model/temperature from a prompt-templates doc. */
   promptId?: string | number | null
-  /** Resolve template by action when promptId is omitted (field AI). */
+  /** Resolve template by action when promptId is omitted. */
   action?: string | null
   templateId?: string | null
 }
@@ -183,7 +183,7 @@ async function loadAiGlobal(payload: Payload): Promise<Record<string, unknown> |
 }
 
 /**
- * Unified LLM resolution for field AI / agent / assistant.
+ * Unified LLM resolution for agent / assistant / embedding.
  * Override chain: explicit args → prompt binding → ai-settings default.
  * No .env fallback — configure llm-providers + ai-settings in Admin.
  */
