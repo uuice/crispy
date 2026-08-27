@@ -1060,25 +1060,25 @@ GitHub Actions .github/workflows/ci.yml：
 - 深色模式：Admin 主题色相 + 各前台皮肤自带 ThemeToggle
 - 前台主题：站点设置切换 blog / cms / kb；有 settings:site|pages:manage|ops:manage 可 ?theme_preview=
 - AI：Admin LLM 提供商 + AI 设置 + verify:ai
-- 后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search + prompt-templates + ai-canvases 元数据
+- 后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search + prompt-templates
 - 前台 AI 助手：右下角浮窗，公开检索文章/小说/章节/分类/友链等（不含正文，ai-settings.enabled 开启时）
 - 前台缓存：/admin/cache DB 条目统计；curl -I 查看 X-Crispy-Page-Cache HIT/MISS
 
 <h2 id="config-center">配置中心方案（Catalog + Active + Override）</h2>
 
-目标：把 LLM / S3 / 邮件 / Unsplash 等可换配置迁入 Admin，方便增删改与多选一；Prompt 可绑定模型；为无限画布（节点各自指定模型）共用同一解析层。仅超级管理员可写密钥类配置。
+目标：把 LLM / S3 / 邮件 / Unsplash 等可换配置迁入 Admin，方便增删改与多选一；Prompt 可绑定模型。仅超级管理员可写密钥类配置。
 
 ### 核心模型
 
 ```
 Catalog（多条配置）
   → Active（全局默认选中一条）
-  → Override（Prompt / API / 画布节点临时指定）
+  → Override（Prompt / API 临时指定）
 ```
 
 | 资源 | Catalog Collection | Active（Global） | Override | 改后是否重启 |
 | --- | --- | --- | --- | --- |
-| LLM | llm-providers | ai-settings.defaultProvider | Prompt / 请求 / 画布节点 | 否 |
+| LLM | llm-providers | ai-settings.defaultProvider | Prompt / 请求 | 否 |
 | Embedding | llm-providers (capabilities=embedding) | ai-settings.defaultEmbeddingProvider | 暂无 | 否 |
 | S3 | storage-targets | storage-settings.activeTarget | 暂无（全局生效） | 是 |
 | Unsplash | integration-credentials (type=unsplash) | integration-settings.activeUnsplash | 可预留 | 否 |
@@ -1098,29 +1098,13 @@ Catalog（多条配置）
 ### Prompt Templates（列表 / trash / versions）
 
 - Collection prompt-templates，像文章一样列表管理，支持软删除与版本
-- 可绑定 provider + model（可空则跟全局默认）——字段 AI 与画布「技能卡」共用
+- 可绑定 provider + model（可空则跟全局默认）——字段 AI 技能卡共用
 - action：polish / expand / shorten / custom / seo_* / rewrite / suggest_taxonomy 等
 - editor 可读；super-admin 可写
 
 ### ai-settings Global（瘦身）
 
 只保留 enabled、defaultProvider、defaultModel、defaultEmbeddingProvider、defaultEmbeddingModel、temperature、maxTokens。旧 provider/baseUrl/model/promptTemplates 已移除。
-
-### 无限画布
-
-```
-// 节点可扩展字段（MVP 已支持 promptId；providerId/model 走 resolveLlmClient）
-{
-  promptId: 'xxx',
-  providerId: 'yyy',
-  model: 'deepseek-chat',
-  tools: [...]
-}
-```
-
-- 画布不另起配置体系，只消费 resolveLlmClient + prompt-templates
-- MVP：ai-canvases + /admin/ai-canvases（输入节点 + Prompt 节点）
-- Provider/Model 有稳定 id，可被节点引用
 
 ### 安全与权限
 
@@ -1136,14 +1120,8 @@ Catalog（多条配置）
 | P0（已完成） | llm-providers + 瘦身 ai-settings + prompt-templates + resolveLlmClient | 多模型切换、Prompt 指定模型 |
 | P1（已完成） | storage-targets / Unsplash + Active Globals（无 env 回退） | S3、Unsplash 多选一 |
 | P2（已完成） | email-transports + email-settings（重启生效） | 邮件多套切换 |
-| P3（MVP） | ai-canvases + /admin/ai-canvases | 画布跑通 |
+| P3 | ai-canvases 已删除（2026-08-27） | 与 Agent + Prompt 重叠，不再维护 React Flow |
 | Embedding | defaultEmbeddingProvider + embeddingDimensions | 语义搜索走 Catalog |
-
-### AI 画布（P3 MVP）
-
-- Collection ai-canvases：user 隔离，一人可建多份；Admin 导航「运营 → AI 画布」；Agent 可管 title/新建/删除，节点图仅 UI
-- 节点：输入 + Prompt（绑 prompt-templates）；运行走 purpose=canvas 的 resolveLlmClient
-- API：/api/ai/canvases、/api/ai/canvases/:id、/api/ai/canvases/:id/run
 
 ### S3 / Unsplash（P1）
 
@@ -1165,7 +1143,6 @@ Catalog（多条配置）
 - src/collections/StorageTargets — S3 Catalog
 - src/collections/IntegrationCredentials — Unsplash 等 Catalog
 - src/collections/EmailTransports — 邮件通道 Catalog
-- src/collections/AiCanvases — 无限画布
 - src/AiSettings / StorageSettings / IntegrationSettings / EmailSettings — Active Globals
 - src/ai/resolveLlmClient.ts — LLM 统一解析
 - src/ai/embeddings/config.ts — Embedding Catalog 解析

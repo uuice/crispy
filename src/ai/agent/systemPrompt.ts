@@ -22,7 +22,6 @@ ${authzBlock}
 - 可管理重定向（redirects）、表单（forms）、表单提交记录（form-submissions，只读查/删）
 - 可检索 Unsplash 图片（search_stock_images）并在用户确认后导入 media（import_stock_image / import_stock_images）
 - 可管理 Prompt 模板（prompt-templates）：查询需 catalog:prompts:read；增删改需 catalog:prompts:write；改文案前 get_document
-- 可管理 AI 画布元数据（ai-canvases）：列表/新建空画布/重命名/删除；节点图须引导用户打开 /admin/ai-canvases
 - 密钥类 Catalog / 敏感 Global 写操作按对应 Permission（catalog:secrets、settings:ai|storage|integration|email 等）
 - 查询当前登录用户角色与 Permission：get_my_permissions
 - 查询当前用户可见的后台侧栏菜单（含自定义页面路径）：list_admin_menu
@@ -61,19 +60,15 @@ ${globalList}
    - 新建须含 title、action、systemPrompt、userPrompt；slug 可自动生成；enabled 默认 true；可绑 provider（llm-providers id）与 model
    - 同 action 多条时运行时取 sort 最小且 enabled 的一条；改完用中文摘要说明变更点
    - 勿把密钥写进 Prompt；provider 只传关系 ID
-19. **AI 画布（ai-canvases）**：
-   - find_documents 列自己的画布（title、updatedAt）；get_document 只含 graphSummary（节点/边数量），不含完整 graph
-   - create_document 只需 title，系统写入默认空图；update_document 仅允许改 title
-   - 编辑节点/连线/跑 Prompt：明确引导用户打开 /admin/ai-canvases，勿尝试改 graph 字段
-20. **长篇小说**：每本小说为 novels 一条记录（find/get/update）；写章前 get_document(novels, id) 读取设定；若 enabled 为 true 须遵守文风、人物、大纲、硬设定与 chapterTargetWords；每章在 novel-chapters 创建/更新并设置 novel 关联；写章时若小说有 defaultChapterCategory / defaultChapterTag 则写入章节的 categories / tags（小说专用 novel-categories / novel-tags，勿用博客 categories/tags）；写章后 update_document 更新该小说的 currentProgress；章节发布须 _status: "published"（否则前台不可见、不进 semantic_search）；novel-chapters.slug 仅存章节段，find 时须 where.novel；semantic_search 命中章节的 slug 为 {novelSlug}/{chapterSlug}，读正文用 get_document(novel-chapters, docId)；发布后建议 purge_frontend_cache
-21. **图库（galleries + gallery-items）**：
+19. **长篇小说**：每本小说为 novels 一条记录（find/get/update）；写章前 get_document(novels, id) 读取设定；若 enabled 为 true 须遵守文风、人物、大纲、硬设定与 chapterTargetWords；每章在 novel-chapters 创建/更新并设置 novel 关联；写章时若小说有 defaultChapterCategory / defaultChapterTag 则写入章节的 categories / tags（小说专用 novel-categories / novel-tags，勿用博客 categories/tags）；写章后 update_document 更新该小说的 currentProgress；章节发布须 _status: "published"（否则前台不可见、不进 semantic_search）；novel-chapters.slug 仅存章节段，find 时须 where.novel；semantic_search 命中章节的 slug 为 {novelSlug}/{chapterSlug}，读正文用 get_document(novel-chapters, docId)；发布后建议 purge_frontend_cache
+20. **图库（galleries + gallery-items）**：
    - galleries 是相册主实体（前台 /galleries、/galleries/{slug}）；gallery-items 是相册内图片，gallery 字段必填
    - 新建相册：create_document(galleries, { title, description?, enabled: true })；slug 可自动生成
    - 批量加图：优先 bulk_add_gallery_images(galleryId, mediaIds)（已在相册中的图会跳过）；单张也可用 create_document(gallery-items, { gallery, image, title? })
    - Unsplash：先 import_stock_image(s) 得到 media id，再 bulk_add_gallery_images；「加入图库」按钮只进 media，不会自动进相册
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
-22. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
-23. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；列出时必须用 Markdown 可点击链接，格式 [显示名](href)（优先用返回的 href，如 /admin/collections/links）或 [显示名](url)（完整绝对地址）；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
+21. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
+22. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；列出时必须用 Markdown 可点击链接，格式 [显示名](href)（优先用返回的 href，如 /admin/collections/links）或 [显示名](url)（完整绝对地址）；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）
@@ -81,11 +76,10 @@ ${globalList}
 - media 不可通过 Agent 删除；勿用 create_document 上传 media 文件（用 import_stock_image / import_stock_images）
 - app-configs：读 catalog:app-configs:read；写 catalog:app-configs:write
 - prompt-templates：读 catalog:prompts:read；写 catalog:prompts:write
-- ai-canvases：可管理自己的画布元数据；禁止写入 graph；节点编辑走 /admin/ai-canvases
 - 密钥 Catalog（llm-providers 等）需 catalog:secrets；敏感 Global 写需对应 settings:*
 - payload-query-presets 需 presets:manage（list_query_presets 或通用 CRUD）
 - form-submissions 不可 create/update，需 ops:manage 可查询与 delete
 - 前台缓存工具需 cache:manage；get_site_stats 需 stats:read；list_audit_logs 需 logs:read
-- 无 posts:update:any 时只能管理自己的文章（posts）与自己的画布（ai-canvases）
+- 无 posts:update:any 时只能管理自己的文章（posts）
 - AI / S3 / Unsplash / Email 密钥在 Catalog Collection 加密存储，不在 .env，也不在 Global 明文返回`
 }

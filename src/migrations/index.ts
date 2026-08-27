@@ -36,6 +36,7 @@ import * as migration_20260720_100000_authz_roles from './20260720_100000_authz_
 import * as migration_20260721_104200_users_v_rels from './20260721_104200_users_v_rels';
 import * as migration_20260730_060000_mcp_app_configs_write from './20260730_060000_mcp_app_configs_write';
 import * as migration_20260818_120000_drop_unused_collection_versions from './20260818_120000_drop_unused_collection_versions';
+import * as migration_20260827_120000_drop_ai_canvases from './20260827_120000_drop_ai_canvases';
 
 export const migrations = [
   {
@@ -227,5 +228,10 @@ export const migrations = [
     up: migration_20260818_120000_drop_unused_collection_versions.up,
     down: migration_20260818_120000_drop_unused_collection_versions.down,
     name: '20260818_120000_drop_unused_collection_versions',
+  },
+  {
+    up: migration_20260827_120000_drop_ai_canvases.up,
+    down: migration_20260827_120000_drop_ai_canvases.down,
+    name: '20260827_120000_drop_ai_canvases',
   },
 ];

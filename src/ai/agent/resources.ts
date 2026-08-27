@@ -58,7 +58,7 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     slug: 'prompt-templates',
     label: 'Prompt 模板',
     description:
-      '字段 AI / 画布技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。读 catalog:prompts:read；写 catalog:prompts:write',
+      '字段 AI 技能卡（action、systemPrompt、userPrompt；可绑 provider/model）。读 catalog:prompts:read；写 catalog:prompts:write',
   },
   {
     slug: 'storage-targets',
@@ -74,12 +74,6 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     slug: 'email-transports',
     label: '邮件通道',
     description: 'Resend / SMTP Catalog（密钥加密；catalog:secrets；切换 Active 后需重启）',
-  },
-  {
-    slug: 'ai-canvases',
-    label: 'AI 画布',
-    description:
-      '无限画布元数据（title、归属用户）。可 list/重命名/删除/新建空画布；节点图请在 /admin/ai-canvases 编辑，Agent 不改 graph',
   },
   {
     slug: 'comments',

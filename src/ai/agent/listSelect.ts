@@ -129,14 +129,6 @@ const AGENT_LIST_SELECT: Partial<Record<CollectionSlug, Record<string, true>>> =
     createdAt: true,
     deletedAt: true,
   },
-  'ai-canvases': {
-    id: true,
-    title: true,
-    user: true,
-    updatedAt: true,
-    createdAt: true,
-    deletedAt: true,
-  },
 }
 
 export function resolveAgentListSelect(

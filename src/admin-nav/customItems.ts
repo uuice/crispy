@@ -18,12 +18,6 @@ export const CUSTOM_ADMIN_NAV_ITEMS: CustomAdminNavItem[] = [
     anyOf: ['ai:use'],
   },
   {
-    path: '/ai-canvases',
-    label: 'AI 画布',
-    group: adminLabels.operationsGroup,
-    anyOf: ['ai:use'],
-  },
-  {
     path: '/stats',
     label: '内容统计',
     group: adminLabels.contentGroup,

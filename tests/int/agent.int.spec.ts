@@ -559,48 +559,6 @@ describe('AI agent', () => {
     ).rejects.toThrow(/无权对 llm-providers/)
   })
 
-  it('ai-canvases are isolated per user for author', async () => {
-    const stamp = Date.now()
-    const ownReq = await createLocalReq({ user: mockAuthor }, payload)
-    const otherReq = await createLocalReq({ user: mockEditor }, payload)
-
-    const own = (await executeAgentTool(ownReq, {
-      id: 'call-canvas-create',
-      name: 'create_document',
-      arguments: JSON.stringify({
-        collection: 'ai-canvases',
-        data: { title: `author-canvas-${stamp}` },
-      }),
-    })) as { summary: { id: number | string; title: string } }
-
-    expect(own.summary.title).toBe(`author-canvas-${stamp}`)
-
-    await expect(
-      executeAgentTool(otherReq, {
-        id: 'call-canvas-get-other',
-        name: 'get_document',
-        arguments: JSON.stringify({ collection: 'ai-canvases', id: own.summary.id }),
-      }),
-    ).rejects.toThrow()
-
-    const listed = (await executeAgentTool(otherReq, {
-      id: 'call-canvas-list',
-      name: 'find_documents',
-      arguments: JSON.stringify({
-        collection: 'ai-canvases',
-        where: { title: { equals: `author-canvas-${stamp}` } },
-      }),
-    })) as { summary: { docs: { id: number | string }[] } }
-
-    expect(listed.summary.docs.some((doc) => doc.id === own.summary.id)).toBe(false)
-
-    await payload.delete({
-      collection: 'ai-canvases',
-      id: own.summary.id,
-      overrideAccess: true,
-    })
-  })
-
   it('restore_document restores soft-deleted tag', async () => {
     const req = await createLocalReq({ user: mockSuperAdmin }, payload)
     const slug = `agent-restore-${Date.now()}`

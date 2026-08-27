@@ -19,11 +19,11 @@
 | Admin Agent | **Keep**（主入口） |
 | MCP plugin | **Keep**（副通道） |
 | 字段 AI（Field Assist / Suggest / SEO 面板 / Lexical rewrite） | **理论可删**，用于显著减少 Collection/字段定制面 |
-| AI Canvases | **建议删**（与 Agent + Prompt 三重叠） |
+| AI Canvases | **已删**（2026-08-27；与 Agent + Prompt 三重叠） |
 | Unsplash 图库引用 | **建议删**（非必须；外站图库集成，维护密钥/API/Agent 工具成本） |
 | Stats / Dev Docs 内嵌 | **建议删或迁出** |
 | **自研 Admin Nav** | **建议回归官方 Nav**（分组嵌入损失可接受） |
-| 侧栏自定义入口（现 6 条） | **清理**；需要时 Agent 快捷方式 / 问 Agent 指路 |
+| 侧栏自定义入口（现 4 条） | **清理**；需要时 Agent 快捷方式 / 问 Agent 指路 |
 | Cache **引擎** | **Keep**；管理 UI 可瘦或删页 |
 | Themes / 业务 Collection / OSS Media | **Keep**（本地/OSS 上传仍是主路径） |
 
@@ -66,7 +66,7 @@
 
 | 能力 | 路径（示意） | 理由 |
 |------|----------------|------|
-| AI Canvases | `src/ai/canvas/`、`AdminAiCanvases/`、`AiCanvases`、`admin/ai-canvases/`、`api/ai/canvases/**` | 与 Agent + Prompt 重叠；维护 React Flow 成本高 |
+| AI Canvases | `src/ai/canvas/`、`AdminAiCanvases/`、`AiCanvases`、`admin/ai-canvases/`、`api/ai/canvases/**` | **已删**（2026-08-27） |
 | **Unsplash 图库** | `src/unsplash/`、`api/admin/unsplash/**`、`UnsplashImportPill`、`ai/agent/stockImages.ts`、`AgentStockImageResults`、IntegrationSettings / credentials 中 Unsplash 相关 | **非必须**；配图走 Media 上传 / OSS 即可。删后去掉外站 API、密钥与 Agent stock-image 工具链路 |
 | 内容统计页 | `admin/stats/`、`admin-stats/` | Agent 已有 `get_site_stats` |
 | 二次开发文档 | `docs/dev-docs.md` | **已迁出**（2026-08-14）；Admin `/dev-docs` 已删除 |
@@ -77,7 +77,7 @@
 
 **产品判断：** 回归官方后「进不了细分组 / 排序变默认 / 少一条管理首页链」**问题不大**，可接受。
 
-现有 6 条自定义侧栏项的处置：
+现有 4 条自定义侧栏项的处置：
 
 | 项 | 处置 |
 |----|------|
@@ -165,7 +165,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 ## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
 1. 字段 AI：摘掉 `withAi*` → 删 UI → 清理仅字段用 API（**减定制收益最大**）。
-2. AI Canvases / Stats / Dev Docs / Unsplash 按 §3.3 删除。
+2. Stats / Unsplash 按 §3.3 删除（AI Canvases、Dev Docs 已删）。
 3. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
 4. **Nav 回归官方**：去掉自研 `AdminNav` / `admin-nav`；不强制 `afterNavLinks`。
 5. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
@@ -176,10 +176,10 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 | 口径 | 现在 | 做完后 |
 |------|------|--------|
 | importMap 自建条目 | ~27 | **~11～14**（约一半） |
-| 自定义侧栏项 | 5（已去掉二次开发文档） | **0** |
-| 自定义 View | 5（已去掉 dev-docs） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
+| 自定义侧栏项 | 4（已去掉二次开发文档与 AI 画布） | **0** |
+| 自定义 View | 4（已去掉 dev-docs 与 AI 画布） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
 | 自研 Nav | 有 | **无**（官方） |
-| 字段 AI / Unsplash / 画布等 | 有 | **无** |
+| 字段 AI / Unsplash 等 | 有 | **无** |
 
 **还留的 Admin UI 定制（按块）：**
 
@@ -215,3 +215,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-07-19 — 增加 §6 最终剩余汇总。
 - 2026-08-14 — 二次开发文档已迁至 `docs/dev-docs.md`，Admin `/dev-docs` 与侧栏入口已删除。
 - 2026-08-20 — 精简（含 AI Canvases）改到 Payload 4.0 升级时再删，当前不改代码。
+- 2026-08-27 — AI Canvases 已删除（Collection / View / API / Agent 工具 / @xyflow/react）；Postgres 迁移 `20260827_120000_drop_ai_canvases`。

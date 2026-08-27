@@ -198,8 +198,6 @@ export const adminLabels = {
   smtpSecure: 'SMTP Secure (TLS)',
   smtpUser: 'SMTP User',
   smtpPass: 'SMTP Password',
-  aiCanvases: { singular: 'AI 画布', plural: 'AI 画布' },
-  aiCanvasGraph: '画布图数据',
   aiAssist: 'AI 助手',
   aiChatSessions: { singular: 'AI 会话', plural: 'AI 会话历史' },
   aiChatSessionTitle: '会话标题',

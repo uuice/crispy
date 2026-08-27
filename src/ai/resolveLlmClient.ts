@@ -4,11 +4,11 @@ import { getPayload, type Payload } from 'payload'
 import { DEFAULT_AI_TEMPLATES } from '@/ai/defaultTemplates'
 import type { AiAction, AiOutputFormat, AiPromptTemplate } from '@/ai/types'
 
-export type LlmPurpose = 'field' | 'agent' | 'assistant' | 'embedding' | 'canvas'
+export type LlmPurpose = 'field' | 'agent' | 'assistant' | 'embedding'
 
 export type ResolveLlmClientArgs = {
   purpose?: LlmPurpose
-  /** Explicit catalog id override (canvas / API). */
+  /** Explicit catalog id override (API). */
   providerId?: string | number | null
   /** Explicit model override. */
   model?: string | null
@@ -183,7 +183,7 @@ async function loadAiGlobal(payload: Payload): Promise<Record<string, unknown> |
 }
 
 /**
- * Unified LLM resolution for field AI / agent / assistant / canvas.
+ * Unified LLM resolution for field AI / agent / assistant.
  * Override chain: explicit args → prompt binding → ai-settings default.
  * No .env fallback — configure llm-providers + ai-settings in Admin.
  */

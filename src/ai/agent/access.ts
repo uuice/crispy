@@ -168,12 +168,6 @@ const COLLECTION_PERMISSIONS: Record<string, Partial<Record<AgentOp, Permission[
     update: ['presets:manage'],
     delete: ['presets:manage'],
   },
-  'ai-canvases': {
-    read: ['ai:use'],
-    create: ['ai:use'],
-    update: ['ai:use'],
-    delete: ['ai:use'],
-  },
 }
 
 const GLOBAL_UPDATE_PERMISSION: Record<string, Permission> = {

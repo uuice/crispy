@@ -148,13 +148,6 @@ const COLLECTION_HINTS: Record<string, string[]> = {
     'find 列表不含 systemPrompt/userPrompt；改文案前先 get_document 读全文',
     '增删改需 catalog:prompts:write；find/get 需 catalog:prompts:read',
   ],
-  'ai-canvases': [
-    '按账号隔离：默认只能看/改自己的画布',
-    'Agent 只管理元数据：title；创建时自动带默认空图（输入+Prompt 节点）',
-    '禁止通过 Agent 写入/修改 graph（节点与边）；引导用户打开 /admin/ai-canvases',
-    'get_document 返回图摘要（节点/边数量），不含完整 graph JSON',
-    '删除为软删除；恢复用 restore_document',
-  ],
 }
 
 function resolveCollectionHints(slug: string): string[] {

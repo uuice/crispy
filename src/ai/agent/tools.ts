@@ -25,10 +25,6 @@ import type { AuditLog, Config, PayloadQueryPreset } from '@/payload-types'
 import type { AgentToolCall } from '@/ai/agent/types'
 import { collectCollectionStats } from '@/admin-stats/collectCollectionStats'
 import {
-  prepareCanvasWriteData,
-  sanitizeCanvasDocForAgent,
-} from '@/ai/canvas/agentView'
-import {
   getFrontendCacheSettings,
   listFrontendCache,
   purgeFrontendCache,
@@ -730,10 +726,7 @@ export async function executeAgentTool(
         overrideAccess: false,
         user: req.user,
       })
-      result =
-        collection === 'ai-canvases' && doc && typeof doc === 'object'
-          ? sanitizeCanvasDocForAgent(doc as unknown as Record<string, unknown>)
-          : doc
+      result = doc
       break
     }
 
@@ -743,19 +736,14 @@ export async function executeAgentTool(
       if (!args.data || typeof args.data !== 'object') {
         throw new Error('data 必须是对象')
       }
-      const rawData = args.data as Record<string, unknown>
-      const data =
-        collection === 'ai-canvases' ? prepareCanvasWriteData(rawData, 'create') : rawData
+      const data = args.data as Record<string, unknown>
       const created = await req.payload.create({
         collection: collection as CollectionSlug,
         data: data as never,
         overrideAccess: false,
         user: req.user,
       })
-      result =
-        collection === 'ai-canvases' && created && typeof created === 'object'
-          ? sanitizeCanvasDocForAgent(created as unknown as Record<string, unknown>)
-          : created
+      result = created
       break
     }
 
@@ -766,9 +754,7 @@ export async function executeAgentTool(
       if (!args.data || typeof args.data !== 'object') {
         throw new Error('data 必须是对象')
       }
-      const rawData = args.data as Record<string, unknown>
-      const data =
-        collection === 'ai-canvases' ? prepareCanvasWriteData(rawData, 'update') : rawData
+      const data = args.data as Record<string, unknown>
       const updated = await req.payload.update({
         collection: collection as CollectionSlug,
         id,
@@ -776,10 +762,7 @@ export async function executeAgentTool(
         overrideAccess: false,
         user: req.user,
       })
-      result =
-        collection === 'ai-canvases' && updated && typeof updated === 'object'
-          ? sanitizeCanvasDocForAgent(updated as unknown as Record<string, unknown>)
-          : updated
+      result = updated
       break
     }
 

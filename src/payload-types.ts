@@ -97,7 +97,6 @@ export interface Config {
     'authz-cache': AuthzCache;
     roles: Role;
     'ai-chat-sessions': AiChatSession;
-    'ai-canvases': AiCanvase;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -153,7 +152,6 @@ export interface Config {
     'authz-cache': AuthzCacheSelect<false> | AuthzCacheSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
     'ai-chat-sessions': AiChatSessionsSelect<false> | AiChatSessionsSelect<true>;
-    'ai-canvases': AiCanvasesSelect<false> | AiCanvasesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -1525,7 +1523,7 @@ export interface LlmProvider {
   deletedAt?: string | null;
 }
 /**
- * 字段 AI / 画布技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。
+ * 字段 AI 技能卡。可绑定 LLM Provider 与模型；留空则使用 AI 设置中的全局默认。也可在后台 AI 助手中由超级管理员维护。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "prompt-templates".
@@ -1771,32 +1769,6 @@ export interface AiChatSession {
    * 完整对话记录（用户消息、AI 回复、工具调用摘要）。
    */
   messages:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * AI 无限画布；按账号隔离，一人可创建多份。请从运营 → AI 画布进入。
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ai-canvases".
- */
-export interface AiCanvase {
-  id: number;
-  title: string;
-  user: number | User;
-  /**
-   * React Flow 节点与边（JSON）
-   */
-  graph:
     | {
         [k: string]: unknown;
       }
@@ -2833,10 +2805,6 @@ export interface PayloadLockedDocument {
         value: number | AiChatSession;
       } | null)
     | ({
-        relationTo: 'ai-canvases';
-        value: number | AiCanvase;
-      } | null)
-    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -2991,7 +2959,6 @@ export interface PayloadQueryPreset {
     | 'authz-cache'
     | 'roles'
     | 'ai-chat-sessions'
-    | 'ai-canvases'
     | 'users'
     | 'redirects'
     | 'forms'
@@ -3748,18 +3715,6 @@ export interface AiChatSessionsSelect<T extends boolean = true> {
   user?: T;
   lastMessageAt?: T;
   messages?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ai-canvases_select".
- */
-export interface AiCanvasesSelect<T extends boolean = true> {
-  title?: T;
-  user?: T;
-  graph?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -4970,7 +4925,6 @@ export interface TaskCreateCollectionExport {
       | 'authz-cache'
       | 'roles'
       | 'ai-chat-sessions'
-      | 'ai-canvases'
       | 'users'
       | 'redirects'
       | 'forms'

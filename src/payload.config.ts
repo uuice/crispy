@@ -16,7 +16,6 @@ import { Galleries } from './collections/Galleries'
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
-import { AiCanvases } from './collections/AiCanvases'
 import { AdSlots } from './collections/AdSlots'
 import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
@@ -82,11 +81,6 @@ export default buildConfig({
         aiAgent: {
           Component: '@/app/(payload)/admin/ai-agent/AiAgentView',
           path: '/ai-agent',
-          exact: true,
-        },
-        aiCanvases: {
-          Component: '@/app/(payload)/admin/ai-canvases/AiCanvasesView',
-          path: '/ai-canvases',
           exact: true,
         },
         stats: {
@@ -205,7 +199,6 @@ export default buildConfig({
     AuthzCache,
     Roles,
     AiChatSessions,
-    AiCanvases,
     Users,
   ],
   onInit: async (payload) => {
