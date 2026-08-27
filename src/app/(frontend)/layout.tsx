@@ -10,7 +10,6 @@ import { FrontendAiAssistant } from '@/components/FrontendAiAssistant'
 import { InitTheme } from '@/frontend/InitTheme'
 import { Layout } from '@/frontend/Layout'
 import { querySidebarData } from '@/frontend/data/queries'
-import { Providers } from '@/providers'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
@@ -36,19 +35,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body className="min-h-screen antialiased">
-        <Providers>
-          <div className="crispy-chrome">
-            {isEnabled ? (
-              <AdminBar
-                adminBarProps={{
-                  preview: isEnabled,
-                }}
-              />
-            ) : null}
-            <FrontendAiAssistant />
-          </div>
-          <Layout layoutData={layoutData}>{children}</Layout>
-        </Providers>
+        <div className="crispy-chrome">
+          {isEnabled ? (
+            <AdminBar
+              adminBarProps={{
+                preview: isEnabled,
+              }}
+            />
+          ) : null}
+          <FrontendAiAssistant />
+        </div>
+        <Layout layoutData={layoutData}>{children}</Layout>
       </body>
     </html>
   )

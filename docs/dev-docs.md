@@ -98,10 +98,9 @@ crispy/
 │   │       └── api/               # Payload REST + Admin AI 路由
 │   ├── collections/             # Posts, Pages, Media, Tags…
 │   ├── collections/defaults.ts  # trash/versions 默认值、内部 Collection 判定
-│   ├── Header/ Footer/ SiteSettings/ AiSettings/ CacheSettings/  # Globals
+│   ├── globals/                 # Header / Footer / SiteSettings / CacheSettings 等
 │   ├── frontend/                # 前台 Layout、页面、样式
 │   ├── frontend-cache/          # 前台 DB 缓存（数据 + 路由状态）
-│   ├── CacheSettings/           # cache-settings Global 配置
 │   ├── access/                  # RBAC：permissions / can / authzCache
 │   ├── collections/Roles|AuthzCache  # 可配角色 + 鉴权缓存
 │   ├── ai/                      # LLM provider、Admin Agent、embedding
@@ -228,7 +227,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 
 - hero.type 为 highImpact / mediumImpact 时才需要 hero.media；lowImpact / none 不要求媒体
 - 版本还原若报「头图 > Media 无效」：检查该版本 hero 类型是否需配图，或关联 media 是否已删除
-- 实现：src/heros/config.ts（条件 validate，非全局 required）
+- 实现：src/fields/hero.ts（条件 validate，非全局 required）
 
 <h2 id="permissions">权限列表（RBAC）</h2>
 
@@ -556,7 +555,7 @@ Admin → 导入导出。importExportPlugin 已启用 Collection（src/plugins/i
 | 层级 | 范围 | 代码 |
 | --- | --- | --- |
 | Payload Search 插件 | posts, pages, jobs, gallery-items | src/plugins/index.ts searchPlugin + src/search/beforeSync.ts |
-| 前台 /search-index.json | 已发布 posts/pages + 启用 jobs/gallery-items | src/search/buildThemeSearchIndex.ts |
+| 前台 /search-index.json | 已发布 posts/pages + 启用 jobs/gallery-items | src/search/buildSearchIndex.ts |
 | 前台 AI 助手 | post/page/category/tag/link/job/gallery 等公开数据 | src/ai/frontend-assistant/publicContent.ts |
 
 新增 jobs / gallery-items 到 Search 插件后，已有数据可能需在 Admin → 系统 → 搜索索引 手动重建一次。
@@ -1235,7 +1234,7 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 - section — 站点栏目入口（/posts、/links、/jobs 等）
 - 数据查询均 overrideAccess: false，遵守 Collection read access
 - 索引实现：src/ai/frontend-assistant/publicContent.ts
-- 前台搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildThemeSearchIndex.ts）
+- 前台搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildSearchIndex.ts）
 
 助手为发现型检索：工具返回标题、链接、短摘要（excerpt），不返回文章或章节正文（token 考量）。用户问「某章写了什么」时，应给出摘要与站内阅读链接，引导至返回的 url 阅读全文。
 

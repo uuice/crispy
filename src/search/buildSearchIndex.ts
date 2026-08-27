@@ -17,7 +17,7 @@ import {
   publishedNovelChaptersWhere,
 } from '@/utilities/publishedContentWhere'
 
-export async function buildThemeSearchIndex(): Promise<SearchIndexItem[]> {
+export async function buildSearchIndex(): Promise<SearchIndexItem[]> {
   const payload = await getPayload({ config: configPromise })
 
   const [postsResult, pagesResult, jobsResult, galleryResult, novelsResult, novelChaptersResult] =

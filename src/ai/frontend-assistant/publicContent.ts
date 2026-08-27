@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import { loadNavigationsPageData } from '@/navigations/loadNavigationsPageData'
+import { loadNavigationsPageData } from '@/frontend/data/navigations'
 import {
   queryGalleries,
   queryJobs,

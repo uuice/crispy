@@ -66,7 +66,7 @@ Go **不**渲染 Lexical、不实现前台主题、不连 Payload、不实现后
 - 类型对齐现助手：`post` / `page` / `novel` / `novel-chapter` / `category` / `tag` / `link` / `job` / `gallery` / `navigation` / `section` 等
 - **不含**正文、草稿、用户、评论后台、API Key、embedding
 
-实现时可复用 `src/search/buildThemeSearchIndex.ts`、`src/ai/frontend-assistant/publicContent.ts`。
+实现时可复用 `src/search/buildSearchIndex.ts`、`src/ai/frontend-assistant/publicContent.ts`。
 
 ### 4.2 `short-links.json`
 
@@ -177,7 +177,7 @@ rsync -av --delete ./export/ user@1g:/var/www/blog/
 | 短链 | `src/app/(frontend)/s/[slug]/page.tsx`、`src/collections/ShortLinks/` |
 | 重定向 | `src/redirects/`、`src/frontend-cache/legacyFrontendRedirects.ts` |
 | 前台 AI | `src/app/(frontend)/api/ai/assistant/route.ts`、`src/ai/frontend-assistant/` |
-| 主题搜索索引 | `src/search/buildThemeSearchIndex.ts` |
+| 前台搜索索引 | `src/search/buildSearchIndex.ts` |
 | 现有 HTML 缓存 | `src/frontend-cache/`（导出抓页时可顺带利用，但 1G 不跑这套） |
 
 ## 13. 下一步（未开工）

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
-import { loadNavigationsPageData } from '@/navigations/loadNavigationsPageData'
+import { loadNavigationsPageData } from '../data/navigations'
 
 import { NavigationsView } from '../views/NavigationsView'
 
-export type { NavCategory, NavigationsPageData } from '@/navigations/types'
+export type { NavCategory, NavigationsPageData } from '../data/navigations'
 
 export { loadNavigationsPageData }
 

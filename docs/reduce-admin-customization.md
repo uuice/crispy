@@ -113,7 +113,7 @@ Postgres 迁移：`20260827_150000_drop_frontend_theme`。
 |----|------|------|----------|
 | Gallery 封面字段 | `src/components/Galleries/GalleryCoverUploadField` | Galleries 封面上传 UX | Keep（业务） |
 | Gallery 图片 Join | `src/components/Galleries/GalleryItemsJoinField` | 相册内图片关联编辑 | Keep（业务） |
-| Header / Footer RowLabel | `src/Header/RowLabel`、`src/Footer/RowLabel` | 导航行标签显示 | Keep（小） |
+| Header / Footer RowLabel | `src/globals/Header/RowLabel`、`src/globals/Footer/RowLabel` | 导航行标签显示 | Keep（小） |
 | AdminListView | `src/components/AdminListView/` + 刷新按钮 | 曾注入刷新 | **已删**（2026-08-27）；列表回官方 DefaultListView |
 
 #### 与壳相关、但不在 Admin importMap 主路径

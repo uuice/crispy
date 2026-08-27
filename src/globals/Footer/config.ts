@@ -6,12 +6,12 @@ import { requirePermission } from '@/access/can'
 import { adminLabels } from '@/i18n/admin-labels'
 import { frontendNavPathHint } from '@/utilities/mapGlobalNavItems'
 
-export const Header: GlobalConfig = {
-  slug: 'header',
-  label: adminLabels.header,
+export const Footer: GlobalConfig = {
+  slug: 'footer',
+  label: adminLabels.footer,
   admin: {
     group: adminLabels.configGroup,
-    description: '控制前台顶栏导航。',
+    description: '控制前台页脚导航链接。',
     hidden: hideUnlessAnyPermission('settings:site'),
   },
   access: {
@@ -33,7 +33,7 @@ export const Header: GlobalConfig = {
         initCollapsed: true,
         description: frontendNavPathHint,
         components: {
-          RowLabel: '@/Header/RowLabel#RowLabel',
+          RowLabel: '@/globals/Footer/RowLabel#RowLabel',
         },
       },
     },
