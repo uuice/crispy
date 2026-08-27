@@ -32,7 +32,7 @@ export async function NovelSlugLayout({ children, params }: Props) {
           <NovelSidebarWithPath data={sidebarData} />
         </div>
       </div>
-      <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
+      <div className="lg:hidden border-t" style={{ borderColor: 'var(--card-border)' }}>
         <NovelSidebarWithPath data={sidebarData} />
       </div>
     </div>

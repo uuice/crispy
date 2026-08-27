@@ -19,7 +19,7 @@ export function PostList({ posts, emptyMessage = '暂时还没有文章' }: Prop
   }
 
   return (
-    <div className="section-card border-0! bg-transparent! overflow-hidden animate-in animate-in-delay-3">
+    <div className="section-card border-0! bg-transparent! animate-in animate-in-delay-3">
       <ul className="post-list terminal-list">
         {posts.map((post) => (
           <li key={post.url}>

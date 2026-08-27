@@ -19,7 +19,7 @@ export function BackToTop() {
   return (
     <button
       aria-label="返回顶部"
-      className={`back-to-top back-to-top-cute-wrap fixed right-6 bottom-6 z-40 transition-opacity duration-200 inline-flex items-center gap-1${
+      className={`back-to-top fixed right-6 bottom-6 z-40 transition-opacity duration-200 inline-flex items-center${
         visible ? ' opacity-100' : ' opacity-0 pointer-events-none'
       }`}
       id="back-to-top"
@@ -37,9 +37,6 @@ export function BackToTop() {
       type="button"
     >
       <span>返回顶部</span>
-      <span aria-hidden="true" className="back-to-top-cute">
-        ˖°
-      </span>
     </button>
   )
 }

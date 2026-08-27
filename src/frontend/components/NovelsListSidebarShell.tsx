@@ -25,7 +25,7 @@ export function NovelsListSidebarShell({ chapters }: Props) {
           <NovelsListSidebar chapters={chapters} />
         </div>
       </div>
-      <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
+      <div className="lg:hidden border-t" style={{ borderColor: 'var(--card-border)' }}>
         <NovelsListSidebar chapters={chapters} />
       </div>
     </>

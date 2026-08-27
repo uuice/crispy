@@ -9,7 +9,7 @@ export function ArticleCopyright({ articleUrl, publishDate }: Props) {
   const licenseUrl = 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
 
   return (
-    <div className="article-copyright mt-8 pt-6">
+    <div className="article-copyright mt-8">
       <div
         className="border px-3 py-2.5 code-label"
         style={{

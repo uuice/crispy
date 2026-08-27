@@ -18,7 +18,6 @@ import { MobileNav } from './components/MobileNav'
 import { NovelsListSidebarShell } from './components/NovelsListSidebarShell'
 import { Sidebar } from './components/Sidebar'
 import { queryLatestNovelChapters } from './data/queries'
-import { SiteCuteDecor } from './components/SiteCuteDecor'
 import { ThemeColor } from './components/ThemeColor'
 
 type Props = {
@@ -68,7 +67,6 @@ export async function Layout({ children, layoutData }: Props) {
           animationRange: '0% 100%',
         }}
       />
-      <SiteCuteDecor variant="blog" />
 
       <div className="relative z-[1] min-h-screen flex flex-col">
         <a className="blog-skip-link" href="#main-content">
@@ -80,15 +78,12 @@ export async function Layout({ children, layoutData }: Props) {
         >
           <div className="blog-shell mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
             <Link
-              className="header-brand font-semibold transition-opacity hover:opacity-80 flex items-center gap-1.5"
+              className="header-brand font-semibold transition-opacity hover:opacity-80"
               href="/"
               prefetch={false}
               style={{ fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)' }}
             >
               <span className="header-brand-name">{siteName}</span>
-              <span aria-hidden="true" className="header-cute-sparkle select-none">
-                ✨
-              </span>
             </Link>
 
             <nav aria-label="主导航" className="hidden lg:flex items-center gap-5">
@@ -127,7 +122,7 @@ export async function Layout({ children, layoutData }: Props) {
             <div className="w-64 shrink-0 hidden lg:block">
               <div className="sticky top-24">{defaultSidebar}</div>
             </div>
-            <div className="lg:hidden mt-6 pt-6 border-t" style={{ borderColor: 'var(--card-border)' }}>
+            <div className="lg:hidden border-t" style={{ borderColor: 'var(--card-border)' }}>
               {defaultSidebar}
             </div>
           </BlogSidebarShell>
@@ -149,16 +144,8 @@ export async function Layout({ children, layoutData }: Props) {
             <p className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
               <FooterBackToTop />
             </p>
-            <p
-              className="font-medium flex flex-wrap items-center gap-x-1.5 gap-y-0.5"
-              style={{ color: 'var(--text)' }}
-            >
-              <span aria-hidden="true" className="footer-cute-emoji select-none">
-                ♡
-              </span>
-              <span>
-                © {new Date().getFullYear()} {siteName}
-              </span>
+            <p className="font-medium" style={{ color: 'var(--text)' }}>
+              © {new Date().getFullYear()} {siteName}
             </p>
             {footerMenu.length > 0 ? (
               <nav

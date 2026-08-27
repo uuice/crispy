@@ -186,9 +186,6 @@ export function BlogSearch() {
           className="search-panel-terminal"
           role="dialog"
         >
-          <span aria-hidden="true" className="search-panel-cute-glyph">
-            ✦ find · ✧
-          </span>
           <div className="search-panel-header flex items-start justify-between gap-2">
             <div>
               <h2 className="search-panel-title" id="blog-search-title">
@@ -270,17 +267,7 @@ export function BlogSearch() {
 
                   return (
                     <li key={item.id}>
-                      <article
-                        className="post-card-cute section-card group"
-                        style={{
-                          borderLeft: 'none',
-                          borderRadius: 0,
-                          boxShadow: 'none',
-                          margin: 0,
-                          borderBottom: '1px solid var(--card-border)',
-                          padding: '0.5rem 0.75rem',
-                        }}
-                      >
+                      <article className="post-card-cute group">
                         <Link
                           className="terminal-meta-line block transition-colors hover:text-(--accent)"
                           href={item.url}

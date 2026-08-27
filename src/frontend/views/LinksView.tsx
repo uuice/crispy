@@ -56,7 +56,7 @@ export function LinksView({ data }: Props) {
                 <p className="code-label m-0">{section.description}</p>
               ) : null}
             </div>
-            <div className="section-card border-0! bg-transparent! overflow-hidden animate-in animate-in-delay-3">
+            <div className="section-card border-0! bg-transparent! animate-in animate-in-delay-3">
               <ul className="post-list terminal-list m-0">
                 {section.links.map((entry) => (
                   <li key={entry.id}>

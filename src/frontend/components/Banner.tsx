@@ -8,7 +8,7 @@ type Props = {
 export function Banner({ title = '', subtitle = '' }: Props) {
   return (
     <header
-      className="banner-hero mb-6 overflow-hidden border py-8 md:py-12 px-5 sm:px-6 rounded-lg animate-in"
+      className="banner-hero overflow-hidden border py-8 md:py-12 px-5 sm:px-6 rounded-lg animate-in"
       style={{ borderColor: 'var(--card-border)', color: 'var(--text)' }}
     >
       <h1

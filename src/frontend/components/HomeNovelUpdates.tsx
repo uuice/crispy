@@ -23,7 +23,7 @@ export function HomeNovelUpdates({ chapters }: Props) {
   if (chapters.length === 0) return null
 
   return (
-    <section className="space-y-5 mt-10 pt-8 border-t animate-in animate-in-delay-3" style={{ borderColor: 'var(--card-border)' }}>
+    <section className="space-y-5 pt-6 border-t animate-in animate-in-delay-3" style={{ borderColor: 'var(--card-border)' }}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 className="section-title m-0">{frontendLabels.novels.homeUpdates}</h2>
         <Link
