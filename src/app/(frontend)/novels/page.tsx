@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function NovelsPage() {
-  return renderThemePage('novels')
+  return renderPage('novels')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('novels')
+  return generatePageMetadata('novels')
 }

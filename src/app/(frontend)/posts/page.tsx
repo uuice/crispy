@@ -1,14 +1,14 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
-import type { ThemeListPageProps } from '@/themes/types'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
+import type { ListPageProps } from '@/frontend/types'
 
 export const revalidate = false
 
-type Args = ThemeListPageProps
+type Args = ListPageProps
 
 export default function PostsPage({ searchParams }: Args) {
-  return renderThemePage('posts', { searchParams })
+  return renderPage('posts', { searchParams })
 }
 
 export function generateMetadata({ searchParams }: Args) {
-  return generateThemeMetadata('posts', { searchParams })
+  return generatePageMetadata('posts', { searchParams })
 }

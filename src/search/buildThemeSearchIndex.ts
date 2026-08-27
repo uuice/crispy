@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import { fieldValueToPlainText } from '@/ai/fieldValueToPlainText'
-import type { ThemeSearchIndexItem } from '@/themes/types'
+import type { SearchIndexItem } from '@/frontend/types'
 import {
   getGalleriesPath,
   getGalleryPath,
@@ -17,7 +17,7 @@ import {
   publishedNovelChaptersWhere,
 } from '@/utilities/publishedContentWhere'
 
-export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
+export async function buildThemeSearchIndex(): Promise<SearchIndexItem[]> {
   const payload = await getPayload({ config: configPromise })
 
   const [postsResult, pagesResult, jobsResult, galleryResult, novelsResult, novelChaptersResult] =
@@ -119,7 +119,7 @@ export async function buildThemeSearchIndex(): Promise<ThemeSearchIndexItem[]> {
       }),
     ])
 
-  const items: ThemeSearchIndexItem[] = []
+  const items: SearchIndexItem[] = []
 
   for (const post of postsResult.docs) {
     if (!post.slug || !post.title) continue

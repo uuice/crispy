@@ -19,20 +19,15 @@ const GROUPS = {
     commands: [
       {
         id: 'dev',
-        summary: '开发服务器（端口 3333）+ 主题 CSS watch',
-        note: '本地默认 SQLite，无需 Docker。等价于 dev-with-theme-css.mjs。',
-        run: () => nodeScript('dev-with-theme-css.mjs'),
+        summary: '开发服务器（端口 3333）',
+        note: '本地默认 SQLite，无需 Docker。',
+        run: () => pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', 'next', 'dev', '-p', '3333']),
       },
       {
         id: 'build',
-        summary: '编译主题 CSS + Next 生产构建',
-        note: 'build 前自动跑 theme CSS + 第三方许可证；build 后自动生成 sitemap。',
-        run: async () => {
-          await runChain([
-            () => nodeScript('build-theme-css.mjs'),
-            () => runProductionBuild(),
-          ])
-        },
+        summary: 'Next 生产构建',
+        note: 'build 前自动跑第三方许可证；build 后自动生成 sitemap。',
+        run: () => runProductionBuild(),
       },
       {
         id: 'start',
@@ -47,7 +42,6 @@ const GROUPS = {
         run: async () => {
           rmRf('.next')
           await runChain([
-            () => nodeScript('build-theme-css.mjs'),
             () => runProductionBuild(),
             () => pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', 'next', 'start']),
           ])
@@ -90,23 +84,6 @@ const GROUPS = {
         summary: '仅打包 standalone（需已 build）',
         note: '不重新 build；缺少 .next/standalone 会报错。',
         run: () => bashScript('pack-standalone.sh'),
-      },
-    ],
-  },
-  theme: {
-    title: '主题 CSS（通常由 dev/build 自动调用）',
-    commands: [
-      {
-        id: 'build',
-        summary: '编译 blog/cms/kb → public/theme-assets/*.css',
-        note: 'layout 运行时只 link 当前主题；部署前须执行或由 build 触发。',
-        run: () => nodeScript('build-theme-css.mjs'),
-      },
-      {
-        id: 'watch',
-        summary: '编译并 watch 主题 CSS',
-        note: '单独调试主题样式时使用；dev 已内置 watch。',
-        run: () => nodeScript('build-theme-css.mjs', ['--watch']),
       },
     ],
   },
@@ -352,7 +329,6 @@ const GROUPS = {
                 ],
                 ciTestEnv,
               ),
-            () => nodeScript('build-theme-css.mjs'),
             () => runProductionBuild(ciEnv),
           ])
         },

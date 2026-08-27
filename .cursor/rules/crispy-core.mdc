@@ -20,7 +20,7 @@ Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，greenfield 重写，与
 - `src/access/` — RBAC：`permissions.ts` / `can.ts` / `authzCache.ts`
 - `src/plugins/` — 官方 + 自建 Plugin 聚合（`index.ts`）
 - `src/ai/` — 后台 Agent、前台只读助手、embedding
-- `src/themes/` — 前台可插拔主题（blog / cms / kb）
+- `src/frontend/` — 前台 Layout / 页面 / 样式
 - `src/app/(payload)/admin/` — Admin Custom Views
 - `src/app/(frontend)/` — 前台 SSR/RSC
 - `src/admin-stats/`、`src/openapi/` — 产品层模块

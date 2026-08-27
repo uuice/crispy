@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function LinksPage() {
-  return renderThemePage('links')
+  return renderPage('links')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('links')
+  return generatePageMetadata('links')
 }

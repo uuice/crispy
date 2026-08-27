@@ -1,4 +1,4 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
@@ -7,9 +7,9 @@ type Args = {
 }
 
 export default function PostPage({ params }: Args) {
-  return renderThemePage('postDetail', { params })
+  return renderPage('postDetail', { params })
 }
 
 export function generateMetadata({ params }: Args) {
-  return generateThemeMetadata('postDetail', { params })
+  return generatePageMetadata('postDetail', { params })
 }

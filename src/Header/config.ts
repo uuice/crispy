@@ -11,7 +11,7 @@ export const Header: GlobalConfig = {
   label: adminLabels.header,
   admin: {
     group: adminLabels.configGroup,
-    description: '控制前台顶栏导航（blog / cms 主题均读取此配置）。',
+    description: '控制前台顶栏导航。',
     hidden: hideUnlessAnyPermission('settings:site'),
   },
   access: {

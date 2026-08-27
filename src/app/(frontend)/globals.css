@@ -5,16 +5,20 @@
 
 @config '../../../tailwind.config.mjs';
 
-@import '../../themes/shared/tailwind-theme.css';
-@import '../../themes/shared/tailwind-variants.css';
+@import '../../frontend/css/tailwind-theme.css';
+@import '../../frontend/css/tailwind-variants.css';
 
 @plugin "@tailwindcss/typography";
 
-/* Crispy chrome only — theme Tailwind utilities load via loadTheme() */
 @source '../../../components/AdminBar/**/*.{ts,tsx}';
-@source '../../../components/ThemePreviewBanner/**/*.{ts,tsx}';
-@source '../../../components/ThemePreview/**/*.{ts,tsx}';
 @source '../../../components/FrontendAiAssistant/**/*.{ts,tsx}';
+@source '../../../frontend/**/*.{ts,tsx}';
+@source '../../../blocks/**/*.{ts,tsx}';
+@source '../../../components/Link/**/*.{ts,tsx}';
+@source '../../../components/Media/**/*.{ts,tsx}';
+@source '../../../components/ui/**/*.{ts,tsx}';
+
+@import '../../frontend/styles.css';
 
 @layer base {
   .crispy-chrome h1,

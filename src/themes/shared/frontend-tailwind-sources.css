@@ -1,5 +1,0 @@
-/* Payload blocks + shared frontend components referenced from theme views */
-@source "../../../blocks/**/*.{ts,tsx}";
-@source "../../../components/Link/**/*.{ts,tsx}";
-@source "../../../components/Media/**/*.{ts,tsx}";
-@source "../../../components/ui/**/*.{ts,tsx}";

@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function HomePage() {
-  return renderThemePage('home')
+  return renderPage('home')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('home')
+  return generatePageMetadata('home')
 }

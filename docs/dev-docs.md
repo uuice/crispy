@@ -2,7 +2,7 @@
 
 > 本文档已从 Admin `/admin/dev-docs` 迁至仓库 Markdown（2026-08-14）。
 
-面向二次开发：技术栈、权限、AI、MCP、部署与前台主题。
+面向二次开发：技术栈、权限、AI、MCP、部署与前台。
 
 - [概述](#overview)
 - [技术栈](#stack)
@@ -19,7 +19,7 @@
 - [部署与迁移](#deploy)
 - [Payload 版本升级 SOP](#payload-upgrade)
 - [前台缓存（Database Cache）](#frontend-cache)
-- [前台主题（可插拔）](#frontend-themes)
+- [前台](#frontend-themes)
 - [CI 与验证](#ci)
 - [配置中心方案（Catalog + Active + Override）](#config-center)
 - [Payload 扩展架构](#architecture)
@@ -42,7 +42,6 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 | MCP | http://localhost:3333/api/mcp |
 | AI 助手（后台） | /admin/ai-agent + POST /api/ai/agent（需 Admin 登录） |
 | AI 助手（前台） | 右下角浮窗 + POST /api/ai/assistant（公开只读） |
-| 前台主题预览 | ?theme_preview=blog\|cms\|kb（需 settings:site\|pages:manage\|ops:manage） |
 | AI 文档 | #openai-api |
 | Swagger API | /admin/api-docs（需 Admin 登录） |
 | OpenAPI JSON | GET /api/openapi.json（需 Admin 登录） |
@@ -93,15 +92,14 @@ crispy/
 ├── src/
 │   ├── app/
 │   │   ├── (frontend)/          # 前台 SSR/RSC
-│   │   │   ├── api/ai/assistant # 公开只读 AI 助手 SSE
-│   │   │   └── next/exit-theme-preview
+│   │   │   └── api/ai/assistant # 公开只读 AI 助手 SSE
 │   │   └── (payload)/             # Admin + API
 │   │       ├── admin/[[...segments]]/
 │   │       └── api/               # Payload REST + Admin AI 路由
 │   ├── collections/             # Posts, Pages, Media, Tags…
 │   ├── collections/defaults.ts  # trash/versions 默认值、内部 Collection 判定
 │   ├── Header/ Footer/ SiteSettings/ AiSettings/ CacheSettings/  # Globals
-│   ├── themes/                  # 前台可插拔主题（blog / cms / kb）
+│   ├── frontend/                # 前台 Layout、页面、样式
 │   ├── frontend-cache/          # 前台 DB 缓存（数据 + 路由状态）
 │   ├── CacheSettings/           # cache-settings Global 配置
 │   ├── access/                  # RBAC：permissions / can / authzCache
@@ -111,7 +109,6 @@ crispy/
 │   │   └── frontend-assistant/  # 前台只读检索助手
 │   ├── components/AdminAiAgent/ # 后台对话式 AI 助手
 │   ├── components/FrontendAiAssistant/  # 前台 AI 浮窗
-│   ├── components/FrontendThemePreview/ # 站点设置主题卡片
 │   ├── plugins/                 # 官方 + 自建插件聚合
 │   ├── redirects/               # 前台 URL 重定向（middleware + internal API）
 │   ├── email/                   # Form Builder 邮件适配器（Resend / SMTP）
@@ -213,7 +210,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | --- | --- | --- |
 | header | 主导航 | navItems[]（link 组） |
 | footer | 页脚 | navItems[] |
-| site-settings | 站点设置 | siteName, description, logo, socialLinks[], enableRss, frontendTheme, adminThemeHue |
+| site-settings | 站点设置 | siteName, description, logo, socialLinks[], enableRss, adminThemeHue |
 | comment-settings | 评论设置 | enabled, moderation, guestComments, nesting, posts/pages 开关 |
 | ai-settings | AI 设置 | enabled, defaultProvider, defaultModel, temperature, maxTokens（旧字段在兼容区） |
 | cache-settings | 缓存设置 | cachingEnabled, pageRevalidateSeconds, exposeCacheHeaders |
@@ -627,7 +624,7 @@ Crispy 是 Payload 3 上的二次开发，不是 fork。与官方同步的核心
 | 数据层 | Collection/插件表结构、迁移格式 | src/collections/、src/migrations/ |
 | Admin | @payloadcms/ui API、Lexical、Custom View 约定 | src/app/(payload)/admin/*、AI 组件 |
 | API | REST/GraphQL、@payloadcms/next 路由 | src/app/(payload)/api/ai/*、internal API |
-| 前台 | Live Preview、AdminBar | src/themes/*、middleware、frontend-cache |
+| 前台 | Live Preview、AdminBar | src/frontend/、middleware、frontend-cache |
 | 插件 | 官方 plugin 配置项 | src/plugins/* 自建 plugin |
 
 ### 版本锁定铁律
@@ -775,7 +772,7 @@ bypass 条件（middlewareCache.ts）：URL 带 ?nocache、存在 __prerender_by
 
 ### 路由 HTML 缓存层（middleware）
 
-middleware 为 Edge 环境，禁止 import Payload。流程：legacy redirect → Payload redirects（60s 缓存）→ getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?theme_preview / ?nocache → BYPASS。
+middleware 为 Edge 环境，禁止 import Payload。流程：legacy redirect → Payload redirects（60s 缓存）→ getMiddlewareCacheSettings → fetch /api/internal/cache-settings；对前台 HTML GET → fetch /api/internal/route-cache-touch → resolveRouteCacheFromDb；HIT/STALE 且有 html 时直接返回 DB HTML，MISS 时 Next 渲染并在 after() 中 capture 写入 route-cache-store。?nocache → BYPASS。
 
 ### HTTP 调试 Header
 
@@ -837,61 +834,22 @@ curl -I http://localhost:3333/
 
 发布/修改内容后，到 /admin/cache 手动清除相关路径或「清除全部」，否则访客可能继续看到旧 HTML（直到 TTL 过期）。
 
-<h2 id="frontend-themes">前台主题（可插拔）</h2>
+<h2 id="frontend-themes">前台</h2>
 
-Crispy 前台通过 src/themes/ 注册多套皮肤，由 site-settings.frontendTheme 或环境变量 FRONTEND_THEME 决定当前主题。App Router 页面统一调用 renderThemePage()，各主题实现自己的 Layout 与页面 View。运行时通过 loadTheme.ts 的 dynamic import 只加载当前主题 chunk（含 styles.css），三套之间禁止互相 import。
+访客站点代码在 `src/frontend/`，路由在 `src/app/(frontend)/`。页面通过 `renderPage()` 加载对应 View；CSS 写在 `src/frontend/styles.css`，由 `globals.css` 引入，随 Next 编译。
 
-| ID | 名称 | 适用场景 |
-| --- | --- | --- |
-| blog | 博客皮肤 | 侧栏导航、卡片列表，适合个人博客 |
-| cms | 通用 CMS | 深色顶栏、杂志式内容区，适合品牌官网 |
-| kb | 知识库 | 左侧分类导航、文档 TOC、站内搜索，适合帮助中心 |
-
-### 配置与预览
-
-- Admin → Globals → 站点设置 → 前台主题：卡片选择 + 新窗口预览
-- 保存后全站生效；切换主题会自动 purge 全部前台 HTML 缓存（purgeCacheOnFrontendThemeChange）
-- 预览：/?theme_preview=blog|cms|kb，需 settings:site | pages:manage | ops:manage；站内链接自动附带 theme_preview
-- 退出预览：/next/exit-theme-preview 清除参数并回到当前页；预览模式 robots noindex
-- 回退顺序：预览 URL 参数 → site-settings → FRONTEND_THEME 环境变量 → 默认 blog
-
-### 代码与样式隔离
-
-- 代码：blog / cms / kb 各自独立目录；仅 registry → loadTheme 动态 import 进入主题模块
-- 主题 CSS：styles.css 原生嵌套写在 html.{theme}-skin { } 内
-- 主题 CSS：pnpm cli theme:build 编译到 public/theme-assets/{id}.css；layout 仅 <link> 当前主题，dev/prod 均只请求一个文件
-- 主题 Tailwind：含在各主题 tailwind.css 内，与 styles.css 一并编译进 theme-assets
-- 共享 Tailwind：globals.css 含 preflight / @theme / .crispy-chrome
-- Admin / AI 浮窗包在 .crispy-chrome，不受主题 CSS 影响
-- 共享数据查询放 src/themes/shared/，主题内组件不得 cross-import 其他主题
+Admin / AI 浮窗包在 `.crispy-chrome`，不受前台皮肤 CSS 影响。Admin 主题色相（`adminThemeHue`）是后台壳。
 
 ```
-src/app/(frontend)/globals.css        # preflight + chrome Tailwind
-public/theme-assets/{blog,cms,kb}.css  # pnpm cli theme:build 产出
-src/themes/blog/tailwind.css           # Tailwind + @source + styles.css（编译输入）
-src/themes/blog/index.ts               # 无 CSS import；layout 按 themeId 挂 link
+src/app/(frontend)/           # 路由 + globals.css
+src/frontend/
+├── Layout.tsx / InitTheme.tsx
+├── styles.css
+├── pages/ / views/ / components/
+├── data/                     # 前台查询
+├── render.tsx                # renderPage / generatePageMetadata
+└── css/                      # Tailwind theme / variants
 ```
-
-### 主题结构
-
-```
-src/themes/
-├── definitions.ts      # FRONTEND_THEME_DEFINITIONS（id + 中文名）
-├── loadTheme.ts        # dynamic import，按 id 加载单主题 chunk + CSS
-├── registry.ts         # getActiveFrontendThemeId / getActiveFrontendTheme
-├── render.tsx          # renderThemePage / generateThemeMetadata
-├── types.ts            # FrontendTheme、ThemePageName
-├── blog/ | cms/ | kb/  # tailwind.css + styles.css + Layout/pages/views
-└── shared/             # data/ + tailwind-theme|variants|sources.css
-```
-
-### 新增主题步骤
-
-1. 在 definitions.ts 注册 id 与 label
-2. 新建 src/themes/<id>/（参考 kb/ 或 cms/），实现全部 ThemePageName 页面
-3. 在 loadTheme.ts 的 themeLoaders 注册 dynamic import
-4. 在 adminMeta.ts 注册；更新 FrontendThemeField 预览 mock
-5. pnpm cli generate:types（site-settings.frontendTheme 联合类型）
 
 <h2 id="ci">CI 与验证</h2>
 
@@ -906,8 +864,8 @@ GitHub Actions .github/workflows/ci.yml：
 - Draft / Live Preview：PREVIEW_SECRET + 编辑页预览
 - 回收站 / 版本历史：列表切换回收站、编辑页版本面板
 - Query Presets：保存列表筛选与排序
-- 深色模式：Admin 主题色相 + 各前台皮肤自带 ThemeToggle
-- 前台主题：站点设置切换 blog / cms / kb；有 settings:site|pages:manage|ops:manage 可 ?theme_preview=
+- 深色模式：Admin 主题色相 + 前台 ThemeToggle
+- 前台：`src/frontend/` 皮肤随 Next 编译（无切换 / 预览）
 - AI：Admin LLM 提供商 + AI 设置 + verify:ai
 - 后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search + prompt-templates
 - 前台 AI 助手：右下角浮窗，公开检索文章/小说/章节/分类/友链等（不含正文，ai-settings.enabled 开启时）
@@ -1036,7 +994,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | Custom View（admin.views） | 独立 Admin 页面（侧栏「工具」） | api-docs、ai-agent、cache、stats |
 | utilities 薄封装 | Payload API 语义不足 | trashOrDeleteDocument |
 | 独立 API 路由 | 非 CRUD 能力 | /api/ai/*（Admin）、/api/ai/assistant（前台）、/api/openapi.json |
-| 前台 Next.js + themes/ | 访客站点（可插拔皮肤 + DB HTML 缓存） | src/app/(frontend)/、src/themes/ |
+| 前台 Next.js | 访客站点（`src/frontend/` + DB HTML 缓存） | src/app/(frontend)/、src/frontend/ |
 
 ### 禁止 / 慎用
 
@@ -1165,7 +1123,7 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 
 <h2 id="frontend-ai-assistant">前台 AI 助手（公开只读）</h2>
 
-访客可在任意前台主题右下角唤起 AI 助手，无需登录。浮窗样式使用各主题 styles.css 内定义的 --crispy-ai-* 变量（与 --accent / --cms-gold / --kb-accent 等同源），随主题色与 html.dark 明暗切换自动适配。与后台 /admin/ai-agent 完全分离：独立 API、独立工具集、无会话持久化、仅检索公开数据。共用 ai-settings 的 LLM 配置（enabled / model / baseUrl），关闭 AI 总开关后前台浮窗不显示。
+访客可在前台右下角唤起 AI 助手，无需登录。浮窗样式使用 `src/frontend/styles.css` 内的 `--crispy-ai-*` 变量，随 `html.dark` 明暗切换。与后台 /admin/ai-agent 完全分离：独立 API、独立工具集、无会话持久化、仅检索公开数据。共用 ai-settings 的 LLM 配置（enabled / model / baseUrl），关闭 AI 总开关后前台浮窗不显示。
 
 | 入口 | 说明 |
 | --- | --- |
@@ -1277,7 +1235,7 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 - section — 站点栏目入口（/posts、/links、/jobs 等）
 - 数据查询均 overrideAccess: false，遵守 Collection read access
 - 索引实现：src/ai/frontend-assistant/publicContent.ts
-- 前台主题搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildThemeSearchIndex.ts）
+- 前台搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildThemeSearchIndex.ts）
 
 助手为发现型检索：工具返回标题、链接、短摘要（excerpt），不返回文章或章节正文（token 考量）。用户问「某章写了什么」时，应给出摘要与站内阅读链接，引导至返回的 url 阅读全文。
 
@@ -1296,9 +1254,9 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 - 软删除调用：trashOrDeleteDocument，勿直接 payload.delete()
 - 扩展红线与 Payload 升级：见 #payload-upgrade（原则见 #architecture）
 - 前台路由：src/app/(frontend)/
-- 前台主题：src/themes/（见 #frontend-themes）
+- 前台：src/frontend/（见 #frontend-themes）
 - 前台 AI：src/ai/frontend-assistant/（见 #frontend-ai-assistant）
-- Revalidation：内容变更后不自动清缓存；切换前台主题或手动 /admin/cache 清除（见 #frontend-cache）
+- Revalidation：内容变更后不自动清缓存；手动 /admin/cache 清除（见 #frontend-cache）
 - 中文 Slug：chineseSlugField + pinyin-pro hook
 
 ### Seed 演示账号

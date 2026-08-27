@@ -1,14 +1,14 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
-import type { SlugPageProps } from '@/themes/types'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
+import type { SlugPageProps } from '@/frontend/types'
 
 export const revalidate = false
 
 type Args = SlugPageProps
 
 export default function TagPage({ params, searchParams }: Args) {
-  return renderThemePage('tagDetail', { params, searchParams })
+  return renderPage('tagDetail', { params, searchParams })
 }
 
 export function generateMetadata({ params, searchParams }: Args) {
-  return generateThemeMetadata('tagDetail', { params, searchParams })
+  return generatePageMetadata('tagDetail', { params, searchParams })
 }

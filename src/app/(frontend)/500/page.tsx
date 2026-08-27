@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function ServerErrorPage() {
-  return renderThemePage('serverError')
+  return renderPage('serverError')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('serverError')
+  return generatePageMetadata('serverError')
 }

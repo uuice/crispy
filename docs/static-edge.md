@@ -38,7 +38,7 @@
 | 本仓库 Crispy | 增加导出命令：起站、按 sitemap 抓 HTML、写出跳转 / 短链 / AI 索引 JSON |
 | 新建 `crispy-edge`（Go） | 读导出目录；跳转、短链、前台 AI、静态文件 |
 
-Go **不**渲染 Lexical、不实现三套主题、不连 Payload、不实现后台 Agent。
+Go **不**渲染 Lexical、不实现前台主题、不连 Payload、不实现后台 Agent。
 
 ## 4. 导出目录
 
@@ -50,7 +50,6 @@ Go **不**渲染 Lexical、不实现三套主题、不连 Payload、不实现后
 ├── posts/
 ├── pages/
 ├── _next/static/              # 从运行中的 Next 拷贝
-├── theme-assets/              # public/theme-assets
 ├── search-index.json          # 现有前台搜索可继续用
 └── edge/
     ├── redirects.json
@@ -107,7 +106,7 @@ Go **不**渲染 Lexical、不实现三套主题、不连 Payload、不实现后
 1. 本机 `next start`（或 dev）+ 现有数据库
 2. URL 列表 = `buildBlogSitemapEntries()` + 固定页（`/`、`/posts`、`/links`、`/rss`、分页等）
 3. GET 每个 URL，写入对应 `index.html`
-4. 拷贝 `.next/static`、`public/theme-assets`、favicon
+4. 拷贝 `.next/static`、favicon
 5. 写出 `edge/*.json`
 6. 对账：expected URL 必须都有文件，缺页 `exit 1`；下线内容删除多余文件
 
@@ -152,7 +151,7 @@ rsync -av --delete ./export/ user@1g:/var/www/blog/
 ## 10. 明确不做
 
 - 1G 上 PM2 + Crispy / SQLite 常驻整站
-- Go 解析 Lexical、实现 blog / cms / kb
+- Go 解析 Lexical、实现前台主题
 - 导出整库、在 Go 里当 CMS
 - 语义搜索、后台 Agent 上 1G
 - 评论 / 表单 / Live Preview 上 1G

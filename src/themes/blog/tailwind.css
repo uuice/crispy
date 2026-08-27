@@ -1,7 +1,0 @@
-@config '../../../tailwind.config.mjs';
-
-@import '../shared/tailwind.css';
-
-@source "./**/*.{ts,tsx}";
-
-@import './styles.css';

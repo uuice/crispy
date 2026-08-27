@@ -1,5 +1,5 @@
-import { renderThemePage } from '@/themes/render'
+import { renderPage } from '@/frontend/render'
 
 export default function NotFound() {
-  return renderThemePage('notFound')
+  return renderPage('notFound')
 }

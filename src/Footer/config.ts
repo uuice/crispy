@@ -11,7 +11,7 @@ export const Footer: GlobalConfig = {
   label: adminLabels.footer,
   admin: {
     group: adminLabels.configGroup,
-    description: '控制前台页脚导航链接（blog / cms 主题均读取此配置）。',
+    description: '控制前台页脚导航链接。',
     hidden: hideUnlessAnyPermission('settings:site'),
   },
   access: {

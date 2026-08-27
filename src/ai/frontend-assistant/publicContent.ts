@@ -8,7 +8,7 @@ import {
   queryJobs,
   queryPosts,
   querySidebarData,
-} from '@/themes/shared/data/queries'
+} from '@/frontend/data/queries'
 import {
   getCategoryPath,
   getGalleriesPath,

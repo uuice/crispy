@@ -4361,7 +4361,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * 控制前台顶栏导航（blog / cms 主题均读取此配置）。
+ * 控制前台顶栏导航。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
@@ -4395,7 +4395,7 @@ export interface Header {
   createdAt?: string | null;
 }
 /**
- * 控制前台页脚导航链接（blog / cms 主题均读取此配置）。
+ * 控制前台页脚导航链接。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
@@ -4464,7 +4464,6 @@ export interface SiteSetting {
     recordText?: string | null;
     showRecord?: boolean | null;
   };
-  frontendTheme?: ('blog' | 'cms' | 'kb') | null;
   adminThemeHue?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -4688,7 +4687,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         recordText?: T;
         showRecord?: T;
       };
-  frontendTheme?: T;
   adminThemeHue?: T;
   updatedAt?: T;
   createdAt?: T;

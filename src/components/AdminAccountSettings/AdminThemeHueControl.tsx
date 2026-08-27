@@ -4,7 +4,7 @@ import { FieldLabel, toast, useAuth, useConfig, useTranslation } from '@payloadc
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { canUseThemePreview } from '@/themes/preview.shared'
+import { type AuthzUserShape, userHasPermissionSync } from '@/access/can'
 import { DEFAULT_ADMIN_THEME_HUE, normalizeAdminThemeHue } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
 
@@ -20,9 +20,7 @@ export function AdminThemeHueControl() {
   const [loaded, setLoaded] = useState(false)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const canEdit =
-    user != null &&
-    canUseThemePreview(user as { permissions?: string[] | null; roles?: unknown })
+  const canEdit = user != null && userHasPermissionSync(user as AuthzUserShape, 'settings:site')
 
   useEffect(() => {
     if (!canEdit) return

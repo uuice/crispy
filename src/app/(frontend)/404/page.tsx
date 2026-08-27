@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function NotFoundPage() {
-  return renderThemePage('notFound')
+  return renderPage('notFound')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('notFound')
+  return generatePageMetadata('notFound')
 }

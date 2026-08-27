@@ -38,6 +38,7 @@ import * as migration_20260730_060000_mcp_app_configs_write from './20260730_060
 import * as migration_20260818_120000_drop_unused_collection_versions from './20260818_120000_drop_unused_collection_versions';
 import * as migration_20260827_120000_drop_ai_canvases from './20260827_120000_drop_ai_canvases';
 import * as migration_20260827_140000_drop_unsplash_integrations from './20260827_140000_drop_unsplash_integrations';
+import * as migration_20260827_150000_drop_frontend_theme from './20260827_150000_drop_frontend_theme';
 
 export const migrations = [
   {
@@ -239,5 +240,10 @@ export const migrations = [
     up: migration_20260827_140000_drop_unsplash_integrations.up,
     down: migration_20260827_140000_drop_unsplash_integrations.down,
     name: '20260827_140000_drop_unsplash_integrations',
+  },
+  {
+    up: migration_20260827_150000_drop_frontend_theme.up,
+    down: migration_20260827_150000_drop_frontend_theme.down,
+    name: '20260827_150000_drop_frontend_theme',
   },
 ];

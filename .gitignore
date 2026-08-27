@@ -8,8 +8,6 @@ node_modules
 next-env.d.ts
 .vercel
 
-public/theme-assets/*.css
-
 .data/
 *.db
 *.db-journal

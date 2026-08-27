@@ -17,88 +17,12 @@ import {
 } from '@/frontend-cache/middlewareCache'
 import { buildRouteCachePath } from '@/frontend-cache/routeCachePath'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
-import {
-  canUseThemePreview,
-  getThemePreviewQueryValue,
-  isFrontendThemeId,
-  THEME_PREVIEW_REQUEST_HEADER,
-} from '@/themes/preview.shared'
-import type { FrontendThemeId } from '@/themes/definitions'
 import { handlePayloadRedirect } from '@/redirects/middlewareRedirects'
 import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 import { applyPoweredByHeader } from '@/utilities/poweredByHeader'
 import { FRONTEND_PATHNAME_HEADER } from '@/utilities/requestPathname'
 
 const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
-
-type ThemePreviewContext = {
-  themeId: FrontendThemeId
-  requestHeaders: Headers
-}
-
-async function canThemePreviewRequest(request: NextRequest): Promise<boolean> {
-  const token = request.cookies.get('payload-token')?.value
-  if (!token) {
-    return false
-  }
-
-  try {
-    const response = await fetch(
-      internalApiUrl('/api/users/me', request.url),
-      withForwardedPublicHost(request.url, {
-        headers: { Authorization: `JWT ${token}` },
-        cache: 'no-store',
-      }),
-    )
-
-    if (!response.ok) {
-      return false
-    }
-
-    const data = (await response.json()) as {
-      user?: { permissions?: string[] | null; roles?: unknown } | null
-    }
-    return canUseThemePreview(data.user)
-  } catch {
-    return false
-  }
-}
-
-async function resolveThemePreviewContext(
-  request: NextRequest,
-): Promise<ThemePreviewContext | null> {
-  const queryTheme = getThemePreviewQueryValue(request)
-
-  if (!isFrontendThemeId(queryTheme) || !(await canThemePreviewRequest(request))) {
-    return null
-  }
-
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set(THEME_PREVIEW_REQUEST_HEADER, queryTheme)
-
-  return { themeId: queryTheme, requestHeaders }
-}
-
-function withThemePreview(
-  response: NextResponse,
-  themePreview: ThemePreviewContext | null,
-): NextResponse {
-  if (!themePreview) {
-    return response
-  }
-
-  response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-  return response
-}
-
-function nextWithRequestHeaders(request: NextRequest, requestHeaders: Headers): NextResponse {
-  requestHeaders.set(FRONTEND_PATHNAME_HEADER, request.nextUrl.pathname)
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  })
-}
 
 function nextWithPathname(request: NextRequest): NextResponse {
   const requestHeaders = new Headers(request.headers)
@@ -276,25 +200,18 @@ function handleLegacyFrontendRedirect(request: NextRequest): NextResponse | null
   return NextResponse.redirect(url, 301)
 }
 
-async function applyFrontendCacheHeaders(
-  request: NextRequest,
-  themePreview: ThemePreviewContext | null,
-): Promise<NextResponse | null> {
+async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResponse | null> {
   if (!isFrontendDocumentRequest(request)) {
     return null
   }
 
   if (isInternalCacheCaptureRequest(request)) {
-    return themePreview
-      ? nextWithRequestHeaders(request, themePreview.requestHeaders)
-      : nextWithPathname(request)
+    return nextWithPathname(request)
   }
 
   const settings = await getMiddlewareCacheSettings(request.url)
   if (!settings.exposeCacheHeaders) {
-    return themePreview
-      ? nextWithRequestHeaders(request, themePreview.requestHeaders)
-      : nextWithPathname(request)
+    return nextWithPathname(request)
   }
 
   const bypass = shouldBypassFrontendCache(request)
@@ -308,9 +225,7 @@ async function applyFrontendCacheHeaders(
     return buildCachedHtmlResponse(request, lookup, settings)
   }
 
-  const response = themePreview
-    ? nextWithRequestHeaders(request, themePreview.requestHeaders)
-    : nextWithPathname(request)
+  const response = nextWithPathname(request)
   applyCrispyCacheHeaders(response.headers, {
     pageStatus: lookup.status,
     dataStatus: 'BYPASS',
@@ -375,13 +290,6 @@ function handleApiAccessLog(request: NextRequest): NextResponse | null {
   return response
 }
 
-function finalizeMiddlewareResponse(
-  response: NextResponse,
-  themePreview: ThemePreviewContext | null,
-): NextResponse {
-  return applyPoweredByHeader(withThemePreview(response, themePreview))
-}
-
 export async function middleware(request: NextRequest) {
   const legacyRedirect = handleLegacyFrontendRedirect(request)
   if (legacyRedirect) {
@@ -393,19 +301,17 @@ export async function middleware(request: NextRequest) {
     return applyPoweredByHeader(payloadRedirect)
   }
 
-  const themePreview = await resolveThemePreviewContext(request)
-
-  const frontendResponse = await applyFrontendCacheHeaders(request, themePreview)
+  const frontendResponse = await applyFrontendCacheHeaders(request)
   if (frontendResponse) {
-    return finalizeMiddlewareResponse(frontendResponse, themePreview)
+    return applyPoweredByHeader(frontendResponse)
   }
 
   const apiResponse = handleApiAccessLog(request)
   if (apiResponse) {
-    return finalizeMiddlewareResponse(apiResponse, themePreview)
+    return applyPoweredByHeader(apiResponse)
   }
 
-  return finalizeMiddlewareResponse(nextWithPathname(request), themePreview)
+  return applyPoweredByHeader(nextWithPathname(request))
 }
 
 export const config = {

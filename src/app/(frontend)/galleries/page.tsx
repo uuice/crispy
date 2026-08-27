@@ -1,11 +1,11 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
 export default function GalleriesPage() {
-  return renderThemePage('galleries')
+  return renderPage('galleries')
 }
 
 export function generateMetadata() {
-  return generateThemeMetadata('galleries')
+  return generatePageMetadata('galleries')
 }

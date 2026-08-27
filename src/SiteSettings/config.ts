@@ -5,8 +5,6 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { requirePermission } from '@/access/can'
 import { DEFAULT_ADMIN_THEME_HUE } from '@/brand/admin-theme'
 import { adminLabels } from '@/i18n/admin-labels'
-import { getFrontendThemeSelectOptions } from '@/themes/definitions'
-
 import { purgeCacheOnSiteSettingsChange } from './hooks/purgeCacheOnSiteSettingsChange'
 
 export const SiteSettings: GlobalConfig = {
@@ -129,26 +127,6 @@ export const SiteSettings: GlobalConfig = {
           defaultValue: true,
         },
       ],
-    },
-    {
-      name: 'frontendTheme',
-      type: 'select',
-      label: adminLabels.frontendTheme,
-      defaultValue: 'blog',
-      options: getFrontendThemeSelectOptions(),
-      admin: {
-        hidden: true,
-      },
-    },
-    {
-      name: 'frontendThemePicker',
-      type: 'ui',
-      admin: {
-        position: 'sidebar',
-        components: {
-          Field: '@/components/FrontendThemePreview/FrontendThemeField',
-        },
-      },
     },
     {
       name: 'adminThemeHue',

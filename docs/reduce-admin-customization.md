@@ -1,6 +1,6 @@
 # 减少 Admin / AI 定制面（决策备忘）
 
-> 状态：决策备忘；部分项已落地（Canvases / Unsplash / 列表刷新 / 字段 AI / **自研 Nav**）
+> 状态：决策备忘；部分项已落地（Canvases / Unsplash / 列表刷新 / 字段 AI / **自研 Nav** / **多主题**）
 > 日期：2026-07-19（修订至 2026-08-27）
 > 背景：个人精力有限；Payload 4.0 将加重 Admin 定制迁移成本；站内 Agent 已覆盖大部分运营操作。
 
@@ -25,7 +25,7 @@
 | **自研 Admin Nav** | **已删**（2026-08-27；回归官方 Nav） |
 | 侧栏自定义入口 | **底部「工具」分组**（afterNavLinks；AI / 缓存 / 统计 / Swagger） |
 | Cache **引擎** | **Keep**；管理 UI 可瘦或删页 |
-| Themes / 业务 Collection / OSS Media | **Keep**（本地/OSS 上传仍是主路径） |
+| Themes（已收进 `src/frontend/`） / 业务 Collection / OSS Media | **Keep**（本地/OSS 上传仍是主路径） |
 
 ## 3. 分层清单
 
@@ -37,7 +37,7 @@
 | LLM 配置中心 | `LlmProviders`、`AiSettings`、`PromptTemplates`、`src/ai/resolveLlmClient.ts` 等 | Agent / 前台助手共用底座 |
 | MCP | `@payloadcms/plugin-mcp`、`mcpCustomTools` | Cursor / 外部 Agent |
 | Frontend cache 引擎 | `src/frontend-cache/`、middleware | 性能 critical path |
-| 业务与前台 | `src/themes/`、collections、OSS uploads | 产品本体 |
+| 业务与前台 | `src/frontend/`、collections、OSS uploads | 产品本体 |
 
 ### 3.2 已删：字段 AI
 
@@ -75,6 +75,12 @@
 
 Agent `list_admin_menu` 使用同一份清单（`src/ai/agent/customAdminPages.ts`）。**不再** fork `admin.components.Nav`。
 
+### 3.3.2 已删：cms / kb 与主题切换
+
+2026-08-27 去掉 `src/themes/`（含 cms / kb 与主题切换、预览）。前台在 `src/frontend/`，CSS 随 Next 编译。Admin 主题色相（`adminThemeHue`）保留，与前台皮肤无关。
+
+Postgres 迁移：`20260827_150000_drop_frontend_theme`。
+
 ### 3.4 可瘦身 / 可删页（入口交给 Agent）
 
 | 能力 | 建议 |
@@ -107,7 +113,6 @@ Agent `list_admin_menu` 使用同一份清单（`src/ai/agent/customAdminPages.t
 |----|------|------|----------|
 | Gallery 封面字段 | `src/components/Galleries/GalleryCoverUploadField` | Galleries 封面上传 UX | Keep（业务） |
 | Gallery 图片 Join | `src/components/Galleries/GalleryItemsJoinField` | 相册内图片关联编辑 | Keep（业务） |
-| 主题预览字段 | `src/components/FrontendThemePreview/` | 站点设置里主题卡片预览 | Keep（配置 UX） |
 | Header / Footer RowLabel | `src/Header/RowLabel`、`src/Footer/RowLabel` | 导航行标签显示 | Keep（小） |
 | AdminListView | `src/components/AdminListView/` + 刷新按钮 | 曾注入刷新 | **已删**（2026-08-27）；列表回官方 DefaultListView |
 
@@ -122,8 +127,8 @@ Agent `list_admin_menu` 使用同一份清单（`src/ai/agent/customAdminPages.t
 | 类别 | 约略条数 |
 |------|----------|
 | 品牌壳（Logo/Icon/Avatar/Theme/BeforeLogin·Dashboard） | ~6 |
-| 业务字段（图库×2、主题预览、RowLabel×2） | ~5 |
-| AdminListView / Nav / CollectionCards | **0**（已回归官方） |
+| 业务字段（图库×2、RowLabel×2） | ~4 |
+| AdminListView / Nav / CollectionCards / 主题预览 | **0**（已回归官方或已删） |
 | Agent（Provider ± 全屏 View） | 1～2 |
 | **合计** | **~12～13** |
 
@@ -157,9 +162,9 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 1. **Agent**（必留）：浮窗 Provider ± 全屏页 —— 升级主要适配面  
 2. **品牌壳**（~6）：Logo / Icon / Avatar / Theme / BeforeLogin·Dashboard  
-3. **业务字段**（~5）：图库×2、主题预览、Header/Footer RowLabel  
+3. **业务字段**（~4）：图库×2、Header/Footer RowLabel  
 
-非 Admin 壳但 Keep：MCP、LLM 配置、cache 引擎、themes、OSS、业务 Collection。
+非 Admin 壳但 Keep：MCP、LLM 配置、cache 引擎、前台（`src/frontend/`）、OSS、业务 Collection。
 
 ## 7. 与 Payload 4.0 的关系
 
@@ -191,3 +196,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-08-27 — 列表刷新按钮与 AdminListView 包装已删，列表回官方 DefaultListView。
 - 2026-08-27 — 字段 AI 已删除（`withAi*` / Assist·SEO 面板 / Lexical rewrite / `/api/ai/complete|stream|structured`）；Agent 与 LLM 配置中心保留。
 - 2026-08-27 — 自研 Admin Nav 已删，侧栏与仪表盘卡片回归官方；自定义 View 改挂官方 `afterNavLinks`「工具」分组。
+- 2026-08-27 — 去掉 cms / kb 与主题切换、预览；随后删除 `src/themes/`，前台收进 `src/frontend/`。Postgres 迁移 `20260827_150000_drop_frontend_theme`。

@@ -1,4 +1,4 @@
-import { generateThemeMetadata, renderThemePage } from '@/themes/render'
+import { generatePageMetadata, renderPage } from '@/frontend/render'
 
 export const revalidate = false
 
@@ -7,9 +7,9 @@ type Args = {
 }
 
 export default function CmsPage({ params }: Args) {
-  return renderThemePage('pageDetail', { params })
+  return renderPage('pageDetail', { params })
 }
 
 export function generateMetadata({ params }: Args) {
-  return generateThemeMetadata('pageDetail', { params })
+  return generatePageMetadata('pageDetail', { params })
 }

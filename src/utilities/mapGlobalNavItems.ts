@@ -1,6 +1,6 @@
 import type { Footer, Header } from '@/payload-types'
 
-import type { NavItem } from '@/themes/shared/data/types'
+import type { NavItem } from '@/frontend/data/types'
 
 import { resolveNavLinkUrl } from './resolveNavLink'
 

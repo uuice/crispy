@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { NovelSlugLayout } from '@/themes/blog/components/NovelSlugLayout'
+import { NovelSlugLayout } from '@/frontend/components/NovelSlugLayout'
 
 export const revalidate = false
 

@@ -7,11 +7,10 @@ import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
 import { FrontendAiAssistant } from '@/components/FrontendAiAssistant'
-import { ThemePreviewBanner } from '@/components/ThemePreviewBanner'
-import { ThemePreviewShell } from '@/components/ThemePreview/ThemePreviewShell'
+import { InitTheme } from '@/frontend/InitTheme'
+import { Layout } from '@/frontend/Layout'
+import { querySidebarData } from '@/frontend/data/queries'
 import { Providers } from '@/providers'
-import { getActiveFrontendTheme, getActiveFrontendThemeId } from '@/themes/registry'
-import { getThemePreviewIdFromHeaders } from '@/themes/preview.server'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
@@ -23,44 +22,32 @@ import { getServerSideURL } from '@/utilities/getURL'
 export const dynamic = 'force-dynamic'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [{ isEnabled }, theme, previewThemeId, themeId] = await Promise.all([
-    draftMode(),
-    getActiveFrontendTheme(),
-    getThemePreviewIdFromHeaders(),
-    getActiveFrontendThemeId(),
-  ])
-  const ThemeLayout = theme.Layout
-  const ThemeInit = theme.InitTheme
-  const layoutData = theme.loadLayoutData ? await theme.loadLayoutData() : undefined
+  const [{ isEnabled }, layoutData] = await Promise.all([draftMode(), querySidebarData()])
 
   return (
     <html
-      className={cn(theme.rootClassName, GeistSans.variable, GeistMono.variable)}
+      className={cn(GeistSans.variable, GeistMono.variable)}
       lang="zh-CN"
       suppressHydrationWarning
     >
       <head>
-        {ThemeInit ? <ThemeInit /> : null}
-        <link href={`/theme-assets/${themeId}.css`} rel="stylesheet" />
+        <InitTheme />
         <link href="/favicon.svg" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body className={cn(theme.bodyClassName, 'min-h-screen antialiased')}>
+      <body className="min-h-screen antialiased">
         <Providers>
-          <ThemePreviewShell themeId={previewThemeId}>
-            <div className="crispy-chrome">
-              {isEnabled ? (
-                <AdminBar
-                  adminBarProps={{
-                    preview: isEnabled,
-                  }}
-                />
-              ) : null}
-              <ThemePreviewBanner />
-              <FrontendAiAssistant />
-            </div>
-            <ThemeLayout layoutData={layoutData}>{children}</ThemeLayout>
-          </ThemePreviewShell>
+          <div className="crispy-chrome">
+            {isEnabled ? (
+              <AdminBar
+                adminBarProps={{
+                  preview: isEnabled,
+                }}
+              />
+            ) : null}
+            <FrontendAiAssistant />
+          </div>
+          <Layout layoutData={layoutData}>{children}</Layout>
         </Providers>
       </body>
     </html>
@@ -68,10 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [settings, previewThemeId] = await Promise.all([
-    getCachedSiteSettings()(),
-    getThemePreviewIdFromHeaders(),
-  ])
+  const settings = await getCachedSiteSettings()()
   const siteName = settings.siteName || 'Crispy'
 
   return {
@@ -85,13 +69,5 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
     },
-    ...(previewThemeId
-      ? {
-          robots: {
-            index: false,
-            follow: false,
-          },
-        }
-      : {}),
   }
 }

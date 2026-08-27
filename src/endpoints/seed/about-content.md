@@ -1,6 +1,6 @@
 ## 关于本站
 
-Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的通用内容管理系统，用于发布技术文章、学习笔记与资源整理。内容与页面在后台编辑，支持分类、标签、归档与全文搜索，具备评论、短链接、AI 助手与可插拔前台主题。
+Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的通用内容管理系统，用于发布技术文章、学习笔记与资源整理。内容与页面在后台编辑，支持分类、标签、归档与全文搜索，具备评论、短链接与 AI 助手。
 
 ---
 
@@ -28,7 +28,7 @@ Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的�
 ### Crispy 自建能力
 
 - **软删除 + 版本历史** — 全业务 Collection 回收站与版本面板
-- **前台可插拔主题** — blog / cms / kb 三套皮肤，站点设置切换与预览
+- **前台** — `src/frontend/`，侧栏导航与卡片列表
 - **Admin AI 助手** — 对话式内容管理（`/admin/ai-agent`）
 - **前台 AI 助手** — 访客公开只读检索（右下角浮窗）
 - **OpenAPI / Swagger** — 自动生成 REST 文档（`/admin/api-docs`）
@@ -57,7 +57,7 @@ Crispy 3.0 是基于 **Payload CMS 3** 与 **Next.js 16 App Router** 构建的�
 
 ## 界面与风格
 
-- **三套前台主题** — blog / cms / kb，站点设置切换，`?theme_preview=` 预览
+- **博客皮肤** — 侧栏导航与卡片列表
 - **Admin 主题色相** — OKLCH `--hue` 可调
 - **响应式** — 移动端导航与阅读区域适配小屏
 
