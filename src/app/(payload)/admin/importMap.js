@@ -61,9 +61,9 @@ import { RowLabel as RowLabel_ec255a65fa6fa8d1faeb09cf35284224 } from '@/Header/
 import { RowLabel as RowLabel_1f6ff6ff633e3695d348f4f3c58f1466 } from '@/Footer/RowLabel'
 import { default as default_241f55cb8d82aadf79f510288248932e } from '@/components/FrontendThemePreview/FrontendThemeField'
 import { default as default_497ff965a89fc4c87f4d374e11f3f378 } from '@/components/AdminAvatar'
-import { default as default_a202ad21aea188adfad41087711ba85c } from '@/components/AdminNav'
 import { default as default_c1363893506d7ed29a71d1a4da01ddb5 } from '@/components/AdminIcon'
 import { default as default_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
+import { default as default_918ac8e1a225020b4c6446e83716d9bc } from '@/components/AdminAfterNavLinks'
 import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { default as default_a0ee26f07b35ad97f90799ca2f39d8a4 } from '@/components/AdminThemeProvider'
@@ -74,7 +74,6 @@ import { default as default_167468770c8106c49118befba831d642 } from '@/app/(payl
 import { default as default_d9568c1ed1cbf811dc1b4af3a8debb56 } from '@/app/(payload)/admin/ai-agent/AiAgentView'
 import { default as default_0450ff08bccdd65acb0af19d12ceca89 } from '@/app/(payload)/admin/stats/StatsView'
 import { default as default_713a7babd883a9dc56f463857f761995 } from '@/app/(payload)/admin/cache/CacheView'
-import { default as default_20177520ae52785e614fad0cc35e0b8c } from '@/components/AdminCollectionCards'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -142,9 +141,9 @@ export const importMap = {
   "@/Footer/RowLabel#RowLabel": RowLabel_1f6ff6ff633e3695d348f4f3c58f1466,
   "@/components/FrontendThemePreview/FrontendThemeField#default": default_241f55cb8d82aadf79f510288248932e,
   "@/components/AdminAvatar#default": default_497ff965a89fc4c87f4d374e11f3f378,
-  "@/components/AdminNav#default": default_a202ad21aea188adfad41087711ba85c,
   "@/components/AdminIcon#default": default_c1363893506d7ed29a71d1a4da01ddb5,
   "@/components/AdminLogo#default": default_aa0a2d19d38a4839dbd373417e210b89,
+  "@/components/AdminAfterNavLinks#default": default_918ac8e1a225020b4c6446e83716d9bc,
   "@/components/BeforeDashboard#default": default_1a7510af427896d367a49dbf838d2de6,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@/components/AdminThemeProvider#default": default_a0ee26f07b35ad97f90799ca2f39d8a4,
@@ -155,6 +154,5 @@ export const importMap = {
   "@/app/(payload)/admin/ai-agent/AiAgentView#default": default_d9568c1ed1cbf811dc1b4af3a8debb56,
   "@/app/(payload)/admin/stats/StatsView#default": default_0450ff08bccdd65acb0af19d12ceca89,
   "@/app/(payload)/admin/cache/CacheView#default": default_713a7babd883a9dc56f463857f761995,
-  "@/components/AdminCollectionCards#default": default_20177520ae52785e614fad0cc35e0b8c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

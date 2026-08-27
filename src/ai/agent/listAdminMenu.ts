@@ -3,9 +3,9 @@ import { EntityType, getAccessResults, type PayloadRequest, type StaticLabel } f
 import { formatAdminURL } from 'payload/shared'
 
 import type { AuthzUserShape } from '@/access/can'
+import { userHasAnyPermissionSync } from '@/access/can'
 import { getUserAuthz } from '@/access/authzCache'
-import { CUSTOM_ADMIN_NAV_ITEMS } from '@/admin-nav/customItems'
-import { isCustomViewEntity, mergeCustomNavIntoGroups } from '@/admin-nav/mergeCustomNavIntoGroups'
+import { CUSTOM_ADMIN_PAGES } from '@/ai/agent/customAdminPages'
 import type { Permission } from '@/access/permissions'
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -45,8 +45,8 @@ function buildAdminLinks(
 }
 
 /**
- * Build the Admin sidebar menu for the current user (same visibility rules as AdminNav).
- * Attaches authz-cache permissions onto the user so admin.hidden + custom nav anyOf match the UI.
+ * Build the Admin menu for the current user: official sidebar Collection/Global groups,
+ * plus custom views that are not in the sidebar (Agent can still link to them).
  */
 export async function listAdminMenuForAgent(
   req: PayloadRequest,
@@ -62,7 +62,6 @@ export async function listAdminMenuForAgent(
   }
 
   const authz = await getUserAuthz(req.payload, req.user.id, req)
-  // Attach authz so admin.hidden / custom nav anyOf match Admin UI (/me permissions).
   const userWithAuthz = {
     ...req.user,
     permissions: authz.permissions,
@@ -72,18 +71,11 @@ export async function listAdminMenuForAgent(
   const reqWithAuthz: PayloadRequest = { ...req, user: userWithAuthz }
   const permissions = await getAccessResults({ req: reqWithAuthz })
   const visibleEntities = getVisibleEntities({ req: reqWithAuthz })
-  const navGroups = mergeCustomNavIntoGroups(
-    getNavGroups(permissions, visibleEntities, req.payload.config, req.i18n),
-    userWithAuthz,
-  )
+  const navGroups = getNavGroups(permissions, visibleEntities, req.payload.config, req.i18n)
 
   const { admin: adminRoute } = req.payload.config.routes
   const serverURL = getServerSideURL().replace(/\/$/, '')
   const language = req.i18n.language
-  const customRequired = new Map(
-    CUSTOM_ADMIN_NAV_ITEMS.map((item) => [item.path, item.anyOf] as const),
-  )
-
   const groupFilter = options?.group?.trim().toLowerCase()
 
   const groups: AdminMenuGroup[] = []
@@ -97,20 +89,6 @@ export async function listAdminMenuForAgent(
     const items: AdminMenuItem[] = []
 
     for (const entity of navGroup.entities) {
-      if (isCustomViewEntity(entity)) {
-        const path = entity.path
-        const links = buildAdminLinks(adminRoute, serverURL, path)
-        const requiredAnyOf = customRequired.get(path)
-        items.push({
-          type: 'custom-view',
-          label: entity.label,
-          path,
-          ...links,
-          ...(requiredAnyOf?.length ? { requiredAnyOf } : {}),
-        })
-        continue
-      }
-
       const label = resolveLabel(entity.label, language)
       if (entity.type === EntityType.collection) {
         const path = `/collections/${entity.slug}` as `/${string}`
@@ -141,11 +119,34 @@ export async function listAdminMenuForAgent(
     }
   }
 
+  for (const page of CUSTOM_ADMIN_PAGES) {
+    if (page.anyOf?.length && !userHasAnyPermissionSync(userWithAuthz, page.anyOf)) {
+      continue
+    }
+    if (groupFilter && !page.group.toLowerCase().includes(groupFilter)) {
+      continue
+    }
+
+    let group = groups.find((entry) => entry.group === page.group)
+    if (!group) {
+      group = { group: page.group, items: [] }
+      groups.push(group)
+    }
+
+    group.items.push({
+      type: 'custom-view',
+      label: page.label,
+      path: page.path,
+      ...buildAdminLinks(adminRoute, serverURL, page.path),
+      ...(page.anyOf?.length ? { requiredAnyOf: page.anyOf } : {}),
+    })
+  }
+
   return {
     adminRoute,
     serverURL,
-    groups,
+    groups: groups.filter((group) => group.items.length > 0),
     note:
-      '仅返回当前用户可见入口。回复时必须用 Markdown 链接：[label](href) 或 [label](url)；href 为站内路径（推荐），url 为完整绝对地址。禁止自行拼接域名或省略 /admin。',
+      '侧栏为官方 Collection/Global，底部「工具」分组含自定义页（AI 助手、缓存、统计、Swagger）。回复必须用 Markdown 链接：[label](href) 或 [label](url)。禁止自行拼接域名或省略 /admin。',
   }
 }

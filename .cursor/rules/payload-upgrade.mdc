@@ -12,7 +12,7 @@ alwaysApply: false
 2. `pnpm install` → `pnpm cli generate:importmap`
 3. Schema 变更 → `pnpm cli db:create <name>` → `pnpm cli db:migrate`
 4. `pnpm cli quality:ci`
-5. Admin 冒烟: 登录、列表、编辑、回收站、版本还原
+5. Admin 冒烟: 登录、官方侧栏、列表、编辑、回收站、版本还原
 6. Plugin: Query Presets
 7. AI：`/admin/ai-agent`；MCP 端点可连通
 8. Postgres 环境再跑 migrate + test:int

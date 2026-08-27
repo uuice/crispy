@@ -16,7 +16,7 @@ alwaysApply: false
 
 1. `src/app/(payload)/admin/<name>/<Name>View.tsx` — 包 `DefaultTemplate` + `Gutter`
 2. `payload.config.ts` → `admin.components.views` 注册 `path` + `Component`
-3. 可选: `afterNavLinks` 加 `*NavLink.tsx`
+3. 自定义 View 入口：用官方 `afterNavLinks`（`AdminAfterNavLinks`，「工具」分组）；**不要**再 fork 整棵 Nav
 4. **`AdminCustomViewStepNav`** — Custom View 必须加，否则面包屑不更新
 
 ```tsx

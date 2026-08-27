@@ -136,14 +136,14 @@ describe('AI agent', () => {
       await executeAgentTool(editorReq, {
         id: 'call-menu-editor',
         name: 'list_admin_menu',
-        arguments: JSON.stringify({ group: '配置' }),
+        arguments: JSON.stringify({ group: '工具' }),
       })
     ).summary as {
       groups: { group: string; items: { path: string }[] }[]
     }
 
     expect(editorMenu.groups.length).toBeGreaterThan(0)
-    expect(editorMenu.groups.every((g) => g.group.includes('配置'))).toBe(true)
+    expect(editorMenu.groups.every((g) => g.group.includes('工具'))).toBe(true)
     const editorPaths = editorMenu.groups.flatMap((g) => g.items.map((i) => i.path))
     expect(editorPaths).toContain('/cache')
   })

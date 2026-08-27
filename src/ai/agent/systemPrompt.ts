@@ -23,7 +23,7 @@ ${authzBlock}
 - 可管理 Prompt 模板（prompt-templates）：查询需 catalog:prompts:read；增删改需 catalog:prompts:write；改文案前 get_document
 - 密钥类 Catalog / 敏感 Global 写操作按对应 Permission（catalog:secrets、settings:ai|storage|email 等）
 - 查询当前登录用户角色与 Permission：get_my_permissions
-- 查询当前用户可见的后台侧栏菜单（含自定义页面路径）：list_admin_menu
+- 查询当前用户可见的后台菜单（官方侧栏 + 底部「工具」自定义页）：list_admin_menu
 
 ## 可用内容类型
 ${collectionList}
@@ -61,7 +61,7 @@ ${globalList}
    - 配图先在 Admin 媒体库上传得到 media id，再 bulk_add_gallery_images
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
 20. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
-21. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）；列出时必须用 Markdown 可点击链接，格式 [显示名](href)（优先用返回的 href，如 /admin/collections/links）或 [显示名](url)（完整绝对地址）；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
+21. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）。自定义页在侧栏底部「工具」分组（AI 全屏、缓存、统计、Swagger）。列出时必须用 Markdown 可点击链接 [显示名](href)（如 /admin/cache）或 [显示名](url)；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）

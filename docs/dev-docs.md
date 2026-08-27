@@ -1033,7 +1033,7 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | Plugin 注入 config | 全 Collection 横切行为 | enableTrashAndVersionsPlugin |
 | Collection hooks / access | 单 Collection 业务规则 | restrictAuthorPublish、syncContentEmbedding 等 |
 | Custom Field 组件 | 字段级 UI | 业务刚需字段（非官方默认交互） |
-| Custom View（admin.views） | 独立 Admin 页面 | api-docs、ai-agent、cache、stats |
+| Custom View（admin.views） | 独立 Admin 页面（侧栏「工具」） | api-docs、ai-agent、cache、stats |
 | utilities 薄封装 | Payload API 语义不足 | trashOrDeleteDocument |
 | 独立 API 路由 | 非 CRUD 能力 | /api/ai/*（Admin）、/api/ai/assistant（前台）、/api/openapi.json |
 | 前台 Next.js + themes/ | 访客站点（可插拔皮肤 + DB HTML 缓存） | src/app/(frontend)/、src/themes/ |
@@ -1123,7 +1123,7 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 | 工具 | 说明 |
 | --- | --- |
 | get_my_permissions | 当前用户角色与 Permission（authz-cache） |
-| list_admin_menu | 当前用户可见的 Admin 侧栏（含 href/url；回复须用 Markdown 链接） |
+| list_admin_menu | 当前用户可见菜单（官方侧栏 + 底部「工具」自定义页） |
 | list_resources | 列出可管理的 Collections / Globals |
 | describe_resource | 查看字段结构（create/update 前应先调用） |
 | semantic_search | posts/pages/novels/novel-chapters 语义搜索（返回 slug、docId、短 excerpt；读全文用 get_document） |

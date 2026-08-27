@@ -1,6 +1,6 @@
 # 减少 Admin / AI 定制面（决策备忘）
 
-> 状态：决策备忘；部分项已落地（Canvases / Unsplash / 列表刷新 / **字段 AI**）
+> 状态：决策备忘；部分项已落地（Canvases / Unsplash / 列表刷新 / 字段 AI / **自研 Nav**）
 > 日期：2026-07-19（修订至 2026-08-27）
 > 背景：个人精力有限；Payload 4.0 将加重 Admin 定制迁移成本；站内 Agent 已覆盖大部分运营操作。
 
@@ -22,8 +22,8 @@
 | AI Canvases | **已删**（2026-08-27；与 Agent + Prompt 三重叠） |
 | Unsplash 图库引用 | **已删**（2026-08-27；配图走 Media / OSS 上传） |
 | Stats / Dev Docs 内嵌 | **建议删或迁出** |
-| **自研 Admin Nav** | **建议回归官方 Nav**（分组嵌入损失可接受） |
-| 侧栏自定义入口（现 4 条） | **清理**；需要时 Agent 快捷方式 / 问 Agent 指路 |
+| **自研 Admin Nav** | **已删**（2026-08-27；回归官方 Nav） |
+| 侧栏自定义入口 | **底部「工具」分组**（afterNavLinks；AI / 缓存 / 统计 / Swagger） |
 | Cache **引擎** | **Keep**；管理 UI 可瘦或删页 |
 | Themes / 业务 Collection / OSS Media | **Keep**（本地/OSS 上传仍是主路径） |
 
@@ -60,28 +60,20 @@
 | 内容统计页 | `admin/stats/`、`admin-stats/` | Agent 已有 `get_site_stats` |
 | 二次开发文档 | `docs/dev-docs.md` | **已迁出**（2026-08-14）；Admin `/dev-docs` 已删除 |
 
-### 3.3.1 自研 Nav → 回归官方（已定调）
+### 3.3.1 已删：自研 Nav → 官方 Nav
 
-当前为把自定义 View **塞进**运营/配置/开发等分组，整棵替换了 `admin.components.Nav`（`AdminNav` + `mergeCustomNavIntoGroups`）。升级时 Nav 分叉成本最高。
+2026-08-27 去掉 `admin.components.Nav` 与 `src/admin-nav/`，侧栏回到官方分组（Collection `admin.group`）。仪表盘 Collection 卡片一并改回官方（原先为把自定义 View 塞进卡片）。
 
-**产品判断：** 回归官方后「进不了细分组 / 排序变默认 / 少一条管理首页链」**问题不大**，可接受。
+自定义 View 在官方侧栏底部「工具」分组（`afterNavLinks` → `AdminAfterNavLinks`），按权限显示：
 
-现有 4 条自定义侧栏项的处置：
-
-| 项 | 处置 |
+| 项 | 入口 |
 |----|------|
-| AI 画布 / 内容统计 / 二次开发文档 | 随能力删除，侧栏一并去掉 |
-| 缓存管理 / Swagger API | 可删侧栏与独立页；需要时 **问 Agent**（清缓存、改 TTL、文档入口）或 Agent UI 内快捷方式 |
-| AI 内容助手 | **不依赖侧栏**：保留全局浮窗；全屏页可选保留，用浮窗进入即可 |
+| AI 内容助手 | 浮窗 + 侧栏「工具」；全屏页 `/admin/ai-agent` |
+| 缓存管理 | 侧栏「工具」或 `/admin/cache` |
+| 内容统计 | 侧栏「工具」或 `/admin/stats` |
+| Swagger API | 侧栏「工具」或 `/admin/api-docs` |
 
-将来实施（本文件不执行）：
-
-1. 去掉 `payload.config.ts` 的 `Nav: '@/components/AdminNav'`，恢复官方 Nav。  
-2. 删除或停用 `src/components/AdminNav/`、`src/admin-nav/`（`customItems` / `mergeCustomNavIntoGroups` 等）。  
-3. **不必**再上 `afterNavLinks` 硬挂一堆入口（除非极少数常点页）；默认「问 Agent / Agent 快捷方式」。  
-4. 可选：在 Agent 系统提示或聊天欢迎区写明常用能力（清缓存、看统计、打开某配置），代替侧栏发现。
-
-**Unsplash 已删（2026-08-27）：** Media 列表 Unsplash 入口、Agent stock 工具、API、`src/unsplash/**`、`integration-credentials` / `integration-settings` 均已移除。已导入的 Media 文件保留。
+Agent `list_admin_menu` 使用同一份清单（`src/ai/agent/customAdminPages.ts`）。**不再** fork `admin.components.Nav`。
 
 ### 3.4 可瘦身 / 可删页（入口交给 Agent）
 
@@ -106,8 +98,8 @@
 | ThemeProvider | `src/components/AdminThemeProvider/` + `src/brand/admin-theme*`、`AdminAccountSettings` | 注入 Admin 主题色 / hue | Keep（多为样式） |
 | BeforeLogin | `src/components/BeforeLogin/` | 登录页额外说明/区块 | 可评估删，改回官方空白 |
 | BeforeDashboard | `src/components/BeforeDashboard/` | 仪表盘顶部提示（含 Seed 等） | 可评估删或极简 |
-| CollectionCards | `src/components/AdminCollectionCards/` | 仪表盘 Collection 卡片 widget | 可评估改回官方 `CollectionCards` |
-| （已定删）Nav | `src/components/AdminNav/`、`src/admin-nav/` | 自研侧栏 | **删，回归官方** |
+| CollectionCards | 官方默认 | 仪表盘 Collection 卡片 | **已改回官方**（2026-08-27，随 Nav） |
+| （已删）Nav | `src/components/AdminNav/`、`src/admin-nav/` | 自研侧栏 | **已删，回归官方**（2026-08-27） |
 
 #### 业务 / 列表字段（Collection 挂载）
 
@@ -129,11 +121,11 @@
 
 | 类别 | 约略条数 |
 |------|----------|
-| 品牌壳（Logo/Icon/Avatar/Theme/Before*/Cards） | ~7 |
+| 品牌壳（Logo/Icon/Avatar/Theme/BeforeLogin·Dashboard） | ~6 |
 | 业务字段（图库×2、主题预览、RowLabel×2） | ~5 |
-| AdminListView | **0**（已删） |
+| AdminListView / Nav / CollectionCards | **0**（已回归官方） |
 | Agent（Provider ± 全屏 View） | 1～2 |
-| **合计** | **~11～14**（相对现在 ~27；约砍一半） |
+| **合计** | **~12～13** |
 
 Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agent stock tools —— **不主要体现在 importMap 条数**，但少一整条外站集成链路，维护量再降一截。
 
@@ -146,26 +138,25 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 ## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
-1. Stats 按 §3.3 删除（AI Canvases、字段 AI、Dev Docs、Unsplash 已删）。
+1. Stats 按 §3.3 删除（AI Canvases、字段 AI、Dev Docs、Unsplash、自研 Nav 已删）。
 2. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
-3. **Nav 回归官方**：去掉自研 `AdminNav` / `admin-nav`；不强制 `afterNavLinks`。
-4. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
-5. 回归：Agent 浮窗与常用工具、MCP、Media 上传、前台缓存、官方侧栏冒烟。
+3. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
+4. 回归：Agent 浮窗与常用工具、MCP、Media 上传、前台缓存、官方侧栏冒烟。
 
 ## 6. 最终剩余（按本文全做完）
 
 | 口径 | 现在 | 做完后 |
 |------|------|--------|
 | importMap 自建条目 | ~27 | **~11～14**（约一半） |
-| 自定义侧栏项 | 4（已去掉二次开发文档与 AI 画布） | **0** |
+| 自定义侧栏项 | **1 组（工具，afterNavLinks）** | **1 组** |
 | 自定义 View | 4（已去掉 dev-docs 与 AI 画布） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
-| 自研 Nav | 有 | **无**（官方） |
+| 自研 Nav | **无** | **无**（官方） |
 | 字段 AI 等 | **无** | **无** |
 
 **还留的 Admin UI 定制（按块）：**
 
 1. **Agent**（必留）：浮窗 Provider ± 全屏页 —— 升级主要适配面  
-2. **品牌壳**（~7）：Logo / Icon / Avatar / Theme / BeforeLogin·Dashboard / CollectionCards  
+2. **品牌壳**（~6）：Logo / Icon / Avatar / Theme / BeforeLogin·Dashboard  
 3. **业务字段**（~5）：图库×2、主题预览、Header/Footer RowLabel  
 
 非 Admin 壳但 Keep：MCP、LLM 配置、cache 引擎、themes、OSS、业务 Collection。
@@ -178,8 +169,9 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 
 ## 8. 相关入口（便于将来删改）
 
-- Admin 自定义导航：`src/admin-nav/customItems.ts`
 - Admin 组件注册：`src/payload.config.ts` → `admin.components` / `admin.avatar`
+- 侧栏「工具」：`src/components/AdminAfterNavLinks/`（`afterNavLinks`）
+- Agent 可指路的自定义页：`src/ai/agent/customAdminPages.ts`
 - AI 开关与配置：`AiSettings` / `src/ai/settings.ts`
 
 ---
@@ -198,3 +190,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-08-27 — Unsplash 已删除（API / Agent stock 工具 / 凭证 Catalog / Global）；Postgres 迁移 `20260827_140000_drop_unsplash_integrations`。
 - 2026-08-27 — 列表刷新按钮与 AdminListView 包装已删，列表回官方 DefaultListView。
 - 2026-08-27 — 字段 AI 已删除（`withAi*` / Assist·SEO 面板 / Lexical rewrite / `/api/ai/complete|stream|structured`）；Agent 与 LLM 配置中心保留。
+- 2026-08-27 — 自研 Admin Nav 已删，侧栏与仪表盘卡片回归官方；自定义 View 改挂官方 `afterNavLinks`「工具」分组。

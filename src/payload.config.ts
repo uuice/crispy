@@ -68,7 +68,7 @@ export default buildConfig({
       },
       beforeLogin: ['@/components/BeforeLogin'],
       beforeDashboard: ['@/components/BeforeDashboard'],
-      Nav: '@/components/AdminNav',
+      afterNavLinks: ['@/components/AdminAfterNavLinks'],
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
         apiDocs: {
@@ -92,15 +92,6 @@ export default buildConfig({
           exact: true,
         },
       },
-    },
-    dashboard: {
-      widgets: [
-        {
-          slug: 'collections',
-          Component: '@/components/AdminCollectionCards',
-          minWidth: 'full',
-        },
-      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
