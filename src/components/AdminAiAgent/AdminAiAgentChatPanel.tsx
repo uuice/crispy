@@ -275,7 +275,7 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
                 <li>把某篇文章的标题改为「…」</li>
                 <li>新建一个标签「前端」</li>
                 <li>查看站点设置中的站点名称</li>
-                <li>帮我找 5 张赛博朋克风格的横图，我看中了再加到媒体</li>
+                <li>列出媒体库最近的图片，把其中几张加入图库「…」</li>
               </ul>
             </div>
           )}
