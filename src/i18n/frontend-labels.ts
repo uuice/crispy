@@ -62,7 +62,7 @@ export const frontendLabels = {
   tag: {
     titlePrefix: '标签：',
     notFound: '标签不存在',
-    browse: '标签',
+    browse: '标签浏览',
   },
   gallery: {
     title: '图库',

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -10,7 +11,14 @@ type Props = {
   menu: NavItem[]
 }
 
+function isNavItemActive(pathname: string, url: string): boolean {
+  if (url === '/') return pathname === '/'
+  const base = url.endsWith('/') ? url.slice(0, -1) : url
+  return pathname === base || pathname.startsWith(`${base}/`)
+}
+
 export function MobileNav({ menu }: Props) {
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -94,23 +102,27 @@ export function MobileNav({ menu }: Props) {
           </button>
         </div>
         <nav aria-label="主导航" className="mobile-nav-links flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain p-3 min-h-0">
-          {menu.map((item) => (
-            <Link
-              className="nav-link-cute flex items-center gap-2 rounded-md px-3 py-3 shrink-0"
-              href={item.url}
-              key={item.url + item.title}
-              prefetch={false}
-              onClick={() => setNavOpen(false)}
-              style={{
-                color: 'var(--text-muted)',
-                fontSize: 'var(--text-sm)',
-                fontFamily: 'var(--font-mono)',
-              }}
-              target={item.target || '_self'}
-            >
-              {item.title}
-            </Link>
-          ))}
+          {menu.map((item) => {
+            const active = isNavItemActive(pathname, item.url)
+            return (
+              <Link
+                aria-current={active ? 'page' : undefined}
+                className="nav-link-cute flex items-center gap-2 rounded-md px-3 py-3 shrink-0"
+                href={item.url}
+                key={item.url + item.title}
+                prefetch={false}
+                onClick={() => setNavOpen(false)}
+                style={{
+                  color: active ? 'var(--accent)' : 'var(--text-muted)',
+                  fontSize: 'var(--text-sm)',
+                  fontFamily: 'var(--font-mono)',
+                }}
+                target={item.target || '_self'}
+              >
+                {item.title}
+              </Link>
+            )
+          })}
         </nav>
       </aside>
     </div>

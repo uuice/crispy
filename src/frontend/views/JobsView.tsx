@@ -33,7 +33,7 @@ export function JobsView({ data }: Props) {
         {jobs.length > 0 ? (
           jobs.map((job, i) => (
             <article
-              className="section-card p-5 sm:p-6 animate-in"
+              className="section-card section-card-interactive p-5 sm:p-6 animate-in"
               key={job.id}
               style={{ animationDelay: `${0.1 + i * 0.05}s` }}
             >

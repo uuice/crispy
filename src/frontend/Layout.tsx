@@ -33,6 +33,12 @@ const emptySidebar: SidebarData = {
   footerMenu: [],
 }
 
+function isNavItemActive(pathname: string, url: string): boolean {
+  if (url === '/') return pathname === '/'
+  const base = url.endsWith('/') ? url.slice(0, -1) : url
+  return pathname === base || pathname.startsWith(`${base}/`)
+}
+
 export async function Layout({ children, layoutData }: Props) {
   const pathname = await getRequestPathname()
   const [settings, latestNovelChapters] = await Promise.all([
@@ -73,7 +79,7 @@ export async function Layout({ children, layoutData }: Props) {
           跳到主要内容
         </a>
         <header
-          className="sticky top-0 z-30 flex flex-col border-b"
+          className="site-header sticky top-0 z-30 flex flex-col border-b"
           style={{ background: 'var(--header-bg)', borderColor: 'var(--border)' }}
         >
           <div className="blog-shell mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
@@ -87,22 +93,26 @@ export async function Layout({ children, layoutData }: Props) {
             </Link>
 
             <nav aria-label="主导航" className="hidden lg:flex items-center gap-5">
-              {menu.map((item) => (
-                <Link
-                  className="nav-link-cute py-1 flex items-center gap-1.5"
-                  href={item.url}
-                  key={item.url + item.title}
-                  prefetch={false}
-                  style={{
-                    color: 'var(--text-muted)',
-                    fontSize: 'var(--text-xs)',
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                  target={item.target || '_self'}
-                >
-                  {item.title}
-                </Link>
-              ))}
+              {menu.map((item) => {
+                const active = isNavItemActive(pathname, item.url)
+                return (
+                  <Link
+                    aria-current={active ? 'page' : undefined}
+                    className="nav-link-cute py-1 flex items-center gap-1.5"
+                    href={item.url}
+                    key={item.url + item.title}
+                    prefetch={false}
+                    style={{
+                      color: active ? 'var(--accent)' : 'var(--text-muted)',
+                      fontSize: 'var(--text-xs)',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                    target={item.target || '_self'}
+                  >
+                    {item.title}
+                  </Link>
+                )
+              })}
             </nav>
 
             <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">

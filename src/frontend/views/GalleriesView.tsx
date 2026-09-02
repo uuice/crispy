@@ -31,7 +31,7 @@ export function GalleriesView({ data }: Props) {
             const href = gallery.slug ? getGalleryPath(gallery.slug) : getGalleryPath(String(gallery.id))
 
             return (
-              <article className="section-card p-5 sm:p-6" key={gallery.id}>
+              <article className="section-card section-card-interactive p-5 sm:p-6" key={gallery.id}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   {cover?.url ? (
                     <Link className="relative block shrink-0" href={href} prefetch={false}>

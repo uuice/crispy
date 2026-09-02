@@ -23,7 +23,7 @@ export function NavigationsView({ data }: Props) {
         <p className="code-label mb-6">点击站点将在新窗口打开</p>
         {categories.map((cat, i) => (
           <div
-            className="section-card p-5 sm:p-6 animate-in nav-category-group"
+            className="section-card section-card-interactive p-5 sm:p-6 animate-in nav-category-group"
             id={`nav-${cat.id}`}
             key={cat.id}
             style={{ animationDelay: `${0.1 + i * 0.05}s` }}

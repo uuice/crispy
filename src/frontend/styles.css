@@ -219,6 +219,7 @@ html {
       'Hiragino Sans',
       'PingFang SC',
       sans-serif;
+    transition: color var(--duration-normal) var(--ease-out-soft);
   }
 
   body {
@@ -260,10 +261,24 @@ html {
     z-index: -1;
     pointer-events: none;
     background: color-mix(in oklch, var(--page-bg-base) 67%, transparent);
+    transition: background var(--duration-normal) var(--ease-out-soft);
   }
 
   &.dark body::after {
     background: color-mix(in oklch, var(--page-bg-base) 77%, transparent);
+  }
+
+  .site-header {
+    backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+  }
+
+  .nav-link-cute[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .nav-link-cute[aria-current='page']::after {
+    width: 100%;
   }
 
   .sym {
@@ -1163,10 +1178,13 @@ html {
     transition:
       border-color var(--duration-fast),
       box-shadow var(--duration-normal),
-      transform var(--duration-normal) var(--ease-out-soft);
+      transform var(--duration-normal) var(--ease-out-soft),
+      background-color var(--duration-normal) var(--ease-out-soft);
   }
 
-  .section-card:hover {
+  /* Hover lift: list rows and entity cards only, not reading shells or sidebars. */
+  .section-card-interactive:hover,
+  .post-card-cute:hover {
     border-color: var(--accent);
     box-shadow: var(--shadow-hover);
     transform: translateY(-2px);
@@ -2141,12 +2159,15 @@ html {
     transition:
       border-color var(--duration-fast),
       background var(--duration-fast),
-      box-shadow var(--duration-fast);
+      box-shadow var(--duration-fast),
+      transform var(--duration-fast) var(--ease-out-soft);
   }
   .terminal-list .post-card-cute:hover,
   .terminal-list .terminal-item:hover {
     border-color: var(--accent);
     background: var(--page-bg);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
   }
   .terminal-list .post-card-cute a,
   .terminal-list .terminal-item a {
@@ -2329,13 +2350,6 @@ html {
   }
   .post-list > li:nth-child(n + 4) {
     animation-delay: 0.08s;
-  }
-  .post-card-cute:hover {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-hover);
-  }
-  .terminal-list .post-card-cute:hover {
-    box-shadow: var(--shadow);
   }
   .blog-shell {
     max-width: var(--layout-max);

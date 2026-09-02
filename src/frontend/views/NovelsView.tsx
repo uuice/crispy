@@ -34,7 +34,7 @@ export function NovelsView({ data }: Props) {
         {novels.length > 0 ? (
           novels.map((novel, index) => (
             <article
-              className="section-card p-5 sm:p-6 animate-in"
+              className="section-card section-card-interactive p-5 sm:p-6 animate-in"
               key={novel.slug}
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
