@@ -159,6 +159,8 @@ export const frontendLabels = {
     guestHint: '以访客身份评论',
     successApproved: '评论已发布',
     successPending: '评论已提交，审核通过后将显示',
+    loading: '加载评论中…',
+    errorLoad: '评论加载失败，请刷新页面重试',
     errorGeneric: '提交失败，请稍后重试',
     errorEmpty: '请输入评论内容',
     errorGuestName: '请输入昵称',

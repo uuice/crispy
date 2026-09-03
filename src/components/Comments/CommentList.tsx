@@ -35,6 +35,7 @@ type CommentItemProps = {
   currentUser?: User | null
   maxDepth: number
   parentAuthorName?: string | null
+  onSubmitted?: (result: { status?: string }) => void
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
@@ -46,6 +47,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   currentUser,
   maxDepth,
   parentAuthorName,
+  onSubmitted,
 }) => {
   const [replyOpen, setReplyOpen] = useState(false)
   const canReply = depth < maxDepth
@@ -86,6 +88,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           compact
           currentUser={currentUser}
           onCancel={() => setReplyOpen(false)}
+          onSubmitted={(result) => {
+            onSubmitted?.(result)
+            if (result.status === 'approved') {
+              setReplyOpen(false)
+            }
+          }}
           parentId={comment.id}
           replyToName={authorName}
           settings={settings}
@@ -103,6 +111,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               depth={depth + 1}
               key={reply.id}
               maxDepth={maxDepth}
+              onSubmitted={onSubmitted}
               parentAuthorName={authorName}
               settings={settings}
               targetId={targetId}
@@ -121,6 +130,7 @@ type CommentListProps = {
   targetId: number
   settings: ResolvedCommentSettings
   currentUser?: User | null
+  onSubmitted?: (result: { status?: string }) => void
 }
 
 export const CommentList: React.FC<CommentListProps> = ({
@@ -129,6 +139,7 @@ export const CommentList: React.FC<CommentListProps> = ({
   targetId,
   settings,
   currentUser,
+  onSubmitted,
 }) => {
   if (comments.length === 0) {
     return <p className="comment-muted">{frontendLabels.comments.empty}</p>
@@ -143,6 +154,7 @@ export const CommentList: React.FC<CommentListProps> = ({
           depth={1}
           key={comment.id}
           maxDepth={settings.maxDepth}
+          onSubmitted={onSubmitted}
           settings={settings}
           targetId={targetId}
           targetType={targetType}

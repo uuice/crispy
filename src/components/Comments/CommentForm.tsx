@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 import { frontendLabels } from '@/i18n/frontend-labels'
 import type { ResolvedCommentSettings } from '@/comments/types'
@@ -17,6 +16,7 @@ type CommentFormProps = {
   settings: ResolvedCommentSettings
   currentUser?: User | null
   onCancel?: () => void
+  onSubmitted?: (result: { status?: string }) => void
   compact?: boolean
 }
 
@@ -28,9 +28,9 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   settings,
   currentUser,
   onCancel,
+  onSubmitted,
   compact = false,
 }) => {
-  const router = useRouter()
   const [content, setContent] = useState('')
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
@@ -100,7 +100,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
           : frontendLabels.comments.successApproved,
       )
       onCancel?.()
-      router.refresh()
+      onSubmitted?.({ status: data?.doc?.status })
     } catch {
       setError(frontendLabels.comments.errorGeneric)
     } finally {
