@@ -13,20 +13,53 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     -- Site settings
     ALTER TABLE "site_settings" DROP COLUMN IF EXISTS "show_novel_updates_on_home";
 
-    -- Embeddings + search leftovers
+    -- Embeddings leftovers
     DELETE FROM "content_embeddings"
       WHERE "collection" IN ('novels', 'novel-chapters', 'jobs');
-    DELETE FROM "search"
-      WHERE "doc"::text LIKE '%"relationTo":"jobs"%'
-         OR "doc"::text LIKE '%"relationTo":"novels"%'
-         OR "doc"::text LIKE '%"relationTo":"novel-chapters"%';
+
+    -- Search plugin: jobs were related via search_rels.jobs_id (no JSON "doc" column).
+    -- _search_v may already be gone after drop_unused_collection_versions.
+    DO $search_jobs$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'search_rels' AND column_name = 'jobs_id'
+      ) THEN
+        DELETE FROM "search"
+          WHERE "id" IN (
+            SELECT DISTINCT "parent_id" FROM "search_rels" WHERE "jobs_id" IS NOT NULL
+          );
+        ALTER TABLE "search_rels" DROP CONSTRAINT IF EXISTS "search_rels_jobs_fk";
+        DROP INDEX IF EXISTS "search_rels_jobs_id_idx";
+        ALTER TABLE "search_rels" DROP COLUMN IF EXISTS "jobs_id";
+      END IF;
+
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = '_search_v_rels' AND column_name = 'jobs_id'
+      ) THEN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_name = '_search_v'
+        ) THEN
+          DELETE FROM "_search_v"
+            WHERE "id" IN (
+              SELECT DISTINCT "parent_id" FROM "_search_v_rels" WHERE "jobs_id" IS NOT NULL
+            );
+        END IF;
+        ALTER TABLE "_search_v_rels" DROP CONSTRAINT IF EXISTS "_search_v_rels_jobs_fk";
+        DROP INDEX IF EXISTS "_search_v_rels_jobs_id_idx";
+        ALTER TABLE "_search_v_rels" DROP COLUMN IF EXISTS "jobs_id";
+      END IF;
+    END
+    $search_jobs$;
 
     -- Roles permission matrix
     DELETE FROM "roles_permissions"
       WHERE "value"::text IN ('novels:manage', 'novels:read:all');
 
     DELETE FROM "payload_query_presets"
-      WHERE "related_collection" IN (
+      WHERE "related_collection"::text IN (
         'jobs', 'novels', 'novel-chapters', 'novel-categories', 'novel-tags'
       );
 
@@ -74,8 +107,23 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "novel_categories_id";
     ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "novel_tags_id";
 
-    ALTER TABLE "_redirects_v_rels" DROP COLUMN IF EXISTS "novel_chapters_id";
-    ALTER TABLE "redirects_rels" DROP COLUMN IF EXISTS "novel_chapters_id";
+    -- redirects version tables may already be gone
+    DO $redirects_novel$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = '_redirects_v_rels' AND column_name = 'novel_chapters_id'
+      ) THEN
+        ALTER TABLE "_redirects_v_rels" DROP COLUMN IF EXISTS "novel_chapters_id";
+      END IF;
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'redirects_rels' AND column_name = 'novel_chapters_id'
+      ) THEN
+        ALTER TABLE "redirects_rels" DROP COLUMN IF EXISTS "novel_chapters_id";
+      END IF;
+    END
+    $redirects_novel$;
 
     -- Drop product tables (CASCADE clears child/version/rel tables)
     DROP TABLE IF EXISTS "_jobs_v" CASCADE;
