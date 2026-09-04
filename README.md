@@ -63,7 +63,6 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | `/search-index.json` | GET | 公开 | 前台搜索索引（posts/pages/galleries） |
 | `/api/internal/redirects` | GET | 内部 | middleware 拉取重定向映射（60s 缓存） |
 | `/api/internal/route-cache-*` | POST | 内部 | 前台 HTML 缓存读写 |
-| `/api/internal/access-log` | POST | Secret | API 访问日志写入 |
 
 OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详见 [dev-docs — OpenAPI](docs/dev-docs.md#openapi)。
 

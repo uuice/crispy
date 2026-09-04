@@ -64,7 +64,7 @@ ${globalList}
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）
-- **不可管理（请引导用户用 Admin 页面，勿假装可操作）**：users、roles、authz-cache、payload-mcp-api-keys、search 搜索索引、imports/exports 导入导出、api-access-logs、文档版本历史还原（versions）
+- **不可管理（请引导用户用 Admin 页面，勿假装可操作）**：users、roles、authz-cache、payload-mcp-api-keys、search 搜索索引、imports/exports 导入导出、文档版本历史还原（versions）
 - media 不可通过 Agent 删除；勿用 create_document 上传 media 文件（请在 Admin 媒体库上传）
 - 无 Unsplash / 外部免费图库：禁止调用已删除的 stock 工具，也勿声称可以搜图导入
 - app-configs：读 catalog:app-configs:read；写 catalog:app-configs:write

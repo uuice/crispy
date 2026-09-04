@@ -137,7 +137,6 @@ crispy/
 | PREVIEW_SECRET | 草稿 / Live Preview 鉴权 |
 | CRON_SECRET | 定时发布 Jobs 鉴权 |
 | MCP_API_KEY | 本地 MCP 用，在 Admin → MCP → API Keys 创建 |
-| API_ACCESS_LOG_ENABLED | API 访问日志 middleware（可选） |
 | CRISPY_FRONTEND_HTML_CACHE | 仅开发：覆盖 cache-settings HTML 缓存开关 |
 
 LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .env（详见 #config-center）。
@@ -187,7 +186,6 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | storage-targets | 存储目标 | S3/OSS Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
 | email-transports | 邮件通道 | Resend / SMTP Catalog（密钥加密；catalog:secrets；Active 切换后需重启） |
 | ai-chat-sessions | AI 对话会话 | title, messages[], user（Agent 侧栏历史；ai:use） |
-| api-access-logs | API 访问日志 | method, path, status, authType, user, duration（logs:read） |
 | frontend-cache-entries | 前台缓存条目（系统） | cacheKey, kind(route), cachedValue(JSON), routePath, expiresAt |
 | audit-logs | 审计日志 | action, collection, docId, user, summary（logs:read） |
 
@@ -276,7 +274,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | users | users:manage | authenticated | 本人或 users:manage | users:manage |
 | roles | roles:manage | roles\|users:manage | roles:manage | roles:manage |
 | llm-providers 等密钥 Catalog | catalog:secrets | catalog:secrets | catalog:secrets | catalog:secrets |
-| audit-logs / api-access-logs | — | logs:read | — | logs:read |
+| audit-logs | — | logs:read | — | logs:read |
 
 ### API 路由鉴权
 
@@ -426,7 +424,6 @@ Swagger UI 自动跟随 Admin 主题（html[data-theme]）：右上角切换浅�
 - MCP：POST /api/mcp（JSON-RPC）
 - GraphQL：POST /api/graphql（按 Collection access）
 - GraphQL Playground：GET /api/graphql-playground（需 Admin 登录）
-- Internal：POST /api/internal/access-log
 - 插件 Collection 随 getPayload().config.collections 自动纳入
 
 ### 命令与代码
@@ -444,7 +441,6 @@ pnpm cli generate:openapi    # 写入 public/openapi.json（本地备份，生�
 | cookieAuth | Admin 会话 payload-token |
 | usersApiKey | Header: Authorization: users API-Key <key> |
 | mcpBearer | MCP API Key Bearer |
-| accessLogSecret | Header: x-access-log-secret |
 
 <h2 id="mcp">MCP 连接</h2>
 
@@ -806,7 +802,7 @@ curl -I http://localhost:3333/
 | src/frontend-cache/registry.ts | Admin 可清除项注册表 |
 | src/frontend-cache/purge.ts | Admin purge 入口（按 path / 全部） |
 | src/frontend-cache/headers.ts | X-Crispy-* Header 常量与写入 |
-| src/proxy.ts | 前台 HTML Header + API access log |
+| src/proxy.ts | 前台 HTML Header / 缓存中间件 |
 | src/collections/FrontendCacheEntries/ | DB Collection 定义（hidden，系统写入） |
 | src/app/(payload)/admin/cache/ | Custom View 缓存管理 UI |
 
@@ -1100,7 +1096,7 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 - Globals：settings:* 分权；ai-settings 更新需 settings:ai
 - 前台缓存工具：cache:manage；get_site_stats：stats:read；list_audit_logs：logs:read
 - payload-query-presets：presets:manage
-- 不覆盖（永久）：users/roles、MCP API Keys、search 索引、imports/exports、api-access-logs、文档版本还原（见 AGENT_OUT_OF_SCOPE）
+- 不覆盖（永久）：users/roles、MCP API Keys、search 索引、imports/exports、文档版本还原（见 AGENT_OUT_OF_SCOPE）
 - 代码：src/ai/agent/、src/components/AdminAiAgent/
 
 ### 与 MCP 的区别

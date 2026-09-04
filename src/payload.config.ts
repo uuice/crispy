@@ -13,7 +13,6 @@ import { EmailTransports } from './collections/EmailTransports'
 import { Comments } from './collections/Comments'
 import { Galleries } from './collections/Galleries'
 import { GalleryItems } from './collections/GalleryItems'
-import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
 import { Categories } from './collections/Categories'
 import { Links } from './collections/Links'
@@ -168,7 +167,6 @@ export default buildConfig({
     StorageTargets,
     EmailTransports,
     Comments,
-    ApiAccessLogs,
     FrontendCacheEntries,
     AuthzCache,
     Roles,

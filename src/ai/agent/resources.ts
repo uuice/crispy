@@ -126,7 +126,6 @@ export const AGENT_OUT_OF_SCOPE = [
   'search',
   'imports',
   'exports',
-  'api-access-logs',
   'document-versions', // Payload versions restore UI — no Agent tool
 ] as const
 

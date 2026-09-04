@@ -24,7 +24,7 @@ export const PERMISSION_CATALOG = [
   { value: 'catalog:prompts:write', label: '修改 Prompt 模板', group: 'catalog' },
   { value: 'catalog:app-configs:read', label: '查看应用配置', group: 'catalog' },
   { value: 'catalog:app-configs:write', label: '修改应用配置', group: 'catalog' },
-  { value: 'logs:read', label: '查看审计/访问日志', group: 'system' },
+  { value: 'logs:read', label: '查看审计日志', group: 'system' },
   { value: 'cache:manage', label: '管理前台缓存', group: 'system' },
   { value: 'stats:read', label: '查看内容统计', group: 'system' },
   { value: 'ai:use', label: '使用 AI / Agent', group: 'system' },

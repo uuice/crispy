@@ -308,25 +308,6 @@ function buildCustomPaths(): Record<string, unknown> {
         security: [{ cookieAuth: [] }],
       },
     },
-    '/api/internal/access-log': {
-      post: {
-        tags: ['Internal'],
-        summary: 'Record API access log (middleware)',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: { $ref: '#/components/schemas/AccessLogRequest' },
-            },
-          },
-        },
-        responses: {
-          '200': jsonResponse('Logged'),
-          '401': jsonResponse('Invalid x-access-log-secret'),
-        },
-        security: [{ accessLogSecret: [] }],
-      },
-    },
     '/api/openapi.json': {
       get: {
         tags: ['Internal'],
@@ -409,23 +390,6 @@ function buildSchemas(): Record<string, unknown> {
           },
         },
         sessionId: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
-      },
-    },
-    AccessLogRequest: {
-      type: 'object',
-      required: ['method', 'path'],
-      properties: {
-        method: { type: 'string' },
-        path: { type: 'string' },
-        status: { type: 'integer' },
-        durationMs: { type: 'number' },
-        ip: { type: 'string', nullable: true },
-        userAgent: { type: 'string', nullable: true },
-        referer: { type: 'string', nullable: true },
-        authType: {
-          type: 'string',
-          enum: ['none', 'session', 'api-key', 'bearer'],
-        },
       },
     },
   }
@@ -513,12 +477,6 @@ export async function buildOpenApiDocument(
           type: 'http',
           scheme: 'bearer',
           description: 'MCP API Key from Admin → MCP → API Keys',
-        },
-        accessLogSecret: {
-          type: 'apiKey',
-          in: 'header',
-          name: 'x-access-log-secret',
-          description: 'ACCESS_LOG_SECRET or PAYLOAD_SECRET',
         },
       },
       schemas: buildSchemas(),

@@ -18,11 +18,8 @@ import {
 import { buildRouteCachePath } from '@/frontend-cache/routeCachePath'
 import type { CrispyCacheStatus } from '@/frontend-cache/headers'
 import { handlePayloadRedirect } from '@/redirects/middlewareRedirects'
-import { detectApiAuthType } from '@/utilities/detectApiAuthType'
 import { applyPoweredByHeader } from '@/utilities/poweredByHeader'
 import { FRONTEND_PATHNAME_HEADER } from '@/utilities/requestPathname'
-
-const SKIP_PREFIXES = ['/api/internal/access-log', '/api/ai/', '/api/media/file', '/api/openapi']
 
 function nextWithPathname(request: NextRequest): NextResponse {
   const requestHeaders = new Headers(request.headers)
@@ -39,19 +36,6 @@ type RouteCacheLookupResult = {
   html?: string
   contentType?: string
   statusCode?: number
-}
-
-function shouldLogApiRequest(pathname: string): boolean {
-  if (!pathname.startsWith('/api/')) return false
-  return !SKIP_PREFIXES.some((prefix) => pathname.startsWith(prefix))
-}
-
-function resolveClientIp(request: NextRequest): string | null {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    null
-  )
 }
 
 function isInternalCacheCaptureRequest(request: NextRequest): boolean {
@@ -245,51 +229,6 @@ async function applyFrontendCacheHeaders(request: NextRequest): Promise<NextResp
   return response
 }
 
-function handleApiAccessLog(request: NextRequest): NextResponse | null {
-  if (process.env.API_ACCESS_LOG_ENABLED === 'false') {
-    return null
-  }
-
-  const { pathname, search } = request.nextUrl
-  if (!shouldLogApiRequest(pathname)) {
-    return null
-  }
-
-  const startedAt = Date.now()
-  const response = nextWithPathname(request)
-
-  after(async () => {
-    const secret = process.env.ACCESS_LOG_SECRET || process.env.PAYLOAD_SECRET
-    if (!secret) return
-
-    const logUrl = new URL('/api/internal/access-log', request.url)
-
-    try {
-      await fetch(logUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-log-secret': secret,
-        },
-        body: JSON.stringify({
-          method: request.method,
-          path: `${pathname}${search}`,
-          status: response.status || null,
-          durationMs: Date.now() - startedAt,
-          ip: resolveClientIp(request),
-          userAgent: request.headers.get('user-agent'),
-          referer: request.headers.get('referer'),
-          authType: detectApiAuthType(request),
-        }),
-      })
-    } catch {
-      // Best-effort logging; never block API responses.
-    }
-  })
-
-  return response
-}
-
 export async function proxy(request: NextRequest) {
   const legacyRedirect = handleLegacyFrontendRedirect(request)
   if (legacyRedirect) {
@@ -304,11 +243,6 @@ export async function proxy(request: NextRequest) {
   const frontendResponse = await applyFrontendCacheHeaders(request)
   if (frontendResponse) {
     return applyPoweredByHeader(frontendResponse)
-  }
-
-  const apiResponse = handleApiAccessLog(request)
-  if (apiResponse) {
-    return applyPoweredByHeader(apiResponse)
   }
 
   return applyPoweredByHeader(nextWithPathname(request))

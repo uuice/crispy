@@ -84,7 +84,6 @@ export interface Config {
     'storage-targets': StorageTarget;
     'email-transports': EmailTransport;
     comments: Comment;
-    'api-access-logs': ApiAccessLog;
     'frontend-cache-entries': FrontendCacheEntry;
     'authz-cache': AuthzCache;
     roles: Role;
@@ -131,7 +130,6 @@ export interface Config {
     'storage-targets': StorageTargetsSelect<false> | StorageTargetsSelect<true>;
     'email-transports': EmailTransportsSelect<false> | EmailTransportsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
-    'api-access-logs': ApiAccessLogsSelect<false> | ApiAccessLogsSelect<true>;
     'frontend-cache-entries': FrontendCacheEntriesSelect<false> | FrontendCacheEntriesSelect<true>;
     'authz-cache': AuthzCacheSelect<false> | AuthzCacheSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
@@ -1385,28 +1383,6 @@ export interface Comment {
   deletedAt?: string | null;
 }
 /**
- * REST / GraphQL API request history (written by middleware).
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-access-logs".
- */
-export interface ApiAccessLog {
-  id: number;
-  method: string;
-  path: string;
-  /**
-   * HTTP status when available; may be empty for middleware-only timing.
-   */
-  status?: number | null;
-  durationMs?: number | null;
-  ip?: string | null;
-  userAgent?: string | null;
-  referer?: string | null;
-  authType?: ('none' | 'session' | 'api-key' | 'bearer') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Database-backed frontend HTML cache (managed by /admin/cache).
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2307,10 +2283,6 @@ export interface PayloadLockedDocument {
         value: number | Comment;
       } | null)
     | ({
-        relationTo: 'api-access-logs';
-        value: number | ApiAccessLog;
-      } | null)
-    | ({
         relationTo: 'frontend-cache-entries';
         value: number | FrontendCacheEntry;
       } | null)
@@ -2468,7 +2440,6 @@ export interface PayloadQueryPreset {
     | 'storage-targets'
     | 'email-transports'
     | 'comments'
-    | 'api-access-logs'
     | 'frontend-cache-entries'
     | 'authz-cache'
     | 'roles'
@@ -3012,22 +2983,6 @@ export interface CommentsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-access-logs_select".
- */
-export interface ApiAccessLogsSelect<T extends boolean = true> {
-  method?: T;
-  path?: T;
-  status?: T;
-  durationMs?: T;
-  ip?: T;
-  userAgent?: T;
-  referer?: T;
-  authType?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4173,7 +4128,6 @@ export interface TaskCreateCollectionExport {
       | 'storage-targets'
       | 'email-transports'
       | 'comments'
-      | 'api-access-logs'
       | 'frontend-cache-entries'
       | 'authz-cache'
       | 'roles'

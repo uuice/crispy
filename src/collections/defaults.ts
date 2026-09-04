@@ -14,7 +14,6 @@ export const SYSTEM_COLLECTION_SLUGS = new Set([
   'frontend-cache-entries',
   'authz-cache',
   'roles',
-  'api-access-logs',
 ])
 
 export function isInternalCollectionSlug(slug: string): boolean {

@@ -41,6 +41,7 @@ import * as migration_20260827_140000_drop_unsplash_integrations from './2026082
 import * as migration_20260827_150000_drop_frontend_theme from './20260827_150000_drop_frontend_theme';
 import * as migration_20260904_160000_drop_jobs_and_novels from './20260904_160000_drop_jobs_and_novels';
 import * as migration_20260904_161000_drop_ads_and_ad_slots from './20260904_161000_drop_ads_and_ad_slots';
+import * as migration_20260904_162000_drop_api_access_logs from './20260904_162000_drop_api_access_logs';
 
 export const migrations = [
   {
@@ -257,5 +258,10 @@ export const migrations = [
     up: migration_20260904_161000_drop_ads_and_ad_slots.up,
     down: migration_20260904_161000_drop_ads_and_ad_slots.down,
     name: '20260904_161000_drop_ads_and_ad_slots',
+  },
+  {
+    up: migration_20260904_162000_drop_api_access_logs.up,
+    down: migration_20260904_162000_drop_api_access_logs.down,
+    name: '20260904_162000_drop_api_access_logs',
   },
 ];
