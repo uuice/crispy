@@ -9,7 +9,6 @@ export const frontendCollectionRoutes = {
   users: 'users',
   links: 'links',
   galleries: 'galleries',
-  jobs: 'jobs',
 } as const satisfies Partial<Record<CollectionSlug, string>>
 
 export function getPostsListPath(): string {
@@ -53,30 +52,6 @@ export function getGalleryPath(slug: string): string {
   return `${getGalleriesPath()}/${encodeURIComponent(slug)}`
 }
 
-export function getJobsPath(): string {
-  return `/${frontendCollectionRoutes.jobs}`
-}
-
-export function getNovelsPath(): string {
-  return '/novels'
-}
-
-export function getNovelPath(slug: string): string {
-  return `${getNovelsPath()}/${encodeURIComponent(slug)}`
-}
-
-export function getNovelChapterPath(novelSlug: string, chapterSlug: string): string {
-  return `${getNovelPath(novelSlug)}/${encodeURIComponent(chapterSlug)}`
-}
-
-export function getNovelCategoryPath(slug: string): string {
-  return `/novel-categories/${encodeURIComponent(slug)}`
-}
-
-export function getNovelTagPath(slug: string): string {
-  return `/novel-tags/${encodeURIComponent(slug)}`
-}
-
 export function getCollectionDocumentPath(collection: CollectionSlug, slug: string): string | null {
   switch (collection) {
     case 'posts':
@@ -87,16 +62,6 @@ export function getCollectionDocumentPath(collection: CollectionSlug, slug: stri
       return getCategoryPath(slug)
     case 'tags':
       return getTagPath(slug)
-    case 'novels':
-      return getNovelPath(slug)
-    case 'novel-chapters': {
-      const [novelSlug, chapterSlug] = slug.split('/')
-      return novelSlug && chapterSlug ? getNovelChapterPath(novelSlug, chapterSlug) : null
-    }
-    case 'novel-categories':
-      return getNovelCategoryPath(slug)
-    case 'novel-tags':
-      return getNovelTagPath(slug)
     case 'galleries':
       return getGalleryPath(slug)
     case 'users':

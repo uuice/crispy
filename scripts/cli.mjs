@@ -138,18 +138,6 @@ const GROUPS = {
         run: () => bashScript('bootstrap-postgres-migration.sh'),
       },
       {
-        id: 'seed',
-        summary: 'CLI 填充示例数据',
-        note: '含 MCP 测试用户；也可在 Admin 仪表盘点击填充。',
-        run: () => tsxScript('run-seed.ts'),
-      },
-      {
-        id: 'import-astro-learn',
-        summary: '从 astro-learn 导入迁移 manifest',
-        note: '默认读取 ../astro-learn；可设 ASTRO_LEARN_PATH。seed 前须先执行。',
-        run: () => tsxScript('import-astro-learn.ts'),
-      },
-      {
         id: 'push-schema',
         summary: '一次性 dev schema push（SQLite 漂移修复）',
         note: '需 DATABASE_PUSH=true；慎用，生产禁止 push。',
@@ -186,33 +174,9 @@ const GROUPS = {
       },
     ],
   },
-  mcp: {
-    title: 'MCP',
-    commands: [
-      {
-        id: 'key',
-        summary: '为 agent 用户生成 MCP API Key',
-        note: '需先 pnpm cli db:seed；输出 MCP_API_KEY 写入 .env 或 Cursor MCP 配置。',
-        run: () => tsxScript('create-mcp-key.ts'),
-      },
-    ],
-  },
   quality: {
     title: '质量与 CI',
     commands: [
-      {
-        id: 'lint-fix',
-        summary: 'ESLint 检查并自动修复',
-        note: '同 quality:lint --fix。',
-        run: () =>
-          pnpmExec([
-            'cross-env',
-            'NODE_OPTIONS=--no-deprecation',
-            'eslint',
-            '.',
-            '--fix',
-          ]),
-      },
       {
         id: 'lint',
         summary: 'ESLint 检查',
@@ -345,12 +309,6 @@ const GROUPS = {
         run: (args) => payload(args),
       },
       {
-        id: 'bootstrap-seed',
-        summary: '空库建超管并 seed',
-        note: '生产/新库一次性：无用户时创建 admin@example.com，再跑 seed。',
-        run: () => tsxScript('bootstrap-and-seed.ts'),
-      },
-      {
         id: 'repair-authz',
         summary: '重建系统角色并回填 authz-cache',
         note: '权限漂移或 Roles 变更后运行。',
@@ -453,10 +411,6 @@ function runProductionBuild(env = {}) {
 
 function payload(args) {
   pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', 'payload', ...args])
-}
-
-function nodeScript(name, args = []) {
-  spawnSyncInherit(process.execPath, [path.join('scripts', name), ...args])
 }
 
 function bashScript(name, args = []) {

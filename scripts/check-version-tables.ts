@@ -9,20 +9,15 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 
 /** Collections with drafts — admin list reads _v with latest=true. */
-const DRAFT_COLLECTIONS = ['posts', 'pages', 'novel-chapters'] as const
+const DRAFT_COLLECTIONS = ['posts', 'pages'] as const
 
 /** Collections with version history (no drafts) — backfill initial _v row per doc. */
 const VERSION_HISTORY_COLLECTIONS = [
   'categories',
   'tags',
-  'novel-categories',
-  'novel-tags',
   'links',
   'link-groups',
   'short-links',
-  'ad-slots',
-  'ads',
-  'jobs',
   'gallery-items',
   'app-configs',
   'comments',
@@ -95,28 +90,6 @@ async function main() {
     console.log(`${slug}: main=${mainCount} _v=${versionCount} → ${status}`)
     if (status === 'MISSING _v TABLE' || status === 'NEEDS BACKFILL') gaps.push(slug)
   }
-
-  console.log('\n=== Rels gaps (novel-chapters on redirects) ===\n')
-  const relsChecks = [
-    ['redirects_rels', 'novel_chapters_id'],
-    ['_redirects_v_rels', 'novel_chapters_id'],
-  ] as const
-
-  for (const [table, column] of relsChecks) {
-    const result = await payload.db.pool
-      .query(
-        `SELECT count(*)::int AS c FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
-        [table, column],
-      )
-      .catch(() => ({ rows: [{ c: 0 }] }))
-    console.log(`${table}.${column}: ${result.rows[0]?.c ? 'exists' : 'MISSING'}`)
-    if (!result.rows[0]?.c) gaps.push(`${table}.${column}`)
-  }
-
-  console.log('\n=== novels (versions disabled) ===\n')
-  const novelsMain = await countTable(payload, 'novels')
-  const novelsV = await countTable(payload, '_novels_v')
-  console.log(`novels: main=${novelsMain} _novels_v=${novelsV ?? 'n/a'} (versions: false, expected)`)
 
   if (gaps.length) {
     console.log('\nGaps:', gaps.join(', '))

@@ -32,14 +32,6 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     doc: { relationTo: collection },
   } = searchDoc
 
-  if (collection === 'jobs') {
-    return syncSimpleDoc({
-      originalDoc,
-      searchDoc,
-      descriptionField: 'location',
-    })
-  }
-
   if (collection === 'galleries') {
     return syncSimpleDoc({ originalDoc, searchDoc })
   }

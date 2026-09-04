@@ -1,23 +1,19 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { SiteSetting } from '@/payload-types'
 import { frontendLabels } from '@/i18n/frontend-labels'
 import { getCachedSiteSettings } from '@/utilities/getSiteSettings'
 import { getRequestPathname } from '@/utilities/requestPathname'
 
-import { defaultBlogMenu, resolveBlogMenu } from './data/constants'
+import { resolveBlogMenu } from './data/constants'
 import type { SidebarData } from './data/types'
-import { isNovelsListPath } from './data/novelRoutes'
 
 import { BackToTop, FooterBackToTop } from './components/BackToTop'
 import { BlogSearch } from './components/BlogSearch'
 import { BlogSidebarShell } from './components/BlogSidebarShell'
 import { DarkModeToggle } from './components/DarkModeToggle'
 import { MobileNav } from './components/MobileNav'
-import { NovelsListSidebarShell } from './components/NovelsListSidebarShell'
 import { Sidebar } from './components/Sidebar'
-import { queryLatestNovelChapters } from './data/queries'
 import { ThemeColor } from './components/ThemeColor'
 
 type Props = {
@@ -41,10 +37,7 @@ function isNavItemActive(pathname: string, url: string): boolean {
 
 export async function Layout({ children, layoutData }: Props) {
   const pathname = await getRequestPathname()
-  const [settings, latestNovelChapters] = await Promise.all([
-    getCachedSiteSettings()(),
-    isNovelsListPath(pathname) ? queryLatestNovelChapters(20) : Promise.resolve([]),
-  ])
+  const settings = await getCachedSiteSettings()()
   const sidebar = (layoutData as SidebarData | undefined) ?? emptySidebar
 
   const siteName = settings.siteName || '博客'
@@ -136,7 +129,6 @@ export async function Layout({ children, layoutData }: Props) {
               {defaultSidebar}
             </div>
           </BlogSidebarShell>
-          <NovelsListSidebarShell chapters={latestNovelChapters} />
         </div>
 
         <footer
@@ -206,16 +198,6 @@ export async function Layout({ children, layoutData }: Props) {
                 target="_blank"
               >
                 {frontendLabels.site.blogRss}
-              </a>
-              {' · '}
-              <a
-                className="hover:opacity-80"
-                href="/novels/rss"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--accent)' }}
-                target="_blank"
-              >
-                {frontendLabels.novels.rss}
               </a>
               {' · '}
               <a

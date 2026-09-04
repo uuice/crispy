@@ -112,20 +112,6 @@ function describeField(field: Field, prefix = ''): DescribedField[] {
 }
 
 const COLLECTION_HINTS: Record<string, string[]> = {
-  novels: [
-    'novels 无 versions；前台可见性用 enabled: true（非 _status）',
-    '章节在 novel-chapters；taxonomy 用 novel-categories / novel-tags（勿用博客 categories/tags）',
-  ],
-  'novel-chapters': [
-    'novel 字段必填（relationship → novels）',
-    'slug 仅存章节段（如 zoulang-jintou），非 URL 复合路径',
-    '前台 URL / embedding / semantic_search 的 slug 为 {novelSlug}/{chapterSlug}',
-    'find 按章节 slug 查询须同时 where.novel；勿用复合 slug 查文档 slug 字段',
-    '发布：_status 设为 published；草稿不进前台与 semantic_search 索引',
-    'find 列表不含 content；读全文用 get_document',
-    'categories/tags 关联 novel-categories / novel-tags',
-    '写章发布后建议 purge_frontend_cache',
-  ],
   galleries: [
     '图库主实体；前台列表 /galleries，详情 /galleries/{slug}',
     '图片在 gallery-items；Admin 可用 bulkImages 批量选 media 后保存自动建条目',

@@ -7,7 +7,7 @@ import { assertAgentCollectionAccess } from '@/ai/agent/access'
 import { describeCollectionSchema } from '@/ai/agent/describeResource'
 import { scopeSemanticSearchHits } from '@/ai/agent/scopeSemanticSearch'
 import { executeAgentTool } from '@/ai/agent/tools'
-import type { NovelCategory, NovelTag, User } from '@/payload-types'
+import type { User } from '@/payload-types'
 
 let payload: Payload
 let mockSuperAdmin: User
@@ -75,18 +75,6 @@ describe('AI agent', () => {
 
     expect(schema.slug).toBe('posts')
     expect(schema.fields.some((f) => f.name === 'title')).toBe(true)
-  })
-
-  it('describeCollectionSchema returns fields for novels', async () => {
-    const req = await createLocalReq({}, payload)
-    const schema = describeCollectionSchema(req, 'novels') as {
-      slug: string
-      fields: { name: string }[]
-    }
-
-    expect(schema.slug).toBe('novels')
-    expect(schema.fields.some((f) => f.name === 'plotOutline')).toBe(true)
-    expect(schema.fields.some((f) => f.name === 'currentProgress')).toBe(true)
   })
 
   it('get_my_permissions returns authz for the current user', async () => {
@@ -225,7 +213,6 @@ describe('AI agent', () => {
 
     expect(result.summary.globals.some((g) => g.slug === 'cache-settings')).toBe(true)
     expect(result.summary.globals.some((g) => g.slug === 'ai-settings')).toBe(true)
-    expect(result.summary.collections.some((c) => c.slug === 'novels')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'payload-query-presets')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'redirects')).toBe(true)
     expect(result.summary.collections.some((c) => c.slug === 'forms')).toBe(true)
@@ -600,41 +587,5 @@ describe('AI agent', () => {
     })
 
     expect(active.deletedAt).toBeFalsy()
-  })
-
-  it('auto-generates novel-category slug from title when slug is omitted', async () => {
-    const title = `测试分类-${Date.now()}`
-    const created = (await payload.create({
-      collection: 'novel-categories',
-      data: { title },
-      overrideAccess: true,
-    } as never)) as NovelCategory
-
-    expect(created.slug).toBeTruthy()
-    expect(created.slug).toMatch(/^ce-shi-fen-lei/)
-
-    await payload.delete({
-      collection: 'novel-categories',
-      id: created.id,
-      overrideAccess: true,
-    })
-  })
-
-  it('auto-generates novel-tag slug from title when slug is omitted', async () => {
-    const title = `测试标签-${Date.now()}`
-    const created = (await payload.create({
-      collection: 'novel-tags',
-      data: { title },
-      overrideAccess: true,
-    } as never)) as NovelTag
-
-    expect(created.slug).toBeTruthy()
-    expect(created.slug).toMatch(/^ce-shi-biao-qian/)
-
-    await payload.delete({
-      collection: 'novel-tags',
-      id: created.id,
-      overrideAccess: true,
-    })
   })
 })

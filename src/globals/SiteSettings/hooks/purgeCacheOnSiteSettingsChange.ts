@@ -14,8 +14,7 @@ export const purgeCacheOnSiteSettingsChange: GlobalAfterChangeHook = async ({ do
   const shouldPurge =
     recordSettingsChanged(previous?.recordSettings, next.recordSettings) ||
     previous?.siteName !== next.siteName ||
-    previous?.siteDescription !== next.siteDescription ||
-    previous?.showNovelUpdatesOnHome !== next.showNovelUpdatesOnHome
+    previous?.siteDescription !== next.siteDescription
 
   if (shouldPurge) {
     await purgeAllRegisteredCache()

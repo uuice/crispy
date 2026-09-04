@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { HomePageData } from '../pages/home'
 import { Banner } from '../components/Banner'
-import { HomeNovelUpdates } from '../components/HomeNovelUpdates'
 import { PostList } from '../components/PostList'
 
 type Props = {
@@ -10,7 +9,7 @@ type Props = {
 }
 
 export function HomeView({ data }: Props) {
-  const { siteName, siteDescription, posts, totalPosts, latestNovelChapters } = data
+  const { siteName, siteDescription, posts, totalPosts } = data
 
   return (
     <>
@@ -29,7 +28,6 @@ export function HomeView({ data }: Props) {
         <h2 className="section-title animate-in animate-in-delay-2">最新文章</h2>
         <PostList posts={posts} />
       </section>
-      <HomeNovelUpdates chapters={latestNovelChapters} />
     </>
   )
 }

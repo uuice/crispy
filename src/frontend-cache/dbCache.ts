@@ -349,9 +349,6 @@ export type DbCacheStats = {
 
 export type RouteCacheExpiryStatus = 'valid' | 'expiringSoon' | 'expired'
 
-/** @deprecated Use RouteCacheExpiryStatus */
-export type DynamicRouteCacheExpiryStatus = RouteCacheExpiryStatus
-
 export type DynamicRouteCacheRow = {
   id: number | string
   routePath: string

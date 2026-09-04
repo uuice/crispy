@@ -73,9 +73,6 @@ export function shouldPushDatabaseSchema(): boolean {
   return process.env.NODE_ENV !== 'production'
 }
 
-/** @deprecated Use shouldPushDatabaseSchema */
-export const shouldPushPostgresSchema = shouldPushDatabaseSchema
-
 export function createDatabaseAdapter() {
   const driver = resolveDatabaseDriver()
   const url = resolveDatabaseUrl(driver)

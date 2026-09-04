@@ -1,19 +1,8 @@
 import type { ContentEmbeddingRow } from '@/ai/embeddings/store'
-import { getNovelChapterPath, getNovelPath, getPagePath, getPostPath } from '@/utilities/frontendPaths'
+import { getPagePath, getPostPath } from '@/utilities/frontendPaths'
 
 export function resolveEmbeddingHitUrl(row: ContentEmbeddingRow): string {
   const slug = row.slug || ''
-
-  if (row.collection === 'novels') {
-    return getNovelPath(slug)
-  }
-
-  if (row.collection === 'novel-chapters' && slug.includes('/')) {
-    const [novelSlug, chapterSlug] = slug.split('/', 2)
-    if (novelSlug && chapterSlug) {
-      return getNovelChapterPath(novelSlug, chapterSlug)
-    }
-  }
 
   if (row.collection === 'posts') {
     return getPostPath(slug)

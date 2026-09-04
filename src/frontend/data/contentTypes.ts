@@ -19,32 +19,6 @@ export type PaginatedPostList = {
   totalPages: number
 }
 
-export type NovelListItem = {
-  title: string
-  slug: string
-  url: string
-  genre?: string
-  synopsis?: string
-  chapterCount: number
-  updatedAt?: string
-}
-
-export type NovelChapterItem = {
-  index: number
-  title: string
-  slug: string
-  url: string
-  publishedAt?: string
-}
-
-export type LatestNovelChapterItem = {
-  title: string
-  url: string
-  novelTitle: string
-  novelUrl: string
-  publishedAt?: string
-}
-
 export type SidebarCategory = {
   id: string
   title: string

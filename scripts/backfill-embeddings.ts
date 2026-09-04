@@ -8,8 +8,8 @@ import { normalizeOpenAiBaseUrl } from '@/ai/providers/openaiCompatible'
 import { syncContentEmbedding } from '@/ai/embeddings/syncContentEmbedding'
 import { createLocalReq } from 'payload'
 
-function backfillDepth(collection: EmbeddableCollection): number {
-  return collection === 'novels' || collection === 'novel-chapters' ? 1 : 0
+function backfillDepth(_collection: EmbeddableCollection): number {
+  return 0
 }
 
 async function backfillCollection(payload: Payload, collection: EmbeddableCollection) {

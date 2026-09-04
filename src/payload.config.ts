@@ -15,10 +15,7 @@ import { Galleries } from './collections/Galleries'
 import { GalleryItems } from './collections/GalleryItems'
 import { ApiAccessLogs } from './collections/ApiAccessLogs'
 import { AiChatSessions } from './collections/AiChatSessions'
-import { AdSlots } from './collections/AdSlots'
-import { Ads } from './collections/Ads'
 import { Categories } from './collections/Categories'
-import { Jobs } from './collections/Jobs'
 import { Links } from './collections/Links'
 import { LinkGroups } from './collections/LinkGroups'
 import { ShortLinks } from './collections/ShortLinks'
@@ -35,10 +32,6 @@ import { AiSettings } from './globals/AiSettings/config'
 import { CommentSettings } from './globals/CommentSettings/config'
 import { StorageSettings } from './globals/StorageSettings/config'
 import { EmailSettings } from './globals/EmailSettings/config'
-import { NovelCategories } from './collections/NovelCategories'
-import { NovelChapters } from './collections/NovelChapters'
-import { Novels } from './collections/Novels'
-import { NovelTags } from './collections/NovelTags'
 import { CacheSettings } from './globals/CacheSettings/config'
 import { requirePermission } from './access/can'
 import { plugins } from './plugins'
@@ -167,13 +160,6 @@ export default buildConfig({
     Links,
     LinkGroups,
     ShortLinks,
-    AdSlots,
-    Ads,
-    Jobs,
-    Novels,
-    NovelChapters,
-    NovelCategories,
-    NovelTags,
     Galleries,
     GalleryItems,
     AppConfigs,

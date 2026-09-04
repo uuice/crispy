@@ -12,10 +12,6 @@ export type ListPageProps = {
   searchParams?: Promise<SearchParams>
 }
 
-export type NovelChapterPageProps = {
-  params: Promise<{ slug: string; chapterSlug: string }>
-}
-
 export type FrontendPageName =
   | 'home'
   | 'posts'
@@ -27,13 +23,7 @@ export type FrontendPageName =
   | 'links'
   | 'galleries'
   | 'galleryDetail'
-  | 'jobs'
   | 'navigations'
-  | 'novels'
-  | 'novelDetail'
-  | 'novelChapter'
-  | 'novelCategoryDetail'
-  | 'novelTagDetail'
   | 'notFound'
   | 'serverError'
 
@@ -46,7 +36,7 @@ export type FrontendPageDefinition = {
   metadata?: (...args: any[]) => Promise<Metadata> | Metadata
   staticParams?: () => Promise<Array<Record<string, string>>>
   /** When set, load/metadata receive SlugPageProps from the app route. */
-  params?: 'slug' | 'novelChapter'
+  params?: 'slug'
 }
 
 export type FrontendPages = Record<FrontendPageName, FrontendPageDefinition>

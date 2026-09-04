@@ -11,8 +11,6 @@ export const PERMISSION_CATALOG = [
   { value: 'media:delete', label: '删除媒体', group: 'media' },
   { value: 'taxonomy:manage', label: '管理分类/标签', group: 'taxonomy' },
   { value: 'ops:manage', label: '管理运营内容', group: 'ops' },
-  { value: 'novels:manage', label: '管理小说', group: 'novels' },
-  { value: 'novels:read:all', label: '阅读全部小说（含未启用）', group: 'novels' },
   { value: 'comments:moderate', label: '审核评论', group: 'comments' },
   { value: 'users:manage', label: '管理用户', group: 'users' },
   { value: 'roles:manage', label: '管理角色与权限', group: 'users' },
@@ -42,7 +40,7 @@ export const PERMISSION_SELECT_OPTIONS = PERMISSION_CATALOG.map((entry) => ({
   value: entry.value,
 }))
 
-/** Stable system role slugs (seeded, not deletable). */
+/** Stable system role slugs (ensured onInit, not deletable). */
 export type SystemRoleSlug = 'super-admin' | 'editor' | 'author'
 
 export const SYSTEM_ROLE_SLUGS: SystemRoleSlug[] = ['super-admin', 'editor', 'author']
@@ -54,7 +52,6 @@ const AUTHOR_PERMISSIONS: Permission[] = [
   'posts:update:own',
   'media:create',
   'media:update',
-  'novels:read:all',
   'ai:use',
 ]
 
@@ -68,7 +65,6 @@ const EDITOR_PERMISSIONS: Permission[] = [
   'media:delete',
   'taxonomy:manage',
   'ops:manage',
-  'novels:manage',
   'comments:moderate',
   'settings:site',
   'catalog:prompts:read',

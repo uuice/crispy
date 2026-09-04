@@ -6,13 +6,6 @@ import type { CrispyRole, SystemRoleSlug } from '@/access/permissions'
 export type { CrispyRole, SystemRoleSlug }
 export { SYSTEM_ROLE_SLUGS as CRISPY_ROLE_VALUES } from '@/access/permissions'
 
-/** @deprecated Use Roles collection; kept for seed labels. */
-export const CRISPY_ROLES: { label: string; value: CrispyRole }[] = [
-  { label: '超级管理员', value: 'super-admin' },
-  { label: '编辑', value: 'editor' },
-  { label: '作者', value: 'author' },
-]
-
 /** Extract role slugs from a user document (JWT / client). Sync — may be stale until refetch. */
 export function extractRoleSlugs(
   user: { roles?: unknown } | null | undefined,

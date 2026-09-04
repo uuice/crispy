@@ -26,7 +26,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | **GraphQL** | `POST /api/graphql`；Playground：`/api/graphql-playground`（需 Admin 登录） |
 | **Admin** | Lexical 富文本、Live Preview、草稿 / 定时发布、版本历史、媒体文件夹 |
 | **SEO 插件** | posts / pages 的 meta title / description / image |
-| **Search 插件** | posts、pages、jobs、gallery-items 站内搜索索引 |
+| **Search 插件** | posts、pages、galleries 站内搜索索引 |
 | **Redirects 插件** | Admin 配置 URL 重定向（Crispy 接入 middleware 实时生效） |
 | **Nested Docs** | categories 嵌套分类与面包屑 URL |
 | **Form Builder** | 表单定义 + `POST /api/form-submissions` 提交（可配邮件通知） |
@@ -35,7 +35,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | **S3 Storage** | Admin 存储目标 + 存储设置；media 存对象存储 |
 | **Jobs** | 定时发布（`schedulePublish`）、导入导出任务等 |
 
-**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、jobs、gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
+**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、galleries / gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
 
 **RBAC**：代码 Permission 枚举 + 后台可配 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`（见文末）。详情：[dev-docs — 权限](docs/dev-docs.md#permissions)。
 
@@ -60,7 +60,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | `/api/ai/agent` | POST | Admin | 后台对话助手 SSE（Function Calling CRUD） |
 | `/api/ai/agent/sessions` | GET/DELETE | Admin | 助手会话列表 / 删除 |
 | `/api/ai/assistant` | GET/POST | **公开** | 前台只读检索助手（SSE） |
-| `/search-index.json` | GET | 公开 | 前台搜索索引（posts/pages/jobs/gallery） |
+| `/search-index.json` | GET | 公开 | 前台搜索索引（posts/pages/galleries） |
 | `/api/internal/redirects` | GET | 内部 | middleware 拉取重定向映射（60s 缓存） |
 | `/api/internal/route-cache-*` | POST | 内部 | 前台 HTML 缓存读写 |
 | `/api/internal/access-log` | POST | Secret | API 访问日志写入 |
@@ -73,11 +73,11 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 
 | 能力 | 说明 |
 | ---- | ---- |
-| **软删除** | 业务 Collection 回收站（`enableTrashAndVersionsPlugin`）；版本历史仅 posts/pages/novel-chapters 草稿流 |
+| **软删除** | 业务 Collection 回收站（`enableTrashAndVersionsPlugin`）；版本历史仅 posts/pages 草稿流 |
 | **URL 重定向（实时）** | Redirects 插件 + middleware，约 60 秒内生效，无需重建 |
 | **表单邮件** | Admin「邮件通道 / 邮件设置」（改 Active 后需重启）；未配置时仅入库不发信 |
-| **Import/Export 扩展** | 含 gallery-items、short-links、redirects、forms、novels 等 |
-| **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（novels、redirects、forms 等） |
+| **Import/Export 扩展** | 含 galleries、gallery-items、short-links、redirects、forms 等 |
+| **MCP 范围对齐** | 与后台 AI Agent 管理范围一致（redirects、forms、galleries 等） |
 | **前台** | Layout / 页面 / 样式在 `src/frontend/` |
 | **后台 AI 助手** | `/admin/ai-agent` — CRUD、语义搜索、缓存 |
 | **前台 AI 助手** | 公开只读检索，无需登录 |
@@ -139,10 +139,10 @@ Authorization: Bearer <mcp-api-key>
 Authorization: users API-Key <user-api-key>
 ```
 
-1. `pnpm cli db:seed` 或 Admin 创建 editor 用户
-2. Admin → MCP → API Keys 生成 Key（或 `pnpm cli mcp:key`）
+1. Admin 创建用户并分配角色（如 editor）
+2. Admin → MCP → API Keys 生成 Key
 
-MCP 可访问 posts、pages、categories、tags、links、jobs、gallery-items、novels、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](docs/dev-docs.md#mcp)。
+MCP 可访问 posts、pages、categories、tags、links、galleries、gallery-items、redirects、forms、media 等（与后台 AI Agent 对齐）。详见 [dev-docs — MCP](docs/dev-docs.md#mcp)。
 
 ## 角色与权限（RBAC）
 

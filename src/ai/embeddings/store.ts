@@ -91,7 +91,7 @@ export async function semanticSearchContent(
       ? sql`AND collection = ${options.collections[0]}`
       : options.collections?.length
         ? sql`AND collection IN (${sql.join(options.collections.map((c) => sql`${c}`), sql`, `)})`
-        : sql`AND collection IN ('posts', 'pages', 'novels', 'novel-chapters')`
+        : sql`AND collection IN ('posts', 'pages')`
 
   const result = await req.payload.db.drizzle.execute(sql`
     SELECT

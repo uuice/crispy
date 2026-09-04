@@ -9,7 +9,18 @@ type GlobalNavItems = Header['navItems'] | Footer['navItems']
 /** Paths removed from the frontend; skip leftover CMS nav entries. */
 export function isRetiredFrontendPath(url: string): boolean {
   const path = url.split('?')[0]?.replace(/\/$/, '') || ''
-  return path === '/games' || path.startsWith('/games/')
+  return (
+    path === '/games' ||
+    path.startsWith('/games/') ||
+    path === '/jobs' ||
+    path.startsWith('/jobs/') ||
+    path === '/novels' ||
+    path.startsWith('/novels/') ||
+    path === '/novel-categories' ||
+    path.startsWith('/novel-categories/') ||
+    path === '/novel-tags' ||
+    path.startsWith('/novel-tags/')
+  )
 }
 
 export function mapGlobalNavItems(navItems: GlobalNavItems | null | undefined): NavItem[] {

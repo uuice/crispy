@@ -1,7 +1,6 @@
 import { Banner } from '@payloadcms/ui/elements/Banner'
 import React from 'react'
 
-import { SeedButton } from './SeedButton'
 import './index.scss'
 
 const baseClass = 'before-dashboard'
@@ -15,12 +14,13 @@ const BeforeDashboard: React.FC = () => {
       建议按以下步骤开始：
       <ul className={`${baseClass}__instructions`}>
         <li>
-          <SeedButton />
-          {' 填充示例页面、文章与演示账号，然后 '}
+          {'在 '}
+          <strong>用户</strong>
+          {' 中创建账号并分配角色，然后 '}
           <a href="/" target="_blank">
             访问前台
           </a>
-          {' 查看效果。'}
+          {'。'}
         </li>
         <li>
           {'二次开发说明见仓库 '}

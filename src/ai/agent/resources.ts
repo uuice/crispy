@@ -6,17 +6,8 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
   { slug: 'pages', label: '页面', description: '静态页面，含 Hero 区块与 SEO' },
   { slug: 'categories', label: '分类', description: '博客文章分类（支持嵌套）' },
   { slug: 'tags', label: '标签', description: '博客文章标签' },
-  {
-    slug: 'novel-categories',
-    label: '小说分类',
-    description: '小说专用分类，与博客 categories 独立',
-  },
-  { slug: 'novel-tags', label: '小说标签', description: '小说专用标签，与博客 tags 独立' },
   { slug: 'links', label: '链接', description: '友情链接（可归属 link-groups 分组）' },
   { slug: 'link-groups', label: '友链分组', description: '友情链接分组（标题、描述、排序、启用）' },
-  { slug: 'ad-slots', label: '广告位', description: '广告展示位' },
-  { slug: 'ads', label: '广告', description: '广告素材' },
-  { slug: 'jobs', label: '招聘', description: '招聘职位' },
   {
     slug: 'galleries',
     label: '图库',
@@ -26,17 +17,6 @@ export const AGENT_COLLECTIONS: AgentManagedCollection[] = [
     slug: 'gallery-items',
     label: '图库图片',
     description: '单张图片条目，gallery 字段必填归属一本图库',
-  },
-  {
-    slug: 'novels',
-    label: '小说',
-    description:
-      '长篇小说项目（一本一条）：书名、梗概、人物、大纲、当前进度、单章目标字数',
-  },
-  {
-    slug: 'novel-chapters',
-    label: '小说章节',
-    description: '长篇小说章节正文，通过 novel 字段关联所属小说',
   },
   {
     slug: 'short-links',

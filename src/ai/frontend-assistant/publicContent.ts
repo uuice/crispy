@@ -5,7 +5,6 @@ import { cache } from 'react'
 import { loadNavigationsPageData } from '@/frontend/data/navigations'
 import {
   queryGalleries,
-  queryJobs,
   queryPosts,
   querySidebarData,
 } from '@/frontend/data/queries'
@@ -13,33 +12,21 @@ import {
   getCategoryPath,
   getGalleriesPath,
   getGalleryPath,
-  getJobsPath,
   getLinksPath,
-  getNovelChapterPath,
-  getNovelCategoryPath,
-  getNovelPath,
-  getNovelsPath,
-  getNovelTagPath,
   getPagePath,
   getPostPath,
   getPostsListPath,
   getTagPath,
 } from '@/utilities/frontendPaths'
 import { getCachedFriendLinkGroups, getCachedFriendLinks } from '@/utilities/getFriendLinks'
-import { publishedNovelChaptersWhere } from '@/utilities/publishedContentWhere'
 
 export const PUBLIC_CONTENT_TYPES = [
   'post',
   'page',
-  'novel',
-  'novel-chapter',
-  'novel-category',
-  'novel-tag',
   'category',
   'tag',
   'link',
   'link-group',
-  'job',
   'gallery',
   'navigation',
   'section',
@@ -59,15 +46,10 @@ export type PublicContentHit = {
 const TYPE_LABELS: Record<PublicContentType, string> = {
   post: '文章',
   page: '页面',
-  novel: '小说',
-  'novel-chapter': '小说章节',
-  'novel-category': '小说分类',
-  'novel-tag': '小说标签',
   category: '分类',
   tag: '标签',
   link: '友链',
   'link-group': '友链分组',
-  job: '招聘',
   gallery: '图库',
   navigation: '导航站点',
   section: '站点栏目',
@@ -92,14 +74,6 @@ const SECTION_PAGES: PublicContentHit[] = [
   },
   {
     type: 'section',
-    title: '招聘职位',
-    url: getJobsPath(),
-    slug: 'jobs',
-    excerpt: '查看在招岗位',
-    keywords: ['招聘', '职位', '工作'],
-  },
-  {
-    type: 'section',
     title: '图库',
     url: getGalleriesPath(),
     slug: 'galleries',
@@ -114,20 +88,12 @@ const SECTION_PAGES: PublicContentHit[] = [
     excerpt: '精选网站导航目录',
     keywords: ['导航', '网站'],
   },
-  {
-    type: 'section',
-    title: '小说',
-    url: getNovelsPath(),
-    slug: 'novels',
-    excerpt: '长篇连载与章节阅读',
-    keywords: ['小说', '连载', '章节'],
-  },
 ]
 
 export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]> => {
   const payload = await getPayload({ config: configPromise })
 
-  const [posts, pagesResult, sidebar, links, linkGroups, jobs, galleries, novelsResult, novelChaptersResult, novelCategoriesResult, novelTagsResult, navigation] =
+  const [posts, pagesResult, sidebar, links, linkGroups, galleries, navigation] =
     await Promise.all([
     queryPosts(),
     payload.find({
@@ -143,46 +109,7 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     querySidebarData(),
     getCachedFriendLinks(),
     getCachedFriendLinkGroups(),
-    queryJobs(),
     queryGalleries(),
-    payload.find({
-      collection: 'novels',
-      depth: 1,
-      limit: 500,
-      overrideAccess: false,
-      pagination: false,
-      select: { title: true, slug: true, genre: true, synopsis: true, categories: true, tags: true },
-      where: { enabled: { equals: true } },
-      sort: 'title',
-    }),
-    payload.find({
-      collection: 'novel-chapters',
-      depth: 1,
-      limit: 2000,
-      overrideAccess: false,
-      pagination: false,
-      select: { title: true, slug: true, meta: true, novel: true, categories: true, tags: true },
-      where: publishedNovelChaptersWhere,
-      sort: '-publishedAt',
-    }),
-    payload.find({
-      collection: 'novel-categories',
-      depth: 0,
-      limit: 500,
-      overrideAccess: false,
-      pagination: false,
-      select: { title: true, slug: true },
-      sort: 'title',
-    }),
-    payload.find({
-      collection: 'novel-tags',
-      depth: 0,
-      limit: 500,
-      overrideAccess: false,
-      pagination: false,
-      select: { title: true, slug: true, description: true },
-      sort: 'title',
-    }),
     loadNavigationsPageData(),
   ])
 
@@ -210,49 +137,6 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
     })
   }
 
-  for (const novel of novelsResult.docs) {
-    if (!novel.slug || !novel.title) continue
-    const novelCategories = (novel.categories || [])
-      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
-      .filter(Boolean) as string[]
-    const novelTags = (novel.tags || [])
-      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
-      .filter(Boolean) as string[]
-
-    records.push({
-      type: 'novel',
-      title: novel.title,
-      url: getNovelPath(novel.slug),
-      slug: novel.slug,
-      excerpt: novel.synopsis || undefined,
-      keywords: ['小说', novel.genre, ...novelCategories, ...novelTags].filter(Boolean) as string[],
-    })
-  }
-
-  for (const chapter of novelChaptersResult.docs) {
-    if (!chapter.slug || !chapter.title) continue
-    const novel = typeof chapter.novel === 'object' ? chapter.novel : null
-    if (!novel?.slug || novel.enabled === false) continue
-
-    const chapterCategories = (chapter.categories || [])
-      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
-      .filter(Boolean) as string[]
-    const chapterTags = (chapter.tags || [])
-      .map((entry) => (typeof entry === 'object' && entry?.title ? entry.title : null))
-      .filter(Boolean) as string[]
-
-    records.push({
-      type: 'novel-chapter',
-      title: chapter.title,
-      url: getNovelChapterPath(novel.slug, chapter.slug),
-      slug: `${novel.slug}/${chapter.slug}`,
-      excerpt: chapter.meta?.description || novel.title,
-      keywords: ['小说', '章节', novel.title, novel.genre, ...chapterCategories, ...chapterTags].filter(
-        Boolean,
-      ) as string[],
-    })
-  }
-
   for (const category of sidebar.categories) {
     records.push({
       type: 'category',
@@ -272,30 +156,6 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
       slug: tag.url.split('/').pop(),
       excerpt: `${tag.count} 篇相关文章`,
       keywords: ['标签'],
-    })
-  }
-
-  for (const category of novelCategoriesResult.docs) {
-    if (!category.slug || !category.title) continue
-    records.push({
-      type: 'novel-category',
-      title: category.title,
-      url: getNovelCategoryPath(category.slug),
-      slug: category.slug,
-      excerpt: '小说分类归档',
-      keywords: ['小说', '分类', category.title],
-    })
-  }
-
-  for (const tag of novelTagsResult.docs) {
-    if (!tag.slug || !tag.title) continue
-    records.push({
-      type: 'novel-tag',
-      title: tag.title,
-      url: getNovelTagPath(tag.slug),
-      slug: tag.slug,
-      excerpt: tag.description || '小说标签归档',
-      keywords: ['小说', '标签', tag.title],
     })
   }
 
@@ -322,22 +182,6 @@ export const loadPublicContentIndex = cache(async (): Promise<PublicContentHit[]
       slug: String(link.id),
       excerpt: link.description || undefined,
       keywords: ['友链', '外链', ...(groupTitle ? [groupTitle] : [])],
-    })
-  }
-
-  for (const job of jobs) {
-    if (!job.title) continue
-    records.push({
-      type: 'job',
-      title: job.title,
-      url: getJobsPath(),
-      slug: job.slug || String(job.id),
-      excerpt: [job.department, job.location, job.employmentType, job.salary]
-        .filter(Boolean)
-        .join(' · '),
-      keywords: ['招聘', job.department, job.location, job.employmentType].filter(
-        Boolean,
-      ) as string[],
     })
   }
 
@@ -493,109 +337,6 @@ export async function getPublicContent(
       slug: page.slug,
       excerpt: page.meta?.description || undefined,
       updatedAt: page.updatedAt,
-    }
-  }
-
-  if (type === 'novel') {
-    const payload = await getPayload({ config: configPromise })
-    const result = await payload.find({
-      collection: 'novels',
-      depth: 1,
-      limit: 1,
-      overrideAccess: false,
-      where: {
-        and: [{ slug: { equals: normalizedSlug } }, { enabled: { equals: true } }],
-      },
-    })
-    const novel = result.docs[0]
-    if (!novel?.slug || !novel.title) return null
-    return {
-      type: 'novel',
-      title: novel.title,
-      url: getNovelPath(novel.slug),
-      slug: novel.slug,
-      excerpt: novel.synopsis || undefined,
-      genre: novel.genre,
-      synopsis: novel.synopsis,
-      writingStyle: novel.writingStyle,
-      plotOutline: novel.plotOutline,
-      categories: (novel.categories || [])
-        .map((c) => (typeof c === 'object' && c?.title ? c.title : null))
-        .filter(Boolean),
-      tags: (novel.tags || [])
-        .map((t) => (typeof t === 'object' && t?.title ? t.title : null))
-        .filter(Boolean),
-    }
-  }
-
-  if (type === 'novel-chapter') {
-    const [novelSlug, chapterSlug] = normalizedSlug.split('/')
-    if (!novelSlug || !chapterSlug) return null
-
-    const payload = await getPayload({ config: configPromise })
-    const novelResult = await payload.find({
-      collection: 'novels',
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      where: {
-        and: [{ slug: { equals: novelSlug } }, { enabled: { equals: true } }],
-      },
-    })
-    const novel = novelResult.docs[0]
-    if (!novel?.slug) return null
-
-    const chapterResult = await payload.find({
-      collection: 'novel-chapters',
-      depth: 1,
-      limit: 1,
-      overrideAccess: false,
-      where: {
-        and: [
-          { slug: { equals: chapterSlug } },
-          { _status: { equals: 'published' } },
-          { novel: { equals: novel.id } },
-        ],
-      },
-    })
-    const chapter = chapterResult.docs[0]
-    if (!chapter?.slug || !chapter.title) return null
-
-    return {
-      type: 'novel-chapter',
-      title: chapter.title,
-      url: getNovelChapterPath(novel.slug, chapter.slug),
-      slug: `${novel.slug}/${chapter.slug}`,
-      excerpt: chapter.meta?.description || undefined,
-      novelTitle: novel.title,
-      novelUrl: getNovelPath(novel.slug),
-      categories: (chapter.categories || [])
-        .map((c) => (typeof c === 'object' && c?.title ? c.title : null))
-        .filter(Boolean),
-      tags: (chapter.tags || [])
-        .map((t) => (typeof t === 'object' && t?.title ? t.title : null))
-        .filter(Boolean),
-    }
-  }
-
-  if (type === 'novel-category' || type === 'novel-tag') {
-    const collection = type === 'novel-category' ? 'novel-categories' : 'novel-tags'
-    const payload = await getPayload({ config: configPromise })
-    const result = await payload.find({
-      collection,
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      where: { slug: { equals: normalizedSlug } },
-    })
-    const doc = result.docs[0]
-    if (!doc?.slug || !doc.title) return null
-    return {
-      type,
-      title: doc.title,
-      url: type === 'novel-category' ? getNovelCategoryPath(doc.slug) : getNovelTagPath(doc.slug),
-      slug: doc.slug,
-      description: 'description' in doc ? doc.description : undefined,
     }
   }
 

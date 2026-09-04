@@ -1,18 +1,16 @@
 import { isRetiredFrontendPath } from '@/utilities/mapGlobalNavItems'
 import {
   getGalleriesPath,
-  getNovelsPath,
   getPagePath,
   getPostsListPath,
 } from '@/utilities/frontendPaths'
 
 import type { NavItem } from './types'
 
-/** Matches astro-learn menu.json order and labels. */
+/** Default nav when Header global has no items. */
 export const defaultBlogMenu: NavItem[] = [
   { title: '首页', url: '/', target: '_self' },
   { title: '归档', url: getPostsListPath(), target: '_self' },
-  { title: '小说', url: getNovelsPath(), target: '_self' },
   { title: '图库', url: getGalleriesPath(), target: '_self' },
   { title: '友情链接', url: '/links', target: '_self' },
   { title: '类库导航', url: '/navigations', target: '_self' },

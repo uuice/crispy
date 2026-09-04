@@ -32,7 +32,7 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     function: {
       name: 'search_content',
       description:
-        '按关键词搜索站内所有公开内容：文章、页面、小说、小说章节、小说分类/标签、博客分类/标签、友链、友链分组、招聘、图库、导航站点与站点栏目。',
+        '按关键词搜索站内所有公开内容：文章、页面、分类/标签、友链、友链分组、图库、导航站点与站点栏目。',
       parameters: {
         type: 'object',
         properties: {
@@ -73,19 +73,18 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     function: {
       name: 'get_content',
       description:
-        '按类型与 slug 获取单条公开内容元数据（标题、摘要、分类等，不含正文）。小说章节 slug 为 {novelSlug}/{chapterSlug}，如 gelou-jiuyaoshi/zoulang-jintou；读全文请引导用户打开返回的 url。',
+        '按类型与 slug 获取单条公开内容元数据（标题、摘要、分类等，不含正文）。读全文请引导用户打开返回的 url。',
       parameters: {
         type: 'object',
         properties: {
           type: {
             type: 'string',
-            enum: ['post', 'page', 'novel', 'novel-chapter', 'novel-category', 'novel-tag', 'category', 'tag', 'link', 'link-group', 'job', 'gallery', 'navigation'],
+            enum: ['post', 'page', 'category', 'tag', 'link', 'link-group', 'gallery', 'navigation'],
             description: '内容类型',
           },
           slug: {
             type: 'string',
-            description:
-              'slug 或唯一标识；novel-chapter 须传复合 slug（{novelSlug}/{chapterSlug}）；link 传数字 id；gallery 传相册 slug',
+            description: 'slug 或唯一标识；link 传数字 id；gallery 传相册 slug',
           },
         },
         required: ['type', 'slug'],
@@ -97,15 +96,15 @@ export const FRONTEND_ASSISTANT_TOOLS: FrontendAssistantToolDefinition[] = [
     function: {
       name: 'semantic_search',
       description:
-        '按语义相似度搜索已发布文章、页面、小说与章节（需站点已配置 Embedding 提供商）。返回 title、url、slug、短 excerpt（非正文）；novel-chapter 的 slug 为 {novelSlug}/{chapterSlug}，可传给 get_content 取元数据；读全文引导用户打开 url。',
+        '按语义相似度搜索已发布文章与页面（需站点已配置 Embedding 提供商）。返回 title、url、slug、短 excerpt（非正文）；可读全文引导用户打开 url。',
       parameters: {
         type: 'object',
         properties: {
           query: { type: 'string', description: '自然语言搜索词或问题' },
           collections: {
             type: 'array',
-            items: { type: 'string', enum: ['posts', 'pages', 'novels', 'novel-chapters'] },
-            description: '限定内容类型，默认 posts + pages + novels + novel-chapters',
+            items: { type: 'string', enum: ['posts', 'pages'] },
+            description: '限定内容类型，默认 posts + pages',
           },
           limit: { type: 'number', description: '返回条数，默认 8，最大 15' },
         },
@@ -178,7 +177,7 @@ export async function executeFrontendAssistantTool(
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
         ? (args.collections.filter(
-            (c) => c === 'posts' || c === 'pages' || c === 'novels' || c === 'novel-chapters',
+            (c) => c === 'posts' || c === 'pages',
           ) as EmbeddableCollection[])
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 15)

@@ -4,7 +4,6 @@ import { getPayload } from 'payload'
 import { getServerSideURL } from '@/utilities/getURL'
 import {
   getGalleriesPath,
-  getJobsPath,
   getPagePath,
   getPostPath,
   getPostsListPath,
@@ -12,7 +11,6 @@ import {
   slugifyUserName,
 } from '@/utilities/frontendPaths'
 import { publishedBlogPostsWhere } from '@/utilities/publishedContentWhere'
-import { buildNovelSitemapEntries } from '@/utilities/buildNovelsSitemap'
 
 export type SitemapUrlEntry = {
   loc: string
@@ -37,7 +35,7 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
   const siteUrl = getServerSideURL().replace(/\/$/, '')
   const today = new Date().toISOString().split('T')[0]
 
-  const [postsResult, pagesResult, categoriesResult, tagsResult, postsForAuthors, novelEntries] =
+  const [postsResult, pagesResult, categoriesResult, tagsResult, postsForAuthors] =
     await Promise.all([
       payload.find({
         collection: 'posts',
@@ -85,7 +83,6 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
         select: { populatedAuthors: true },
         where: publishedBlogPostsWhere,
       }),
-      buildNovelSitemapEntries(siteUrl),
     ])
 
   const urls: SitemapUrlEntry[] = [
@@ -93,7 +90,6 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
     { loc: `${siteUrl}${getPostsListPath()}`, lastmod: today, changefreq: 'daily', priority: '0.9' },
     { loc: `${siteUrl}/links`, lastmod: today, changefreq: 'monthly', priority: '0.5' },
     { loc: `${siteUrl}${getGalleriesPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
-    { loc: `${siteUrl}${getJobsPath()}`, lastmod: today, changefreq: 'weekly', priority: '0.55' },
     { loc: `${siteUrl}/navigations`, lastmod: today, changefreq: 'weekly', priority: '0.5' },
   ]
 
@@ -153,8 +149,6 @@ export async function buildBlogSitemapEntries(): Promise<SitemapUrlEntry[]> {
       priority: '0.5',
     })
   }
-
-  urls.push(...novelEntries)
 
   return urls
 }

@@ -88,13 +88,3 @@ export async function getApprovedCommentTree(
   const comments = await fetchAllApprovedComments({ targetType, targetId, limit })
   return buildCommentTree(comments, maxDepth)
 }
-
-/** @deprecated Use getApprovedComments */
-export function getCachedComments(options: GetCommentsOptions) {
-  return () => getApprovedComments(options)
-}
-
-/** @deprecated Use getApprovedCommentTree */
-export function getCachedCommentTree(options: GetCommentTreeOptions) {
-  return () => getApprovedCommentTree(options)
-}

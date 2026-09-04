@@ -4,7 +4,7 @@ import { isInternalCollectionSlug } from '@/collections/defaults'
 
 /**
  * Enable soft delete on every user-facing collection.
- * Version history is opt-in on the Collection (drafts for posts/pages/novel-chapters).
+ * Version history is opt-in on the Collection (drafts for posts/pages).
  * Do not blanket-enable versions: each save would duplicate rows in `_v` tables.
  */
 export function enableTrashAndVersionsPlugin(): Plugin {

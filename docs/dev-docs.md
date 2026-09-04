@@ -117,7 +117,7 @@ crispy/
 │   ├── migrations/              # Postgres 迁移（生产）
 │   └── payload.config.ts
 ├── docs/                        # 二次开发文档等（dev-docs.md）
-├── scripts/                     # seed、verify、migrate bootstrap
+├── scripts/                     # migrate、MCP key、运维脚本
 ├── .github/workflows/ci.yml
 └── Dockerfile
 ```
@@ -136,7 +136,7 @@ crispy/
 | NEXT_PUBLIC_SERVER_URL | 站点公网 URL，默认 http://localhost:3333 |
 | PREVIEW_SECRET | 草稿 / Live Preview 鉴权 |
 | CRON_SECRET | 定时发布 Jobs 鉴权 |
-| MCP_API_KEY | 本地 verify 用，来自 seed 或 Admin MCP Keys |
+| MCP_API_KEY | 本地 MCP 用，在 Admin → MCP → API Keys 创建 |
 | API_ACCESS_LOG_ENABLED | API 访问日志 middleware（可选） |
 | CRISPY_FRONTEND_HTML_CACHE | 仅开发：覆盖 cache-settings HTML 缓存开关 |
 
@@ -162,14 +162,13 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | pnpm cli db:bootstrap | 首次迁移（Docker Postgres） |
 | pnpm cli db:create <name> | Schema 变更后新建迁移 |
 | pnpm cli quality:ci | 本地 CI：lint + tsc + test + build |
-| pnpm cli db:seed / mcp:key | 示例数据 / MCP Key |
 | pnpm cli generate:types\|importmap\|openapi | 类型 / import map / OpenAPI |
-| pnpm cli util:repair-authz\|sync-oss-sizes\|test-oss\|… | 运维脚本（authz / OSS / versions / 空库 seed）；pnpm cli help util |
+| pnpm cli util:repair-authz\|sync-oss-sizes\|test-oss\|… | 运维脚本（authz / OSS / versions）；pnpm cli help util |
 | — | Payload 版本升级 SOP：见 #payload-upgrade |
 
 <h2 id="collections">Collection 列表与字段</h2>
 
-以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys、payload-query-presets 等表。`enableTrashAndVersionsPlugin` 只统一启用 trash（软删除）。versions 仅 opt-in：posts / pages / novel-chapters 保留 drafts。Catalog 密钥类 Collection 关闭 versions，避免历史记录泄露旧密钥。
+以下为业务 Collection 与主要字段摘要；插件还会自动生成 redirects、forms、search、exports、imports、payload-mcp-api-keys、payload-query-presets 等表。`enableTrashAndVersionsPlugin` 只统一启用 trash（软删除）。versions 仅 opt-in：posts / pages 保留 drafts。Catalog 密钥类 Collection 关闭 versions，避免历史记录泄露旧密钥。
 
 | Slug | 说明 | 主要字段 |
 | --- | --- | --- |
@@ -180,9 +179,6 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | tags | 标签 | title, slug, description |
 | users | 用户 | name, email, roles[], API Key, auth |
 | links | 友情链接 | title, url, logo, description, enabled, order |
-| ad-slots | 广告位 | title, slug, description, enabled |
-| ads | 广告 | title, slot, format, image/html, link, enabled, schedule |
-| jobs | 招聘 | title, slug, department, location, employmentType, salary, description, requirements, enabled |
 | gallery-items | 图库 | title, image, description, enabled, order |
 | comments | 评论 | content, status, post/page, parent, author, guestInfo |
 | app-configs | 应用配置 | key, valueType, value（KV；读/写：catalog:app-configs:*） |
@@ -233,13 +229,13 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 
 模型：代码注册 Permission 枚举 → 后台 Roles 勾选 → Users 挂角色 → authz-cache 存合并后的 permissions（无 TTL）。运行时统一 can() / requirePermission()；改角色后 hooks 重写缓存，无需重新登录。
 
-### 系统角色（seed，不可删）
+### 系统角色（onInit 确保，不可删）
 
 | 角色 slug | 权限摘要 |
 | --- | --- |
 | super-admin | PERMISSION_CATALOG 全集（含 users/roles/密钥/日志等） |
-| editor | 内容 CRUD+发布、taxonomy/ops/novels、settings:site、cache/stats、prompts 只读等 |
-| author | posts:create + update:own、media 上传编辑、novels:read:all、ai:use（不可发布） |
+| editor | 内容 CRUD+发布、taxonomy/ops、settings:site、cache/stats、prompts 只读等 |
+| author | posts:create + update:own、media 上传编辑、ai:use（不可发布） |
 | 自定义 | Admin → 系统 → 角色 新建；勾选权限；Users 上多选角色 |
 
 ### 关键路径
@@ -247,7 +243,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 - 枚举与默认矩阵：src/access/permissions.ts
 - 判定：src/access/can.ts（can / requirePermission / requireAnyPermission）
 - 缓存读写：src/access/authzCache.ts；Collection：roles、authz-cache
-- 系统角色确保：src/access/ensureSystemRoles.ts（onInit + seed）
+- 系统角色确保：src/access/ensureSystemRoles.ts（onInit）
 - Agent 映射：src/ai/agent/access.ts（与 Admin permission 对齐；posts 无 update:any 时仅自己的稿）
 - API Session：requirePermissionSession（如 cache:manage）；OpenAPI：requireAdminSession
 - 主题预览：/me 附带 permissions；middleware 要求 settings:site | pages:manage | ops:manage
@@ -260,9 +256,8 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | posts:* | 文章 CRUD / 发布；update:own 仅本人 |
 | pages:manage / pages:read:drafts | 单页写；草稿读 |
 | media:* | 媒体上传/编辑/删除 |
-| taxonomy:manage | 分类/标签（含小说分类标签） |
-| ops:manage | 友链/广告/招聘/图库/短链等运营 |
-| novels:manage / novels:read:all | 小说写；读全部（含未启用） |
+| taxonomy:manage | 分类/标签 |
+| ops:manage | 友链/图库/短链等运营 |
 | comments:moderate | 评论审核 |
 | users:manage / roles:manage | 用户；角色矩阵（users:manage 可读 roles 供下拉） |
 | settings:site\|ai\|comment\|storage\|email | 对应 Globals |
@@ -276,7 +271,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | posts | posts:create | 已发布公开 / 登录见草稿 | update:any 或 update:own | posts:delete |
 | pages | pages:manage | read:drafts 见草稿，否则 published | pages:manage | pages:manage |
 | categories / tags | taxonomy:manage | 公开读 | taxonomy:manage | taxonomy:manage |
-| links / ads / jobs / galleries… | ops:manage | 公开仅 enabled；有 ops 见全部 | ops:manage | ops:manage |
+| links / galleries… | ops:manage | 公开仅 enabled；有 ops 见全部 | ops:manage | ops:manage |
 | media | media:create | 公开读 | media:update | media:delete |
 | users | users:manage | authenticated | 本人或 users:manage | users:manage |
 | roles | roles:manage | roles\|users:manage | roles:manage | roles:manage |
@@ -463,17 +458,14 @@ Payload @payloadcms/plugin-mcp 提供 JSON-RPC 端点，供 Cursor / Claude 等 
 
 ### 获取 API Key
 
-- pnpm cli db:seed 或 Admin 仪表盘「填充示例数据」→ 终端 MCP_API_KEY
-- Admin → MCP → API Keys → 关联 editor 用户（如 agent@example.com）
-- pnpm cli mcp:key 单独轮换
+- Admin → MCP → API Keys → 关联已有用户并创建密钥
 
 ### MCP Collection 能力（plugins/index.ts 默认）
 
 | Collection | find | create | update | delete |
 | --- | --- | --- | --- | --- |
 | posts / pages / categories / tags / links / link-groups | ✓ | ✓ | ✓ | ✓ |
-| jobs / gallery-items / ad-slots / ads / novels / short-links | ✓ | ✓ | ✓ | ✓ |
-| novel-chapters / novel-categories / novel-tags | ✓ | ✓ | ✓ | ✓ |
+| galleries / gallery-items / short-links | ✓ | ✓ | ✓ | ✓ |
 | redirects / forms / payload-query-presets | ✓ | ✓ | ✓ | ✓ |
 | form-submissions | ✓ | ✗ | ✗ | ✓ |
 | media | ✓ | ✓ | ✓ | ✗ |
@@ -498,10 +490,10 @@ mcpPlugin.globals 启用 header、footer、site-settings、cache-settings、comm
 | get_cache_settings | 读取 cache-settings | getCacheSettings |
 | update_cache_settings | 更新 cache-settings（开关、TTL、调试 Header） | updateCacheSettings |
 | restore_document | 从回收站恢复软删除文档 | restoreDocument |
-| describe_resource | 查看 collection/global 字段结构（含小说 hints） | describeResource |
-| semantic_search | posts/pages/novels/novel-chapters 语义搜索（返回 slug、docId、短 excerpt） | semanticSearch |
+| describe_resource | 查看 collection/global 字段结构 | describeResource |
+| semantic_search | posts/pages 语义搜索（返回 slug、docId、短 excerpt） | semanticSearch |
 
-pnpm cli mcp:key 轮换 Key 时默认开启上述自定义 tools 与常用 Globals。内容发布后缓存不会自动清除，可用 purge_frontend_cache 手动清除。
+在 Admin 创建 MCP API Key 时，按需勾选上述自定义 tools 与常用 Globals。内容发布后缓存不会自动清除，可用 purge_frontend_cache 手动清除。
 
 ### Cursor .cursor/mcp.json 示例
 
@@ -546,19 +538,19 @@ payload.config.ts 通过 src/email/createEmailAdapter.ts 注册邮件适配器�
 
 Admin → 导入导出。importExportPlugin 已启用 Collection（src/plugins/index.ts）：
 
-- posts, pages, categories, tags, links, link-groups, jobs, users
-- gallery-items, short-links, redirects, forms, comments, ad-slots, ads, novels
+- posts, pages, categories, tags, links, link-groups, users
+- galleries, gallery-items, short-links, redirects, forms, comments
 - 不含 media（二进制）、form-submissions（敏感数据）、audit-logs 等系统表
 
 ### 搜索索引
 
 | 层级 | 范围 | 代码 |
 | --- | --- | --- |
-| Payload Search 插件 | posts, pages, jobs, gallery-items | src/plugins/index.ts searchPlugin + src/search/beforeSync.ts |
-| 前台 /search-index.json | 已发布 posts/pages + 启用 jobs/gallery-items | src/search/buildSearchIndex.ts |
-| 前台 AI 助手 | post/page/category/tag/link/job/gallery 等公开数据 | src/ai/frontend-assistant/publicContent.ts |
+| Payload Search 插件 | posts, pages, galleries | src/plugins/index.ts searchPlugin + src/search/beforeSync.ts |
+| 前台 /search-index.json | 已发布 posts/pages + 启用 galleries | src/search/buildSearchIndex.ts |
+| 前台 AI 助手 | post/page/category/tag/link/gallery 等公开数据 | src/ai/frontend-assistant/publicContent.ts |
 
-新增 jobs / gallery-items 到 Search 插件后，已有数据可能需在 Admin → 系统 → 搜索索引 手动重建一次。
+新增 galleries 到 Search 插件后，已有数据可能需在 Admin → 系统 → 搜索索引 手动重建一次。
 
 <h2 id="deploy">部署与迁移</h2>
 
@@ -668,7 +660,7 @@ pnpm cli quality:ci
 | Lexical + AI 改写 | richtext-lexical / Lexical API 变更 | Posts/Pages 编辑、AI 改写按钮 |
 | 官方 Plugin overrides | fields/hooks 签名漂移 | Redirects、Search、Form 发信、Import/Export、MCP |
 | Postgres 迁移 | 插件新增表/字段 | db:migrate + db:status；勿生产 push |
-| enableTrashAndVersionsPlugin | trash 行为 | 回收站；drafts 版本仍在 posts/pages/novel-chapters |
+| enableTrashAndVersionsPlugin | trash 行为 | 回收站；drafts 版本仍在 posts/pages |
 | Next proxy | 与 Payload 版本无关，但 Next 升级要回归 | 缓存 HIT、redirects |
 
 ### 同步频率建议
@@ -867,7 +859,7 @@ GitHub Actions .github/workflows/ci.yml：
 - 前台：`src/frontend/` 皮肤随 Next 编译（无切换 / 预览）
 - AI：Admin LLM 提供商 + AI 设置 + verify:ai
 - 后台 AI 助手：/admin/ai-agent 对话 CRUD + semantic_search + prompt-templates
-- 前台 AI 助手：右下角浮窗，公开检索文章/小说/章节/分类/友链等（不含正文，ai-settings.enabled 开启时）
+- 前台 AI 助手：右下角浮窗，公开检索文章/页面/分类/友链/图库等（不含正文，ai-settings.enabled 开启时）
 - 前台缓存：/admin/cache DB 条目统计；curl -I 查看 X-Crispy-Page-Cache HIT/MISS
 
 <h2 id="config-center">配置中心方案（Catalog + Active + Override）</h2>
@@ -1083,9 +1075,9 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 | list_admin_menu | 当前用户可见菜单（官方侧栏 + 底部「工具」自定义页） |
 | list_resources | 列出可管理的 Collections / Globals |
 | describe_resource | 查看字段结构（create/update 前应先调用） |
-| semantic_search | posts/pages/novels/novel-chapters 语义搜索（返回 slug、docId、短 excerpt；读全文用 get_document） |
-| find_documents / get_document | 列表查询 / 单条详情含正文（find 支持 trash: true；novel-chapters slug 仅为章节段） |
-| create_document / update_document | 新建 / 更新文档（posts/pages/novel-chapters 发布设 _status: published） |
+| semantic_search | posts/pages 语义搜索（返回 slug、docId、短 excerpt；读全文用 get_document） |
+| find_documents / get_document | 列表查询 / 单条详情含正文（find 支持 trash: true） |
+| create_document / update_document | 新建 / 更新文档（posts/pages 发布设 _status: published） |
 | delete_document / restore_document | 移入回收站 / 从回收站恢复 |
 | get_global / update_global | 读取 / 更新 Global 配置 |
 | get_cache_settings | 读取 cache-settings（开关、TTL、调试 Header） |
@@ -1101,7 +1093,7 @@ Admin 内对话式 AI 助手（/admin/ai-agent），通过 Function Calling 读�
 
 - 入口：ai:use；工具层按 Permission 映射（src/ai/agent/access.ts，与 Admin can() 对齐）
 - posts：无 posts:update:any 时仅能管自己作者的稿；delete 需 posts:delete
-- pages / taxonomy / ops / novels / redirects / forms / short-links：对应 pages:manage、taxonomy:manage、ops:manage、novels:manage
+- pages / taxonomy / ops / redirects / forms / short-links：对应 pages:manage、taxonomy:manage、ops:manage
 - media：create/update/delete 分权；Agent 不提供 media delete
 - app-configs：读写分 catalog:app-configs:read|write
 - form-submissions：ops:manage 只读查/删（不可 create/update）
@@ -1219,24 +1211,22 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 | --- | --- |
 | search_content | 关键词搜索全站公开内容（可按 type 过滤；不含正文） |
 | list_content | 按类型浏览目录（分类、标签、友链等） |
-| get_content | 按 type + slug 获取单条元数据（不含正文；novel-chapter slug 为 {novelSlug}/{chapterSlug}） |
-| semantic_search | posts/pages/novels/novel-chapters 语义搜索（返回 slug + 短 excerpt；仅 published） |
+| get_content | 按 type + slug 获取单条元数据（不含正文） |
+| semantic_search | posts/pages 语义搜索（返回 slug + 短 excerpt；仅 published） |
 
 ### 可检索公开类型
 
 - post / page — 已发布文章与单页（助手仅元数据，不含正文）
-- novel / novel-chapter — 已启用小说与已发布章节（章节 slug 为 {novelSlug}/{chapterSlug}）
-- novel-category / novel-tag — 小说专用分类与标签
 - category / tag — 博客分类与标签（含文章计数）
-- link — 已启用友链
-- job / gallery-item — 已启用招聘与图库条目
+- link / link-group — 已启用友链与分组
+- gallery — 已启用图库相册
 - navigation — 类库导航 JSON 中的外部站点
-- section — 站点栏目入口（/posts、/links、/jobs 等）
+- section — 站点栏目入口（/posts、/links、/galleries 等）
 - 数据查询均 overrideAccess: false，遵守 Collection read access
 - 索引实现：src/ai/frontend-assistant/publicContent.ts
-- 前台搜索框：GET /search-index.json（posts/pages/jobs/gallery-items，见 src/search/buildSearchIndex.ts）
+- 前台搜索框：GET /search-index.json（posts/pages/galleries，见 src/search/buildSearchIndex.ts）
 
-助手为发现型检索：工具返回标题、链接、短摘要（excerpt），不返回文章或章节正文（token 考量）。用户问「某章写了什么」时，应给出摘要与站内阅读链接，引导至返回的 url 阅读全文。
+助手为发现型检索：工具返回标题、链接、短摘要（excerpt），不返回文章正文（token 考量）。用户问「某文写了什么」时，应给出摘要与站内阅读链接，引导至返回的 url 阅读全文。
 
 ### 代码位置
 
@@ -1257,12 +1247,3 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 - 前台 AI：src/ai/frontend-assistant/（见 #frontend-ai-assistant）
 - Revalidation：内容变更后不自动清缓存；手动 /admin/cache 清除（见 #frontend-cache）
 - 中文 Slug：chineseSlugField + pinyin-pro hook
-
-### Seed 演示账号
-
-| 邮箱 | 密码 | 角色 |
-| --- | --- | --- |
-| admin@example.com | password | super-admin |
-| editor@example.com | password | editor |
-| author@example.com | password | author |
-| agent@example.com | password | editor（MCP） |

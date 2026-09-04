@@ -63,7 +63,7 @@ Go **不**渲染 Lexical、不实现前台主题、不连 Payload、不实现后
 
 - `siteName`
 - `items[]`：`type`, `title`, `slug`, `url`, `excerpt`, `keywords[]`
-- 类型对齐现助手：`post` / `page` / `novel` / `novel-chapter` / `category` / `tag` / `link` / `job` / `gallery` / `navigation` / `section` 等
+- 类型对齐现助手：`post` / `page` / `category` / `tag` / `link` / `gallery` / `navigation` / `section` 等
 - **不含**正文、草稿、用户、评论后台、API Key、embedding
 
 实现时可复用 `src/search/buildSearchIndex.ts`、`src/ai/frontend-assistant/publicContent.ts`。

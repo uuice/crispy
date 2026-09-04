@@ -5,10 +5,7 @@
  */
 export const DEFAULT_EMBEDDING_DIMENSIONS = 1024
 
-/** @deprecated Use DEFAULT_EMBEDDING_DIMENSIONS */
-export const EMBEDDING_DIMENSIONS = DEFAULT_EMBEDDING_DIMENSIONS
-
-export const EMBEDDING_COLLECTIONS = ['posts', 'pages', 'novels', 'novel-chapters'] as const
+export const EMBEDDING_COLLECTIONS = ['posts', 'pages'] as const
 
 export type EmbeddableCollection = (typeof EMBEDDING_COLLECTIONS)[number]
 

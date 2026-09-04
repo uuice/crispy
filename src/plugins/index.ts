@@ -40,7 +40,7 @@ const s3StoragePlugin = createS3StoragePlugin()
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
-    collections: ['pages', 'posts', 'novel-chapters'],
+    collections: ['pages', 'posts'],
     overrides: {
       // Keep public read for middleware; gate write so Admin Create/Delete hide without permission.
       access: {
@@ -138,7 +138,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts', 'pages', 'jobs', 'galleries'],
+    collections: ['posts', 'pages', 'galleries'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       access: {
@@ -175,15 +175,8 @@ export const plugins: Plugin[] = [
       tags: { enabled: true },
       links: { enabled: true },
       'link-groups': { enabled: true },
-      'ad-slots': { enabled: true },
-      ads: { enabled: true },
-      jobs: { enabled: true },
       galleries: { enabled: true },
       'gallery-items': { enabled: true },
-      novels: { enabled: true },
-      'novel-chapters': { enabled: true },
-      'novel-categories': { enabled: true },
-      'novel-tags': { enabled: true },
       'short-links': { enabled: true },
       redirects: { enabled: true },
       forms: { enabled: true },
@@ -282,7 +275,6 @@ export const plugins: Plugin[] = [
       { slug: 'tags' },
       { slug: 'links' },
       { slug: 'link-groups' },
-      { slug: 'jobs' },
       { slug: 'users' },
       { slug: 'galleries' },
       { slug: 'gallery-items' },
@@ -290,12 +282,6 @@ export const plugins: Plugin[] = [
       { slug: 'redirects' },
       { slug: 'forms' },
       { slug: 'comments' },
-      { slug: 'ad-slots' },
-      { slug: 'ads' },
-      { slug: 'novels' },
-      { slug: 'novel-chapters' },
-      { slug: 'novel-categories' },
-      { slug: 'novel-tags' },
     ],
   }),
   auditLogPlugin(),

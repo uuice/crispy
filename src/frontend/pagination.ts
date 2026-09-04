@@ -1,7 +1,6 @@
 import type { PostListItem } from './data/types'
 
 export const BLOG_HOME_POST_LIMIT = 12
-export const BLOG_HOME_NOVEL_UPDATE_LIMIT = 10
 export const BLOG_LIST_PAGE_SIZE = 12
 
 export type SearchParams = Record<string, string | string[] | undefined>

@@ -170,15 +170,15 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'semantic_search',
       description:
-        '按语义相似度搜索 posts/pages/novels/novel-chapters（需 Postgres + pgvector，且 AI 设置已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 get_document(collection, docId)。',
+        '按语义相似度搜索 posts/pages（需 Postgres + pgvector，且 AI 设置已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 get_document(collection, docId)。',
       parameters: {
         type: 'object',
         properties: {
           query: { type: 'string', description: '自然语言搜索词' },
           collections: {
             type: 'array',
-            items: { type: 'string', enum: ['posts', 'pages', 'novels', 'novel-chapters'] },
-            description: '限定内容类型，默认 posts + pages + novels + novel-chapters',
+            items: { type: 'string', enum: ['posts', 'pages'] },
+            description: '限定内容类型，默认 posts + pages',
           },
           limit: { type: 'number', description: '返回条数，默认 8，最大 25' },
           status: {
@@ -195,7 +195,7 @@ export const AGENT_TOOLS: AgentToolDefinition[] = [
     function: {
       name: 'find_documents',
       description:
-        '查询/搜索某个内容类型下的文档列表（不含正文等大字段，详情用 get_document）；novel-chapters 的 slug 仅为章节段，须配合 where.novel；查回收站时设 trash: true',
+        '查询/搜索某个内容类型下的文档列表（不含正文等大字段，详情用 get_document）；查回收站时设 trash: true',
       parameters: {
         type: 'object',
         properties: {
@@ -567,8 +567,7 @@ export async function executeAgentTool(
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
         ? args.collections.filter(
-            (c): c is 'posts' | 'pages' | 'novels' | 'novel-chapters' =>
-              c === 'posts' || c === 'pages' || c === 'novels' || c === 'novel-chapters',
+            (c): c is 'posts' | 'pages' => c === 'posts' || c === 'pages',
           )
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)

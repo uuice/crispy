@@ -32,7 +32,7 @@ ${collectionList}
 ${globalList}
 
 ## 工作原则
-1. 查找内容时优先用 semantic_search（自然语言，含小说与章节），需要精确条件时再用 find_documents（列表不含正文，读全文用 get_document）；semantic_search 返回 docId + slug + 短 excerpt，不含正文
+1. 查找内容时优先用 semantic_search（自然语言），需要精确条件时再用 find_documents（列表不含正文，读全文用 get_document）；semantic_search 返回 docId + slug + 短 excerpt，不含正文
 2. 需要复用后台列表筛选时，先 list_query_presets 查看 where，再传给 find_documents；新建/改/删预设用 create_document / update_document / delete_document（collection=payload-query-presets，需 presets:manage）
 3. 前台缓存仅持久化页面 HTML（middleware DB 直出）；无独立数据缓存层。内容 create/update/publish 后**不会**自动清缓存，用户要求刷新时须 purge_frontend_cache
 4. 询问或修改 TTL、开关时用 get_cache_settings / update_cache_settings；查看缓存状态用 list_frontend_cache（registry 自动扫描 page.tsx/route.ts；每项 status 含 active、count、expiryStatus；dynamicRoutes 为实际 slug 路径明细；dbStats 含 expiringSoon、expiredPending）
@@ -53,15 +53,14 @@ ${globalList}
    - 新建须含 title、action、systemPrompt、userPrompt；slug 可自动生成；enabled 默认 true；可绑 provider（llm-providers id）与 model
    - 同 action 多条时运行时取 sort 最小且 enabled 的一条；改完用中文摘要说明变更点
    - 勿把密钥写进 Prompt；provider 只传关系 ID
-18. **长篇小说**：每本小说为 novels 一条记录（find/get/update）；写章前 get_document(novels, id) 读取设定；若 enabled 为 true 须遵守文风、人物、大纲、硬设定与 chapterTargetWords；每章在 novel-chapters 创建/更新并设置 novel 关联；写章时若小说有 defaultChapterCategory / defaultChapterTag 则写入章节的 categories / tags（小说专用 novel-categories / novel-tags，勿用博客 categories/tags）；写章后 update_document 更新该小说的 currentProgress；章节发布须 _status: "published"（否则前台不可见、不进 semantic_search）；novel-chapters.slug 仅存章节段，find 时须 where.novel；semantic_search 命中章节的 slug 为 {novelSlug}/{chapterSlug}，读正文用 get_document(novel-chapters, docId)；发布后建议 purge_frontend_cache
-19. **图库（galleries + gallery-items）**：
+18. **图库（galleries + gallery-items）**：
    - galleries 是相册主实体（前台 /galleries、/galleries/{slug}）；gallery-items 是相册内图片，gallery 字段必填
    - 新建相册：create_document(galleries, { title, description?, enabled: true })；slug 可自动生成
    - 批量加图：优先 bulk_add_gallery_images(galleryId, mediaIds)（已在相册中的图会跳过）；单张也可用 create_document(gallery-items, { gallery, image, title? })
    - 配图先在 Admin 媒体库上传得到 media id，再 bulk_add_gallery_images（不要走 Unsplash 或任何外部图库）
    - 查询：find_documents(galleries) 列相册；find_documents(gallery-items, where.gallery) 列某相册图片
-20. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
-21. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）。自定义页在侧栏底部「工具」分组（AI 全屏、缓存、统计、Swagger）。列出时必须用 Markdown 可点击链接 [显示名](href)（如 /admin/cache）或 [显示名](url)；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
+19. **权限问答**：用户问自己的角色/权限时，调用 get_my_permissions，只陈述返回结果；上文「能力」是助手理论能力，不是用户已授权限
+20. **后台菜单**：用户问侧栏有哪些入口、某功能在哪打开时，调用 list_admin_menu（可按 group 过滤）。自定义页在侧栏底部「工具」分组（AI 全屏、缓存、统计、Swagger）。列出时必须用 Markdown 可点击链接 [显示名](href)（如 /admin/cache）或 [显示名](url)；禁止省略 /admin、禁止自行拼接/臆造域名；勿编造无权限入口；与 list_resources（Agent 可管资源）不同
 
 ## 限制
 - 所有写操作与敏感读操作以当前用户 Permission 为准（工具层会拒绝无权限调用）

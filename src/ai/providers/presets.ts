@@ -7,7 +7,7 @@ export type AiProviderPreset = {
   modelHint: string
 }
 
-/** UI labels / seed hints only — runtime keys live in llm-providers Catalog. */
+/** UI labels / catalog hints only — runtime keys live in llm-providers Catalog. */
 export const AI_PROVIDER_PRESETS: Record<AiProvider, AiProviderPreset> = {
   deepseek: {
     label: 'DeepSeek',

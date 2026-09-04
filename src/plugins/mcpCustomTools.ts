@@ -119,7 +119,7 @@ export const mcpCustomTools: McpCustomTool[] = [
   {
     name: 'describe_resource',
     description:
-      '查看某个 collection 或 global 的字段结构（create/update 前应先调用）。含小说章节 slug、发布状态等 hints。',
+      '查看某个 collection 或 global 的字段结构（create/update 前应先调用）。',
     parameters: {
       kind: z.enum(['collection', 'global']),
       slug: z.string(),
@@ -141,12 +141,10 @@ export const mcpCustomTools: McpCustomTool[] = [
   {
     name: 'semantic_search',
     description:
-      '按语义相似度搜索 posts/pages/novels/novel-chapters（需 Postgres + pgvector，且 Admin「AI 设置」已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。',
+      '按语义相似度搜索 posts/pages（需 Postgres + pgvector，且 Admin「AI 设置」已选 Embedding 提供商）。返回 title、url、slug、docId、短 excerpt（非正文）；读全文用 find + get 对应 collection 文档。',
     parameters: {
       query: z.string(),
-      collections: z
-        .array(z.enum(['posts', 'pages', 'novels', 'novel-chapters']))
-        .optional(),
+      collections: z.array(z.enum(['posts', 'pages'])).optional(),
       limit: z.number().optional(),
       status: z.string().optional(),
     },
@@ -154,11 +152,7 @@ export const mcpCustomTools: McpCustomTool[] = [
       const query = String(args.query ?? '')
       const collections = Array.isArray(args.collections)
         ? args.collections.filter(
-            (c): c is 'posts' | 'pages' | 'novels' | 'novel-chapters' =>
-              c === 'posts' ||
-              c === 'pages' ||
-              c === 'novels' ||
-              c === 'novel-chapters',
+            (c): c is 'posts' | 'pages' => c === 'posts' || c === 'pages',
           )
         : undefined
       const limit = Math.min(Math.max(Number(args.limit) || 8, 1), 25)

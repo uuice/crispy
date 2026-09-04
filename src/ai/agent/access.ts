@@ -41,18 +41,6 @@ const COLLECTION_PERMISSIONS: Record<string, Partial<Record<AgentOp, Permission[
     update: ['taxonomy:manage'],
     delete: ['taxonomy:manage'],
   },
-  'novel-categories': {
-    read: ['taxonomy:manage', 'novels:manage'],
-    create: ['taxonomy:manage'],
-    update: ['taxonomy:manage'],
-    delete: ['taxonomy:manage'],
-  },
-  'novel-tags': {
-    read: ['taxonomy:manage', 'novels:manage'],
-    create: ['taxonomy:manage'],
-    update: ['taxonomy:manage'],
-    delete: ['taxonomy:manage'],
-  },
   links: { read: ['ops:manage'], create: ['ops:manage'], update: ['ops:manage'], delete: ['ops:manage'] },
   'link-groups': {
     read: ['ops:manage'],
@@ -60,14 +48,6 @@ const COLLECTION_PERMISSIONS: Record<string, Partial<Record<AgentOp, Permission[
     update: ['ops:manage'],
     delete: ['ops:manage'],
   },
-  'ad-slots': {
-    read: ['ops:manage'],
-    create: ['ops:manage'],
-    update: ['ops:manage'],
-    delete: ['ops:manage'],
-  },
-  ads: { read: ['ops:manage'], create: ['ops:manage'], update: ['ops:manage'], delete: ['ops:manage'] },
-  jobs: { read: ['ops:manage'], create: ['ops:manage'], update: ['ops:manage'], delete: ['ops:manage'] },
   galleries: {
     read: ['ops:manage'],
     create: ['ops:manage'],
@@ -85,18 +65,6 @@ const COLLECTION_PERMISSIONS: Record<string, Partial<Record<AgentOp, Permission[
     create: ['ops:manage'],
     update: ['ops:manage'],
     delete: ['ops:manage'],
-  },
-  novels: {
-    read: ['novels:read:all', 'novels:manage'],
-    create: ['novels:manage'],
-    update: ['novels:manage'],
-    delete: ['novels:manage'],
-  },
-  'novel-chapters': {
-    read: ['novels:read:all', 'novels:manage'],
-    create: ['novels:manage'],
-    update: ['novels:manage'],
-    delete: ['novels:manage'],
   },
   media: {
     read: ['media:create', 'media:update', 'media:delete'],

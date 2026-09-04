@@ -8,20 +8,12 @@ import type {
   Gallery,
   GalleryItem,
   Media,
-  Novel,
-  NovelCategory,
-  NovelTag,
   Tag,
 } from '@/payload-types'
 
 import { getCachedFriendLinkSections, getCachedFriendLinks } from '@/utilities/getFriendLinks'
 import {
   getCategoryPath,
-  getNovelChapterPath,
-  getNovelCategoryPath,
-  getNovelPath,
-  getNovelsPath,
-  getNovelTagPath,
   getPostPath,
   getTagPath,
   getUserPath,
@@ -30,15 +22,11 @@ import {
 import { mapGlobalNavItems } from '@/utilities/mapGlobalNavItems'
 import {
   publishedBlogPostsWhere,
-  publishedNovelChaptersWhere,
   withPublishedBlogPostsWhere,
 } from '@/utilities/publishedContentWhere'
 
 import type {
-  LatestNovelChapterItem,
   NavItem,
-  NovelChapterItem,
-  NovelListItem,
   PaginatedPostList,
   PostListItem,
   SidebarAuthor,
@@ -48,8 +36,6 @@ import type {
 
 export type {
   NavItem,
-  NovelChapterItem,
-  NovelListItem,
   PaginatedPostList,
   PostListItem,
   SidebarAuthor,
@@ -548,31 +534,6 @@ export const queryUserPagePaginated = cache(async (slug: string, page = 1, pageS
 export const queryFriendLinks = getCachedFriendLinks
 export const queryFriendLinkSections = getCachedFriendLinkSections
 
-export const queryJobs = cache(async () => {
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'jobs',
-    depth: 0,
-    limit: 100,
-    overrideAccess: false,
-    pagination: false,
-    sort: '-publishedAt',
-    where: { enabled: { equals: true } },
-    select: {
-      title: true,
-      slug: true,
-      department: true,
-      location: true,
-      employmentType: true,
-      salary: true,
-      publishedAt: true,
-    },
-  })
-
-  return result.docs
-})
-
 export type GalleryListItem = Gallery & {
   /** Explicit cover, or first enabled item image when cover is unset. */
   listCover: Media | null
@@ -672,318 +633,5 @@ export const queryGalleryBySlug = cache(
     })
 
     return { gallery, items: items.docs }
-  },
-)
-
-/** @deprecated Prefer queryGalleries / queryGalleryBySlug */
-export const queryGalleryItems = cache(async (): Promise<GalleryItem[]> => {
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'gallery-items',
-    depth: 1,
-    limit: 100,
-    overrideAccess: false,
-    pagination: false,
-    sort: 'sort',
-    where: { enabled: { equals: true } },
-  })
-
-  return result.docs
-})
-
-export const queryPublishedNovels = cache(async (): Promise<NovelListItem[]> => {
-  const payload = await getPayload({ config: configPromise })
-
-  const novelsResult = await payload.find({
-    collection: 'novels',
-    depth: 0,
-    limit: 100,
-    overrideAccess: false,
-    pagination: false,
-    sort: '-updatedAt',
-    where: { enabled: { equals: true } },
-    select: { title: true, slug: true, genre: true, synopsis: true, updatedAt: true },
-  })
-
-  const novels = novelsResult.docs.filter((novel) => Boolean(novel.slug))
-  if (novels.length === 0) return []
-
-  const counts = await Promise.all(
-    novels.map(async (novel) => {
-      const result = await payload.count({
-        collection: 'novel-chapters',
-        overrideAccess: false,
-        where: {
-          and: [{ _status: { equals: 'published' } }, { novel: { equals: novel.id } }],
-        },
-      })
-      return result.totalDocs
-    }),
-  )
-
-  return novels.map((novel, index) => ({
-    title: novel.title,
-    slug: novel.slug!,
-    url: getNovelPath(novel.slug!),
-    genre: novel.genre || undefined,
-    synopsis: novel.synopsis || undefined,
-    chapterCount: counts[index] ?? 0,
-    updatedAt: novel.updatedAt,
-  }))
-})
-
-export const queryNovelBySlug = cache(async (slug: string) => {
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'novels',
-    depth: 0,
-    limit: 1,
-    overrideAccess: false,
-    where: {
-      and: [{ slug: { equals: slug } }, { enabled: { equals: true } }],
-    },
-  })
-
-  return result.docs[0] ?? null
-})
-
-export const queryNovelChapters = cache(
-  async (
-    novelSlug: string,
-  ): Promise<{ novel: Novel | null; chapters: NovelChapterItem[] }> => {
-    const novel = await queryNovelBySlug(novelSlug)
-    if (!novel?.slug) return { novel: null, chapters: [] }
-
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection: 'novel-chapters',
-      depth: 0,
-      limit: 500,
-      overrideAccess: false,
-      pagination: false,
-      sort: 'publishedAt',
-      select: { title: true, slug: true, publishedAt: true },
-      where: {
-        and: [{ _status: { equals: 'published' } }, { novel: { equals: novel.id } }],
-      },
-    })
-
-    const chapters = result.docs
-      .filter((chapter) => Boolean(chapter.slug && chapter.title))
-      .map((chapter, index) => ({
-        index: index + 1,
-        title: chapter.title,
-        slug: chapter.slug!,
-        url: getNovelChapterPath(novel.slug!, chapter.slug!),
-        publishedAt: chapter.publishedAt || undefined,
-      }))
-
-    return { novel, chapters }
-  },
-)
-
-export const queryNovelChapter = cache(async (novelSlug: string, chapterSlug: string) => {
-  const { novel, chapters } = await queryNovelChapters(novelSlug)
-  if (!novel?.slug) return null
-
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'novel-chapters',
-    depth: 2,
-    limit: 1,
-    overrideAccess: false,
-    where: {
-      and: [
-        { slug: { equals: chapterSlug } },
-        { _status: { equals: 'published' } },
-        { novel: { equals: novel.id } },
-      ],
-    },
-  })
-
-  const chapter = result.docs[0]
-  if (!chapter) return null
-
-  const chapterIndex = chapters.findIndex((item) => item.slug === chapterSlug)
-  const prev = chapterIndex > 0 ? chapters[chapterIndex - 1] : null
-  const next =
-    chapterIndex >= 0 && chapterIndex < chapters.length - 1 ? chapters[chapterIndex + 1] : null
-
-  return {
-    novel,
-    chapter,
-    chapters,
-    chapterIndex: chapterIndex >= 0 ? chapterIndex + 1 : 0,
-    prev,
-    next,
-    novelUrl: getNovelPath(novel.slug),
-    novelsUrl: getNovelsPath(),
-  }
-})
-
-export const queryLatestNovelChapters = cache(async (limit = 20): Promise<LatestNovelChapterItem[]> => {
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'novel-chapters',
-    depth: 1,
-    limit,
-    overrideAccess: false,
-    pagination: false,
-    sort: '-publishedAt',
-    select: { title: true, slug: true, publishedAt: true, novel: true },
-    where: publishedNovelChaptersWhere,
-  })
-
-  const chapters: LatestNovelChapterItem[] = []
-
-  for (const chapter of result.docs) {
-    if (!chapter.slug || !chapter.title) continue
-
-    const novel = typeof chapter.novel === 'object' ? chapter.novel : null
-    if (!novel?.slug || novel.enabled === false) continue
-
-    chapters.push({
-      title: chapter.title,
-      url: getNovelChapterPath(novel.slug, chapter.slug),
-      novelTitle: novel.title,
-      novelUrl: getNovelPath(novel.slug),
-      publishedAt: chapter.publishedAt || undefined,
-    })
-  }
-
-  return chapters
-})
-
-async function mapNovelsToListItems(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  novels: Array<Pick<Novel, 'id' | 'title' | 'slug' | 'genre' | 'synopsis' | 'updatedAt'>>,
-): Promise<NovelListItem[]> {
-  const filtered = novels.filter((novel) => Boolean(novel.slug))
-  if (filtered.length === 0) return []
-
-  const counts = await Promise.all(
-    filtered.map(async (novel) => {
-      const result = await payload.count({
-        collection: 'novel-chapters',
-        overrideAccess: false,
-        where: {
-          and: [{ _status: { equals: 'published' } }, { novel: { equals: novel.id } }],
-        },
-      })
-      return result.totalDocs
-    }),
-  )
-
-  return filtered.map((novel, index) => ({
-    title: novel.title,
-    slug: novel.slug!,
-    url: getNovelPath(novel.slug!),
-    genre: novel.genre || undefined,
-    synopsis: novel.synopsis || undefined,
-    chapterCount: counts[index] ?? 0,
-    updatedAt: novel.updatedAt,
-  }))
-}
-
-export const queryNovelsByNovelCategorySlugPaginated = cache(
-  async (slug: string, page = 1, pageSize = 12) => {
-    const payload = await getPayload({ config: configPromise })
-
-    const categoryResult = await payload.find({
-      collection: 'novel-categories',
-      limit: 1,
-      overrideAccess: false,
-      pagination: false,
-      where: { slug: { equals: slug } },
-    })
-
-    const category = categoryResult.docs[0]
-    if (!category) {
-      return {
-        category: null,
-        novels: [] as NovelListItem[],
-        page: 1,
-        pageSize,
-        totalDocs: 0,
-        totalPages: 1,
-      }
-    }
-
-    const result = await payload.find({
-      collection: 'novels',
-      depth: 0,
-      limit: pageSize,
-      page,
-      overrideAccess: false,
-      pagination: true,
-      sort: '-updatedAt',
-      where: {
-        and: [{ enabled: { equals: true } }, { categories: { contains: category.id } }],
-      },
-      select: { title: true, slug: true, genre: true, synopsis: true, updatedAt: true },
-    })
-
-    return {
-      category,
-      novels: await mapNovelsToListItems(payload, result.docs),
-      page: result.page ?? page,
-      pageSize,
-      totalDocs: result.totalDocs,
-      totalPages: result.totalPages,
-    }
-  },
-)
-
-export const queryNovelsByNovelTagSlugPaginated = cache(
-  async (slug: string, page = 1, pageSize = 12) => {
-    const payload = await getPayload({ config: configPromise })
-
-    const tagResult = await payload.find({
-      collection: 'novel-tags',
-      limit: 1,
-      overrideAccess: false,
-      pagination: false,
-      where: { slug: { equals: slug } },
-    })
-
-    const tag = tagResult.docs[0]
-    if (!tag) {
-      return {
-        tag: null,
-        novels: [] as NovelListItem[],
-        page: 1,
-        pageSize,
-        totalDocs: 0,
-        totalPages: 1,
-      }
-    }
-
-    const result = await payload.find({
-      collection: 'novels',
-      depth: 0,
-      limit: pageSize,
-      page,
-      overrideAccess: false,
-      pagination: true,
-      sort: '-updatedAt',
-      where: {
-        and: [{ enabled: { equals: true } }, { tags: { contains: tag.id } }],
-      },
-      select: { title: true, slug: true, genre: true, synopsis: true, updatedAt: true },
-    })
-
-    return {
-      tag,
-      novels: await mapNovelsToListItems(payload, result.docs),
-      page: result.page ?? page,
-      pageSize,
-      totalDocs: result.totalDocs,
-      totalPages: result.totalPages,
-    }
   },
 )
