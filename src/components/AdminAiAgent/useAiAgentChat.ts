@@ -88,7 +88,11 @@ export function useAiAgentChat() {
 
   // Providers mount on the login page too; re-fetch once auth user is available.
   useEffect(() => {
-    void refreshSessions()
+    // Defer so the effect body does not synchronously call setState (react-hooks/set-state-in-effect).
+    const id = window.setTimeout(() => {
+      void refreshSessions()
+    }, 0)
+    return () => window.clearTimeout(id)
   }, [refreshSessions])
 
   const loadSession = useCallback(async (id: string | number) => {

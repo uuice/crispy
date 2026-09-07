@@ -1,7 +1,6 @@
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
-  PayloadRequest,
 } from 'payload'
 
 import { writeAuditLog } from '@/plugins/auditLogWriter'

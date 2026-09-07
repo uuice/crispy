@@ -21,7 +21,7 @@ export const Card: React.FC<{
   showTags?: boolean
   title?: string
 }> = (props) => {
-  const { card, link } = useClickableCard({})
+  const { cardRef, linkRef } = useClickableCard({})
   const {
     className,
     doc,
@@ -46,7 +46,7 @@ export const Card: React.FC<{
         'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
         className,
       )}
-      ref={card.ref}
+      ref={cardRef}
     >
       <div className="relative w-full ">
         {!metaImage && <div className="">{frontendLabels.posts.noImage}</div>}
@@ -101,7 +101,7 @@ export const Card: React.FC<{
         {titleToUse && (
           <div className="prose">
             <h3>
-              <Link className="not-prose" href={href} ref={link.ref}>
+              <Link className="not-prose" href={href} ref={linkRef}>
                 {titleToUse}
               </Link>
             </h3>

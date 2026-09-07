@@ -60,7 +60,10 @@ export function CommentsSectionClient({
   }, [targetId, targetType])
 
   useEffect(() => {
-    void loadComments()
+    const id = window.setTimeout(() => {
+      void loadComments()
+    }, 0)
+    return () => window.clearTimeout(id)
   }, [loadComments])
 
   const handleSubmitted = useCallback(

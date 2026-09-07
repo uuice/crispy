@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { Media } from '@/components/Media'
 import type { GalleryItem, Media as MediaType } from '@/payload-types'
 import { cn } from '@/utilities/ui'
+import { useIsClient } from '@/utilities/useIsClient'
 
 import './galleryLightbox.scss'
 
@@ -35,11 +36,7 @@ function mediaResource(item: GalleryLightboxItem): MediaType | null {
 export function GalleryLightboxGrid({ items, classNames }: Props) {
   const labelId = useId()
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useIsClient()
 
   const close = useCallback(() => setActiveIndex(null), [])
 

@@ -1,7 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { DEFAULT_CACHE_SETTINGS, normalizeCacheSettings, type ResolvedCacheSettings } from '@/frontend-cache/settings'
+import { normalizeCacheSettings, type ResolvedCacheSettings } from '@/frontend-cache/settings'
 import { applyDevHtmlCacheEnvOverride } from '@/frontend-cache/envOverrides'
 
 export type { ResolvedCacheSettings } from '@/frontend-cache/settings'

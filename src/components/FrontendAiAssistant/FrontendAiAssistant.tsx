@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AiIcon } from '@/components/AiIcon'
 import { frontendLabels } from '@/i18n/frontend-labels'
+import { useIsClient } from '@/utilities/useIsClient'
 
 import type { FrontendAssistantMessage } from './useFrontendAiAssistant'
 import { useFrontendAiAssistant } from './useFrontendAiAssistant'
@@ -166,18 +167,18 @@ function MessageBubble({ message }: { message: FrontendAssistantMessage }) {
 export function FrontendAiAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [available, setAvailable] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useIsClient()
   const chat = useFrontendAiAssistant()
 
   useEffect(() => {
-    setMounted(true)
+    if (!mounted) return
     void fetch('/api/ai/assistant')
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { available?: boolean } | null) => {
         setAvailable(Boolean(data?.available))
       })
       .catch(() => setAvailable(false))
-  }, [])
+  }, [mounted])
 
   if (!mounted || !available) return null
 

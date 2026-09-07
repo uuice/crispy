@@ -41,20 +41,23 @@ export function AdminAccountThemeHueInjector() {
 
   useEffect(() => {
     if (!pathname?.endsWith('/account')) {
-      setMount(null)
-      return
+      const id = window.setTimeout(() => setMount(null), 0)
+      return () => window.clearTimeout(id)
     }
 
     const sync = () => {
       setMount(findOrCreateMount())
     }
 
-    sync()
+    const id = window.setTimeout(sync, 0)
 
     const observer = new MutationObserver(sync)
     observer.observe(document.body, { childList: true, subtree: true })
 
-    return () => observer.disconnect()
+    return () => {
+      window.clearTimeout(id)
+      observer.disconnect()
+    }
   }, [pathname])
 
   if (!mount) return null

@@ -18,7 +18,6 @@ import {
 import {
   AGENT_COLLECTIONS,
   AGENT_GLOBALS,
-  isAgentCollection,
   isAgentGlobal,
 } from '@/ai/agent/resources'
 import type { AuditLog, Config, PayloadQueryPreset } from '@/payload-types'

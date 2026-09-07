@@ -1,15 +1,21 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useSyncExternalStore } from 'react'
 
 const THEME_KEY = 'theme'
 
-export function DarkModeToggle() {
-  const [isDark, setIsDark] = useState(false)
+function subscribeDark(onStoreChange: () => void) {
+  const observer = new MutationObserver(onStoreChange)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  return () => observer.disconnect()
+}
 
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'))
-  }, [])
+function getIsDark() {
+  return document.documentElement.classList.contains('dark')
+}
+
+export function DarkModeToggle() {
+  const isDark = useSyncExternalStore(subscribeDark, getIsDark, () => false)
 
   const toggle = useCallback(() => {
     const html = document.documentElement
@@ -17,7 +23,6 @@ export function DarkModeToggle() {
     const next = html.classList.contains('dark') ? 'dark' : 'light'
     localStorage.setItem(THEME_KEY, next)
     html.setAttribute('data-theme', next)
-    setIsDark(next === 'dark')
   }, [])
 
   return (

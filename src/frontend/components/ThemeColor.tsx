@@ -28,11 +28,15 @@ export function ThemeColor() {
 
   useEffect(() => {
     const saved = localStorage.getItem(HUE_KEY)
-    if (saved !== null) {
-      const h = parseInt(saved, 10)
-      if (!Number.isNaN(h) && h >= 0 && h <= 360) applyHue(h)
-    }
-  }, [applyHue])
+    if (saved === null) return
+    const h = parseInt(saved, 10)
+    if (Number.isNaN(h) || h < 0 || h > 360) return
+    const n = normalizeHue(h)
+    if (n === null) return
+    document.documentElement.style.setProperty('--hue', String(n))
+    const id = window.setTimeout(() => setHue(n), 0)
+    return () => window.clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     if (!open) return

@@ -58,6 +58,8 @@ const AdminAvatar: React.FC = () => {
   const src = resolveAvatarSrc(user as User | null | undefined)
   if (src) {
     return (
+      // Payload Admin avatar: next/image is not used inside Admin chrome.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         alt=""
         className="crispy-admin-avatar"

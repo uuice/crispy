@@ -16,6 +16,7 @@ const AdminAiAgentContext = createContext<AdminAiAgentContextValue | null>(null)
 
 export function AdminAiAgentContextProvider({ children }: { children: React.ReactNode }) {
   const chat = useAiAgentChat()
+  const { refreshSessions } = chat
   const [isOpen, setIsOpen] = useState(false)
   const wasOpenRef = useRef(false)
   const toggleOpen = useCallback(() => setIsOpen((open) => !open), [])
@@ -23,10 +24,10 @@ export function AdminAiAgentContextProvider({ children }: { children: React.Reac
   // Refresh history when the floating drawer opens (covers post-login / stale list).
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
-      void chat.refreshSessions()
+      void refreshSessions()
     }
     wasOpenRef.current = isOpen
-  }, [isOpen, chat.refreshSessions])
+  }, [isOpen, refreshSessions])
 
   return (
     <AdminAiAgentContext.Provider value={{ ...chat, isOpen, setIsOpen, toggleOpen }}>

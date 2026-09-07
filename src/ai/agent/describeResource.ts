@@ -12,12 +12,6 @@ export type DescribedField = {
   note?: string
 }
 
-function fieldLabel(field: Field): string {
-  if ('name' in field && field.name) return field.name
-  if ('type' in field) return field.type
-  return 'unknown'
-}
-
 function describeField(field: Field, prefix = ''): DescribedField[] {
   const path = prefix
     ? 'name' in field && field.name

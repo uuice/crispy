@@ -26,7 +26,6 @@ import {
 } from '@/utilities/publishedContentWhere'
 
 import type {
-  NavItem,
   PaginatedPostList,
   PostListItem,
   SidebarAuthor,

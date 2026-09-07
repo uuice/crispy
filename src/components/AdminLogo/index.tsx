@@ -72,6 +72,8 @@ const AdminLogo = async ({ payload }: Props) => {
   if (mediaLogo) {
     return (
       <div className="crispy-admin-logo crispy-admin-logo--media">
+        {/* Payload Admin logo: next/image is not used inside Admin chrome. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img alt={mediaLogo.alt} className="crispy-admin-logo__image" src={mediaLogo.src} />
       </div>
     )

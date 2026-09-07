@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { useIsClient } from '@/utilities/useIsClient'
+
 const WORK_START_HOUR = 9
 const WORK_START_MINUTE = 0
 const WORK_END_HOUR = 18
@@ -156,15 +158,17 @@ function formatRange(h: HolidayItem): string {
 }
 
 export function SidebarCountdown({ holidays }: SidebarCountdownProps) {
-  const [now, setNow] = useState<Date | null>(null)
+  const isClient = useIsClient()
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    setNow(new Date())
-    const timer = setInterval(() => setNow(new Date()), 1000)
+    if (!isClient) return
+    const timer = setInterval(() => setTick((n) => n + 1), 1000)
     return () => clearInterval(timer)
-  }, [])
+  }, [isClient])
 
   const viewModel = useMemo(() => {
+    const now = isClient ? new Date() : null
     if (!now) {
       return {
         workLine: '加载中...' as React.ReactNode,
@@ -249,7 +253,9 @@ export function SidebarCountdown({ holidays }: SidebarCountdownProps) {
     }
 
     return { workLine, untilWorkLine, holidayLine, pastHolidays, remainingHolidays }
-  }, [holidays, now])
+    // tick forces a recompute every second for live countdown text
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick is an intentional refresh signal
+  }, [holidays, isClient, tick])
 
   return (
     <div

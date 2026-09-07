@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useIsClient } from '@/utilities/useIsClient'
+
 import type { NavItem } from '../data/types'
 
 type Props = {
@@ -20,11 +22,7 @@ function isNavItemActive(pathname: string, url: string): boolean {
 export function MobileNav({ menu }: Props) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useIsClient()
 
   const setNavOpen = useCallback((next: boolean) => {
     setOpen(next)
