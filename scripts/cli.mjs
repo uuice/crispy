@@ -102,12 +102,6 @@ const GROUPS = {
         note: '改 Admin 视图/字段组件后必跑。',
         run: () => payload(['generate:importmap']),
       },
-      {
-        id: 'openapi',
-        summary: '写入 public/openapi.json（Swagger 静态备份）',
-        note: '运行时也可 GET /api/openapi.json；生产勿公开静态文件。',
-        run: () => tsxScript('generate-openapi.ts'),
-      },
     ],
   },
   db: {
@@ -128,7 +122,7 @@ const GROUPS = {
       {
         id: 'create',
         summary: '新建 Postgres 迁移（需 Docker PG）',
-        note: 'SQLite 不可用；tsx 已 pin 4.21.0，Node 20/22/24 均可。例：pnpm cli db:create add_foo',
+        note: 'SQLite 不可用；Payload≥3.85.2 后 Node 20/22/24 均可。例：pnpm cli db:create add_foo',
         run: (args) => bashScript('migrate-create.sh', args),
       },
       {
@@ -331,27 +325,6 @@ const GROUPS = {
         summary: '探测 Active 存储目标 OSS 连通性',
         note: '读 .data/storage-runtime.json；不写业务数据（会试 Put 测写权限）。',
         run: () => tsxScript('test-oss.ts'),
-      },
-      {
-        id: 'install',
-        summary: 'pnpm install --ignore-workspace',
-        note: 'monorepo 边缘场景；一般直接用 pnpm install。',
-        run: () =>
-          pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', '--ignore-workspace', 'install']),
-      },
-      {
-        id: 'reinstall',
-        summary: '删除 node_modules 与 lockfile 后重装',
-        note: '依赖异常时的核弹选项。',
-        run: async () => {
-          rmRf('node_modules')
-          try {
-            spawnSync('rm', ['-f', 'pnpm-lock.yaml'], { cwd: ROOT, stdio: 'inherit' })
-          } catch {
-            /* windows may lack rm */
-          }
-          pnpmExec(['cross-env', 'NODE_OPTIONS=--no-deprecation', '--ignore-workspace', 'install'])
-        },
       },
     ],
   },

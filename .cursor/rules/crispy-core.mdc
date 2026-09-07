@@ -1,11 +1,11 @@
 ---
-description: Crispy 3 项目基础约定（栈、目录、命令、通用原则）
+description: Crispy 3 博客站基础约定（栈、目录、命令、原则）
 alwaysApply: true
 ---
 
 # Crispy 3 Core
 
-Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，greenfield 重写，与 2.x 无代码继承。`main` 为稳定主线；`v3-payload` 用于开发/测试/修 bug；2.x 归档在 `crispy-2x`。
+Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router** 的个人博客 / 内容站（非通用多业态 CMS），greenfield 重写，与 2.x 无代码继承。`main` 为稳定主线；`v3-payload` / `personal-blog` 用于开发与产品收窄；2.x 归档在 `crispy-2x`。
 
 ## Stack
 
@@ -24,10 +24,10 @@ Crispy 3.0 = **Payload CMS 3 + Next.js 16 App Router**，greenfield 重写，与
 - `src/frontend/` — 前台 Layout / 页面 / 样式
 - `src/app/(payload)/admin/` — Admin Custom Views
 - `src/app/(frontend)/` — 前台 SSR/RSC
-- `src/admin-stats/`、`src/openapi/` — 产品层模块
+- `src/admin-stats/` — 内容统计（可选运营页）
 - 二次开发文档: `docs/dev-docs.md`（含 #permissions）
 
-## 通用原则
+## 原则
 
 - **最小 diff**：只改任务相关文件，不顺手重构
 - **不 fork Payload**，不改 `node_modules`

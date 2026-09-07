@@ -5,14 +5,14 @@ export const customTranslations = {
     ...pluginTranslationsZh,
     crispy: {
       siteSettings: '站点设置',
-      welcomeDashboard: '欢迎使用 Crispy CMS',
+      welcomeDashboard: '欢迎使用 Crispy',
     },
   },
   en: {
     ...pluginTranslationsEn,
     crispy: {
       siteSettings: 'Site Settings',
-      welcomeDashboard: 'Welcome to Crispy CMS',
+      welcomeDashboard: 'Welcome to Crispy',
     },
   },
 }

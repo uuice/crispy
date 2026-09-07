@@ -10,7 +10,7 @@ export const mergeOpenGraph = (
 ): Metadata['openGraph'] => {
   const defaultOpenGraph: Metadata['openGraph'] = {
     type: 'website',
-    description: siteDescription || 'Crispy — 基于 Payload 的通用 CMS',
+    description: siteDescription || 'Crispy — 基于 Payload 的个人博客',
     images: [
       {
         url: `${getServerSideURL()}/website-template-OG.webp`,

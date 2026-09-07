@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## 何时用 Custom View
 
-- ✅ 工作流、统计、对话、文档、Swagger 等非标准 CRUD
+- ✅ 工作流、统计、对话等非标准 CRUD
 - ✅ Payload 列表/编辑 UI fit 不好的交互
 - ❌ 标准内容文档 CRUD → 用 Collection + 必要时 Custom Field
 

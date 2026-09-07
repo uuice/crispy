@@ -8,7 +8,7 @@ export DATABASE_DRIVER=postgres
 export DATABASE_URL="${DATABASE_URL:-postgresql://crispy:crispy@127.0.0.1:5432/crispy}"
 export PAYLOAD_SECRET="${PAYLOAD_SECRET:-dev-migration-secret}"
 
-# tsx is pinned to 4.21.0 (package.json pnpm.overrides) so migrate:create works on Node 20/22/24.
+# Payload ≥3.85.2: migrate:create works on Node 20/22/24 (no tsx pin required).
 echo "→ Starting PostgreSQL (docker compose)…"
 docker compose up -d --wait
 

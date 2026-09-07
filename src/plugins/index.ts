@@ -27,7 +27,7 @@ import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Crispy` : 'Crispy CMS'
+  return doc?.title ? `${doc.title} | Crispy` : 'Crispy'
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {

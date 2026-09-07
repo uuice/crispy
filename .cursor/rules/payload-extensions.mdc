@@ -9,7 +9,7 @@ alwaysApply: false
 ## 扩展分层
 
 ```
-产品层（AI / 审计 / OpenAPI / stats）→ 自有 src/ 模块
+产品层（AI / 审计 / stats）→ 自有 src/ 模块
 横切 Plugin                          → src/plugins/enableXxx.ts
 Payload 原生                         → Collections / Access / Admin
 ```

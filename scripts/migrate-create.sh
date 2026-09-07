@@ -19,8 +19,8 @@ if [[ ! "$DATABASE_URL" =~ ^postgres(ql)?:// ]]; then
   exit 1
 fi
 
-# Node 24 + tsx≥4.21.1 can hit ENOENT on node:crypto (Payload #16949 / tsx #801).
-# Crispy pins tsx@4.21.0 via pnpm.overrides so Node 20/22/24 all work for migrate:create.
+# Payload ≥3.85.2 disables tsx registerHooks in bin.js, so migrate:create works on Node 20/22/24
+# without pinning an older tsx (see Payload #16949).
 if ! command -v docker >/dev/null 2>&1; then
   echo "Warning: Docker not found. Ensure PostgreSQL is reachable at DATABASE_URL." >&2
 else

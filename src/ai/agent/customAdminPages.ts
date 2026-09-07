@@ -32,5 +32,4 @@ export const CUSTOM_ADMIN_PAGES: CustomAdminPage[] = [
     group: adminLabels.toolsGroup,
     anyOf: ['cache:manage'],
   },
-  { path: '/api-docs', label: 'Swagger API', group: adminLabels.toolsGroup },
 ]

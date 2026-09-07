@@ -22,7 +22,7 @@ function disabledConfig(from?: Partial<ResolvedEmailConfig>): ResolvedEmailConfi
     smtpPort: 587,
     smtpSecure: false,
     fromAddress: 'noreply@example.com',
-    fromName: 'Crispy CMS',
+    fromName: 'Crispy',
     source: 'none',
     ...from,
   }
@@ -30,7 +30,7 @@ function disabledConfig(from?: Partial<ResolvedEmailConfig>): ResolvedEmailConfi
 
 function fromRuntime(file: EmailRuntimeConfig): ResolvedEmailConfig {
   const fromAddress = file.fromAddress?.trim() || 'noreply@example.com'
-  const fromName = file.fromName?.trim() || 'Crispy CMS'
+  const fromName = file.fromName?.trim() || 'Crispy'
   const formDefaultToEmail = file.formDefaultToEmail?.trim() || undefined
   const overrideRecipient = file.overrideRecipient?.trim() || undefined
 

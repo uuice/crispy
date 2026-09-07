@@ -47,7 +47,7 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     meta: {
-      titleSuffix: '- Crispy CMS',
+      titleSuffix: '- Crispy',
     },
     // Uploadable user avatar; falls back to local SVG (Gravatar is blocked in CN).
     avatar: {
@@ -63,11 +63,6 @@ export default buildConfig({
       afterNavLinks: ['@/components/AdminAfterNavLinks'],
       providers: ['@/components/AdminThemeProvider', '@/components/AdminAiAgent/AdminAiAgentProvider'],
       views: {
-        apiDocs: {
-          Component: '@/app/(payload)/admin/api-docs/SwaggerView',
-          path: '/api-docs',
-          exact: true,
-        },
         aiAgent: {
           Component: '@/app/(payload)/admin/ai-agent/AiAgentView',
           path: '/ai-agent',

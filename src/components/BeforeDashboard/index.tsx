@@ -9,7 +9,7 @@ const BeforeDashboard: React.FC = () => {
   return (
     <div className={baseClass}>
       <Banner className={`${baseClass}__banner`} type="success">
-        <h4>欢迎使用 Crispy CMS</h4>
+        <h4>欢迎使用 Crispy</h4>
       </Banner>
       建议按以下步骤开始：
       <ul className={`${baseClass}__instructions`}>

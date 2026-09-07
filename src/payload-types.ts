@@ -3894,7 +3894,7 @@ export interface EmailSetting {
    */
   fromAddress?: string | null;
   /**
-   * 默认发件名称；空则 Crispy CMS
+   * 默认发件名称；空则 Crispy
    */
   fromName?: string | null;
   /**

@@ -268,7 +268,7 @@ export function AdminAiAgentChatPanel({ variant = 'widget', onClose }: ChatPanel
 
           {!isLoadingSession && messages.length === 0 && (
             <div className="admin-ai-agent__empty">
-              <p>你好！我是 Crispy CMS 的全局 AI 助手。</p>
+              <p>你好！我是 Crispy 的全局 AI 助手。</p>
               <p>对话会自动保存，可在左侧查看历史会话。</p>
               <ul>
                 <li>列出最近发布的 5 篇文章</li>

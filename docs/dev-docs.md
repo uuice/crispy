@@ -13,14 +13,13 @@
 - [权限列表（RBAC）](#permissions)
 - [Admin AI（DeepSeek / OpenAI 兼容）](#ai)
 - [OpenAI 兼容 API 文档](#openai-api)
-- [Swagger / OpenAPI](#swagger)
 - [MCP 连接](#mcp)
 - [运营能力（重定向 / 邮件 / 导入导出 / 搜索）](#cms-operations)
 - [部署与迁移](#deploy)
 - [Payload 版本升级 SOP](#payload-upgrade)
 - [依赖升级节奏](#deps-upgrade)
 - [前台缓存（Database Cache）](#frontend-cache)
-- [前台](#frontend-themes)
+- [前台](#frontend)
 - [CI 与验证](#ci)
 - [配置中心方案（Catalog + Active + Override）](#config-center)
 - [Payload 扩展架构](#architecture)
@@ -31,21 +30,17 @@
 
 <h2 id="overview">概述</h2>
 
-Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js App Router，本地 SQLite 开发、生产 PostgreSQL + 显式迁移。greenfield 重写，与 2.x 无代码继承。main 为稳定主线（生产部署）；v3-payload 用于日常开发、测试与 bug 修复；2.x 已归档至 crispy-2x 与 v2-last。
+Crispy 3.0 是基于 Payload CMS 3 的**个人博客 / 内容站**（非通用多业态 CMS），单仓 Next.js App Router，本地 SQLite、生产 PostgreSQL + 显式迁移。greenfield 重写，与 2.x 无代码继承。`main` 为稳定主线；`v3-payload` / `personal-blog` 等分支用于开发与收窄产品面；2.x 已归档至 crispy-2x 与 v2-last。
 
 | 入口 | URL |
 | --- | --- |
 | 前台 | http://localhost:3333 |
 | Admin | http://localhost:3333/admin |
 | REST API | http://localhost:3333/api |
-| GraphQL API | POST /api/graphql（按 Collection access） |
-| GraphQL Playground | /api/graphql-playground（需 Admin 登录） |
 | MCP | http://localhost:3333/api/mcp |
 | AI 助手（后台） | /admin/ai-agent + POST /api/ai/agent（需 Admin 登录） |
 | AI 助手（前台） | 右下角浮窗 + POST /api/ai/assistant（公开只读） |
 | AI 文档 | #openai-api |
-| Swagger API | /admin/api-docs（需 Admin 登录） |
-| OpenAPI JSON | GET /api/openapi.json（需 Admin 登录） |
 | 前台缓存管理 | /admin/cache（cache:manage） |
 | 缓存配置 Global | /admin/globals/cache-settings（settings:site） |
 | 配置中心方案 | #config-center |
@@ -62,7 +57,7 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 | 编辑器 | Lexical（Payload 内置） |
 | 样式 | Tailwind 4 + Payload Admin UI |
 | 包管理 | pnpm |
-| 运行时 | Node 20+（推荐 22 LTS；migrate:create 依赖 pnpm.overrides 钉死 tsx@4.21.0） |
+| 运行时 | Node 20+（推荐 22 LTS；Payload≥3.85.2 后 migrate:create 在 20/22/24 均可） |
 | LLM | DeepSeek（OpenAI 兼容 Chat Completions API） |
 
 ### 官方插件（已启用）
@@ -84,7 +79,7 @@ Crispy 3.0 是基于 Payload CMS 3 的通用内容管理系统，单仓 Next.js 
 
 ### 明确不使用
 
-Prisma、Hono、自研 Admin RPC、NextAuth 独立层、MySQL。
+Prisma、Hono、自研 Admin RPC、NextAuth 独立层、MySQL。**GraphQL 已关闭**（`graphQL.disable: true`：Roles.permissions 含 `:`，非法 GraphQL enum 名；`graphql` 包仍作 Payload peer 保留）。
 
 <h2 id="structure">目录结构</h2>
 
@@ -136,7 +131,7 @@ crispy/
 | PAYLOAD_SECRET | JWT 加密（openssl rand -hex 32） |
 | NEXT_PUBLIC_SERVER_URL | 站点公网 URL，默认 http://localhost:3333 |
 | PREVIEW_SECRET | 草稿 / Live Preview 鉴权 |
-| CRON_SECRET | 定时发布 Jobs 鉴权 |
+| CRON_SECRET | Payload Jobs（定时发布等）任务鉴权 |
 | MCP_API_KEY | 本地 MCP 用，在 Admin → MCP → API Keys 创建 |
 | CRISPY_FRONTEND_HTML_CACHE | 仅开发：覆盖 cache-settings HTML 缓存开关 |
 
@@ -162,7 +157,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 | pnpm cli db:bootstrap | 首次迁移（Docker Postgres） |
 | pnpm cli db:create <name> | Schema 变更后新建迁移 |
 | pnpm cli quality:ci | 本地 CI：lint + tsc + test + build |
-| pnpm cli generate:types\|importmap\|openapi | 类型 / import map / OpenAPI |
+| pnpm cli generate:types\|importmap | 类型 / import map |
 | pnpm cli util:repair-authz\|sync-oss-sizes\|test-oss\|… | 运维脚本（authz / OSS / versions）；pnpm cli help util |
 | — | Payload 版本升级 SOP：见 #payload-upgrade |
 
@@ -244,7 +239,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 - 缓存读写：src/access/authzCache.ts；Collection：roles、authz-cache
 - 系统角色确保：src/access/ensureSystemRoles.ts（onInit）
 - Agent 映射：src/ai/agent/access.ts（与 Admin permission 对齐；posts 无 update:any 时仅自己的稿）
-- API Session：requirePermissionSession（如 cache:manage）；OpenAPI：requireAdminSession
+- API Session：requirePermissionSession（如 cache:manage）；部分内部路由：requireAdminSession
 - 主题预览：/me 附带 permissions；middleware 要求 settings:site | pages:manage | ops:manage
 - 迁移：20260720_100000_authz_roles；修缓存可 pnpm exec tsx scripts/repair-authz.ts
 
@@ -281,9 +276,7 @@ LLM / S3 / Email 密钥与端点改在 Admin 配置中心维护，不再使用 .
 
 | 路由 | 鉴权 | 说明 |
 | --- | --- | --- |
-| GET /api/openapi.json | Admin Cookie | Swagger Spec；未登录 401 |
-| GET /api/graphql-playground | Admin Cookie | GraphQL Playground；未登录 401 |
-| POST /api/graphql | 按 Collection access | Cookie / users API-Key；权限与 REST 一致 |
+| GET /api/admin/cache* 等 | cache:manage | requirePermissionSession |
 | POST /api/ai/agent | Admin Cookie + can() | 后台对话助手；工具层与 Collection access 双检 |
 | GET/DELETE /api/ai/agent/sessions | Admin Cookie + ai:use | 会话列表 / 软删除 |
 | GET/POST /api/ai/assistant | 无（公开） | 前台只读助手 |
@@ -400,48 +393,6 @@ Collection prompt-templates：按 action 维护 systemPrompt / userPrompt，可�
 - Admin：/admin/ai-agent 对话
 - 代码入口：src/app/(payload)/api/ai/agent/route.ts
 - OpenAI 官方文档：https://platform.openai.com/docs/api-reference/chat
-
-<h2 id="swagger">Swagger / OpenAPI</h2>
-
-Crispy 从 Payload 运行时配置自动生成 OpenAPI 3.0 文档，覆盖全部 Collection/Global REST、Auth、AI、MCP、GraphQL 与内部路由。新增 Collection 或插件后无需手写，刷新 Spec 即可同步。**OpenAPI JSON 需 Admin 登录**，与 Swagger UI 一致。
-
-| 入口 | URL |
-| --- | --- |
-| Swagger UI（Admin） | /admin/api-docs |
-| OpenAPI JSON（动态） | GET /api/openapi.json（需 Admin Cookie） |
-| 静态文件（本地可选） | public/openapi.json（pnpm cli generate:openapi；勿在生产公开托管） |
-
-### 主题
-
-Swagger UI 自动跟随 Admin 主题（html[data-theme]）：右上角切换浅色/深色时，文档区同步更新，使用与后台一致的 --crispy-admin-surface、--theme-text 等变量。
-
-### 自动生成范围
-
-- 每个 Collection：GET/POST /api/{slug}、GET/PATCH/DELETE /api/{slug}/{id}、GET /api/{slug}/count
-- 每个 Global：GET/POST /api/globals/{slug}
-- Auth：login / logout / me / refresh-token
-- AI：/api/ai/agent（含 request/response schema）
-- 前台 AI：GET/POST /api/ai/assistant（公开只读）
-- MCP：POST /api/mcp（JSON-RPC）
-- GraphQL：POST /api/graphql（按 Collection access）
-- GraphQL Playground：GET /api/graphql-playground（需 Admin 登录）
-- 插件 Collection 随 getPayload().config.collections 自动纳入
-
-### 命令与代码
-
-```
-pnpm cli generate:openapi    # 写入 public/openapi.json（本地备份，生产勿公开）
-# 实现：src/openapi/buildDocument.ts
-# 路由：src/app/(payload)/api/openapi/route.ts（requireAdminSession）
-```
-
-### 鉴权方案（components.securitySchemes）
-
-| Scheme | 用途 |
-| --- | --- |
-| cookieAuth | Admin 会话 payload-token |
-| usersApiKey | Header: Authorization: users API-Key <key> |
-| mcpBearer | MCP API Key Bearer |
 
 <h2 id="mcp">MCP 连接</h2>
 
@@ -597,9 +548,9 @@ docker run -p 3333:3333 \
 - SQLite: 复制 .data/payload.db
 - 媒体: public/media/ 或 S3 bucket
 
-### 低内存 / 静态边缘（未实现）
+### 低内存部署说明
 
-Payload + Next 常驻约 350MB+，不适合 1G 机器 24 小时跑整站。规划：本机 Admin 发文并导出 HTML/JSON，1G 只跑 Go 小服务（静态文件 + 短链/重定向 + 前台 AI）。详见仓库 docs/static-edge.md。当前生产仍用 standalone + PM2。
+Payload + Next 常驻约 350MB+，不适合 1G 机器 24 小时跑整站。当前生产仍用 standalone + PM2；更轻量的边缘方案不在本仓库实现范围内。
 
 <h2 id="payload-upgrade">Payload 版本升级 SOP</h2>
 
@@ -611,7 +562,7 @@ Crispy 是 Payload 3 上的二次开发，不是 fork。与官方同步的核心
 | --- | --- | --- |
 | 数据层 | Collection/插件表结构、迁移格式 | src/collections/、src/migrations/ |
 | Admin | @payloadcms/ui API、Lexical、Custom View 约定 | src/app/(payload)/admin/*、AI 组件 |
-| API | REST/GraphQL、@payloadcms/next 路由 | src/app/(payload)/api/ai/*、internal API |
+| API | REST、@payloadcms/next 路由 | src/app/(payload)/api/ai/*、internal API |
 | 前台 | Live Preview、AdminBar | src/frontend/、middleware、frontend-cache |
 | 插件 | 官方 plugin 配置项 | src/plugins/* 自建 plugin |
 
@@ -704,7 +655,7 @@ pnpm cli quality:ci
 固定钉死、勿随手升：
 
 - `lexical` — 与 `@payloadcms/richtext-lexical` 对齐
-- `tsx@4.21.0` — `pnpm.overrides`，Payload `migrate:create` 依赖
+- `tsx` — 跟随 Payload（当前 4.22.4）；≥3.85.2 后不必再 pin 4.21.0
 
 <h2 id="frontend-cache">前台缓存（Database Cache）</h2>
 
@@ -838,7 +789,7 @@ curl -I http://localhost:3333/
 
 发布/修改内容后，到 /admin/cache 手动清除相关路径或「清除全部」，否则访客可能继续看到旧 HTML（直到 TTL 过期）。
 
-<h2 id="frontend-themes">前台</h2>
+<h2 id="frontend">前台</h2>
 
 访客站点代码在 `src/frontend/`，路由在 `src/app/(frontend)/`。页面通过 `renderPage()` 加载对应 View；CSS 写在 `src/frontend/styles.css`，由 `globals.css` 引入，随 Next 编译。
 
@@ -961,12 +912,12 @@ Catalog（多条配置）
 
 <h2 id="architecture">Payload 扩展架构</h2>
 
-Crispy 在 Payload 能力边界内做产品化二次开发：不 fork 核心、不改 node_modules，通过 Plugin、Custom View、薄 wrapper 注入横切行为；差异化能力（AI Agent、审计、OpenAPI、embedding）放在自有模块。
+Crispy 在 Payload 能力边界内做博客站二次开发：不 fork 核心、不改 node_modules，通过 Plugin、Custom View、薄 wrapper 注入横切行为；差异化能力（AI Agent、审计、embedding）放在自有模块。
 
 ```
 ┌─────────────────────────────────────────┐
 │  Crispy 产品层                           │
-│  AI Agent · 前台助手 · 主题 · 审计 · OpenAPI   │
+│  AI Agent · 前台助手 · 主题 · 审计        │
 ├─────────────────────────────────────────┤
 │  横切 Plugin（src/plugins/）             │
 │  trash/versions · query presets            │
@@ -995,9 +946,9 @@ Payload 的 delete() 为硬删；启用 trash 后须 update({ deletedAt }) 才�
 | Plugin 注入 config | 全 Collection 横切行为 | enableTrashAndVersionsPlugin |
 | Collection hooks / access | 单 Collection 业务规则 | restrictAuthorPublish、syncContentEmbedding 等 |
 | Custom Field 组件 | 字段级 UI | 业务刚需字段（非官方默认交互） |
-| Custom View（admin.views） | 独立 Admin 页面（侧栏「工具」） | api-docs、ai-agent、cache、stats |
+| Custom View（admin.views） | 独立 Admin 页面（侧栏「工具」） | ai-agent、cache、stats |
 | utilities 薄封装 | Payload API 语义不足 | trashOrDeleteDocument |
-| 独立 API 路由 | 非 CRUD 能力 | /api/ai/*（Admin）、/api/ai/assistant（前台）、/api/openapi.json |
+| 独立 API 路由 | 非 CRUD 能力 | /api/ai/*（Admin）、/api/ai/assistant（前台） |
 | 前台 Next.js | 访客站点（`src/frontend/` + DB HTML 缓存） | src/app/(frontend)/、src/frontend/ |
 
 ### 禁止 / 慎用
@@ -1256,7 +1207,7 @@ data: {"type":"error","error":"AI 助手暂未开启"}
 - 软删除调用：trashOrDeleteDocument，勿直接 payload.delete()
 - 扩展红线与 Payload 升级：见 #payload-upgrade（原则见 #architecture）
 - 前台路由：src/app/(frontend)/
-- 前台：src/frontend/（见 #frontend-themes）
+- 前台：src/frontend/（见 #frontend）
 - 前台 AI：src/ai/frontend-assistant/（见 #frontend-ai-assistant）
 - Revalidation：内容变更后不自动清缓存；手动 /admin/cache 清除（见 #frontend-cache）
 - 中文 Slug：chineseSlugField + pinyin-pro hook

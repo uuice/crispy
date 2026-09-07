@@ -147,6 +147,6 @@ export async function listAdminMenuForAgent(
     serverURL,
     groups: groups.filter((group) => group.items.length > 0),
     note:
-      '侧栏为官方 Collection/Global，底部「工具」分组含自定义页（AI 助手、缓存、统计、Swagger）。回复必须用 Markdown 链接：[label](href) 或 [label](url)。禁止自行拼接域名或省略 /admin。',
+      '侧栏为官方 Collection/Global，底部「工具」分组含自定义页（AI 助手、缓存、统计）。回复必须用 Markdown 链接：[label](href) 或 [label](url)。禁止自行拼接域名或省略 /admin。',
   }
 }

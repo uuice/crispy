@@ -23,7 +23,7 @@
 | Unsplash 图库引用 | **已删**（2026-08-27；配图走 Media / OSS 上传） |
 | Stats / Dev Docs 内嵌 | **建议删或迁出** |
 | **自研 Admin Nav** | **已删**（2026-08-27；回归官方 Nav） |
-| 侧栏自定义入口 | **底部「工具」分组**（afterNavLinks；AI / 缓存 / 统计 / Swagger） |
+| 侧栏自定义入口 | **底部「工具」分组**（afterNavLinks；AI / 缓存 / 统计） |
 | Cache **引擎** | **Keep**；管理 UI 可瘦或删页 |
 | Themes（已收进 `src/frontend/`） / 业务 Collection / OSS Media | **Keep**（本地/OSS 上传仍是主路径） |
 
@@ -45,7 +45,7 @@
 
 | 模块 | 路径（示意） | 结果 |
 |------|----------------|------|
-| 字段包装 | `src/fields/ai/`、`withAiTextField` / `withAiRewriteFeatures` | 已删；Posts/Pages/Jobs/… 无内联 AI 按钮 |
+| 字段包装 | `src/fields/ai/`、`withAiTextField` / `withAiRewriteFeatures` | 已删；Posts/Pages 等无内联 AI 按钮 |
 | Admin 字段 UI | `src/components/AdminAi/`（Suggest / SEO / Assist / Lexical rewrite） | 已删；`AiIcon` 挪到 `src/components/AiIcon.tsx`（Agent / 前台助手仍用） |
 | Completion API | `api/ai/complete` / `stream` / `structured` | 已删（仅字段 AI 使用） |
 
@@ -71,7 +71,6 @@
 | AI 内容助手 | 浮窗 + 侧栏「工具」；全屏页 `/admin/ai-agent` |
 | 缓存管理 | 侧栏「工具」或 `/admin/cache` |
 | 内容统计 | 侧栏「工具」或 `/admin/stats` |
-| Swagger API | 侧栏「工具」或 `/admin/api-docs` |
 
 Agent `list_admin_menu` 使用同一份清单（`src/ai/agent/customAdminPages.ts`）。**不再** fork `admin.components.Nav`。
 
@@ -86,7 +85,6 @@ Postgres 迁移：`20260827_150000_drop_frontend_theme`。
 | 能力 | 建议 |
 |------|------|
 | Cache 管理页 `admin/cache/` | **引擎 Keep**；页与侧栏可删，清缓存 / 改 TTL 走 Agent（或 MCP） |
-| Swagger `admin/api-docs/` | 可选删页；需要时问 Agent 或直接打开 URL / 仓库文档 |
 | 前台访客助手 | 与 Admin Agent 无重叠；按产品要不要单独决定 |
 | Embeddings / 语义搜 | 若生产在用则留；Agent/MCP 的 `semantic_search` 依赖它时勿删 |
 
@@ -144,7 +142,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 ## 5. 将来实施顺序（Payload 4.0 升级时一并做）
 
 1. Stats 按 §3.3 删除（AI Canvases、字段 AI、Dev Docs、Unsplash、自研 Nav 已删）。
-2. Cache（及可选 Swagger）管理页删除或停用；能力留在 Agent tools。
+2. Cache 管理页删除或停用；能力留在 Agent tools。
 3. （可选）Agent 欢迎语 / systemPrompt 补充「清缓存、统计、配置」等快捷说明。
 4. 回归：Agent 浮窗与常用工具、MCP、Media 上传、前台缓存、官方侧栏冒烟。
 
@@ -154,7 +152,7 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 |------|------|--------|
 | importMap 自建条目 | ~27 | **~11～14**（约一半） |
 | 自定义侧栏项 | **1 组（工具，afterNavLinks）** | **1 组** |
-| 自定义 View | 4（已去掉 dev-docs 与 AI 画布） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
+| 自定义 View | **3**（ai-agent / cache / stats；Swagger 已删） | **0～1**（可选只留 Agent 全屏；浮窗即可） |
 | 自研 Nav | **无** | **无**（官方） |
 | 字段 AI 等 | **无** | **无** |
 
@@ -197,3 +195,4 @@ Unsplash 本身还带走：`UnsplashImportPill`、API、`src/unsplash/**`、Agen
 - 2026-08-27 — 字段 AI 已删除（`withAi*` / Assist·SEO 面板 / Lexical rewrite / `/api/ai/complete|stream|structured`）；Agent 与 LLM 配置中心保留。
 - 2026-08-27 — 自研 Admin Nav 已删，侧栏与仪表盘卡片回归官方；自定义 View 改挂官方 `afterNavLinks`「工具」分组。
 - 2026-08-27 — 去掉 cms / kb 与主题切换、预览；随后删除 `src/themes/`，前台收进 `src/frontend/`。Postgres 迁移 `20260827_150000_drop_frontend_theme`。
+- 2026-09-07 — Swagger / OpenAPI 已删（Admin `/api-docs`、`/api/openapi.json`、`src/openapi/`、`generate:openapi`、`swagger-ui-dist`）；对接看 REST + `docs/dev-docs.md` / MCP。

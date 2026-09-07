@@ -6,7 +6,10 @@ import { resolveNavLinkUrl } from './resolveNavLink'
 
 type GlobalNavItems = Header['navItems'] | Footer['navItems']
 
-/** Paths removed from the frontend; skip leftover CMS nav entries. */
+/**
+ * Paths for removed frontend products (games / jobs / novels).
+ * Keep filtering so leftover Header/Footer custom URLs do not 404 in nav.
+ */
 export function isRetiredFrontendPath(url: string): boolean {
   const path = url.split('?')[0]?.replace(/\/$/, '') || ''
   return (

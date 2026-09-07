@@ -60,7 +60,7 @@ export const EmailSettings: GlobalConfig = {
           label: adminLabels.emailFromName,
           admin: {
             width: '50%',
-            description: '默认发件名称；空则 Crispy CMS',
+            description: '默认发件名称；空则 Crispy',
           },
         },
       ],

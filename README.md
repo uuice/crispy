@@ -1,6 +1,6 @@
 # Crispy 3.0
 
-基于 **Payload CMS 3** 的通用内容管理系统。在 Payload 原生 REST / GraphQL / Admin / 插件体系之上，叠加 Crispy 产品层 API 与运营能力。
+基于 **Payload CMS 3** 的个人博客 / 内容站。文章与页面为主，叠加 REST、Admin、后台 AI Agent 与 MCP（GraphQL 已关闭）。不再定位为「通用多业态 CMS」。
 
 ## 快速开始
 
@@ -14,30 +14,29 @@ pnpm cli dev:dev              # http://localhost:3333
 
 生产环境使用 **PostgreSQL**，`DATABASE_PUSH=false`，部署前执行 `pnpm cli db:migrate`。完整说明见 **[二次开发文档](docs/dev-docs.md)**。
 
-低内存机器（约 1G）不建议常驻 Node；静态导出 + Go 边缘的方案见 [`docs/static-edge.md`](docs/static-edge.md)（仅文档，尚未实现）。
+低内存机器（约 1G）不建议常驻完整 Node（Payload + Next）；当前生产仍用 standalone + PM2。
 
-## Payload 原生能力
+## Payload 能力（博客相关）
 
-Crispy 不 fork Payload，核心能力均来自官方栈与插件：
+Crispy 不 fork Payload，核心能力来自官方栈与插件：
 
 | 能力 | 说明 |
 | ---- | ---- |
 | **REST API** | `GET/POST/PATCH/DELETE /api/{collection}`，按 Collection `access` 鉴权 |
-| **GraphQL** | `POST /api/graphql`；Playground：`/api/graphql-playground`（需 Admin 登录） |
 | **Admin** | Lexical 富文本、Live Preview、草稿 / 定时发布、版本历史、媒体文件夹 |
 | **SEO 插件** | posts / pages 的 meta title / description / image |
 | **Search 插件** | posts、pages、galleries 站内搜索索引 |
-| **Redirects 插件** | Admin 配置 URL 重定向（Crispy 接入 middleware 实时生效） |
+| **Redirects 插件** | Admin 配置 URL 重定向（middleware 实时生效） |
 | **Nested Docs** | categories 嵌套分类与面包屑 URL |
-| **Form Builder** | 表单定义 + `POST /api/form-submissions` 提交（可配邮件通知） |
-| **Import/Export** | Admin 批量导入导出多 Collection |
-| **MCP 插件** | `POST /api/mcp` JSON-RPC，外部 Agent 读写内容 |
-| **S3 Storage** | Admin 存储目标 + 存储设置；media 存对象存储 |
-| **Jobs** | 定时发布（`schedulePublish`）、导入导出任务等 |
+| **Form Builder** | 可选：联系表单等（`POST /api/form-submissions`） |
+| **Import/Export** | Admin 批量导入导出 |
+| **MCP 插件** | `POST /api/mcp`，外部 Agent 读写内容 |
+| **S3 Storage** | 媒体对象存储（可选） |
+| **Jobs** | Payload 任务队列：定时发布、导入导出等 |
 
-**内容模型（节选）**：pages（Hero + Blocks）、posts（Lexical + 分类/标签）、media、categories、tags、galleries / gallery-items、comments、users / roles（RBAC）等。插件自动创建 redirects、forms、search、exports 等表。
+**内容模型（博客向）**：posts（Lexical + 分类/标签）、pages、media、categories、tags、comments；可选 galleries、短链、友链等。插件表：redirects、forms、search、exports 等。
 
-**RBAC**：代码 Permission 枚举 + 后台可配 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`（见文末）。详情：[dev-docs — 权限](docs/dev-docs.md#permissions)。
+**RBAC**：Permission 枚举 + 后台 Roles + `authz-cache`；系统三角色 `super-admin` / `editor` / `author`。详情：[dev-docs — 权限](docs/dev-docs.md#permissions)。
 
 ## API 一览
 
@@ -47,7 +46,6 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | ---- | ---- | ---- | ---- |
 | `/api/{collection}` | REST | JWT / API Key / 公开 read | 标准 CRUD + count |
 | `/api/globals/{slug}` | REST | 按 Global access | header、footer、site-settings 等 |
-| `/api/graphql` | POST | 按 Collection access | GraphQL 查询与变更 |
 | `/api/form-submissions` | POST | 匿名（插件默认） | 前台表单提交 |
 | `/api/mcp` | POST | Bearer MCP Key 或 `users API-Key` | JSON-RPC，见 [MCP 章节](#mcp) |
 
@@ -55,8 +53,6 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 
 | 端点 | 方法 | 鉴权 | 说明 |
 | ---- | ---- | ---- | ---- |
-| `/api/openapi.json` | GET | Admin 登录 | OpenAPI 3.0 文档（动态生成） |
-| `/admin/api-docs` | GET | Admin 登录 | Swagger UI |
 | `/api/ai/agent` | POST | Admin | 后台对话助手 SSE（Function Calling CRUD） |
 | `/api/ai/agent/sessions` | GET/DELETE | Admin | 助手会话列表 / 删除 |
 | `/api/ai/assistant` | GET/POST | **公开** | 前台只读检索助手（SSE） |
@@ -64,7 +60,7 @@ Crispy 不 fork Payload，核心能力均来自官方栈与插件：
 | `/api/internal/redirects` | GET | 内部 | middleware 拉取重定向映射（60s 缓存） |
 | `/api/internal/route-cache-*` | POST | 内部 | 前台 HTML 缓存读写 |
 
-OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详见 [dev-docs — OpenAPI](docs/dev-docs.md#openapi)。
+对接说明见 [dev-docs](docs/dev-docs.md)（REST / MCP / AI）；已不再提供 Swagger / OpenAPI Spec。
 
 ## Crispy 新增能力
 
@@ -93,9 +89,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | 前台 | http://localhost:3333 |
 | Admin | http://localhost:3333/admin |
 | REST | http://localhost:3333/api |
-| GraphQL | http://localhost:3333/api/graphql |
 | MCP | http://localhost:3333/api/mcp |
-| Swagger | http://localhost:3333/admin/api-docs |
 | 后台 AI | http://localhost:3333/admin/ai-agent |
 | 二次开发文档 | [docs/dev-docs.md](docs/dev-docs.md) |
 
@@ -118,7 +112,7 @@ OpenAPI 覆盖全部 Collection、Globals、插件表及上述 AI 路由。详�
 | `pnpm cli dev:dev` | 开发服务器（3333） |
 | `pnpm cli dev:build` | 生产构建 |
 | `pnpm cli db:migrate` | Postgres 迁移（生产必跑） |
-| `pnpm cli db:create <name>` | 新建迁移（需 Postgres；tsx 已 pin，Node 20/22/24 均可） |
+| `pnpm cli db:create <name>` | 新建迁移（需 Postgres；Node 20/22/24 均可） |
 | `pnpm cli generate:types` | 生成 `payload-types.ts` |
 | `pnpm cli quality:ci` | lint + tsc + test + build |
 | `pnpm cli util:repair-authz` | 重建系统角色 / authz-cache |
@@ -157,7 +151,7 @@ MCP 可访问 posts、pages、categories、tags、links、galleries、gallery-it
 
 ## 分支与 2.x
 
-Crispy 3.0 为 greenfield 重写，不继承 2.x 代码。2.x 已归档至 `crispy-2x` 分支与 `v2-last` 标签。
+Crispy 3.0 为面向个人博客的 greenfield 重写，不继承 2.x 代码。2.x 已归档至 `crispy-2x` 分支与 `v2-last` 标签。
 
 | 分支 | 用途 |
 | ---- | ---- |
