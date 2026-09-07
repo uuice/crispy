@@ -18,6 +18,7 @@
 - [运营能力（重定向 / 邮件 / 导入导出 / 搜索）](#cms-operations)
 - [部署与迁移](#deploy)
 - [Payload 版本升级 SOP](#payload-upgrade)
+- [依赖升级节奏](#deps-upgrade)
 - [前台缓存（Database Cache）](#frontend-cache)
 - [前台](#frontend-themes)
 - [CI 与验证](#ci)
@@ -616,7 +617,7 @@ Crispy 是 Payload 3 上的二次开发，不是 fork。与官方同步的核心
 
 ### 版本锁定铁律
 
-- payload 与全部 @payloadcms/*（db、next、ui、richtext-lexical、各 plugin…）必须同一版本号，见 package.json（当前 3.86.0）
+- payload 与全部 @payloadcms/*（db、next、ui、richtext-lexical、各 plugin…）必须同一版本号，见 package.json（当前 3.88.0）
 - 不要用 ^ 让 pnpm 自动漂到不同小版本
 - Next.js 大版本升级需对照 Payload 官方兼容说明，勿单独猛升 Next
 - lexical 版本与 @payloadcms/richtext-lexical 要求保持一致
@@ -688,6 +689,22 @@ pnpm cli quality:ci
 - 用 SQLite 跑 db:create（会读 Postgres snapshot 失败；见 src/migrations/README.md）
 
 扩展原则与禁止模式详见 #architecture；自建 Plugin 说明见 #payload-plugins。
+
+<h2 id="deps-upgrade">依赖升级节奏</h2>
+
+目标：安全补丁与小版本常青，大版本按需、有分支。手动维护：`pnpm outdated` → 改 `package.json` → `pnpm install` → `pnpm cli quality:ci`。
+
+| 类型 | 节奏 | 做法 |
+| --- | --- | --- |
+| Payload / `@payloadcms/*` | 有稳定 release 再升 | 走 #payload-upgrade；全家桶同版本 |
+| Next / React / types | 跟 Payload 兼容矩阵 | 小版本可跟；大版本单独评估 |
+| 其它 minor/patch | 定期（建议每月） | 升完跑 `pnpm cli quality:ci` |
+| 高风险 major（zod / eslint / TS / vitest / graphql / lucide 等） | 手动评估 | 单独分支 + 读 changelog |
+
+固定钉死、勿随手升：
+
+- `lexical` — 与 `@payloadcms/richtext-lexical` 对齐
+- `tsx@4.21.0` — `pnpm.overrides`，Payload `migrate:create` 依赖
 
 <h2 id="frontend-cache">前台缓存（Database Cache）</h2>
 
