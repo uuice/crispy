@@ -60,7 +60,8 @@ function fromRuntime(file: StorageRuntimeConfig): ResolvedStorageConfig | null {
 /**
  * Sync resolver for plugin bootstrap and upload helpers.
  * Reads Admin Active via .data/storage-runtime.json only (no S3_* env fallback).
- * Set CRISPY_DISABLE_S3=true to force local/no-plugin (e.g. pg→sqlite import; files already on OSS).
+ * Set CRISPY_DISABLE_S3=true to force local mode (no S3 adapter/uploads).
+ * The storage plugin still inserts media.prefix via alwaysInsertFields when disabled.
  */
 export function resolveStorageConfigSync(): ResolvedStorageConfig {
   if (process.env.CRISPY_DISABLE_S3 === 'true') {

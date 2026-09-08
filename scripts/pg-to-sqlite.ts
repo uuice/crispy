@@ -292,7 +292,7 @@ async function importToSqlite(dumpPath: string): Promise<void> {
   process.env.DATABASE_PUSH = 'true'
   process.env.PGVECTOR_ENABLED = 'false'
   process.env.CRISPY_ALLOW_ID_ON_CREATE = 'true'
-  // Files already live on OSS — do not load S3 plugin or re-upload.
+  // Disable S3 adapter/uploads (files already on OSS). Plugin still inserts media.prefix.
   process.env.CRISPY_DISABLE_S3 = 'true'
   // Avoid ensureSystemRoles racing with role import; keep jobs from holding the process.
   process.env.CRISPY_SKIP_ONINIT = 'true'

@@ -7,14 +7,31 @@ export function isS3Enabled(): boolean {
   return resolveStorageConfigSync().enabled
 }
 
-export function createS3StoragePlugin(): Plugin | null {
+/**
+ * Always register the S3 storage plugin so `media.prefix` exists in the DB schema.
+ * When S3 is off (or CRISPY_DISABLE_S3=true), use enabled:false + alwaysInsertFields
+ * so push/import still creates `prefix` without uploading to OSS.
+ */
+export function createS3StoragePlugin(): Plugin {
   const config = resolveStorageConfigSync()
+
   if (!config.enabled) {
-    return null
+    return s3Storage({
+      enabled: false,
+      alwaysInsertFields: true,
+      collections: {
+        media: {
+          prefix: config.prefix || 'media',
+        },
+      },
+      bucket: 'unused',
+      config: {},
+    })
   }
 
   return s3Storage({
     enabled: true,
+    alwaysInsertFields: true,
     collections: {
       media: {
         prefix: config.prefix,

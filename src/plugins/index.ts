@@ -36,8 +36,6 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
 
-const s3StoragePlugin = createS3StoragePlugin()
-
 export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
@@ -289,5 +287,5 @@ export const plugins: Plugin[] = [
   enableQueryPresetsPlugin(),
   enableTrashAndVersionsPlugin(),
   localizeFieldLabelsPlugin(),
-  ...(s3StoragePlugin ? [s3StoragePlugin] : []),
+  createS3StoragePlugin(),
 ]
