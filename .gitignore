@@ -3,6 +3,9 @@ dist/
 node_modules
 .DS_Store
 .env
+.env.sqlite
+.env.local
+.local.env
 .idea/
 .next
 next-env.d.ts

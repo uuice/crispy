@@ -77,12 +77,16 @@ export function createDatabaseAdapter() {
   const driver = resolveDatabaseDriver()
   const url = resolveDatabaseUrl(driver)
 
+  // Used by scripts/pg-to-sqlite.ts so relationship IDs survive the copy.
+  const allowIDOnCreate = process.env.CRISPY_ALLOW_ID_ON_CREATE === 'true'
+
   if (driver === 'sqlite') {
     return sqliteAdapter({
       client: {
         url,
       },
       push: shouldPushDatabaseSchema(),
+      allowIDOnCreate,
     })
   }
 
@@ -93,5 +97,6 @@ export function createDatabaseAdapter() {
       connectionString: url,
     },
     push: shouldPushDatabaseSchema(),
+    allowIDOnCreate,
   })
 }

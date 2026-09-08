@@ -32,7 +32,9 @@ TIMESTAMP="$(date -u +%Y%m%d%H%M%S)"
 LINUX_ARCH="${LINUX_ARCH:-x64}"
 LINUX_LIBC="${LINUX_LIBC:-glibc}"
 STAGING_DIR="$OUT_DIR/crispy-standalone-$VERSION"
-if [[ "${PACK_LINUX:-}" == "1" ]]; then
+if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+  ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-sqlite-spare-${TIMESTAMP}.tar.gz"
+elif [[ "${PACK_LINUX:-}" == "1" ]]; then
   ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-standalone-${TIMESTAMP}.tar.gz"
 else
   ARCHIVE_NAME="crispy-${VERSION}-standalone-${TIMESTAMP}.tar.gz"
@@ -53,7 +55,21 @@ if [[ "${PACK_LINUX:-}" == "1" ]]; then
     "$STAGING_DIR/.env.production" \
     "$STAGING_DIR/.env.production.local" \
     "$STAGING_DIR/.env.development" \
-    "$STAGING_DIR/.env.development.local"
+    "$STAGING_DIR/.env.development.local" \
+    "$STAGING_DIR/.env.sqlite"
+  # Runtime config may contain S3 / SMTP secrets — never ship
+  rm -f \
+    "$STAGING_DIR/.data/storage-runtime.json" \
+    "$STAGING_DIR/.data/email-runtime.json"
+fi
+
+# SQLite spare site: inject DB only (never ship .env / runtime secrets).
+if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+  echo "→ Injecting SQLite spare DB (.data/payload.db)..."
+  mkdir -p "$STAGING_DIR/.data"
+  cp -a ".data/payload.db" "$STAGING_DIR/.data/payload.db"
+  # Drop sqlite sidecars if any
+  rm -f "$STAGING_DIR/.data/payload.db-wal" "$STAGING_DIR/.data/payload.db-shm" || true
 fi
 
 echo "→ Copying .next/static..."
@@ -83,7 +99,34 @@ fi
 if [[ "${PACK_LINUX:-}" == "1" ]]; then
   echo "→ Patching native modules for linux/${LINUX_ARCH} (${LINUX_LIBC})..."
   PATCH_SOURCE_NEXT_MODULES="$ROOT_DIR/.next/node_modules" node scripts/patch-standalone-linux-native.mjs "$STAGING_DIR"
-  cat > "$STAGING_DIR/start.sh" <<'EOF'
+  if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+    cat > "$STAGING_DIR/start.sh" <<'EOF'
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")"
+
+if [ ! -f .env ]; then
+  echo "error: .env missing. Copy .env.example to .env and configure SQLite (see DEPLOY.txt)." >&2
+  exit 1
+fi
+
+if [ ! -f .data/payload.db ]; then
+  echo "error: .data/payload.db missing." >&2
+  exit 1
+fi
+
+export NODE_ENV="${NODE_ENV:-production}"
+export HOSTNAME="${HOSTNAME:-0.0.0.0}"
+export PORT="${PORT:-3333}"
+# Prefer file env so shell exports cannot override SQLite URL
+if node --env-file=.env -e "process.exit(0)" 2>/dev/null; then
+  exec node --env-file=.env server.js
+fi
+exec node server.js
+EOF
+  else
+    cat > "$STAGING_DIR/start.sh" <<'EOF'
 #!/usr/bin/env sh
 set -eu
 
@@ -99,6 +142,7 @@ export PORT="${PORT:-3333}"
 
 exec node server.js
 EOF
+  fi
 else
   cat > "$STAGING_DIR/start.sh" <<'EOF'
 #!/usr/bin/env sh
@@ -225,7 +269,44 @@ esac
 EOF
 chmod +x "$STAGING_DIR/pm2.sh"
 
-if [[ "${PACK_LINUX:-}" == "1" ]]; then
+if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+  cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
+Crispy SQLite spare-site bundle (linux/${LINUX_ARCH})
+
+Includes app + .data/payload.db. Does NOT include .env or other secrets (configure on server).
+
+1. Extract:
+   mkdir -p /opt/crispy && tar -xzf crispy-*-linux-${LINUX_ARCH}-sqlite-spare-*.tar.gz -C /opt/crispy
+   cd /opt/crispy
+
+2. Install Node.js 22+ on the server (no Docker).
+
+3. Configure environment (required):
+   cp .env.example .env
+   # Required for spare:
+   #   DATABASE_DRIVER=sqlite
+   #   DATABASE_URL=file:./.data/payload.db
+   #   DATABASE_PUSH=false
+   #   PGVECTOR_ENABLED=false
+   #   NEXT_PUBLIC_SERVER_URL=https://your-spare-domain
+   #   PAYLOAD_SECRET / CRON_SECRET
+   # Optional: S3 / email — set in Admin after start, or place storage-runtime.json / email-runtime.json under .data/
+
+4. Start:
+
+   Option A — foreground:
+   ./start.sh
+
+   Option B — PM2:
+   npm i -g pm2
+   ./pm2.sh start
+
+Notes:
+- No db:migrate; schema lives inside payload.db.
+- Do not enable DATABASE_PUSH=true on the spare server.
+- Rebuild content locally with: pnpm cli db:pg-to-sqlite && pnpm cli dev:pack-sqlite-spare
+EOF
+elif [[ "${PACK_LINUX:-}" == "1" ]]; then
   cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
 Crispy standalone deployment bundle (linux/${LINUX_ARCH})
 
@@ -308,5 +389,12 @@ echo ""
 echo "Done: $ARCHIVE_PATH"
 echo "Size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
 echo ""
-echo "On server:"
-echo "  tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy && cp .env.example .env && ./pm2.sh start"
+if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+  echo "On spare server:"
+  echo "  mkdir -p /opt/crispy && tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy"
+  echo "  cp .env.example .env   # set DATABASE_DRIVER=sqlite, DATABASE_URL=file:./.data/payload.db, secrets"
+  echo "  ./start.sh"
+else
+  echo "On server:"
+  echo "  tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy && cp .env.example .env && ./pm2.sh start"
+fi

@@ -80,6 +80,25 @@ const GROUPS = {
         run: () => bashScript('pack-linux-standalone.sh'),
       },
       {
+        id: 'pack-sqlite-spare',
+        summary: 'build + 打包备用站（Linux + SQLite 库，不含 .env）',
+        note:
+          '需已有 .data/payload.db。输出 dist/crispy-*-sqlite-spare-*.tar.gz；包内不含 .env，服务器上 cp .env.example .env 后配置。LINUX_ARCH/LINUX_LIBC 同 pack-linux。',
+        run: async () => {
+          console.log('→ Removing dist/ before build+pack...')
+          rmRf('dist')
+          const build = lookup.get('dev:build')
+          await build.def.run([])
+          bashScript('pack-sqlite-spare.sh')
+        },
+      },
+      {
+        id: 'pack-sqlite-spare-standalone',
+        summary: '仅打包备用站（需已 build）',
+        note: '不重新 build；注入 .data/payload.db，不打包 .env。详见 scripts/pack-sqlite-spare.sh',
+        run: () => bashScript('pack-sqlite-spare.sh'),
+      },
+      {
         id: 'pack-standalone',
         summary: '仅打包 standalone（需已 build）',
         note: '不重新 build；缺少 .next/standalone 会报错。',
@@ -136,6 +155,18 @@ const GROUPS = {
         summary: '一次性 dev schema push（SQLite 漂移修复）',
         note: '需 DATABASE_PUSH=true；慎用，生产禁止 push。',
         run: () => tsxScript('push-dev-schema.ts'),
+      },
+      {
+        id: 'ensure-sqlite-env',
+        summary: '从 .env 生成/刷新 .env.sqlite（备用站用）',
+        note: '写出 gitignore 的 .env.sqlite：SQLite + PGVECTOR_ENABLED=false。拷到备用机可当 .env。',
+        run: () => tsxScript('pg-to-sqlite.ts', ['--ensure-env-only']),
+      },
+      {
+        id: 'pg-to-sqlite',
+        summary: 'Postgres → 新 SQLite（先 push 表结构再灌内容）',
+        note: '读 .env(PG)；刷新 .env.sqlite；备份旧 .data/payload.db；push 表结构后导入。媒体只写元数据（不上传 OSS）。可加 --import-only 复用已有 dump。',
+        run: (args) => tsxScript('pg-to-sqlite.ts', args),
       },
       {
         id: 'docker-build',

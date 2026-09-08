@@ -264,15 +264,9 @@ export function SidebarCountdown({ holidays }: SidebarCountdownProps) {
     >
       <h3 className="section-title">倒计时</h3>
       <div className="mt-2 space-y-2" style={{ color: 'var(--text-muted)' }}>
-        {!now ? (
-          <p className="m-0">加载中...</p>
-        ) : (
-          <>
-            <p className="m-0">{viewModel.workLine}</p>
-            {viewModel.untilWorkLine ? <p className="m-0">{viewModel.untilWorkLine}</p> : null}
-            <p className="m-0">{viewModel.holidayLine}</p>
-          </>
-        )}
+        <p className="m-0">{viewModel.workLine}</p>
+        {viewModel.untilWorkLine ? <p className="m-0">{viewModel.untilWorkLine}</p> : null}
+        <p className="m-0">{viewModel.holidayLine}</p>
       </div>
       {viewModel.pastHolidays.length > 0 ? (
         <div className="mt-3 pt-2 border-t" style={{ borderColor: 'var(--card-border)' }}>

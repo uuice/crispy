@@ -169,6 +169,7 @@ export default buildConfig({
     Users,
   ],
   onInit: async (payload) => {
+    if (process.env.CRISPY_SKIP_ONINIT === 'true') return
     try {
       const { ensureSystemRoles } = await import('./access/ensureSystemRoles')
       const { recomputeAllUserAuthzCaches } = await import('./access/authzCache')
@@ -196,12 +197,15 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
-    autoRun: [
-      {
-        allQueues: true,
-        cron: '*/5 * * * *',
-      },
-    ],
+    autoRun:
+      process.env.CRISPY_SKIP_ONINIT === 'true'
+        ? []
+        : [
+            {
+              allQueues: true,
+              cron: '*/5 * * * *',
+            },
+          ],
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
         // Allow logged in users to execute this endpoint (default)
