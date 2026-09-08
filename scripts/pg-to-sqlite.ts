@@ -12,6 +12,11 @@
  *
  * Skips ephemeral collections (authz-cache, frontend HTML cache, AI sessions).
  * Embeddings / pgvector are not copied.
+ *
+ * Encrypted secrets (LLM apiKey, S3 keys, email passwords):
+ *   Export uses context.preserveEncrypted so dump keeps enc:v1:… ciphertext (not ••••••••).
+ *   Import drops Payload secret masks; spare site needs the same PAYLOAD_SECRET to decrypt.
+ *   Old dumps that only have masks will import empty secrets — re-enter in Admin or re-export.
  */
 import dotenv from 'dotenv'
 import { spawnSync } from 'node:child_process'
@@ -21,6 +26,8 @@ import { fileURLToPath } from 'node:url'
 
 import { getPayload } from 'payload'
 import type { Payload, PayloadRequest, SanitizedConfig } from 'payload'
+
+import { isSecretMask } from '../src/utilities/secretCrypto'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const ENV_PG = path.join(ROOT, '.env')
@@ -124,6 +131,22 @@ const COLLECTION_ORDER = [
 /** AfterRead-only array; inserting it collides with user ids in posts_populated_authors. */
 const STRIP_ON_IMPORT = new Set(['populatedAuthors'])
 
+/** Replace Payload secret masks (••••••••) with empty string — never persist masks as real values. */
+function scrubMaskedSecrets(value: unknown): unknown {
+  if (isSecretMask(value)) return ''
+  if (Array.isArray(value)) {
+    return value.map((item) => scrubMaskedSecrets(item))
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = scrubMaskedSecrets(v)
+    }
+    return out
+  }
+  return value
+}
+
 function sortCommentsParentsFirst(docs: Record<string, unknown>[]): Record<string, unknown>[] {
   const byId = new Map<string | number, Record<string, unknown>>()
   for (const doc of docs) {
@@ -207,6 +230,8 @@ async function findAllDocs(payload: Payload, slug: string): Promise<Record<strin
   for (;;) {
     const result = await payload.find({
       collection: slug as never,
+      // Keep enc:v1:… ciphertext instead of Admin •••••••• masks
+      context: { preserveEncrypted: true },
       depth: 0,
       draft: true,
       limit,
@@ -257,6 +282,7 @@ async function exportFromPostgres(): Promise<string> {
     try {
       const doc = await payload.findGlobal({
         slug: slug as never,
+        context: { preserveEncrypted: true },
         depth: 0,
         overrideAccess: true,
         showHiddenFields: true,
@@ -323,8 +349,17 @@ async function importToSqlite(dumpPath: string): Promise<void> {
     t: (k: string) => k,
   } as unknown as PayloadRequest
 
-  /** Collections where Local API hooks break hash/OSS metadata import. */
-  const useDbCreate = new Set(['roles', 'users', 'media', 'comments', 'payload-mcp-api-keys'])
+  /** Collections where Local API hooks break hash/OSS metadata import, or secrets must skip required validation when masked. */
+  const useDbCreate = new Set([
+    'roles',
+    'users',
+    'media',
+    'comments',
+    'payload-mcp-api-keys',
+    'llm-providers',
+    'storage-targets',
+    'email-transports',
+  ])
   const usedFilenames = new Set<string>()
 
   for (const slug of orderedSlugs(Object.keys(dump.collections))) {
@@ -338,7 +373,7 @@ async function importToSqlite(dumpPath: string): Promise<void> {
     let failed = 0
 
     for (const doc of docs) {
-      const data = { ...doc }
+      const data = scrubMaskedSecrets({ ...doc }) as Record<string, unknown>
       for (const key of STRIP_ON_IMPORT) {
         delete data[key]
       }
@@ -424,7 +459,7 @@ async function importToSqlite(dumpPath: string): Promise<void> {
     if (!doc) continue
     process.stdout.write(`  import global:${slug}… `)
     try {
-      const data = { ...doc }
+      const data = scrubMaskedSecrets({ ...doc }) as Record<string, unknown>
       delete data.id
       delete data.globalType
       await payload.updateGlobal({

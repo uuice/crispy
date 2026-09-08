@@ -41,6 +41,9 @@ function fromRuntime(file: StorageRuntimeConfig): ResolvedStorageConfig | null {
 
   if (!file.bucket || !file.accessKeyId || !file.secretAccessKey) return null
 
+  // Reject Admin masks leaked into runtime (••••••••) — invalid in HTTP Authorization.
+  if (/•/.test(file.accessKeyId) || /•/.test(file.secretAccessKey)) return null
+
   return {
     enabled: true,
     mode: 's3',

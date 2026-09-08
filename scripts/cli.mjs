@@ -165,7 +165,7 @@ const GROUPS = {
       {
         id: 'pg-to-sqlite',
         summary: 'Postgres → 新 SQLite（先 push 表结构再灌内容）',
-        note: '读 .env(PG)；刷新 .env.sqlite；备份旧 .data/payload.db；push 表结构后导入。媒体只写元数据（不上传 OSS）。可加 --import-only 复用已有 dump。',
+        note: '读 .env(PG)；刷新 .env.sqlite；备份旧 .data/payload.db；push 表结构后导入。媒体只写元数据（不上传 OSS）。加密字段导出 ciphertext（非 ••••）；掩码会被丢弃。备用站须同 PAYLOAD_SECRET。可加 --import-only 复用已有 dump。',
         run: (args) => tsxScript('pg-to-sqlite.ts', args),
       },
       {

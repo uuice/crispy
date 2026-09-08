@@ -6,6 +6,11 @@ import { MEDIA_IMAGE_SIZES } from '@/uploads/mediaImageSizes'
 
 type VirtualSizes = NonNullable<Media['sizes']>
 
+type DrizzleClient = {
+  execute?: (query: unknown) => Promise<unknown> | unknown
+  run?: (query: unknown) => Promise<unknown> | unknown
+}
+
 function mediaSizeColumnPrefix(name: string): string {
   return `sizes_${name.replace(/-/g, '_')}`
 }
@@ -37,13 +42,26 @@ export function buildVirtualMediaSizesSqlSets(
   return sets
 }
 
+async function runDrizzleSql(drizzle: DrizzleClient, query: unknown): Promise<void> {
+  // Postgres drizzle exposes execute(); SQLite/libsql uses run().
+  if (typeof drizzle.execute === 'function') {
+    await drizzle.execute(query)
+    return
+  }
+  if (typeof drizzle.run === 'function') {
+    await drizzle.run(query)
+    return
+  }
+  throw new Error('Database drizzle client has neither execute() nor run()')
+}
+
 export async function persistVirtualMediaSizes(
   req: PayloadRequest,
   mediaId: number | string,
   sizes: VirtualSizes,
   thumbnailURL?: string | null,
 ): Promise<void> {
-  const drizzle = req.payload.db.drizzle
+  const drizzle = req.payload.db.drizzle as DrizzleClient | undefined
   if (!drizzle) {
     throw new Error('Database drizzle client unavailable')
   }
@@ -51,9 +69,12 @@ export async function persistVirtualMediaSizes(
   const sets = buildVirtualMediaSizesSqlSets(sizes, thumbnailURL)
   if (sets.length === 0) return
 
-  await drizzle.execute(sql`
+  await runDrizzleSql(
+    drizzle,
+    sql`
     UPDATE media
     SET ${sql.join(sets, sql`, `)}
     WHERE id = ${mediaId}
-  `)
+  `,
+  )
 }

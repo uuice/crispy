@@ -179,6 +179,17 @@ export default buildConfig({
     } catch (error) {
       payload.logger.error({ err: error }, 'Failed to ensure system roles / authz-cache')
     }
+
+    // Rebuild .data/*-runtime.json from encrypted DB secrets (same PAYLOAD_SECRET).
+    // S3 plugin reads the file at process start — restart once after first boot if uploads still fail.
+    try {
+      const { syncStorageRuntimeFile } = await import('./storage/syncStorageRuntimeFile')
+      const { syncEmailRuntimeFile } = await import('./email/syncEmailRuntimeFile')
+      await syncStorageRuntimeFile(payload)
+      await syncEmailRuntimeFile(payload)
+    } catch (error) {
+      payload.logger.error({ err: error }, 'Failed to sync storage/email runtime files')
+    }
   },
   cors: [getServerSideURL()].filter(Boolean),
   globals: [

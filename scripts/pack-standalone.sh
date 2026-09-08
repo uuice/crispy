@@ -116,6 +116,15 @@ if [ ! -f .data/payload.db ]; then
   exit 1
 fi
 
+# Drop runtime files that still contain Admin secret masks (••••) — invalid in HTTP headers.
+# onInit will rebuild them from enc:v1 ciphertext when PAYLOAD_SECRET matches production.
+for f in .data/storage-runtime.json .data/email-runtime.json; do
+  if [ -f "$f" ] && grep -q '•' "$f" 2>/dev/null; then
+    echo "warning: removing masked secrets from $f (will regenerate on boot)" >&2
+    rm -f "$f"
+  fi
+done
+
 export NODE_ENV="${NODE_ENV:-production}"
 export HOSTNAME="${HOSTNAME:-0.0.0.0}"
 export PORT="${PORT:-3333}"
@@ -289,10 +298,15 @@ Includes app + .data/payload.db. Does NOT include .env or other secrets (configu
    #   DATABASE_PUSH=false
    #   PGVECTOR_ENABLED=false
    #   NEXT_PUBLIC_SERVER_URL=https://your-spare-domain
-   #   PAYLOAD_SECRET / CRON_SECRET
-   # Optional: S3 / email — set in Admin after start, or place storage-runtime.json / email-runtime.json under .data/
+   #   PAYLOAD_SECRET  ← MUST match the main site (decrypts LLM/S3/email enc:v1 secrets)
+   #   CRON_SECRET
+   # Do NOT paste Admin •••••••• masks into .env or runtime JSON.
 
-4. Start:
+4. If upgrading from an older spare DB that stored masked secrets:
+   rm -f .data/storage-runtime.json .data/email-runtime.json
+   # Then replace .data/payload.db with a fresh migrate (enc:v1 ciphertext).
+
+5. Start:
 
    Option A — foreground:
    ./start.sh
@@ -301,7 +315,12 @@ Includes app + .data/payload.db. Does NOT include .env or other secrets (configu
    npm i -g pm2
    ./pm2.sh start
 
+   After first boot, onInit writes storage-runtime.json from DB.
+   Restart once more so the S3 plugin picks up credentials:
+   ./pm2.sh restart
+
 Notes:
+- Encrypted secrets migrate as enc:v1:… ciphertext inside payload.db (not re-typed).
 - No db:migrate; schema lives inside payload.db.
 - Do not enable DATABASE_PUSH=true on the spare server.
 - Rebuild content locally with: pnpm cli db:pg-to-sqlite && pnpm cli dev:pack-sqlite-spare

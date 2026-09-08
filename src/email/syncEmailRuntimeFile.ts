@@ -3,6 +3,7 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
+import { isSecretMask } from '@/utilities/secretCrypto'
 import { resolveDataFile } from '@/utilities/runtimeDataPath'
 
 export type EmailRuntimeConfig = {
@@ -120,7 +121,7 @@ export async function syncEmailRuntimeFile(
   }
 
   if (transport.type === 'resend') {
-    if (!transport.apiKey) {
+    if (!transport.apiKey || isSecretMask(transport.apiKey)) {
       writeEmailRuntimeFile({
         enabled: false,
         fromAddress,
@@ -131,7 +132,7 @@ export async function syncEmailRuntimeFile(
       })
       payload.logger.error({
         msg: 'email-runtime fell back to disabled',
-        reason: 'resend-api-key-missing',
+        reason: !transport.apiKey ? 'resend-api-key-missing' : 'secrets-still-masked',
         transportId,
       })
       return
@@ -164,6 +165,23 @@ export async function syncEmailRuntimeFile(
       payload.logger.error({
         msg: 'email-runtime fell back to disabled',
         reason: 'smtp-host-missing',
+        transportId,
+      })
+      return
+    }
+
+    if (isSecretMask(transport.smtpPass)) {
+      writeEmailRuntimeFile({
+        enabled: false,
+        fromAddress,
+        fromName,
+        formDefaultToEmail,
+        overrideRecipient,
+        updatedAt: new Date().toISOString(),
+      })
+      payload.logger.error({
+        msg: 'email-runtime fell back to disabled',
+        reason: 'secrets-still-masked',
         transportId,
       })
       return

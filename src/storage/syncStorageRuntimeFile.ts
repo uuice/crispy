@@ -3,6 +3,7 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
+import { isSecretMask } from '@/utilities/secretCrypto'
 import { resolveDataFile } from '@/utilities/runtimeDataPath'
 
 export type StorageRuntimeConfig = {
@@ -111,6 +112,17 @@ export async function syncStorageRuntimeFile(
       msg: 'storage-runtime fell back to local',
       reason: 'secrets-unavailable',
       targetId,
+    })
+    return
+  }
+
+  if (isSecretMask(target.accessKeyId) || isSecretMask(target.secretAccessKey)) {
+    writeStorageRuntimeFile({ mode: 'local', updatedAt: new Date().toISOString() })
+    payload.logger.error({
+      msg: 'storage-runtime fell back to local',
+      reason: 'secrets-still-masked',
+      targetId,
+      hint: 'Re-import SQLite with preserveEncrypted dump, or re-enter keys. Never store ••••••••.',
     })
     return
   }
