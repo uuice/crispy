@@ -91,7 +91,11 @@ export async function syncEmailRuntimeFile(
       overrideRecipient,
       updatedAt: new Date().toISOString(),
     })
-    payload.logger.info({ msg: 'email-runtime synced', enabled: false, reason: 'no-active-transport' })
+    payload.logger.info({
+      msg: 'email-runtime synced',
+      enabled: false,
+      reason: 'no-active-transport',
+    })
     return
   }
 
