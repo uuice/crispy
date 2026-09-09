@@ -14,7 +14,7 @@ pnpm cli dev:dev              # http://localhost:3333
 
 生产环境使用 **PostgreSQL**，`DATABASE_PUSH=false`，部署前执行 `pnpm cli db:migrate`。完整说明见 **[二次开发文档](docs/dev-docs.md)**。
 
-低内存机器（约 1G）不建议常驻完整 Node（Payload + Next）；当前生产仍用 standalone + PM2。
+低内存备用站可用 **SQLite standalone**（约 1G 机可行）：`pnpm cli dev:pack-sqlite-spare` 默认只打应用，不覆盖服务器上的 `.data/payload.db`；首次部署再 `-- --with-db`。
 
 ## Payload 能力（博客相关）
 

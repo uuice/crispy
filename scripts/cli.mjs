@@ -81,22 +81,23 @@ const GROUPS = {
       },
       {
         id: 'pack-sqlite-spare',
-        summary: 'build + 打包备用站（Linux + SQLite 库，不含 .env）',
+        summary: 'build + 打包备用站（Linux，默认不含 SQLite 库）',
         note:
-          '需已有 .data/payload.db。输出 dist/crispy-*-sqlite-spare-*.tar.gz；包内不含 .env，服务器上 cp .env.example .env 后配置。LINUX_ARCH/LINUX_LIBC 同 pack-linux。',
-        run: async () => {
+          '默认只打应用（升级安全，不覆盖服务器 .data/payload.db）。首次/换库：加 -- --with-db（需先 db:pg-to-sqlite；产物名带 -seed-）。包内不含 .env。LINUX_ARCH/LINUX_LIBC 同 pack-linux。',
+        run: async (args) => {
           console.log('→ Removing dist/ before build+pack...')
           rmRf('dist')
           const build = lookup.get('dev:build')
           await build.def.run([])
-          bashScript('pack-sqlite-spare.sh')
+          bashScript('pack-sqlite-spare.sh', args)
         },
       },
       {
         id: 'pack-sqlite-spare-standalone',
-        summary: '仅打包备用站（需已 build）',
-        note: '不重新 build；注入 .data/payload.db，不打包 .env。详见 scripts/pack-sqlite-spare.sh',
-        run: () => bashScript('pack-sqlite-spare.sh'),
+        summary: '仅打包备用站（需已 build；默认不含库）',
+        note:
+          '不重新 build。默认不含 payload.db；--with-db 才注入。详见 scripts/pack-sqlite-spare.sh',
+        run: (args) => bashScript('pack-sqlite-spare.sh', args),
       },
       {
         id: 'pack-standalone',

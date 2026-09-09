@@ -548,9 +548,9 @@ docker run -p 3333:3333 \
 - SQLite: 复制 .data/payload.db
 - 媒体: public/media/ 或 S3 bucket
 
-### 低内存部署说明
+### 低内存 / SQLite 备用站
 
-Payload + Next 常驻约 350MB+，不适合 1G 机器 24 小时跑整站。当前生产仍用 standalone + PM2；更轻量的边缘方案不在本仓库实现范围内。
+约 1G 机器可用 SQLite spare standalone（`pnpm cli dev:pack-sqlite-spare`）。默认包**不含** `.data/payload.db`，升级解压不会冲掉线上库；首次或刻意换库用 `-- --with-db`（产物名带 `-seed-`）。服务器升级优先 `./upgrade.sh archive.tar.gz`。主站生产仍推荐 PostgreSQL + `pnpm cli db:migrate`。
 
 <h2 id="payload-upgrade">Payload 版本升级 SOP</h2>
 

@@ -33,7 +33,11 @@ LINUX_ARCH="${LINUX_ARCH:-x64}"
 LINUX_LIBC="${LINUX_LIBC:-glibc}"
 STAGING_DIR="$OUT_DIR/crispy-standalone-$VERSION"
 if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
-  ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-sqlite-spare-${TIMESTAMP}.tar.gz"
+  if [[ "${PACK_SQLITE_WITH_DB:-}" == "1" ]]; then
+    ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-sqlite-spare-seed-${TIMESTAMP}.tar.gz"
+  else
+    ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-sqlite-spare-${TIMESTAMP}.tar.gz"
+  fi
 elif [[ "${PACK_LINUX:-}" == "1" ]]; then
   ARCHIVE_NAME="crispy-${VERSION}-linux-${LINUX_ARCH}-standalone-${TIMESTAMP}.tar.gz"
 else
@@ -63,13 +67,25 @@ if [[ "${PACK_LINUX:-}" == "1" ]]; then
     "$STAGING_DIR/.data/email-runtime.json"
 fi
 
-# SQLite spare site: inject DB only (never ship .env / runtime secrets).
+# SQLite spare: never ship accidental local DB unless --with-db (seed).
 if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
-  echo "→ Injecting SQLite spare DB (.data/payload.db)..."
   mkdir -p "$STAGING_DIR/.data"
-  cp -a ".data/payload.db" "$STAGING_DIR/.data/payload.db"
-  # Drop sqlite sidecars if any
-  rm -f "$STAGING_DIR/.data/payload.db-wal" "$STAGING_DIR/.data/payload.db-shm" || true
+  rm -f \
+    "$STAGING_DIR/.data/payload.db" \
+    "$STAGING_DIR/.data/payload.db-wal" \
+    "$STAGING_DIR/.data/payload.db-shm" \
+    "$STAGING_DIR/.data/payload.db-journal" || true
+  if [[ "${PACK_SQLITE_WITH_DB:-}" == "1" ]]; then
+    echo "→ Injecting SQLite seed DB (.data/payload.db)..."
+    cp -a ".data/payload.db" "$STAGING_DIR/.data/payload.db"
+  else
+    echo "→ Skipping SQLite DB (upgrade-safe app pack)"
+    cat > "$STAGING_DIR/.data/README.txt" <<'DATAEOF'
+Live data lives on the server: .data/payload.db
+Upgrade tarballs intentionally omit the DB so extract does not wipe content.
+First install: pack with --with-db, or copy payload.db here before ./start.sh
+DATAEOF
+  fi
 fi
 
 echo "→ Copying .next/static..."
@@ -171,6 +187,39 @@ exec node server.js
 EOF
 fi
 chmod +x "$STAGING_DIR/start.sh"
+
+if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
+  cat > "$STAGING_DIR/upgrade.sh" <<'EOF'
+#!/usr/bin/env sh
+# Upgrade in place without overwriting live SQLite / .env / runtime secrets.
+# Usage (from the install dir): ./upgrade.sh /path/to/crispy-*-sqlite-spare-*.tar.gz
+set -eu
+
+cd "$(dirname "$0")"
+ARCHIVE="${1:-}"
+if [ -z "$ARCHIVE" ] || [ ! -f "$ARCHIVE" ]; then
+  echo "usage: $0 /path/to/crispy-*-sqlite-spare-*.tar.gz" >&2
+  exit 1
+fi
+
+echo "→ Extracting $ARCHIVE (preserving .env and .data/payload.db*)..."
+tar -xzf "$ARCHIVE" \
+  --exclude='.env' \
+  --exclude='.data/payload.db' \
+  --exclude='.data/payload.db-wal' \
+  --exclude='.data/payload.db-shm' \
+  --exclude='.data/payload.db-journal' \
+  --exclude='.data/storage-runtime.json' \
+  --exclude='.data/email-runtime.json'
+
+if [ ! -f .data/payload.db ]; then
+  echo "warning: .data/payload.db missing after upgrade — copy a seed DB or re-extract a *-seed-* archive once." >&2
+fi
+
+echo "Done. Reload: ./pm2.sh reload   (or ./start.sh)"
+EOF
+  chmod +x "$STAGING_DIR/upgrade.sh"
+fi
 
 if [[ "${PACK_LINUX:-}" == "1" ]]; then
   cat > "$STAGING_DIR/ecosystem.config.cjs" <<'EOF'
@@ -279,13 +328,17 @@ EOF
 chmod +x "$STAGING_DIR/pm2.sh"
 
 if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
-  cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
-Crispy SQLite spare-site bundle (linux/${LINUX_ARCH})
+  if [[ "${PACK_SQLITE_WITH_DB:-}" == "1" ]]; then
+    cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
+Crispy SQLite spare-site SEED bundle (linux/${LINUX_ARCH})
 
-Includes app + .data/payload.db. Does NOT include .env or other secrets (configure on server).
+Includes app + .data/payload.db. Does NOT include .env (configure on server).
+WARNING: Extracting this archive over an existing install WILL overwrite payload.db.
+Use only for first install or intentional content replace. For app upgrades, pack
+without --with-db (or use upgrade.sh from an app-only archive).
 
-1. Extract:
-   mkdir -p /opt/crispy && tar -xzf crispy-*-linux-${LINUX_ARCH}-sqlite-spare-*.tar.gz -C /opt/crispy
+1. First install:
+   mkdir -p /opt/crispy && tar -xzf crispy-*-linux-${LINUX_ARCH}-sqlite-spare-seed-*.tar.gz -C /opt/crispy
    cd /opt/crispy
 
 2. Install Node.js 22+ on the server (no Docker).
@@ -323,8 +376,50 @@ Notes:
 - Encrypted secrets migrate as enc:v1:… ciphertext inside payload.db (not re-typed).
 - No db:migrate; schema lives inside payload.db.
 - Do not enable DATABASE_PUSH=true on the spare server.
-- Rebuild content locally with: pnpm cli db:pg-to-sqlite && pnpm cli dev:pack-sqlite-spare
+- Rebuild seed locally: pnpm cli db:pg-to-sqlite && pnpm cli dev:pack-sqlite-spare -- --with-db
+- App-only upgrades: pnpm cli dev:pack-sqlite-spare  (no --with-db), then ./upgrade.sh archive.tar.gz
 EOF
+  else
+    cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
+Crispy SQLite spare-site APP bundle (linux/${LINUX_ARCH})
+
+Includes app only — does NOT include .data/payload.db or .env.
+Safe to extract over an existing install without wiping live content.
+(Still prefer ./upgrade.sh so .env and runtime JSON are never touched.)
+
+1. Upgrade (recommended):
+   cd /opt/crispy
+   ./upgrade.sh /path/to/crispy-*-linux-${LINUX_ARCH}-sqlite-spare-*.tar.gz
+   ./pm2.sh reload
+
+   Or extract manually (DB not in this archive, so it will not be overwritten):
+   tar -xzf crispy-*-linux-${LINUX_ARCH}-sqlite-spare-*.tar.gz -C /opt/crispy
+
+2. First install without a seed archive:
+   mkdir -p /opt/crispy && tar -xzf crispy-*-linux-${LINUX_ARCH}-sqlite-spare-*.tar.gz -C /opt/crispy
+   cd /opt/crispy
+   # Copy .data/payload.db from a seed pack / pg-to-sqlite export onto the server
+   cp .env.example .env   # configure SQLite + secrets (see below)
+   ./start.sh
+
+3. Configure environment (required):
+   #   DATABASE_DRIVER=sqlite
+   #   DATABASE_URL=file:./.data/payload.db
+   #   DATABASE_PUSH=false
+   #   PGVECTOR_ENABLED=false
+   #   NEXT_PUBLIC_SERVER_URL=https://your-spare-domain
+   #   PAYLOAD_SECRET  ← MUST match the main site
+   #   CRON_SECRET
+
+4. Intentional content replace (wipes live DB):
+   pnpm cli db:pg-to-sqlite && pnpm cli dev:pack-sqlite-spare -- --with-db
+   # Then extract the *-seed-* archive, or replace .data/payload.db only.
+
+Notes:
+- No db:migrate; schema lives inside payload.db.
+- Do not enable DATABASE_PUSH=true on the spare server.
+EOF
+  fi
 elif [[ "${PACK_LINUX:-}" == "1" ]]; then
   cat > "$STAGING_DIR/DEPLOY.txt" <<EOF
 Crispy standalone deployment bundle (linux/${LINUX_ARCH})
@@ -409,10 +504,16 @@ echo "Done: $ARCHIVE_PATH"
 echo "Size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
 echo ""
 if [[ "${PACK_SQLITE_SPARE:-}" == "1" ]]; then
-  echo "On spare server:"
-  echo "  mkdir -p /opt/crispy && tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy"
-  echo "  cp .env.example .env   # set DATABASE_DRIVER=sqlite, DATABASE_URL=file:./.data/payload.db, secrets"
-  echo "  ./start.sh"
+  if [[ "${PACK_SQLITE_WITH_DB:-}" == "1" ]]; then
+    echo "On spare server (SEED — overwrites payload.db if extracted over existing install):"
+    echo "  mkdir -p /opt/crispy && tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy"
+    echo "  cp .env.example .env   # set DATABASE_DRIVER=sqlite, DATABASE_URL=file:./.data/payload.db, secrets"
+    echo "  ./start.sh"
+  else
+    echo "On spare server (APP upgrade — DB not in archive):"
+    echo "  cd /opt/crispy && ./upgrade.sh /path/to/$ARCHIVE_NAME && ./pm2.sh reload"
+    echo "  # first install: extract, copy payload.db onto server, then cp .env.example .env && ./start.sh"
+  fi
 else
   echo "On server:"
   echo "  tar -xzf $ARCHIVE_NAME -C /opt/crispy && cd /opt/crispy && cp .env.example .env && ./pm2.sh start"
