@@ -1,10 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import holidayData from '../data/holiday.json'
 import type { SidebarAuthor, SidebarCategory, SidebarTag } from '../data/types'
-
-import { SidebarCountdown } from './SidebarCountdown'
 
 type Props = {
   categories: SidebarCategory[]
@@ -71,8 +68,6 @@ export function Sidebar({ categories, tags, authors }: Props) {
           </ul>
         </div>
       )}
-
-      <SidebarCountdown holidays={holidayData.holidays} />
     </aside>
   )
 }
