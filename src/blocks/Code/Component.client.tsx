@@ -1,7 +1,11 @@
 'use client'
+import './registerPrismLanguages'
+
 import { Highlight } from 'prism-react-renderer'
 import React from 'react'
+
 import { CopyButton } from './CopyButton'
+import { normalizeCodeBlockLanguage } from './languages'
 import { crispyPrismTheme } from './prismTheme'
 
 type Props = {
@@ -12,8 +16,10 @@ type Props = {
 export const Code: React.FC<Props> = ({ code, language = '' }) => {
   if (!code) return null
 
+  const resolvedLanguage = normalizeCodeBlockLanguage(language || 'typescript')
+
   return (
-    <Highlight code={code} language={language} theme={crispyPrismTheme}>
+    <Highlight code={code} language={resolvedLanguage} theme={crispyPrismTheme}>
       {({ getLineProps, getTokenProps, tokens }) => (
         <pre className="blog-code-block p-4 text-xs rounded overflow-x-auto">
           {tokens.map((line, i) => (

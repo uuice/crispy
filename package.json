@@ -43,6 +43,7 @@
     "payload": "3.88.0",
     "pinyin-pro": "^3.29.3",
     "prism-react-renderer": "^2.3.1",
+    "prismjs": "^1.30.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-hook-form": "7.87.0",
