@@ -237,7 +237,8 @@ html {
     --footer-bg: color-mix(in oklch, var(--footer-bg-base) 76%, transparent);
   }
 
-  body::before {
+  /* Photo atmosphere: dark only — light mode reads cleaner without it */
+  &.dark body::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -1963,7 +1964,7 @@ html {
     line-height: var(--line-height-banner-title);
   }
   @media (prefers-reduced-transparency: reduce) {
-    body::before {
+    &.dark body::before {
       opacity: 0.35;
     }
     body::after {
