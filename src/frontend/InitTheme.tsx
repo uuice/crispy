@@ -21,6 +21,7 @@ export const InitTheme: React.FC = () => {
     var n=parseInt(h,10);
     if(!isNaN(n)&&n>=0&&n<=360)d.style.setProperty('--hue',String(n));
   }
+  if(localStorage.getItem('showPostCovers')==='0')d.setAttribute('data-show-covers','off');
 })();
 `,
       }}

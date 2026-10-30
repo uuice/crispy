@@ -1794,6 +1794,10 @@ html {
     gap: 0;
     padding: 0;
   }
+  &[data-show-covers='off'] .post-card-cover,
+  &[data-show-covers='off'] .post-detail-cover {
+    display: none;
+  }
   .post-card-cover {
     position: relative;
     width: 100%;

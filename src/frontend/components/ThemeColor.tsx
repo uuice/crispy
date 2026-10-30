@@ -4,7 +4,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 const DEFAULT_HUE = 250
 const HUE_KEY = 'themeHue'
+const SHOW_COVERS_KEY = 'showPostCovers'
 const HUE_STEP = 5
+
+function applyShowCovers(show: boolean) {
+  if (show) document.documentElement.removeAttribute('data-show-covers')
+  else document.documentElement.setAttribute('data-show-covers', 'off')
+}
 
 function normalizeHue(h: number): number | null {
   let n = Math.round(Number(h))
@@ -17,6 +23,7 @@ function normalizeHue(h: number): number | null {
 export function ThemeColor() {
   const [open, setOpen] = useState(false)
   const [hue, setHue] = useState(DEFAULT_HUE)
+  const [showCovers, setShowCovers] = useState(true)
   const panelRef = useRef<HTMLDivElement>(null)
 
   const applyHue = useCallback((value: number) => {
@@ -27,14 +34,18 @@ export function ThemeColor() {
   }, [])
 
   useEffect(() => {
+    const show = localStorage.getItem(SHOW_COVERS_KEY) !== '0'
+    applyShowCovers(show)
+
     const saved = localStorage.getItem(HUE_KEY)
-    if (saved === null) return
-    const h = parseInt(saved, 10)
-    if (Number.isNaN(h) || h < 0 || h > 360) return
-    const n = normalizeHue(h)
-    if (n === null) return
-    document.documentElement.style.setProperty('--hue', String(n))
-    const id = window.setTimeout(() => setHue(n), 0)
+    const h = saved === null ? null : parseInt(saved, 10)
+    const n = h === null || Number.isNaN(h) || h < 0 || h > 360 ? null : normalizeHue(h)
+    if (n !== null) document.documentElement.style.setProperty('--hue', String(n))
+
+    const id = window.setTimeout(() => {
+      setShowCovers(show)
+      if (n !== null) setHue(n)
+    }, 0)
     return () => window.clearTimeout(id)
   }, [])
 
@@ -90,7 +101,7 @@ export function ThemeColor() {
       </button>
 
       <div
-        aria-label="主题色设置"
+        aria-label="主题色与缩略图"
         className={`absolute right-0 top-full mt-2 w-64 section-card p-4 z-50${open ? '' : ' hidden'}`}
         id="theme-color-panel"
         onClick={(e) => e.stopPropagation()}
@@ -145,6 +156,22 @@ export function ThemeColor() {
             {hue}
           </output>
         </div>
+        <label className="mt-3 pt-3 border-t flex items-center justify-between gap-3 cursor-pointer" style={{ borderColor: 'var(--card-border)' }}>
+          <span className="code-label">显示缩略图</span>
+          <input
+            checked={showCovers}
+            className="size-4 accent-(--accent) cursor-pointer"
+            id="theme-show-covers"
+            onChange={(e) => {
+              const show = e.target.checked
+              applyShowCovers(show)
+              setShowCovers(show)
+              if (show) localStorage.removeItem(SHOW_COVERS_KEY)
+              else localStorage.setItem(SHOW_COVERS_KEY, '0')
+            }}
+            type="checkbox"
+          />
+        </label>
       </div>
     </div>
   )
