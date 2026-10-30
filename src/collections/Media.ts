@@ -9,6 +9,7 @@ import { hideUnlessAnyPermission } from '@/access/adminHidden'
 import { mediaCreateAccess, mediaDeleteAccess, mediaUpdateAccess } from '../access/media'
 import { adminLabels } from '@/i18n/admin-labels'
 import { createSanitizeLexicalHook } from '@/hooks/createSanitizeLexicalHook'
+import { deleteGalleryItemsReferencingMedia } from '@/hooks/deleteGalleryItemsReferencingMedia'
 import { setMediaOssDatePrefix } from '@/hooks/setMediaOssDatePrefix'
 import { presentMediaOssUrlsAfterRead } from '@/hooks/presentMediaOssUrlsAfterRead'
 import { syncOssVirtualSizesAfterOperation } from '@/hooks/syncOssVirtualSizes'
@@ -36,6 +37,7 @@ export const Media: CollectionConfig = {
     update: mediaUpdateAccess,
   },
   hooks: {
+    beforeDelete: [deleteGalleryItemsReferencingMedia],
     beforeChange: [setMediaOssDatePrefix],
     beforeValidate: [createSanitizeLexicalHook(['caption'])],
     afterRead: [presentMediaOssUrlsAfterRead],
