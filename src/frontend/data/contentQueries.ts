@@ -50,10 +50,25 @@ const POST_CARD_SELECT = {
   publishedAt: true,
   categories: true,
   tags: true,
+  heroImage: true,
 } as const
 
 function blogStreamPostWhere(extra?: Where): Where {
   return withPublishedBlogPostsWhere(extra)
+}
+
+function coverFromHero(hero: number | Media | null | undefined): PostListItem['cover'] {
+  if (!hero || typeof hero !== 'object' || !hero.url) return undefined
+  return {
+    alt: hero.alt,
+    url: hero.url,
+    width: hero.width,
+    height: hero.height,
+    mimeType: hero.mimeType,
+    sizes: hero.sizes,
+    thumbnailURL: hero.thumbnailURL,
+    updatedAt: hero.updatedAt,
+  }
 }
 
 function formatPostListItem(post: {
@@ -63,6 +78,7 @@ function formatPostListItem(post: {
   publishedAt?: string | null
   categories?: (number | Category)[] | null
   tags?: (number | Tag)[] | null
+  heroImage?: number | Media | null
 }): PostListItem | null {
   if (!post.slug || !post.title || !post.publishedAt) return null
 
@@ -81,6 +97,7 @@ function formatPostListItem(post: {
     pubDate: post.publishedAt,
     categories,
     tags,
+    cover: coverFromHero(post.heroImage),
   }
 }
 

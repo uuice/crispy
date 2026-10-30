@@ -2,6 +2,8 @@ import Link from 'next/link'
 import React from 'react'
 
 import { CommentsSection } from '@/components/Comments'
+import { Media } from '@/components/Media'
+import type { Media as MediaType } from '@/payload-types'
 import { getCategoryPath, getPostsListPath, getTagPath } from '@/utilities/frontendPaths'
 
 import type { PostDetailPageData } from '../pages/postDetail'
@@ -16,6 +18,10 @@ type Props = {
 
 export function PostDetailView({ data }: Props) {
   const { post, dateStr, categories, tags, articleUrl, authorName } = data
+  const cover =
+    post.heroImage && typeof post.heroImage === 'object' && post.heroImage.url
+      ? post.heroImage
+      : null
   const jsonLd = buildArticleJsonLd({
     title: post.title,
     description: post.meta?.description || undefined,
@@ -40,6 +46,18 @@ export function PostDetailView({ data }: Props) {
         </Link>
       </p>
       <article className="section-card animate-in animate-in-delay-2">
+        {cover ? (
+          <div className="post-detail-cover">
+            <Media
+              fill
+              imageVariant="large"
+              imgClassName="post-detail-cover-image"
+              priority
+              resource={cover as MediaType}
+              size="(max-width: 768px) 100vw, 720px"
+            />
+          </div>
+        ) : null}
         <header
           className="px-6 md:px-10 pt-6 pb-5 border-b"
           style={{ borderColor: 'var(--card-border)' }}

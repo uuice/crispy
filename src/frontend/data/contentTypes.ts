@@ -1,6 +1,12 @@
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { lexicalToPlainText } from '@/ai/lexical/toPlainText'
+import type { Media } from '@/payload-types'
+
+export type PostCover = Pick<
+  Media,
+  'url' | 'alt' | 'width' | 'height' | 'mimeType' | 'sizes' | 'thumbnailURL' | 'updatedAt'
+>
 
 export type PostListItem = {
   title: string
@@ -9,6 +15,7 @@ export type PostListItem = {
   pubDate: string
   categories: string[]
   tags: string[]
+  cover?: PostCover
 }
 
 export type PaginatedPostList = {
